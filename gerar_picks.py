@@ -243,9 +243,9 @@ try:
 except Exception:
     now_pt = datetime.utcnow()
 
-today = now_pt.date().isoformat()
-tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
-fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
+    today = now_pt.date().isoformat()
+    tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
+    fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
 
     rows15, rows25 = [], []
 
