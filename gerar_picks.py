@@ -232,7 +232,7 @@ def main():
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
-    fixtures["Date"] = pd.to_datetime(fixtures["Date"], dayfirst=True, errors="coerce").dt.date.astype(str)
+    fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
     # Timezone "Portugal" (Lisboa) - sem complicar indentação
