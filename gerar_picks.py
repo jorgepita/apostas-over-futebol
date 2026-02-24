@@ -251,7 +251,7 @@ fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
 
 rows15, rows25 = [], []
 history_cfg = cfg.get("history", {})
-    window = int(history_cfg.get("window", 10))
+window = int(history_cfg.get("window", 10))
 
     for league_key, league_meta in cfg["leagues"].items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
