@@ -243,7 +243,7 @@ def main():
     except Exception:
         now_pt = datetime.utcnow()
 
-        days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
+            days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
 
@@ -251,7 +251,6 @@ def main():
     fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
 
-    # guardar Date novamente em string ISO (YYYY-MM-DD) já alinhado
     fixtures["Date"] = fixtures_dt.astype(str)
 
     rows15, rows25 = [], []
@@ -268,6 +267,7 @@ def main():
         if not hist_path.exists():
             continue
 
+        df_hist = pd.read_csv(hist_path)
         df_hist = pd.read_csv(hist_path)
 
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
