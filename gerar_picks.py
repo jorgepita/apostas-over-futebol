@@ -253,10 +253,10 @@ fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
 
 # guardar Date novamente em string ISO (YYYY-MM-DD) já alinhado
 fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
-    rows15, rows25 = [], []
+rows15, rows25 = [], []
 
-    history_cfg = cfg.get("history", {})
-    window = int(history_cfg.get("window", 10))
+history_cfg = cfg.get("history", {})
+window = int(history_cfg.get("window", 10))
 
     for league_key, league_meta in cfg["leagues"].items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
