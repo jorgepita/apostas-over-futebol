@@ -3,7 +3,13 @@
     "over15": 500.0,
     "over25": 500.0
   },
+
+  "run": {
+    "days_ahead": 10
+  },
+
   "leagues": {
+    ...
     "premier": {
       "name": "Premier League",
       "country": "ENG"
