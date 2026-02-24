@@ -243,7 +243,7 @@ def main():
     except Exception:
         now_pt = datetime.utcnow()
 
-            days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
 
