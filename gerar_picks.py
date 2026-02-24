@@ -247,6 +247,8 @@ def main():
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
 
+    today = start.isoformat()
+
     # manter jogos entre hoje e hoje+days_ahead (inclusive)
     fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
@@ -268,7 +270,6 @@ def main():
         if not hist_path.exists():
             continue
 
-        df_hist = pd.read_csv(hist_path)
         df_hist = pd.read_csv(hist_path)
 
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
