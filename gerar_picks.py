@@ -235,19 +235,17 @@ def main():
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone "Portugal" (Lisboa) - sem complicar indentação
-from datetime import datetime, timedelta
+    # Timezone "Portugal" (Lisboa)
+    from datetime import datetime, timedelta
+    try:
+        from zoneinfo import ZoneInfo
+        now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
+    except Exception:
+        now_pt = datetime.utcnow()
 
-try:
-    from zoneinfo import ZoneInfo
-    now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
-except Exception:
-    # fallback simples
-    now_pt = datetime.utcnow()
-
-today = now_pt.date().isoformat()
-tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
-fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
+    today = now_pt.date().isoformat()
+    tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
+    fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
 
     rows15, rows25 = [], []
 
@@ -258,7 +256,6 @@ fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
             continue
-
         hist_path = BASE / "data_raw" / f"{league_key}.csv"
         if not hist_path.exists():
             continue
