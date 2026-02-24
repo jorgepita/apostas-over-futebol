@@ -1,0 +1,62 @@
+{
+  "bankroll": {
+    "over15": 500.0,
+    "over25": 500.0
+  },
+  "leagues": {
+    "premier": {
+      "name": "Premier League",
+      "country": "ENG"
+    },
+    "portugal": {
+      "name": "Liga Portugal",
+      "country": "POR"
+    },
+    "espanha": {
+      "name": "LaLiga",
+      "country": "ESP"
+    },
+    "franca": {
+      "name": "Ligue 1",
+      "country": "FRA"
+    },
+    "italia": {
+      "name": "Serie A",
+      "country": "ITA"
+    },
+    "alemanha": {
+      "name": "Bundesliga",
+      "country": "GER"
+    },
+    "holanda": {
+      "name": "Eredivisie",
+      "country": "NED"
+    }
+  },
+  "history": {
+    "min_games_home": 10,
+    "min_games_away": 10,
+    "window": 10
+  },
+  "rules": {
+    "over15": {
+      "edge_min": 0.03,
+      "kelly_fraction": 0.25,
+      "cap_frac": 0.05,
+      "daily_cap_frac": 0.15,
+      "min_picks": 3
+    },
+    "over25": {
+      "edge_min": 0.05,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
+      "daily_cap_frac": 0.15,
+      "min_picks": 3
+    }
+  },
+  "telegram": {
+    "enabled": false,
+    "bot_token": "COLOCA_AQUI",
+    "chat_id": "COLOCA_AQUI"
+  }
+}

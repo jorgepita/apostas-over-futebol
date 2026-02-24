@@ -1,0 +1,505 @@
+﻿Date,HomeTeam,AwayTeam,FTHG,FTAG
+16/08/2024,Le Havre,Paris SG,1,4
+17/08/2024,Brest,Marseille,1,5
+17/08/2024,Reims,Lille,0,2
+17/08/2024,Monaco,St Etienne,1,0
+18/08/2024,Auxerre,Nice,2,1
+18/08/2024,Angers,Lens,0,1
+18/08/2024,Montpellier,Strasbourg,1,1
+18/08/2024,Toulouse,Nantes,0,0
+18/08/2024,Rennes,Lyon,3,0
+23/08/2024,Paris SG,Montpellier,6,0
+24/08/2024,Lyon,Monaco,0,2
+24/08/2024,Lille,Angers,2,0
+24/08/2024,St Etienne,Le Havre,0,2
+25/08/2024,Lens,Brest,2,0
+25/08/2024,Nantes,Auxerre,2,0
+25/08/2024,Nice,Toulouse,1,1
+25/08/2024,Strasbourg,Rennes,3,1
+25/08/2024,Marseille,Reims,2,2
+30/08/2024,Lyon,Strasbourg,4,3
+31/08/2024,Brest,St Etienne,4,0
+31/08/2024,Montpellier,Nantes,1,3
+31/08/2024,Toulouse,Marseille,1,3
+01/09/2024,Monaco,Lens,1,1
+01/09/2024,Angers,Nice,1,4
+01/09/2024,Le Havre,Auxerre,3,1
+01/09/2024,Reims,Rennes,2,1
+01/09/2024,Lille,Paris SG,1,3
+13/09/2024,St Etienne,Lille,1,0
+14/09/2024,Marseille,Nice,2,0
+14/09/2024,Auxerre,Monaco,0,3
+14/09/2024,Paris SG,Brest,3,1
+15/09/2024,Rennes,Montpellier,3,0
+15/09/2024,Nantes,Reims,1,2
+15/09/2024,Strasbourg,Angers,1,1
+15/09/2024,Toulouse,Le Havre,2,0
+15/09/2024,Lens,Lyon,0,0
+20/09/2024,Nice,St Etienne,8,0
+21/09/2024,Lille,Strasbourg,3,3
+21/09/2024,Rennes,Lens,1,1
+21/09/2024,Reims,Paris SG,1,1
+22/09/2024,Monaco,Le Havre,3,1
+22/09/2024,Angers,Nantes,1,1
+22/09/2024,Brest,Toulouse,2,0
+22/09/2024,Montpellier,Auxerre,3,2
+22/09/2024,Lyon,Marseille,2,3
+27/09/2024,Auxerre,Brest,3,0
+27/09/2024,Paris SG,Rennes,3,1
+28/09/2024,Lens,Nice,0,0
+28/09/2024,Le Havre,Lille,0,3
+28/09/2024,Monaco,Montpellier,2,1
+29/09/2024,Toulouse,Lyon,1,2
+29/09/2024,Angers,Reims,1,3
+29/09/2024,Nantes,St Etienne,2,2
+29/09/2024,Strasbourg,Marseille,1,0
+04/10/2024,Marseille,Angers,1,1
+05/10/2024,St Etienne,Auxerre,3,1
+05/10/2024,Lille,Toulouse,2,1
+05/10/2024,Rennes,Monaco,1,2
+06/10/2024,Lyon,Nantes,2,0
+06/10/2024,Brest,Le Havre,2,0
+06/10/2024,Reims,Montpellier,4,2
+06/10/2024,Strasbourg,Lens,2,2
+06/10/2024,Nice,Paris SG,1,1
+18/10/2024,Monaco,Lille,0,0
+19/10/2024,Brest,Rennes,1,1
+19/10/2024,St Etienne,Lens,0,2
+19/10/2024,Paris SG,Strasbourg,4,2
+20/10/2024,Le Havre,Lyon,0,4
+20/10/2024,Auxerre,Reims,2,1
+20/10/2024,Nantes,Nice,1,1
+20/10/2024,Toulouse,Angers,1,1
+20/10/2024,Montpellier,Marseille,0,5
+25/10/2024,Rennes,Le Havre,1,0
+26/10/2024,Angers,St Etienne,4,2
+26/10/2024,Reims,Brest,1,2
+26/10/2024,Lens,Lille,0,2
+27/10/2024,Lyon,Auxerre,2,2
+27/10/2024,Montpellier,Toulouse,0,3
+27/10/2024,Nice,Monaco,2,1
+27/10/2024,Strasbourg,Nantes,3,1
+27/10/2024,Marseille,Paris SG,0,3
+01/11/2024,Monaco,Angers,0,1
+01/11/2024,Lille,Lyon,1,1
+02/11/2024,Paris SG,Lens,1,0
+02/11/2024,Brest,Nice,0,1
+02/11/2024,St Etienne,Strasbourg,2,0
+03/11/2024,Toulouse,Reims,1,0
+03/11/2024,Auxerre,Rennes,4,0
+03/11/2024,Le Havre,Montpellier,1,0
+03/11/2024,Nantes,Marseille,1,2
+08/11/2024,Marseille,Auxerre,1,3
+09/11/2024,Strasbourg,Monaco,1,3
+09/11/2024,Lens,Nantes,3,2
+09/11/2024,Angers,Paris SG,2,4
+10/11/2024,Nice,Lille,2,2
+10/11/2024,Le Havre,Reims,0,3
+10/11/2024,Montpellier,Brest,3,1
+10/11/2024,Rennes,Toulouse,0,2
+10/11/2024,Lyon,St Etienne,1,0
+22/11/2024,Monaco,Brest,3,2
+22/11/2024,Paris SG,Toulouse,3,0
+23/11/2024,Lens,Marseille,1,3
+23/11/2024,St Etienne,Montpellier,1,0
+23/11/2024,Reims,Lyon,1,1
+24/11/2024,Lille,Rennes,1,0
+24/11/2024,Auxerre,Angers,1,0
+24/11/2024,Nantes,Le Havre,0,2
+24/11/2024,Nice,Strasbourg,2,1
+29/11/2024,Reims,Lens,0,2
+30/11/2024,Rennes,St Etienne,5,0
+30/11/2024,Brest,Strasbourg,3,1
+30/11/2024,Paris SG,Nantes,1,1
+01/12/2024,Montpellier,Lille,2,2
+01/12/2024,Le Havre,Angers,0,1
+01/12/2024,Lyon,Nice,4,1
+01/12/2024,Toulouse,Auxerre,2,0
+01/12/2024,Marseille,Monaco,2,1
+06/12/2024,Lille,Brest,3,1
+06/12/2024,Auxerre,Paris SG,0,0
+07/12/2024,Monaco,Toulouse,2,0
+07/12/2024,Nice,Le Havre,2,1
+07/12/2024,Angers,Lyon,0,3
+08/12/2024,Lens,Montpellier,2,0
+08/12/2024,Nantes,Rennes,1,0
+08/12/2024,Strasbourg,Reims,0,0
+08/12/2024,St Etienne,Marseille,0,2
+13/12/2024,Toulouse,St Etienne,2,1
+14/12/2024,Marseille,Lille,1,1
+14/12/2024,Auxerre,Lens,2,2
+14/12/2024,Reims,Monaco,0,0
+15/12/2024,Montpellier,Nice,2,2
+15/12/2024,Brest,Nantes,4,1
+15/12/2024,Le Havre,Strasbourg,0,3
+15/12/2024,Rennes,Angers,2,0
+15/12/2024,Paris SG,Lyon,3,1
+18/12/2024,Monaco,Paris SG,2,4
+03/01/2025,Nice,Rennes,3,2
+04/01/2025,St Etienne,Reims,3,1
+04/01/2025,Lille,Nantes,1,1
+04/01/2025,Lyon,Montpellier,1,0
+05/01/2025,Angers,Brest,2,0
+05/01/2025,Lens,Toulouse,0,1
+05/01/2025,Strasbourg,Auxerre,3,1
+05/01/2025,Marseille,Le Havre,5,1
+10/01/2025,Nantes,Monaco,2,2
+10/01/2025,Auxerre,Lille,0,0
+11/01/2025,Brest,Lyon,2,1
+11/01/2025,Reims,Nice,2,4
+11/01/2025,Rennes,Marseille,1,2
+12/01/2025,Le Havre,Lens,1,2
+12/01/2025,Montpellier,Angers,1,3
+12/01/2025,Toulouse,Strasbourg,1,2
+12/01/2025,Paris SG,St Etienne,2,1
+17/01/2025,Montpellier,Monaco,2,1
+17/01/2025,Lille,Nice,2,1
+18/01/2025,Lens,Paris SG,1,2
+18/01/2025,Rennes,Brest,1,2
+18/01/2025,Lyon,Toulouse,0,0
+19/01/2025,St Etienne,Nantes,1,1
+19/01/2025,Angers,Auxerre,2,0
+19/01/2025,Reims,Le Havre,1,1
+19/01/2025,Marseille,Strasbourg,1,1
+24/01/2025,Auxerre,St Etienne,1,1
+25/01/2025,Monaco,Rennes,3,2
+25/01/2025,Strasbourg,Lille,2,1
+25/01/2025,Paris SG,Reims,1,1
+26/01/2025,Le Havre,Brest,0,1
+26/01/2025,Lens,Angers,1,0
+26/01/2025,Nantes,Lyon,1,1
+26/01/2025,Toulouse,Montpellier,1,2
+26/01/2025,Nice,Marseille,2,0
+31/01/2025,Montpellier,Lens,0,2
+01/02/2025,Brest,Paris SG,2,5
+01/02/2025,Monaco,Auxerre,4,2
+01/02/2025,Lille,St Etienne,4,1
+02/02/2025,Toulouse,Nice,1,1
+02/02/2025,Angers,Le Havre,1,1
+02/02/2025,Reims,Nantes,1,2
+02/02/2025,Rennes,Strasbourg,1,0
+02/02/2025,Marseille,Lyon,3,2
+07/02/2025,Nantes,Brest,0,2
+07/02/2025,Paris SG,Monaco,4,1
+08/02/2025,Nice,Lens,2,0
+08/02/2025,Lille,Le Havre,1,2
+08/02/2025,St Etienne,Rennes,0,2
+09/02/2025,Lyon,Reims,4,0
+09/02/2025,Auxerre,Toulouse,2,2
+09/02/2025,Strasbourg,Montpellier,2,0
+09/02/2025,Angers,Marseille,0,2
+14/02/2025,Brest,Auxerre,2,2
+15/02/2025,Marseille,St Etienne,5,1
+15/02/2025,Monaco,Nantes,7,1
+15/02/2025,Toulouse,Paris SG,0,1
+16/02/2025,Montpellier,Lyon,1,4
+16/02/2025,Le Havre,Nice,1,3
+16/02/2025,Lens,Strasbourg,0,2
+16/02/2025,Reims,Angers,0,1
+16/02/2025,Rennes,Lille,0,2
+21/02/2025,Rennes,Reims,1,0
+22/02/2025,Lille,Monaco,2,1
+22/02/2025,St Etienne,Angers,3,3
+22/02/2025,Auxerre,Marseille,3,0
+23/02/2025,Nantes,Lens,3,1
+23/02/2025,Le Havre,Toulouse,1,4
+23/02/2025,Nice,Montpellier,2,0
+23/02/2025,Strasbourg,Brest,0,0
+23/02/2025,Lyon,Paris SG,2,3
+28/02/2025,Monaco,Reims,3,0
+01/03/2025,St Etienne,Nice,1,3
+01/03/2025,Lens,Le Havre,3,4
+01/03/2025,Paris SG,Lille,4,1
+02/03/2025,Lyon,Brest,2,1
+02/03/2025,Angers,Toulouse,0,4
+02/03/2025,Auxerre,Strasbourg,0,1
+02/03/2025,Montpellier,Rennes,0,4
+02/03/2025,Marseille,Nantes,2,0
+07/03/2025,Toulouse,Monaco,1,1
+08/03/2025,Rennes,Paris SG,1,4
+08/03/2025,Lille,Montpellier,1,0
+08/03/2025,Marseille,Lens,0,1
+09/03/2025,Brest,Angers,2,0
+09/03/2025,Le Havre,St Etienne,1,1
+09/03/2025,Nantes,Strasbourg,0,1
+09/03/2025,Reims,Auxerre,0,2
+09/03/2025,Nice,Lyon,0,2
+14/03/2025,Nice,Auxerre,1,1
+15/03/2025,Nantes,Lille,1,0
+15/03/2025,Angers,Monaco,0,2
+15/03/2025,Lens,Rennes,1,0
+16/03/2025,Lyon,Le Havre,4,2
+16/03/2025,Brest,Reims,0,0
+16/03/2025,Montpellier,St Etienne,0,2
+16/03/2025,Strasbourg,Toulouse,2,1
+16/03/2025,Paris SG,Marseille,3,1
+28/03/2025,Strasbourg,Lyon,4,2
+29/03/2025,Reims,Marseille,3,1
+29/03/2025,St Etienne,Paris SG,1,6
+29/03/2025,Monaco,Nice,2,1
+30/03/2025,Toulouse,Brest,2,4
+30/03/2025,Angers,Rennes,0,3
+30/03/2025,Auxerre,Montpellier,1,0
+30/03/2025,Le Havre,Nantes,3,2
+30/03/2025,Lille,Lens,1,0
+04/04/2025,Nice,Nantes,1,2
+05/04/2025,Paris SG,Angers,1,0
+05/04/2025,Brest,Monaco,2,1
+05/04/2025,Lyon,Lille,2,1
+06/04/2025,Lens,St Etienne,1,0
+06/04/2025,Montpellier,Le Havre,0,2
+06/04/2025,Reims,Strasbourg,0,1
+06/04/2025,Rennes,Auxerre,0,1
+06/04/2025,Marseille,Toulouse,3,2
+11/04/2025,Lens,Reims,0,2
+12/04/2025,Monaco,Marseille,3,0
+12/04/2025,Toulouse,Lille,1,2
+12/04/2025,Strasbourg,Nice,2,2
+13/04/2025,St Etienne,Brest,3,3
+13/04/2025,Angers,Montpellier,2,0
+13/04/2025,Le Havre,Rennes,1,5
+13/04/2025,Auxerre,Lyon,1,3
+18/04/2025,Rennes,Nantes,2,1
+19/04/2025,Paris SG,Le Havre,2,1
+19/04/2025,Monaco,Strasbourg,0,0
+19/04/2025,Marseille,Montpellier,5,1
+20/04/2025,Lille,Auxerre,3,1
+20/04/2025,Brest,Lens,1,3
+20/04/2025,Nice,Angers,2,1
+20/04/2025,Reims,Toulouse,1,0
+20/04/2025,St Etienne,Lyon,2,1
+22/04/2025,Nantes,Paris SG,1,1
+25/04/2025,Paris SG,Nice,1,3
+26/04/2025,Strasbourg,St Etienne,3,1
+26/04/2025,Le Havre,Monaco,1,1
+26/04/2025,Lyon,Rennes,4,1
+27/04/2025,Angers,Lille,0,2
+27/04/2025,Lens,Auxerre,0,4
+27/04/2025,Montpellier,Reims,0,0
+27/04/2025,Nantes,Toulouse,0,0
+27/04/2025,Marseille,Brest,4,1
+02/05/2025,Nice,Reims,1,0
+03/05/2025,Strasbourg,Paris SG,2,1
+03/05/2025,Toulouse,Rennes,2,1
+03/05/2025,St Etienne,Monaco,1,3
+04/05/2025,Nantes,Angers,0,1
+04/05/2025,Auxerre,Le Havre,1,2
+04/05/2025,Brest,Montpellier,1,0
+04/05/2025,Lyon,Lens,1,2
+04/05/2025,Lille,Marseille,1,1
+10/05/2025,Angers,Strasbourg,2,1
+10/05/2025,Auxerre,Nantes,1,1
+10/05/2025,Brest,Lille,2,0
+10/05/2025,Le Havre,Marseille,1,3
+10/05/2025,Monaco,Lyon,2,0
+10/05/2025,Montpellier,Paris SG,1,4
+10/05/2025,Reims,St Etienne,0,2
+10/05/2025,Rennes,Nice,2,0
+10/05/2025,Toulouse,Lens,1,1
+17/05/2025,Lens,Monaco,4,0
+17/05/2025,Lille,Reims,2,1
+17/05/2025,Lyon,Angers,2,0
+17/05/2025,Marseille,Rennes,4,2
+17/05/2025,Nantes,Montpellier,3,0
+17/05/2025,Nice,Brest,6,0
+17/05/2025,Paris SG,Auxerre,3,1
+17/05/2025,St Etienne,Toulouse,2,3
+17/05/2025,Strasbourg,Le Havre,2,3
+15/08/2025,Rennes,Marseille,1,0
+16/08/2025,Lens,Lyon,0,1
+16/08/2025,Monaco,Le Havre,3,1
+16/08/2025,Nice,Toulouse,0,1
+17/08/2025,Brest,Lille,3,3
+17/08/2025,Angers,Paris FC,1,0
+17/08/2025,Auxerre,Lorient,1,0
+17/08/2025,Metz,Strasbourg,0,1
+17/08/2025,Nantes,Paris SG,0,1
+22/08/2025,Paris SG,Angers,1,0
+23/08/2025,Marseille,Paris FC,5,2
+23/08/2025,Nice,Auxerre,3,1
+23/08/2025,Lyon,Metz,3,0
+24/08/2025,Lorient,Rennes,4,0
+24/08/2025,Le Havre,Lens,1,2
+24/08/2025,Strasbourg,Nantes,1,0
+24/08/2025,Toulouse,Brest,2,0
+24/08/2025,Lille,Monaco,1,0
+29/08/2025,Lens,Brest,3,1
+30/08/2025,Lorient,Lille,1,7
+30/08/2025,Nantes,Auxerre,1,0
+30/08/2025,Toulouse,Paris SG,3,6
+31/08/2025,Angers,Rennes,1,1
+31/08/2025,Le Havre,Nice,3,1
+31/08/2025,Monaco,Strasbourg,3,2
+31/08/2025,Paris FC,Metz,3,2
+31/08/2025,Lyon,Marseille,1,0
+12/09/2025,Marseille,Lorient,4,0
+13/09/2025,Nice,Nantes,1,0
+13/09/2025,Auxerre,Monaco,1,2
+14/09/2025,Lille,Toulouse,2,1
+14/09/2025,Brest,Paris FC,1,2
+14/09/2025,Metz,Angers,1,1
+14/09/2025,Paris SG,Lens,2,0
+14/09/2025,Strasbourg,Le Havre,1,0
+14/09/2025,Rennes,Lyon,3,1
+19/09/2025,Lyon,Angers,1,0
+20/09/2025,Nantes,Rennes,2,2
+20/09/2025,Brest,Nice,4,1
+20/09/2025,Lens,Lille,3,0
+21/09/2025,Paris FC,Strasbourg,2,3
+21/09/2025,Auxerre,Toulouse,1,0
+21/09/2025,Le Havre,Lorient,1,1
+21/09/2025,Monaco,Metz,5,2
+22/09/2025,Marseille,Paris SG,1,0
+26/09/2025,Strasbourg,Marseille,1,2
+27/09/2025,Lorient,Monaco,3,1
+27/09/2025,Toulouse,Nantes,2,2
+27/09/2025,Paris SG,Auxerre,2,0
+28/09/2025,Nice,Paris FC,1,1
+28/09/2025,Angers,Brest,0,2
+28/09/2025,Lille,Lyon,0,1
+28/09/2025,Metz,Le Havre,0,0
+28/09/2025,Rennes,Lens,0,0
+03/10/2025,Paris FC,Lorient,2,0
+04/10/2025,Metz,Marseille,0,3
+04/10/2025,Brest,Nantes,0,0
+04/10/2025,Auxerre,Lens,1,2
+05/10/2025,Lyon,Toulouse,1,2
+05/10/2025,Le Havre,Rennes,2,2
+05/10/2025,Monaco,Nice,2,2
+05/10/2025,Strasbourg,Angers,5,0
+05/10/2025,Lille,Paris SG,1,1
+17/10/2025,Paris SG,Strasbourg,3,3
+18/10/2025,Nice,Lyon,3,2
+18/10/2025,Angers,Monaco,1,1
+18/10/2025,Marseille,Le Havre,6,2
+19/10/2025,Lens,Paris FC,2,1
+19/10/2025,Lorient,Brest,3,3
+19/10/2025,Rennes,Auxerre,2,2
+19/10/2025,Toulouse,Metz,4,0
+19/10/2025,Nantes,Lille,0,2
+24/10/2025,Paris FC,Nantes,1,2
+25/10/2025,Brest,Paris SG,0,3
+25/10/2025,Monaco,Toulouse,1,0
+25/10/2025,Lens,Marseille,2,1
+26/10/2025,Lille,Metz,6,1
+26/10/2025,Angers,Lorient,2,0
+26/10/2025,Auxerre,Le Havre,0,1
+26/10/2025,Rennes,Nice,1,2
+26/10/2025,Lyon,Strasbourg,2,1
+29/10/2025,Le Havre,Brest,1,0
+29/10/2025,Lorient,Paris SG,1,1
+29/10/2025,Metz,Lens,2,0
+29/10/2025,Nice,Lille,2,0
+29/10/2025,Marseille,Angers,2,2
+29/10/2025,Nantes,Monaco,3,5
+29/10/2025,Paris FC,Lyon,3,3
+29/10/2025,Strasbourg,Auxerre,3,0
+29/10/2025,Toulouse,Rennes,2,2
+01/11/2025,Paris SG,Nice,1,0
+01/11/2025,Monaco,Paris FC,0,1
+01/11/2025,Auxerre,Marseille,0,1
+02/11/2025,Rennes,Strasbourg,4,1
+02/11/2025,Lens,Lorient,3,0
+02/11/2025,Lille,Angers,1,0
+02/11/2025,Nantes,Metz,0,2
+02/11/2025,Toulouse,Le Havre,0,0
+02/11/2025,Brest,Lyon,0,0
+07/11/2025,Paris FC,Rennes,0,1
+08/11/2025,Marseille,Brest,3,0
+08/11/2025,Le Havre,Nantes,1,1
+08/11/2025,Monaco,Lens,1,4
+09/11/2025,Lorient,Toulouse,1,1
+09/11/2025,Angers,Auxerre,2,0
+09/11/2025,Metz,Nice,2,1
+09/11/2025,Strasbourg,Lille,2,0
+09/11/2025,Lyon,Paris SG,2,3
+21/11/2025,Nice,Marseille,1,5
+22/11/2025,Lens,Strasbourg,1,0
+22/11/2025,Rennes,Monaco,4,1
+22/11/2025,Paris SG,Le Havre,3,0
+23/11/2025,Auxerre,Lyon,0,0
+23/11/2025,Brest,Metz,3,2
+23/11/2025,Nantes,Lorient,1,1
+23/11/2025,Toulouse,Angers,0,1
+23/11/2025,Lille,Paris FC,4,2
+28/11/2025,Metz,Rennes,0,1
+29/11/2025,Monaco,Paris SG,1,0
+29/11/2025,Paris FC,Auxerre,1,1
+29/11/2025,Marseille,Toulouse,2,2
+30/11/2025,Strasbourg,Brest,1,2
+30/11/2025,Angers,Lens,1,2
+30/11/2025,Le Havre,Lille,0,1
+30/11/2025,Lorient,Nice,3,1
+30/11/2025,Lyon,Nantes,3,0
+05/12/2025,Brest,Monaco,1,0
+05/12/2025,Lille,Marseille,1,0
+06/12/2025,Nantes,Lens,1,2
+06/12/2025,Toulouse,Strasbourg,1,0
+06/12/2025,Paris SG,Rennes,5,0
+07/12/2025,Nice,Angers,0,1
+07/12/2025,Auxerre,Metz,3,1
+07/12/2025,Le Havre,Paris FC,0,0
+07/12/2025,Lorient,Lyon,1,0
+12/12/2025,Angers,Nantes,4,1
+13/12/2025,Rennes,Brest,3,1
+13/12/2025,Metz,Paris SG,2,3
+13/12/2025,Paris FC,Toulouse,0,3
+14/12/2025,Lyon,Le Havre,1,0
+14/12/2025,Auxerre,Lille,3,4
+14/12/2025,Lens,Nice,2,0
+14/12/2025,Strasbourg,Lorient,0,0
+14/12/2025,Marseille,Monaco,1,0
+02/01/2026,Toulouse,Lens,0,3
+03/01/2026,Monaco,Lyon,1,3
+03/01/2026,Nice,Strasbourg,1,1
+03/01/2026,Lille,Rennes,0,2
+04/01/2026,Marseille,Nantes,0,2
+04/01/2026,Brest,Auxerre,2,0
+04/01/2026,Le Havre,Angers,2,1
+04/01/2026,Lorient,Metz,1,1
+04/01/2026,Paris SG,Paris FC,2,1
+16/01/2026,Monaco,Lorient,1,3
+16/01/2026,Paris SG,Lille,3,0
+17/01/2026,Lens,Auxerre,1,0
+17/01/2026,Toulouse,Nice,5,1
+17/01/2026,Angers,Marseille,2,5
+18/01/2026,Strasbourg,Metz,2,1
+18/01/2026,Nantes,Paris FC,1,2
+18/01/2026,Rennes,Le Havre,1,1
+18/01/2026,Lyon,Brest,2,1
+23/01/2026,Auxerre,Paris SG,0,1
+24/01/2026,Rennes,Lorient,0,2
+24/01/2026,Le Havre,Monaco,0,0
+24/01/2026,Marseille,Lens,3,1
+25/01/2026,Nantes,Nice,1,4
+25/01/2026,Brest,Toulouse,0,2
+25/01/2026,Metz,Lyon,2,5
+25/01/2026,Paris FC,Angers,0,0
+25/01/2026,Lille,Strasbourg,1,4
+30/01/2026,Lens,Le Havre,1,0
+31/01/2026,Paris FC,Marseille,2,2
+31/01/2026,Lorient,Nantes,2,1
+31/01/2026,Monaco,Rennes,4,0
+01/02/2026,Lyon,Lille,1,0
+01/02/2026,Angers,Metz,1,0
+01/02/2026,Nice,Brest,2,2
+01/02/2026,Toulouse,Auxerre,0,0
+01/02/2026,Strasbourg,Paris SG,1,2
+06/02/2026,Metz,Lille,0,0
+07/02/2026,Lens,Rennes,3,1
+07/02/2026,Brest,Lorient,2,0
+07/02/2026,Nantes,Lyon,0,1
+08/02/2026,Nice,Monaco,0,0
+08/02/2026,Angers,Toulouse,1,0
+08/02/2026,Auxerre,Paris FC,0,0
+08/02/2026,Le Havre,Strasbourg,2,1
+08/02/2026,Paris SG,Marseille,5,0
+13/02/2026,Rennes,Paris SG,3,1
+13/02/2026,Monaco,Nantes,3,1
+14/02/2026,Marseille,Strasbourg,2,2
+14/02/2026,Lille,Brest,1,1
+14/02/2026,Paris FC,Lens,0,5
+15/02/2026,Le Havre,Toulouse,2,1
+15/02/2026,Lorient,Angers,2,0
+15/02/2026,Metz,Auxerre,1,3
+15/02/2026,Lyon,Nice,2,0
