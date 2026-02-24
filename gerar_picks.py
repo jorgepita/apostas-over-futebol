@@ -4,11 +4,43 @@ import math
 import os
 from pathlib import Path
 from urllib import request, parse
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 
 import pandas as pd
 
 BASE = Path(__file__).resolve().parent
+
+# -----------------------------
+# Anti-duplicados (por dia)
+# -----------------------------
+SENT_STATE_PATH = BASE / "sent_state.json"
+
+def load_sent_state(today_iso: str) -> set[str]:
+    """
+    Lê o estado {date, sent[]} e devolve set(ids).
+    Se a data guardada for diferente de hoje, reseta.
+    """
+    try:
+        if not SENT_STATE_PATH.exists():
+            return set()
+        data = json.loads(SENT_STATE_PATH.read_text(encoding="utf-8"))
+        if data.get("date") != today_iso:
+            return set()
+        sent_list = data.get("sent", [])
+        return set(sent_list) if isinstance(sent_list, list) else set()
+    except Exception:
+        # se o ficheiro corromper, recomeça
+        return set()
+
+def save_sent_state(today_iso: str, sent: set[str]) -> None:
+    payload = {"date": today_iso, "sent": sorted(sent)}
+    SENT_STATE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def pick_id(row: dict) -> str:
+    """
+    ID único da pick (por dia): Date|League|Home|Away|Market
+    """
+    return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
 
 
 # -----------------------------
@@ -203,8 +235,16 @@ def main():
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], dayfirst=True, errors="coerce").dt.date.astype(str)
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    today = date.today().isoformat()
-    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    from datetime import datetime, timedelta
+
+try:
+    from zoneinfo import ZoneInfo
+    now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
+except Exception:
+    now_pt = datetime.utcnow()
+
+today = now_pt.date().isoformat()
+tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
     fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
 
     rows15, rows25 = [], []
@@ -309,8 +349,8 @@ def main():
     print(f"- {out25_path.name} ({len(out25)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
 
-    # ==========================
-    # Telegram (mensagens separadas por mercado)
+        # ==========================
+    # Telegram (anti-duplicados por dia)
     # ==========================
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
@@ -337,25 +377,64 @@ def main():
             prefix = f"{title} ({i}/{len(parts)})\n"
             send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, prefix + p)
 
-    def build_message(df: pd.DataFrame, titulo: str) -> str:
+    def df_to_rows(df: pd.DataFrame) -> list[dict]:
         if df is None or len(df) == 0:
-            return f"❌ {titulo}\nSem picks hoje (filtros não passaram)."
+            return []
+        # converte para dicts “simples”
+        return df.to_dict(orient="records")
 
-        # Texto simples (sem Markdown) para não partir por caracteres especiais
+    def build_message(rows: list[dict], titulo: str) -> str:
+        if not rows:
+            return ""  # sem novas picks -> não enviar nada
         msg = f"📊 {titulo}\n\n"
-        for _, r in df.iterrows():
+        for r in rows:
             msg += (
                 f"{r['LeagueName']} | {r['HomeTeam']} vs {r['AwayTeam']}\n"
                 f"Market: {r['Market']} @ {r['Odd']}\n"
-                f"Edge: {r['Edge']:.2%} | Stake: {r['Stake€']:.2f}€\n\n"
+                f"Edge: {float(r['Edge']):.2%} | Stake: {float(r['Stake€']):.2f}€\n\n"
             )
         return msg
 
     if TELEGRAM_TOKEN and CHAT_ID:
         try:
-            _send_in_chunks(build_message(out15, "PICKS OVER 1.5"), "PICKS OVER 1.5")
-            _send_in_chunks(build_message(out25, "PICKS OVER 2.5"), "PICKS OVER 2.5")
-            print("Telegram: mensagens O1.5 e O2.5 enviadas.")
+            # usar a mesma data que já calculaste (timezone Lisboa)
+            sent = load_sent_state(today)
+
+            # filtrar apenas novas picks (por dia)
+            new15 = []
+            for r in df_to_rows(out15):
+                pid = pick_id(r)
+                if pid not in sent:
+                    new15.append(r)
+
+            new25 = []
+            for r in df_to_rows(out25):
+                pid = pick_id(r)
+                if pid not in sent:
+                    new25.append(r)
+
+            # enviar só o que é novo
+            msg_15 = build_message(new15, "PICKS OVER 1.5 (NOVAS)")
+            if msg_15:
+                _send_in_chunks(msg_15, "PICKS OVER 1.5")
+
+            msg_25 = build_message(new25, "PICKS OVER 2.5 (NOVAS)")
+            if msg_25:
+                _send_in_chunks(msg_25, "PICKS OVER 2.5")
+
+            # só marcar como “enviado” depois de tentar enviar
+            for r in new15:
+                sent.add(pick_id(r))
+            for r in new25:
+                sent.add(pick_id(r))
+
+            save_sent_state(today, sent)
+
+            if msg_15 or msg_25:
+                print(f"Telegram: enviei {len(new15)} novas O1.5 + {len(new25)} novas O2.5.")
+            else:
+                print("Telegram: sem novas picks (não enviei).")
+
         except Exception as e:
             print(f"Telegram: erro ao enviar -> {e}")
     else:
