@@ -243,25 +243,27 @@ def main():
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
-start = now_pt.date()
-end = start + timedelta(days=days_ahead)
+        days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
+    start = now_pt.date()
+    end = start + timedelta(days=days_ahead)
 
-# manter jogos entre hoje e hoje+days_ahead (inclusive)
-fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
-fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
+    # manter jogos entre hoje e hoje+days_ahead (inclusive)
+    fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
+    fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
 
-# guardar Date novamente em string ISO (YYYY-MM-DD) já alinhado
-fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
-rows15, rows25 = [], []
+    # guardar Date novamente em string ISO (YYYY-MM-DD) já alinhado
+    fixtures["Date"] = fixtures_dt.astype(str)
 
-history_cfg = cfg.get("history", {})
-window = int(history_cfg.get("window", 10))
+    rows15, rows25 = [], []
+
+    history_cfg = cfg.get("history", {})
+    window = int(history_cfg.get("window", 10))
 
     for league_key, league_meta in cfg["leagues"].items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
             continue
+
         hist_path = BASE / "data_raw" / f"{league_key}.csv"
         if not hist_path.exists():
             continue
