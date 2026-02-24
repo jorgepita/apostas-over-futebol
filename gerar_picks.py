@@ -245,7 +245,7 @@ except Exception:
 
 today = now_pt.date().isoformat()
 tomorrow = (now_pt.date() + timedelta(days=1)).isoformat()
-    fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
+fixtures = fixtures[fixtures["Date"].isin([today, tomorrow])].copy()
 
     rows15, rows25 = [], []
 
