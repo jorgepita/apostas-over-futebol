@@ -235,7 +235,7 @@ def main():
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone "Portugal" (Lisboa)
+        # Timezone "Portugal" (Lisboa)
     from datetime import datetime, timedelta
     try:
         from zoneinfo import ZoneInfo
@@ -251,13 +251,14 @@ def main():
     fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
 
+    # guardar Date novamente em string ISO (YYYY-MM-DD)
     fixtures["Date"] = fixtures_dt.astype(str)
 
     rows15, rows25 = [], []
 
     history_cfg = cfg.get("history", {})
+    
     window = int(history_cfg.get("window", 10))
-
     for league_key, league_meta in cfg["leagues"].items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
