@@ -412,11 +412,11 @@ def main():
     combo.to_csv(combo_path, index=False)
 
     # --- GitHub: guardar os CSV no repo ---
-today_iso = start.isoformat()  # já tens start = now_pt.date()
-git_commit_and_push(
+    today_iso = start.isoformat()  # já tens start = now_pt.date()
+    git_commit_and_push(
     files_to_commit=["picks_over15.csv", "picks_over25.csv", "picks_hoje.csv"],
     commit_msg=f"update picks {today_iso}",
-)
+    ) 
 
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
