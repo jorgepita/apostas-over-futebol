@@ -5,6 +5,7 @@ from typing import Optional, Dict, Any, List
 
 
 API_KEY = os.getenv("ODDS_API_KEY", "").strip()
+print(f"[DBG] ODDS_API_KEY len = {len(API_KEY)}")
 BASE = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
 
 # Ligas (sport keys do The Odds API)
@@ -129,4 +130,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
