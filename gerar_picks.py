@@ -1,19 +1,21 @@
 # gerar_picks.py
+import base64
 import json
 import math
 import os
 from pathlib import Path
-from urllib import request, parse
+from urllib import request, parse, error
 from datetime import datetime, timedelta
 
 import pandas as pd
 
 BASE = Path(__file__).resolve().parent
 
-# -----------------------------
+# =============================
 # Anti-duplicados (por dia)
-# -----------------------------
+# =============================
 SENT_STATE_PATH = BASE / "sent_state.json"
+
 
 def load_sent_state(today_iso: str) -> set[str]:
     """
@@ -32,9 +34,13 @@ def load_sent_state(today_iso: str) -> set[str]:
         # se o ficheiro corromper, recomeça
         return set()
 
+
 def save_sent_state(today_iso: str, sent: set[str]) -> None:
     payload = {"date": today_iso, "sent": sorted(sent)}
-    SENT_STATE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    SENT_STATE_PATH.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
 
 def pick_id(row: dict) -> str:
     """
@@ -43,9 +49,9 @@ def pick_id(row: dict) -> str:
     return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
 
 
-# -----------------------------
+# =============================
 # Helpers estatísticos / modelo
-# -----------------------------
+# =============================
 def safe_mean(series) -> float:
     if series is None:
         return 0.0
@@ -107,7 +113,9 @@ def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
     return d.tail(n)
 
 
-def compute_lambdas(df_hist: pd.DataFrame, home: str, away: str, window: int) -> tuple[float, float, float]:
+def compute_lambdas(
+    df_hist: pd.DataFrame, home: str, away: str, window: int
+) -> tuple[float, float, float]:
     """
     Modelo simples:
     lambdaHome = avg_home * home_attack * away_defense
@@ -143,9 +151,9 @@ def compute_lambdas(df_hist: pd.DataFrame, home: str, away: str, window: int) ->
     return lam_home, lam_away, lam_total
 
 
-# -----------------------------
+# =============================
 # Telegram
-# -----------------------------
+# =============================
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
@@ -160,9 +168,51 @@ def send_telegram_message(token: str, chat_id: str, text: str) -> None:
         _ = resp.read()
 
 
-# -----------------------------
+def _send_in_chunks(token: str, chat_id: str, text: str, title: str) -> None:
+    MAX = 3900
+    if not text:
+        return
+    if len(text) <= MAX:
+        send_telegram_message(token, chat_id, text)
+        return
+
+    parts = []
+    cur = ""
+    for line in text.splitlines(True):
+        if len(cur) + len(line) > MAX:
+            parts.append(cur)
+            cur = ""
+        cur += line
+    if cur:
+        parts.append(cur)
+
+    for i, p in enumerate(parts, 1):
+        prefix = f"{title} ({i}/{len(parts)})\n"
+        send_telegram_message(token, chat_id, prefix + p)
+
+
+def df_to_rows(df: pd.DataFrame) -> list[dict]:
+    if df is None or len(df) == 0:
+        return []
+    return df.to_dict(orient="records")
+
+
+def build_message(rows: list[dict], titulo: str) -> str:
+    if not rows:
+        return ""
+    msg = f"📊 {titulo}\n\n"
+    for r in rows:
+        msg += (
+            f"{r['LeagueName']} | {r['HomeTeam']} vs {r['AwayTeam']}\n"
+            f"Market: {r['Market']} @ {r['Odd']}\n"
+            f"Edge: {float(r['Edge']):.2%} | Stake: {float(r.get('Stake€', 0.0)):.2f}€\n\n"
+        )
+    return msg
+
+
+# =============================
 # Regras de mercado / stakes
-# -----------------------------
+# =============================
 def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
     if not rows:
         return pd.DataFrame()
@@ -195,7 +245,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(drop=True)
+    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(
+        drop=True
+    )
 
     round_cols = {
         "LambdaHome": 3,
@@ -215,118 +267,141 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 
     return df
 
-import subprocess
 
-def git_commit_and_push(files_to_commit: list[str], commit_msg: str) -> None:
-    """
-    Faz commit e push dos ficheiros indicados para o GitHub usando HTTPS + token.
-    Requer ENV:
-      - GITHUB_TOKEN (fine-grained PAT)
-      - GITHUB_REPO  (ex: jorgepita/apostas-over-futebol)
-      - GITHUB_BRANCH (opcional, default: main)
-    """
+# =============================
+# GitHub upload (via API, sem git)
+# =============================
+def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Authorization": f"token {token}",
+        "User-Agent": "render-apostas-bot",
+    }
+    body = None
+    if data is not None:
+        body = json.dumps(data).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+
+    req = request.Request(url, data=body, headers=headers, method=method)
+    with request.urlopen(req, timeout=30) as resp:
+        raw = resp.read().decode("utf-8")
+        return json.loads(raw) if raw else {}
+
+
+def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str) -> str | None:
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}?ref={parse.quote(branch)}"
+    try:
+        j = github_request(url, token, method="GET")
+        sha = j.get("sha")
+        return sha if isinstance(sha, str) else None
+    except error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+
+
+def github_put_file(
+    owner: str,
+    repo: str,
+    path: str,
+    content_bytes: bytes,
+    branch: str,
+    token: str,
+    message: str,
+) -> None:
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}"
+
+    sha = github_get_sha(owner, repo, path, branch, token)
+
+    payload = {
+        "message": message,
+        "content": base64.b64encode(content_bytes).decode("utf-8"),
+        "branch": branch,
+    }
+    if sha:
+        payload["sha"] = sha
+
+    _ = github_request(url, token, method="PUT", data=payload)
+
+
+def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str) -> None:
     token = os.getenv("GITHUB_TOKEN", "").strip()
-    repo = os.getenv("GITHUB_REPO", "").strip()
-    branch = os.getenv("GITHUB_BRANCH", "main").strip()
-
-    if not token or not repo:
-        print("GitHub: sem GITHUB_TOKEN ou GITHUB_REPO (não fiz commit).")
+    if not token:
+        print("GitHub: GITHUB_TOKEN em falta (não fiz upload).")
         return
 
-    # garantir que estamos no diretório do projeto
-    cwd = str(BASE)
+    prefix = os.getenv("GITHUB_PATH_PREFIX", "").strip().strip("/")
+    # exemplo: se quiseres meter em pasta "out", defines GITHUB_PATH_PREFIX=out
 
-    # configurar remote com token (não imprime o token)
-    remote_url = f"https://x-access-token:{token}@github.com/{repo}.git"
+    ok = 0
+    for fp in files:
+        if not fp.exists():
+            continue
 
-    def run(cmd: list[str]) -> str:
-        return subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT, text=True)
+        rel_path = fp.name if not prefix else f"{prefix}/{fp.name}"
 
-    try:
-        # inicializar git se necessário (normalmente já existe)
-        if not (BASE / ".git").exists():
-            print("GitHub: não existe pasta .git (Render pode não ter checkout completo).")
-            return
+        try:
+            content = fp.read_bytes()
+            msg = f"Update {fp.name} ({datetime.utcnow().isoformat()}Z)"
+            github_put_file(owner, repo, rel_path, content, branch, token, msg)
+            ok += 1
+        except Exception as e:
+            print(f"GitHub: falhou upload de {fp.name} -> {e}")
 
-        # remover origin se existir
-    try:
-    run(["git", "remote", "remove", "origin"])
-    except:
-    pass
-
-        # adicionar origin novamente
-        run(["git", "remote", "add", "origin", remote_url])
-
-        # garantir branch
-        run(["git", "checkout", branch])
-
-        # adicionar ficheiros
-        run(["git", "add", *files_to_commit])
-
-        # se não há alterações, sai
-        status = run(["git", "status", "--porcelain"])
-        if not status.strip():
-            print("GitHub: sem alterações para commitar.")
-            return
-
-        # commit e push
-        run(["git", "commit", "-m", commit_msg])
-        run(["git", "push", "origin", branch])
-
-        print("GitHub: commit+push OK.")
-    except subprocess.CalledProcessError as e:
-        print("GitHub: erro ao commitar/push:")
-        print(e.output)
-    except Exception as e:
-        print(f"GitHub: erro inesperado: {e}")
+    print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
-# -----------------------------
+# =============================
 # Main
-# -----------------------------
+# =============================
 def main():
-    cfg = json.loads((BASE / "config.json").read_text(encoding="utf-8"))
+    cfg_path = BASE / "config.json"
+    if not cfg_path.exists():
+        raise SystemExit("Falta config.json na pasta do projeto.")
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
 
     fixtures_path = BASE / "fixtures_today.csv"
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
 
-    fixtures = pd.read_csv(fixtures_path)
+    # Robust: tenta detetar separador (vírgula/;), sem rebentar
+    fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
-    fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date.astype(str)
+    # Date -> date
+    fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-        # Timezone "Portugal" (Lisboa)
-    from datetime import datetime, timedelta
+    # Timezone "Portugal" (Lisboa)
     try:
         from zoneinfo import ZoneInfo
+
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # por defeito 1 dia
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # default 1 dia
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
-
-    today = start.isoformat()
+    today_iso = start.isoformat()
 
     # manter jogos entre hoje e hoje+days_ahead (inclusive)
-    fixtures_dt = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
-    fixtures = fixtures[(fixtures_dt >= start) & (fixtures_dt <= end)].copy()
+    fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
 
-    # guardar Date novamente em string ISO (YYYY-MM-DD)
-    fixtures["Date"] = fixtures_dt.astype(str)
+    # guardar Date em string ISO
+    fixtures["Date"] = fixtures["Date"].astype(str)
 
     rows15, rows25 = [], []
 
     history_cfg = cfg.get("history", {})
-    
     window = int(history_cfg.get("window", 10))
-    for league_key, league_meta in cfg["leagues"].items():
+
+    leagues_cfg = cfg.get("leagues", {})
+    for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
             continue
@@ -335,7 +410,7 @@ def main():
         if not hist_path.exists():
             continue
 
-        df_hist = pd.read_csv(hist_path)
+        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
 
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
         if not need_hist.issubset(set(df_hist.columns)):
@@ -402,86 +477,40 @@ def main():
                 }
             )
 
-    bankroll15 = float(cfg["bankroll"]["over15"])
-    bankroll25 = float(cfg["bankroll"]["over25"])
+    bankroll_cfg = cfg.get("bankroll", {})
+    rules_cfg = cfg.get("rules", {})
 
-    out15 = apply_market_rules(rows15, bankroll15, cfg["rules"]["over15"])
-    out25 = apply_market_rules(rows25, bankroll25, cfg["rules"]["over25"])
+    bankroll15 = float(bankroll_cfg.get("over15", 0.0))
+    bankroll25 = float(bankroll_cfg.get("over25", 0.0))
+
+    out15 = apply_market_rules(rows15, bankroll15, rules_cfg.get("over15", {}))
+    out25 = apply_market_rules(rows25, bankroll25, rules_cfg.get("over25", {}))
 
     out15_path = BASE / "picks_over15.csv"
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    out15.to_csv(out15_path, index=False)
-    out25.to_csv(out25_path, index=False)
-
+    # Para abrir melhor no LibreOffice PT, usamos separador ";"
+    out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
+    out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
-    combo.to_csv(combo_path, index=False)
-
-    # --- GitHub: guardar os CSV no repo ---
-    today_iso = start.isoformat()  # já tens start = now_pt.date()
-    git_commit_and_push(
-    files_to_commit=["picks_over15.csv", "picks_over25.csv", "picks_hoje.csv"],
-    commit_msg=f"update picks {today_iso}",
-    ) 
+    combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
     print(f"- {out25_path.name} ({len(out25)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
 
-        # ==========================
+    # ==========================
     # Telegram (anti-duplicados por dia)
     # ==========================
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
 
-    def _send_in_chunks(text: str, title: str):
-        MAX = 3900
-        if not text:
-            return
-        if len(text) <= MAX:
-            send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, text)
-            return
-
-        parts = []
-        cur = ""
-        for line in text.splitlines(True):
-            if len(cur) + len(line) > MAX:
-                parts.append(cur)
-                cur = ""
-            cur += line
-        if cur:
-            parts.append(cur)
-
-        for i, p in enumerate(parts, 1):
-            prefix = f"{title} ({i}/{len(parts)})\n"
-            send_telegram_message(TELEGRAM_TOKEN, CHAT_ID, prefix + p)
-
-    def df_to_rows(df: pd.DataFrame) -> list[dict]:
-        if df is None or len(df) == 0:
-            return []
-        # converte para dicts “simples”
-        return df.to_dict(orient="records")
-
-    def build_message(rows: list[dict], titulo: str) -> str:
-        if not rows:
-            return ""  # sem novas picks -> não enviar nada
-        msg = f"📊 {titulo}\n\n"
-        for r in rows:
-            msg += (
-                f"{r['LeagueName']} | {r['HomeTeam']} vs {r['AwayTeam']}\n"
-                f"Market: {r['Market']} @ {r['Odd']}\n"
-                f"Edge: {float(r['Edge']):.2%} | Stake: {float(r['Stake€']):.2f}€\n\n"
-            )
-        return msg
-
     if TELEGRAM_TOKEN and CHAT_ID:
         try:
-            # usar a mesma data que já calculaste (timezone Lisboa)
-            sent = load_sent_state(today)
+            sent = load_sent_state(today_iso)
 
-            # filtrar apenas novas picks (por dia)
             new15 = []
             for r in df_to_rows(out15):
                 pid = pick_id(r)
@@ -494,32 +523,37 @@ def main():
                 if pid not in sent:
                     new25.append(r)
 
-            # enviar só o que é novo
             msg_15 = build_message(new15, "PICKS OVER 1.5 (NOVAS)")
             if msg_15:
-                _send_in_chunks(msg_15, "PICKS OVER 1.5")
+                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_15, "PICKS OVER 1.5")
 
             msg_25 = build_message(new25, "PICKS OVER 2.5 (NOVAS)")
             if msg_25:
-                _send_in_chunks(msg_25, "PICKS OVER 2.5")
+                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_25, "PICKS OVER 2.5")
 
-            # só marcar como “enviado” depois de tentar enviar
             for r in new15:
                 sent.add(pick_id(r))
             for r in new25:
                 sent.add(pick_id(r))
 
-            save_sent_state(today, sent)
+            save_sent_state(today_iso, sent)
 
             if msg_15 or msg_25:
                 print(f"Telegram: enviei {len(new15)} novas O1.5 + {len(new25)} novas O2.5.")
             else:
                 print("Telegram: sem novas picks (não enviei).")
-
         except Exception as e:
             print(f"Telegram: erro ao enviar -> {e}")
     else:
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
+
+    # ==========================
+    # GitHub: upload dos CSVs gerados
+    # ==========================
+    owner = "jorgepita"
+    repo = "apostas-over-futebol"
+    branch = "main"
+    upload_csvs_to_github([out15_path, out25_path, combo_path], owner, repo, branch)
 
 
 if __name__ == "__main__":
