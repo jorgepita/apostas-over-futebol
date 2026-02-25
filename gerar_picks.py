@@ -248,7 +248,14 @@ def git_commit_and_push(files_to_commit: list[str], commit_msg: str) -> None:
             print("GitHub: não existe pasta .git (Render pode não ter checkout completo).")
             return
 
-        run(["git", "remote", "set-url", "origin", remote_url])
+        # remover origin se existir
+    try:
+    run(["git", "remote", "remove", "origin"])
+    except:
+    pass
+
+        # adicionar origin novamente
+        run(["git", "remote", "add", "origin", remote_url])
 
         # garantir branch
         run(["git", "checkout", branch])
