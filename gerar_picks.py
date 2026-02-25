@@ -215,6 +215,64 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 
     return df
 
+import subprocess
+
+def git_commit_and_push(files_to_commit: list[str], commit_msg: str) -> None:
+    """
+    Faz commit e push dos ficheiros indicados para o GitHub usando HTTPS + token.
+    Requer ENV:
+      - GITHUB_TOKEN (fine-grained PAT)
+      - GITHUB_REPO  (ex: jorgepita/apostas-over-futebol)
+      - GITHUB_BRANCH (opcional, default: main)
+    """
+    token = os.getenv("GITHUB_TOKEN", "").strip()
+    repo = os.getenv("GITHUB_REPO", "").strip()
+    branch = os.getenv("GITHUB_BRANCH", "main").strip()
+
+    if not token or not repo:
+        print("GitHub: sem GITHUB_TOKEN ou GITHUB_REPO (não fiz commit).")
+        return
+
+    # garantir que estamos no diretório do projeto
+    cwd = str(BASE)
+
+    # configurar remote com token (não imprime o token)
+    remote_url = f"https://x-access-token:{token}@github.com/{repo}.git"
+
+    def run(cmd: list[str]) -> str:
+        return subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT, text=True)
+
+    try:
+        # inicializar git se necessário (normalmente já existe)
+        if not (BASE / ".git").exists():
+            print("GitHub: não existe pasta .git (Render pode não ter checkout completo).")
+            return
+
+        run(["git", "remote", "set-url", "origin", remote_url])
+
+        # garantir branch
+        run(["git", "checkout", branch])
+
+        # adicionar ficheiros
+        run(["git", "add", *files_to_commit])
+
+        # se não há alterações, sai
+        status = run(["git", "status", "--porcelain"])
+        if not status.strip():
+            print("GitHub: sem alterações para commitar.")
+            return
+
+        # commit e push
+        run(["git", "commit", "-m", commit_msg])
+        run(["git", "push", "origin", branch])
+
+        print("GitHub: commit+push OK.")
+    except subprocess.CalledProcessError as e:
+        print("GitHub: erro ao commitar/push:")
+        print(e.output)
+    except Exception as e:
+        print(f"GitHub: erro inesperado: {e}")
+
 
 # -----------------------------
 # Main
@@ -352,6 +410,13 @@ def main():
 
     combo = pd.concat([out15, out25], ignore_index=True)
     combo.to_csv(combo_path, index=False)
+
+    # --- GitHub: guardar os CSV no repo ---
+today_iso = start.isoformat()  # já tens start = now_pt.date()
+git_commit_and_push(
+    files_to_commit=["picks_over15.csv", "picks_over25.csv", "picks_hoje.csv"],
+    commit_msg=f"update picks {today_iso}",
+)
 
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
