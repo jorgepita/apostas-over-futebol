@@ -113,14 +113,7 @@ def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
     return d.tail(n)
 
 
-def compute_lambdas(
-    df_hist: pd.DataFrame, home: str, away: str, window: int
-) -> tuple[float, float, float]:
-    """
-    Modelo simples:
-    lambdaHome = avg_home * home_attack * away_defense
-    lambdaAway = avg_away * away_attack * home_defense
-    """
+def compute_lambdas(df_hist: pd.DataFrame, home: str, away: str, window: int) -> tuple[float, float, float]:
     avg_home, avg_away = league_avgs(df_hist)
     if avg_home <= 0:
         avg_home = 1.2
@@ -130,25 +123,34 @@ def compute_lambdas(
     h_last = last_n_home(df_hist, home, window)
     a_last = last_n_away(df_hist, away, window)
 
-    home_scored = safe_mean(h_last.get("FTHG", pd.Series(dtype=float)))
-    home_attack = (home_scored / avg_home) if avg_home > 0 else 1.0
+    # neutros por defeito
+    home_attack = 1.0
+    home_defense = 1.0
+    away_attack = 1.0
+    away_defense = 1.0
 
-    home_conceded = safe_mean(h_last.get("FTAG", pd.Series(dtype=float)))
-    home_defense = (home_conceded / avg_away) if avg_away > 0 else 1.0
+    if h_last is not None and len(h_last) > 0:
+        home_scored = safe_mean(h_last.get("FTHG", pd.Series(dtype=float)))
+        home_conceded = safe_mean(h_last.get("FTAG", pd.Series(dtype=float)))
+        if home_scored > 0:
+            home_attack = home_scored / avg_home if avg_home > 0 else 1.0
+        if home_conceded > 0:
+            home_defense = home_conceded / avg_away if avg_away > 0 else 1.0
 
-    away_scored = safe_mean(a_last.get("FTAG", pd.Series(dtype=float)))
-    away_attack = (away_scored / avg_away) if avg_away > 0 else 1.0
-
-    away_conceded = safe_mean(a_last.get("FTHG", pd.Series(dtype=float)))
-    away_defense = (away_conceded / avg_home) if avg_home > 0 else 1.0
+    if a_last is not None and len(a_last) > 0:
+        away_scored = safe_mean(a_last.get("FTAG", pd.Series(dtype=float)))
+        away_conceded = safe_mean(a_last.get("FTHG", pd.Series(dtype=float)))
+        if away_scored > 0:
+            away_attack = away_scored / avg_away if avg_away > 0 else 1.0
+        if away_conceded > 0:
+            away_defense = away_conceded / avg_home if avg_home > 0 else 1.0
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
 
     lam_home = float(max(0.05, min(6.0, lam_home)))
     lam_away = float(max(0.05, min(6.0, lam_away)))
-    lam_total = lam_home + lam_away
-    return lam_home, lam_away, lam_total
+    return lam_home, lam_away, lam_home + lam_away
 
 
 # =============================
