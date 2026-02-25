@@ -439,7 +439,15 @@ def main():
             pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
 
             edge15 = p15 - pm15
+            print(
+                f"[DBG] {league_key} {home} vs {away} | "
+                f"lam={lam_t:.2f} p15={p15:.3f} pm15={pm15:.3f} edge15={edge15:.3f}"
+            )
             edge25 = p25 - pm25
+            print(
+                f"[DBG] {league_key} {home} vs {away} | "
+                f"p25={p25:.3f} pm25={pm25:.3f} edge25={edge25:.3f}"
+            )
 
             k15 = kelly_fraction(p15, odd15)
             k25 = kelly_fraction(p25, odd25)
