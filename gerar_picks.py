@@ -370,6 +370,11 @@ def main():
     # Robust: tenta detetar separador (vírgula/;), sem rebentar
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
 
+    fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
+
+    print("[DBG] GERAR_PICKS START v2")
+    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
+
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
@@ -403,6 +408,9 @@ def main():
     window = int(history_cfg.get("window", 10))
 
     leagues_cfg = cfg.get("leagues", {})
+    
+    print("[DBG] config leagues:", sorted(list(leagues_cfg.keys())))
+    
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
