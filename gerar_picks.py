@@ -429,6 +429,13 @@ def main():
 
             lam_h, lam_a, lam_t = compute_lambdas(df_hist, home, away, window)
 
+        # Boost do modelo (para corrigir underestimation)
+        lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
+        if lambda_boost and lambda_boost != 1.0:
+            lam_h = max(0.05, min(6.0, lam_h * lambda_boost))
+            lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
+            lam_t = lam_h + lam_a
+
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
 
