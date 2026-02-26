@@ -45,14 +45,14 @@
   },
   "rules": {
     "over15": {
-      "edge_min": -0.02,
+      "edge_min": -0.08,
       "kelly_fraction": 0.25,
       "cap_frac": 0.05,
       "daily_cap_frac": 0.15,
       "min_picks": 1
     },
     "over25": {
-      "edge_min": -0.02,
+      "edge_min": -0.06,
       "kelly_fraction": 0.2,
       "cap_frac": 0.04,
       "daily_cap_frac": 0.15,
