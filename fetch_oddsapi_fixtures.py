@@ -12,11 +12,7 @@ BASE = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
 SPORTS = {
     "premier": "soccer_epl",
     "portugal": "soccer_portugal_primeira_liga",
-    "espanha": "soccer_spain_la_liga",
-    "franca": "soccer_france_ligue_one",
-    "italia": "soccer_italy_serie_a",
     "alemanha": "soccer_germany_bundesliga",
-    "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
 REGIONS = "eu"
@@ -132,3 +128,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
