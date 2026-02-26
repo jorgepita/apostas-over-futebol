@@ -410,6 +410,7 @@ def main():
     leagues_cfg = cfg.get("leagues", {})
     
     print("[DBG] config leagues:", sorted(list(leagues_cfg.keys())))
+    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
     
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
