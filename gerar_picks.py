@@ -5,7 +5,7 @@ import math
 import os
 from pathlib import Path
 from urllib import request, parse, error
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -49,20 +49,39 @@ def pick_id(row: dict) -> str:
 
 
 # =============================
-# Helpers estatísticos / modelo
+# Helpers / modelo
 # =============================
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove BOM (\ufeff) e espaços em nomes de colunas.
+    """
+    df = df.copy()
+    df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+    return df
+
+
 def safe_mean(series) -> float:
     if series is None:
-        return 0.0
-    try:
-        if len(series) == 0:
-            return 0.0
-    except Exception:
         return 0.0
     s = pd.to_numeric(series, errors="coerce").dropna()
     if len(s) == 0:
         return 0.0
     return float(s.mean())
+
+
+def weighted_mean(values, decay: float = 0.88) -> float:
+    """
+    Média ponderada com decaimento exponencial.
+    O valor mais recente tem mais peso.
+    """
+    v = pd.to_numeric(pd.Series(values), errors="coerce").dropna().tolist()
+    if not v:
+        return 0.0
+    n = len(v)
+    w = [decay ** (n - 1 - i) for i in range(n)]
+    num = sum(v[i] * w[i] for i in range(n))
+    den = sum(w)
+    return float(num / den) if den > 0 else 0.0
 
 
 def poisson_cdf(k: int, lam: float) -> float:
@@ -113,8 +132,21 @@ def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
 
 
 def compute_lambdas(
-    df_hist: pd.DataFrame, home: str, away: str, window: int
+    df_hist: pd.DataFrame,
+    home: str,
+    away: str,
+    window: int,
+    decay: float,
+    min_games_home: int,
+    min_games_away: int,
 ) -> tuple[float, float, float]:
+    """
+    Modelo v3:
+    - base = médias da liga (FTHG, FTAG)
+    - forma recente com pesos (decay)
+    - casa/fora (home em casa, away fora)
+    - fallback robusto quando há poucos jogos
+    """
     avg_home, avg_away = league_avgs(df_hist)
     if avg_home <= 0:
         avg_home = 1.2
@@ -124,26 +156,28 @@ def compute_lambdas(
     h_last = last_n_home(df_hist, home, window)
     a_last = last_n_away(df_hist, away, window)
 
-    home_attack = 1.0
-    home_defense = 1.0
-    away_attack = 1.0
-    away_defense = 1.0
+    if len(h_last) < min_games_home or len(a_last) < min_games_away:
+        lam_home = float(max(0.05, min(6.0, avg_home)))
+        lam_away = float(max(0.05, min(6.0, avg_away)))
+        return lam_home, lam_away, lam_home + lam_away
 
-    if h_last is not None and len(h_last) > 0:
-        home_scored = safe_mean(h_last.get("FTHG", pd.Series(dtype=float)))
-        home_conceded = safe_mean(h_last.get("FTAG", pd.Series(dtype=float)))
-        if home_scored > 0:
-            home_attack = home_scored / avg_home if avg_home > 0 else 1.0
-        if home_conceded > 0:
-            home_defense = home_conceded / avg_away if avg_away > 0 else 1.0
+    home_scored = weighted_mean(h_last["FTHG"], decay=decay)
+    home_conceded = weighted_mean(h_last["FTAG"], decay=decay)
+    away_scored = weighted_mean(a_last["FTAG"], decay=decay)
+    away_conceded = weighted_mean(a_last["FTHG"], decay=decay)
 
-    if a_last is not None and len(a_last) > 0:
-        away_scored = safe_mean(a_last.get("FTAG", pd.Series(dtype=float)))
-        away_conceded = safe_mean(a_last.get("FTHG", pd.Series(dtype=float)))
-        if away_scored > 0:
-            away_attack = away_scored / avg_away if avg_away > 0 else 1.0
-        if away_conceded > 0:
-            away_defense = away_conceded / avg_home if avg_home > 0 else 1.0
+    home_attack = (home_scored / avg_home) if avg_home > 0 else 1.0
+    home_defense = (home_conceded / avg_away) if avg_away > 0 else 1.0
+    away_attack = (away_scored / avg_away) if avg_away > 0 else 1.0
+    away_defense = (away_conceded / avg_home) if avg_home > 0 else 1.0
+
+    def clamp(x, lo=0.60, hi=1.60):
+        return float(max(lo, min(hi, x)))
+
+    home_attack = clamp(home_attack)
+    home_defense = clamp(home_defense)
+    away_attack = clamp(away_attack)
+    away_defense = clamp(away_defense)
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
@@ -159,7 +193,11 @@ def compute_lambdas(
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
-        {"chat_id": chat_id, "text": text, "disable_web_page_preview": "true"}
+        {
+            "chat_id": chat_id,
+            "text": text,
+            "disable_web_page_preview": "true",
+        }
     ).encode("utf-8")
     req = request.Request(url, data=data, method="POST")
     with request.urlopen(req, timeout=20) as resp:
@@ -266,25 +304,10 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     return df
 
 
-def dbg_edges(tag: str, rows: list[dict]) -> None:
-    if not rows:
-        print(f"[DBG] {tag}: rows=0")
-        return
-    edges = [float(r.get("Edge", 0.0)) for r in rows]
-    odds = [float(r.get("Odd", 0.0)) for r in rows]
-    print(
-        f"[DBG] {tag}: rows={len(rows)} "
-        f"edge_max={max(edges):.4f} edge_min={min(edges):.4f} "
-        f"odd_min={min(odds):.2f} odd_max={max(odds):.2f}"
-    )
-
-
 # =============================
 # GitHub upload (via API, sem git)
 # =============================
-def github_request(
-    url: str, token: str, method: str = "GET", data: dict | None = None
-):
+def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -302,9 +325,7 @@ def github_request(
         return json.loads(raw) if raw else {}
 
 
-def github_get_sha(
-    owner: str, repo: str, path: str, branch: str, token: str
-) -> str | None:
+def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str) -> str | None:
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}?ref={parse.quote(branch)}"
     try:
         j = github_request(url, token, method="GET")
@@ -326,6 +347,7 @@ def github_put_file(
     message: str,
 ) -> None:
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}"
+
     sha = github_get_sha(owner, repo, path, branch, token)
 
     payload = {
@@ -356,7 +378,7 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
 
         try:
             content = fp.read_bytes()
-            msg = f"Update {fp.name} ({datetime.utcnow().isoformat()}Z)"
+            msg = f"Update {fp.name} ({datetime.now(timezone.utc).isoformat()}Z)"
             github_put_file(owner, repo, rel_path, content, branch, token, msg)
             ok += 1
         except Exception as e:
@@ -378,10 +400,8 @@ def main():
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
 
-    # Robust: tenta detetar separador (vírgula/;), sem rebentar
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
-
-    print("[DBG] GERAR_PICKS START v3")
+    fixtures = normalize_columns(fixtures)
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
@@ -391,15 +411,14 @@ def main():
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone Portugal
+    # Timezone "Portugal" (Lisboa)
     try:
         from zoneinfo import ZoneInfo
-
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # default 1 dia
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
     today_iso = start.isoformat()
@@ -407,37 +426,31 @@ def main():
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
     fixtures["Date"] = fixtures["Date"].astype(str)
 
+    rows15, rows25 = [], []
+
     history_cfg = cfg.get("history", {})
-    window = int(history_cfg.get("window", 10))
-    lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
+    window = int(history_cfg.get("window", 12))
+    decay = float(history_cfg.get("decay", 0.88))
+    min_games_home = int(history_cfg.get("min_games_home", 8))
+    min_games_away = int(history_cfg.get("min_games_away", 8))
 
     leagues_cfg = cfg.get("leagues", {})
 
-    print("[DBG] config leagues:", sorted(list(leagues_cfg.keys())))
-    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
-
-    rows15, rows25 = [], []
-
     for league_key, league_meta in leagues_cfg.items():
-        print(f"[DBG] league={league_key} fixtures={int((fixtures['League'] == league_key).sum())}")
-
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
             continue
 
         hist_path = BASE / "data_raw" / f"{league_key}.csv"
-        print(f"[DBG] hist_path={hist_path} exists={hist_path.exists()}")
-
         if not hist_path.exists():
             continue
 
-        df_hist = pd.read_csv(hist_path, sep=None, engine="python", encoding="utf-8-sig")
-        df_hist.columns = df_hist.columns.str.replace("\ufeff", "")
-        df_hist.columns = df_hist.columns.str.strip()
-        
+        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
+        df_hist = normalize_columns(df_hist)
+
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
         if not need_hist.issubset(set(df_hist.columns)):
-            print(f"[DBG] {league_key}: histórico sem colunas necessárias -> {sorted(list(set(df_hist.columns)))}")
+            print(f"{league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
             continue
 
         df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
@@ -445,14 +458,24 @@ def main():
 
         league_name = league_meta.get("name", league_key)
 
-        # ======= LOOP POR JOGO (ISTO É O QUE TE FALTAVA) =======
+        # Boost por liga (se existir), senão usa global
+        league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
+        lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
+
         for _, fx in league_fixt.iterrows():
             home = str(fx["HomeTeam"])
             away = str(fx["AwayTeam"])
 
-            lam_h, lam_a, lam_t = compute_lambdas(df_hist, home, away, window)
+            lam_h, lam_a, lam_t = compute_lambdas(
+                df_hist,
+                home,
+                away,
+                window=window,
+                decay=decay,
+                min_games_home=min_games_home,
+                min_games_away=min_games_away,
+            )
 
-            # Boost do modelo (se quiseres)
             if lambda_boost and lambda_boost != 1.0:
                 lam_h = max(0.05, min(6.0, lam_h * lambda_boost))
                 lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
@@ -461,26 +484,20 @@ def main():
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
 
-            odd15 = float(fx["Odd_Over15"]) if not pd.isna(fx["Odd_Over15"]) else None
-            odd25 = float(fx["Odd_Over25"]) if not pd.isna(fx["Odd_Over25"]) else None
+            try:
+                odd15 = float(fx["Odd_Over15"]) if not pd.isna(fx["Odd_Over15"]) else 0.0
+            except Exception:
+                odd15 = 0.0
+            try:
+                odd25 = float(fx["Odd_Over25"]) if not pd.isna(fx["Odd_Over25"]) else 0.0
+            except Exception:
+                odd25 = 0.0
 
-            # ignorar odds inválidas
-            if odd15 is None or odd15 <= 1.01:
-                continue
-            if odd25 is None or odd25 <= 1.01:
-                continue
-
-            pm15 = 1.0 / odd15
-            pm25 = 1.0 / odd25
+            pm15 = (1.0 / odd15) if odd15 > 1.0 else 0.0
+            pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
 
             edge15 = p15 - pm15
             edge25 = p25 - pm25
-
-            print(
-                f"[DBG] {league_key} {home} vs {away} | "
-                f"lam={lam_t:.2f} p15={p15:.3f} pm15={pm15:.3f} edge15={edge15:.3f} | "
-                f"p25={p25:.3f} pm25={pm25:.3f} edge25={edge25:.3f}"
-            )
 
             k15 = kelly_fraction(p15, odd15)
             k25 = kelly_fraction(p25, odd25)
@@ -519,11 +536,6 @@ def main():
                     "KellyTrue": k25,
                 }
             )
-        # ======= FIM LOOP POR JOGO =======
-
-    # DEBUG: antes de filtrar
-    dbg_edges("PRE-FILTER O1.5", rows15)
-    dbg_edges("PRE-FILTER O2.5", rows25)
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
@@ -538,6 +550,7 @@ def main():
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
+    # Para abrir melhor no LibreOffice PT, usamos separador ";"
     out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
