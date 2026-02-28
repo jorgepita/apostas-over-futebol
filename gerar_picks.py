@@ -31,7 +31,6 @@ def load_sent_state(today_iso: str) -> set[str]:
         sent_list = data.get("sent", [])
         return set(sent_list) if isinstance(sent_list, list) else set()
     except Exception:
-        # se o ficheiro corromper, recomeça
         return set()
 
 
@@ -125,7 +124,6 @@ def compute_lambdas(
     h_last = last_n_home(df_hist, home, window)
     a_last = last_n_away(df_hist, away, window)
 
-    # neutros por defeito
     home_attack = 1.0
     home_defense = 1.0
     away_attack = 1.0
@@ -134,18 +132,18 @@ def compute_lambdas(
     if h_last is not None and len(h_last) > 0:
         home_scored = safe_mean(h_last.get("FTHG", pd.Series(dtype=float)))
         home_conceded = safe_mean(h_last.get("FTAG", pd.Series(dtype=float)))
-        if home_scored > 0:
-            home_attack = home_scored / avg_home if avg_home > 0 else 1.0
-        if home_conceded > 0:
-            home_defense = home_conceded / avg_away if avg_away > 0 else 1.0
+        if home_scored > 0 and avg_home > 0:
+            home_attack = home_scored / avg_home
+        if home_conceded > 0 and avg_away > 0:
+            home_defense = home_conceded / avg_away
 
     if a_last is not None and len(a_last) > 0:
         away_scored = safe_mean(a_last.get("FTAG", pd.Series(dtype=float)))
         away_conceded = safe_mean(a_last.get("FTHG", pd.Series(dtype=float)))
-        if away_scored > 0:
-            away_attack = away_scored / avg_away if avg_away > 0 else 1.0
-        if away_conceded > 0:
-            away_defense = away_conceded / avg_home if avg_home > 0 else 1.0
+        if away_scored > 0 and avg_away > 0:
+            away_attack = away_scored / avg_away
+        if away_conceded > 0 and avg_home > 0:
+            away_defense = away_conceded / avg_home
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
@@ -319,7 +317,6 @@ def github_put_file(
     message: str,
 ) -> None:
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}"
-
     sha = github_get_sha(owner, repo, path, branch, token)
 
     payload = {
@@ -372,38 +369,30 @@ def main():
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
 
-    # Robust: tenta detetar separador (vírgula/;), sem rebentar
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
 
     print("[DBG] GERAR_PICKS START v2")
-    if "League" in fixtures.columns:
-        print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
+    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
-    # Date -> date
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone "Portugal" (Lisboa)
     try:
         from zoneinfo import ZoneInfo
-
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # default 1 dia
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
     today_iso = start.isoformat()
 
-    # manter jogos entre hoje e hoje+days_ahead (inclusive)
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
-
-    # guardar Date em string ISO
     fixtures["Date"] = fixtures["Date"].astype(str)
 
     rows15, rows25 = [], []
@@ -441,13 +430,13 @@ def main():
 
         league_name = league_meta.get("name", league_key)
 
+        # ✅ TUDO o que é cálculo por jogo TEM de estar dentro deste loop
         for _, fx in league_fixt.iterrows():
             home = str(fx["HomeTeam"])
             away = str(fx["AwayTeam"])
 
             lam_h, lam_a, lam_t = compute_lambdas(df_hist, home, away, window)
 
-            # Boost do modelo (para corrigir underestimation)
             if lambda_boost and lambda_boost != 1.0:
                 lam_h = float(max(0.05, min(6.0, lam_h * lambda_boost)))
                 lam_a = float(max(0.05, min(6.0, lam_a * lambda_boost)))
@@ -468,7 +457,7 @@ def main():
             k15 = kelly_fraction(p15, odd15)
             k25 = kelly_fraction(p25, odd25)
 
-            # DEBUG COMPLETO (o que pediste)
+            # DBG por jogo (agora vai aparecer SEMPRE que houver fixtures)
             print(
                 f"[DBG] {league_key} {home} vs {away} | "
                 f"lamT={lam_t:.2f} "
@@ -524,7 +513,6 @@ def main():
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    # Para abrir melhor no LibreOffice PT, usamos separador ";"
     out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
