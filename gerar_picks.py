@@ -89,7 +89,7 @@ def prob_over_line(lam_total: float, line: float) -> float:
 
 
 def kelly_fraction(p: float, odd: float) -> float:
-    """Kelly "true": f = (p*odd - 1)/(odd-1), com piso 0."""
+    """Kelly 'true': f = (p*odd - 1)/(odd-1), com piso 0."""
     if odd is None or odd <= 1.0:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
@@ -113,7 +113,9 @@ def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
     return d.tail(n)
 
 
-def compute_lambdas(df_hist: pd.DataFrame, home: str, away: str, window: int) -> tuple[float, float, float]:
+def compute_lambdas(
+    df_hist: pd.DataFrame, home: str, away: str, window: int
+) -> tuple[float, float, float]:
     avg_home, avg_away = league_avgs(df_hist)
     if avg_home <= 0:
         avg_home = 1.2
@@ -273,7 +275,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 # =============================
 # GitHub upload (via API, sem git)
 # =============================
-def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
+def github_request(
+    url: str, token: str, method: str = "GET", data: dict | None = None
+):
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -291,7 +295,9 @@ def github_request(url: str, token: str, method: str = "GET", data: dict | None 
         return json.loads(raw) if raw else {}
 
 
-def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str) -> str | None:
+def github_get_sha(
+    owner: str, repo: str, path: str, branch: str, token: str
+) -> str | None:
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}?ref={parse.quote(branch)}"
     try:
         j = github_request(url, token, method="GET")
@@ -334,7 +340,6 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
         return
 
     prefix = os.getenv("GITHUB_PATH_PREFIX", "").strip().strip("/")
-    # exemplo: se quiseres meter em pasta "out", defines GITHUB_PATH_PREFIX=out
 
     ok = 0
     for fp in files:
@@ -370,10 +375,9 @@ def main():
     # Robust: tenta detetar separador (vírgula/;), sem rebentar
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
 
-    fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
-
     print("[DBG] GERAR_PICKS START v2")
-    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
+    if "League" in fixtures.columns:
+        print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
@@ -406,15 +410,15 @@ def main():
 
     history_cfg = cfg.get("history", {})
     window = int(history_cfg.get("window", 10))
+    lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
 
     leagues_cfg = cfg.get("leagues", {})
-    
+
     print("[DBG] config leagues:", sorted(list(leagues_cfg.keys())))
     print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
-    
-    for league_key, league_meta in leagues_cfg.items():
 
-        print(f"[DBG] league={league_key} fixtures={int((fixtures['League']==league_key).sum())}")
+    for league_key, league_meta in leagues_cfg.items():
+        print(f"[DBG] league={league_key} fixtures={int((fixtures['League'] == league_key).sum())}")
 
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
@@ -443,12 +447,11 @@ def main():
 
             lam_h, lam_a, lam_t = compute_lambdas(df_hist, home, away, window)
 
-        # Boost do modelo (para corrigir underestimation)
-        lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
-        if lambda_boost and lambda_boost != 1.0:
-            lam_h = max(0.05, min(6.0, lam_h * lambda_boost))
-            lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
-            lam_t = lam_h + lam_a
+            # Boost do modelo (para corrigir underestimation)
+            if lambda_boost and lambda_boost != 1.0:
+                lam_h = float(max(0.05, min(6.0, lam_h * lambda_boost)))
+                lam_a = float(max(0.05, min(6.0, lam_a * lambda_boost)))
+                lam_t = lam_h + lam_a
 
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
@@ -460,18 +463,18 @@ def main():
             pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
 
             edge15 = p15 - pm15
-            print(
-                f"[DBG] {league_key} {home} vs {away} | "
-                f"lam={lam_t:.2f} p15={p15:.3f} pm15={pm15:.3f} edge15={edge15:.3f}"
-            )
             edge25 = p25 - pm25
-            print(
-                f"[DBG] {league_key} {home} vs {away} | "
-                f"p25={p25:.3f} pm25={pm25:.3f} edge25={edge25:.3f}"
-            )
 
             k15 = kelly_fraction(p15, odd15)
             k25 = kelly_fraction(p25, odd25)
+
+            # DEBUG COMPLETO (o que pediste)
+            print(
+                f"[DBG] {league_key} {home} vs {away} | "
+                f"lamT={lam_t:.2f} "
+                f"odd15={odd15:.2f} pm15={pm15:.3f} p15={p15:.3f} edge15={edge15:.3f} k15={k15:.3f} | "
+                f"odd25={odd25:.2f} pm25={pm25:.3f} p25={p25:.3f} edge25={edge25:.3f} k25={k25:.3f}"
+            )
 
             base_row = {
                 "Date": fx["Date"],
