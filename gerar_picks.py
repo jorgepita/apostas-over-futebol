@@ -461,11 +461,17 @@ def main():
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
 
-            odd15 = float(fx["Odd_Over15"]) if not pd.isna(fx["Odd_Over15"]) else 0.0
-            odd25 = float(fx["Odd_Over25"]) if not pd.isna(fx["Odd_Over25"]) else 0.0
+            odd15 = float(fx["Odd_Over15"]) if not pd.isna(fx["Odd_Over15"]) else None
+            odd25 = float(fx["Odd_Over25"]) if not pd.isna(fx["Odd_Over25"]) else None
 
-            pm15 = (1.0 / odd15) if odd15 > 1.0 else 0.0
-            pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
+            # ignorar odds inválidas
+            if odd15 is None or odd15 <= 1.01:
+                continue
+            if odd25 is None or odd25 <= 1.01:
+                continue
+
+            pm15 = 1.0 / odd15
+            pm25 = 1.0 / odd25
 
             edge15 = p15 - pm15
             edge25 = p25 - pm25
