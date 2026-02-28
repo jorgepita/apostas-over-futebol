@@ -1,11 +1,11 @@
 {
-  "bankroll": {
-    "over15": 500.0,
-    "over25": 500.0
+  "run": {
+    "days_ahead": 1
   },
 
-  "run": {
-    "days_ahead": 10
+  "bankroll": {
+    "over15": 500,
+    "over25": 500
   },
 
   "leagues": {
@@ -14,11 +14,15 @@
       "country": "ENG"
     },
     "portugal": {
-      "name": "Liga Portugal",
-      "country": "POR"
+      "name": "Primeira Liga",
+      "country": "PRT"
+    },
+    "alemanha": {
+      "name": "Bundesliga",
+      "country": "GER"
     },
     "espanha": {
-      "name": "LaLiga",
+      "name": "La Liga",
       "country": "ESP"
     },
     "franca": {
@@ -29,23 +33,20 @@
       "name": "Serie A",
       "country": "ITA"
     },
-    "alemanha": {
-      "name": "Bundesliga",
-      "country": "GER"
-    },
     "paises_baixos": {
       "name": "Eredivisie",
       "country": "NED"
     }
   },
+
   "history": {
-  "window": 12,
-  "decay": 0.88,
-  "min_games_home": 8,
-  "min_games_away": 8,
-  "lambda_boost": 1.12
-}
+    "window": 12,
+    "decay": 0.88,
+    "min_games_home": 8,
+    "min_games_away": 8,
+    "lambda_boost": 1.12
   },
+
   "rules": {
     "over15": {
       "edge_min": -0.08,
@@ -61,10 +62,5 @@
       "daily_cap_frac": 0.15,
       "min_picks": 1
     }
-  },
-  "telegram": {
-    "enabled": false,
-    "bot_token": "COLOCA_AQUI",
-    "chat_id": "COLOCA_AQUI"
   }
 }
