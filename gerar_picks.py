@@ -88,7 +88,7 @@ def prob_over_line(lam_total: float, line: float) -> float:
 
 
 def kelly_fraction(p: float, odd: float) -> float:
-    """Kelly 'true': f = (p*odd - 1)/(odd-1), com piso 0."""
+    """Kelly "true": f = (p*odd - 1)/(odd-1), com piso 0."""
     if odd is None or odd <= 1.0:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
@@ -132,18 +132,18 @@ def compute_lambdas(
     if h_last is not None and len(h_last) > 0:
         home_scored = safe_mean(h_last.get("FTHG", pd.Series(dtype=float)))
         home_conceded = safe_mean(h_last.get("FTAG", pd.Series(dtype=float)))
-        if home_scored > 0 and avg_home > 0:
-            home_attack = home_scored / avg_home
-        if home_conceded > 0 and avg_away > 0:
-            home_defense = home_conceded / avg_away
+        if home_scored > 0:
+            home_attack = home_scored / avg_home if avg_home > 0 else 1.0
+        if home_conceded > 0:
+            home_defense = home_conceded / avg_away if avg_away > 0 else 1.0
 
     if a_last is not None and len(a_last) > 0:
         away_scored = safe_mean(a_last.get("FTAG", pd.Series(dtype=float)))
         away_conceded = safe_mean(a_last.get("FTHG", pd.Series(dtype=float)))
-        if away_scored > 0 and avg_away > 0:
-            away_attack = away_scored / avg_away
-        if away_conceded > 0 and avg_home > 0:
-            away_defense = away_conceded / avg_home
+        if away_scored > 0:
+            away_attack = away_scored / avg_away if avg_away > 0 else 1.0
+        if away_conceded > 0:
+            away_defense = away_conceded / avg_home if avg_home > 0 else 1.0
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
@@ -159,11 +159,7 @@ def compute_lambdas(
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
-        {
-            "chat_id": chat_id,
-            "text": text,
-            "disable_web_page_preview": "true",
-        }
+        {"chat_id": chat_id, "text": text, "disable_web_page_preview": "true"}
     ).encode("utf-8")
     req = request.Request(url, data=data, method="POST")
     with request.urlopen(req, timeout=20) as resp:
@@ -270,6 +266,19 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     return df
 
 
+def dbg_edges(tag: str, rows: list[dict]) -> None:
+    if not rows:
+        print(f"[DBG] {tag}: rows=0")
+        return
+    edges = [float(r.get("Edge", 0.0)) for r in rows]
+    odds = [float(r.get("Odd", 0.0)) for r in rows]
+    print(
+        f"[DBG] {tag}: rows={len(rows)} "
+        f"edge_max={max(edges):.4f} edge_min={min(edges):.4f} "
+        f"odd_min={min(odds):.2f} odd_max={max(odds):.2f}"
+    )
+
+
 # =============================
 # GitHub upload (via API, sem git)
 # =============================
@@ -369,20 +378,23 @@ def main():
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
 
+    # Robust: tenta detetar separador (vírgula/;), sem rebentar
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
 
-    print("[DBG] GERAR_PICKS START v2")
-    print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
+    print("[DBG] GERAR_PICKS START v3")
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
+    # Date -> date
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
+    # Timezone Portugal
     try:
         from zoneinfo import ZoneInfo
+
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
         now_pt = datetime.utcnow()
@@ -395,8 +407,6 @@ def main():
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
     fixtures["Date"] = fixtures["Date"].astype(str)
 
-    rows15, rows25 = [], []
-
     history_cfg = cfg.get("history", {})
     window = int(history_cfg.get("window", 10))
     lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
@@ -405,6 +415,8 @@ def main():
 
     print("[DBG] config leagues:", sorted(list(leagues_cfg.keys())))
     print("[DBG] fixtures leagues:", sorted(fixtures["League"].dropna().unique().tolist()))
+
+    rows15, rows25 = [], []
 
     for league_key, league_meta in leagues_cfg.items():
         print(f"[DBG] league={league_key} fixtures={int((fixtures['League'] == league_key).sum())}")
@@ -423,6 +435,7 @@ def main():
 
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
         if not need_hist.issubset(set(df_hist.columns)):
+            print(f"[DBG] {league_key}: histórico sem colunas necessárias -> {sorted(list(set(df_hist.columns)))}")
             continue
 
         df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
@@ -430,16 +443,17 @@ def main():
 
         league_name = league_meta.get("name", league_key)
 
-        # ✅ TUDO o que é cálculo por jogo TEM de estar dentro deste loop
+        # ======= LOOP POR JOGO (ISTO É O QUE TE FALTAVA) =======
         for _, fx in league_fixt.iterrows():
             home = str(fx["HomeTeam"])
             away = str(fx["AwayTeam"])
 
             lam_h, lam_a, lam_t = compute_lambdas(df_hist, home, away, window)
 
+            # Boost do modelo (se quiseres)
             if lambda_boost and lambda_boost != 1.0:
-                lam_h = float(max(0.05, min(6.0, lam_h * lambda_boost)))
-                lam_a = float(max(0.05, min(6.0, lam_a * lambda_boost)))
+                lam_h = max(0.05, min(6.0, lam_h * lambda_boost))
+                lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
             p15 = prob_over_line(lam_t, 1.5)
@@ -454,16 +468,14 @@ def main():
             edge15 = p15 - pm15
             edge25 = p25 - pm25
 
-            k15 = kelly_fraction(p15, odd15)
-            k25 = kelly_fraction(p25, odd25)
-
-            # DBG por jogo (agora vai aparecer SEMPRE que houver fixtures)
             print(
                 f"[DBG] {league_key} {home} vs {away} | "
-                f"lamT={lam_t:.2f} "
-                f"odd15={odd15:.2f} pm15={pm15:.3f} p15={p15:.3f} edge15={edge15:.3f} k15={k15:.3f} | "
-                f"odd25={odd25:.2f} pm25={pm25:.3f} p25={p25:.3f} edge25={edge25:.3f} k25={k25:.3f}"
+                f"lam={lam_t:.2f} p15={p15:.3f} pm15={pm15:.3f} edge15={edge15:.3f} | "
+                f"p25={p25:.3f} pm25={pm25:.3f} edge25={edge25:.3f}"
             )
+
+            k15 = kelly_fraction(p15, odd15)
+            k25 = kelly_fraction(p25, odd25)
 
             base_row = {
                 "Date": fx["Date"],
@@ -499,6 +511,11 @@ def main():
                     "KellyTrue": k25,
                 }
             )
+        # ======= FIM LOOP POR JOGO =======
+
+    # DEBUG: antes de filtrar
+    dbg_edges("PRE-FILTER O1.5", rows15)
+    dbg_edges("PRE-FILTER O2.5", rows25)
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
