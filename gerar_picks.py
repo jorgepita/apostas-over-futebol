@@ -431,8 +431,10 @@ def main():
         if not hist_path.exists():
             continue
 
-        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
-
+        df_hist = pd.read_csv(hist_path, sep=None, engine="python", encoding="utf-8-sig")
+        df_hist.columns = df_hist.columns.str.replace("\ufeff", "")
+        df_hist.columns = df_hist.columns.str.strip()
+        
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
         if not need_hist.issubset(set(df_hist.columns)):
             print(f"[DBG] {league_key}: histórico sem colunas necessárias -> {sorted(list(set(df_hist.columns)))}")
