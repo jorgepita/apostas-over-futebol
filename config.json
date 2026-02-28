@@ -2,43 +2,20 @@
   "run": {
     "days_ahead": 1
   },
-
   "bankroll": {
     "over15": 500,
-    "over25": 500
+    "over25": 500,
+    "nba_over": 500
   },
-
   "leagues": {
-    "premier": {
-      "name": "Premier League",
-      "country": "ENG"
-    },
-    "portugal": {
-      "name": "Primeira Liga",
-      "country": "PRT"
-    },
-    "alemanha": {
-      "name": "Bundesliga",
-      "country": "GER"
-    },
-    "espanha": {
-      "name": "La Liga",
-      "country": "ESP"
-    },
-    "franca": {
-      "name": "Ligue 1",
-      "country": "FRA"
-    },
-    "italia": {
-      "name": "Serie A",
-      "country": "ITA"
-    },
-    "paises_baixos": {
-      "name": "Eredivisie",
-      "country": "NED"
-    }
+    "premier": { "name": "Premier League", "country": "ENG" },
+    "portugal": { "name": "Primeira Liga", "country": "PRT" },
+    "alemanha": { "name": "Bundesliga", "country": "DEU" },
+    "espanha": { "name": "LaLiga", "country": "ESP" },
+    "franca": { "name": "Ligue 1", "country": "FRA" },
+    "italia": { "name": "Serie A", "country": "ITA" },
+    "paises_baixos": { "name": "Eredivisie", "country": "NED" }
   },
-
   "history": {
     "window": 12,
     "decay": 0.88,
@@ -46,7 +23,6 @@
     "min_games_away": 8,
     "lambda_boost": 1.12
   },
-
   "rules": {
     "over15": {
       "edge_min": -0.08,
@@ -61,6 +37,17 @@
       "cap_frac": 0.04,
       "daily_cap_frac": 0.15,
       "min_picks": 1
+    },
+    "nba_over": {
+      "edge_min": -0.03,
+      "kelly_fraction": 0.25,
+      "cap_frac": 0.05,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
     }
+  },
+  "nba": {
+    "window": 10,
+    "sigma_total": 14.0
   }
 }
