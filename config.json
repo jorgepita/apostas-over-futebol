@@ -39,11 +39,12 @@
     }
   },
   "history": {
-    "min_games_home": 8,
-    "min_games_away": 8,
-    "window": 12,
-    ¨decay¨: 0.88,
-    "lambda_boost": 1.12
+  "window": 12,
+  "decay": 0.88,
+  "min_games_home": 8,
+  "min_games_away": 8,
+  "lambda_boost": 1.12
+}
   },
   "rules": {
     "over15": {
