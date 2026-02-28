@@ -414,20 +414,19 @@ def main():
     
     for league_key, league_meta in leagues_cfg.items():
 
-        print(f"[DBG] league={league_key} fixtures={int((fixtures['League']==league_key).sum())}")
-        print(f"[DBG] hist_path={hist_path} exists={hist_path.exists()}")
-        
-        league_fixt = fixtures[fixtures["League"] == league_key].copy()
-        if league_fixt.empty:
-            continue
-   
-        hist_path = BASE / "data_raw" / f"{league_key}.csv"
-        if not hist_path.exists():
-            continue
+    print(f"[DBG] league={league_key} fixtures={int((fixtures['League']==league_key).sum())}")
+
+    league_fixt = fixtures[fixtures["League"] == league_key].copy()
+    if league_fixt.empty:
+        continue
+
+    hist_path = BASE / "data_raw" / f"{league_key}.csv"
+    print(f"[DBG] hist_path={hist_path} exists={hist_path.exists()}")
+
+    if not hist_path.exists():
+        continue
 
         df_hist = pd.read_csv(hist_path, sep=None, engine="python")
-
-        
 
         need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
         if not need_hist.issubset(set(df_hist.columns)):
