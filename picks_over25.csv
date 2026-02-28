@@ -1,2 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-02-28;premier;Premier League;Leeds United;Manchester City;1.709;1.508;3.217;O2.5;0.624;2.25;0.444;0.1791;0.3224;0.0645;0.04;20.0;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue
