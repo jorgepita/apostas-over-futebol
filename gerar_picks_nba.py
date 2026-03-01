@@ -1,4 +1,4 @@
-# gerar_picks.py  (NBA - apenas OVER, window=15)
+# gerar_picks_nba.py (NBA - OVER, com fixtures_today_nba.csv)
 import base64
 import json
 import math
@@ -14,7 +14,7 @@ BASE = Path(__file__).resolve().parent
 # =============================
 # Anti-duplicados (por dia)
 # =============================
-SENT_STATE_PATH = BASE / "sent_state.json"
+SENT_STATE_PATH = BASE / "sent_state_nba.json"
 
 
 def load_sent_state(today_iso: str) -> set[str]:
@@ -38,48 +38,34 @@ def save_sent_state(today_iso: str, sent: set[str]) -> None:
 
 
 def pick_id(row: dict) -> str:
-    # ID único por jogo/linha
+    # Date|Home|Away|Line|Book
     return (
-        f"{row.get('Date','')}|{row.get('League','')}|{row.get('HomeTeam','')}|"
-        f"{row.get('AwayTeam','')}|OVER|{row.get('Line','')}"
+        f"{row.get('Date','')}|{row.get('HomeTeam','')}|{row.get('AwayTeam','')}|"
+        f"{row.get('Line','')}|{row.get('Book','')}"
     )
 
 
 # =============================
-# Helpers estatísticos
+# Helpers
 # =============================
 def safe_mean(series) -> float:
-    if series is None:
-        return 0.0
-    try:
-        if len(series) == 0:
-            return 0.0
-    except Exception:
-        return 0.0
     s = pd.to_numeric(series, errors="coerce").dropna()
     if len(s) == 0:
         return 0.0
     return float(s.mean())
 
 
-def safe_std(series) -> float:
-    s = pd.to_numeric(series, errors="coerce").dropna()
-    if len(s) < 2:
-        return 0.0
-    return float(s.std(ddof=1))
-
-
 def normal_cdf(x: float, mu: float, sigma: float) -> float:
-    # CDF Normal via erf
     if sigma <= 1e-9:
         return 1.0 if x >= mu else 0.0
     z = (x - mu) / (sigma * math.sqrt(2.0))
     return 0.5 * (1.0 + math.erf(z))
 
 
-def prob_over_total(mu_total: float, sigma_total: float, line: float) -> float:
-    # P(Total > line) = 1 - CDF(line)
-    return 1.0 - normal_cdf(line, mu_total, sigma_total)
+def prob_over_normal(mu_total: float, line: float, std_total: float) -> float:
+    # P(total > line) = 1 - CDF(line)
+    p = 1.0 - normal_cdf(line, mu_total, std_total)
+    return float(min(1.0, max(0.0, p)))
 
 
 def kelly_fraction(p: float, odd: float) -> float:
@@ -90,94 +76,139 @@ def kelly_fraction(p: float, odd: float) -> float:
 
 
 # =============================
-# Modelo NBA (muito simples e robusto)
-# - Estima pontos esperados de cada equipa usando:
-#   ataque (pontos marcados) e defesa (pontos sofridos)
-#   em janelas recentes "window".
-# - Desvio padrão do total estimado pelo histórico recente de totais.
+# Modelo NBA (window=15)
 # =============================
-def build_team_history(df_hist: pd.DataFrame) -> pd.DataFrame:
-    """
-    Converte jogos Home/Away em linhas por equipa:
-    Date, Team, PTS, PA
-    """
-    home = df_hist[["Date", "HomeTeam", "FTHG", "FTAG"]].copy()
-    home.columns = ["Date", "Team", "PTS", "PA"]
-
-    away = df_hist[["Date", "AwayTeam", "FTAG", "FTHG"]].copy()
-    away.columns = ["Date", "Team", "PTS", "PA"]
-
-    out = pd.concat([home, away], ignore_index=True)
-    out["PTS"] = pd.to_numeric(out["PTS"], errors="coerce")
-    out["PA"] = pd.to_numeric(out["PA"], errors="coerce")
-    out = out.dropna(subset=["Date", "Team", "PTS", "PA"]).copy()
-    return out
+def league_avgs_points(df_hist: pd.DataFrame) -> tuple[float, float]:
+    return (
+        safe_mean(df_hist.get("FTHG", pd.Series(dtype=float))),
+        safe_mean(df_hist.get("FTAG", pd.Series(dtype=float))),
+    )
 
 
-def last_n_team(team_df: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
-    d = team_df[team_df["Team"] == team].sort_values("Date")
+def last_n_home(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
+    d = df_hist[df_hist["HomeTeam"] == team].sort_values("Date")
     return d.tail(n)
 
 
-def expected_points(team_df: pd.DataFrame, team: str, opp: str, window: int) -> tuple[float, float]:
+def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
+    d = df_hist[df_hist["AwayTeam"] == team].sort_values("Date")
+    return d.tail(n)
+
+
+def compute_expected_total(
+    df_hist: pd.DataFrame,
+    home: str,
+    away: str,
+    window: int,
+    min_games_home: int,
+    min_games_away: int,
+    shrink: float,
+) -> tuple[float, float, float, int, int]:
     """
-    Retorna (mu_team, mu_opp_component):
-      mu_team: pontos esperados do 'team'
-      mu_opp_component: pontos sofridos esperados pelo 'opp' (defesa do opp)
+    Retorna: (mu_home, mu_away, mu_total, h_n, a_n)
+    Modelo por rácios ataque/defesa com shrink.
     """
-    t_last = last_n_team(team_df, team, window)
-    o_last = last_n_team(team_df, opp, window)
+    avg_home, avg_away = league_avgs_points(df_hist)
+    if avg_home <= 0:
+        avg_home = 112.0
+    if avg_away <= 0:
+        avg_away = 110.0
 
-    mu_scored = safe_mean(t_last["PTS"]) if len(t_last) else 0.0
-    mu_allowed_by_opp = safe_mean(o_last["PA"]) if len(o_last) else 0.0
+    h_last = last_n_home(df_hist, home, window)
+    a_last = last_n_away(df_hist, away, window)
 
-    return mu_scored, mu_allowed_by_opp
+    h_n = len(h_last)
+    a_n = len(a_last)
 
+    # neutros
+    home_attack = 1.0
+    home_def = 1.0
+    away_attack = 1.0
+    away_def = 1.0
 
-def estimate_total(df_hist: pd.DataFrame, home: str, away: str, window: int) -> tuple[float, float, float, float]:
-    """
-    Devolve:
-      mu_home, mu_away, mu_total, sigma_total
-    """
-    team_df = build_team_history(df_hist)
+    if h_n >= max(1, min_games_home):
+        h_scored = safe_mean(h_last["FTHG"])
+        h_conc = safe_mean(h_last["FTAG"])
+        home_attack = (h_scored / avg_home) if avg_home > 0 else 1.0
+        home_def = (h_conc / avg_away) if avg_away > 0 else 1.0
+        home_attack = 1.0 + shrink * (home_attack - 1.0)
+        home_def = 1.0 + shrink * (home_def - 1.0)
 
-    # fallback liga (se equipa não tiver histórico suficiente)
-    league_mu_pts = safe_mean(team_df["PTS"])
-    if league_mu_pts <= 0:
-        league_mu_pts = 110.0  # NBA típico
+    if a_n >= max(1, min_games_away):
+        a_scored = safe_mean(a_last["FTAG"])
+        a_conc = safe_mean(a_last["FTHG"])
+        away_attack = (a_scored / avg_away) if avg_away > 0 else 1.0
+        away_def = (a_conc / avg_home) if avg_home > 0 else 1.0
+        away_attack = 1.0 + shrink * (away_attack - 1.0)
+        away_def = 1.0 + shrink * (away_def - 1.0)
 
-    # médias por equipa
-    h_scored, a_allowed = expected_points(team_df, home, away, window)
-    a_scored, h_allowed = expected_points(team_df, away, home, window)
+    mu_home = avg_home * home_attack * away_def
+    mu_away = avg_away * away_attack * home_def
 
-    # se faltar histórico, usa média liga
-    if h_scored <= 0:
-        h_scored = league_mu_pts
-    if a_scored <= 0:
-        a_scored = league_mu_pts
-    if a_allowed <= 0:
-        a_allowed = league_mu_pts
-    if h_allowed <= 0:
-        h_allowed = league_mu_pts
-
-    # mistura ataque vs defesa (simples e estável)
-    mu_home = 0.5 * h_scored + 0.5 * a_allowed
-    mu_away = 0.5 * a_scored + 0.5 * h_allowed
+    mu_home = float(max(80.0, min(140.0, mu_home)))
+    mu_away = float(max(80.0, min(140.0, mu_away)))
     mu_total = mu_home + mu_away
+    return mu_home, mu_away, mu_total, h_n, a_n
 
-    # sigma do total pelos totais recentes dos jogos dessas equipas
-    df_hist = df_hist.sort_values("Date").copy()
-    df_hist["TOTAL"] = pd.to_numeric(df_hist["FTHG"], errors="coerce") + pd.to_numeric(df_hist["FTAG"], errors="coerce")
 
-    # jogos onde home ou away participa
-    mask = (df_hist["HomeTeam"].isin([home, away])) | (df_hist["AwayTeam"].isin([home, away]))
-    recent_totals = df_hist.loc[mask, "TOTAL"].tail(max(30, window * 2))
-    sigma_total = safe_std(recent_totals)
-    if sigma_total <= 1e-6:
-        # fallback: sigma típico NBA
-        sigma_total = 14.0
+# =============================
+# Regras / stakes
+# =============================
+def apply_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
+    if not rows:
+        return pd.DataFrame()
 
-    return float(mu_home), float(mu_away), float(mu_total), float(sigma_total)
+    df = pd.DataFrame(rows)
+
+    edge_min = float(rules.get("edge_min", 0.0))
+    min_odd = float(rules.get("min_odd", 1.01))
+    max_picks = int(rules.get("max_picks", 10))
+
+    df = df[df["Edge"] >= edge_min].copy()
+    df = df[df["Odd"] >= min_odd].copy()
+    if df.empty:
+        return df
+
+    # ordenar e cortar
+    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).head(max_picks).copy()
+
+    kfrac = float(rules.get("kelly_fraction", 0.25))
+    cap_frac = float(rules.get("cap_frac", 0.05))
+    daily_cap_frac = float(rules.get("daily_cap_frac", 0.15))
+
+    df["StakeFracRaw"] = df["KellyTrue"] * kfrac
+    df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
+
+    total_frac = float(df["StakeFrac"].sum())
+    scale = 1.0
+    if total_frac > daily_cap_frac and total_frac > 0:
+        scale = daily_cap_frac / total_frac
+        df["StakeFrac"] = df["StakeFrac"] * scale
+
+    df["Stake€"] = df["StakeFrac"] * float(bankroll)
+    df["DailyScale"] = float(scale)
+    df["Bankroll€"] = float(bankroll)
+
+    # arredondar
+    round_cols = {
+        "MuHome": 2,
+        "MuAway": 2,
+        "MuTotal": 2,
+        "StdTotal": 2,
+        "ProbModel": 4,
+        "ProbMarket": 4,
+        "Edge": 4,
+        "KellyTrue": 4,
+        "StakeFrac": 4,
+        "Stake€": 2,
+        "Odd": 2,
+        "Line": 1,
+    }
+    for col, dec in round_cols.items():
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").round(dec)
+
+    return df.reset_index(drop=True)
 
 
 # =============================
@@ -228,72 +259,16 @@ def build_message(rows: list[dict], titulo: str) -> str:
     msg = f"🏀 {titulo}\n\n"
     for r in rows:
         msg += (
-            f"{r['HomeTeam']} vs {r['AwayTeam']} | Line: {r['Line']} | Over @ {r['Odd']}\n"
-            f"Model P: {float(r['ProbModel']):.3f} | Market P: {float(r['ProbMarket']):.3f}\n"
-            f"Edge: {float(r['Edge']):.2%} | Stake: {float(r.get('Stake€', 0.0)):.2f}€\n\n"
+            f"NBA | {r['AwayTeam']} @ {r['HomeTeam']} | {r['Date']}\n"
+            f"OVER {r['Line']} @ {r['Odd']} ({r.get('Book','')})\n"
+            f"Model {float(r['ProbModel']):.1%} | Market {float(r['ProbMarket']):.1%}\n"
+            f"Edge {float(r['Edge']):.1%} | Stake {float(r.get('Stake€', 0.0)):.2f}€\n\n"
         )
     return msg
 
 
 # =============================
-# Regras / stakes
-# =============================
-def apply_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
-    if not rows:
-        return pd.DataFrame()
-
-    df = pd.DataFrame(rows)
-
-    edge_min = float(rules.get("edge_min", 0.0))
-    df = df[df["Edge"] >= edge_min].copy()
-    if df.empty:
-        return df
-
-    kfrac = float(rules.get("kelly_fraction", 0.25))
-    cap_frac = float(rules.get("cap_frac", 0.05))
-    daily_cap_frac = float(rules.get("daily_cap_frac", 0.15))
-    min_picks = int(rules.get("min_picks", 1))
-
-    df["StakeFracRaw"] = df["KellyTrue"] * kfrac
-    df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
-
-    if len(df) < min_picks:
-        return df.iloc[0:0].copy()
-
-    total_frac = float(df["StakeFrac"].sum())
-    scale = 1.0
-    if total_frac > daily_cap_frac and total_frac > 0:
-        scale = daily_cap_frac / total_frac
-        df["StakeFrac"] = df["StakeFrac"] * scale
-
-    df["Stake€"] = df["StakeFrac"] * float(bankroll)
-    df["DailyScale"] = float(scale)
-    df["Bankroll€"] = float(bankroll)
-
-    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(drop=True)
-
-    round_cols = {
-        "MuHome": 2,
-        "MuAway": 2,
-        "MuTotal": 2,
-        "SigmaTotal": 2,
-        "ProbModel": 3,
-        "ProbMarket": 3,
-        "Edge": 4,
-        "KellyTrue": 4,
-        "StakeFracRaw": 4,
-        "StakeFrac": 4,
-        "Stake€": 2,
-    }
-    for col, dec in round_cols.items():
-        if col in df.columns:
-            df[col] = df[col].round(dec)
-
-    return df
-
-
-# =============================
-# GitHub upload (via API, sem git)
+# GitHub upload (via API)
 # =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
@@ -340,7 +315,7 @@ def github_put_file(owner: str, repo: str, path: str, content_bytes: bytes, bran
     _ = github_request(url, token, method="PUT", data=payload)
 
 
-def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str) -> None:
+def upload_files_to_github(files: list[Path], owner: str, repo: str, branch: str) -> None:
     token = os.getenv("GITHUB_TOKEN", "").strip()
     if not token:
         print("GitHub: GITHUB_TOKEN em falta (não fiz upload).")
@@ -351,10 +326,12 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
     for fp in files:
         if not fp.exists():
             continue
+
         rel_path = fp.name if not prefix else f"{prefix}/{fp.name}"
+
         try:
             content = fp.read_bytes()
-            msg = f"Update {fp.name} ({datetime.now(timezone.utc).isoformat()}Z)"
+            msg = f"Update {fp.name} ({datetime.now(timezone.utc).isoformat()})"
             github_put_file(owner, repo, rel_path, content, branch, token, msg)
             ok += 1
         except Exception as e:
@@ -367,83 +344,43 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
 # Main
 # =============================
 def main():
-    # ---- Config (se não existir, usa defaults seguros) ----
     cfg_path = BASE / "config.json"
-    cfg = {}
-    if cfg_path.exists():
-        try:
-            cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-        except Exception as e:
-            raise SystemExit(f"config.json inválido: {e}")
+    if not cfg_path.exists():
+        raise SystemExit("Falta config.json na pasta do projeto.")
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
 
-    run_cfg = cfg.get("run", {})
-    history_cfg = cfg.get("history", {})
-    rules_cfg = cfg.get("rules", {})
-    bankroll_cfg = cfg.get("bankroll", {})
+    # Lê fixtures NBA
+    fx_path = BASE / "fixtures_today_nba.csv"
+    if not fx_path.exists():
+        raise SystemExit("Falta fixtures_today_nba.csv (corre fetch_fixtures_nba.py primeiro).")
 
-    # window pedido: 15
-    window = int(history_cfg.get("window", 15))
-    days_ahead = int(run_cfg.get("days_ahead", 1))
+    fx = pd.read_csv(fx_path, sep=None, engine="python")
+    need_fx = {"Date", "League", "HomeTeam", "AwayTeam", "Book", "Line", "Odd"}
+    if not need_fx.issubset(set(fx.columns)):
+        raise SystemExit(f"fixtures_today_nba.csv precisa colunas: {sorted(need_fx)}")
 
-    # ---- Fixtures do dia (NBA) ----
-    fixtures_path = BASE / "fixtures_today.csv"
-    if not fixtures_path.exists():
-        raise SystemExit("Falta fixtures_today.csv (o fetch NBA tem de correr antes).")
+    # Filtro NBA
+    fx["League"] = fx["League"].astype(str).str.lower()
+    fx = fx[fx["League"].isin(["nba", "basketball_nba"])].copy()
 
-    fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
+    # Date -> date
+    fx["Date"] = pd.to_datetime(fx["Date"], errors="coerce").dt.date
+    fx = fx.dropna(subset=["Date"]).copy()
 
-    # Mapeia colunas possíveis
-    col_map = {
-        "Date": ["Date", "date", "game_date", "CommenceDate"],
-        "League": ["League", "league", "sport", "competition"],
-        "HomeTeam": ["HomeTeam", "home", "home_team", "Home"],
-        "AwayTeam": ["AwayTeam", "away", "away_team", "Away"],
-        "Line": ["Line", "line", "TotalLine", "total_line", "Point", "point"],
-        "Odd_Over": ["Odd_Over", "odd_over", "OverOdd", "over_odds", "price_over", "OddOver"],
-    }
-
-    def pick_col(df: pd.DataFrame, key: str) -> str | None:
-        for c in col_map.get(key, []):
-            if c in df.columns:
-                return c
-        return None
-
-    c_date = pick_col(fixtures, "Date")
-    c_league = pick_col(fixtures, "League")
-    c_home = pick_col(fixtures, "HomeTeam")
-    c_away = pick_col(fixtures, "AwayTeam")
-    c_line = pick_col(fixtures, "Line")
-    c_odd = pick_col(fixtures, "Odd_Over")
-
-    missing = [k for k, c in [("Date", c_date), ("League", c_league), ("HomeTeam", c_home), ("AwayTeam", c_away), ("Line", c_line), ("Odd_Over", c_odd)] if c is None]
-    if missing:
-        raise SystemExit(f"fixtures_today.csv NBA precisa colunas (ou equivalentes): {missing}. Colunas atuais: {list(fixtures.columns)}")
-
-    fixtures = fixtures.rename(columns={c_date: "Date", c_league: "League", c_home: "HomeTeam", c_away: "AwayTeam", c_line: "Line", c_odd: "Odd_Over"}).copy()
-
-    # Só NBA
-    fixtures["League"] = fixtures["League"].astype(str).str.lower()
-    fixtures = fixtures[fixtures["League"].isin(["nba", "basketball_nba"])].copy()
-
-    if fixtures.empty:
-        raise SystemExit("fixtures_today.csv não tem jogos NBA (League=nba).")
-
-    # Date -> date (assume ISO)
-    fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
-    fixtures = fixtures.dropna(subset=["Date"]).copy()
-
-    # Janela de dias
+    # Janela de dias (hoje..hoje+days_ahead)
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
     today = datetime.now(timezone.utc).date()
     end = today + timedelta(days=days_ahead)
     today_iso = today.isoformat()
 
-    fixtures = fixtures[(fixtures["Date"] >= today) & (fixtures["Date"] <= end)].copy()
-    fixtures["Date"] = fixtures["Date"].astype(str)
+    fx = fx[(fx["Date"] >= today) & (fx["Date"] <= end)].copy()
+    fx["Date"] = fx["Date"].astype(str)
 
-    print("[DBG] GERAR_PICKS NBA START")
-    print(f"[DBG] fixtures NBA in range: {len(fixtures)} | window={window} | days_ahead={days_ahead}")
+    print("[DBG] NBA FIXTURES rows:", len(fx))
+    if fx.empty:
+        raise SystemExit("Sem fixtures NBA no range (hoje..days_ahead).")
 
-    # ---- Histórico NBA ----
+    # Histórico NBA
     hist_path = BASE / "data_raw" / "nba.csv"
     if not hist_path.exists():
         raise SystemExit("Falta data_raw/nba.csv (histórico).")
@@ -451,78 +388,88 @@ def main():
     df_hist = pd.read_csv(hist_path, sep=None, engine="python")
     need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
     if not need_hist.issubset(set(df_hist.columns)):
-        raise SystemExit(f"nba.csv precisa colunas {sorted(need_hist)}. Tem: {list(df_hist.columns)}")
+        raise SystemExit(f"nba.csv precisa colunas: {sorted(need_hist)}")
 
     df_hist["Date"] = pd.to_datetime(df_hist["Date"], errors="coerce")
-    df_hist = df_hist.dropna(subset=["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"]).copy()
+    df_hist = df_hist.dropna(subset=["Date"]).copy()
 
-    # ---- Gerar rows (apenas OVER) ----
-    rows = []
-    for _, fx in fixtures.iterrows():
-        home = str(fx["HomeTeam"]).strip()
-        away = str(fx["AwayTeam"]).strip()
+    model_cfg = cfg.get("model", {})
+    window = int(model_cfg.get("window", 15))
+    min_games_home = int(model_cfg.get("min_games_home", 8))
+    min_games_away = int(model_cfg.get("min_games_away", 8))
+    shrink = float(model_cfg.get("shrink", 0.75))
+    std_total = float(model_cfg.get("std_total", 14.0))
+    mu_boost = float(model_cfg.get("mu_boost", 1.0))
+
+    bankroll = float(cfg.get("bankroll", {}).get("nba_over", 0.0))
+    rules = cfg.get("rules", {}).get("nba_over", {})
+
+    # Agrupar por jogo e escolher melhor linha (maior Edge)
+    best_by_game: dict[tuple[str, str, str], dict] = {}
+
+    for _, r in fx.iterrows():
+        home = str(r["HomeTeam"]).strip()
+        away = str(r["AwayTeam"]).strip()
+        date_iso = str(r["Date"]).strip()
 
         try:
-            line = float(fx["Line"])
+            line = float(r["Line"])
+            odd = float(r["Odd"])
         except Exception:
             continue
 
-        try:
-            odd_over = float(fx["Odd_Over"])
-        except Exception:
+        if odd <= 1.0:
             continue
 
-        if odd_over <= 1.0:
-            continue
-
-        mu_h, mu_a, mu_t, sig_t = estimate_total(df_hist, home, away, window)
-
-        # Ajuste opcional
-        mu_boost = float(history_cfg.get("mu_boost", 1.0))
-        if mu_boost and mu_boost != 1.0:
-            mu_h *= mu_boost
-            mu_a *= mu_boost
-            mu_t = mu_h + mu_a
-
-        p_model = prob_over_total(mu_t, sig_t, line)
-        p_market = (1.0 / odd_over) if odd_over > 1.0 else 0.0
-        edge = p_model - p_market
-        k = kelly_fraction(p_model, odd_over)
-
-        rows.append(
-            {
-                "Date": fx["Date"],
-                "League": "nba",
-                "HomeTeam": home,
-                "AwayTeam": away,
-                "Line": line,
-                "Odd": odd_over,
-                "MuHome": mu_h,
-                "MuAway": mu_a,
-                "MuTotal": mu_t,
-                "SigmaTotal": sig_t,
-                "ProbModel": p_model,
-                "ProbMarket": p_market,
-                "Edge": edge,
-                "KellyTrue": k,
-            }
+        mu_h, mu_a, mu_t, h_n, a_n = compute_expected_total(
+            df_hist, home, away, window, min_games_home, min_games_away, shrink
         )
 
-    # debug curto
-    if rows:
-        edges = [r["Edge"] for r in rows]
-        odds = [r["Odd"] for r in rows]
-        print(f"[DBG] PRE-FILTER rows={len(rows)} edge_max={max(edges):.4f} edge_min={min(edges):.4f} odd_min={min(odds):.2f} odd_max={max(odds):.2f}")
-    else:
-        print("[DBG] PRE-FILTER rows=0")
+        if mu_boost and mu_boost != 1.0:
+            mu_t = mu_t * mu_boost
 
-    bankroll = float(bankroll_cfg.get("nba_over", bankroll_cfg.get("over", 0.0)))
-    out = apply_rules(rows, bankroll, rules_cfg.get("nba_over", rules_cfg.get("over", {})))
+        p_model = prob_over_normal(mu_t, line, std_total)
+        p_market = (1.0 / odd) if odd > 1.0 else 0.0
+        edge = p_model - p_market
+        ktrue = kelly_fraction(p_model, odd)
+
+        cand = {
+            "Date": date_iso,
+            "League": "nba",
+            "HomeTeam": home,
+            "AwayTeam": away,
+            "Book": str(r["Book"]),
+            "Market": "OVER",
+            "Line": line,
+            "Odd": odd,
+            "MuHome": mu_h,
+            "MuAway": mu_a,
+            "MuTotal": mu_t,
+            "StdTotal": std_total,
+            "ProbModel": p_model,
+            "ProbMarket": p_market,
+            "Edge": edge,
+            "KellyTrue": ktrue,
+            "HomeGamesUsed": h_n,
+            "AwayGamesUsed": a_n,
+        }
+
+        key = (date_iso, home, away)
+        prev = best_by_game.get(key)
+        if prev is None or cand["Edge"] > prev["Edge"]:
+            best_by_game[key] = cand
+
+    rows = list(best_by_game.values())
+
+    print(f"[DBG] PRE-FILTER unique games={len(rows)}")
+    if rows:
+        print(f"[DBG] edge_max={max(x['Edge'] for x in rows):.4f} edge_min={min(x['Edge'] for x in rows):.4f}")
+
+    out = apply_rules(rows, bankroll, rules)
 
     out_path = BASE / "picks_nba_over.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    # separador ; para LibreOffice PT
     out.to_csv(out_path, index=False, encoding="utf-8", sep=";")
     out.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
@@ -530,29 +477,29 @@ def main():
     print(f"- {out_path.name} ({len(out)} picks)")
     print(f"- {combo_path.name} ({len(out)} picks)")
 
-    # ==========================
-    # Telegram (anti-duplicados por dia)
-    # ==========================
+    # Telegram
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
 
     if TELEGRAM_TOKEN and CHAT_ID:
         try:
             sent = load_sent_state(today_iso)
-
             new_rows = []
-            for r in df_to_rows(out):
-                pid = pick_id(r)
+            for rr in df_to_rows(out):
+                pid = pick_id(rr)
                 if pid not in sent:
-                    new_rows.append(r)
+                    new_rows.append(rr)
 
             msg = build_message(new_rows, "PICKS NBA OVER (NOVAS)")
             if msg:
-                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg, "PICKS NBA OVER")
-                for r in new_rows:
-                    sent.add(pick_id(r))
-                save_sent_state(today_iso, sent)
-                print(f"Telegram: enviei {len(new_rows)} novas NBA OVER.")
+                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg, "NBA OVER")
+
+            for rr in new_rows:
+                sent.add(pick_id(rr))
+            save_sent_state(today_iso, sent)
+
+            if msg:
+                print(f"Telegram: enviei {len(new_rows)} novas.")
             else:
                 print("Telegram: sem novas picks (não enviei).")
         except Exception as e:
@@ -560,13 +507,11 @@ def main():
     else:
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
 
-    # ==========================
-    # GitHub upload dos CSVs gerados
-    # ==========================
+    # GitHub upload
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
-    upload_csvs_to_github([out_path, combo_path], owner, repo, branch)
+    upload_files_to_github([out_path, combo_path], owner, repo, branch)
 
 
 if __name__ == "__main__":
