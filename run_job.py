@@ -1,4 +1,3 @@
-# run_job.py
 import sys
 import subprocess
 
@@ -16,10 +15,6 @@ def main():
     # ===== FUTEBOL =====
     run([py, "fetch_oddsapi_fixtures.py"])
     run([py, "gerar_picks.py"])
-
-    # ===== NBA =====
-    run([py, "fetch_oddsapi_fixtures_nba.py"])
-    run([py, "gerar_picks_nba.py"])
 
 
 if __name__ == "__main__":
