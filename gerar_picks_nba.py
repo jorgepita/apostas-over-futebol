@@ -344,7 +344,7 @@ def upload_files_to_github(files: list[Path], owner: str, repo: str, branch: str
 # Main
 # =============================
 def main():
-    cfg_path = BASE / "config.json"
+    cfg_path = BASE / "config_nba.json"
     if not cfg_path.exists():
         raise SystemExit("Falta config.json na pasta do projeto.")
     cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
