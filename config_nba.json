@@ -8,7 +8,7 @@
     "min_games_home": 8,
     "min_games_away": 8,
     "shrink": 0.75,
-    "std_total": 14.0,
+    "std_total": 11.5,
     "mu_boost": 1.03
   },
 
