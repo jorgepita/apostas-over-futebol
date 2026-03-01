@@ -60,6 +60,29 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def to_float(x, default: float = 0.0) -> float:
+    """
+    Float robusto:
+    - aceita NaN, "", None
+    - aceita "1,52" (vírgula) e converte para ponto
+    """
+    if x is None:
+        return default
+    try:
+        if pd.isna(x):
+            return default
+    except Exception:
+        pass
+    s = str(x).strip()
+    if not s:
+        return default
+    s = s.replace(",", ".")
+    try:
+        return float(s)
+    except Exception:
+        return default
+
+
 def safe_mean(series) -> float:
     if series is None:
         return 0.0
@@ -481,26 +504,18 @@ def main():
                 lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
+            # Odds robustas
+            odd15 = to_float(fx.get("Odd_Over15", ""), 0.0)
+            odd25 = to_float(fx.get("Odd_Over25", ""), 0.0)
+
+            # 🔒 Sem odd válida -> NÃO cria pick (evita edge falso + stake 0)
+            have15 = odd15 > 1.01
+            have25 = odd25 > 1.01
+            if (not have15) and (not have25):
+                continue
+
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
-
-            try:
-                odd15 = float(fx["Odd_Over15"]) if not pd.isna(fx["Odd_Over15"]) else 0.0
-            except Exception:
-                odd15 = 0.0
-            try:
-                odd25 = float(fx["Odd_Over25"]) if not pd.isna(fx["Odd_Over25"]) else 0.0
-            except Exception:
-                odd25 = 0.0
-
-            pm15 = (1.0 / odd15) if odd15 > 1.0 else 0.0
-            pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
-
-            edge15 = p15 - pm15
-            edge25 = p25 - pm25
-
-            k15 = kelly_fraction(p15, odd15)
-            k25 = kelly_fraction(p25, odd25)
 
             base_row = {
                 "Date": fx["Date"],
@@ -513,29 +528,37 @@ def main():
                 "LambdaTotal": lam_t,
             }
 
-            rows15.append(
-                {
-                    **base_row,
-                    "Market": "O1.5",
-                    "ProbModel": p15,
-                    "Odd": odd15,
-                    "ProbMarket": pm15,
-                    "Edge": edge15,
-                    "KellyTrue": k15,
-                }
-            )
+            if have15:
+                pm15 = 1.0 / odd15
+                edge15 = p15 - pm15
+                k15 = kelly_fraction(p15, odd15)
+                rows15.append(
+                    {
+                        **base_row,
+                        "Market": "O1.5",
+                        "ProbModel": p15,
+                        "Odd": odd15,
+                        "ProbMarket": pm15,
+                        "Edge": edge15,
+                        "KellyTrue": k15,
+                    }
+                )
 
-            rows25.append(
-                {
-                    **base_row,
-                    "Market": "O2.5",
-                    "ProbModel": p25,
-                    "Odd": odd25,
-                    "ProbMarket": pm25,
-                    "Edge": edge25,
-                    "KellyTrue": k25,
-                }
-            )
+            if have25:
+                pm25 = 1.0 / odd25
+                edge25 = p25 - pm25
+                k25 = kelly_fraction(p25, odd25)
+                rows25.append(
+                    {
+                        **base_row,
+                        "Market": "O2.5",
+                        "ProbModel": p25,
+                        "Odd": odd25,
+                        "ProbMarket": pm25,
+                        "Edge": edge25,
+                        "KellyTrue": k25,
+                    }
+                )
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
