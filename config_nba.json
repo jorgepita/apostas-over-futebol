@@ -1,1 +1,29 @@
+{
+  "run": {
+    "days_ahead": 1
+  },
 
+  "model": {
+    "window": 15,
+    "min_games_home": 8,
+    "min_games_away": 8,
+    "shrink": 0.75,
+    "std_total": 14.0,
+    "mu_boost": 1.0
+  },
+
+  "bankroll": {
+    "nba_over": 500
+  },
+
+  "rules": {
+    "nba_over": {
+      "edge_min": -0.01,
+      "min_odd": 1.80,
+      "max_picks": 6,
+      "kelly_fraction": 0.25,
+      "cap_frac": 0.05,
+      "daily_cap_frac": 0.20
+    }
+  }
+}
