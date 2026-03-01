@@ -1,9 +1,8 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-03-01;alemanha;Bundesliga;Eintracht Frankfurt;SC Freiburg;1.882;1.652;3.534;O2.5;0.685;1.88;0.532;0.1534;0.3278;0.0656;0.04;20.0;1.0;500.0
+2026-03-01;alemanha;Bundesliga;Eintracht Frankfurt;SC Freiburg;1.882;1.652;3.534;O2.5;0.685;1.87;0.535;0.1506;0.3237;0.0647;0.04;20.0;1.0;500.0
 2026-03-01;portugal;Primeira Liga;Casa Pia;Moreirense FC;1.62;1.344;2.964;O2.5;0.569;2.32;0.431;0.1378;0.2421;0.0484;0.04;20.0;1.0;500.0
+2026-03-01;premier;Premier League;Manchester United;Crystal Palace;1.709;1.508;3.217;O2.5;0.624;1.8;0.556;0.068;0.153;0.0306;0.0306;15.3;1.0;500.0
 2026-03-01;alemanha;Bundesliga;Hamburger SV;RB Leipzig;1.882;1.652;3.534;O2.5;0.685;1.57;0.637;0.0484;0.1333;0.0267;0.0267;13.33;1.0;500.0
 2026-03-01;portugal;Primeira Liga;Rio Ave FC;Famalicão;1.62;1.344;2.964;O2.5;0.569;1.83;0.546;0.0223;0.0493;0.0099;0.0099;4.93;1.0;500.0
-2026-03-01;premier;Premier League;Arsenal;Chelsea;1.906;1.198;3.104;O2.5;0.6;1.66;0.602;-0.0027;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-02;portugal;Primeira Liga;Gil Vicente;Benfica;1.307;1.306;2.613;O2.5;0.485;2.03;0.493;-0.0079;0.0;0.0;0.0;0.0;1.0;500.0
-2026-03-01;premier;Premier League;Fulham;Tottenham Hotspur;1.709;1.508;3.217;O2.5;0.624;1.55;0.645;-0.0216;0.0;0.0;0.0;0.0;1.0;500.0
-2026-03-01;premier;Premier League;Manchester United;Crystal Palace;1.709;1.508;3.217;O2.5;0.624;1.5;0.667;-0.0431;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-01;premier;Premier League;Arsenal;Chelsea;1.906;1.198;3.104;O2.5;0.6;1.64;0.61;-0.0101;0.0;0.0;0.0;0.0;1.0;500.0
