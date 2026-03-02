@@ -60,29 +60,6 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def to_float(x, default: float = 0.0) -> float:
-    """
-    Float robusto:
-    - aceita NaN, "", None
-    - aceita "1,52" (vírgula) e converte para ponto
-    """
-    if x is None:
-        return default
-    try:
-        if pd.isna(x):
-            return default
-    except Exception:
-        pass
-    s = str(x).strip()
-    if not s:
-        return default
-    s = s.replace(",", ".")
-    try:
-        return float(s)
-    except Exception:
-        return default
-
-
 def safe_mean(series) -> float:
     if series is None:
         return 0.0
@@ -459,6 +436,12 @@ def main():
 
     leagues_cfg = cfg.get("leagues", {})
 
+    def _to_float(x, default=0.0):
+        try:
+            return float(x)
+        except Exception:
+            return float(default)
+
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
@@ -481,7 +464,6 @@ def main():
 
         league_name = league_meta.get("name", league_key)
 
-        # Boost por liga (se existir), senão usa global
         league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
         lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
 
@@ -504,18 +486,20 @@ def main():
                 lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
-            # Odds robustas
-            odd15 = to_float(fx.get("Odd_Over15", ""), 0.0)
-            odd25 = to_float(fx.get("Odd_Over25", ""), 0.0)
-
-            # 🔒 Sem odd válida -> NÃO cria pick (evita edge falso + stake 0)
-            have15 = odd15 > 1.01
-            have25 = odd25 > 1.01
-            if (not have15) and (not have25):
-                continue
-
             p15 = prob_over_line(lam_t, 1.5)
             p25 = prob_over_line(lam_t, 2.5)
+
+            odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
+            odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
+
+            pm15 = (1.0 / odd15) if odd15 > 1.0 else 0.0
+            pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
+
+            edge15 = p15 - pm15
+            edge25 = p25 - pm25
+
+            k15 = kelly_fraction(p15, odd15)
+            k25 = kelly_fraction(p25, odd25)
 
             base_row = {
                 "Date": fx["Date"],
@@ -528,37 +512,29 @@ def main():
                 "LambdaTotal": lam_t,
             }
 
-            if have15:
-                pm15 = 1.0 / odd15
-                edge15 = p15 - pm15
-                k15 = kelly_fraction(p15, odd15)
-                rows15.append(
-                    {
-                        **base_row,
-                        "Market": "O1.5",
-                        "ProbModel": p15,
-                        "Odd": odd15,
-                        "ProbMarket": pm15,
-                        "Edge": edge15,
-                        "KellyTrue": k15,
-                    }
-                )
+            rows15.append(
+                {
+                    **base_row,
+                    "Market": "O1.5",
+                    "ProbModel": p15,
+                    "Odd": odd15,
+                    "ProbMarket": pm15,
+                    "Edge": edge15,
+                    "KellyTrue": k15,
+                }
+            )
 
-            if have25:
-                pm25 = 1.0 / odd25
-                edge25 = p25 - pm25
-                k25 = kelly_fraction(p25, odd25)
-                rows25.append(
-                    {
-                        **base_row,
-                        "Market": "O2.5",
-                        "ProbModel": p25,
-                        "Odd": odd25,
-                        "ProbMarket": pm25,
-                        "Edge": edge25,
-                        "KellyTrue": k25,
-                    }
-                )
+            rows25.append(
+                {
+                    **base_row,
+                    "Market": "O2.5",
+                    "ProbModel": p25,
+                    "Odd": odd25,
+                    "ProbMarket": pm25,
+                    "Edge": edge25,
+                    "KellyTrue": k25,
+                }
+            )
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
@@ -578,13 +554,42 @@ def main():
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
+
+    # Versão "GitHub-friendly" (vírgulas) para o preview do GitHub ficar bonito
     combo_github_path = BASE / "picks_hoje_github.csv"
     combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
-    
+
+    # ==========================
+    # CSV simplificado (para registo manual)
+    # ==========================
+    simple_path = BASE / "picks_hoje_simplificado.csv"
+    if len(combo) > 0:
+        simple = combo.copy()
+        simple["Jogo"] = simple["HomeTeam"].astype(str) + " vs " + simple["AwayTeam"].astype(str)
+        simple["Data"] = simple["Date"].astype(str)
+        simple["Liga"] = simple["LeagueName"].astype(str)
+        simple["Mercado"] = simple["Market"].astype(str)
+
+        simple["Odd"] = simple["Odd"].apply(_to_float)
+        simple["Stake€"] = simple.get("Stake€", 0.0).apply(_to_float)
+        simple["Edge%"] = (simple["Edge"].apply(_to_float) * 100.0).round(2)
+
+        simple["Resultado"] = ""  # W/L
+        simple["Lucro€"] = ""     # opcional manual
+
+        cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
+        simple = simple[cols].copy()
+        simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+    else:
+        pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])\
+          .to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
     print(f"- {out25_path.name} ({len(out25)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
+    print(f"- {combo_github_path.name} ({len(combo)} picks)")
+    print(f"- {simple_path.name} ({len(combo)} picks)")
 
     # ==========================
     # Telegram (anti-duplicados por dia)
@@ -638,13 +643,13 @@ def main():
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
-
     upload_csvs_to_github(
-    [out15_path, out25_path, combo_path, combo_github_path],
-    owner,
-    repo,
-    branch,
+        [out15_path, out25_path, combo_path, combo_github_path, simple_path],
+        owner,
+        repo,
+        branch,
     )
 
-    if __name__ == "__main__":
+
+if __name__ == "__main__":
     main()
