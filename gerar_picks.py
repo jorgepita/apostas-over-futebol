@@ -578,7 +578,9 @@ def main():
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
-
+    combo_github_path = BASE / "picks_hoje_github.csv"
+    combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
+    
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
     print(f"- {out25_path.name} ({len(out25)} picks)")
@@ -636,8 +638,13 @@ def main():
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
-    upload_csvs_to_github([out15_path, out25_path, combo_path], owner, repo, branch)
 
+    upload_csvs_to_github(
+    [out15_path, out25_path, combo_path, combo_github_path],
+    owner,
+    repo,
+    branch,
+    )
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
     main()
