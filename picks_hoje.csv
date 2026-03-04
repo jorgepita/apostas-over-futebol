@@ -1,4 +1,3 @@
 Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-03-05;nba;Boston Celtics;Charlotte Hornets;fanduel;OVER;215.5;1.91;104.36;101.58;220.35;11.5;0.6635;0.5236;0.14;0.2937;0;0;0.07343531784566831;0.05;25.0;1.0;500.0
-2026-03-04;nba;Charlotte Hornets;Dallas Mavericks;betmgm;OVER;216.5;1.91;104.36;101.58;220.35;11.5;0.6312;0.5236;0.1077;0.226;0;0;0.056495677705806005;0.05;25.0;1.0;500.0
-2026-03-04;nba;Cleveland Cavaliers;Detroit Pistons;draftkings;OVER;218.5;1.87;104.36;101.58;220.35;11.5;0.564;0.5348;0.0293;0.0629;0;0;0.015728340351495618;0.0157;7.86;1.0;500.0
+2026-03-04;nba;Charlotte Hornets;Dallas Mavericks;bovada;OVER;218.0;1.87;104.36;101.58;220.35;11.5;0.5811;0.5348;0.0463;0.0996;0;0;0.024893602651443338;0.0249;12.45;1.0;500.0
