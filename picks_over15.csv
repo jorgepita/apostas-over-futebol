@@ -1,4 +1,13 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-03-07;portugal;Primeira Liga;Estoril;Casa Pia;3.216;1.09;4.307;O1.5;0.928;;0.0;0.9285;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;RB Leipzig;Augsburg;2.975;1.157;4.132;O1.5;0.918;;0.0;0.9176;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-06;alemanha;Bundesliga;Bayern Munich;Borussia Monchengladbach;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
-2026-03-05;premier;Premier League;Tottenham Hotspur;Crystal Palace;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;1. FC Heidenheim;TSG Hoffenheim;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;SC Freiburg;Bayer Leverkusen;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;FSV Mainz 05;VfB Stuttgart;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;VfL Wolfsburg;Hamburger SV;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;alemanha;Bundesliga;1. FC Köln;Borussia Dortmund;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-06;portugal;Primeira Liga;Famalicão;Arouca;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;portugal;Primeira Liga;Alverca;AVS Futebol SAD;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;portugal;Primeira Liga;Moreirense FC;Nacional;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-07;portugal;Primeira Liga;Braga;Sporting Lisbon;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
