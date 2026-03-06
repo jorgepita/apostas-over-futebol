@@ -1,6 +1,24 @@
 Date,League,LeagueName,HomeTeam,AwayTeam,LambdaHome,LambdaAway,LambdaTotal,Market,ProbModel,Odd,ProbMarket,Edge,KellyTrue,StakeFracRaw,StakeFrac,Stake€,DailyScale,Bankroll€
+2026-03-07,portugal,Primeira Liga,Estoril,Casa Pia,3.216,1.09,4.307,O1.5,0.928,,0.0,0.9285,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,RB Leipzig,Augsburg,2.975,1.157,4.132,O1.5,0.918,,0.0,0.9176,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-06,alemanha,Bundesliga,Bayern Munich,Borussia Monchengladbach,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
-2026-03-05,premier,Premier League,Tottenham Hotspur,Crystal Palace,1.709,1.508,3.217,O1.5,0.831,,0.0,0.831,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,1. FC Heidenheim,TSG Hoffenheim,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,SC Freiburg,Bayer Leverkusen,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,FSV Mainz 05,VfB Stuttgart,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,VfL Wolfsburg,Hamburger SV,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,alemanha,Bundesliga,1. FC Köln,Borussia Dortmund,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-06,portugal,Primeira Liga,Famalicão,Arouca,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
-2026-03-05,premier,Premier League,Tottenham Hotspur,Crystal Palace,1.709,1.508,3.217,O2.5,0.624,1.93,0.518,0.1054,0.2188,0.0438,0.04,20.0,1.0,500.0
-2026-03-06,portugal,Primeira Liga,Famalicão,Arouca,1.62,1.344,2.964,O2.5,0.569,1.88,0.532,0.0369,0.0788,0.0158,0.0158,7.88,1.0,500.0
+2026-03-07,portugal,Primeira Liga,Alverca,AVS Futebol SAD,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,portugal,Primeira Liga,Moreirense FC,Nacional,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,portugal,Primeira Liga,Braga,Sporting Lisbon,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-07,portugal,Primeira Liga,Estoril,Casa Pia,3.216,1.09,4.307,O2.5,0.803,1.7,0.588,0.2152,0.5227,0.1045,0.0209,10.43,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,SC Freiburg,Bayer Leverkusen,1.882,1.652,3.534,O2.5,0.685,1.85,0.541,0.1448,0.3151,0.063,0.0209,10.43,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,VfL Wolfsburg,Hamburger SV,1.882,1.652,3.534,O2.5,0.685,1.68,0.595,0.0901,0.2226,0.0445,0.0209,10.43,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,RB Leipzig,Augsburg,2.975,1.157,4.132,O2.5,0.781,1.44,0.694,0.0862,0.282,0.0564,0.0209,10.43,0.5216023155167182,500.0
+2026-03-07,portugal,Primeira Liga,Alverca,AVS Futebol SAD,1.62,1.344,2.964,O2.5,0.569,2.01,0.498,0.0713,0.1419,0.0284,0.0148,7.4,0.5216023155167182,500.0
+2026-03-07,portugal,Primeira Liga,Moreirense FC,Nacional,1.62,1.344,2.964,O2.5,0.569,2.0,0.5,0.0688,0.1376,0.0275,0.0144,7.18,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,FSV Mainz 05,VfB Stuttgart,1.882,1.652,3.534,O2.5,0.685,1.6,0.625,0.0603,0.1609,0.0322,0.0168,8.39,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,1. FC Köln,Borussia Dortmund,1.882,1.652,3.534,O2.5,0.685,1.55,0.645,0.0402,0.1132,0.0226,0.0118,5.91,0.5216023155167182,500.0
+2026-03-06,portugal,Primeira Liga,Famalicão,Arouca,1.62,1.344,2.964,O2.5,0.569,1.89,0.529,0.0397,0.0843,0.0169,0.0088,4.4,0.5216023155167182,500.0
+2026-03-07,alemanha,Bundesliga,1. FC Heidenheim,TSG Hoffenheim,1.882,1.652,3.534,O2.5,0.685,1.44,0.694,-0.0091,0.0,0.0,0.0,0.0,0.5216023155167182,500.0
+2026-03-07,portugal,Primeira Liga,Braga,Sporting Lisbon,1.62,1.344,2.964,O2.5,0.569,1.68,0.595,-0.0264,0.0,0.0,0.0,0.0,0.5216023155167182,500.0
