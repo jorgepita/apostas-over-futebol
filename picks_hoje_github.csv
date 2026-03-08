@@ -1,15 +1,13 @@
 Date,League,LeagueName,HomeTeam,AwayTeam,LambdaHome,LambdaAway,LambdaTotal,Market,ProbModel,Odd,ProbMarket,Edge,KellyTrue,StakeFracRaw,StakeFrac,Stake€,DailyScale,Bankroll€
-2026-03-07,portugal,Primeira Liga,Estoril,Casa Pia,3.216,1.09,4.307,O1.5,0.928,,0.0,0.9285,0.0,0.0,0.0,0.0,1.0,500.0
-2026-03-07,alemanha,Bundesliga,1. FC Köln,Borussia Dortmund,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-08,alemanha,Bundesliga,FC St. Pauli,Eintracht Frankfurt,1.882,1.652,3.534,O1.5,0.868,,0.0,0.8676,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-08,portugal,Primeira Liga,CF Estrela,Gil Vicente,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-08,portugal,Primeira Liga,Benfica,FC Porto,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-08,portugal,Primeira Liga,Santa Clara,Vitória SC,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
+2026-03-09,portugal,Primeira Liga,Tondela,Rio Ave FC,1.62,1.344,2.964,O1.5,0.795,,0.0,0.7955,0.0,0.0,0.0,0.0,1.0,500.0
 2026-03-08,alemanha,Bundesliga,Union Berlin,Werder Bremen,1.506,1.112,2.618,O1.5,0.736,,0.0,0.736,0.0,0.0,0.0,0.0,1.0,500.0
-2026-03-07,portugal,Primeira Liga,Estoril,Casa Pia,3.216,1.09,4.307,O2.5,0.803,1.7,0.588,0.2152,0.5227,0.1045,0.0319,15.93,0.7962713053731513,500.0
-2026-03-08,alemanha,Bundesliga,FC St. Pauli,Eintracht Frankfurt,1.882,1.652,3.534,O2.5,0.685,1.92,0.521,0.1645,0.3433,0.0687,0.0319,15.93,0.7962713053731513,500.0
-2026-03-08,portugal,Primeira Liga,Santa Clara,Vitória SC,1.62,1.344,2.964,O2.5,0.569,2.35,0.426,0.1433,0.2494,0.0499,0.0319,15.93,0.7962713053731513,500.0
-2026-03-08,portugal,Primeira Liga,Benfica,FC Porto,1.62,1.344,2.964,O2.5,0.569,2.14,0.467,0.1015,0.1905,0.0381,0.0303,15.17,0.7962713053731513,500.0
-2026-03-08,portugal,Primeira Liga,CF Estrela,Gil Vicente,1.62,1.344,2.964,O2.5,0.569,1.97,0.508,0.0612,0.1243,0.0249,0.0198,9.89,0.7962713053731513,500.0
-2026-03-08,alemanha,Bundesliga,Union Berlin,Werder Bremen,1.506,1.112,2.618,O2.5,0.486,2.12,0.472,0.0143,0.0271,0.0054,0.0043,2.16,0.7962713053731513,500.0
-2026-03-07,alemanha,Bundesliga,1. FC Köln,Borussia Dortmund,1.882,1.652,3.534,O2.5,0.685,1.36,0.735,-0.05,0.0,0.0,0.0,0.0,0.7962713053731513,500.0
+2026-03-08,alemanha,Bundesliga,FC St. Pauli,Eintracht Frankfurt,1.882,1.652,3.534,O2.5,0.685,1.92,0.521,0.1645,0.3433,0.0687,0.0334,16.71,0.8354876163728113,500.0
+2026-03-08,portugal,Primeira Liga,Santa Clara,Vitória SC,1.62,1.344,2.964,O2.5,0.569,2.35,0.426,0.1433,0.2494,0.0499,0.0334,16.71,0.8354876163728113,500.0
+2026-03-08,portugal,Primeira Liga,Benfica,FC Porto,1.62,1.344,2.964,O2.5,0.569,2.14,0.467,0.1015,0.1905,0.0381,0.0318,15.92,0.8354876163728113,500.0
+2026-03-09,portugal,Primeira Liga,Tondela,Rio Ave FC,1.62,1.344,2.964,O2.5,0.569,1.98,0.505,0.0637,0.1288,0.0258,0.0215,10.76,0.8354876163728113,500.0
+2026-03-08,portugal,Primeira Liga,CF Estrela,Gil Vicente,1.62,1.344,2.964,O2.5,0.569,1.97,0.508,0.0612,0.1243,0.0249,0.0208,10.38,0.8354876163728113,500.0
+2026-03-08,alemanha,Bundesliga,Union Berlin,Werder Bremen,1.506,1.112,2.618,O2.5,0.486,2.19,0.457,0.0294,0.0541,0.0108,0.009,4.52,0.8354876163728113,500.0
