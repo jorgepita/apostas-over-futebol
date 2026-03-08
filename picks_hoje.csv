@@ -1,4 +1,4 @@
 Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-03-08;nba;Los Angeles Lakers;New York Knicks;betmgm;OVER;212.5;1.91;104.36;101.58;220.35;11.5;0.7527;0.5236;0.2291;0.4809;0;0;0.12022235359603993;0.05;25.0;1.0;500.0
-2026-03-09;nba;Milwaukee Bucks;Orlando Magic;lowvig;OVER;216.5;1.93;104.36;101.58;220.35;11.5;0.6312;0.5181;0.1131;0.2347;0;0;0.05867441240483426;0.05;25.0;1.0;500.0
+2026-03-08;nba;Los Angeles Lakers;New York Knicks;fanduel;OVER;217.5;2.12;104.36;101.58;220.35;11.5;0.598;0.4717;0.1263;0.2391;0;0;0.059763384920558146;0.05;25.0;1.0;500.0
+2026-03-09;nba;Milwaukee Bucks;Orlando Magic;lowvig;OVER;216.5;1.91;104.36;101.58;220.35;11.5;0.6312;0.5236;0.1077;0.226;0;0;0.056495677705806005;0.05;25.0;1.0;500.0
 2026-03-09;nba;Phoenix Suns;Charlotte Hornets;draftkings;OVER;217.5;1.87;104.36;101.58;220.35;11.5;0.598;0.5348;0.0632;0.1359;0;0;0.03397768020907448;0.034;16.99;1.0;500.0
