@@ -1,3 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-03-09;portugal;Primeira Liga;Tondela;Rio Ave FC;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
-2026-03-09;portugal;Primeira Liga;Tondela;Rio Ave FC;1.62;1.344;2.964;O2.5;0.569;2.06;0.485;0.0834;0.162;0.0324;0.0324;16.2;1.0;500.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed
