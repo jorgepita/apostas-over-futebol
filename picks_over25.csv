@@ -1,2 +1,13 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-03-13;alemanha;Bundesliga;Borussia Monchengladbach;FC St. Pauli;1.882;1.652;3.534;O2.5;0.685;2.27;0.441;0.2448;0.4376;0.0875;0.04;20.0;1.0;500.0
+2026-03-13;alemanha;Bundesliga;Borussia Monchengladbach;FC St. Pauli;1.882;1.652;3.534;O2.5;0.685;2.37;0.422;0.2634;0.4557;0.0911;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;portugal;Primeira Liga;Gil Vicente;Alverca;3.16;0.692;3.852;O2.5;0.739;1.85;0.541;0.1988;0.4327;0.0865;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;portugal;Primeira Liga;Arouca;Benfica;0.96;3.289;4.249;O2.5;0.796;1.6;0.625;0.1711;0.4564;0.0913;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;premier;Premier League;Burnley;Bournemouth;1.363;2.6;3.963;O2.5;0.756;1.67;0.599;0.1576;0.3929;0.0786;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;alemanha;Bundesliga;Hamburger SV;1. FC Köln;1.882;1.652;3.534;O2.5;0.685;1.84;0.543;0.1419;0.3107;0.0621;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;premier;Premier League;Sunderland;Brighton and Hove Albion;1.709;1.508;3.217;O2.5;0.624;1.99;0.503;0.1211;0.2433;0.0487;0.0206;10.3;0.5151617357819119;500.0
+2026-03-14;portugal;Primeira Liga;Vitória SC;Famalicão;1.62;1.344;2.964;O2.5;0.569;1.96;0.51;0.0586;0.1196;0.0239;0.0123;6.16;0.5151617357819119;500.0
+2026-03-14;alemanha;Bundesliga;Eintracht Frankfurt;1. FC Heidenheim;1.882;1.652;3.534;O2.5;0.685;1.52;0.658;0.0274;0.0802;0.016;0.0083;4.13;0.5151617357819119;500.0
+2026-03-14;alemanha;Bundesliga;Borussia Dortmund;Augsburg;1.882;1.652;3.534;O2.5;0.685;1.5;0.667;0.0187;0.056;0.0112;0.0058;2.89;0.5151617357819119;500.0
+2026-03-14;alemanha;Bundesliga;TSG Hoffenheim;VfL Wolfsburg;1.882;1.652;3.534;O2.5;0.685;1.4;0.714;-0.0289;0.0;0.0;0.0;0.0;0.5151617357819119;500.0
+2026-03-14;premier;Premier League;West Ham United;Manchester City;1.709;1.508;3.217;O2.5;0.624;1.5;0.667;-0.0431;0.0;0.0;0.0;0.0;0.5151617357819119;500.0
+2026-03-14;alemanha;Bundesliga;Bayer Leverkusen;Bayern Munich;1.882;1.652;3.534;O2.5;0.685;1.36;0.735;-0.05;0.0;0.0;0.0;0.0;0.5151617357819119;500.0
