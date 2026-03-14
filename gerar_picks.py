@@ -107,7 +107,7 @@ def prob_over_line(lam_total: float, line: float) -> float:
 
 
 def kelly_fraction(p: float, odd: float) -> float:
-    """Kelly "true": f = (p*odd - 1)/(odd-1), com piso 0."""
+    """Kelly true: f = (p*odd - 1)/(odd-1), com piso 0."""
     if odd is None or odd <= 1.0:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
@@ -255,6 +255,18 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 
     df = pd.DataFrame(rows)
 
+    # Só picks com odd válida
+    if "Odd" in df.columns:
+        df = df[pd.to_numeric(df["Odd"], errors="coerce") > 1.0].copy()
+
+    # Só picks com edge válido
+    if "Edge" in df.columns:
+        df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
+        df = df[df["Edge"].notna()].copy()
+
+    if df.empty:
+        return df
+
     edge_min = float(rules.get("edge_min", 0.0))
     df = df[df["Edge"] >= edge_min].copy()
     if df.empty:
@@ -299,7 +311,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     }
     for col, dec in round_cols.items():
         if col in df.columns:
-            df[col] = df[col].round(dec)
+            df[col] = pd.to_numeric(df[col], errors="coerce").round(dec)
 
     return df
 
@@ -407,18 +419,17 @@ def main():
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
-    # Date -> date
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone "Portugal" (Lisboa)
+    # Timezone Portugal
     try:
         from zoneinfo import ZoneInfo
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))  # default 1 dia
+    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
     start = now_pt.date()
     end = start + timedelta(days=days_ahead)
     today_iso = start.isoformat()
@@ -438,7 +449,12 @@ def main():
 
     def _to_float(x, default=0.0):
         try:
-            return float(x)
+            if x is None:
+                return float(default)
+            s = str(x).strip().replace(",", ".")
+            if s == "":
+                return float(default)
+            return float(s)
         except Exception:
             return float(default)
 
@@ -492,14 +508,14 @@ def main():
             odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
 
-            pm15 = (1.0 / odd15) if odd15 > 1.0 else 0.0
-            pm25 = (1.0 / odd25) if odd25 > 1.0 else 0.0
+            pm15 = (1.0 / odd15) if odd15 > 1.0 else None
+            pm25 = (1.0 / odd25) if odd25 > 1.0 else None
 
-            edge15 = p15 - pm15
-            edge25 = p25 - pm25
+            edge15 = (p15 - pm15) if pm15 is not None else None
+            edge25 = (p25 - pm25) if pm25 is not None else None
 
-            k15 = kelly_fraction(p15, odd15)
-            k25 = kelly_fraction(p25, odd25)
+            k15 = kelly_fraction(p15, odd15) if odd15 > 1.0 else 0.0
+            k25 = kelly_fraction(p25, odd25) if odd25 > 1.0 else 0.0
 
             base_row = {
                 "Date": fx["Date"],
@@ -512,29 +528,31 @@ def main():
                 "LambdaTotal": lam_t,
             }
 
-            rows15.append(
-                {
-                    **base_row,
-                    "Market": "O1.5",
-                    "ProbModel": p15,
-                    "Odd": odd15,
-                    "ProbMarket": pm15,
-                    "Edge": edge15,
-                    "KellyTrue": k15,
-                }
-            )
+            if odd15 > 1.0:
+                rows15.append(
+                    {
+                        **base_row,
+                        "Market": "O1.5",
+                        "ProbModel": p15,
+                        "Odd": odd15,
+                        "ProbMarket": pm15,
+                        "Edge": edge15,
+                        "KellyTrue": k15,
+                    }
+                )
 
-            rows25.append(
-                {
-                    **base_row,
-                    "Market": "O2.5",
-                    "ProbModel": p25,
-                    "Odd": odd25,
-                    "ProbMarket": pm25,
-                    "Edge": edge25,
-                    "KellyTrue": k25,
-                }
-            )
+            if odd25 > 1.0:
+                rows25.append(
+                    {
+                        **base_row,
+                        "Market": "O2.5",
+                        "ProbModel": p25,
+                        "Odd": odd25,
+                        "ProbMarket": pm25,
+                        "Edge": edge25,
+                        "KellyTrue": k25,
+                    }
+                )
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
@@ -549,18 +567,16 @@ def main():
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    # Para abrir melhor no LibreOffice PT, usamos separador ";"
     out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
     combo = pd.concat([out15, out25], ignore_index=True)
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
-    # Versão "GitHub-friendly" (vírgulas) para o preview do GitHub ficar bonito
     combo_github_path = BASE / "picks_hoje_github.csv"
     combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
 
     # ==========================
-    # CSV simplificado (para registo manual)
+    # CSV simplificado
     # ==========================
     simple_path = BASE / "picks_hoje_simplificado.csv"
     if len(combo) > 0:
@@ -574,15 +590,16 @@ def main():
         simple["Stake€"] = simple.get("Stake€", 0.0).apply(_to_float)
         simple["Edge%"] = (simple["Edge"].apply(_to_float) * 100.0).round(2)
 
-        simple["Resultado"] = ""  # W/L
-        simple["Lucro€"] = ""     # opcional manual
+        simple["Resultado"] = ""
+        simple["Lucro€"] = ""
 
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
-        pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])\
-          .to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+        pd.DataFrame(
+            columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
+        ).to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
     print(f"- {out15_path.name} ({len(out15)} picks)")
@@ -638,7 +655,7 @@ def main():
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
 
     # ==========================
-    # GitHub: upload dos CSVs gerados
+    # GitHub upload dos CSVs
     # ==========================
     owner = "jorgepita"
     repo = "apostas-over-futebol"
