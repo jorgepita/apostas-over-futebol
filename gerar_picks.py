@@ -108,7 +108,7 @@ def prob_over_line(lam_total: float, line: float) -> float:
 
 def kelly_fraction(p: float, odd: float) -> float:
     """Kelly true: f = (p*odd - 1)/(odd-1), com piso 0."""
-    if odd is None or odd <= 1.0:
+    if odd is None or odd <= 1.01:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
     return max(0.0, float(f))
@@ -255,14 +255,16 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 
     df = pd.DataFrame(rows)
 
-    # Só picks com odd válida
     if "Odd" in df.columns:
-        df = df[pd.to_numeric(df["Odd"], errors="coerce") > 1.0].copy()
+        df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
+        df = df[df["Odd"] > 1.01].copy()
 
-    # Só picks com edge válido
     if "Edge" in df.columns:
         df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
         df = df[df["Edge"].notna()].copy()
+
+    if "KellyTrue" in df.columns:
+        df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 
     if df.empty:
         return df
@@ -289,7 +291,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
         scale = daily_cap_frac / total_frac
         df["StakeFrac"] = df["StakeFrac"] * scale
 
-    df["Stake€"] = df["StakeFrac"] * float(bankroll)
+    df["Stake€"] = (df["StakeFrac"] * float(bankroll)).round(2)
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
@@ -422,7 +424,6 @@ def main():
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
-    # Timezone Portugal
     try:
         from zoneinfo import ZoneInfo
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
@@ -508,14 +509,14 @@ def main():
             odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
 
-            pm15 = (1.0 / odd15) if odd15 > 1.0 else None
-            pm25 = (1.0 / odd25) if odd25 > 1.0 else None
+            pm15 = (1.0 / odd15) if odd15 > 1.01 else None
+            pm25 = (1.0 / odd25) if odd25 > 1.01 else None
 
             edge15 = (p15 - pm15) if pm15 is not None else None
             edge25 = (p25 - pm25) if pm25 is not None else None
 
-            k15 = kelly_fraction(p15, odd15) if odd15 > 1.0 else 0.0
-            k25 = kelly_fraction(p25, odd25) if odd25 > 1.0 else 0.0
+            k15 = kelly_fraction(p15, odd15) if odd15 > 1.01 else 0.0
+            k25 = kelly_fraction(p25, odd25) if odd25 > 1.01 else 0.0
 
             base_row = {
                 "Date": fx["Date"],
@@ -528,7 +529,7 @@ def main():
                 "LambdaTotal": lam_t,
             }
 
-            if odd15 > 1.0:
+            if odd15 > 1.01:
                 rows15.append(
                     {
                         **base_row,
@@ -541,7 +542,7 @@ def main():
                     }
                 )
 
-            if odd25 > 1.0:
+            if odd25 > 1.01:
                 rows25.append(
                     {
                         **base_row,
@@ -575,9 +576,7 @@ def main():
     combo_github_path = BASE / "picks_hoje_github.csv"
     combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
 
-    # ==========================
     # CSV simplificado
-    # ==========================
     simple_path = BASE / "picks_hoje_simplificado.csv"
     if len(combo) > 0:
         simple = combo.copy()
@@ -608,9 +607,7 @@ def main():
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
     print(f"- {simple_path.name} ({len(combo)} picks)")
 
-    # ==========================
-    # Telegram (anti-duplicados por dia)
-    # ==========================
+    # Telegram
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
 
@@ -654,9 +651,7 @@ def main():
     else:
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
 
-    # ==========================
     # GitHub upload dos CSVs
-    # ==========================
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
