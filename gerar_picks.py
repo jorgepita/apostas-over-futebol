@@ -11,9 +11,6 @@ import pandas as pd
 
 BASE = Path(__file__).resolve().parent
 
-# =============================
-# Anti-duplicados (por dia)
-# =============================
 SENT_STATE_PATH = BASE / "sent_state.json"
 
 
@@ -41,9 +38,6 @@ def pick_id(row: dict) -> str:
     return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
 
 
-# =============================
-# Helpers / modelo
-# =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
@@ -94,9 +88,6 @@ def kelly_fraction(p: float, odd: float) -> float:
 
 
 def clamp_prob(prob: float, market: str) -> float:
-    """
-    Travões para evitar probabilidades absurdas do Poisson puro.
-    """
     if market == "O1.5":
         return float(max(0.45, min(0.88, prob)))
     if market == "O2.5":
@@ -105,9 +96,6 @@ def clamp_prob(prob: float, market: str) -> float:
 
 
 def clamp_edge(edge: float, market: str) -> float:
-    """
-    Travões para evitar edges irreais.
-    """
     if market == "O1.5":
         return float(max(-0.20, min(0.18, edge)))
     if market == "O2.5":
@@ -176,15 +164,11 @@ def compute_lambdas(
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
 
-    # travão final para não explodir o total
     lam_home = float(max(0.15, min(2.8, lam_home)))
     lam_away = float(max(0.10, min(2.4, lam_away)))
     return lam_home, lam_away, lam_home + lam_away
 
 
-# =============================
-# Telegram
-# =============================
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
@@ -241,9 +225,6 @@ def build_message(rows: list[dict], titulo: str) -> str:
     return msg
 
 
-# =============================
-# Regras de mercado / stakes
-# =============================
 def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
     if not rows:
         return pd.DataFrame()
@@ -312,9 +293,6 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     return df
 
 
-# =============================
-# GitHub upload (via API, sem git)
-# =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
@@ -355,7 +333,6 @@ def github_put_file(
     message: str,
 ) -> None:
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}"
-
     sha = github_get_sha(owner, repo, path, branch, token)
 
     payload = {
@@ -395,9 +372,6 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
     print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
-# =============================
-# Main
-# =============================
 def main():
     cfg_path = BASE / "config.json"
     if not cfg_path.exists():
@@ -453,7 +427,6 @@ def main():
         except Exception:
             return float(default)
 
-    # odd média observada nas fixtures do dia
     odd15_series = pd.to_numeric(fixtures["Odd_Over15"], errors="coerce")
     odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
     avg_odd15 = float(odd15_series[odd15_series > 1.01].mean()) if (odd15_series > 1.01).any() else 1.55
@@ -515,7 +488,6 @@ def main():
             odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
 
-            # fallback apenas para referência interna de mercado médio
             if odd15 <= 1.01:
                 odd15 = 0.0
             if odd25 <= 1.01:
@@ -576,14 +548,12 @@ def main():
     rules15 = dict(rules_cfg.get("over15", {}))
     rules25 = dict(rules_cfg.get("over25", {}))
 
-    # travões extra
     rules15.setdefault("edge_max", 0.18)
     rules25.setdefault("edge_max", 0.15)
 
     out15 = apply_market_rules(rows15, bankroll15, rules15)
     out25 = apply_market_rules(rows25, bankroll25, rules25)
 
-    # Limpeza 1
     if not out15.empty:
         out15["Odd"] = pd.to_numeric(out15["Odd"], errors="coerce")
         out15["Stake€"] = pd.to_numeric(out15["Stake€"], errors="coerce")
@@ -603,7 +573,6 @@ def main():
 
     combo = pd.concat([out15, out25], ignore_index=True)
 
-    # Limpeza 2
     if not combo.empty:
         combo["Odd"] = pd.to_numeric(combo["Odd"], errors="coerce")
         combo["Stake€"] = pd.to_numeric(combo["Stake€"], errors="coerce")
@@ -622,7 +591,6 @@ def main():
         simple["Liga"] = simple["LeagueName"].astype(str)
         simple["Mercado"] = simple["Market"].astype(str)
 
-        # IMPORTANTE: usar to_numeric, não _to_float, para preservar NaN
         simple["Odd"] = pd.to_numeric(simple["Odd"], errors="coerce")
         simple["Stake€"] = pd.to_numeric(simple.get("Stake€", 0.0), errors="coerce")
         simple["Edge%"] = (pd.to_numeric(simple["Edge"], errors="coerce") * 100.0).round(2)
@@ -632,8 +600,6 @@ def main():
 
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
-
-        # Limpeza 3
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0)].copy()
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
@@ -649,7 +615,6 @@ def main():
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
     print(f"- {simple_path.name} ({len(combo)} picks)")
 
-    # Telegram
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
 
@@ -693,7 +658,6 @@ def main():
     else:
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
 
-    # GitHub upload
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
