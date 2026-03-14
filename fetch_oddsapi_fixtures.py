@@ -1,5 +1,8 @@
-import os, json, csv
-import urllib.parse, urllib.request
+import os
+import json
+import csv
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
 
@@ -14,14 +17,12 @@ SPORTS = {
     "premier": "soccer_epl",
     "portugal": "soccer_portugal_primeira_liga",
     "alemanha": "soccer_germany_bundesliga",
-    # podes voltar a acrescentar:
     # "espanha": "soccer_spain_la_liga",
     # "franca": "soccer_france_ligue_one",
     # "italia": "soccer_italy_serie_a",
     # "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
-# Mais regiões = mais bookmakers/linhas -> mais odds encontradas
 REGIONS = "eu,uk"
 MARKETS = "totals"
 ODDS_FORMAT = "decimal"
@@ -74,6 +75,10 @@ def main():
     errors = []
     unauthorized_count = 0
 
+    count_both = 0
+    count_only_15 = 0
+    count_only_25 = 0
+
     for league_key, sport_key in SPORTS.items():
         try:
             url = build_url(sport_key)
@@ -99,9 +104,18 @@ def main():
             odd15 = pick_over_price(bms, 1.5)
             odd25 = pick_over_price(bms, 2.5)
 
-            # ✅ só descartar se NÃO houver nenhuma odd
+            # Só descartar se não houver nenhuma das duas
             if odd15 is None and odd25 is None:
                 continue
+
+            if odd15 is not None and odd25 is not None:
+                count_both += 1
+            elif odd15 is not None and odd25 is None:
+                count_only_15 += 1
+                print(f"[WARN] Com O1.5 mas sem O2.5 -> {league_key} | {home} vs {away} | O1.5={odd15}")
+            elif odd15 is None and odd25 is not None:
+                count_only_25 += 1
+                print(f"[WARN] Sem O1.5 mas com O2.5 -> {league_key} | {home} vs {away} | O2.5={odd25}")
 
             rows.append(
                 {
@@ -109,7 +123,6 @@ def main():
                     "League": league_key,
                     "HomeTeam": home,
                     "AwayTeam": away,
-                    # deixar vazio se não existir (o gerar_picks.py trata como 0.0)
                     "Odd_Over15": (f"{odd15:.2f}" if odd15 is not None else ""),
                     "Odd_Over25": (f"{odd25:.2f}" if odd25 is not None else ""),
                 }
@@ -118,7 +131,6 @@ def main():
 
         print(f"[DBG] FETCH league={league_key} kept_rows={kept}")
 
-    # Escrever sempre o CSV (para não partir o passo seguinte)
     with open("fixtures_today.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
@@ -128,13 +140,15 @@ def main():
         w.writerows(rows)
 
     print(f"OK fixtures_today.csv: {len(rows)} jogos (com O1.5 ou O2.5)")
+    print(f"[DBG] Jogos com ambas odds: {count_both}")
+    print(f"[DBG] Jogos só com O1.5: {count_only_15}")
+    print(f"[DBG] Jogos só com O2.5: {count_only_25}")
 
     if errors:
         print("\nAvisos por liga:")
         for e in errors:
             print(" -", e)
 
-    # Se TODAS as ligas deram 401, é key errada -> falhar job (alerta no run_job.py)
     if unauthorized_count == len(SPORTS):
         raise SystemExit("ODDS_API_KEY inválida (401 em todas as ligas).")
 
