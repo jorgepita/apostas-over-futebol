@@ -88,16 +88,18 @@ def kelly_fraction(p: float, odd: float) -> float:
 
 
 def clamp_prob(prob: float, market: str) -> float:
+    # Só apertamos mais o O1.5; O2.5 fica praticamente como estava
     if market == "O1.5":
-        return float(max(0.45, min(0.88, prob)))
+        return float(max(0.50, min(0.80, prob)))
     if market == "O2.5":
         return float(max(0.20, min(0.72, prob)))
     return float(max(0.01, min(0.99, prob)))
 
 
 def clamp_edge(edge: float, market: str) -> float:
+    # Só apertamos mais o O1.5; O2.5 mantém-se
     if market == "O1.5":
-        return float(max(-0.20, min(0.18, edge)))
+        return float(max(-0.12, min(0.12, edge)))
     if market == "O2.5":
         return float(max(-0.20, min(0.15, edge)))
     return float(max(-0.20, min(0.20, edge)))
@@ -488,18 +490,21 @@ def main():
             odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
 
+            # O1.5: se não houver odd real, usa proxy média do dia
             if odd15 <= 1.01:
-                odd15 = 0.0
+                odd15 = round(avg_odd15, 2)
+
+            # O2.5 mantém apenas odd real
             if odd25 <= 1.01:
                 odd25 = 0.0
 
-            pm15 = (1.0 / odd15) if odd15 > 1.01 else (1.0 / avg_odd15)
+            pm15 = 1.0 / odd15
             pm25 = (1.0 / odd25) if odd25 > 1.01 else (1.0 / avg_odd25)
 
             edge15 = clamp_edge(p15 - pm15, "O1.5")
             edge25 = clamp_edge(p25 - pm25, "O2.5")
 
-            k15 = kelly_fraction(p15, odd15) if odd15 > 1.01 else 0.0
+            k15 = kelly_fraction(p15, odd15)
             k25 = kelly_fraction(p25, odd25) if odd25 > 1.01 else 0.0
 
             base_row = {
@@ -548,7 +553,8 @@ def main():
     rules15 = dict(rules_cfg.get("over15", {}))
     rules25 = dict(rules_cfg.get("over25", {}))
 
-    rules15.setdefault("edge_max", 0.18)
+    # Só apertamos O1.5
+    rules15.setdefault("edge_max", 0.12)
     rules25.setdefault("edge_max", 0.15)
 
     out15 = apply_market_rules(rows15, bankroll15, rules15)
