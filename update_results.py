@@ -2,39 +2,51 @@ import pandas as pd
 
 FILE = "picks_hoje_simplificado.csv"
 
-df = pd.read_csv(FILE, sep=";")
+# ler tudo como texto
+df = pd.read_csv(FILE, sep=";", dtype=str).fillna("")
 
-# garantir que as colunas existem
+# garantir colunas
 if "Resultado" not in df.columns:
     df["Resultado"] = ""
 
 if "Lucro€" not in df.columns:
-    df["Lucro€"] = 0.0
+    df["Lucro€"] = ""
 
-# converter para tipos corretos
-df["Resultado"] = df["Resultado"].astype(str)
-df["Lucro€"] = pd.to_numeric(df["Lucro€"], errors="coerce").fillna(0)
+if "Stake€" not in df.columns:
+    df["Stake€"] = ""
+
+if "Odd" not in df.columns:
+    df["Odd"] = ""
 
 for i, row in df.iterrows():
+    resultado_atual = str(row.get("Resultado", "")).strip()
 
     # se já tiver resultado, ignora
-    if row["Resultado"] not in ["", "nan"]:
+    if resultado_atual not in ["", "nan", "None"]:
         continue
 
-    # placeholder (mais tarde ligamos API resultados)
+    # placeholder por agora
     resultado = ""
 
+    try:
+        stake = float(str(row.get("Stake€", "")).replace(",", "."))
+    except Exception:
+        stake = 0.0
+
+    try:
+        odd = float(str(row.get("Odd", "")).replace(",", "."))
+    except Exception:
+        odd = 0.0
+
     if resultado == "win":
-        lucro = row["Stake€"] * (row["Odd"] - 1)
-
+        lucro = round(stake * (odd - 1), 2)
     elif resultado == "lose":
-        lucro = -row["Stake€"]
-
+        lucro = round(-stake, 2)
     else:
-        lucro = 0
+        lucro = 0.0
 
     df.at[i, "Resultado"] = resultado
-    df.at[i, "Lucro€"] = round(lucro, 2)
+    df.at[i, "Lucro€"] = str(lucro)
 
 df.to_csv(FILE, index=False, sep=";")
 
