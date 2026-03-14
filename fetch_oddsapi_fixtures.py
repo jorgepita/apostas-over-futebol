@@ -12,7 +12,6 @@ print(f"[DBG] ODDS_API_KEY len = {len(API_KEY)}")
 
 BASE = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
 
-# Ligas (sport keys do The Odds API)
 SPORTS = {
     "premier": "soccer_epl",
     "portugal": "soccer_portugal_primeira_liga",
@@ -23,7 +22,6 @@ SPORTS = {
     # "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
-# Mais regiões = mais bookmakers / mais linhas
 REGIONS = "eu,uk"
 MARKETS = "totals"
 ODDS_FORMAT = "decimal"
@@ -56,7 +54,6 @@ def build_url(sport_key: str) -> str:
 def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> Optional[float]:
     """
     Procura a melhor odd disponível para Over X.5 em todos os bookmakers.
-    Devolve a maior odd válida encontrada.
     """
     best_price = None
 
@@ -89,19 +86,12 @@ def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> 
 
 def estimate_over15_from_over25(odd25: Optional[float]) -> Optional[float]:
     """
-    Fallback conservador para estimar O1.5 a partir de O2.5.
-    Não é perfeito, mas é muito melhor do que odd=0.
-
-    Exemplo:
-    O2.5 @ 1.80 -> O1.5 ~ 1.44
-    O2.5 @ 2.00 -> O1.5 ~ 1.55
+    Fallback conservador: estima O1.5 a partir de O2.5.
     """
     if odd25 is None or odd25 <= 1.01:
         return None
 
     est = 1.0 + (odd25 - 1.0) * 0.55
-
-    # intervalo realista
     est = max(1.12, min(1.80, est))
     return round(est, 2)
 
@@ -150,7 +140,6 @@ def main():
             odd15_final = odd15_real
             odd25_final = odd25_real
 
-            # fallback: se não houver O1.5 real mas houver O2.5, estimar O1.5
             if odd15_final is None and odd25_final is not None:
                 odd15_final = estimate_over15_from_over25(odd25_final)
                 if odd15_final is not None:
@@ -160,7 +149,6 @@ def main():
                         f"O2.5={odd25_final:.2f} => O1.5~{odd15_final:.2f}"
                     )
 
-            # descartar se não houver nenhuma odd útil
             if odd15_final is None and odd25_final is None:
                 continue
 
@@ -168,16 +156,8 @@ def main():
                 count_both_real += 1
             elif odd15_real is not None and odd25_real is None:
                 count_only_15_real += 1
-                print(
-                    f"[WARN] Com O1.5 real mas sem O2.5 -> "
-                    f"{league_key} | {home} vs {away} | O1.5={odd15_real:.2f}"
-                )
             elif odd15_real is None and odd25_real is not None:
                 count_only_25_real += 1
-                print(
-                    f"[WARN] Sem O1.5 real mas com O2.5 -> "
-                    f"{league_key} | {home} vs {away} | O2.5={odd25_real:.2f}"
-                )
 
             rows.append(
                 {
