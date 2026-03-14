@@ -1,1 +1,339 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Apostas</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --accent: #0f172a;
+      --ok: #16a34a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .hero, .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .hero {
+      padding: 24px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    h1,h2,h3,p { margin: 0; }
+    .sub { color: var(--muted); margin-top: 8px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 14px;
+      padding: 10px 14px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .grid { display: grid; gap: 16px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
+    .stat { padding: 18px; }
+    .stat .label { color: var(--muted); font-size: 14px; }
+    .stat .value { font-size: 30px; font-weight: 700; margin-top: 8px; }
+    .stat .note { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .section { padding: 20px; }
+    .section-head {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 999px; padding: 7px 12px; background: #ecfdf5; color: #166534; font-weight: 600; font-size: 13px;
+    }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+    .input, .select {
+      padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: white; min-width: 180px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; border-top: 1px solid var(--line); text-align: left; font-size: 14px; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #fafafa; }
+    .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #f1f5f9; font-size: 12px; font-weight: 700; }
+    .muted { color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .split { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .small { font-size: 13px; color: var(--muted); }
+    .list { display: grid; gap: 10px; }
+    .item { border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+    .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); }
+    @media (max-width: 1100px) {
+      .grid-4, .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      .wrap { padding: 14px; }
+      .hero, .section, .stat { padding: 16px; }
+      th, td { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <p class="small">Projeto Apostas Bot</p>
+        <h1>Dashboard GitHub Pages</h1>
+        <p class="sub">Ligado diretamente aos teus CSV do GitHub. Atualiza sozinho a cada 60 segundos.</p>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="refreshBtn">Atualizar agora</button>
+        <a class="btn" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
+      </div>
+    </div>
 
+    <div class="grid grid-4" id="stats"></div>
+
+    <div class="grid grid-2" style="margin-top:16px; align-items:start;">
+      <div class="card section">
+        <div class="section-head">
+          <div>
+            <h2>Futebol</h2>
+            <p class="small">Fonte: picks_hoje_simplificado.csv</p>
+          </div>
+          <div class="toolbar">
+            <input id="searchFootball" class="input" placeholder="Pesquisar jogo ou liga" />
+            <select id="leagueFilter" class="select"><option value="">Todas as ligas</option></select>
+          </div>
+        </div>
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Liga</th>
+                <th>Jogo</th>
+                <th>Mercado</th>
+                <th>Odd</th>
+                <th>Edge</th>
+                <th>Stake</th>
+              </tr>
+            </thead>
+            <tbody id="footballRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="card section">
+          <div class="section-head">
+            <div>
+              <h2>NBA</h2>
+              <p class="small">Fonte: picks_hoje.csv</p>
+            </div>
+            <span class="pill">Atualização automática</span>
+          </div>
+          <div style="overflow:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Linha</th>
+                  <th>Odd</th>
+                  <th>Stake€</th>
+                </tr>
+              </thead>
+              <tbody id="nbaRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card section">
+          <div class="section-head">
+            <div>
+              <h2>Resumo rápido</h2>
+              <p class="small">Com base nos teus CSV reais</p>
+            </div>
+          </div>
+          <div class="list" id="summaryList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const URLS = {
+      football: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+      nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje.csv'
+    };
+
+    const state = {
+      football: [],
+      nba: [],
+      lastUpdated: null,
+    };
+
+    function parseSemicolonCsv(text) {
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (!lines.length) return [];
+      const headers = lines[0].split(';').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = line.split(';');
+        const row = {};
+        headers.forEach((h, i) => row[h] = (values[i] ?? '').trim());
+        return row;
+      });
+    }
+
+    function num(v) {
+      const n = Number(String(v).replace(',', '.'));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function avg(arr) {
+      const valid = arr.filter(v => typeof v === 'number' && !Number.isNaN(v));
+      if (!valid.length) return 0;
+      return valid.reduce((a,b) => a + b, 0) / valid.length;
+    }
+
+    function fmt(n, d = 2) {
+      return Number.isFinite(n) ? n.toFixed(d) : '—';
+    }
+
+    function renderStats() {
+      const football = state.football;
+      const nba = state.nba;
+      const leagues = new Set(football.map(r => r['Liga']).filter(Boolean));
+      const footballOdds = football.map(r => num(r['Odd']));
+      const footballEdges = football.map(r => num(r['Edge%']));
+      const nbaOdds = nba.map(r => num(r['Odd']));
+
+      const cards = [
+        { label: 'Picks futebol', value: football.length, note: `${leagues.size} ligas` },
+        { label: 'Odd média futebol', value: fmt(avg(footballOdds)), note: `Edge médio ${fmt(avg(footballEdges))}%` },
+        { label: 'Picks NBA', value: nba.length, note: `Odd média ${fmt(avg(nbaOdds))}` },
+        { label: 'Última atualização', value: state.lastUpdated ? new Date(state.lastUpdated).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '—', note: 'Refresh automático: 60s' },
+      ];
+
+      document.getElementById('stats').innerHTML = cards.map(card => `
+        <div class="card stat">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+          <div class="note">${card.note}</div>
+        </div>
+      `).join('');
+    }
+
+    function fillLeagueFilter() {
+      const select = document.getElementById('leagueFilter');
+      const current = select.value;
+      const leagues = [...new Set(state.football.map(r => r['Liga']).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Todas as ligas</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
+      select.value = current;
+    }
+
+    function renderFootball() {
+      const q = document.getElementById('searchFootball').value.toLowerCase();
+      const league = document.getElementById('leagueFilter').value;
+      const rows = state.football.filter(r => {
+        const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
+        const okSearch = text.includes(q);
+        const okLeague = !league || r['Liga'] === league;
+        return okSearch && okLeague;
+      });
+
+      document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => `
+        <tr>
+          <td>${r['Data'] || '—'}</td>
+          <td><span class="tag">${r['Liga'] || '—'}</span></td>
+          <td>${r['Jogo'] || '—'}</td>
+          <td>${r['Mercado'] || '—'}</td>
+          <td class="mono">${r['Odd'] || '—'}</td>
+          <td class="mono">${r['Edge%'] || '—'}</td>
+          <td class="mono">${r['Stake€'] || '—'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="7"><div class="empty">Nenhuma pick encontrada.</div></td></tr>`;
+    }
+
+    function renderNba() {
+      document.getElementById('nbaRows').innerHTML = state.nba.length ? state.nba.map(r => `
+        <tr>
+          <td>${r['Date'] || '—'}</td>
+          <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${r['HomeTeam']} vs ${r['AwayTeam']}` : '—'}</td>
+          <td>${r['Market'] || '—'}</td>
+          <td class="mono">${r['Line'] || '—'}</td>
+          <td class="mono">${r['Odd'] || '—'}</td>
+          <td class="mono">${r['Stake€'] || '—'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="6"><div class="empty">Sem picks NBA neste momento.</div></td></tr>`;
+    }
+
+    function renderSummary() {
+      const topFootball = [...state.football]
+        .map(r => ({ jogo: r['Jogo'], liga: r['Liga'], edge: num(r['Edge%']) ?? -1, odd: r['Odd'] }))
+        .sort((a,b) => b.edge - a.edge)
+        .slice(0, 3);
+
+      const items = [
+        `Top edge futebol: ${topFootball[0] ? `${topFootball[0].jogo} (${topFootball[0].liga}) • ${fmt(topFootball[0].edge)}%` : '—'}`,
+        `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`,
+        `Ligação ativa aos CSV do GitHub: OK`,
+      ];
+
+      document.getElementById('summaryList').innerHTML = items.map(t => `<div class="item">${t}</div>`).join('');
+    }
+
+    async function loadData() {
+      try {
+        const [footballRes, nbaRes] = await Promise.all([
+          fetch(URLS.football + '?t=' + Date.now()),
+          fetch(URLS.nba + '?t=' + Date.now()),
+        ]);
+
+        const footballText = await footballRes.text();
+        const nbaText = await nbaRes.text();
+
+        state.football = parseSemicolonCsv(footballText);
+        state.nba = parseSemicolonCsv(nbaText);
+        state.lastUpdated = new Date().toISOString();
+
+        fillLeagueFilter();
+        renderStats();
+        renderFootball();
+        renderNba();
+        renderSummary();
+      } catch (e) {
+        alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
+        console.error(e);
+      }
+    }
+
+    document.getElementById('searchFootball').addEventListener('input', renderFootball);
+    document.getElementById('leagueFilter').addEventListener('change', renderFootball);
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
+</body>
+</html>
