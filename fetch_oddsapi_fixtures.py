@@ -56,7 +56,7 @@ def build_url(sport_key: str) -> str:
 def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> Optional[float]:
     """
     Procura a melhor odd disponível para Over X.5 em todos os bookmakers.
-    Em vez de devolver a primeira que encontrar, devolve a maior odd.
+    Devolve a maior odd válida encontrada.
     """
     best_price = None
 
@@ -78,7 +78,7 @@ def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> 
 
                     if float(point) == float(goal_line):
                         price = float(price)
-                        if price > 1.0:
+                        if price > 1.01:
                             if best_price is None or price > best_price:
                                 best_price = price
                 except Exception:
@@ -96,14 +96,12 @@ def estimate_over15_from_over25(odd25: Optional[float]) -> Optional[float]:
     O2.5 @ 1.80 -> O1.5 ~ 1.44
     O2.5 @ 2.00 -> O1.5 ~ 1.55
     """
-    if odd25 is None:
-        return None
-    if odd25 <= 1.01:
+    if odd25 is None or odd25 <= 1.01:
         return None
 
     est = 1.0 + (odd25 - 1.0) * 0.55
 
-    # limitar a um intervalo realista
+    # intervalo realista
     est = max(1.12, min(1.80, est))
     return round(est, 2)
 
@@ -152,7 +150,7 @@ def main():
             odd15_final = odd15_real
             odd25_final = odd25_real
 
-            # Fallback: se não houver O1.5 real mas houver O2.5, estimar O1.5
+            # fallback: se não houver O1.5 real mas houver O2.5, estimar O1.5
             if odd15_final is None and odd25_final is not None:
                 odd15_final = estimate_over15_from_over25(odd25_final)
                 if odd15_final is not None:
@@ -162,7 +160,7 @@ def main():
                         f"O2.5={odd25_final:.2f} => O1.5~{odd15_final:.2f}"
                     )
 
-            # Só descartar se não houver nenhuma odds útil
+            # descartar se não houver nenhuma odd útil
             if odd15_final is None and odd25_final is None:
                 continue
 
