@@ -606,7 +606,12 @@ def main():
 
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
-        simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0)].copy()
+        simple = simple[
+            (simple["Odd"].notna()) &
+            (simple["Odd"] > 1.01) &
+            (simple["Stake€"] > 0) &
+            (simple["Edge%"] > 0)
+        ].copy()
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
