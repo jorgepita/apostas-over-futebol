@@ -564,12 +564,24 @@ def main():
     out15 = apply_market_rules(rows15, bankroll15, rules_cfg.get("over15", {}))
     out25 = apply_market_rules(rows25, bankroll25, rules_cfg.get("over25", {}))
 
+    # Limpeza final: só manter picks com odd válida e stake positiva
+    if not out15.empty:
+        out15["Odd"] = pd.to_numeric(out15["Odd"], errors="coerce")
+        out15["Stake€"] = pd.to_numeric(out15["Stake€"], errors="coerce")
+        out15 = out15[(out15["Odd"] > 1.01) & (out15["Stake€"] > 0)].copy()
+
+    if not out25.empty:
+        out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
+        out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
+        out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
+
     out15_path = BASE / "picks_over15.csv"
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
     out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
+
     combo = pd.concat([out15, out25], ignore_index=True)
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
