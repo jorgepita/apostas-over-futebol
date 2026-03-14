@@ -18,10 +18,6 @@ SENT_STATE_PATH = BASE / "sent_state.json"
 
 
 def load_sent_state(today_iso: str) -> set[str]:
-    """
-    Lê o estado {date, sent[]} e devolve set(ids).
-    Se a data guardada for diferente de hoje, reseta.
-    """
     try:
         if not SENT_STATE_PATH.exists():
             return set()
@@ -42,9 +38,6 @@ def save_sent_state(today_iso: str, sent: set[str]) -> None:
 
 
 def pick_id(row: dict) -> str:
-    """
-    ID único da pick (por dia): Date|League|Home|Away|Market
-    """
     return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
 
 
@@ -52,9 +45,6 @@ def pick_id(row: dict) -> str:
 # Helpers / modelo
 # =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Remove BOM (\ufeff) e espaços em nomes de colunas.
-    """
     df = df.copy()
     df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
     return df
@@ -70,10 +60,6 @@ def safe_mean(series) -> float:
 
 
 def weighted_mean(values, decay: float = 0.88) -> float:
-    """
-    Média ponderada com decaimento exponencial.
-    O valor mais recente tem mais peso.
-    """
     v = pd.to_numeric(pd.Series(values), errors="coerce").dropna().tolist()
     if not v:
         return 0.0
@@ -85,7 +71,6 @@ def weighted_mean(values, decay: float = 0.88) -> float:
 
 
 def poisson_cdf(k: int, lam: float) -> float:
-    """P(X <= k) para X ~ Poisson(lam)."""
     if lam <= 0:
         return 1.0 if k >= 0 else 0.0
     term = math.exp(-lam)
@@ -97,21 +82,37 @@ def poisson_cdf(k: int, lam: float) -> float:
 
 
 def prob_over_line(lam_total: float, line: float) -> float:
-    """
-    Para total goals ~ Poisson(lam_total).
-    Over 1.5 => >=2 => 1 - P(X<=1)
-    Over 2.5 => >=3 => 1 - P(X<=2)
-    """
     k = int(math.floor(line))
     return 1.0 - poisson_cdf(k, lam_total)
 
 
 def kelly_fraction(p: float, odd: float) -> float:
-    """Kelly true: f = (p*odd - 1)/(odd-1), com piso 0."""
     if odd is None or odd <= 1.01:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
     return max(0.0, float(f))
+
+
+def clamp_prob(prob: float, market: str) -> float:
+    """
+    Travões para evitar probabilidades absurdas do Poisson puro.
+    """
+    if market == "O1.5":
+        return float(max(0.45, min(0.88, prob)))
+    if market == "O2.5":
+        return float(max(0.20, min(0.72, prob)))
+    return float(max(0.01, min(0.99, prob)))
+
+
+def clamp_edge(edge: float, market: str) -> float:
+    """
+    Travões para evitar edges irreais.
+    """
+    if market == "O1.5":
+        return float(max(-0.20, min(0.18, edge)))
+    if market == "O2.5":
+        return float(max(-0.20, min(0.15, edge)))
+    return float(max(-0.20, min(0.20, edge)))
 
 
 def league_avgs(df_hist: pd.DataFrame) -> tuple[float, float]:
@@ -140,13 +141,6 @@ def compute_lambdas(
     min_games_home: int,
     min_games_away: int,
 ) -> tuple[float, float, float]:
-    """
-    Modelo v3:
-    - base = médias da liga (FTHG, FTAG)
-    - forma recente com pesos (decay)
-    - casa/fora (home em casa, away fora)
-    - fallback robusto quando há poucos jogos
-    """
     avg_home, avg_away = league_avgs(df_hist)
     if avg_home <= 0:
         avg_home = 1.2
@@ -157,8 +151,8 @@ def compute_lambdas(
     a_last = last_n_away(df_hist, away, window)
 
     if len(h_last) < min_games_home or len(a_last) < min_games_away:
-        lam_home = float(max(0.05, min(6.0, avg_home)))
-        lam_away = float(max(0.05, min(6.0, avg_away)))
+        lam_home = float(max(0.15, min(3.0, avg_home)))
+        lam_away = float(max(0.10, min(2.6, avg_away)))
         return lam_home, lam_away, lam_home + lam_away
 
     home_scored = weighted_mean(h_last["FTHG"], decay=decay)
@@ -171,19 +165,20 @@ def compute_lambdas(
     away_attack = (away_scored / avg_away) if avg_away > 0 else 1.0
     away_defense = (away_conceded / avg_home) if avg_home > 0 else 1.0
 
-    def clamp(x, lo=0.60, hi=1.60):
+    def clamp_strength(x, lo=0.75, hi=1.35):
         return float(max(lo, min(hi, x)))
 
-    home_attack = clamp(home_attack)
-    home_defense = clamp(home_defense)
-    away_attack = clamp(away_attack)
-    away_defense = clamp(away_defense)
+    home_attack = clamp_strength(home_attack)
+    home_defense = clamp_strength(home_defense)
+    away_attack = clamp_strength(away_attack)
+    away_defense = clamp_strength(away_defense)
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
 
-    lam_home = float(max(0.05, min(6.0, lam_home)))
-    lam_away = float(max(0.05, min(6.0, lam_away)))
+    # travão final para não explodir o total
+    lam_home = float(max(0.15, min(2.8, lam_home)))
+    lam_away = float(max(0.10, min(2.4, lam_away)))
     return lam_home, lam_away, lam_home + lam_away
 
 
@@ -270,7 +265,8 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
         return df
 
     edge_min = float(rules.get("edge_min", 0.0))
-    df = df[df["Edge"] >= edge_min].copy()
+    edge_max = float(rules.get("edge_max", 0.20))
+    df = df[(df["Edge"] >= edge_min) & (df["Edge"] <= edge_max)].copy()
     if df.empty:
         return df
 
@@ -295,9 +291,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(
-        drop=True
-    )
+    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(drop=True)
 
     round_cols = {
         "LambdaHome": 3,
@@ -459,6 +453,15 @@ def main():
         except Exception:
             return float(default)
 
+    # odd média observada nas fixtures do dia
+    odd15_series = pd.to_numeric(fixtures["Odd_Over15"], errors="coerce")
+    odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
+    avg_odd15 = float(odd15_series[odd15_series > 1.01].mean()) if (odd15_series > 1.01).any() else 1.55
+    avg_odd25 = float(odd25_series[odd25_series > 1.01].mean()) if (odd25_series > 1.01).any() else 1.95
+
+    print(f"[DBG] Odd média O1.5 do dia: {avg_odd15:.2f}")
+    print(f"[DBG] Odd média O2.5 do dia: {avg_odd25:.2f}")
+
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
@@ -499,21 +502,30 @@ def main():
             )
 
             if lambda_boost and lambda_boost != 1.0:
-                lam_h = max(0.05, min(6.0, lam_h * lambda_boost))
-                lam_a = max(0.05, min(6.0, lam_a * lambda_boost))
+                lam_h = max(0.15, min(2.8, lam_h * lambda_boost))
+                lam_a = max(0.10, min(2.4, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
-            p15 = prob_over_line(lam_t, 1.5)
-            p25 = prob_over_line(lam_t, 2.5)
+            p15_raw = prob_over_line(lam_t, 1.5)
+            p25_raw = prob_over_line(lam_t, 2.5)
+
+            p15 = clamp_prob(p15_raw, "O1.5")
+            p25 = clamp_prob(p25_raw, "O2.5")
 
             odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
 
-            pm15 = (1.0 / odd15) if odd15 > 1.01 else None
-            pm25 = (1.0 / odd25) if odd25 > 1.01 else None
+            # fallback apenas para referência interna de mercado médio
+            if odd15 <= 1.01:
+                odd15 = 0.0
+            if odd25 <= 1.01:
+                odd25 = 0.0
 
-            edge15 = (p15 - pm15) if pm15 is not None else None
-            edge25 = (p25 - pm25) if pm25 is not None else None
+            pm15 = (1.0 / odd15) if odd15 > 1.01 else (1.0 / avg_odd15)
+            pm25 = (1.0 / odd25) if odd25 > 1.01 else (1.0 / avg_odd25)
+
+            edge15 = clamp_edge(p15 - pm15, "O1.5")
+            edge25 = clamp_edge(p25 - pm25, "O2.5")
 
             k15 = kelly_fraction(p15, odd15) if odd15 > 1.01 else 0.0
             k25 = kelly_fraction(p25, odd25) if odd25 > 1.01 else 0.0
@@ -561,10 +573,17 @@ def main():
     bankroll15 = float(bankroll_cfg.get("over15", 0.0))
     bankroll25 = float(bankroll_cfg.get("over25", 0.0))
 
-    out15 = apply_market_rules(rows15, bankroll15, rules_cfg.get("over15", {}))
-    out25 = apply_market_rules(rows25, bankroll25, rules_cfg.get("over25", {}))
+    rules15 = dict(rules_cfg.get("over15", {}))
+    rules25 = dict(rules_cfg.get("over25", {}))
 
-    # Limpeza 1: out15 / out25
+    # travões extra
+    rules15.setdefault("edge_max", 0.18)
+    rules25.setdefault("edge_max", 0.15)
+
+    out15 = apply_market_rules(rows15, bankroll15, rules15)
+    out25 = apply_market_rules(rows25, bankroll25, rules25)
+
+    # Limpeza 1
     if not out15.empty:
         out15["Odd"] = pd.to_numeric(out15["Odd"], errors="coerce")
         out15["Stake€"] = pd.to_numeric(out15["Stake€"], errors="coerce")
@@ -584,7 +603,7 @@ def main():
 
     combo = pd.concat([out15, out25], ignore_index=True)
 
-    # Limpeza 2: combo
+    # Limpeza 2
     if not combo.empty:
         combo["Odd"] = pd.to_numeric(combo["Odd"], errors="coerce")
         combo["Stake€"] = pd.to_numeric(combo["Stake€"], errors="coerce")
@@ -595,7 +614,6 @@ def main():
     combo_github_path = BASE / "picks_hoje_github.csv"
     combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
 
-    # CSV simplificado
     simple_path = BASE / "picks_hoje_simplificado.csv"
     if len(combo) > 0:
         simple = combo.copy()
@@ -604,9 +622,10 @@ def main():
         simple["Liga"] = simple["LeagueName"].astype(str)
         simple["Mercado"] = simple["Market"].astype(str)
 
-        simple["Odd"] = simple["Odd"].apply(_to_float)
-        simple["Stake€"] = simple.get("Stake€", 0.0).apply(_to_float)
-        simple["Edge%"] = (simple["Edge"].apply(_to_float) * 100.0).round(2)
+        # IMPORTANTE: usar to_numeric, não _to_float, para preservar NaN
+        simple["Odd"] = pd.to_numeric(simple["Odd"], errors="coerce")
+        simple["Stake€"] = pd.to_numeric(simple.get("Stake€", 0.0), errors="coerce")
+        simple["Edge%"] = (pd.to_numeric(simple["Edge"], errors="coerce") * 100.0).round(2)
 
         simple["Resultado"] = ""
         simple["Lucro€"] = ""
@@ -614,7 +633,7 @@ def main():
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
 
-        # Limpeza 3: simplificado
+        # Limpeza 3
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0)].copy()
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
@@ -674,7 +693,7 @@ def main():
     else:
         print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
 
-    # GitHub upload dos CSVs
+    # GitHub upload
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
