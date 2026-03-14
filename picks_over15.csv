@@ -1,15 +1,25 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-03-15;portugal;Primeira Liga;Nacional;Estoril;2.423;2.513;4.936;O1.5;0.957;;0.0;0.9574;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;portugal;Primeira Liga;Arouca;Benfica;0.96;3.289;4.249;O1.5;0.925;;0.0;0.925;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;premier;Premier League;Burnley;Bournemouth;1.363;2.6;3.963;O1.5;0.906;;0.0;0.9057;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;portugal;Primeira Liga;Gil Vicente;Alverca;3.16;0.692;3.852;O1.5;0.897;;0.0;0.8969;0.0;0.0;0.0;0.0;1.0;500.0
-2026-03-13;alemanha;Bundesliga;Borussia Monchengladbach;FC St. Pauli;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;alemanha;Bundesliga;Eintracht Frankfurt;1. FC Heidenheim;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;alemanha;Bundesliga;Borussia Dortmund;Augsburg;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;alemanha;Bundesliga;Bayer Leverkusen;Bayern Munich;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;alemanha;Bundesliga;TSG Hoffenheim;VfL Wolfsburg;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;alemanha;Bundesliga;Hamburger SV;1. FC Köln;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;alemanha;Bundesliga;Werder Bremen;FSV Mainz 05;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;alemanha;Bundesliga;SC Freiburg;Union Berlin;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;alemanha;Bundesliga;VfB Stuttgart;RB Leipzig;1.882;1.652;3.534;O1.5;0.868;;0.0;0.8676;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;premier;Premier League;Sunderland;Brighton and Hove Albion;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;premier;Premier League;Chelsea;Newcastle United;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;premier;Premier League;West Ham United;Manchester City;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;premier;Premier League;Manchester United;Aston Villa;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;premier;Premier League;Crystal Palace;Leeds United;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;premier;Premier League;Nottingham Forest;Fulham;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;premier;Premier League;Liverpool;Tottenham Hotspur;1.709;1.508;3.217;O1.5;0.831;;0.0;0.831;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;portugal;Primeira Liga;Vitória SC;Famalicão;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;portugal;Primeira Liga;AVS Futebol SAD;Santa Clara;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;portugal;Primeira Liga;Rio Ave FC;CF Estrela;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
+2026-03-15;portugal;Primeira Liga;FC Porto;Moreirense FC;1.62;1.344;2.964;O1.5;0.795;;0.0;0.7955;0.0;0.0;0.0;0.0;1.0;500.0
 2026-03-14;premier;Premier League;Arsenal;Everton;1.471;0.747;2.218;O1.5;0.65;;0.0;0.6498;0.0;0.0;0.0;0.0;1.0;500.0
