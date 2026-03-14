@@ -78,7 +78,6 @@
     th, td { padding: 12px 10px; border-top: 1px solid var(--line); text-align: left; font-size: 14px; vertical-align: top; }
     th { color: var(--muted); font-weight: 600; background: #fafafa; }
     .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #f1f5f9; font-size: 12px; font-weight: 700; }
-    .muted { color: var(--muted); }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .split { display: grid; grid-template-columns: 1fr; gap: 16px; }
     .small { font-size: 13px; color: var(--muted); }
@@ -121,7 +120,9 @@
           </div>
           <div class="toolbar">
             <input id="searchFootball" class="input" placeholder="Pesquisar jogo ou liga" />
-            <select id="leagueFilter" class="select"><option value="">Todas as ligas</option></select>
+            <select id="leagueFilter" class="select">
+              <option value="">Todas as ligas</option>
+            </select>
           </div>
         </div>
         <div style="overflow:auto;">
@@ -147,7 +148,7 @@
           <div class="section-head">
             <div>
               <h2>NBA</h2>
-              <p class="small">Fonte: picks_hoje.csv</p>
+              <p class="small">Fonte: picks_nba_over.csv</p>
             </div>
             <span class="pill">Atualização automática</span>
           </div>
@@ -184,7 +185,7 @@
   <script>
     const URLS = {
       football: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
-      nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje.csv'
+      nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
     };
 
     const state = {
@@ -213,7 +214,7 @@
     function avg(arr) {
       const valid = arr.filter(v => typeof v === 'number' && !Number.isNaN(v));
       if (!valid.length) return 0;
-      return valid.reduce((a,b) => a + b, 0) / valid.length;
+      return valid.reduce((a, b) => a + b, 0) / valid.length;
     }
 
     function fmt(n, d = 2) {
@@ -255,6 +256,7 @@
     function renderFootball() {
       const q = document.getElementById('searchFootball').value.toLowerCase();
       const league = document.getElementById('leagueFilter').value;
+
       const rows = state.football.filter(r => {
         const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
         const okSearch = text.includes(q);
@@ -290,8 +292,8 @@
 
     function renderSummary() {
       const topFootball = [...state.football]
-        .map(r => ({ jogo: r['Jogo'], liga: r['Liga'], edge: num(r['Edge%']) ?? -1, odd: r['Odd'] }))
-        .sort((a,b) => b.edge - a.edge)
+        .map(r => ({ jogo: r['Jogo'], liga: r['Liga'], edge: num(r['Edge%']) ?? -1 }))
+        .sort((a, b) => b.edge - a.edge)
         .slice(0, 3);
 
       const items = [
