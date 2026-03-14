@@ -23,6 +23,7 @@ SPORTS = {
     # "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
+# Mais regiões = mais bookmakers / mais linhas
 REGIONS = "eu,uk"
 MARKETS = "totals"
 ODDS_FORMAT = "decimal"
@@ -31,7 +32,10 @@ ODDS_FORMAT = "decimal"
 def http_get_json(url: str):
     req = urllib.request.Request(
         url,
-        headers={"Accept": "application/json", "User-Agent": "apostas-over-futebol/1.0"},
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "apostas-over-futebol/1.0",
+        },
     )
     with urllib.request.urlopen(req, timeout=40) as r:
         return json.loads(r.read().decode("utf-8"))
@@ -49,20 +53,59 @@ def build_url(sport_key: str) -> str:
     return BASE.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
 
 
-def pick_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> Optional[float]:
+def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> Optional[float]:
+    """
+    Procura a melhor odd disponível para Over X.5 em todos os bookmakers.
+    Em vez de devolver a primeira que encontrar, devolve a maior odd.
+    """
+    best_price = None
+
     for bm in bookmakers or []:
         for m in bm.get("markets", []) or []:
             if m.get("key") != "totals":
                 continue
+
             for o in m.get("outcomes", []) or []:
                 try:
-                    if o.get("name") == "Over" and float(o.get("point")) == float(goal_line):
-                        price = o.get("price")
-                        if price is not None:
-                            return float(price)
+                    if o.get("name") != "Over":
+                        continue
+
+                    point = o.get("point")
+                    price = o.get("price")
+
+                    if point is None or price is None:
+                        continue
+
+                    if float(point) == float(goal_line):
+                        price = float(price)
+                        if price > 1.0:
+                            if best_price is None or price > best_price:
+                                best_price = price
                 except Exception:
                     continue
-    return None
+
+    return best_price
+
+
+def estimate_over15_from_over25(odd25: Optional[float]) -> Optional[float]:
+    """
+    Fallback conservador para estimar O1.5 a partir de O2.5.
+    Não é perfeito, mas é muito melhor do que odd=0.
+
+    Exemplo:
+    O2.5 @ 1.80 -> O1.5 ~ 1.44
+    O2.5 @ 2.00 -> O1.5 ~ 1.55
+    """
+    if odd25 is None:
+        return None
+    if odd25 <= 1.01:
+        return None
+
+    est = 1.0 + (odd25 - 1.0) * 0.55
+
+    # limitar a um intervalo realista
+    est = max(1.12, min(1.80, est))
+    return round(est, 2)
 
 
 def iso_to_date_utc(iso_utc: str) -> str:
@@ -75,9 +118,10 @@ def main():
     errors = []
     unauthorized_count = 0
 
-    count_both = 0
-    count_only_15 = 0
-    count_only_25 = 0
+    count_both_real = 0
+    count_only_15_real = 0
+    count_only_25_real = 0
+    count_15_estimated = 0
 
     for league_key, sport_key in SPORTS.items():
         try:
@@ -92,6 +136,7 @@ def main():
             continue
 
         kept = 0
+
         for ev in data or []:
             home = ev.get("home_team")
             away = ev.get("away_team")
@@ -101,21 +146,40 @@ def main():
             if not (home and away and commence):
                 continue
 
-            odd15 = pick_over_price(bms, 1.5)
-            odd25 = pick_over_price(bms, 2.5)
+            odd15_real = pick_best_over_price(bms, 1.5)
+            odd25_real = pick_best_over_price(bms, 2.5)
 
-            # Só descartar se não houver nenhuma das duas
-            if odd15 is None and odd25 is None:
+            odd15_final = odd15_real
+            odd25_final = odd25_real
+
+            # Fallback: se não houver O1.5 real mas houver O2.5, estimar O1.5
+            if odd15_final is None and odd25_final is not None:
+                odd15_final = estimate_over15_from_over25(odd25_final)
+                if odd15_final is not None:
+                    count_15_estimated += 1
+                    print(
+                        f"[INFO] O1.5 estimado -> {league_key} | {home} vs {away} | "
+                        f"O2.5={odd25_final:.2f} => O1.5~{odd15_final:.2f}"
+                    )
+
+            # Só descartar se não houver nenhuma odds útil
+            if odd15_final is None and odd25_final is None:
                 continue
 
-            if odd15 is not None and odd25 is not None:
-                count_both += 1
-            elif odd15 is not None and odd25 is None:
-                count_only_15 += 1
-                print(f"[WARN] Com O1.5 mas sem O2.5 -> {league_key} | {home} vs {away} | O1.5={odd15}")
-            elif odd15 is None and odd25 is not None:
-                count_only_25 += 1
-                print(f"[WARN] Sem O1.5 mas com O2.5 -> {league_key} | {home} vs {away} | O2.5={odd25}")
+            if odd15_real is not None and odd25_real is not None:
+                count_both_real += 1
+            elif odd15_real is not None and odd25_real is None:
+                count_only_15_real += 1
+                print(
+                    f"[WARN] Com O1.5 real mas sem O2.5 -> "
+                    f"{league_key} | {home} vs {away} | O1.5={odd15_real:.2f}"
+                )
+            elif odd15_real is None and odd25_real is not None:
+                count_only_25_real += 1
+                print(
+                    f"[WARN] Sem O1.5 real mas com O2.5 -> "
+                    f"{league_key} | {home} vs {away} | O2.5={odd25_real:.2f}"
+                )
 
             rows.append(
                 {
@@ -123,8 +187,8 @@ def main():
                     "League": league_key,
                     "HomeTeam": home,
                     "AwayTeam": away,
-                    "Odd_Over15": (f"{odd15:.2f}" if odd15 is not None else ""),
-                    "Odd_Over25": (f"{odd25:.2f}" if odd25 is not None else ""),
+                    "Odd_Over15": (f"{odd15_final:.2f}" if odd15_final is not None else ""),
+                    "Odd_Over25": (f"{odd25_final:.2f}" if odd25_final is not None else ""),
                 }
             )
             kept += 1
@@ -140,9 +204,10 @@ def main():
         w.writerows(rows)
 
     print(f"OK fixtures_today.csv: {len(rows)} jogos (com O1.5 ou O2.5)")
-    print(f"[DBG] Jogos com ambas odds: {count_both}")
-    print(f"[DBG] Jogos só com O1.5: {count_only_15}")
-    print(f"[DBG] Jogos só com O2.5: {count_only_25}")
+    print(f"[DBG] Jogos com ambas odds reais: {count_both_real}")
+    print(f"[DBG] Jogos só com O1.5 real: {count_only_15_real}")
+    print(f"[DBG] Jogos só com O2.5 real: {count_only_25_real}")
+    print(f"[DBG] O1.5 estimado a partir de O2.5: {count_15_estimated}")
 
     if errors:
         print("\nAvisos por liga:")
