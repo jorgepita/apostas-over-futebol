@@ -564,7 +564,7 @@ def main():
     out15 = apply_market_rules(rows15, bankroll15, rules_cfg.get("over15", {}))
     out25 = apply_market_rules(rows25, bankroll25, rules_cfg.get("over25", {}))
 
-    # Limpeza final: só manter picks com odd válida e stake positiva
+    # Limpeza 1: out15 / out25
     if not out15.empty:
         out15["Odd"] = pd.to_numeric(out15["Odd"], errors="coerce")
         out15["Stake€"] = pd.to_numeric(out15["Stake€"], errors="coerce")
@@ -583,6 +583,13 @@ def main():
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
 
     combo = pd.concat([out15, out25], ignore_index=True)
+
+    # Limpeza 2: combo
+    if not combo.empty:
+        combo["Odd"] = pd.to_numeric(combo["Odd"], errors="coerce")
+        combo["Stake€"] = pd.to_numeric(combo["Stake€"], errors="coerce")
+        combo = combo[(combo["Odd"] > 1.01) & (combo["Stake€"] > 0)].copy()
+
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
     combo_github_path = BASE / "picks_hoje_github.csv"
@@ -606,6 +613,10 @@ def main():
 
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
+
+        # Limpeza 3: simplificado
+        simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0)].copy()
+
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
         pd.DataFrame(
