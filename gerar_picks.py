@@ -10,10 +10,12 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 
 BASE = Path(__file__).resolve().parent
-
 SENT_STATE_PATH = BASE / "sent_state.json"
 
 
+# =============================
+# Anti-duplicados (por dia)
+# =============================
 def load_sent_state(today_iso: str) -> set[str]:
     try:
         if not SENT_STATE_PATH.exists():
@@ -38,6 +40,9 @@ def pick_id(row: dict) -> str:
     return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
 
 
+# =============================
+# Helpers
+# =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
@@ -53,14 +58,14 @@ def safe_mean(series) -> float:
     return float(s.mean())
 
 
-def weighted_mean(values, decay: float = 0.88) -> float:
+def weighted_mean(values, decay: float = 0.90) -> float:
     v = pd.to_numeric(pd.Series(values), errors="coerce").dropna().tolist()
     if not v:
         return 0.0
     n = len(v)
-    w = [decay ** (n - 1 - i) for i in range(n)]
-    num = sum(v[i] * w[i] for i in range(n))
-    den = sum(w)
+    weights = [decay ** (n - 1 - i) for i in range(n)]
+    num = sum(v[i] * weights[i] for i in range(n))
+    den = sum(weights)
     return float(num / den) if den > 0 else 0.0
 
 
@@ -75,9 +80,9 @@ def poisson_cdf(k: int, lam: float) -> float:
     return float(min(1.0, max(0.0, s)))
 
 
-def prob_over_line(lam_total: float, line: float) -> float:
-    k = int(math.floor(line))
-    return 1.0 - poisson_cdf(k, lam_total)
+def prob_over25(lam_total: float) -> float:
+    # Over 2.5 => >=3 => 1 - P(X<=2)
+    return 1.0 - poisson_cdf(2, lam_total)
 
 
 def kelly_fraction(p: float, odd: float) -> float:
@@ -85,24 +90,6 @@ def kelly_fraction(p: float, odd: float) -> float:
         return 0.0
     f = (p * odd - 1.0) / (odd - 1.0)
     return max(0.0, float(f))
-
-
-def clamp_prob(prob: float, market: str) -> float:
-    # Só apertamos mais o O1.5; O2.5 fica praticamente como estava
-    if market == "O1.5":
-        return float(max(0.50, min(0.80, prob)))
-    if market == "O2.5":
-        return float(max(0.20, min(0.72, prob)))
-    return float(max(0.01, min(0.99, prob)))
-
-
-def clamp_edge(edge: float, market: str) -> float:
-    # Só apertamos mais o O1.5; O2.5 mantém-se
-    if market == "O1.5":
-        return float(max(-0.12, min(0.12, edge)))
-    if market == "O2.5":
-        return float(max(-0.20, min(0.15, edge)))
-    return float(max(-0.20, min(0.20, edge)))
 
 
 def league_avgs(df_hist: pd.DataFrame) -> tuple[float, float]:
@@ -122,6 +109,10 @@ def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
     return d.tail(n)
 
 
+def clamp_strength(x: float, lo: float = 0.80, hi: float = 1.30) -> float:
+    return float(max(lo, min(hi, x)))
+
+
 def compute_lambdas(
     df_hist: pd.DataFrame,
     home: str,
@@ -132,17 +123,18 @@ def compute_lambdas(
     min_games_away: int,
 ) -> tuple[float, float, float]:
     avg_home, avg_away = league_avgs(df_hist)
+
     if avg_home <= 0:
-        avg_home = 1.2
+        avg_home = 1.20
     if avg_away <= 0:
-        avg_away = 1.0
+        avg_away = 1.00
 
     h_last = last_n_home(df_hist, home, window)
     a_last = last_n_away(df_hist, away, window)
 
     if len(h_last) < min_games_home or len(a_last) < min_games_away:
-        lam_home = float(max(0.15, min(3.0, avg_home)))
-        lam_away = float(max(0.10, min(2.6, avg_away)))
+        lam_home = float(max(0.25, min(2.20, avg_home)))
+        lam_away = float(max(0.20, min(1.90, avg_away)))
         return lam_home, lam_away, lam_home + lam_away
 
     home_scored = weighted_mean(h_last["FTHG"], decay=decay)
@@ -150,27 +142,34 @@ def compute_lambdas(
     away_scored = weighted_mean(a_last["FTAG"], decay=decay)
     away_conceded = weighted_mean(a_last["FTHG"], decay=decay)
 
-    home_attack = (home_scored / avg_home) if avg_home > 0 else 1.0
-    home_defense = (home_conceded / avg_away) if avg_away > 0 else 1.0
-    away_attack = (away_scored / avg_away) if avg_away > 0 else 1.0
-    away_defense = (away_conceded / avg_home) if avg_home > 0 else 1.0
-
-    def clamp_strength(x, lo=0.75, hi=1.35):
-        return float(max(lo, min(hi, x)))
-
-    home_attack = clamp_strength(home_attack)
-    home_defense = clamp_strength(home_defense)
-    away_attack = clamp_strength(away_attack)
-    away_defense = clamp_strength(away_defense)
+    home_attack = clamp_strength(home_scored / avg_home if avg_home > 0 else 1.0)
+    home_defense = clamp_strength(home_conceded / avg_away if avg_away > 0 else 1.0)
+    away_attack = clamp_strength(away_scored / avg_away if avg_away > 0 else 1.0)
+    away_defense = clamp_strength(away_conceded / avg_home if avg_home > 0 else 1.0)
 
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
 
-    lam_home = float(max(0.15, min(2.8, lam_home)))
-    lam_away = float(max(0.10, min(2.4, lam_away)))
+    # Travões para evitar probabilidades absurdas
+    lam_home = float(max(0.25, min(2.20, lam_home)))
+    lam_away = float(max(0.20, min(1.90, lam_away)))
+
     return lam_home, lam_away, lam_home + lam_away
 
 
+def clamp_prob_o25(prob: float) -> float:
+    # Mantém O2.5 dentro de faixa realista
+    return float(max(0.22, min(0.70, prob)))
+
+
+def clamp_edge_o25(edge: float) -> float:
+    # Não alterar demasiado o edge, mas impedir disparates
+    return float(max(-0.20, min(0.15, edge)))
+
+
+# =============================
+# Telegram
+# =============================
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
@@ -186,17 +185,17 @@ def send_telegram_message(token: str, chat_id: str, text: str) -> None:
 
 
 def _send_in_chunks(token: str, chat_id: str, text: str, title: str) -> None:
-    MAX = 3900
+    max_len = 3900
     if not text:
         return
-    if len(text) <= MAX:
+    if len(text) <= max_len:
         send_telegram_message(token, chat_id, text)
         return
 
     parts = []
     cur = ""
     for line in text.splitlines(True):
-        if len(cur) + len(line) > MAX:
+        if len(cur) + len(line) > max_len:
             parts.append(cur)
             cur = ""
         cur += line
@@ -227,29 +226,29 @@ def build_message(rows: list[dict], titulo: str) -> str:
     return msg
 
 
+# =============================
+# Regras de mercado / stake
+# =============================
 def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
     if not rows:
         return pd.DataFrame()
 
     df = pd.DataFrame(rows)
 
-    if "Odd" in df.columns:
-        df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
-        df = df[df["Odd"] > 1.01].copy()
+    df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
+    df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
+    df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 
-    if "Edge" in df.columns:
-        df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
-        df = df[df["Edge"].notna()].copy()
-
-    if "KellyTrue" in df.columns:
-        df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+    df = df[df["Odd"] > 1.01].copy()
+    df = df[df["Edge"].notna()].copy()
 
     if df.empty:
         return df
 
     edge_min = float(rules.get("edge_min", 0.0))
-    edge_max = float(rules.get("edge_max", 0.20))
+    edge_max = float(rules.get("edge_max", 0.15))
     df = df[(df["Edge"] >= edge_min) & (df["Edge"] <= edge_max)].copy()
+
     if df.empty:
         return df
 
@@ -295,6 +294,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     return df
 
 
+# =============================
+# GitHub upload
+# =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
@@ -374,6 +376,9 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
     print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
+# =============================
+# Main
+# =============================
 def main():
     cfg_path = BASE / "config.json"
     if not cfg_path.exists():
@@ -387,7 +392,7 @@ def main():
     fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
     fixtures = normalize_columns(fixtures)
 
-    required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"}
+    required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
 
@@ -408,11 +413,11 @@ def main():
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
     fixtures["Date"] = fixtures["Date"].astype(str)
 
-    rows15, rows25 = [], []
+    rows25 = []
 
     history_cfg = cfg.get("history", {})
     window = int(history_cfg.get("window", 12))
-    decay = float(history_cfg.get("decay", 0.88))
+    decay = float(history_cfg.get("decay", 0.90))
     min_games_home = int(history_cfg.get("min_games_home", 8))
     min_games_away = int(history_cfg.get("min_games_away", 8))
 
@@ -429,12 +434,8 @@ def main():
         except Exception:
             return float(default)
 
-    odd15_series = pd.to_numeric(fixtures["Odd_Over15"], errors="coerce")
-    odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
-    avg_odd15 = float(odd15_series[odd15_series > 1.01].mean()) if (odd15_series > 1.01).any() else 1.55
-    avg_odd25 = float(odd25_series[odd25_series > 1.01].mean()) if (odd25_series > 1.01).any() else 1.95
-
-    print(f"[DBG] Odd média O1.5 do dia: {avg_odd15:.2f}")
+    avg_odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
+    avg_odd25 = float(avg_odd25_series[avg_odd25_series > 1.01].mean()) if (avg_odd25_series > 1.01).any() else 1.95
     print(f"[DBG] Odd média O2.5 do dia: {avg_odd25:.2f}")
 
     for league_key, league_meta in leagues_cfg.items():
@@ -477,35 +478,20 @@ def main():
             )
 
             if lambda_boost and lambda_boost != 1.0:
-                lam_h = max(0.15, min(2.8, lam_h * lambda_boost))
-                lam_a = max(0.10, min(2.4, lam_a * lambda_boost))
+                lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
+                lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
-            p15_raw = prob_over_line(lam_t, 1.5)
-            p25_raw = prob_over_line(lam_t, 2.5)
+            p25_raw = prob_over25(lam_t)
+            p25 = clamp_prob_o25(p25_raw)
 
-            p15 = clamp_prob(p15_raw, "O1.5")
-            p25 = clamp_prob(p25_raw, "O2.5")
-
-            odd15 = _to_float(fx.get("Odd_Over15", 0.0), 0.0)
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
-
-            # O1.5: se não houver odd real, usa proxy média do dia
-            if odd15 <= 1.01:
-                odd15 = round(avg_odd15, 2)
-
-            # O2.5 mantém apenas odd real
             if odd25 <= 1.01:
-                odd25 = 0.0
+                continue
 
-            pm15 = 1.0 / odd15
-            pm25 = (1.0 / odd25) if odd25 > 1.01 else (1.0 / avg_odd25)
-
-            edge15 = clamp_edge(p15 - pm15, "O1.5")
-            edge25 = clamp_edge(p25 - pm25, "O2.5")
-
-            k15 = kelly_fraction(p15, odd15)
-            k25 = kelly_fraction(p25, odd25) if odd25 > 1.01 else 0.0
+            pm25 = 1.0 / odd25
+            edge25 = clamp_edge_o25(p25 - pm25)
+            k25 = kelly_fraction(p25, odd25)
 
             base_row = {
                 "Date": fx["Date"],
@@ -518,72 +504,38 @@ def main():
                 "LambdaTotal": lam_t,
             }
 
-            if odd15 > 1.01:
-                rows15.append(
-                    {
-                        **base_row,
-                        "Market": "O1.5",
-                        "ProbModel": p15,
-                        "Odd": odd15,
-                        "ProbMarket": pm15,
-                        "Edge": edge15,
-                        "KellyTrue": k15,
-                    }
-                )
-
-            if odd25 > 1.01:
-                rows25.append(
-                    {
-                        **base_row,
-                        "Market": "O2.5",
-                        "ProbModel": p25,
-                        "Odd": odd25,
-                        "ProbMarket": pm25,
-                        "Edge": edge25,
-                        "KellyTrue": k25,
-                    }
-                )
+            rows25.append(
+                {
+                    **base_row,
+                    "Market": "O2.5",
+                    "ProbModel": p25,
+                    "Odd": odd25,
+                    "ProbMarket": pm25,
+                    "Edge": edge25,
+                    "KellyTrue": k25,
+                }
+            )
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
 
-    bankroll15 = float(bankroll_cfg.get("over15", 0.0))
     bankroll25 = float(bankroll_cfg.get("over25", 0.0))
-
-    rules15 = dict(rules_cfg.get("over15", {}))
     rules25 = dict(rules_cfg.get("over25", {}))
-
-    # Só apertamos O1.5
-    rules15.setdefault("edge_max", 0.12)
     rules25.setdefault("edge_max", 0.15)
 
-    out15 = apply_market_rules(rows15, bankroll15, rules15)
     out25 = apply_market_rules(rows25, bankroll25, rules25)
-
-    if not out15.empty:
-        out15["Odd"] = pd.to_numeric(out15["Odd"], errors="coerce")
-        out15["Stake€"] = pd.to_numeric(out15["Stake€"], errors="coerce")
-        out15 = out15[(out15["Odd"] > 1.01) & (out15["Stake€"] > 0)].copy()
 
     if not out25.empty:
         out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
         out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
         out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
 
-    out15_path = BASE / "picks_over15.csv"
     out25_path = BASE / "picks_over25.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    out15.to_csv(out15_path, index=False, encoding="utf-8", sep=";")
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
 
-    combo = pd.concat([out15, out25], ignore_index=True)
-
-    if not combo.empty:
-        combo["Odd"] = pd.to_numeric(combo["Odd"], errors="coerce")
-        combo["Stake€"] = pd.to_numeric(combo["Stake€"], errors="coerce")
-        combo = combo[(combo["Odd"] > 1.01) & (combo["Stake€"] > 0)].copy()
-
+    combo = out25.copy()
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
     combo_github_path = BASE / "picks_hoje_github.csv"
@@ -606,12 +558,7 @@ def main():
 
         cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
         simple = simple[cols].copy()
-        simple = simple[
-            (simple["Odd"].notna()) &
-            (simple["Odd"] > 1.01) &
-            (simple["Stake€"] > 0) &
-            (simple["Edge%"] > 0)
-        ].copy()
+        simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
@@ -620,11 +567,10 @@ def main():
         ).to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
-    print(f"- {out15_path.name} ({len(out15)} picks)")
     print(f"- {out25_path.name} ({len(out25)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
-    print(f"- {simple_path.name} ({len(combo)} picks)")
+    print(f"- {simple_path.name} ({len(simple) if len(combo) > 0 else 0} picks)")
 
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
@@ -633,37 +579,25 @@ def main():
         try:
             sent = load_sent_state(today_iso)
 
-            new15 = []
-            for r in df_to_rows(out15):
-                pid = pick_id(r)
-                if pid not in sent:
-                    new15.append(r)
-
             new25 = []
             for r in df_to_rows(out25):
                 pid = pick_id(r)
                 if pid not in sent:
                     new25.append(r)
 
-            msg_15 = build_message(new15, "PICKS OVER 1.5 (NOVAS)")
-            if msg_15:
-                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_15, "PICKS OVER 1.5")
-
             msg_25 = build_message(new25, "PICKS OVER 2.5 (NOVAS)")
             if msg_25:
                 _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_25, "PICKS OVER 2.5")
 
-            for r in new15:
-                sent.add(pick_id(r))
             for r in new25:
                 sent.add(pick_id(r))
 
             save_sent_state(today_iso, sent)
 
-            if msg_15 or msg_25:
-                print(f"Telegram: enviei {len(new15)} novas O1.5 + {len(new25)} novas O2.5.")
+            if msg_25:
+                print(f"Telegram: enviei {len(new25)} novas O2.5.")
             else:
-                print("Telegram: sem novas picks (não enviei).")
+                print("Telegram: sem novas picks O2.5.")
         except Exception as e:
             print(f"Telegram: erro ao enviar -> {e}")
     else:
@@ -673,7 +607,7 @@ def main():
     repo = "apostas-over-futebol"
     branch = "main"
     upload_csvs_to_github(
-        [out15_path, out25_path, combo_path, combo_github_path, simple_path],
+        [out25_path, combo_path, combo_github_path, simple_path],
         owner,
         repo,
         branch,
