@@ -1,0 +1,27 @@
+{
+  "bankrollInicial": 1000,
+  "localEdits": {
+    "2026-03-15|Bundesliga|VfB Stuttgart vs RB Leipzig|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-03-15|Primeira Liga|Rio Ave FC vs CF Estrela|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-03-16|Premier League|Brentford vs Wolverhampton Wanderers|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-03-15|Primeira Liga|FC Porto vs Moreirense FC|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    }
+  },
+  "manualBets": [],
+  "updatedAt": "2026-03-15T19:27:24.304965+00:00"
+}
