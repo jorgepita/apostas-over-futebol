@@ -26,7 +26,7 @@
       background: var(--bg);
       color: var(--text);
     }
-    .wrap { max-width: 1460px; margin: 0 auto; padding: 24px; }
+    .wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
     .hero, .card {
       background: var(--card);
       border: 1px solid var(--line);
@@ -56,6 +56,7 @@
       cursor: pointer;
     }
     .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn.warn { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
 
     .grid { display: grid; gap: 16px; }
     .grid-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
@@ -76,9 +77,16 @@
       border-radius: 999px; padding: 7px 12px; background: #ecfdf5; color: #166534; font-weight: 600; font-size: 13px;
     }
 
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
-    .input, .select {
-      padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: white; min-width: 180px;
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .input, .select, .number {
+      padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: white;
+      min-width: 180px; font: inherit;
+    }
+    .number.small-input { min-width: 96px; width: 96px; padding: 8px 10px; border-radius: 10px; }
+    .check {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
 
     table { width: 100%; border-collapse: collapse; }
@@ -123,6 +131,13 @@
       display: block;
     }
 
+    .control-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 1350px) {
       .grid-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .grid-2 { grid-template-columns: 1fr; }
@@ -133,6 +148,7 @@
       .hero, .section, .stat { padding: 16px; }
       th, td { font-size: 13px; }
       canvas { height: 260px; }
+      .number.small-input { min-width: 80px; width: 80px; }
     }
   </style>
 </head>
@@ -142,11 +158,27 @@
       <div>
         <p class="small">Projeto Apostas Bot</p>
         <h1>Dashboard GitHub Pages</h1>
-        <p class="sub">Modelo vs execução real. Atualiza sozinho a cada 60 segundos.</p>
+        <p class="sub">Modelo vs execução real. Com controlos locais para banca, stake e odd.</p>
       </div>
       <div class="actions">
         <button class="btn primary" id="refreshBtn">Atualizar agora</button>
+        <button class="btn warn" id="resetLocalBtn">Limpar controlos locais</button>
         <a class="btn" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
+      </div>
+    </div>
+
+    <div class="card section" style="margin-bottom:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Controlos locais</h2>
+          <p class="small">Estes valores ficam guardados neste browser.</p>
+        </div>
+        <div class="toolbar">
+          <div class="control-box">
+            <label class="small" for="bankrollInput">Banca inicial</label>
+            <input id="bankrollInput" class="number" type="number" step="0.01" min="0" value="1000" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -156,7 +188,7 @@
       <div class="section-head">
         <div>
           <h2>Evolução da banca real</h2>
-          <p class="small">Calculada apenas com apostas realmente feitas</p>
+          <p class="small">Calculada apenas com apostas realmente feitas neste browser.</p>
         </div>
         <span class="pill" id="bankrollLabel">Banca inicial: €1000.00</span>
       </div>
@@ -232,7 +264,7 @@
           <div class="section-head">
             <div>
               <h2>Resumo rápido</h2>
-              <p class="small">Modelo e banca real</p>
+              <p class="small">Modelo e banca real local</p>
             </div>
           </div>
           <div class="list" id="summaryList"></div>
@@ -248,13 +280,18 @@
       nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
     };
 
-    const BANKROLL_INICIAL = 1000;
+    const STORAGE_KEYS = {
+      bankroll: 'apostas_bot_bankroll_inicial',
+      picks: 'apostas_bot_local_edits_v1'
+    };
 
     const state = {
       footballDaily: [],
       footballHistory: [],
       nba: [],
       lastUpdated: null,
+      bankrollInicial: 1000,
+      localEdits: {}
     };
 
     function parseSemicolonCsv(text) {
@@ -304,26 +341,94 @@
       return '';
     }
 
-    function isBetPlaced(v) {
-      return ['sim', 's', 'yes', 'y', '1', 'true'].includes(String(v || '').trim().toLowerCase());
+    function makePickKey(row) {
+      return [
+        row['Data'] || '',
+        row['Liga'] || '',
+        row['Jogo'] || '',
+        row['Mercado'] || ''
+      ].join('|');
+    }
+
+    function loadLocalState() {
+      const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
+      const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
+
+      const bankrollParsed = num(savedBankroll);
+      if (bankrollParsed !== null && bankrollParsed >= 0) {
+        state.bankrollInicial = bankrollParsed;
+      }
+
+      try {
+        state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
+      } catch {
+        state.localEdits = {};
+      }
+    }
+
+    function saveLocalState() {
+      localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+      localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
+    }
+
+    function getRowWithLocalEdits(row) {
+      const key = makePickKey(row);
+      const edit = state.localEdits[key] || {};
+
+      const apostada = edit.apostada ?? row['Apostada'] ?? '';
+      const oddReal = edit.oddReal ?? row['OddReal'] ?? '';
+      const stakeReal = edit.stakeReal ?? row['StakeReal€'] ?? '';
+
+      const merged = {
+        ...row,
+        Apostada: apostada,
+        OddReal: oddReal,
+        'StakeReal€': stakeReal
+      };
+
+      const res = String(merged['Resultado'] || '').trim().toUpperCase();
+      const isPlaced = !!edit.apostada;
+      const oddRealNum = num(oddReal);
+      const stakeRealNum = num(stakeReal);
+
+      let lucroRealLocal = null;
+      if (isPlaced && oddRealNum !== null && stakeRealNum !== null && stakeRealNum > 0 && oddRealNum > 1.01) {
+        if (res === 'W') lucroRealLocal = stakeRealNum * (oddRealNum - 1);
+        else if (res === 'L') lucroRealLocal = -stakeRealNum;
+        else if (res === 'P') lucroRealLocal = 0;
+      }
+
+      merged._pickKey = key;
+      merged._apostadaBool = isPlaced;
+      merged._oddRealNum = oddRealNum;
+      merged._stakeRealNum = stakeRealNum;
+      merged._lucroRealLocal = lucroRealLocal;
+
+      return merged;
+    }
+
+    function getDailyRowsMerged() {
+      return state.footballDaily.map(getRowWithLocalEdits);
+    }
+
+    function getHistoryRowsMerged() {
+      return state.footballHistory.map(getRowWithLocalEdits);
     }
 
     function getResolvedHistory() {
-      return state.footballHistory.filter(r => {
+      return getHistoryRowsMerged().filter(r => {
         const res = String(r['Resultado'] || '').trim().toUpperCase();
         return res === 'W' || res === 'L';
       });
     }
 
     function getRealResolvedHistory() {
-      return getResolvedHistory().filter(r => {
-        return isBetPlaced(r['Apostada']) && num(r['LucroReal€']) !== null;
-      });
+      return getResolvedHistory().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
     }
 
     function getMetrics() {
-      const history = state.footballHistory;
-      const daily = state.footballDaily;
+      const history = getHistoryRowsMerged();
+      const daily = getDailyRowsMerged();
       const resolved = getResolvedHistory();
       const realResolved = getRealResolvedHistory();
 
@@ -337,14 +442,14 @@
       const modelRoi = modelStake > 0 ? (modelProfit / modelStake) * 100 : 0;
       const modelWr = modelCount > 0 ? (modelWins / modelCount) * 100 : 0;
 
-      const realStake = sum(realResolved.map(r => num(r['StakeReal€'])).filter(v => v !== null));
-      const realProfit = sum(realResolved.map(r => num(r['LucroReal€'])).filter(v => v !== null));
+      const realStake = sum(realResolved.map(r => r._stakeRealNum).filter(v => v !== null));
+      const realProfit = sum(realResolved.map(r => r._lucroRealLocal).filter(v => v !== null));
       const realCount = realResolved.length;
       const realWins = realResolved.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
       const realLosses = realResolved.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
       const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
       const realWr = realCount > 0 ? (realWins / realCount) * 100 : 0;
-      const realBankroll = BANKROLL_INICIAL + realProfit;
+      const realBankroll = state.bankrollInicial + realProfit;
 
       return {
         dailyCount: daily.length,
@@ -370,7 +475,8 @@
 
     function renderStats() {
       const m = getMetrics();
-      document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(BANKROLL_INICIAL)}`;
+      document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(state.bankrollInicial)}`;
+      document.getElementById('bankrollInput').value = state.bankrollInicial;
 
       const cards = [
         { label: 'Picks do dia', value: m.dailyCount, note: `Histórico: ${m.totalHistory}` },
@@ -379,7 +485,7 @@
         { label: 'Win rate mod.', value: pct(m.modelWr), note: `${m.modelCount} resolvidas` },
         { label: 'Lucro real', value: `€${fmt(m.realProfit)}`, note: `Stake real €${fmt(m.realStake)}` },
         { label: 'ROI real', value: pct(m.realRoi), note: `${m.realWins}W / ${m.realLosses}L` },
-        { label: 'Banca real', value: `€${fmt(m.realBankroll)}`, note: `Inicial €${fmt(BANKROLL_INICIAL)}` },
+        { label: 'Banca real', value: `€${fmt(m.realBankroll)}`, note: `Inicial €${fmt(state.bankrollInicial)}` },
         { label: 'Última atualização', value: state.lastUpdated ? new Date(state.lastUpdated).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '—', note: 'Refresh 60s' },
       ];
 
@@ -404,7 +510,7 @@
       const q = document.getElementById('searchFootball').value.toLowerCase();
       const league = document.getElementById('leagueFilter').value;
 
-      const rows = state.footballDaily.filter(r => {
+      const rows = getDailyRowsMerged().filter(r => {
         const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
         const okSearch = text.includes(q);
         const okLeague = !league || r['Liga'] === league;
@@ -413,7 +519,8 @@
 
       document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => {
         const lucroModelo = num(r['Lucro€']);
-        const lucroReal = num(r['LucroReal€']);
+        const lucroReal = r._lucroRealLocal;
+        const checked = r._apostadaBool ? 'checked' : '';
         return `
         <tr>
           <td>${r['Data'] || '—'}</td>
@@ -422,14 +529,22 @@
           <td>${r['Mercado'] || '—'}</td>
           <td class="mono">${r['Odd'] || '—'}</td>
           <td class="mono">${r['Stake€'] || '—'}</td>
-          <td>${r['Apostada'] || '—'}</td>
-          <td class="mono">${r['OddReal'] || '—'}</td>
-          <td class="mono">${r['StakeReal€'] || '—'}</td>
+          <td>
+            <input class="check js-apostada" type="checkbox" data-pick-key="${r._pickKey}" ${checked} />
+          </td>
+          <td>
+            <input class="number small-input js-odd-real" type="number" step="0.01" min="1" data-pick-key="${r._pickKey}" value="${r['OddReal'] || ''}" />
+          </td>
+          <td>
+            <input class="number small-input js-stake-real" type="number" step="0.01" min="0" data-pick-key="${r._pickKey}" value="${r['StakeReal€'] || ''}" />
+          </td>
           <td>${resultLabel(r['Resultado'])}</td>
           <td class="mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
           <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
         </tr>`;
       }).join('') : `<tr><td colspan="12"><div class="empty">Nenhuma pick encontrada.</div></td></tr>`;
+
+      bindTableControls();
     }
 
     function renderNba() {
@@ -453,7 +568,7 @@
         .sort((a, b) => b.lucro - a.lucro)[0];
 
       const bestReal = [...getRealResolvedHistory()]
-        .map(r => ({ jogo: r['Jogo'], lucro: num(r['LucroReal€']) ?? -9999 }))
+        .map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 }))
         .sort((a, b) => b.lucro - a.lucro)[0];
 
       const items = [
@@ -478,11 +593,11 @@
         return da - db;
       });
 
-      const points = [{ label: 'Inicial', value: BANKROLL_INICIAL }];
-      let acc = BANKROLL_INICIAL;
+      const points = [{ label: 'Inicial', value: state.bankrollInicial }];
+      let acc = state.bankrollInicial;
 
       resolved.forEach((r, idx) => {
-        const lucro = num(r['LucroReal€']) ?? 0;
+        const lucro = r._lucroRealLocal ?? 0;
         acc += lucro;
         points.push({
           label: r['Data'] || `Pick ${idx + 1}`,
@@ -555,6 +670,63 @@
       ctx.fillText(`Banca real: €${fmt(last.value)}`, width - 170, 24);
     }
 
+    function rerenderAll() {
+      saveLocalState();
+      renderStats();
+      renderFootball();
+      renderNba();
+      renderSummary();
+      drawBankrollChart();
+    }
+
+    function ensureEditObject(pickKey) {
+      if (!state.localEdits[pickKey]) {
+        state.localEdits[pickKey] = {
+          apostada: false,
+          oddReal: '',
+          stakeReal: ''
+        };
+      }
+      return state.localEdits[pickKey];
+    }
+
+    function bindTableControls() {
+      document.querySelectorAll('.js-apostada').forEach(el => {
+        el.addEventListener('change', e => {
+          const key = e.target.dataset.pickKey;
+          const edit = ensureEditObject(key);
+          edit.apostada = e.target.checked;
+          rerenderAll();
+        });
+      });
+
+      document.querySelectorAll('.js-odd-real').forEach(el => {
+        el.addEventListener('input', e => {
+          const key = e.target.dataset.pickKey;
+          const edit = ensureEditObject(key);
+          edit.oddReal = e.target.value;
+          saveLocalState();
+          renderStats();
+          renderSummary();
+          drawBankrollChart();
+          renderFootball();
+        });
+      });
+
+      document.querySelectorAll('.js-stake-real').forEach(el => {
+        el.addEventListener('input', e => {
+          const key = e.target.dataset.pickKey;
+          const edit = ensureEditObject(key);
+          edit.stakeReal = e.target.value;
+          saveLocalState();
+          renderStats();
+          renderSummary();
+          drawBankrollChart();
+          renderFootball();
+        });
+      });
+    }
+
     async function loadData() {
       try {
         const [dailyRes, historyRes, nbaRes] = await Promise.all([
@@ -573,11 +745,7 @@
         state.lastUpdated = new Date().toISOString();
 
         fillLeagueFilter();
-        renderStats();
-        renderFootball();
-        renderNba();
-        renderSummary();
-        drawBankrollChart();
+        rerenderAll();
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
         console.error(e);
@@ -586,7 +754,30 @@
 
     document.getElementById('searchFootball').addEventListener('input', renderFootball);
     document.getElementById('leagueFilter').addEventListener('change', renderFootball);
+
     document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    document.getElementById('bankrollInput').addEventListener('input', e => {
+      const v = num(e.target.value);
+      state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+      saveLocalState();
+      renderStats();
+      renderSummary();
+      drawBankrollChart();
+    });
+
+    document.getElementById('resetLocalBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEYS.bankroll);
+      localStorage.removeItem(STORAGE_KEYS.picks);
+      state.bankrollInicial = 1000;
+      state.localEdits = {};
+      fillLeagueFilter();
+      rerenderAll();
+      document.getElementById('bankrollInput').value = 1000;
+    });
+
+    loadLocalState();
+    document.getElementById('bankrollInput').value = state.bankrollInicial;
 
     loadData();
     setInterval(loadData, 60000);
