@@ -18,7 +18,7 @@
     },
     "2026-03-15|Primeira Liga|FC Porto vs Moreirense FC|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.04",
       "stakeReal": ""
     }
   },
@@ -68,5 +68,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-03-15T20:16:16.025591+00:00"
+  "updatedAt": "2026-03-15T20:16:29.757462+00:00"
 }
