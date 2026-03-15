@@ -3,7 +3,7 @@
   "localEdits": {
     "2026-03-15|Bundesliga|VfB Stuttgart vs RB Leipzig|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1",
       "stakeReal": ""
     },
     "2026-03-15|Primeira Liga|Rio Ave FC vs CF Estrela|O2.5": {
@@ -68,5 +68,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-03-15T20:14:15.600003+00:00"
+  "updatedAt": "2026-03-15T20:14:22.217506+00:00"
 }
