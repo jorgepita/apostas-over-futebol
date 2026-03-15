@@ -114,16 +114,42 @@ def calc_profit(resultado: str, stake: float, odd: float) -> float:
     return 0.0
 
 
+def calc_real_profit(apostada: str, resultado: str, stake_real: float, odd_real: float):
+    ap = str(apostada).strip().lower()
+    if ap not in {"sim", "s", "yes", "y", "1", "true"}:
+        return ""
+
+    if stake_real <= 0 or odd_real <= 1.01:
+        return ""
+
+    if resultado == "W":
+        return str(round(stake_real * (odd_real - 1.0), 2))
+    if resultado == "L":
+        return str(round(-stake_real, 2))
+    if resultado == "P":
+        return "0.0"
+    return ""
+
+
 def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    for col in ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]:
+    cols = [
+        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+        "Apostada", "OddReal", "StakeReal€",
+        "Resultado", "Lucro€", "LucroReal€"
+    ]
+    for col in cols:
         if col not in df.columns:
             df[col] = ""
     return df
 
 
 def safe_read_csv(path: Path) -> pd.DataFrame:
-    cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]
+    cols = [
+        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+        "Apostada", "OddReal", "StakeReal€",
+        "Resultado", "Lucro€", "LucroReal€"
+    ]
 
     if not path.exists():
         return pd.DataFrame(columns=cols)
@@ -264,6 +290,16 @@ def update_dataframe(df: pd.DataFrame, label: str):
 
         if resultado_atual in {"W", "L", "P"}:
             already_done += 1
+
+            lucro_real = calc_real_profit(
+                row.get("Apostada", ""),
+                resultado_atual,
+                parse_float(row.get("StakeReal€", ""), 0.0),
+                parse_float(row.get("OddReal", ""), 0.0),
+            )
+            if lucro_real != "":
+                df.at[i, "LucroReal€"] = lucro_real
+
             continue
 
         data = str(row.get("Data", "")).strip()
@@ -341,11 +377,21 @@ def update_dataframe(df: pd.DataFrame, label: str):
 
         df.at[i, "Resultado"] = resultado
         df.at[i, "Lucro€"] = str(lucro)
+
+        lucro_real = calc_real_profit(
+            row.get("Apostada", ""),
+            resultado,
+            parse_float(row.get("StakeReal€", ""), 0.0),
+            parse_float(row.get("OddReal", ""), 0.0),
+        )
+        if lucro_real != "":
+            df.at[i, "LucroReal€"] = lucro_real
+
         updated += 1
 
         print(
             f"[OK] {label}: {jogo} | {mercado} | {home_goals}-{away_goals} "
-            f"=> {resultado} | Lucro {lucro}"
+            f"=> {resultado} | Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
         )
 
     return df, updated, already_done, ignored
@@ -361,17 +407,13 @@ def main():
     daily_df = safe_read_csv(DAILY_FILE)
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
     daily_df.to_csv(DAILY_FILE, index=False, sep=";")
-    print(
-        f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}"
-    )
+    print(f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}")
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
     history_df = safe_read_csv(HISTORY_FILE)
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
     history_df.to_csv(HISTORY_FILE, index=False, sep=";")
-    print(
-        f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}"
-    )
+    print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
 
 
