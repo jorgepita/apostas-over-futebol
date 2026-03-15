@@ -661,6 +661,10 @@
 
     const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
 
+    let autoSaveTimer = null;
+    let autoSaveEnabled = true;
+    let autoSaveInFlight = false;
+
     const state = {
       footballDaily: [],
       footballHistory: [],
@@ -1712,7 +1716,7 @@
         state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
 
         saveLocalState();
-        rerenderAll();
+        rerenderAll(false);
         alert('Estado cloud carregado com sucesso.');
       } catch (e) {
         alert('Erro de ligação ao serviço cloud.');
@@ -1720,8 +1724,12 @@
       }
     }
 
-    async function saveCloudState() {
+    async function saveCloudState(showSuccess = true) {
       try {
+        if (autoSaveInFlight) return;
+
+        autoSaveInFlight = true;
+
         const payload = {
           bankrollInicial: state.bankrollInicial,
           localEdits: state.localEdits,
@@ -1737,19 +1745,35 @@
         const data = await res.json();
 
         if (!data.ok) {
-          alert('Erro ao guardar estado cloud.');
+          if (showSuccess) alert('Erro ao guardar estado cloud.');
           console.error(data);
           return;
         }
 
-        alert('Estado guardado na cloud com sucesso.');
+        if (showSuccess) {
+          alert('Estado guardado na cloud com sucesso.');
+        }
       } catch (e) {
-        alert('Erro de ligação ao serviço cloud.');
+        if (showSuccess) alert('Erro de ligação ao serviço cloud.');
         console.error(e);
+      } finally {
+        autoSaveInFlight = false;
       }
     }
 
-    function rerenderAll() {
+    function scheduleAutoSaveCloud() {
+      if (!autoSaveEnabled) return;
+
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+
+      autoSaveTimer = setTimeout(() => {
+        saveCloudState(false);
+      }, 2000);
+    }
+
+    function rerenderAll(triggerAutoSave = true) {
       saveLocalState();
       fillFilters();
       renderStats();
@@ -1759,6 +1783,10 @@
       renderNba();
       renderSummary();
       drawBankrollChart();
+
+      if (triggerAutoSave) {
+        scheduleAutoSaveCloud();
+      }
     }
 
     function bindBotTableControls() {
@@ -1866,7 +1894,7 @@
         state.nba = parseSemicolonCsv(nbaText);
         state.lastUpdated = new Date().toISOString();
 
-        rerenderAll();
+        rerenderAll(false);
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
         console.error(e);
@@ -1889,7 +1917,7 @@
 
     document.getElementById('refreshBtn').addEventListener('click', loadData);
     document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
-    document.getElementById('saveCloudBtn').addEventListener('click', saveCloudState);
+    document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
 
     document.getElementById('bankrollInput').addEventListener('input', e => {
       const v = num(e.target.value);
