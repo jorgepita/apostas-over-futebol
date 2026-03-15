@@ -93,6 +93,14 @@ def prob_over25(lam_total: float) -> float:
     return 1.0 - poisson_cdf(2, lam_total)
 
 
+def prob_btts_yes(lam_home: float, lam_away: float) -> float:
+    # Assumindo Poisson independentes:
+    # P(BTTS Yes) = 1 - P(H=0) - P(A=0) + P(H=0,A=0)
+    p_home0 = math.exp(-max(0.0, lam_home))
+    p_away0 = math.exp(-max(0.0, lam_away))
+    return float(max(0.0, min(1.0, 1.0 - p_home0 - p_away0 + (p_home0 * p_away0))))
+
+
 def kelly_fraction(p: float, odd: float) -> float:
     if odd is None or odd <= 1.01:
         return 0.0
@@ -168,7 +176,15 @@ def clamp_prob_o25(prob: float) -> float:
     return float(max(0.22, min(0.70, prob)))
 
 
+def clamp_prob_btts(prob: float) -> float:
+    return float(max(0.25, min(0.72, prob)))
+
+
 def clamp_edge_o25(edge: float) -> float:
+    return float(max(-0.20, min(0.15, edge)))
+
+
+def clamp_edge_btts(edge: float) -> float:
     return float(max(-0.20, min(0.15, edge)))
 
 
@@ -219,8 +235,8 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
     if "Data" in history.columns:
         history["_sort_date"] = pd.to_datetime(history["Data"], errors="coerce")
         history = history.sort_values(
-            ["_sort_date", "Liga", "Jogo"],
-            ascending=[True, True, True],
+            ["_sort_date", "Liga", "Jogo", "Mercado"],
+            ascending=[True, True, True, True],
             na_position="last"
         )
         history = history.drop(columns=["_sort_date"])
@@ -476,6 +492,7 @@ def main():
     fixtures["Date"] = fixtures["Date"].astype(str)
 
     rows25 = []
+    rows_btts = []
 
     history_cfg = cfg.get("history", {})
     window = int(history_cfg.get("window", 12))
@@ -495,6 +512,21 @@ def main():
             return float(s)
         except Exception:
             return float(default)
+
+    def get_btts_odd(fx_row) -> float:
+        candidates = [
+            "Odd_BTTS_Yes",
+            "Odd_BTTS",
+            "Odd_BTTSYes",
+            "Odd_Btts_Yes",
+            "Odd_Btts",
+        ]
+        for col in candidates:
+            if col in fixtures.columns:
+                odd = _to_float(fx_row.get(col, 0.0), 0.0)
+                if odd > 1.01:
+                    return odd
+        return 0.0
 
     avg_odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
     avg_odd25 = float(avg_odd25_series[avg_odd25_series > 1.01].mean()) if (avg_odd25_series > 1.01).any() else 1.95
@@ -548,35 +580,64 @@ def main():
             p25 = clamp_prob_o25(p25_raw)
 
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
-            if odd25 <= 1.01:
-                continue
+            if odd25 > 1.01:
+                pm25 = 1.0 / odd25
+                edge25 = clamp_edge_o25(p25 - pm25)
+                k25 = kelly_fraction(p25, odd25)
 
-            pm25 = 1.0 / odd25
-            edge25 = clamp_edge_o25(p25 - pm25)
-            k25 = kelly_fraction(p25, odd25)
-
-            base_row = {
-                "Date": fx["Date"],
-                "League": league_key,
-                "LeagueName": league_name,
-                "HomeTeam": home,
-                "AwayTeam": away,
-                "LambdaHome": lam_h,
-                "LambdaAway": lam_a,
-                "LambdaTotal": lam_t,
-            }
-
-            rows25.append(
-                {
-                    **base_row,
-                    "Market": "O2.5",
-                    "ProbModel": p25,
-                    "Odd": odd25,
-                    "ProbMarket": pm25,
-                    "Edge": edge25,
-                    "KellyTrue": k25,
+                base_row = {
+                    "Date": fx["Date"],
+                    "League": league_key,
+                    "LeagueName": league_name,
+                    "HomeTeam": home,
+                    "AwayTeam": away,
+                    "LambdaHome": lam_h,
+                    "LambdaAway": lam_a,
+                    "LambdaTotal": lam_t,
                 }
-            )
+
+                rows25.append(
+                    {
+                        **base_row,
+                        "Market": "O2.5",
+                        "ProbModel": p25,
+                        "Odd": odd25,
+                        "ProbMarket": pm25,
+                        "Edge": edge25,
+                        "KellyTrue": k25,
+                    }
+                )
+
+            odd_btts = get_btts_odd(fx)
+            if odd_btts > 1.01:
+                pbtts_raw = prob_btts_yes(lam_h, lam_a)
+                pbtts = clamp_prob_btts(pbtts_raw)
+                pmbtts = 1.0 / odd_btts
+                edgebtts = clamp_edge_btts(pbtts - pmbtts)
+                kbtts = kelly_fraction(pbtts, odd_btts)
+
+                base_row = {
+                    "Date": fx["Date"],
+                    "League": league_key,
+                    "LeagueName": league_name,
+                    "HomeTeam": home,
+                    "AwayTeam": away,
+                    "LambdaHome": lam_h,
+                    "LambdaAway": lam_a,
+                    "LambdaTotal": lam_t,
+                }
+
+                rows_btts.append(
+                    {
+                        **base_row,
+                        "Market": "BTTS",
+                        "ProbModel": pbtts,
+                        "Odd": odd_btts,
+                        "ProbMarket": pmbtts,
+                        "Edge": edgebtts,
+                        "KellyTrue": kbtts,
+                    }
+                )
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
@@ -585,19 +646,34 @@ def main():
     rules25 = dict(rules_cfg.get("over25", {}))
     rules25.setdefault("edge_max", 0.15)
 
+    bankroll_btts = float(bankroll_cfg.get("btts", 0.0))
+    rules_btts = dict(rules_cfg.get("btts", {}))
+    rules_btts.setdefault("edge_max", 0.15)
+
     out25 = apply_market_rules(rows25, bankroll25, rules25)
+    out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts)
 
     if not out25.empty:
-        out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
-        out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
-        out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
+      out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
+      out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
+      out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
+
+    if not out_btts.empty:
+      out_btts["Odd"] = pd.to_numeric(out_btts["Odd"], errors="coerce")
+      out_btts["Stake€"] = pd.to_numeric(out_btts["Stake€"], errors="coerce")
+      out_btts = out_btts[(out_btts["Odd"] > 1.01) & (out_btts["Stake€"] > 0)].copy()
 
     out25_path = BASE / "picks_over25.csv"
+    out_btts_path = BASE / "picks_btts.csv"
     combo_path = BASE / "picks_hoje.csv"
 
     out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
+    out_btts.to_csv(out_btts_path, index=False, encoding="utf-8", sep=";")
 
-    combo = out25.copy()
+    combo = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
+    if not combo.empty:
+        combo = combo.sort_values(["Date", "LeagueName", "HomeTeam", "AwayTeam", "Market"]).reset_index(drop=True)
+
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
     combo_github_path = BASE / "picks_hoje_github.csv"
@@ -644,6 +720,7 @@ def main():
 
     print("OK. Gerados:")
     print(f"- {out25_path.name} ({len(out25)} picks)")
+    print(f"- {out_btts_path.name} ({len(out_btts)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
     print(f"- {simple_path.name} ({len(simple)} picks)")
@@ -662,11 +739,23 @@ def main():
                 if pid not in sent:
                     new25.append(r)
 
+            new_btts = []
+            for r in df_to_rows(out_btts):
+                pid = pick_id(r)
+                if pid not in sent:
+                    new_btts.append(r)
+
             msg_25 = build_message(new25, "PICKS OVER 2.5 (NOVAS)")
             if msg_25:
                 _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_25, "PICKS OVER 2.5")
 
+            msg_btts = build_message(new_btts, "PICKS BTTS (NOVAS)")
+            if msg_btts:
+                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_btts, "PICKS BTTS")
+
             for r in new25:
+                sent.add(pick_id(r))
+            for r in new_btts:
                 sent.add(pick_id(r))
 
             save_sent_state(today_iso, sent)
@@ -675,6 +764,12 @@ def main():
                 print(f"Telegram: enviei {len(new25)} novas O2.5.")
             else:
                 print("Telegram: sem novas picks O2.5.")
+
+            if msg_btts:
+                print(f"Telegram: enviei {len(new_btts)} novas BTTS.")
+            else:
+                print("Telegram: sem novas picks BTTS.")
+
         except Exception as e:
             print(f"Telegram: erro ao enviar -> {e}")
     else:
@@ -684,7 +779,7 @@ def main():
     repo = "apostas-over-futebol"
     branch = "main"
     upload_csvs_to_github(
-        [out25_path, combo_path, combo_github_path, simple_path, HISTORY_PATH],
+        [out25_path, out_btts_path, combo_path, combo_github_path, simple_path, HISTORY_PATH],
         owner,
         repo,
         branch,
