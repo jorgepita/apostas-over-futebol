@@ -19,7 +19,7 @@
     "2026-03-16|Premier League|Brentford vs Wolverhampton Wanderers|O2.5": {
       "apostada": true,
       "oddReal": "",
-      "stakeReal": "2"
+      "stakeReal": "20"
     }
   },
   "manualBets": [
@@ -64,9 +64,9 @@
       "mercado": "btts",
       "notas": "",
       "odd": "1.76",
-      "resultado": "W",
+      "resultado": "L",
       "stake": "25"
     }
   ],
-  "updatedAt": "2026-03-15T20:51:37.240523+00:00"
+  "updatedAt": "2026-03-15T20:51:58.242961+00:00"
 }
