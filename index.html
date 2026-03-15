@@ -81,6 +81,7 @@
     .grid-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
     .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
     .grid-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-analytics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
     .stat { padding: 18px; }
     .stat .label { color: var(--muted); font-size: 14px; }
@@ -265,9 +266,16 @@
       width: 100%;
     }
 
+    .analytics-table-wrap {
+      overflow: auto;
+      max-height: 420px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
     @media (max-width: 1400px) {
       .grid-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .grid-2, .grid-form, .filters-grid { grid-template-columns: 1fr; }
+      .grid-2, .grid-form, .filters-grid, .grid-analytics { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
@@ -371,6 +379,98 @@
       </div>
       <div class="chart-wrap">
         <canvas id="bankrollChart" width="1200" height="320"></canvas>
+      </div>
+    </div>
+
+    <div class="card section" style="margin-top:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Analytics</h2>
+          <p class="small">Calculados com base nos filtros atuais e apenas em apostas reais fechadas.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-analytics">
+        <div class="card section" style="padding:16px;">
+          <div class="section-head">
+            <div>
+              <h3>Por liga</h3>
+              <p class="small">ROI e lucro por competição</p>
+            </div>
+          </div>
+          <div class="analytics-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Liga</th>
+                  <th>Apostas</th>
+                  <th>W</th>
+                  <th>L</th>
+                  <th>P</th>
+                  <th>WR</th>
+                  <th>Stake</th>
+                  <th>Lucro</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsLeagueRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card section" style="padding:16px;">
+          <div class="section-head">
+            <div>
+              <h3>Por mercado</h3>
+              <p class="small">Onde estás a performar melhor</p>
+            </div>
+          </div>
+          <div class="analytics-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mercado</th>
+                  <th>Apostas</th>
+                  <th>W</th>
+                  <th>L</th>
+                  <th>P</th>
+                  <th>WR</th>
+                  <th>Stake</th>
+                  <th>Lucro</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsMarketRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card section" style="padding:16px;">
+          <div class="section-head">
+            <div>
+              <h3>Por origem</h3>
+              <p class="small">Bot vs manual</p>
+            </div>
+          </div>
+          <div class="analytics-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Apostas</th>
+                  <th>W</th>
+                  <th>L</th>
+                  <th>P</th>
+                  <th>WR</th>
+                  <th>Stake</th>
+                  <th>Lucro</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody id="analyticsSourceRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -928,8 +1028,8 @@
 
     function getFilterSourceRows() {
       return [
-        ...getDailyRowsMerged().map(r => ({ type: 'bot', league: r['Liga'] || '', market: r['Mercado'] || '' })),
-        ...getManualRowsMerged().map(r => ({ type: 'manual', league: r.liga || '', market: r.mercado || '' }))
+        ...getDailyRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
+        ...getManualRowsMerged().map(r => ({ league: r.liga || '', market: r.mercado || '' }))
       ];
     }
 
@@ -1009,6 +1109,112 @@
 
         return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
       });
+    }
+
+    function getFilteredRealClosedRows() {
+      const filters = getGlobalFilters();
+
+      const botClosed = filterBotRows(getHistoryRowsMerged(), filters)
+        .filter(r => r._apostadaBool && r._lucroRealLocal !== null)
+        .map(r => ({
+          source: 'bot',
+          sourceLabel: 'Bot',
+          league: r['Liga'] || '—',
+          market: r['Mercado'] || '—',
+          result: String(r['Resultado'] || '').trim().toUpperCase(),
+          stake: r._stakeRealNum ?? 0,
+          lucro: r._lucroRealLocal ?? 0
+        }));
+
+      const manualClosed = filterManualRows(getManualRowsMerged(), filters)
+        .filter(r => r._lucro !== null)
+        .map(r => ({
+          source: 'manual',
+          sourceLabel: 'Manual',
+          league: r.liga || '—',
+          market: r.mercado || '—',
+          result: String(r.resultado || '').trim().toUpperCase(),
+          stake: num(r.stake) ?? 0,
+          lucro: r._lucro ?? 0
+        }));
+
+      return [...botClosed, ...manualClosed];
+    }
+
+    function buildAnalytics(rows, field) {
+      const map = new Map();
+
+      rows.forEach(r => {
+        const key = r[field] || '—';
+
+        if (!map.has(key)) {
+          map.set(key, {
+            key,
+            apostas: 0,
+            wins: 0,
+            losses: 0,
+            pushes: 0,
+            stake: 0,
+            lucro: 0
+          });
+        }
+
+        const item = map.get(key);
+        item.apostas += 1;
+        item.stake += r.stake || 0;
+        item.lucro += r.lucro || 0;
+
+        if (r.result === 'W') item.wins += 1;
+        else if (r.result === 'L') item.losses += 1;
+        else if (r.result === 'P') item.pushes += 1;
+      });
+
+      return [...map.values()]
+        .map(item => {
+          const decisionCount = item.wins + item.losses;
+          const winRate = decisionCount > 0 ? (item.wins / decisionCount) * 100 : 0;
+          const roi = item.stake > 0 ? (item.lucro / item.stake) * 100 : 0;
+
+          return {
+            ...item,
+            winRate,
+            roi
+          };
+        })
+        .sort((a, b) => {
+          if (b.lucro !== a.lucro) return b.lucro - a.lucro;
+          return b.roi - a.roi;
+        });
+    }
+
+    function renderAnalyticsTable(targetId, rows, labelField) {
+      const html = rows.length ? rows.map(r => `
+        <tr>
+          <td>${escapeHtml(r[labelField])}</td>
+          <td class="mono">${r.apostas}</td>
+          <td class="mono">${r.wins}</td>
+          <td class="mono">${r.losses}</td>
+          <td class="mono">${r.pushes}</td>
+          <td class="mono">${pct(r.winRate)}</td>
+          <td class="mono">€${fmt(r.stake)}</td>
+          <td class="mono ${profitClass(r.lucro)}">€${fmt(r.lucro)}</td>
+          <td class="mono ${profitClass(r.roi)}">${pct(r.roi)}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="9"><div class="empty">Sem dados suficientes com os filtros atuais.</div></td></tr>`;
+
+      document.getElementById(targetId).innerHTML = html;
+    }
+
+    function renderAnalytics() {
+      const rows = getFilteredRealClosedRows();
+
+      const byLeague = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
+      const byMarket = buildAnalytics(rows, 'market').map(r => ({ ...r, market: r.key }));
+      const bySource = buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key }));
+
+      renderAnalyticsTable('analyticsLeagueRows', byLeague, 'league');
+      renderAnalyticsTable('analyticsMarketRows', byMarket, 'market');
+      renderAnalyticsTable('analyticsSourceRows', bySource, 'sourceLabel');
     }
 
     function renderFootball() {
@@ -1243,6 +1449,7 @@
       saveLocalState();
       fillFilters();
       renderStats();
+      renderAnalytics();
       renderFootball();
       renderManualBets();
       renderNba();
@@ -1362,40 +1569,19 @@
       }
     }
 
-    document.getElementById('searchGlobal').addEventListener('input', () => {
+    function rerenderFilteredSectionsOnly() {
+      renderAnalytics();
       renderFootball();
       renderManualBets();
-    });
+    }
 
-    document.getElementById('sourceFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
-
-    document.getElementById('leagueFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
-
-    document.getElementById('marketFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
-
-    document.getElementById('resultFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
-
-    document.getElementById('executionFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
-
-    document.getElementById('dateFilter').addEventListener('change', () => {
-      renderFootball();
-      renderManualBets();
-    });
+    document.getElementById('searchGlobal').addEventListener('input', rerenderFilteredSectionsOnly);
+    document.getElementById('sourceFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+    document.getElementById('leagueFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+    document.getElementById('marketFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+    document.getElementById('resultFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+    document.getElementById('executionFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+    document.getElementById('dateFilter').addEventListener('change', rerenderFilteredSectionsOnly);
 
     document.getElementById('refreshBtn').addEventListener('click', loadData);
 
