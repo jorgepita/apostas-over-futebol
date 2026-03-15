@@ -50,7 +50,7 @@ def normalize_text(s: str) -> str:
     return s
 
 
-def split_game(game: str) -> tuple[str, str] | tuple[None, None]:
+def split_game(game: str):
     game = str(game).strip()
     if " vs " not in game:
         return None, None
@@ -88,15 +88,15 @@ def games_match(csv_home: str, csv_away: str, api_home: str, api_away: str) -> b
     return home_score >= 10 and away_score >= 10
 
 
-def market_result(market: str, home_goals: int, away_goals: int) -> str | None:
+def market_result(market: str, home_goals: int, away_goals: int):
     total = home_goals + away_goals
     m = str(market).strip().upper()
 
-    if m == "O2.5":
-        return "W" if total >= 3 else "L"
-
     if m == "O1.5":
         return "W" if total >= 2 else "L"
+
+    if m == "O2.5":
+        return "W" if total >= 3 else "L"
 
     if m == "O3.5":
         return "W" if total >= 4 else "L"
@@ -120,6 +120,27 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = ""
     return df
+
+
+def safe_read_csv(path: Path) -> pd.DataFrame:
+    cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]
+
+    if not path.exists():
+        return pd.DataFrame(columns=cols)
+
+    try:
+        if path.stat().st_size == 0:
+            return pd.DataFrame(columns=cols)
+
+        df = pd.read_csv(path, sep=";", dtype=str).fillna("")
+        return ensure_columns(df)
+
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame(columns=cols)
+
+    except Exception as e:
+        print(f"[WARN] Erro a ler {path.name}: {e}")
+        return pd.DataFrame(columns=cols)
 
 
 # =============================
@@ -168,7 +189,7 @@ def github_request(url: str, token: str, method: str = "GET", data: dict | None 
         return json.loads(raw) if raw else {}
 
 
-def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str) -> str | None:
+def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str):
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}?ref={parse.quote(branch)}"
     try:
         j = github_request(url, token, method="GET")
@@ -229,10 +250,10 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
 # =============================
 # Core update
 # =============================
-def update_dataframe(df: pd.DataFrame, label: str) -> tuple[pd.DataFrame, int, int, int]:
+def update_dataframe(df: pd.DataFrame, label: str):
     df = ensure_columns(df)
 
-    matches_cache: dict[tuple[str, str], list[dict]] = {}
+    matches_cache = {}
 
     updated = 0
     ignored = 0
@@ -337,27 +358,21 @@ def main():
     if not API_TOKEN:
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
-    if not DAILY_FILE.exists():
-        print("Aviso: picks_hoje_simplificado.csv não existe.")
-    else:
-        daily_df = pd.read_csv(DAILY_FILE, sep=";", dtype=str).fillna("")
-        daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
-        daily_df.to_csv(DAILY_FILE, index=False, sep=";")
-        print(
-            f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}"
-        )
-        upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
+    daily_df = safe_read_csv(DAILY_FILE)
+    daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
+    daily_df.to_csv(DAILY_FILE, index=False, sep=";")
+    print(
+        f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}"
+    )
+    upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
-    if not HISTORY_FILE.exists():
-        print("Aviso: picks_history.csv não existe.")
-    else:
-        history_df = pd.read_csv(HISTORY_FILE, sep=";", dtype=str).fillna("")
-        history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
-        history_df.to_csv(HISTORY_FILE, index=False, sep=";")
-        print(
-            f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}"
-        )
-        upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
+    history_df = safe_read_csv(HISTORY_FILE)
+    history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
+    history_df.to_csv(HISTORY_FILE, index=False, sep=";")
+    print(
+        f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}"
+    )
+    upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
 
 
 if __name__ == "__main__":
