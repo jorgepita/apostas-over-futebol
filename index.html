@@ -1817,19 +1817,47 @@
           const key = e.target.dataset.pickKey;
           const edit = ensureEditObject(key);
           edit.oddReal = e.target.value;
+          saveLocalState();
+          markDirty();
+        });
+
+        el.addEventListener('blur', e => {
+          const key = e.target.dataset.pickKey;
+          const edit = ensureEditObject(key);
+          edit.oddReal = e.target.value;
           rerenderAll();
+        });
+
+        el.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.target.blur();
+          }
         });
       });
 
-      document.querySelectorAll('.js-stake-real').forEach(el => {
-        el.addEventListener('input', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.stakeReal = e.target.value;
-          rerenderAll();
-        });
-      });
-    }
+  document.querySelectorAll('.js-stake-real').forEach(el => {
+    el.addEventListener('input', e => {
+      const key = e.target.dataset.pickKey;
+      const edit = ensureEditObject(key);
+      edit.stakeReal = e.target.value;
+      saveLocalState();
+      markDirty();
+    });
+
+    el.addEventListener('blur', e => {
+      const key = e.target.dataset.pickKey;
+      const edit = ensureEditObject(key);
+      edit.stakeReal = e.target.value;
+      rerenderAll();
+    });
+
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.target.blur();
+      }
+    });
+  });
+}
 
     function bindManualControls() {
       document.querySelectorAll('.js-manual-resultado').forEach(el => {
