@@ -1,1 +1,5 @@
-
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-03-15;alemanha;Bundesliga;VfB Stuttgart;RB Leipzig;1.882;1.652;3.534;O2.5;0.685;1.87;0.535;0.15;0.3237;0.0647;0.04;20.0;1.0;500.0
+2026-03-15;portugal;Primeira Liga;Rio Ave FC;CF Estrela;1.62;1.344;2.964;O2.5;0.569;2.22;0.45;0.1183;0.2154;0.0431;0.04;20.0;1.0;500.0
+2026-03-16;premier;Premier League;Brentford;Wolverhampton Wanderers;1.709;1.508;3.217;O2.5;0.624;1.8;0.556;0.068;0.153;0.0306;0.0306;15.3;1.0;500.0
+2026-03-15;portugal;Primeira Liga;FC Porto;Moreirense FC;1.62;1.344;2.964;O2.5;0.569;1.88;0.532;0.0369;0.0788;0.0158;0.0158;7.88;1.0;500.0
