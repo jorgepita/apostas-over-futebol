@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 import pandas as pd
 
 BASE = Path(__file__).resolve().parent
-FILE = BASE / "picks_hoje_simplificado.csv"
+DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
+HISTORY_FILE = BASE / "picks_history.csv"
 
 API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
@@ -18,9 +19,10 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
 GITHUB_OWNER = "jorgepita"
 GITHUB_REPO = "apostas-over-futebol"
 GITHUB_BRANCH = "main"
-REMOTE_CSV_NAME = "picks_hoje_simplificado.csv"
 
-# football-data.org competition codes
+REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
+REMOTE_HISTORY_NAME = "picks_history.csv"
+
 LEAGUE_CODE_MAP = {
     "Premier League": "PL",
     "Primeira Liga": "PPL",
@@ -57,10 +59,6 @@ def split_game(game: str) -> tuple[str, str] | tuple[None, None]:
 
 
 def team_match_score(a: str, b: str) -> int:
-    """
-    score simples de correspondência entre nomes de equipa.
-    quanto maior, melhor.
-    """
     na = normalize_text(a)
     nb = normalize_text(b)
 
@@ -77,7 +75,6 @@ def team_match_score(a: str, b: str) -> int:
     if inter == 0:
         return 0
 
-    # favorece nomes muito parecidos
     score = inter * 10
     if na in nb or nb in na:
         score += 20
@@ -101,6 +98,9 @@ def market_result(market: str, home_goals: int, away_goals: int) -> str | None:
     if m == "O1.5":
         return "W" if total >= 2 else "L"
 
+    if m == "O3.5":
+        return "W" if total >= 4 else "L"
+
     return None
 
 
@@ -109,7 +109,17 @@ def calc_profit(resultado: str, stake: float, odd: float) -> float:
         return round(stake * (odd - 1.0), 2)
     if resultado == "L":
         return round(-stake, 2)
+    if resultado == "P":
+        return 0.0
     return 0.0
+
+
+def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    for col in ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]:
+        if col not in df.columns:
+            df[col] = ""
+    return df
 
 
 # =============================
@@ -198,6 +208,10 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
         print("GitHub: GITHUB_TOKEN em falta, não atualizei o CSV no repositório.")
         return
 
+    if not local_path.exists():
+        print(f"GitHub: ficheiro não existe: {local_path.name}")
+        return
+
     content = local_path.read_bytes()
     msg = f"Update {remote_name} ({datetime.now(timezone.utc).isoformat()}Z)"
     github_put_file(
@@ -213,23 +227,11 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
 
 
 # =============================
-# Main
+# Core update
 # =============================
-def main():
-    if not FILE.exists():
-        raise SystemExit("Falta picks_hoje_simplificado.csv")
+def update_dataframe(df: pd.DataFrame, label: str) -> tuple[pd.DataFrame, int, int, int]:
+    df = ensure_columns(df)
 
-    if not API_TOKEN:
-        raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
-
-    df = pd.read_csv(FILE, sep=";", dtype=str).fillna("")
-
-    # garantir colunas
-    for col in ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]:
-        if col not in df.columns:
-            df[col] = ""
-
-    # cache para evitar pedidos repetidos
     matches_cache: dict[tuple[str, str], list[dict]] = {}
 
     updated = 0
@@ -256,13 +258,13 @@ def main():
 
         league_code = LEAGUE_CODE_MAP.get(liga)
         if not league_code:
-            print(f"[WARN] Liga sem mapping: {liga}")
+            print(f"[WARN] {label}: Liga sem mapping: {liga}")
             ignored += 1
             continue
 
         home_csv, away_csv = split_game(jogo)
         if not home_csv or not away_csv:
-            print(f"[WARN] Jogo mal formatado: {jogo}")
+            print(f"[WARN] {label}: Jogo mal formatado: {jogo}")
             ignored += 1
             continue
 
@@ -270,9 +272,9 @@ def main():
         if cache_key not in matches_cache:
             try:
                 matches_cache[cache_key] = fetch_matches_for_league_date(league_code, data)
-                print(f"[DBG] {liga} {data}: {len(matches_cache[cache_key])} jogos encontrados")
+                print(f"[DBG] {label}: {liga} {data}: {len(matches_cache[cache_key])} jogos encontrados")
             except Exception as e:
-                print(f"[ERR] API {liga} {data}: {e}")
+                print(f"[ERR] {label}: API {liga} {data}: {e}")
                 ignored += 1
                 continue
 
@@ -288,13 +290,13 @@ def main():
                 break
 
         if not matched:
-            print(f"[WARN] Sem match API para: {jogo} | {liga} | {data}")
+            print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
             ignored += 1
             continue
 
         status = str(matched.get("status", "")).upper()
         if status != "FINISHED":
-            print(f"[DBG] Ainda não terminado: {jogo} | status={status}")
+            print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
             ignored += 1
             continue
 
@@ -304,13 +306,13 @@ def main():
         away_goals = ft.get("away")
 
         if home_goals is None or away_goals is None:
-            print(f"[WARN] Sem fullTime score para: {jogo}")
+            print(f"[WARN] {label}: Sem fullTime score para: {jogo}")
             ignored += 1
             continue
 
         resultado = market_result(mercado, int(home_goals), int(away_goals))
         if resultado is None:
-            print(f"[WARN] Mercado não suportado: {mercado}")
+            print(f"[WARN] {label}: Mercado não suportado: {mercado}")
             ignored += 1
             continue
 
@@ -321,18 +323,41 @@ def main():
         updated += 1
 
         print(
-            f"[OK] {jogo} | {mercado} | {home_goals}-{away_goals} "
+            f"[OK] {label}: {jogo} | {mercado} | {home_goals}-{away_goals} "
             f"=> {resultado} | Lucro {lucro}"
         )
 
-    df.to_csv(FILE, index=False, sep=";")
+    return df, updated, already_done, ignored
 
-    print(
-        f"Resultados atualizados: {updated} | "
-        f"já resolvidos: {already_done} | ignorados: {ignored}"
-    )
 
-    upload_csv_to_github(FILE, REMOTE_CSV_NAME)
+# =============================
+# Main
+# =============================
+def main():
+    if not API_TOKEN:
+        raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
+
+    if not DAILY_FILE.exists():
+        print("Aviso: picks_hoje_simplificado.csv não existe.")
+    else:
+        daily_df = pd.read_csv(DAILY_FILE, sep=";", dtype=str).fillna("")
+        daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
+        daily_df.to_csv(DAILY_FILE, index=False, sep=";")
+        print(
+            f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}"
+        )
+        upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
+
+    if not HISTORY_FILE.exists():
+        print("Aviso: picks_history.csv não existe.")
+    else:
+        history_df = pd.read_csv(HISTORY_FILE, sep=";", dtype=str).fillna("")
+        history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
+        history_df.to_csv(HISTORY_FILE, index=False, sep=";")
+        print(
+            f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}"
+        )
+        upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
 
 
 if __name__ == "__main__":
