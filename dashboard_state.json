@@ -4,7 +4,12 @@
     "2026-03-15|Bundesliga|VfB Stuttgart vs RB Leipzig|O2.5": {
       "apostada": true,
       "oddReal": "",
-      "stakeReal": "0.03"
+      "stakeReal": ""
+    },
+    "2026-03-15|Primeira Liga|FC Porto vs Moreirense FC|O2.5": {
+      "apostada": true,
+      "oddReal": "1.75",
+      "stakeReal": ""
     },
     "2026-03-15|Primeira Liga|Rio Ave FC vs CF Estrela|O2.5": {
       "apostada": true,
@@ -15,58 +20,53 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
-    },
-    "2026-03-15|Primeira Liga|FC Porto vs Moreirense FC|O2.5": {
-      "apostada": true,
-      "oddReal": "1.75",
-      "stakeReal": ""
     }
   },
   "manualBets": [
     {
+      "data": "2026-03-15",
       "id": "manual_1773589552242_8emqn2",
-      "data": "2026-03-15",
-      "liga": "z",
       "jogo": "a x b",
+      "liga": "z",
       "mercado": "btts",
+      "notas": "",
       "odd": "1.8",
-      "stake": "10",
       "resultado": "L",
-      "notas": ""
+      "stake": "10"
     },
     {
+      "data": "2026-03-15",
       "id": "manual_1773589680194_x2ivu1",
-      "data": "2026-03-15",
-      "liga": "y",
       "jogo": "c x f",
+      "liga": "y",
       "mercado": "total 2",
+      "notas": "",
       "odd": "2.06",
-      "stake": "20",
       "resultado": "W",
-      "notas": ""
+      "stake": "20"
     },
     {
+      "data": "2026-03-15",
       "id": "manual_1773589737044_mie7xu",
-      "data": "2026-03-15",
-      "liga": "g",
       "jogo": "j x r",
+      "liga": "g",
       "mercado": "total 1ª parte",
+      "notas": "",
       "odd": "1.79",
-      "stake": "15",
       "resultado": "W",
-      "notas": ""
+      "stake": "15"
     },
     {
-      "id": "manual_1773605594799_lpt5s8",
       "data": "2026-03-15",
-      "liga": "teste",
+      "id": "manual_1773605594799_lpt5s8",
       "jogo": "a x v",
+      "liga": "teste",
       "mercado": "btts",
+      "notas": "",
       "odd": "1.76",
-      "stake": "25",
-      "resultado": "",
-      "notas": ""
+      "resultado": "W",
+      "stake": "25"
     }
   ],
-  "updatedAt": "2026-03-15T20:23:45.931066+00:00"
+  "updatedAt": "2026-03-15T20:29:45.549237+00:00"
 }
