@@ -18,21 +18,28 @@
       --bad-bg: #fef2f2;
       --warn: #b45309;
       --warn-bg: #fffbeb;
+      --info: #2563eb;
+      --info-bg: #eff6ff;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
     }
+
     .wrap { max-width: 1540px; margin: 0 auto; padding: 24px; }
+
     .hero, .card {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 24px;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
+
     .hero {
       padding: 24px;
       margin-bottom: 20px;
@@ -42,9 +49,16 @@
       justify-content: space-between;
       flex-wrap: wrap;
     }
-    h1,h2,h3,p { margin: 0; }
+
+    h1, h2, h3, p { margin: 0; }
     .sub { color: var(--muted); margin-top: 8px; }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .btn {
       border: 1px solid var(--line);
       background: white;
@@ -56,6 +70,7 @@
       cursor: pointer;
       font: inherit;
     }
+
     .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .btn.warn { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
     .btn.danger { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
@@ -71,16 +86,35 @@
     .stat .note { color: var(--muted); font-size: 14px; margin-top: 6px; }
 
     .section { padding: 20px; }
+
     .section-head {
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
     }
 
     .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      border-radius: 999px; padding: 7px 12px; background: #ecfdf5; color: #166534; font-weight: 600; font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #ecfdf5;
+      color: #166534;
+      font-weight: 600;
+      font-size: 13px;
     }
 
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
     .input, .select, .number, .textarea {
       padding: 10px 12px;
       border: 1px solid var(--line);
@@ -90,7 +124,14 @@
       font: inherit;
       width: 100%;
     }
-    .number.small-input { min-width: 96px; width: 96px; padding: 8px 10px; border-radius: 10px; }
+
+    .number.small-input {
+      min-width: 96px;
+      width: 96px;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+
     .check {
       width: 18px;
       height: 18px;
@@ -100,18 +141,75 @@
     .field { display: grid; gap: 6px; }
     .field label { font-size: 13px; color: var(--muted); }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px 10px; border-top: 1px solid var(--line); text-align: left; font-size: 14px; vertical-align: top; }
-    th { color: var(--muted); font-weight: 600; background: #fafafa; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
 
-    .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #f1f5f9; font-size: 12px; font-weight: 700; }
+    th, td {
+      padding: 12px 10px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: #fafafa;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.source-bot {
+      background: var(--info-bg);
+      color: var(--info);
+    }
+
+    .tag.source-manual {
+      background: #f5f3ff;
+      color: #6d28d9;
+    }
+
+    .tag.exec-yes {
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+
+    .tag.exec-no {
+      background: #f8fafc;
+      color: #475569;
+    }
+
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
     .split { display: grid; grid-template-columns: 1fr; gap: 16px; }
     .small { font-size: 13px; color: var(--muted); }
     .list { display: grid; gap: 10px; }
-    .item { border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
-    .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+    }
 
     .result-badge {
       display: inline-block;
@@ -120,9 +218,11 @@
       font-size: 12px;
       font-weight: 700;
     }
+
     .result-win { background: var(--ok-bg); color: var(--ok); }
     .result-loss { background: var(--bad-bg); color: var(--bad); }
     .result-pending { background: var(--warn-bg); color: var(--warn); }
+    .result-push { background: #f8fafc; color: #334155; }
 
     .profit-pos { color: var(--ok); font-weight: 700; }
     .profit-neg { color: var(--bad); font-weight: 700; }
@@ -135,6 +235,7 @@
       padding: 12px;
       background: #fff;
     }
+
     canvas {
       width: 100%;
       max-width: 100%;
@@ -155,10 +256,18 @@
       flex-wrap: wrap;
     }
 
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
     @media (max-width: 1400px) {
       .grid-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .grid-2, .grid-form { grid-template-columns: 1fr; }
+      .grid-2, .grid-form, .filters-grid { grid-template-columns: 1fr; }
     }
+
     @media (max-width: 760px) {
       .grid-8 { grid-template-columns: 1fr; }
       .wrap { padding: 14px; }
@@ -277,24 +386,54 @@
               <h2>Futebol</h2>
               <p class="small">Fonte: picks_hoje_simplificado.csv</p>
             </div>
-            <div class="toolbar">
-              <input id="searchFootball" class="input" placeholder="Pesquisar jogo ou liga" />
-              <select id="leagueFilter" class="select">
-                <option value="">Todas as ligas</option>
-              </select>
-            </div>
           </div>
+
+          <div class="filters-grid" style="margin-bottom:14px;">
+            <input id="searchFootball" class="input" placeholder="Pesquisar jogo, liga ou mercado" />
+
+            <select id="leagueFilter" class="select">
+              <option value="">Todas as ligas</option>
+            </select>
+
+            <select id="marketFilter" class="select">
+              <option value="">Todos os mercados</option>
+            </select>
+
+            <select id="resultFilter" class="select">
+              <option value="">Todos os resultados</option>
+              <option value="pending">Pendentes</option>
+              <option value="W">Win</option>
+              <option value="L">Loss</option>
+              <option value="P">Push</option>
+            </select>
+
+            <select id="executionFilter" class="select">
+              <option value="">Toda a execução</option>
+              <option value="executed">Executadas</option>
+              <option value="not_executed">Não executadas</option>
+            </select>
+
+            <select id="dateFilter" class="select">
+              <option value="">Todas as datas</option>
+              <option value="today">Hoje</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+            </select>
+          </div>
+
           <div style="overflow:auto;">
             <table>
               <thead>
                 <tr>
+                  <th>Origem</th>
                   <th>Data</th>
                   <th>Liga</th>
                   <th>Jogo</th>
                   <th>Mercado</th>
                   <th>Odd</th>
                   <th>Stake</th>
-                  <th>Apostada</th>
+                  <th>Executada</th>
+                  <th>Marcar</th>
                   <th>Odd real</th>
                   <th>Stake real</th>
                   <th>Resultado</th>
@@ -318,6 +457,8 @@
             <table>
               <thead>
                 <tr>
+                  <th>Origem</th>
+                  <th>Executada</th>
                   <th>Data</th>
                   <th>Liga</th>
                   <th>Jogo</th>
@@ -432,12 +573,57 @@
       return Number.isFinite(n) ? `${n.toFixed(d)}%` : '—';
     }
 
+    function normalizeDateString(value) {
+      const s = String(value || '').trim();
+      if (!s) return '';
+      const match = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (match) return s;
+      return '';
+    }
+
+    function parseDateSafe(value) {
+      const normalized = normalizeDateString(value);
+      if (!normalized) return null;
+      const d = new Date(normalized + 'T00:00:00');
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function isWithinLastDays(dateStr, days) {
+      const d = parseDateSafe(dateStr);
+      if (!d) return false;
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const minDate = new Date(today);
+      minDate.setDate(today.getDate() - (days - 1));
+
+      return d >= minDate && d <= today;
+    }
+
+    function isToday(dateStr) {
+      const d = parseDateSafe(dateStr);
+      if (!d) return false;
+
+      const now = new Date();
+      return (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+      );
+    }
+
     function resultLabel(r) {
       const x = String(r || '').trim().toUpperCase();
       if (x === 'W') return '<span class="result-badge result-win">🟢 Win</span>';
       if (x === 'L') return '<span class="result-badge result-loss">🔴 Loss</span>';
-      if (x === 'P') return '<span class="result-badge result-pending">🟡 Push</span>';
+      if (x === 'P') return '<span class="result-badge result-push">⚪ Push</span>';
       return '<span class="result-badge result-pending">🟡 Pendente</span>';
+    }
+
+    function resultKey(r) {
+      const x = String(r || '').trim().toUpperCase();
+      if (x === 'W' || x === 'L' || x === 'P') return x;
+      return 'pending';
     }
 
     function profitClass(v) {
@@ -465,10 +651,12 @@
       const oddNum = num(odd);
 
       if (stakeNum === null || stakeNum <= 0) return null;
+
       if (r === 'W') {
         if (oddNum === null || oddNum <= 1.01) return null;
         return stakeNum * (oddNum - 1);
       }
+
       if (r === 'L') return -stakeNum;
       if (r === 'P') return 0;
       return null;
@@ -503,6 +691,17 @@
       localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
     }
 
+    function ensureEditObject(pickKey) {
+      if (!state.localEdits[pickKey]) {
+        state.localEdits[pickKey] = {
+          apostada: false,
+          oddReal: '',
+          stakeReal: ''
+        };
+      }
+      return state.localEdits[pickKey];
+    }
+
     function getRowWithLocalEdits(row) {
       const key = makePickKey(row);
       const edit = state.localEdits[key] || {};
@@ -513,6 +712,7 @@
 
       const merged = {
         ...row,
+        Origem: 'Bot',
         Apostada: apostada ? 'Sim' : '',
         OddReal: oddReal,
         'StakeReal€': stakeReal
@@ -532,6 +732,8 @@
       merged._oddRealNum = oddRealNum;
       merged._stakeRealNum = stakeRealNum;
       merged._lucroRealLocal = lucroRealLocal;
+      merged._resultKey = resultKey(merged['Resultado']);
+      merged._dateNormalized = normalizeDateString(merged['Data']);
 
       return merged;
     }
@@ -559,9 +761,28 @@
       return state.manualBets
         .map(b => ({
           ...b,
-          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd)
+          source: 'Manual',
+          executada: true,
+          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd),
+          _resultKey: resultKey(b.resultado),
+          _dateNormalized: normalizeDateString(b.data)
         }))
         .filter(b => b._lucro !== null);
+    }
+
+    function getExecutionStats() {
+      const history = getHistoryRowsMerged();
+      const generated = history.length;
+      const executed = history.filter(r => r._apostadaBool).length;
+      const notExecuted = generated - executed;
+      const executionRate = generated > 0 ? (executed / generated) * 100 : 0;
+
+      return {
+        generated,
+        executed,
+        notExecuted,
+        executionRate
+      };
     }
 
     function getMetrics() {
@@ -570,8 +791,10 @@
       const resolved = getResolvedHistory();
       const realResolvedBot = getRealResolvedBotHistory();
       const resolvedManual = getResolvedManualBets();
+      const execution = getExecutionStats();
 
       const leagues = new Set(history.map(r => r['Liga']).filter(Boolean));
+      const markets = new Set(history.map(r => r['Mercado']).filter(Boolean));
 
       const modelStake = sum(resolved.map(r => num(r['Stake€'])).filter(v => v !== null));
       const modelProfit = sum(resolved.map(r => num(r['Lucro€'])).filter(v => v !== null));
@@ -602,6 +825,7 @@
         dailyCount: daily.length,
         totalHistory: history.length,
         leagues: leagues.size,
+        markets: markets.size,
         modelStake,
         modelProfit,
         modelWins,
@@ -618,24 +842,33 @@
         realWr,
         realBankroll,
         manualCount: state.manualBets.length,
-        manualResolvedCount: resolvedManual.length
+        manualResolvedCount: resolvedManual.length,
+        generatedCount: execution.generated,
+        executedCount: execution.executed,
+        notExecutedCount: execution.notExecuted,
+        executionRate: execution.executionRate
       };
     }
 
     function renderStats() {
       const m = getMetrics();
+
       document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(state.bankrollInicial)}`;
       document.getElementById('bankrollInput').value = state.bankrollInicial;
 
       const cards = [
         { label: 'Picks do dia', value: m.dailyCount, note: `Histórico bot: ${m.totalHistory}` },
+        { label: 'Picks geradas', value: m.generatedCount, note: `${m.leagues} ligas • ${m.markets} mercados` },
+        { label: 'Picks executadas', value: m.executedCount, note: 'Bot marcadas como executadas' },
+        { label: 'Não executadas', value: m.notExecutedCount, note: 'Picks do bot não apostadas' },
+        { label: 'Taxa de execução', value: pct(m.executionRate), note: `${m.executedCount}/${m.generatedCount || 0}` },
         { label: 'Lucro modelo', value: `€${fmt(m.modelProfit)}`, note: `Stake mod. €${fmt(m.modelStake)}` },
         { label: 'ROI modelo', value: pct(m.modelRoi), note: `${m.modelWins}W / ${m.modelLosses}L` },
         { label: 'Win rate mod.', value: pct(m.modelWr), note: `${m.modelCount} resolvidas` },
         { label: 'Lucro real total', value: `€${fmt(m.realProfit)}`, note: `Stake real €${fmt(m.realStake)}` },
         { label: 'ROI real total', value: pct(m.realRoi), note: `${m.realWins}W / ${m.realLosses}L` },
         { label: 'Banca real', value: `€${fmt(m.realBankroll)}`, note: `Inicial €${fmt(state.bankrollInicial)}` },
-        { label: 'Manuais', value: m.manualCount, note: `${m.manualResolvedCount} fechadas` },
+        { label: 'Manuais', value: m.manualCount, note: `${m.manualResolvedCount} fechadas` }
       ];
 
       document.getElementById('stats').innerHTML = cards.map(card => `
@@ -647,82 +880,162 @@
       `).join('');
     }
 
-    function fillLeagueFilter() {
-      const select = document.getElementById('leagueFilter');
-      const current = select.value;
+    function fillFilters() {
+      const leagueSelect = document.getElementById('leagueFilter');
+      const marketSelect = document.getElementById('marketFilter');
+
+      const currentLeague = leagueSelect.value;
+      const currentMarket = marketSelect.value;
+
       const leagues = [...new Set(state.footballDaily.map(r => r['Liga']).filter(Boolean))].sort();
-      select.innerHTML = '<option value="">Todas as ligas</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
-      select.value = current;
+      const markets = [...new Set(state.footballDaily.map(r => r['Mercado']).filter(Boolean))].sort();
+
+      leagueSelect.innerHTML =
+        '<option value="">Todas as ligas</option>' +
+        leagues.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+
+      marketSelect.innerHTML =
+        '<option value="">Todos os mercados</option>' +
+        markets.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+
+      leagueSelect.value = leagues.includes(currentLeague) ? currentLeague : '';
+      marketSelect.value = markets.includes(currentMarket) ? currentMarket : '';
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function getFootballFilters() {
+      return {
+        q: document.getElementById('searchFootball').value.trim().toLowerCase(),
+        league: document.getElementById('leagueFilter').value,
+        market: document.getElementById('marketFilter').value,
+        result: document.getElementById('resultFilter').value,
+        execution: document.getElementById('executionFilter').value,
+        date: document.getElementById('dateFilter').value
+      };
+    }
+
+    function matchDateFilter(dateStr, dateFilterValue) {
+      if (!dateFilterValue) return true;
+      if (dateFilterValue === 'today') return isToday(dateStr);
+      if (dateFilterValue === '7') return isWithinLastDays(dateStr, 7);
+      if (dateFilterValue === '30') return isWithinLastDays(dateStr, 30);
+      return true;
+    }
+
+    function filterFootballRows(rows, filters) {
+      return rows.filter(r => {
+        const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
+
+        const okSearch = !filters.q || text.includes(filters.q);
+        const okLeague = !filters.league || r['Liga'] === filters.league;
+        const okMarket = !filters.market || r['Mercado'] === filters.market;
+        const okResult = !filters.result || r._resultKey === filters.result;
+        const okExecution =
+          !filters.execution ||
+          (filters.execution === 'executed' && r._apostadaBool) ||
+          (filters.execution === 'not_executed' && !r._apostadaBool);
+        const okDate = matchDateFilter(r['Data'], filters.date);
+
+        return okSearch && okLeague && okMarket && okResult && okExecution && okDate;
+      });
     }
 
     function renderFootball() {
-      const q = document.getElementById('searchFootball').value.toLowerCase();
-      const league = document.getElementById('leagueFilter').value;
-
-      const rows = getDailyRowsMerged().filter(r => {
-        const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
-        const okSearch = text.includes(q);
-        const okLeague = !league || r['Liga'] === league;
-        return okSearch && okLeague;
-      });
+      const filters = getFootballFilters();
+      const rows = filterFootballRows(getDailyRowsMerged(), filters);
 
       document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => {
         const lucroModelo = num(r['Lucro€']);
         const lucroReal = r._lucroRealLocal;
         const checked = r._apostadaBool ? 'checked' : '';
+
         return `
-        <tr>
-          <td>${r['Data'] || '—'}</td>
-          <td><span class="tag">${r['Liga'] || '—'}</span></td>
-          <td>${r['Jogo'] || '—'}</td>
-          <td>${r['Mercado'] || '—'}</td>
-          <td class="mono">${r['Odd'] || '—'}</td>
-          <td class="mono">${r['Stake€'] || '—'}</td>
-          <td>
-            <input class="check js-apostada" type="checkbox" data-pick-key="${r._pickKey}" ${checked} />
-          </td>
-          <td>
-            <input class="number small-input js-odd-real" type="number" step="0.01" min="1" data-pick-key="${r._pickKey}" value="${r['OddReal'] || ''}" />
-          </td>
-          <td>
-            <input class="number small-input js-stake-real" type="number" step="0.01" min="0" data-pick-key="${r._pickKey}" value="${r['StakeReal€'] || ''}" />
-          </td>
-          <td>${resultLabel(r['Resultado'])}</td>
-          <td class="mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
-          <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
-        </tr>`;
-      }).join('') : `<tr><td colspan="12"><div class="empty">Nenhuma pick encontrada.</div></td></tr>`;
+          <tr>
+            <td><span class="tag source-bot">Bot</span></td>
+            <td>${escapeHtml(r['Data'] || '—')}</td>
+            <td><span class="tag">${escapeHtml(r['Liga'] || '—')}</span></td>
+            <td>${escapeHtml(r['Jogo'] || '—')}</td>
+            <td>${escapeHtml(r['Mercado'] || '—')}</td>
+            <td class="mono">${escapeHtml(r['Odd'] || '—')}</td>
+            <td class="mono">${escapeHtml(r['Stake€'] || '—')}</td>
+            <td>
+              ${r._apostadaBool
+                ? '<span class="tag exec-yes">Sim</span>'
+                : '<span class="tag exec-no">Não</span>'}
+            </td>
+            <td>
+              <input class="check js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} />
+            </td>
+            <td>
+              <input
+                class="number small-input js-odd-real"
+                type="number"
+                step="0.01"
+                min="1"
+                data-pick-key="${escapeHtml(r._pickKey)}"
+                value="${escapeHtml(r['OddReal'] || '')}"
+              />
+            </td>
+            <td>
+              <input
+                class="number small-input js-stake-real"
+                type="number"
+                step="0.01"
+                min="0"
+                data-pick-key="${escapeHtml(r._pickKey)}"
+                value="${escapeHtml(r['StakeReal€'] || '')}"
+              />
+            </td>
+            <td>${resultLabel(r['Resultado'])}</td>
+            <td class="mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
+            <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
+          </tr>
+        `;
+      }).join('') : `<tr><td colspan="14"><div class="empty">Nenhuma pick encontrada com os filtros atuais.</div></td></tr>`;
 
       bindBotTableControls();
     }
 
     function renderManualBets() {
       const rows = [...state.manualBets].sort((a, b) => String(b.data).localeCompare(String(a.data)));
+
       document.getElementById('manualRows').innerHTML = rows.length ? rows.map(b => {
         const lucro = calcProfitByResult(b.resultado, b.stake, b.odd);
+
         return `
-        <tr>
-          <td>${b.data || '—'}</td>
-          <td>${b.liga || '—'}</td>
-          <td>${b.jogo || '—'}</td>
-          <td>${b.mercado || '—'}</td>
-          <td class="mono">${b.odd || '—'}</td>
-          <td class="mono">${b.stake || '—'}</td>
-          <td>
-            <select class="select js-manual-resultado" data-id="${b.id}">
-              <option value="" ${!b.resultado ? 'selected' : ''}>Pendente</option>
-              <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>Win</option>
-              <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>Loss</option>
-              <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
-            </select>
-          </td>
-          <td class="mono ${profitClass(lucro)}">${lucro === null ? '—' : `€${fmt(lucro)}`}</td>
-          <td>${b.notas || '—'}</td>
-          <td>
-            <button class="btn danger js-delete-manual" data-id="${b.id}">Apagar</button>
-          </td>
-        </tr>`;
-      }).join('') : `<tr><td colspan="10"><div class="empty">Ainda não tens apostas manuais.</div></td></tr>`;
+          <tr>
+            <td><span class="tag source-manual">Manual</span></td>
+            <td><span class="tag exec-yes">Sim</span></td>
+            <td>${escapeHtml(b.data || '—')}</td>
+            <td>${escapeHtml(b.liga || '—')}</td>
+            <td>${escapeHtml(b.jogo || '—')}</td>
+            <td>${escapeHtml(b.mercado || '—')}</td>
+            <td class="mono">${escapeHtml(b.odd || '—')}</td>
+            <td class="mono">${escapeHtml(b.stake || '—')}</td>
+            <td>
+              <select class="select js-manual-resultado" data-id="${escapeHtml(b.id)}">
+                <option value="" ${!b.resultado ? 'selected' : ''}>Pendente</option>
+                <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>Win</option>
+                <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>Loss</option>
+                <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
+              </select>
+            </td>
+            <td class="mono ${profitClass(lucro)}">${lucro === null ? '—' : `€${fmt(lucro)}`}</td>
+            <td>${escapeHtml(b.notas || '—')}</td>
+            <td>
+              <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
+            </td>
+          </tr>
+        `;
+      }).join('') : `<tr><td colspan="12"><div class="empty">Ainda não tens apostas manuais.</div></td></tr>`;
 
       bindManualControls();
     }
@@ -730,12 +1043,12 @@
     function renderNba() {
       document.getElementById('nbaRows').innerHTML = state.nba.length ? state.nba.map(r => `
         <tr>
-          <td>${r['Date'] || '—'}</td>
-          <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${r['HomeTeam']} vs ${r['AwayTeam']}` : '—'}</td>
-          <td>${r['Market'] || '—'}</td>
-          <td class="mono">${r['Line'] || '—'}</td>
-          <td class="mono">${r['Odd'] || '—'}</td>
-          <td class="mono">${r['Stake€'] || '—'}</td>
+          <td>${escapeHtml(r['Date'] || '—')}</td>
+          <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${escapeHtml(r['HomeTeam'])} vs ${escapeHtml(r['AwayTeam'])}` : '—'}</td>
+          <td>${escapeHtml(r['Market'] || '—')}</td>
+          <td class="mono">${escapeHtml(r['Line'] || '—')}</td>
+          <td class="mono">${escapeHtml(r['Odd'] || '—')}</td>
+          <td class="mono">${escapeHtml(r['Stake€'] || '—')}</td>
         </tr>
       `).join('') : `<tr><td colspan="6"><div class="empty">Sem picks NBA neste momento.</div></td></tr>`;
     }
@@ -751,10 +1064,12 @@
         ...getRealResolvedBotHistory().map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 })),
         ...getResolvedManualBets().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
       ];
+
       const bestReal = [...allRealClosed].sort((a, b) => b.lucro - a.lucro)[0];
 
       const items = [
         `Modelo: lucro €${fmt(m.modelProfit)} | ROI ${pct(m.modelRoi)} | Win rate ${pct(m.modelWr)}`,
+        `Execução: ${m.executedCount} executadas | ${m.notExecutedCount} não executadas | taxa ${pct(m.executionRate)}`,
         `Real total: lucro €${fmt(m.realProfit)} | ROI ${pct(m.realRoi)} | Banca €${fmt(m.realBankroll)}`,
         `Fechadas reais: ${m.realResolvedCount} | Ganhas: ${m.realWins} | Perdidas: ${m.realLosses}`,
         `Apostas manuais: ${m.manualCount} | Fechadas: ${m.manualResolvedCount}`,
@@ -763,7 +1078,8 @@
         `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
       ];
 
-      document.getElementById('summaryList').innerHTML = items.map(t => `<div class="item">${t}</div>`).join('');
+      document.getElementById('summaryList').innerHTML =
+        items.map(t => `<div class="item">${escapeHtml(t)}</div>`).join('');
     }
 
     function drawBankrollChart() {
@@ -857,7 +1173,7 @@
       const last = points[points.length - 1];
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 13px sans-serif';
-      ctx.fillText(`Banca real: €${fmt(last.value)}`, width - 170, 24);
+      ctx.fillText(`Banca real: €${fmt(last.value)}`, width - 190, 24);
     }
 
     function rerenderAll() {
@@ -868,17 +1184,6 @@
       renderNba();
       renderSummary();
       drawBankrollChart();
-    }
-
-    function ensureEditObject(pickKey) {
-      if (!state.localEdits[pickKey]) {
-        state.localEdits[pickKey] = {
-          apostada: false,
-          oddReal: '',
-          stakeReal: ''
-        };
-      }
-      return state.localEdits[pickKey];
     }
 
     function bindBotTableControls() {
@@ -974,7 +1279,7 @@
         const [dailyRes, historyRes, nbaRes] = await Promise.all([
           fetch(URLS.footballDaily + '?t=' + Date.now()),
           fetch(URLS.footballHistory + '?t=' + Date.now()),
-          fetch(URLS.nba + '?t=' + Date.now()),
+          fetch(URLS.nba + '?t=' + Date.now())
         ]);
 
         const dailyText = await dailyRes.text();
@@ -986,7 +1291,7 @@
         state.nba = parseSemicolonCsv(nbaText);
         state.lastUpdated = new Date().toISOString();
 
-        fillLeagueFilter();
+        fillFilters();
         rerenderAll();
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
@@ -996,6 +1301,10 @@
 
     document.getElementById('searchFootball').addEventListener('input', renderFootball);
     document.getElementById('leagueFilter').addEventListener('change', renderFootball);
+    document.getElementById('marketFilter').addEventListener('change', renderFootball);
+    document.getElementById('resultFilter').addEventListener('change', renderFootball);
+    document.getElementById('executionFilter').addEventListener('change', renderFootball);
+    document.getElementById('dateFilter').addEventListener('change', renderFootball);
     document.getElementById('refreshBtn').addEventListener('click', loadData);
 
     document.getElementById('bankrollInput').addEventListener('input', e => {
