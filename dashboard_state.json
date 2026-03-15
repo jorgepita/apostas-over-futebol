@@ -18,7 +18,7 @@
     },
     "2026-03-16|Premier League|Brentford vs Wolverhampton Wanderers|O2.5": {
       "apostada": true,
-      "oddReal": "1",
+      "oddReal": "1.",
       "stakeReal": ""
     }
   },
@@ -68,5 +68,5 @@
       "stake": "25"
     }
   ],
-  "updatedAt": "2026-03-15T20:51:01.958307+00:00"
+  "updatedAt": "2026-03-15T20:51:07.386499+00:00"
 }
