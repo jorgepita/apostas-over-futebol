@@ -13,6 +13,11 @@
       --line: #e2e8f0;
       --accent: #0f172a;
       --ok: #16a34a;
+      --ok-bg: #ecfdf5;
+      --bad: #dc2626;
+      --bad-bg: #fef2f2;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
     }
     * { box-sizing: border-box; }
     body {
@@ -22,7 +27,7 @@
       color: var(--text);
     }
     .wrap {
-      max-width: 1320px;
+      max-width: 1380px;
       margin: 0 auto;
       padding: 24px;
     }
@@ -56,7 +61,7 @@
     }
     .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .grid { display: grid; gap: 16px; }
-    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
     .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
     .stat { padding: 18px; }
     .stat .label { color: var(--muted); font-size: 14px; }
@@ -84,14 +89,46 @@
     .list { display: grid; gap: 10px; }
     .item { border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
     .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 16px; color: var(--muted); }
-    @media (max-width: 1100px) {
-      .grid-4, .grid-2 { grid-template-columns: 1fr 1fr; }
+
+    .result-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .result-win { background: var(--ok-bg); color: var(--ok); }
+    .result-loss { background: var(--bad-bg); color: var(--bad); }
+    .result-pending { background: var(--warn-bg); color: var(--warn); }
+
+    .profit-pos { color: var(--ok); font-weight: 700; }
+    .profit-neg { color: var(--bad); font-weight: 700; }
+
+    .chart-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      background: #fff;
+    }
+    canvas {
+      width: 100%;
+      max-width: 100%;
+      height: 320px;
+      display: block;
+    }
+
+    @media (max-width: 1250px) {
+      .grid-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
     }
     @media (max-width: 760px) {
-      .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      .grid-6 { grid-template-columns: 1fr; }
       .wrap { padding: 14px; }
       .hero, .section, .stat { padding: 16px; }
       th, td { font-size: 13px; }
+      canvas { height: 260px; }
     }
   </style>
 </head>
@@ -109,7 +146,20 @@
       </div>
     </div>
 
-    <div class="grid grid-4" id="stats"></div>
+    <div class="grid grid-6" id="stats"></div>
+
+    <div class="card section" style="margin-top:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Evolução da banca</h2>
+          <p class="small">Com base nas picks já resolvidas do futebol</p>
+        </div>
+        <span class="pill" id="bankrollLabel">Banca inicial: €1000.00</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="bankrollChart" width="1200" height="320"></canvas>
+      </div>
+    </div>
 
     <div class="grid grid-2" style="margin-top:16px; align-items:start;">
       <div class="card section">
@@ -134,8 +184,9 @@
                 <th>Jogo</th>
                 <th>Mercado</th>
                 <th>Odd</th>
-                <th>Edge</th>
                 <th>Stake</th>
+                <th>Resultado</th>
+                <th>Lucro</th>
               </tr>
             </thead>
             <tbody id="footballRows"></tbody>
@@ -188,6 +239,8 @@
       nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
     };
 
+    const BANKROLL_INICIAL = 1000;
+
     const state = {
       football: [],
       nba: [],
@@ -217,22 +270,85 @@
       return valid.reduce((a, b) => a + b, 0) / valid.length;
     }
 
+    function sum(arr) {
+      return arr
+        .filter(v => typeof v === 'number' && !Number.isNaN(v))
+        .reduce((a, b) => a + b, 0);
+    }
+
     function fmt(n, d = 2) {
       return Number.isFinite(n) ? n.toFixed(d) : '—';
     }
 
-    function renderStats() {
+    function pct(n, d = 2) {
+      return Number.isFinite(n) ? `${n.toFixed(d)}%` : '—';
+    }
+
+    function resultLabel(r) {
+      const x = String(r || '').trim().toUpperCase();
+      if (x === 'W') return '<span class="result-badge result-win">🟢 Win</span>';
+      if (x === 'L') return '<span class="result-badge result-loss">🔴 Loss</span>';
+      return '<span class="result-badge result-pending">🟡 Pendente</span>';
+    }
+
+    function profitClass(v) {
+      if (v > 0) return 'profit-pos';
+      if (v < 0) return 'profit-neg';
+      return '';
+    }
+
+    function getResolvedFootball() {
+      return state.football.filter(r => {
+        const res = String(r['Resultado'] || '').trim().toUpperCase();
+        return res === 'W' || res === 'L';
+      });
+    }
+
+    function getMetrics() {
       const football = state.football;
       const nba = state.nba;
       const leagues = new Set(football.map(r => r['Liga']).filter(Boolean));
-      const footballOdds = football.map(r => num(r['Odd']));
-      const footballEdges = football.map(r => num(r['Edge%']));
-      const nbaOdds = nba.map(r => num(r['Odd']));
+      const resolved = getResolvedFootball();
+
+      const stakesResolved = resolved.map(r => num(r['Stake€'])).filter(v => v !== null);
+      const profitsResolved = resolved.map(r => num(r['Lucro€'])).filter(v => v !== null);
+
+      const totalStake = sum(stakesResolved);
+      const totalProfit = sum(profitsResolved);
+      const wins = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
+      const losses = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
+      const totalResolved = wins + losses;
+      const roi = totalStake > 0 ? (totalProfit / totalStake) * 100 : 0;
+      const winRate = totalResolved > 0 ? (wins / totalResolved) * 100 : 0;
+      const currentBankroll = BANKROLL_INICIAL + totalProfit;
+
+      return {
+        footballCount: football.length,
+        nbaCount: nba.length,
+        leagues: leagues.size,
+        totalStake,
+        totalProfit,
+        wins,
+        losses,
+        totalResolved,
+        roi,
+        winRate,
+        currentBankroll,
+        pending: football.length - totalResolved
+      };
+    }
+
+    function renderStats() {
+      const m = getMetrics();
+
+      document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(BANKROLL_INICIAL)}`;
 
       const cards = [
-        { label: 'Picks futebol', value: football.length, note: `${leagues.size} ligas` },
-        { label: 'Odd média futebol', value: fmt(avg(footballOdds)), note: `Edge médio ${fmt(avg(footballEdges))}%` },
-        { label: 'Picks NBA', value: nba.length, note: `Odd média ${fmt(avg(nbaOdds))}` },
+        { label: 'Picks futebol', value: m.footballCount, note: `${m.leagues} ligas` },
+        { label: 'Lucro total', value: `€${fmt(m.totalProfit)}`, note: `Stake total €${fmt(m.totalStake)}` },
+        { label: 'ROI', value: pct(m.roi), note: 'Lucro / stake total' },
+        { label: 'Win rate', value: pct(m.winRate), note: `${m.wins}W / ${m.losses}L` },
+        { label: 'Banca atual', value: `€${fmt(m.currentBankroll)}`, note: `Inicial €${fmt(BANKROLL_INICIAL)}` },
         { label: 'Última atualização', value: state.lastUpdated ? new Date(state.lastUpdated).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '—', note: 'Refresh automático: 60s' },
       ];
 
@@ -264,17 +380,20 @@
         return okSearch && okLeague;
       });
 
-      document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => `
+      document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => {
+        const lucro = num(r['Lucro€']);
+        return `
         <tr>
           <td>${r['Data'] || '—'}</td>
           <td><span class="tag">${r['Liga'] || '—'}</span></td>
           <td>${r['Jogo'] || '—'}</td>
           <td>${r['Mercado'] || '—'}</td>
           <td class="mono">${r['Odd'] || '—'}</td>
-          <td class="mono">${r['Edge%'] || '—'}</td>
           <td class="mono">${r['Stake€'] || '—'}</td>
-        </tr>
-      `).join('') : `<tr><td colspan="7"><div class="empty">Nenhuma pick encontrada.</div></td></tr>`;
+          <td>${resultLabel(r['Resultado'])}</td>
+          <td class="mono ${profitClass(lucro)}">${lucro === null ? '—' : `€${fmt(lucro)}`}</td>
+        </tr>`;
+      }).join('') : `<tr><td colspan="8"><div class="empty">Nenhuma pick encontrada.</div></td></tr>`;
     }
 
     function renderNba() {
@@ -291,18 +410,120 @@
     }
 
     function renderSummary() {
+      const m = getMetrics();
+
       const topFootball = [...state.football]
         .map(r => ({ jogo: r['Jogo'], liga: r['Liga'], edge: num(r['Edge%']) ?? -1 }))
         .sort((a, b) => b.edge - a.edge)
         .slice(0, 3);
 
+      const best = [...getResolvedFootball()]
+        .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? -9999 }))
+        .sort((a, b) => b.lucro - a.lucro)[0];
+
       const items = [
+        `Lucro acumulado: €${fmt(m.totalProfit)} | ROI: ${pct(m.roi)} | Win rate: ${pct(m.winRate)}`,
+        `Picks resolvidas: ${m.totalResolved} | Ganhas: ${m.wins} | Perdidas: ${m.losses} | Pendentes: ${m.pending}`,
         `Top edge futebol: ${topFootball[0] ? `${topFootball[0].jogo} (${topFootball[0].liga}) • ${fmt(topFootball[0].edge)}%` : '—'}`,
-        `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`,
-        `Ligação ativa aos CSV do GitHub: OK`,
+        `Melhor pick fechada: ${best ? `${best.jogo} • €${fmt(best.lucro)}` : '—'}`,
+        `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
       ];
 
       document.getElementById('summaryList').innerHTML = items.map(t => `<div class="item">${t}</div>`).join('');
+    }
+
+    function drawBankrollChart() {
+      const canvas = document.getElementById('bankrollChart');
+      const ctx = canvas.getContext('2d');
+
+      const resolved = [...getResolvedFootball()].sort((a, b) => {
+        const da = new Date(a['Data'] || '1970-01-01').getTime();
+        const db = new Date(b['Data'] || '1970-01-01').getTime();
+        return da - db;
+      });
+
+      const points = [{ label: 'Inicial', value: BANKROLL_INICIAL }];
+      let acc = BANKROLL_INICIAL;
+
+      resolved.forEach((r, idx) => {
+        const lucro = num(r['Lucro€']) ?? 0;
+        acc += lucro;
+        points.push({
+          label: r['Data'] || `Pick ${idx + 1}`,
+          value: acc
+        });
+      });
+
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (points.length < 2) {
+        ctx.fillStyle = '#475569';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Ainda não há picks resolvidas suficientes para desenhar o gráfico.', 20, 40);
+        return;
+      }
+
+      const padding = 40;
+      const values = points.map(p => p.value);
+      const minVal = Math.min(...values);
+      const maxVal = Math.max(...values);
+      const range = Math.max(maxVal - minVal, 1);
+
+      const xStep = (width - padding * 2) / (points.length - 1);
+
+      function getX(i) {
+        return padding + i * xStep;
+      }
+
+      function getY(v) {
+        return height - padding - ((v - minVal) / range) * (height - padding * 2);
+      }
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < 5; i++) {
+        const y = padding + i * ((height - padding * 2) / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      points.forEach((p, i) => {
+        const x = getX(i);
+        const y = getY(p.value);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+
+      ctx.fillStyle = '#0f172a';
+      points.forEach((p, i) => {
+        const x = getX(i);
+        const y = getY(p.value);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`€${fmt(maxVal)}`, 8, padding + 4);
+      ctx.fillText(`€${fmt(minVal)}`, 8, height - padding + 4);
+
+      const last = points[points.length - 1];
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText(`Banca atual: €${fmt(last.value)}`, width - 180, 24);
     }
 
     async function loadData() {
@@ -324,6 +545,7 @@
         renderFootball();
         renderNba();
         renderSummary();
+        drawBankrollChart();
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
         console.error(e);
