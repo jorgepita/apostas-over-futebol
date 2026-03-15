@@ -1,4 +1,3 @@
-# gerar_picks.py
 import base64
 import json
 import math
@@ -11,6 +10,7 @@ import pandas as pd
 
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
+HISTORY_PATH = BASE / "picks_history.csv"
 
 
 # =============================
@@ -38,6 +38,15 @@ def save_sent_state(today_iso: str, sent: set[str]) -> None:
 
 def pick_id(row: dict) -> str:
     return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
+
+
+def history_pick_id_from_simple(row: pd.Series) -> str:
+    return (
+        f"{str(row.get('Data', '')).strip()}|"
+        f"{str(row.get('Liga', '')).strip()}|"
+        f"{str(row.get('Jogo', '')).strip()}|"
+        f"{str(row.get('Mercado', '')).strip()}"
+    )
 
 
 # =============================
@@ -81,7 +90,6 @@ def poisson_cdf(k: int, lam: float) -> float:
 
 
 def prob_over25(lam_total: float) -> float:
-    # Over 2.5 => >=3 => 1 - P(X<=2)
     return 1.0 - poisson_cdf(2, lam_total)
 
 
@@ -150,7 +158,6 @@ def compute_lambdas(
     lam_home = avg_home * home_attack * away_defense
     lam_away = avg_away * away_attack * home_defense
 
-    # Travões para evitar probabilidades absurdas
     lam_home = float(max(0.25, min(2.20, lam_home)))
     lam_away = float(max(0.20, min(1.90, lam_away)))
 
@@ -158,13 +165,55 @@ def compute_lambdas(
 
 
 def clamp_prob_o25(prob: float) -> float:
-    # Mantém O2.5 dentro de faixa realista
     return float(max(0.22, min(0.70, prob)))
 
 
 def clamp_edge_o25(edge: float) -> float:
-    # Não alterar demasiado o edge, mas impedir disparates
     return float(max(-0.20, min(0.15, edge)))
+
+
+def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
+    for col in cols:
+        if col not in df.columns:
+            df[col] = ""
+    return df[cols].copy()
+
+
+def load_history() -> pd.DataFrame:
+    if not HISTORY_PATH.exists():
+        return pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])
+    try:
+        df = pd.read_csv(HISTORY_PATH, sep=";", dtype=str).fillna("")
+        return ensure_simple_columns(df)
+    except Exception:
+        return pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])
+
+
+def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
+    history = load_history()
+    history = ensure_simple_columns(history)
+    simple_df = ensure_simple_columns(simple_df)
+
+    existing_ids = {history_pick_id_from_simple(row) for _, row in history.iterrows()}
+
+    new_rows = []
+    for _, row in simple_df.iterrows():
+        pid = history_pick_id_from_simple(row)
+        if pid not in existing_ids:
+            new_rows.append(row.to_dict())
+
+    if new_rows:
+        history = pd.concat([history, pd.DataFrame(new_rows)], ignore_index=True)
+
+    if "Data" in history.columns:
+        history["_sort_date"] = pd.to_datetime(history["Data"], errors="coerce")
+        history = history.sort_values(["_sort_date", "Liga", "Jogo"], ascending=[True, True, True], na_position="last")
+        history = history.drop(columns=["_sort_date"])
+
+    history = history.reset_index(drop=True)
+    return ensure_simple_columns(history)
 
 
 # =============================
@@ -562,15 +611,20 @@ def main():
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
-        pd.DataFrame(
+        simple = pd.DataFrame(
             columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
-        ).to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+        )
+        simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+
+    history = merge_into_history(simple)
+    history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
     print(f"- {out25_path.name} ({len(out25)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
-    print(f"- {simple_path.name} ({len(simple) if len(combo) > 0 else 0} picks)")
+    print(f"- {simple_path.name} ({len(simple)} picks)")
+    print(f"- {HISTORY_PATH.name} ({len(history)} linhas de histórico)")
 
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
@@ -607,7 +661,7 @@ def main():
     repo = "apostas-over-futebol"
     branch = "main"
     upload_csvs_to_github(
-        [out25_path, combo_path, combo_github_path, simple_path],
+        [out25_path, combo_path, combo_github_path, simple_path, HISTORY_PATH],
         owner,
         repo,
         branch,
