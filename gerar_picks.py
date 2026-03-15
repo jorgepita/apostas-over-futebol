@@ -174,7 +174,11 @@ def clamp_edge_o25(edge: float) -> float:
 
 def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
+    cols = [
+        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+        "Apostada", "OddReal", "StakeReal€",
+        "Resultado", "Lucro€", "LucroReal€"
+    ]
     for col in cols:
         if col not in df.columns:
             df[col] = ""
@@ -182,13 +186,18 @@ def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_history() -> pd.DataFrame:
+    cols = [
+        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+        "Apostada", "OddReal", "StakeReal€",
+        "Resultado", "Lucro€", "LucroReal€"
+    ]
     if not HISTORY_PATH.exists():
-        return pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])
+        return pd.DataFrame(columns=cols)
     try:
         df = pd.read_csv(HISTORY_PATH, sep=";", dtype=str).fillna("")
         return ensure_simple_columns(df)
     except Exception:
-        return pd.DataFrame(columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"])
+        return pd.DataFrame(columns=cols)
 
 
 def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
@@ -209,7 +218,11 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
 
     if "Data" in history.columns:
         history["_sort_date"] = pd.to_datetime(history["Data"], errors="coerce")
-        history = history.sort_values(["_sort_date", "Liga", "Jogo"], ascending=[True, True, True], na_position="last")
+        history = history.sort_values(
+            ["_sort_date", "Liga", "Jogo"],
+            ascending=[True, True, True],
+            na_position="last"
+        )
         history = history.drop(columns=["_sort_date"])
 
     history = history.reset_index(drop=True)
@@ -602,18 +615,28 @@ def main():
         simple["Stake€"] = pd.to_numeric(simple.get("Stake€", 0.0), errors="coerce")
         simple["Edge%"] = (pd.to_numeric(simple["Edge"], errors="coerce") * 100.0).round(2)
 
+        simple["Apostada"] = ""
+        simple["OddReal"] = ""
+        simple["StakeReal€"] = ""
         simple["Resultado"] = ""
         simple["Lucro€"] = ""
+        simple["LucroReal€"] = ""
 
-        cols = ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
+        cols = [
+            "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+            "Apostada", "OddReal", "StakeReal€",
+            "Resultado", "Lucro€", "LucroReal€"
+        ]
         simple = simple[cols].copy()
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
 
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
-        simple = pd.DataFrame(
-            columns=["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%", "Resultado", "Lucro€"]
-        )
+        simple = pd.DataFrame(columns=[
+            "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+            "Apostada", "OddReal", "StakeReal€",
+            "Resultado", "Lucro€", "LucroReal€"
+        ])
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
     history = merge_into_history(simple)
