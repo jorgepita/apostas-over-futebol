@@ -664,6 +664,7 @@
     let autoSaveTimer = null;
     let autoSaveEnabled = true;
     let autoSaveInFlight = false;
+    let hasPendingCloudChanges = false;
 
     const state = {
       footballDaily: [],
@@ -1411,21 +1412,21 @@
             <td>
               <input
                 class="number small-input js-odd-real"
-                type="number"
-                step="0.01"
-                min="1"
+                type="text"
+                inputmode="decimal"
                 data-pick-key="${escapeHtml(r._pickKey)}"
                 value="${escapeHtml(r['OddReal'] || '')}"
+                placeholder="1.85"
               />
             </td>
             <td>
               <input
                 class="number small-input js-stake-real"
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                inputmode="decimal"
                 data-pick-key="${escapeHtml(r._pickKey)}"
                 value="${escapeHtml(r['StakeReal€'] || '')}"
+                placeholder="10"
               />
             </td>
             <td>${resultLabel(r['Resultado'])}</td>
@@ -1716,6 +1717,7 @@
         state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
 
         saveLocalState();
+        hasPendingCloudChanges = false;
         rerenderAll(false);
         alert('Estado cloud carregado com sucesso.');
       } catch (e) {
@@ -1726,7 +1728,7 @@
 
     async function saveCloudState(showSuccess = true) {
       try {
-        if (autoSaveInFlight) return;
+        if (autoSaveInFlight) return false;
 
         autoSaveInFlight = true;
 
@@ -1747,18 +1749,28 @@
         if (!data.ok) {
           if (showSuccess) alert('Erro ao guardar estado cloud.');
           console.error(data);
-          return;
+          return false;
         }
+
+        hasPendingCloudChanges = false;
 
         if (showSuccess) {
           alert('Estado guardado na cloud com sucesso.');
         }
+
+        return true;
       } catch (e) {
         if (showSuccess) alert('Erro de ligação ao serviço cloud.');
         console.error(e);
+        return false;
       } finally {
         autoSaveInFlight = false;
       }
+    }
+
+    function markDirty() {
+      hasPendingCloudChanges = true;
+      scheduleAutoSaveCloud();
     }
 
     function scheduleAutoSaveCloud() {
@@ -1768,8 +1780,9 @@
         clearTimeout(autoSaveTimer);
       }
 
-      autoSaveTimer = setTimeout(() => {
-        saveCloudState(false);
+      autoSaveTimer = setTimeout(async () => {
+        if (!hasPendingCloudChanges) return;
+        await saveCloudState(false);
       }, 2000);
     }
 
@@ -1785,7 +1798,7 @@
       drawBankrollChart();
 
       if (triggerAutoSave) {
-        scheduleAutoSaveCloud();
+        markDirty();
       }
     }
 
@@ -1894,6 +1907,7 @@
         state.nba = parseSemicolonCsv(nbaText);
         state.lastUpdated = new Date().toISOString();
 
+        hasPendingCloudChanges = false;
         rerenderAll(false);
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
@@ -1953,6 +1967,18 @@
       if (!file) return;
       await importManualJsonFromFile(file);
       e.target.value = '';
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && hasPendingCloudChanges) {
+        saveCloudState(false);
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (hasPendingCloudChanges) {
+        saveCloudState(false);
+      }
     });
 
     loadLocalState();
