@@ -5,6 +5,7 @@
   "bankroll": {
     "over15": 500,
     "over25": 500,
+    "btts": 500,
     "nba_over": 500
   },
   "leagues": {
@@ -32,6 +33,13 @@
       "min_picks": 1
     },
     "over25": {
+      "edge_min": -0.06,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
+    },
+    "btts": {
       "edge_min": -0.06,
       "kelly_fraction": 0.2,
       "cap_frac": 0.04,
