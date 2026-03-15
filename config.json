@@ -1,6 +1,6 @@
 {
   "run": {
-    "days_ahead": 1
+    "days_ahead": 2
   },
   "bankroll": {
     "over15": 500,
