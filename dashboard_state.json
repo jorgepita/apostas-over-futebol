@@ -9,7 +9,7 @@
     "2026-03-15|Primeira Liga|Rio Ave FC vs CF Estrela|O2.5": {
       "apostada": false,
       "oddReal": "1.9",
-      "stakeReal": "1.61"
+      "stakeReal": "1"
     },
     "2026-03-16|Premier League|Brentford vs Wolverhampton Wanderers|O2.5": {
       "apostada": true,
@@ -68,5 +68,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-03-15T20:16:01.448331+00:00"
+  "updatedAt": "2026-03-15T20:16:07.039219+00:00"
 }
