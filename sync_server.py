@@ -22,7 +22,7 @@ if not GITHUB_TOKEN:
 HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
     "Accept": "application/vnd.github+json",
-    "User-Agent": "apostas-dashboard-sync"
+    "User-Agent": "apostas-dashboard-sync",
 }
 
 
@@ -31,18 +31,32 @@ def github_contents_url(path: str) -> str:
 
 
 def get_file_from_github(path: str):
-    url = github_contents_url(path)
-    resp = requests.get(url, headers=HEADERS, params={"ref": GITHUB_BRANCH})
+    try:
+        url = github_contents_url(path)
+        resp = requests.get(
+            url,
+            headers=HEADERS,
+            params={"ref": GITHUB_BRANCH},
+            timeout=10,
+        )
 
-    if resp.status_code == 404:
+        if resp.status_code == 404:
+            return None, None
+
+        resp.raise_for_status()
+        data = resp.json()
+        content_b64 = data.get("content", "")
+        sha = data.get("sha")
+
+        if not content_b64:
+            return None, sha
+
+        decoded = base64.b64decode(content_b64).decode("utf-8")
+        return decoded, sha
+
+    except Exception as e:
+        print("GitHub read error:", e, flush=True)
         return None, None
-
-    resp.raise_for_status()
-    data = resp.json()
-    content_b64 = data.get("content", "")
-    sha = data.get("sha")
-    decoded = base64.b64decode(content_b64).decode("utf-8")
-    return decoded, sha
 
 
 def put_file_to_github(path: str, content_text: str, message: str, sha=None):
@@ -52,12 +66,49 @@ def put_file_to_github(path: str, content_text: str, message: str, sha=None):
         "content": base64.b64encode(content_text.encode("utf-8")).decode("utf-8"),
         "branch": GITHUB_BRANCH,
     }
+
     if sha:
         payload["sha"] = sha
 
-    resp = requests.put(url, headers=HEADERS, json=payload)
+    resp = requests.put(
+        url,
+        headers=HEADERS,
+        json=payload,
+        timeout=10,
+    )
     resp.raise_for_status()
     return resp.json()
+
+
+def validate_state(payload):
+    if not isinstance(payload, dict):
+        raise ValueError("Payload inválido")
+
+    bankroll = payload.get("bankrollInicial", 1000)
+    local_edits = payload.get("localEdits", {})
+    manual_bets = payload.get("manualBets", [])
+
+    if not isinstance(local_edits, dict):
+        raise ValueError("localEdits tem de ser objeto")
+
+    if not isinstance(manual_bets, list):
+        raise ValueError("manualBets tem de ser lista")
+
+    return {
+        "bankrollInicial": bankroll,
+        "localEdits": local_edits,
+        "manualBets": manual_bets,
+        "updatedAt": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/")
+def root():
+    return jsonify({
+        "ok": True,
+        "service": "apostas-dashboard-sync",
+        "endpoints": ["/health", "/state"],
+    })
 
 
 @app.get("/health")
@@ -67,39 +118,54 @@ def health():
 
 @app.get("/state")
 def get_state():
-    content, _sha = get_file_from_github(STATE_PATH)
+    try:
+        content, _sha = get_file_from_github(STATE_PATH)
 
-    if content is None:
+        if content is None:
+            return jsonify({
+                "ok": True,
+                "exists": False,
+                "state": {
+                    "bankrollInicial": 1000,
+                    "localEdits": {},
+                    "manualBets": [],
+                    "updatedAt": None,
+                },
+            })
+
+        parsed = json.loads(content)
         return jsonify({
             "ok": True,
-            "state": {
-                "bankrollInicial": 1000,
-                "localEdits": {},
-                "manualBets": []
-            }
+            "exists": True,
+            "state": parsed,
         })
 
-    return jsonify({"ok": True, "state": json.loads(content)})
+    except Exception as e:
+        print("GET /state error:", e, flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.post("/state")
 def save_state():
-    payload = request.get_json()
+    try:
+        payload = request.get_json(force=True, silent=False)
+        state = validate_state(payload)
 
-    state = {
-        "bankrollInicial": payload.get("bankrollInicial", 1000),
-        "localEdits": payload.get("localEdits", {}),
-        "manualBets": payload.get("manualBets", []),
-        "updatedAt": datetime.now(timezone.utc).isoformat()
-    }
+        _old_content, sha = get_file_from_github(STATE_PATH)
 
-    old_content, sha = get_file_from_github(STATE_PATH)
+        put_file_to_github(
+            STATE_PATH,
+            json.dumps(state, ensure_ascii=False, indent=2),
+            "update dashboard state",
+            sha=sha,
+        )
 
-    put_file_to_github(
-        STATE_PATH,
-        json.dumps(state, indent=2),
-        "update dashboard state",
-        sha=sha
-    )
+        return jsonify({"ok": True, "state": state})
 
-    return jsonify({"ok": True})
+    except Exception as e:
+        print("POST /state error:", e, flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000, debug=False)
