@@ -20,6 +20,8 @@
       --warn-bg: #fffbeb;
       --info: #2563eb;
       --info-bg: #eff6ff;
+      --manual: #6d28d9;
+      --manual-bg: #f5f3ff;
     }
 
     * { box-sizing: border-box; }
@@ -178,8 +180,8 @@
     }
 
     .tag.source-manual {
-      background: #f5f3ff;
-      color: #6d28d9;
+      background: var(--manual-bg);
+      color: var(--manual);
     }
 
     .tag.exec-yes {
@@ -258,7 +260,7 @@
 
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 10px;
       width: 100%;
     }
@@ -306,6 +308,54 @@
             <input id="bankrollInput" class="number" type="number" step="0.01" min="0" value="1000" />
           </div>
         </div>
+      </div>
+    </div>
+
+    <div class="card section" style="margin-bottom:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Filtros globais</h2>
+          <p class="small">Aplicados às picks do bot e às apostas manuais.</p>
+        </div>
+      </div>
+
+      <div class="filters-grid">
+        <input id="searchGlobal" class="input" placeholder="Pesquisar jogo, liga ou mercado" />
+
+        <select id="sourceFilter" class="select">
+          <option value="">Todas as origens</option>
+          <option value="bot">Só bot</option>
+          <option value="manual">Só manuais</option>
+        </select>
+
+        <select id="leagueFilter" class="select">
+          <option value="">Todas as ligas</option>
+        </select>
+
+        <select id="marketFilter" class="select">
+          <option value="">Todos os mercados</option>
+        </select>
+
+        <select id="resultFilter" class="select">
+          <option value="">Todos os resultados</option>
+          <option value="pending">Pendentes</option>
+          <option value="W">Win</option>
+          <option value="L">Loss</option>
+          <option value="P">Push</option>
+        </select>
+
+        <select id="executionFilter" class="select">
+          <option value="">Toda a execução</option>
+          <option value="executed">Executadas</option>
+          <option value="not_executed">Não executadas</option>
+        </select>
+
+        <select id="dateFilter" class="select">
+          <option value="">Todas as datas</option>
+          <option value="today">Hoje</option>
+          <option value="7">Últimos 7 dias</option>
+          <option value="30">Últimos 30 dias</option>
+        </select>
       </div>
     </div>
 
@@ -386,39 +436,6 @@
               <h2>Futebol</h2>
               <p class="small">Fonte: picks_hoje_simplificado.csv</p>
             </div>
-          </div>
-
-          <div class="filters-grid" style="margin-bottom:14px;">
-            <input id="searchFootball" class="input" placeholder="Pesquisar jogo, liga ou mercado" />
-
-            <select id="leagueFilter" class="select">
-              <option value="">Todas as ligas</option>
-            </select>
-
-            <select id="marketFilter" class="select">
-              <option value="">Todos os mercados</option>
-            </select>
-
-            <select id="resultFilter" class="select">
-              <option value="">Todos os resultados</option>
-              <option value="pending">Pendentes</option>
-              <option value="W">Win</option>
-              <option value="L">Loss</option>
-              <option value="P">Push</option>
-            </select>
-
-            <select id="executionFilter" class="select">
-              <option value="">Toda a execução</option>
-              <option value="executed">Executadas</option>
-              <option value="not_executed">Não executadas</option>
-            </select>
-
-            <select id="dateFilter" class="select">
-              <option value="">Todas as datas</option>
-              <option value="today">Hoje</option>
-              <option value="7">Últimos 7 dias</option>
-              <option value="30">Últimos 30 dias</option>
-            </select>
           </div>
 
           <div style="overflow:auto;">
@@ -632,6 +649,15 @@
       return '';
     }
 
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
     function makePickKey(row) {
       return [
         row['Data'] || '',
@@ -712,7 +738,8 @@
 
       const merged = {
         ...row,
-        Origem: 'Bot',
+        source: 'bot',
+        sourceLabel: 'Bot',
         Apostada: apostada ? 'Sim' : '',
         OddReal: oddReal,
         'StakeReal€': stakeReal
@@ -734,6 +761,9 @@
       merged._lucroRealLocal = lucroRealLocal;
       merged._resultKey = resultKey(merged['Resultado']);
       merged._dateNormalized = normalizeDateString(merged['Data']);
+      merged._league = merged['Liga'] || '';
+      merged._market = merged['Mercado'] || '';
+      merged._searchText = `${merged['Liga'] || ''} ${merged['Jogo'] || ''} ${merged['Mercado'] || ''}`.toLowerCase();
 
       return merged;
     }
@@ -757,17 +787,26 @@
       return getResolvedHistory().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
     }
 
-    function getResolvedManualBets() {
-      return state.manualBets
-        .map(b => ({
+    function getManualRowsMerged() {
+      return state.manualBets.map(b => {
+        const lucro = calcProfitByResult(b.resultado, b.stake, b.odd);
+        return {
           ...b,
-          source: 'Manual',
+          source: 'manual',
+          sourceLabel: 'Manual',
           executada: true,
-          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd),
+          _lucro: lucro,
           _resultKey: resultKey(b.resultado),
-          _dateNormalized: normalizeDateString(b.data)
-        }))
-        .filter(b => b._lucro !== null);
+          _dateNormalized: normalizeDateString(b.data),
+          _league: b.liga || '',
+          _market: b.mercado || '',
+          _searchText: `${b.liga || ''} ${b.jogo || ''} ${b.mercado || ''}`.toLowerCase()
+        };
+      });
+    }
+
+    function getResolvedManualBets() {
+      return getManualRowsMerged().filter(b => b._lucro !== null);
     }
 
     function getExecutionStats() {
@@ -793,8 +832,15 @@
       const resolvedManual = getResolvedManualBets();
       const execution = getExecutionStats();
 
-      const leagues = new Set(history.map(r => r['Liga']).filter(Boolean));
-      const markets = new Set(history.map(r => r['Mercado']).filter(Boolean));
+      const leagues = new Set([
+        ...history.map(r => r['Liga']).filter(Boolean),
+        ...state.manualBets.map(b => b.liga).filter(Boolean)
+      ]);
+
+      const markets = new Set([
+        ...history.map(r => r['Mercado']).filter(Boolean),
+        ...state.manualBets.map(b => b.mercado).filter(Boolean)
+      ]);
 
       const modelStake = sum(resolved.map(r => num(r['Stake€'])).filter(v => v !== null));
       const modelProfit = sum(resolved.map(r => num(r['Lucro€'])).filter(v => v !== null));
@@ -880,6 +926,13 @@
       `).join('');
     }
 
+    function getFilterSourceRows() {
+      return [
+        ...getDailyRowsMerged().map(r => ({ type: 'bot', league: r['Liga'] || '', market: r['Mercado'] || '' })),
+        ...getManualRowsMerged().map(r => ({ type: 'manual', league: r.liga || '', market: r.mercado || '' }))
+      ];
+    }
+
     function fillFilters() {
       const leagueSelect = document.getElementById('leagueFilter');
       const marketSelect = document.getElementById('marketFilter');
@@ -887,8 +940,10 @@
       const currentLeague = leagueSelect.value;
       const currentMarket = marketSelect.value;
 
-      const leagues = [...new Set(state.footballDaily.map(r => r['Liga']).filter(Boolean))].sort();
-      const markets = [...new Set(state.footballDaily.map(r => r['Mercado']).filter(Boolean))].sort();
+      const rows = getFilterSourceRows();
+
+      const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      const markets = [...new Set(rows.map(r => r.market).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
       leagueSelect.innerHTML =
         '<option value="">Todas as ligas</option>' +
@@ -902,18 +957,10 @@
       marketSelect.value = markets.includes(currentMarket) ? currentMarket : '';
     }
 
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function getFootballFilters() {
+    function getGlobalFilters() {
       return {
-        q: document.getElementById('searchFootball').value.trim().toLowerCase(),
+        q: document.getElementById('searchGlobal').value.trim().toLowerCase(),
+        source: document.getElementById('sourceFilter').value,
         league: document.getElementById('leagueFilter').value,
         market: document.getElementById('marketFilter').value,
         result: document.getElementById('resultFilter').value,
@@ -930,11 +977,10 @@
       return true;
     }
 
-    function filterFootballRows(rows, filters) {
+    function filterBotRows(rows, filters) {
       return rows.filter(r => {
-        const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
-
-        const okSearch = !filters.q || text.includes(filters.q);
+        const okSearch = !filters.q || r._searchText.includes(filters.q);
+        const okSource = !filters.source || filters.source === 'bot';
         const okLeague = !filters.league || r['Liga'] === filters.league;
         const okMarket = !filters.market || r['Mercado'] === filters.market;
         const okResult = !filters.result || r._resultKey === filters.result;
@@ -944,13 +990,30 @@
           (filters.execution === 'not_executed' && !r._apostadaBool);
         const okDate = matchDateFilter(r['Data'], filters.date);
 
-        return okSearch && okLeague && okMarket && okResult && okExecution && okDate;
+        return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+      });
+    }
+
+    function filterManualRows(rows, filters) {
+      return rows.filter(r => {
+        const okSearch = !filters.q || r._searchText.includes(filters.q);
+        const okSource = !filters.source || filters.source === 'manual';
+        const okLeague = !filters.league || (r.liga || '') === filters.league;
+        const okMarket = !filters.market || (r.mercado || '') === filters.market;
+        const okResult = !filters.result || r._resultKey === filters.result;
+        const okExecution =
+          !filters.execution ||
+          (filters.execution === 'executed') ||
+          (filters.execution === 'not_executed' ? false : true);
+        const okDate = matchDateFilter(r.data, filters.date);
+
+        return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
       });
     }
 
     function renderFootball() {
-      const filters = getFootballFilters();
-      const rows = filterFootballRows(getDailyRowsMerged(), filters);
+      const filters = getGlobalFilters();
+      const rows = filterBotRows(getDailyRowsMerged(), filters);
 
       document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => {
         const lucroModelo = num(r['Lucro€']);
@@ -999,17 +1062,17 @@
             <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
           </tr>
         `;
-      }).join('') : `<tr><td colspan="14"><div class="empty">Nenhuma pick encontrada com os filtros atuais.</div></td></tr>`;
+      }).join('') : `<tr><td colspan="14"><div class="empty">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>`;
 
       bindBotTableControls();
     }
 
     function renderManualBets() {
-      const rows = [...state.manualBets].sort((a, b) => String(b.data).localeCompare(String(a.data)));
+      const filters = getGlobalFilters();
+      const rows = filterManualRows(getManualRowsMerged(), filters)
+        .sort((a, b) => String(b.data).localeCompare(String(a.data)));
 
       document.getElementById('manualRows').innerHTML = rows.length ? rows.map(b => {
-        const lucro = calcProfitByResult(b.resultado, b.stake, b.odd);
-
         return `
           <tr>
             <td><span class="tag source-manual">Manual</span></td>
@@ -1028,14 +1091,14 @@
                 <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
               </select>
             </td>
-            <td class="mono ${profitClass(lucro)}">${lucro === null ? '—' : `€${fmt(lucro)}`}</td>
+            <td class="mono ${profitClass(b._lucro)}">${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
             <td>${escapeHtml(b.notas || '—')}</td>
             <td>
               <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
             </td>
           </tr>
         `;
-      }).join('') : `<tr><td colspan="12"><div class="empty">Ainda não tens apostas manuais.</div></td></tr>`;
+      }).join('') : `<tr><td colspan="12"><div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>`;
 
       bindManualControls();
     }
@@ -1178,6 +1241,7 @@
 
     function rerenderAll() {
       saveLocalState();
+      fillFilters();
       renderStats();
       renderFootball();
       renderManualBets();
@@ -1291,7 +1355,6 @@
         state.nba = parseSemicolonCsv(nbaText);
         state.lastUpdated = new Date().toISOString();
 
-        fillFilters();
         rerenderAll();
       } catch (e) {
         alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
@@ -1299,12 +1362,41 @@
       }
     }
 
-    document.getElementById('searchFootball').addEventListener('input', renderFootball);
-    document.getElementById('leagueFilter').addEventListener('change', renderFootball);
-    document.getElementById('marketFilter').addEventListener('change', renderFootball);
-    document.getElementById('resultFilter').addEventListener('change', renderFootball);
-    document.getElementById('executionFilter').addEventListener('change', renderFootball);
-    document.getElementById('dateFilter').addEventListener('change', renderFootball);
+    document.getElementById('searchGlobal').addEventListener('input', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('sourceFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('leagueFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('marketFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('resultFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('executionFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
+    document.getElementById('dateFilter').addEventListener('change', () => {
+      renderFootball();
+      renderManualBets();
+    });
+
     document.getElementById('refreshBtn').addEventListener('click', loadData);
 
     document.getElementById('bankrollInput').addEventListener('input', e => {
