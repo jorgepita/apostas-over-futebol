@@ -1,14 +1,24 @@
 import base64
 import json
 import os
+import re
+import unicodedata
 from pathlib import Path
 from urllib import request, parse, error
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import pandas as pd
 
 BASE = Path(__file__).resolve().parent
 FILE = BASE / "picks_hoje_simplificado.csv"
+
+API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
+
+GITHUB_OWNER = "jorgepita"
+GITHUB_REPO = "apostas-over-futebol"
+GITHUB_BRANCH = "main"
+REMOTE_CSV_NAME = "picks_hoje_simplificado.csv"
 
 # football-data.org competition codes
 LEAGUE_CODE_MAP = {
@@ -17,15 +27,94 @@ LEAGUE_CODE_MAP = {
     "Bundesliga": "BL1",
 }
 
-API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 
-# GitHub upload
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
-GITHUB_OWNER = "jorgepita"
-GITHUB_REPO = "apostas-over-futebol"
-GITHUB_BRANCH = "main"
+# =============================
+# Helpers
+# =============================
+def parse_float(v, default=0.0) -> float:
+    try:
+        return float(str(v).replace(",", "."))
+    except Exception:
+        return float(default)
 
 
+def normalize_text(s: str) -> str:
+    s = str(s).strip().lower()
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    s = s.replace("&", " and ")
+    s = re.sub(r"\b(fc|cf|sc|sv|afc|sad|club|deportivo|futebol)\b", " ", s)
+    s = re.sub(r"[^a-z0-9 ]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def split_game(game: str) -> tuple[str, str] | tuple[None, None]:
+    game = str(game).strip()
+    if " vs " not in game:
+        return None, None
+    a, b = game.split(" vs ", 1)
+    return a.strip(), b.strip()
+
+
+def team_match_score(a: str, b: str) -> int:
+    """
+    score simples de correspondência entre nomes de equipa.
+    quanto maior, melhor.
+    """
+    na = normalize_text(a)
+    nb = normalize_text(b)
+
+    if na == nb:
+        return 100
+
+    sa = set(na.split())
+    sb = set(nb.split())
+
+    if not sa or not sb:
+        return 0
+
+    inter = len(sa & sb)
+    if inter == 0:
+        return 0
+
+    # favorece nomes muito parecidos
+    score = inter * 10
+    if na in nb or nb in na:
+        score += 20
+
+    return score
+
+
+def games_match(csv_home: str, csv_away: str, api_home: str, api_away: str) -> bool:
+    home_score = team_match_score(csv_home, api_home)
+    away_score = team_match_score(csv_away, api_away)
+    return home_score >= 10 and away_score >= 10
+
+
+def market_result(market: str, home_goals: int, away_goals: int) -> str | None:
+    total = home_goals + away_goals
+    m = str(market).strip().upper()
+
+    if m == "O2.5":
+        return "W" if total >= 3 else "L"
+
+    if m == "O1.5":
+        return "W" if total >= 2 else "L"
+
+    return None
+
+
+def calc_profit(resultado: str, stake: float, odd: float) -> float:
+    if resultado == "W":
+        return round(stake * (odd - 1.0), 2)
+    if resultado == "L":
+        return round(-stake, 2)
+    return 0.0
+
+
+# =============================
+# football-data.org
+# =============================
 def http_get_json(url: str, token: str):
     req = request.Request(
         url,
@@ -39,6 +128,18 @@ def http_get_json(url: str, token: str):
         return json.loads(resp.read().decode("utf-8"))
 
 
+def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]:
+    url = (
+        f"https://api.football-data.org/v4/competitions/{league_code}/matches"
+        f"?dateFrom={parse.quote(date_str)}&dateTo={parse.quote(date_str)}"
+    )
+    data = http_get_json(url, API_TOKEN)
+    return data.get("matches", []) or []
+
+
+# =============================
+# GitHub upload
+# =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
@@ -92,7 +193,7 @@ def github_put_file(
     _ = github_request(url, token, method="PUT", data=payload)
 
 
-def upload_file_to_github(local_path: Path, remote_name: str) -> None:
+def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
     if not GITHUB_TOKEN:
         print("GitHub: GITHUB_TOKEN em falta, não atualizei o CSV no repositório.")
         return
@@ -111,54 +212,9 @@ def upload_file_to_github(local_path: Path, remote_name: str) -> None:
     print(f"GitHub: atualizado {remote_name}")
 
 
-def normalize_name(s: str) -> str:
-    return " ".join(str(s).strip().lower().split())
-
-
-def parse_float(v, default=0.0) -> float:
-    try:
-        return float(str(v).replace(",", "."))
-    except Exception:
-        return float(default)
-
-
-def market_won(market: str, home_goals: int, away_goals: int) -> bool | None:
-    total = home_goals + away_goals
-    m = str(market).strip().upper()
-    if m == "O2.5":
-        return total >= 3
-    if m == "O1.5":
-        return total >= 2
-    return None
-
-
-def fetch_finished_matches_for_date(league_code: str, date_str: str) -> list[dict]:
-    url = (
-        f"https://api.football-data.org/v4/competitions/{league_code}/matches"
-        f"?status=FINISHED&dateFrom={date_str}&dateTo={date_str}"
-    )
-    data = http_get_json(url, API_TOKEN)
-    return data.get("matches", []) or []
-
-
-def build_match_index(matches: list[dict]) -> dict:
-    idx = {}
-    for m in matches:
-        home = normalize_name(m.get("homeTeam", {}).get("name", ""))
-        away = normalize_name(m.get("awayTeam", {}).get("name", ""))
-        score = m.get("score", {}) or {}
-        ft = score.get("fullTime", {}) or {}
-
-        key = (home, away)
-        idx[key] = {
-            "status": m.get("status"),
-            "winner": score.get("winner"),
-            "home_goals": ft.get("home"),
-            "away_goals": ft.get("away"),
-        }
-    return idx
-
-
+# =============================
+# Main
+# =============================
 def main():
     if not FILE.exists():
         raise SystemExit("Falta picks_hoje_simplificado.csv")
@@ -168,82 +224,115 @@ def main():
 
     df = pd.read_csv(FILE, sep=";", dtype=str).fillna("")
 
-    for col in ["Resultado", "Lucro€", "Odd", "Stake€", "Liga", "Jogo", "Mercado", "Data"]:
+    # garantir colunas
+    for col in ["Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Resultado", "Lucro€"]:
         if col not in df.columns:
             df[col] = ""
 
-    # cache por liga+data para não gastar pedidos
-    cache: dict[tuple[str, str], dict] = {}
+    # cache para evitar pedidos repetidos
+    matches_cache: dict[tuple[str, str], list[dict]] = {}
 
     updated = 0
-    skipped = 0
+    ignored = 0
+    already_done = 0
 
     for i, row in df.iterrows():
-        resultado_atual = str(row.get("Resultado", "")).strip().lower()
-        if resultado_atual not in ["", "nan", "none"]:
-            skipped += 1
+        resultado_atual = str(row.get("Resultado", "")).strip().upper()
+
+        if resultado_atual in {"W", "L", "P"}:
+            already_done += 1
             continue
 
-        liga = str(row.get("Liga", "")).strip()
         data = str(row.get("Data", "")).strip()
+        liga = str(row.get("Liga", "")).strip()
         jogo = str(row.get("Jogo", "")).strip()
         mercado = str(row.get("Mercado", "")).strip()
         odd = parse_float(row.get("Odd", ""), 0.0)
         stake = parse_float(row.get("Stake€", ""), 0.0)
 
-        if not liga or not data or not jogo or odd <= 1.01 or stake <= 0:
-            skipped += 1
+        if not data or not liga or not jogo or odd <= 1.01 or stake <= 0:
+            ignored += 1
             continue
 
         league_code = LEAGUE_CODE_MAP.get(liga)
         if not league_code:
-            skipped += 1
+            print(f"[WARN] Liga sem mapping: {liga}")
+            ignored += 1
             continue
 
-        try:
-            home_name, away_name = [x.strip() for x in jogo.split(" vs ", 1)]
-        except ValueError:
-            skipped += 1
+        home_csv, away_csv = split_game(jogo)
+        if not home_csv or not away_csv:
+            print(f"[WARN] Jogo mal formatado: {jogo}")
+            ignored += 1
             continue
 
         cache_key = (league_code, data)
-        if cache_key not in cache:
-            matches = fetch_finished_matches_for_date(league_code, data)
-            cache[cache_key] = build_match_index(matches)
+        if cache_key not in matches_cache:
+            try:
+                matches_cache[cache_key] = fetch_matches_for_league_date(league_code, data)
+                print(f"[DBG] {liga} {data}: {len(matches_cache[cache_key])} jogos encontrados")
+            except Exception as e:
+                print(f"[ERR] API {liga} {data}: {e}")
+                ignored += 1
+                continue
 
-        match_idx = cache[cache_key]
-        result = match_idx.get((normalize_name(home_name), normalize_name(away_name)))
+        matches = matches_cache[cache_key]
 
-        if not result:
-            skipped += 1
+        matched = None
+        for m in matches:
+            api_home = m.get("homeTeam", {}).get("name", "")
+            api_away = m.get("awayTeam", {}).get("name", "")
+
+            if games_match(home_csv, away_csv, api_home, api_away):
+                matched = m
+                break
+
+        if not matched:
+            print(f"[WARN] Sem match API para: {jogo} | {liga} | {data}")
+            ignored += 1
             continue
 
-        if result.get("status") != "FINISHED":
-            skipped += 1
+        status = str(matched.get("status", "")).upper()
+        if status != "FINISHED":
+            print(f"[DBG] Ainda não terminado: {jogo} | status={status}")
+            ignored += 1
             continue
 
-        home_goals = result.get("home_goals")
-        away_goals = result.get("away_goals")
+        score = matched.get("score", {}) or {}
+        ft = score.get("fullTime", {}) or {}
+        home_goals = ft.get("home")
+        away_goals = ft.get("away")
+
         if home_goals is None or away_goals is None:
-            skipped += 1
+            print(f"[WARN] Sem fullTime score para: {jogo}")
+            ignored += 1
             continue
 
-        won = market_won(mercado, int(home_goals), int(away_goals))
-        if won is None:
-            skipped += 1
+        resultado = market_result(mercado, int(home_goals), int(away_goals))
+        if resultado is None:
+            print(f"[WARN] Mercado não suportado: {mercado}")
+            ignored += 1
             continue
 
-        resultado = "W" if won else "L"
-        lucro = round(stake * (odd - 1), 2) if won else round(-stake, 2)
+        lucro = calc_profit(resultado, stake, odd)
 
         df.at[i, "Resultado"] = resultado
         df.at[i, "Lucro€"] = str(lucro)
         updated += 1
 
-    df.to_csv(FILE, index=False, sep=";")
-    print(f"Resultados atualizados: {updated} | ignorados: {skipped}")
+        print(
+            f"[OK] {jogo} | {mercado} | {home_goals}-{away_goals} "
+            f"=> {resultado} | Lucro {lucro}"
+        )
 
-    upload_file_to_github(FILE, "picks_hoje_simplificado.csv")
+    df.to_csv(FILE, index=False, sep=";")
+
+    print(
+        f"Resultados atualizados: {updated} | "
+        f"já resolvidos: {already_done} | ignorados: {ignored}"
+    )
+
+    upload_csv_to_github(FILE, REMOTE_CSV_NAME)
 
 
 if __name__ == "__main__":
