@@ -1,5 +1,5 @@
 {
-  "bankrollInicial": 1000,
+  "bankrollInicial": 300,
   "localEdits": {
     "2026-03-15|Bundesliga|VfB Stuttgart vs RB Leipzig|O2.5": {
       "apostada": true,
@@ -22,6 +22,51 @@
       "stakeReal": ""
     }
   },
-  "manualBets": [],
-  "updatedAt": "2026-03-15T19:27:24.304965+00:00"
+  "manualBets": [
+    {
+      "id": "manual_1773589552242_8emqn2",
+      "data": "2026-03-15",
+      "liga": "z",
+      "jogo": "a x b",
+      "mercado": "btts",
+      "odd": "1.8",
+      "stake": "10",
+      "resultado": "L",
+      "notas": ""
+    },
+    {
+      "id": "manual_1773589680194_x2ivu1",
+      "data": "2026-03-15",
+      "liga": "y",
+      "jogo": "c x f",
+      "mercado": "total 2",
+      "odd": "2.06",
+      "stake": "20",
+      "resultado": "W",
+      "notas": ""
+    },
+    {
+      "id": "manual_1773589737044_mie7xu",
+      "data": "2026-03-15",
+      "liga": "g",
+      "jogo": "j x r",
+      "mercado": "total 1ª parte",
+      "odd": "1.79",
+      "stake": "15",
+      "resultado": "W",
+      "notas": ""
+    },
+    {
+      "id": "manual_1773605594799_lpt5s8",
+      "data": "2026-03-15",
+      "liga": "teste",
+      "jogo": "a x v",
+      "mercado": "btts",
+      "odd": "1.76",
+      "stake": "25",
+      "resultado": "",
+      "notas": ""
+    }
+  ],
+  "updatedAt": "2026-03-15T20:13:17.399046+00:00"
 }
