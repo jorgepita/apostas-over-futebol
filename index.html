@@ -152,7 +152,7 @@
       <div class="section-head">
         <div>
           <h2>Evolução da banca</h2>
-          <p class="small">Com base nas picks já resolvidas do futebol</p>
+          <p class="small">Com base no histórico total de picks resolvidas</p>
         </div>
         <span class="pill" id="bankrollLabel">Banca inicial: €1000.00</span>
       </div>
@@ -166,7 +166,7 @@
         <div class="section-head">
           <div>
             <h2>Futebol</h2>
-            <p class="small">Fonte: picks_hoje_simplificado.csv</p>
+            <p class="small">Fonte: picks_hoje_simplificado.csv (picks do dia)</p>
           </div>
           <div class="toolbar">
             <input id="searchFootball" class="input" placeholder="Pesquisar jogo ou liga" />
@@ -224,7 +224,7 @@
           <div class="section-head">
             <div>
               <h2>Resumo rápido</h2>
-              <p class="small">Com base nos teus CSV reais</p>
+              <p class="small">Com base no histórico real</p>
             </div>
           </div>
           <div class="list" id="summaryList"></div>
@@ -235,22 +235,29 @@
 
   <script>
     const URLS = {
-      football: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+      footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+      footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
       nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
     };
 
     const BANKROLL_INICIAL = 1000;
 
     const state = {
-      football: [],
+      footballDaily: [],
+      footballHistory: [],
       nba: [],
       lastUpdated: null,
     };
 
     function parseSemicolonCsv(text) {
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      const trimmed = (text || '').trim();
+      if (!trimmed) return [];
+
+      const lines = trimmed.split(/\r?\n/).filter(Boolean);
       if (!lines.length) return [];
+
       const headers = lines[0].split(';').map(h => h.trim());
+
       return lines.slice(1).map(line => {
         const values = line.split(';');
         const row = {};
@@ -262,12 +269,6 @@
     function num(v) {
       const n = Number(String(v).replace(',', '.'));
       return Number.isFinite(n) ? n : null;
-    }
-
-    function avg(arr) {
-      const valid = arr.filter(v => typeof v === 'number' && !Number.isNaN(v));
-      if (!valid.length) return 0;
-      return valid.reduce((a, b) => a + b, 0) / valid.length;
     }
 
     function sum(arr) {
@@ -297,18 +298,27 @@
       return '';
     }
 
-    function getResolvedFootball() {
-      return state.football.filter(r => {
+    function getResolvedHistory() {
+      return state.footballHistory.filter(r => {
         const res = String(r['Resultado'] || '').trim().toUpperCase();
         return res === 'W' || res === 'L';
       });
     }
 
+    function getPendingHistory() {
+      return state.footballHistory.filter(r => {
+        const res = String(r['Resultado'] || '').trim().toUpperCase();
+        return !(res === 'W' || res === 'L');
+      });
+    }
+
     function getMetrics() {
-      const football = state.football;
+      const history = state.footballHistory;
+      const daily = state.footballDaily;
       const nba = state.nba;
-      const leagues = new Set(football.map(r => r['Liga']).filter(Boolean));
-      const resolved = getResolvedFootball();
+      const resolved = getResolvedHistory();
+
+      const leagues = new Set(history.map(r => r['Liga']).filter(Boolean));
 
       const stakesResolved = resolved.map(r => num(r['Stake€'])).filter(v => v !== null);
       const profitsResolved = resolved.map(r => num(r['Lucro€'])).filter(v => v !== null);
@@ -318,23 +328,26 @@
       const wins = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
       const losses = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
       const totalResolved = wins + losses;
+      const totalHistory = history.length;
+      const pending = totalHistory - totalResolved;
       const roi = totalStake > 0 ? (totalProfit / totalStake) * 100 : 0;
       const winRate = totalResolved > 0 ? (wins / totalResolved) * 100 : 0;
       const currentBankroll = BANKROLL_INICIAL + totalProfit;
 
       return {
-        footballCount: football.length,
+        dailyCount: daily.length,
         nbaCount: nba.length,
+        totalHistory,
         leagues: leagues.size,
         totalStake,
         totalProfit,
         wins,
         losses,
         totalResolved,
+        pending,
         roi,
         winRate,
-        currentBankroll,
-        pending: football.length - totalResolved
+        currentBankroll
       };
     }
 
@@ -344,9 +357,9 @@
       document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(BANKROLL_INICIAL)}`;
 
       const cards = [
-        { label: 'Picks futebol', value: m.footballCount, note: `${m.leagues} ligas` },
+        { label: 'Picks do dia', value: m.dailyCount, note: `Histórico total: ${m.totalHistory}` },
         { label: 'Lucro total', value: `€${fmt(m.totalProfit)}`, note: `Stake total €${fmt(m.totalStake)}` },
-        { label: 'ROI', value: pct(m.roi), note: 'Lucro / stake total' },
+        { label: 'ROI total', value: pct(m.roi), note: 'Com base no histórico' },
         { label: 'Win rate', value: pct(m.winRate), note: `${m.wins}W / ${m.losses}L` },
         { label: 'Banca atual', value: `€${fmt(m.currentBankroll)}`, note: `Inicial €${fmt(BANKROLL_INICIAL)}` },
         { label: 'Última atualização', value: state.lastUpdated ? new Date(state.lastUpdated).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '—', note: 'Refresh automático: 60s' },
@@ -364,7 +377,7 @@
     function fillLeagueFilter() {
       const select = document.getElementById('leagueFilter');
       const current = select.value;
-      const leagues = [...new Set(state.football.map(r => r['Liga']).filter(Boolean))].sort();
+      const leagues = [...new Set(state.footballDaily.map(r => r['Liga']).filter(Boolean))].sort();
       select.innerHTML = '<option value="">Todas as ligas</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
       select.value = current;
     }
@@ -373,7 +386,7 @@
       const q = document.getElementById('searchFootball').value.toLowerCase();
       const league = document.getElementById('leagueFilter').value;
 
-      const rows = state.football.filter(r => {
+      const rows = state.footballDaily.filter(r => {
         const text = `${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase();
         const okSearch = text.includes(q);
         const okLeague = !league || r['Liga'] === league;
@@ -412,20 +425,25 @@
     function renderSummary() {
       const m = getMetrics();
 
-      const topFootball = [...state.football]
+      const topHistoryEdge = [...state.footballHistory]
         .map(r => ({ jogo: r['Jogo'], liga: r['Liga'], edge: num(r['Edge%']) ?? -1 }))
         .sort((a, b) => b.edge - a.edge)
-        .slice(0, 3);
+        .slice(0, 1)[0];
 
-      const best = [...getResolvedFootball()]
+      const best = [...getResolvedHistory()]
         .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? -9999 }))
         .sort((a, b) => b.lucro - a.lucro)[0];
 
+      const worst = [...getResolvedHistory()]
+        .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? 9999 }))
+        .sort((a, b) => a.lucro - b.lucro)[0];
+
       const items = [
-        `Lucro acumulado: €${fmt(m.totalProfit)} | ROI: ${pct(m.roi)} | Win rate: ${pct(m.winRate)}`,
-        `Picks resolvidas: ${m.totalResolved} | Ganhas: ${m.wins} | Perdidas: ${m.losses} | Pendentes: ${m.pending}`,
-        `Top edge futebol: ${topFootball[0] ? `${topFootball[0].jogo} (${topFootball[0].liga}) • ${fmt(topFootball[0].edge)}%` : '—'}`,
+        `Lucro acumulado: €${fmt(m.totalProfit)} | ROI total: ${pct(m.roi)} | Win rate: ${pct(m.winRate)}`,
+        `Histórico: ${m.totalHistory} picks | Resolvidas: ${m.totalResolved} | Pendentes: ${m.pending}`,
+        `Top edge histórico: ${topHistoryEdge ? `${topHistoryEdge.jogo} (${topHistoryEdge.liga}) • ${fmt(topHistoryEdge.edge)}%` : '—'}`,
         `Melhor pick fechada: ${best ? `${best.jogo} • €${fmt(best.lucro)}` : '—'}`,
+        `Pior pick fechada: ${worst ? `${worst.jogo} • €${fmt(worst.lucro)}` : '—'}`,
         `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
       ];
 
@@ -436,7 +454,7 @@
       const canvas = document.getElementById('bankrollChart');
       const ctx = canvas.getContext('2d');
 
-      const resolved = [...getResolvedFootball()].sort((a, b) => {
+      const resolved = [...getResolvedHistory()].sort((a, b) => {
         const da = new Date(a['Data'] || '1970-01-01').getTime();
         const db = new Date(b['Data'] || '1970-01-01').getTime();
         return da - db;
@@ -528,15 +546,18 @@
 
     async function loadData() {
       try {
-        const [footballRes, nbaRes] = await Promise.all([
-          fetch(URLS.football + '?t=' + Date.now()),
+        const [dailyRes, historyRes, nbaRes] = await Promise.all([
+          fetch(URLS.footballDaily + '?t=' + Date.now()),
+          fetch(URLS.footballHistory + '?t=' + Date.now()),
           fetch(URLS.nba + '?t=' + Date.now()),
         ]);
 
-        const footballText = await footballRes.text();
+        const dailyText = await dailyRes.text();
+        const historyText = await historyRes.text();
         const nbaText = await nbaRes.text();
 
-        state.football = parseSemicolonCsv(footballText);
+        state.footballDaily = parseSemicolonCsv(dailyText);
+        state.footballHistory = parseSemicolonCsv(historyText);
         state.nba = parseSemicolonCsv(nbaText);
         state.lastUpdated = new Date().toISOString();
 
