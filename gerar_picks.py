@@ -94,8 +94,6 @@ def prob_over25(lam_total: float) -> float:
 
 
 def prob_btts_yes(lam_home: float, lam_away: float) -> float:
-    # Assumindo Poisson independentes:
-    # P(BTTS Yes) = 1 - P(H=0) - P(A=0) + P(H=0,A=0)
     p_home0 = math.exp(-max(0.0, lam_home))
     p_away0 = math.exp(-max(0.0, lam_away))
     return float(max(0.0, min(1.0, 1.0 - p_home0 - p_away0 + (p_home0 * p_away0))))
@@ -305,13 +303,107 @@ def build_message(rows: list[dict], titulo: str) -> str:
 
 
 # =============================
+# Qualidade / score / correlação
+# =============================
+def market_quality_filter(row: dict) -> bool:
+    market = str(row.get("Market", "")).strip().upper()
+    odd = float(row.get("Odd", 0.0) or 0.0)
+    lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
+    lam_a = float(row.get("LambdaAway", 0.0) or 0.0)
+    lam_t = float(row.get("LambdaTotal", 0.0) or 0.0)
+    edge = float(row.get("Edge", 0.0) or 0.0)
+
+    if odd <= 1.01:
+        return False
+
+    # Filtros mais apertados para melhorar qualidade real
+    if market == "O2.5":
+        if lam_t < 2.20:
+            return False
+        if odd < 1.70 or odd > 2.30:
+            return False
+        if edge <= 0:
+            return False
+
+    elif market == "BTTS":
+        if lam_h < 0.85 or lam_a < 0.85:
+            return False
+        if lam_t < 2.10:
+            return False
+        if odd < 1.65 or odd > 2.25:
+            return False
+        if edge <= 0:
+            return False
+
+    return True
+
+
+def compute_pick_score(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    df = df.copy()
+    df["ProbModel"] = pd.to_numeric(df["ProbModel"], errors="coerce").fillna(0.0)
+    df["ProbMarket"] = pd.to_numeric(df["ProbMarket"], errors="coerce").fillna(0.0)
+    df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
+    df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+    df["LambdaHome"] = pd.to_numeric(df["LambdaHome"], errors="coerce").fillna(0.0)
+    df["LambdaAway"] = pd.to_numeric(df["LambdaAway"], errors="coerce").fillna(0.0)
+    df["LambdaTotal"] = pd.to_numeric(df["LambdaTotal"], errors="coerce").fillna(0.0)
+
+    df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
+
+    # Score simples mas forte:
+    # edge pesa mais, Kelly complementa, gap confirma, lambdas reforçam confiança
+    df["Score"] = (
+        (df["Edge"] * 100.0)
+        + (df["KellyTrue"] * 20.0)
+        + (df["ProbGap"] * 50.0)
+        + (df["LambdaTotal"] * 1.0)
+    )
+
+    return df
+
+
+def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    df = df.copy()
+    df = compute_pick_score(df)
+
+    game_cols = ["Date", "League", "HomeTeam", "AwayTeam"]
+    keep_rows = []
+
+    for _, g in df.groupby(game_cols, dropna=False):
+        g = g.sort_values(
+            ["Score", "Edge", "KellyTrue", "ProbModel"],
+            ascending=[False, False, False, False]
+        ).reset_index(drop=True)
+
+        # Mantém só a melhor pick por jogo para evitar correlação O2.5 + BTTS
+        keep_rows.append(g.iloc[0].to_dict())
+
+    out = pd.DataFrame(keep_rows)
+    out = out.sort_values(
+        ["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"],
+        ascending=[True, True, True, True, False]
+    ).reset_index(drop=True)
+    return out
+
+
+# =============================
 # Regras de mercado / stake
 # =============================
 def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
     if not rows:
         return pd.DataFrame()
 
-    df = pd.DataFrame(rows)
+    filtered_rows = [r for r in rows if market_quality_filter(r)]
+    if not filtered_rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(filtered_rows)
 
     df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
     df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
@@ -335,6 +427,12 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     daily_cap_frac = float(rules.get("daily_cap_frac", 0.15))
     min_picks = int(rules.get("min_picks", 1))
 
+    df = compute_pick_score(df)
+    df = dedupe_correlated_picks(df)
+
+    if df.empty:
+        return df
+
     df["StakeFracRaw"] = df["KellyTrue"] * kfrac
     df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
@@ -351,7 +449,13 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-    df = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).reset_index(drop=True)
+    # Remover picks com stake nula após scaling
+    df = df[df["Stake€"] > 0].copy()
+
+    df = df.sort_values(
+        ["Score", "Edge", "KellyTrue"],
+        ascending=[False, False, False]
+    ).reset_index(drop=True)
 
     round_cols = {
         "LambdaHome": 3,
@@ -359,8 +463,10 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
         "LambdaTotal": 3,
         "ProbModel": 3,
         "ProbMarket": 3,
+        "ProbGap": 3,
         "Edge": 4,
         "KellyTrue": 4,
+        "Score": 3,
         "StakeFracRaw": 4,
         "StakeFrac": 4,
         "Stake€": 2,
@@ -528,10 +634,6 @@ def main():
                     return odd
         return 0.0
 
-    avg_odd25_series = pd.to_numeric(fixtures["Odd_Over25"], errors="coerce")
-    avg_odd25 = float(avg_odd25_series[avg_odd25_series > 1.01].mean()) if (avg_odd25_series > 1.01).any() else 1.95
-    print(f"[DBG] Odd média O2.5 do dia: {avg_odd25:.2f}")
-
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
         if league_fixt.empty:
@@ -539,6 +641,7 @@ def main():
 
         hist_path = BASE / "data_raw" / f"{league_key}.csv"
         if not hist_path.exists():
+            print(f"[WARN] histórico em falta para {league_key}")
             continue
 
         df_hist = pd.read_csv(hist_path, sep=None, engine="python")
@@ -576,25 +679,24 @@ def main():
                 lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
                 lam_t = lam_h + lam_a
 
-            p25_raw = prob_over25(lam_t)
-            p25 = clamp_prob_o25(p25_raw)
+            base_row = {
+                "Date": fx["Date"],
+                "League": league_key,
+                "LeagueName": league_name,
+                "HomeTeam": home,
+                "AwayTeam": away,
+                "LambdaHome": lam_h,
+                "LambdaAway": lam_a,
+                "LambdaTotal": lam_t,
+            }
 
             odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
             if odd25 > 1.01:
+                p25_raw = prob_over25(lam_t)
+                p25 = clamp_prob_o25(p25_raw)
                 pm25 = 1.0 / odd25
                 edge25 = clamp_edge_o25(p25 - pm25)
                 k25 = kelly_fraction(p25, odd25)
-
-                base_row = {
-                    "Date": fx["Date"],
-                    "League": league_key,
-                    "LeagueName": league_name,
-                    "HomeTeam": home,
-                    "AwayTeam": away,
-                    "LambdaHome": lam_h,
-                    "LambdaAway": lam_a,
-                    "LambdaTotal": lam_t,
-                }
 
                 rows25.append(
                     {
@@ -615,17 +717,6 @@ def main():
                 pmbtts = 1.0 / odd_btts
                 edgebtts = clamp_edge_btts(pbtts - pmbtts)
                 kbtts = kelly_fraction(pbtts, odd_btts)
-
-                base_row = {
-                    "Date": fx["Date"],
-                    "League": league_key,
-                    "LeagueName": league_name,
-                    "HomeTeam": home,
-                    "AwayTeam": away,
-                    "LambdaHome": lam_h,
-                    "LambdaAway": lam_a,
-                    "LambdaTotal": lam_t,
-                }
 
                 rows_btts.append(
                     {
@@ -654,26 +745,32 @@ def main():
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts)
 
     if not out25.empty:
-      out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
-      out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
-      out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
+        out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
+        out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
+        out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
 
     if not out_btts.empty:
-      out_btts["Odd"] = pd.to_numeric(out_btts["Odd"], errors="coerce")
-      out_btts["Stake€"] = pd.to_numeric(out_btts["Stake€"], errors="coerce")
-      out_btts = out_btts[(out_btts["Odd"] > 1.01) & (out_btts["Stake€"] > 0)].copy()
+        out_btts["Odd"] = pd.to_numeric(out_btts["Odd"], errors="coerce")
+        out_btts["Stake€"] = pd.to_numeric(out_btts["Stake€"], errors="coerce")
+        out_btts = out_btts[(out_btts["Odd"] > 1.01) & (out_btts["Stake€"] > 0)].copy()
+
+    # Junta tudo e remove correlação final entre mercados do mesmo jogo
+    combo = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
+    if not combo.empty:
+        combo = dedupe_correlated_picks(combo)
+        combo = combo[combo["Stake€"] > 0].copy()
+        combo = combo.sort_values(["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"], ascending=[True, True, True, True, False]).reset_index(drop=True)
+
+    # Repartir combo final por mercado para manter CSV separados coerentes
+    out25_final = combo[combo["Market"] == "O2.5"].copy() if not combo.empty else pd.DataFrame()
+    out_btts_final = combo[combo["Market"] == "BTTS"].copy() if not combo.empty else pd.DataFrame()
 
     out25_path = BASE / "picks_over25.csv"
     out_btts_path = BASE / "picks_btts.csv"
     combo_path = BASE / "picks_hoje.csv"
 
-    out25.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
-    out_btts.to_csv(out_btts_path, index=False, encoding="utf-8", sep=";")
-
-    combo = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
-    if not combo.empty:
-        combo = combo.sort_values(["Date", "LeagueName", "HomeTeam", "AwayTeam", "Market"]).reset_index(drop=True)
-
+    out25_final.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
+    out_btts_final.to_csv(out_btts_path, index=False, encoding="utf-8", sep=";")
     combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
 
     combo_github_path = BASE / "picks_hoje_github.csv"
@@ -719,8 +816,8 @@ def main():
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
-    print(f"- {out25_path.name} ({len(out25)} picks)")
-    print(f"- {out_btts_path.name} ({len(out_btts)} picks)")
+    print(f"- {out25_path.name} ({len(out25_final)} picks)")
+    print(f"- {out_btts_path.name} ({len(out_btts_final)} picks)")
     print(f"- {combo_path.name} ({len(combo)} picks)")
     print(f"- {combo_github_path.name} ({len(combo)} picks)")
     print(f"- {simple_path.name} ({len(simple)} picks)")
@@ -734,13 +831,13 @@ def main():
             sent = load_sent_state(today_iso)
 
             new25 = []
-            for r in df_to_rows(out25):
+            for r in df_to_rows(out25_final):
                 pid = pick_id(r)
                 if pid not in sent:
                     new25.append(r)
 
             new_btts = []
-            for r in df_to_rows(out_btts):
+            for r in df_to_rows(out_btts_final):
                 pid = pick_id(r)
                 if pid not in sent:
                     new_btts.append(r)
