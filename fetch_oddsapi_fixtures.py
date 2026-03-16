@@ -16,13 +16,14 @@ SPORTS = {
     "premier": "soccer_epl",
     "portugal": "soccer_portugal_primeira_liga",
     "alemanha": "soccer_germany_bundesliga",
+    # "espanha": "soccer_spain_la_liga",
+    # "franca": "soccer_france_ligue_one",
+    # "italia": "soccer_italy_serie_a",
+    # "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
 REGIONS = "eu,uk"
-
-# AGORA PEDE TOTALS E BTTS
 MARKETS = "totals,btts"
-
 ODDS_FORMAT = "decimal"
 
 
@@ -39,6 +40,8 @@ def http_get_json(url: str):
 
 
 def build_url(sport_key: str) -> str:
+    if not API_KEY:
+        raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
     params = {
         "apiKey": API_KEY,
         "regions": REGIONS,
@@ -48,52 +51,59 @@ def build_url(sport_key: str) -> str:
     return BASE.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
 
 
-def pick_best_over_price(bookmakers, goal_line):
-
+def pick_best_over25_price(bookmakers: List[Dict[str, Any]]) -> Optional[float]:
     best_price = None
 
     for bm in bookmakers or []:
-        for m in bm.get("markets", []) or []:
-
-            if m.get("key") != "totals":
+        for market in bm.get("markets", []) or []:
+            if market.get("key") != "totals":
                 continue
 
-            for o in m.get("outcomes", []) or []:
+            for outcome in market.get("outcomes", []) or []:
+                try:
+                    if outcome.get("name") != "Over":
+                        continue
 
-                if o.get("name") != "Over":
+                    point = outcome.get("point")
+                    price = outcome.get("price")
+
+                    if point is None or price is None:
+                        continue
+
+                    if float(point) == 2.5:
+                        price = float(price)
+                        if price > 1.01:
+                            if best_price is None or price > best_price:
+                                best_price = price
+                except Exception:
                     continue
-
-                if float(o.get("point", 0)) == goal_line:
-
-                    price = float(o.get("price", 0))
-
-                    if price > 1.01:
-                        if best_price is None or price > best_price:
-                            best_price = price
 
     return best_price
 
 
-def pick_best_btts(bookmakers):
-
+def pick_best_btts_yes_price(bookmakers: List[Dict[str, Any]]) -> Optional[float]:
     best_price = None
 
     for bm in bookmakers or []:
-        for m in bm.get("markets", []) or []:
-
-            if m.get("key") != "btts":
+        for market in bm.get("markets", []) or []:
+            if market.get("key") != "btts":
                 continue
 
-            for o in m.get("outcomes", []) or []:
+            for outcome in market.get("outcomes", []) or []:
+                try:
+                    name = str(outcome.get("name", "")).strip().lower()
+                    price = outcome.get("price")
 
-                if o.get("name") != "Yes":
+                    if price is None:
+                        continue
+
+                    if name in {"yes", "sim"}:
+                        price = float(price)
+                        if price > 1.01:
+                            if best_price is None or price > best_price:
+                                best_price = price
+                except Exception:
                     continue
-
-                price = float(o.get("price", 0))
-
-                if price > 1.01:
-                    if best_price is None or price > best_price:
-                        best_price = price
 
     return best_price
 
@@ -104,43 +114,49 @@ def iso_to_date_utc(iso_utc: str) -> str:
 
 
 def main():
-
     rows = []
+    errors = []
+    unauthorized_count = 0
+
+    count_o25_real = 0
+    count_btts_real = 0
+    count_both_real = 0
 
     for league_key, sport_key in SPORTS.items():
-
         try:
-
             url = build_url(sport_key)
-
             data = http_get_json(url)
-
-            print(f"[DBG] {league_key} events = {len(data)}")
-
+            print(f"[DBG] FETCH league={league_key} sport={sport_key} events={len(data or [])}")
         except Exception as e:
-
-            print(f"Erro {league_key} -> {e}")
-
+            msg = str(e)
+            if ("HTTP Error 401" in msg) or ("401" in msg and "Unauthorized" in msg):
+                unauthorized_count += 1
+            errors.append(f"{league_key}: {e}")
             continue
 
-        for ev in data:
+        kept = 0
 
+        for ev in data or []:
             home = ev.get("home_team")
             away = ev.get("away_team")
             commence = ev.get("commence_time")
-
-            if not home or not away or not commence:
-                continue
-
             bms = ev.get("bookmakers", [])
 
-            odd15 = pick_best_over_price(bms, 1.5)
-            odd25 = pick_best_over_price(bms, 2.5)
-
-            odd_btts = pick_best_btts(bms)
-
-            if not odd15 and not odd25 and not odd_btts:
+            if not (home and away and commence):
                 continue
+
+            odd25 = pick_best_over25_price(bms)
+            odd_btts = pick_best_btts_yes_price(bms)
+
+            if odd25 is None and odd_btts is None:
+                continue
+
+            if odd25 is not None:
+                count_o25_real += 1
+            if odd_btts is not None:
+                count_btts_real += 1
+            if odd25 is not None and odd_btts is not None:
+                count_both_real += 1
 
             rows.append(
                 {
@@ -148,32 +164,34 @@ def main():
                     "League": league_key,
                     "HomeTeam": home,
                     "AwayTeam": away,
-                    "Odd_Over15": f"{odd15:.2f}" if odd15 else "",
-                    "Odd_Over25": f"{odd25:.2f}" if odd25 else "",
-                    "Odd_BTTS_Yes": f"{odd_btts:.2f}" if odd_btts else "",
+                    "Odd_Over25": (f"{odd25:.2f}" if odd25 is not None else ""),
+                    "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
                 }
             )
+            kept += 1
+
+        print(f"[DBG] FETCH league={league_key} kept_rows={kept}")
 
     with open("fixtures_today.csv", "w", newline="", encoding="utf-8") as f:
-
         w = csv.DictWriter(
             f,
-            fieldnames=[
-                "Date",
-                "League",
-                "HomeTeam",
-                "AwayTeam",
-                "Odd_Over15",
-                "Odd_Over25",
-                "Odd_BTTS_Yes",
-            ],
+            fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25", "Odd_BTTS_Yes"],
         )
-
         w.writeheader()
-
         w.writerows(rows)
 
-    print(f"OK fixtures_today.csv: {len(rows)} jogos")
+    print(f"OK fixtures_today.csv: {len(rows)} jogos (com O2.5 ou BTTS)")
+    print(f"[DBG] Jogos com O2.5 real: {count_o25_real}")
+    print(f"[DBG] Jogos com BTTS real: {count_btts_real}")
+    print(f"[DBG] Jogos com ambos os mercados: {count_both_real}")
+
+    if errors:
+        print("\nAvisos por liga:")
+        for e in errors:
+            print(" -", e)
+
+    if unauthorized_count == len(SPORTS):
+        raise SystemExit("ODDS_API_KEY inválida (401 em todas as ligas).")
 
 
 if __name__ == "__main__":
