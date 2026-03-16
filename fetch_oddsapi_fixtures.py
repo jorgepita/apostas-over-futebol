@@ -16,14 +16,13 @@ SPORTS = {
     "premier": "soccer_epl",
     "portugal": "soccer_portugal_primeira_liga",
     "alemanha": "soccer_germany_bundesliga",
-    # "espanha": "soccer_spain_la_liga",
-    # "franca": "soccer_france_ligue_one",
-    # "italia": "soccer_italy_serie_a",
-    # "paises_baixos": "soccer_netherlands_eredivisie",
 }
 
 REGIONS = "eu,uk"
-MARKETS = "totals"
+
+# AGORA PEDE TOTALS E BTTS
+MARKETS = "totals,btts"
+
 ODDS_FORMAT = "decimal"
 
 
@@ -40,8 +39,6 @@ def http_get_json(url: str):
 
 
 def build_url(sport_key: str) -> str:
-    if not API_KEY:
-        raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
     params = {
         "apiKey": API_KEY,
         "regions": REGIONS,
@@ -51,49 +48,54 @@ def build_url(sport_key: str) -> str:
     return BASE.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
 
 
-def pick_best_over_price(bookmakers: List[Dict[str, Any]], goal_line: float) -> Optional[float]:
-    """
-    Procura a melhor odd disponível para Over X.5 em todos os bookmakers.
-    """
+def pick_best_over_price(bookmakers, goal_line):
+
     best_price = None
 
     for bm in bookmakers or []:
         for m in bm.get("markets", []) or []:
+
             if m.get("key") != "totals":
                 continue
 
             for o in m.get("outcomes", []) or []:
-                try:
-                    if o.get("name") != "Over":
-                        continue
 
-                    point = o.get("point")
-                    price = o.get("price")
-
-                    if point is None or price is None:
-                        continue
-
-                    if float(point) == float(goal_line):
-                        price = float(price)
-                        if price > 1.01:
-                            if best_price is None or price > best_price:
-                                best_price = price
-                except Exception:
+                if o.get("name") != "Over":
                     continue
+
+                if float(o.get("point", 0)) == goal_line:
+
+                    price = float(o.get("price", 0))
+
+                    if price > 1.01:
+                        if best_price is None or price > best_price:
+                            best_price = price
 
     return best_price
 
 
-def estimate_over15_from_over25(odd25: Optional[float]) -> Optional[float]:
-    """
-    Fallback conservador: estima O1.5 a partir de O2.5.
-    """
-    if odd25 is None or odd25 <= 1.01:
-        return None
+def pick_best_btts(bookmakers):
 
-    est = 1.0 + (odd25 - 1.0) * 0.55
-    est = max(1.12, min(1.80, est))
-    return round(est, 2)
+    best_price = None
+
+    for bm in bookmakers or []:
+        for m in bm.get("markets", []) or []:
+
+            if m.get("key") != "btts":
+                continue
+
+            for o in m.get("outcomes", []) or []:
+
+                if o.get("name") != "Yes":
+                    continue
+
+                price = float(o.get("price", 0))
+
+                if price > 1.01:
+                    if best_price is None or price > best_price:
+                        best_price = price
+
+    return best_price
 
 
 def iso_to_date_utc(iso_utc: str) -> str:
@@ -102,62 +104,43 @@ def iso_to_date_utc(iso_utc: str) -> str:
 
 
 def main():
-    rows = []
-    errors = []
-    unauthorized_count = 0
 
-    count_both_real = 0
-    count_only_15_real = 0
-    count_only_25_real = 0
-    count_15_estimated = 0
+    rows = []
 
     for league_key, sport_key in SPORTS.items():
+
         try:
+
             url = build_url(sport_key)
+
             data = http_get_json(url)
-            print(f"[DBG] FETCH league={league_key} sport={sport_key} events={len(data or [])}")
+
+            print(f"[DBG] {league_key} events = {len(data)}")
+
         except Exception as e:
-            msg = str(e)
-            if ("HTTP Error 401" in msg) or ("401" in msg and "Unauthorized" in msg):
-                unauthorized_count += 1
-            errors.append(f"{league_key}: {e}")
+
+            print(f"Erro {league_key} -> {e}")
+
             continue
 
-        kept = 0
+        for ev in data:
 
-        for ev in data or []:
             home = ev.get("home_team")
             away = ev.get("away_team")
             commence = ev.get("commence_time")
+
+            if not home or not away or not commence:
+                continue
+
             bms = ev.get("bookmakers", [])
 
-            if not (home and away and commence):
+            odd15 = pick_best_over_price(bms, 1.5)
+            odd25 = pick_best_over_price(bms, 2.5)
+
+            odd_btts = pick_best_btts(bms)
+
+            if not odd15 and not odd25 and not odd_btts:
                 continue
-
-            odd15_real = pick_best_over_price(bms, 1.5)
-            odd25_real = pick_best_over_price(bms, 2.5)
-
-            odd15_final = odd15_real
-            odd25_final = odd25_real
-
-            if odd15_final is None and odd25_final is not None:
-                odd15_final = estimate_over15_from_over25(odd25_final)
-                if odd15_final is not None:
-                    count_15_estimated += 1
-                    print(
-                        f"[INFO] O1.5 estimado -> {league_key} | {home} vs {away} | "
-                        f"O2.5={odd25_final:.2f} => O1.5~{odd15_final:.2f}"
-                    )
-
-            if odd15_final is None and odd25_final is None:
-                continue
-
-            if odd15_real is not None and odd25_real is not None:
-                count_both_real += 1
-            elif odd15_real is not None and odd25_real is None:
-                count_only_15_real += 1
-            elif odd15_real is None and odd25_real is not None:
-                count_only_25_real += 1
 
             rows.append(
                 {
@@ -165,35 +148,32 @@ def main():
                     "League": league_key,
                     "HomeTeam": home,
                     "AwayTeam": away,
-                    "Odd_Over15": (f"{odd15_final:.2f}" if odd15_final is not None else ""),
-                    "Odd_Over25": (f"{odd25_final:.2f}" if odd25_final is not None else ""),
+                    "Odd_Over15": f"{odd15:.2f}" if odd15 else "",
+                    "Odd_Over25": f"{odd25:.2f}" if odd25 else "",
+                    "Odd_BTTS_Yes": f"{odd_btts:.2f}" if odd_btts else "",
                 }
             )
-            kept += 1
-
-        print(f"[DBG] FETCH league={league_key} kept_rows={kept}")
 
     with open("fixtures_today.csv", "w", newline="", encoding="utf-8") as f:
+
         w = csv.DictWriter(
             f,
-            fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over15", "Odd_Over25"],
+            fieldnames=[
+                "Date",
+                "League",
+                "HomeTeam",
+                "AwayTeam",
+                "Odd_Over15",
+                "Odd_Over25",
+                "Odd_BTTS_Yes",
+            ],
         )
+
         w.writeheader()
+
         w.writerows(rows)
 
-    print(f"OK fixtures_today.csv: {len(rows)} jogos (com O1.5 ou O2.5)")
-    print(f"[DBG] Jogos com ambas odds reais: {count_both_real}")
-    print(f"[DBG] Jogos só com O1.5 real: {count_only_15_real}")
-    print(f"[DBG] Jogos só com O2.5 real: {count_only_25_real}")
-    print(f"[DBG] O1.5 estimado a partir de O2.5: {count_15_estimated}")
-
-    if errors:
-        print("\nAvisos por liga:")
-        for e in errors:
-            print(" -", e)
-
-    if unauthorized_count == len(SPORTS):
-        raise SystemExit("ODDS_API_KEY inválida (401 em todas as ligas).")
+    print(f"OK fixtures_today.csv: {len(rows)} jogos")
 
 
 if __name__ == "__main__":
