@@ -3,7 +3,6 @@
     "days_ahead": 2
   },
   "bankroll": {
-    "over15": 500,
     "over25": 500,
     "btts": 500,
     "nba_over": 500
@@ -25,13 +24,6 @@
     "lambda_boost": 1.12
   },
   "rules": {
-    "over15": {
-      "edge_min": -0.08,
-      "kelly_fraction": 0.25,
-      "cap_frac": 0.05,
-      "daily_cap_frac": 0.15,
-      "min_picks": 1
-    },
     "over25": {
       "edge_min": -0.06,
       "kelly_fraction": 0.2,
