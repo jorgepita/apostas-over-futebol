@@ -10,7 +10,8 @@ from typing import Optional, Dict, Any, List
 API_KEY = os.getenv("ODDS_API_KEY", "").strip()
 print(f"[DBG] ODDS_API_KEY len = {len(API_KEY)}")
 
-BASE = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
+BASE_ODDS = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
+BASE_EVENT_ODDS = "https://api.the-odds-api.com/v4/sports/{sport}/events/{event_id}/odds"
 
 SPORTS = {
     "premier": "soccer_epl",
@@ -23,7 +24,6 @@ SPORTS = {
 }
 
 REGIONS = "eu,uk"
-MARKETS = "totals,btts"
 ODDS_FORMAT = "decimal"
 
 
@@ -39,16 +39,30 @@ def http_get_json(url: str):
         return json.loads(r.read().decode("utf-8"))
 
 
-def build_url(sport_key: str) -> str:
+def build_totals_url(sport_key: str) -> str:
     if not API_KEY:
         raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
+
     params = {
         "apiKey": API_KEY,
         "regions": REGIONS,
-        "markets": MARKETS,
+        "markets": "totals",
         "oddsFormat": ODDS_FORMAT,
     }
-    return BASE.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
+    return BASE_ODDS.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
+
+
+def build_btts_url(sport_key: str, event_id: str) -> str:
+    if not API_KEY:
+        raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
+
+    params = {
+        "apiKey": API_KEY,
+        "regions": REGIONS,
+        "markets": "btts",
+        "oddsFormat": ODDS_FORMAT,
+    }
+    return BASE_EVENT_ODDS.format(sport=sport_key, event_id=event_id) + "?" + urllib.parse.urlencode(params)
 
 
 def pick_best_over25_price(bookmakers: List[Dict[str, Any]]) -> Optional[float]:
@@ -113,6 +127,20 @@ def iso_to_date_utc(iso_utc: str) -> str:
     return dt.date().isoformat()
 
 
+def fetch_btts_for_event(sport_key: str, event_id: str) -> Optional[float]:
+    try:
+        url = build_btts_url(sport_key, event_id)
+        data = http_get_json(url)
+
+        # O endpoint por evento pode devolver bookmakers na raiz
+        bookmakers = data.get("bookmakers", []) if isinstance(data, dict) else []
+        return pick_best_btts_yes_price(bookmakers)
+
+    except Exception as e:
+        print(f"[WARN] BTTS fetch falhou sport={sport_key} event={event_id} -> {e}")
+        return None
+
+
 def main():
     rows = []
     errors = []
@@ -121,12 +149,14 @@ def main():
     count_o25_real = 0
     count_btts_real = 0
     count_both_real = 0
+    count_events_seen = 0
+    count_btts_requests = 0
 
     for league_key, sport_key in SPORTS.items():
         try:
-            url = build_url(sport_key)
+            url = build_totals_url(sport_key)
             data = http_get_json(url)
-            print(f"[DBG] FETCH league={league_key} sport={sport_key} events={len(data or [])}")
+            print(f"[DBG] FETCH TOTALS league={league_key} sport={sport_key} events={len(data or [])}")
         except Exception as e:
             msg = str(e)
             if ("HTTP Error 401" in msg) or ("401" in msg and "Unauthorized" in msg):
@@ -137,16 +167,21 @@ def main():
         kept = 0
 
         for ev in data or []:
+            count_events_seen += 1
+
+            event_id = ev.get("id")
             home = ev.get("home_team")
             away = ev.get("away_team")
             commence = ev.get("commence_time")
             bms = ev.get("bookmakers", [])
 
-            if not (home and away and commence):
+            if not (event_id and home and away and commence):
                 continue
 
             odd25 = pick_best_over25_price(bms)
-            odd_btts = pick_best_btts_yes_price(bms)
+
+            count_btts_requests += 1
+            odd_btts = fetch_btts_for_event(sport_key, event_id)
 
             if odd25 is None and odd_btts is None:
                 continue
@@ -181,6 +216,8 @@ def main():
         w.writerows(rows)
 
     print(f"OK fixtures_today.csv: {len(rows)} jogos (com O2.5 ou BTTS)")
+    print(f"[DBG] Eventos vistos: {count_events_seen}")
+    print(f"[DBG] Requests BTTS por evento: {count_btts_requests}")
     print(f"[DBG] Jogos com O2.5 real: {count_o25_real}")
     print(f"[DBG] Jogos com BTTS real: {count_btts_real}")
     print(f"[DBG] Jogos com ambos os mercados: {count_both_real}")
