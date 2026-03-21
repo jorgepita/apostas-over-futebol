@@ -1,6 +1,6 @@
 {
   "run": {
-    "days_ahead": 2
+    "days_ahead": 7
   },
   "bankroll": {
     "over25": 500,
@@ -19,6 +19,22 @@
     "alemanha": {
       "name": "Bundesliga",
       "country": "DEU"
+    },
+    "espanha": {
+      "name": "LaLiga",
+      "country": "ESP"
+    },
+    "franca": {
+      "name": "Ligue 1",
+      "country": "FRA"
+    },
+    "italia": {
+      "name": "Serie A",
+      "country": "ITA"
+    },
+    "paises_baixos": {
+      "name": "Eredivisie",
+      "country": "NLD"
     }
   },
   "history": {
@@ -59,26 +75,21 @@
     "league_ids": {
       "premier": 39,
       "portugal": 94,
-      "alemanha": 78
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88
     },
-    "shortlist_total": 10,
-    "shortlist_per_league_per_day": 3
-  },
-  "future": {
-    "paid_plan_ready": {
-      "enable_more_leagues": false,
-      "enable_more_days": false,
-      "enable_more_markets": false,
-      "enable_team_mapping": false,
-      "enable_bookmaker_filter": false
+    "shortlist_total": 12,
+    "shortlist_per_league_per_day": 2,
+    "fallback_to_internationals": true,
+    "international_league_ids": {
+      "uefa_nations_league": 5,
+      "world_cup_qualification_europe": 32,
+      "euro_championship_qualification": 4,
+      "international_friendlies": 10
     },
-    "markets": {
-      "over25": true,
-      "btts": true,
-      "over15": false,
-      "over35": false,
-      "home_win": false,
-      "draw_no_bet": false
-    }
+    "shortlist_per_international_day": 4
   }
 }
