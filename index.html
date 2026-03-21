@@ -82,6 +82,8 @@
 
     .grid { display: grid; gap: 16px; }
     .grid-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+    .grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
     .grid-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .grid-analytics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -101,6 +103,15 @@
       gap: 12px;
       margin-bottom: 14px;
       flex-wrap: wrap;
+    }
+
+    .subsection-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .pill {
@@ -309,12 +320,12 @@
     }
 
     @media (max-width: 1400px) {
-      .grid-8 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .grid-8, .grid-6, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-2, .grid-form, .filters-grid, .grid-analytics, .grid-streaks { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 760px) {
-      .grid-8 { grid-template-columns: 1fr; }
+      .grid-8, .grid-6, .grid-4 { grid-template-columns: 1fr; }
       .wrap { padding: 14px; }
       .hero, .section, .stat { padding: 16px; }
       th, td { font-size: 13px; }
@@ -409,7 +420,53 @@
       </div>
     </div>
 
-    <div class="grid grid-8" id="stats"></div>
+    <div class="card section" style="margin-bottom:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Operacional</h2>
+          <p class="small">Estado do fluxo do bot e da execução.</p>
+        </div>
+      </div>
+      <div class="grid grid-4" id="operationalStats"></div>
+    </div>
+
+    <div class="card section" style="margin-bottom:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Sessão atual vs Geral</h2>
+          <p class="small">A sessão atual começa na data definida no reset. O geral mostra o histórico ativo carregado.</p>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div class="subsection-title">Sessão atual</div>
+        <div class="grid grid-4" id="sessionStats"></div>
+      </div>
+
+      <div>
+        <div class="subsection-title">Geral</div>
+        <div class="grid grid-4" id="generalStats"></div>
+      </div>
+    </div>
+
+    <div class="card section" style="margin-bottom:16px;">
+      <div class="section-head">
+        <div>
+          <h2>Modelo vs Real</h2>
+          <p class="small">Separação clara entre desempenho teórico do modelo e execução real.</p>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div class="subsection-title">Modelo</div>
+        <div class="grid grid-4" id="modelStats"></div>
+      </div>
+
+      <div>
+        <div class="subsection-title">Execução real</div>
+        <div class="grid grid-4" id="realStats"></div>
+      </div>
+    </div>
 
     <div class="card section" style="margin-top:16px;">
       <div class="section-head">
@@ -678,7 +735,7 @@
           <div class="section-head">
             <div>
               <h2>Resumo rápido</h2>
-              <p class="small">Sessão atual + geral</p>
+              <p class="small">Sessão atual + geral + modelo vs real</p>
             </div>
           </div>
           <div class="list" id="summaryList"></div>
@@ -1115,6 +1172,16 @@
       };
     }
 
+    function renderCardGrid(targetId, cards) {
+      document.getElementById(targetId).innerHTML = cards.map(card => `
+        <div class="card stat">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+          <div class="note">${card.note}</div>
+        </div>
+      `).join('');
+    }
+
     function renderStats() {
       const m = getMetrics();
 
@@ -1122,30 +1189,42 @@
       document.getElementById('bankrollInput').value = state.bankrollInicial;
       document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(m.sessionStartDate)}`;
 
-      const cards = [
+      renderCardGrid('operationalStats', [
         { label: 'Picks do dia', value: m.dailyCount, note: `Histórico bot: ${m.totalHistory}` },
         { label: 'Picks geradas', value: m.generatedCount, note: `${m.leagues} ligas • ${m.markets} mercados` },
         { label: 'Picks executadas', value: m.executedCount, note: 'Bot marcadas como executadas' },
+        { label: 'Não executadas', value: m.notExecutedCount, note: 'Picks do bot não apostadas' },
         { label: 'Taxa de execução', value: pct(m.executionRate), note: `${m.executedCount}/${m.generatedCount || 0}` },
+        { label: 'Início da sessão', value: formatDatePt(m.sessionStartDate), note: 'Base da sessão atual' }
+      ]);
 
-        { label: 'Sessão • Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `Stake €${fmt(m.sessao.realStake)}` },
-        { label: 'Sessão • ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
-        { label: 'Sessão • Win rate', value: pct(m.sessao.realWr), note: `${m.sessao.realResolvedCount} fechadas` },
-        { label: 'Sessão • Banca', value: `€${fmt(m.sessao.realBankroll)}`, note: `Desde ${formatDatePt(m.sessionStartDate)}` },
+      renderCardGrid('sessionStats', [
+        { label: 'Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `Stake €${fmt(m.sessao.realStake)}` },
+        { label: 'ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
+        { label: 'Win rate', value: pct(m.sessao.realWr), note: `${m.sessao.realResolvedCount} fechadas` },
+        { label: 'Banca', value: `€${fmt(m.sessao.realBankroll)}`, note: `Desde ${formatDatePt(m.sessionStartDate)}` }
+      ]);
 
-        { label: 'Geral • Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `Stake €${fmt(m.geral.realStake)}` },
-        { label: 'Geral • ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
-        { label: 'Geral • Win rate', value: pct(m.geral.realWr), note: `${m.geral.realResolvedCount} fechadas` },
-        { label: 'Geral • Banca', value: `€${fmt(m.geral.realBankroll)}`, note: `Base €${fmt(state.bankrollInicial)}` }
-      ];
+      renderCardGrid('generalStats', [
+        { label: 'Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `Stake €${fmt(m.geral.realStake)}` },
+        { label: 'ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
+        { label: 'Win rate', value: pct(m.geral.realWr), note: `${m.geral.realResolvedCount} fechadas` },
+        { label: 'Banca', value: `€${fmt(m.geral.realBankroll)}`, note: `Base €${fmt(state.bankrollInicial)}` }
+      ]);
 
-      document.getElementById('stats').innerHTML = cards.map(card => `
-        <div class="card stat">
-          <div class="label">${card.label}</div>
-          <div class="value">${card.value}</div>
-          <div class="note">${card.note}</div>
-        </div>
-      `).join('');
+      renderCardGrid('modelStats', [
+        { label: 'Sessão • Lucro modelo', value: `€${fmt(m.sessao.modelProfit)}`, note: `Stake €${fmt(m.sessao.modelStake)}` },
+        { label: 'Sessão • ROI modelo', value: pct(m.sessao.modelRoi), note: `${m.sessao.modelWins}W / ${m.sessao.modelLosses}L` },
+        { label: 'Geral • Lucro modelo', value: `€${fmt(m.geral.modelProfit)}`, note: `Stake €${fmt(m.geral.modelStake)}` },
+        { label: 'Geral • ROI modelo', value: pct(m.geral.modelRoi), note: `${m.geral.modelWins}W / ${m.geral.modelLosses}L` }
+      ]);
+
+      renderCardGrid('realStats', [
+        { label: 'Sessão • Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
+        { label: 'Sessão • ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realResolvedCount} fechadas` },
+        { label: 'Geral • Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
+        { label: 'Geral • ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realResolvedCount} fechadas` }
+      ]);
     }
 
     function getFilterSourceRows() {
@@ -1593,25 +1672,37 @@
     function renderSummary() {
       const m = getMetrics();
 
-      const bestModel = [...getResolvedHistorySinceSession()]
+      const bestModelSession = [...getResolvedHistorySinceSession()]
         .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? -9999 }))
         .sort((a, b) => b.lucro - a.lucro)[0];
 
-      const allRealClosed = [
+      const bestModelGeneral = [...getResolvedHistory()]
+        .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? -9999 }))
+        .sort((a, b) => b.lucro - a.lucro)[0];
+
+      const allRealClosedSession = [
         ...getRealResolvedBotHistorySinceSession().map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 })),
         ...getResolvedManualBetsSinceSession().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
       ];
 
-      const bestReal = [...allRealClosed].sort((a, b) => b.lucro - a.lucro)[0];
+      const allRealClosedGeneral = [
+        ...getRealResolvedBotHistory().map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 })),
+        ...getResolvedManualBets().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
+      ];
+
+      const bestRealSession = [...allRealClosedSession].sort((a, b) => b.lucro - a.lucro)[0];
+      const bestRealGeneral = [...allRealClosedGeneral].sort((a, b) => b.lucro - a.lucro)[0];
 
       const items = [
         `Sessão atual desde ${formatDatePt(m.sessionStartDate)}`,
-        `Sessão: lucro €${fmt(m.sessao.realProfit)} | ROI ${pct(m.sessao.realRoi)} | WR ${pct(m.sessao.realWr)} | banca €${fmt(m.sessao.realBankroll)}`,
-        `Geral: lucro €${fmt(m.geral.realProfit)} | ROI ${pct(m.geral.realRoi)} | WR ${pct(m.geral.realWr)} | banca €${fmt(m.geral.realBankroll)}`,
-        `Modelo sessão: lucro €${fmt(m.sessao.modelProfit)} | ROI ${pct(m.sessao.modelRoi)} | Win rate ${pct(m.sessao.modelWr)}`,
-        `Execução: ${m.executedCount} executadas | ${m.notExecutedCount} não executadas | taxa ${pct(m.executionRate)}`,
-        `Melhor pick modelo da sessão: ${bestModel ? `${bestModel.jogo} • €${fmt(bestModel.lucro)}` : '—'}`,
-        `Melhor aposta real da sessão: ${bestReal ? `${bestReal.jogo} • €${fmt(bestReal.lucro)}` : '—'}`,
+        `Sessão • Real: lucro €${fmt(m.sessao.realProfit)} | ROI ${pct(m.sessao.realRoi)} | WR ${pct(m.sessao.realWr)} | banca €${fmt(m.sessao.realBankroll)}`,
+        `Geral • Real: lucro €${fmt(m.geral.realProfit)} | ROI ${pct(m.geral.realRoi)} | WR ${pct(m.geral.realWr)} | banca €${fmt(m.geral.realBankroll)}`,
+        `Sessão • Modelo: lucro €${fmt(m.sessao.modelProfit)} | ROI ${pct(m.sessao.modelRoi)} | WR ${pct(m.sessao.modelWr)}`,
+        `Geral • Modelo: lucro €${fmt(m.geral.modelProfit)} | ROI ${pct(m.geral.modelRoi)} | WR ${pct(m.geral.modelWr)}`,
+        `Melhor pick modelo sessão: ${bestModelSession ? `${bestModelSession.jogo} • €${fmt(bestModelSession.lucro)}` : '—'}`,
+        `Melhor pick modelo geral: ${bestModelGeneral ? `${bestModelGeneral.jogo} • €${fmt(bestModelGeneral.lucro)}` : '—'}`,
+        `Melhor aposta real sessão: ${bestRealSession ? `${bestRealSession.jogo} • €${fmt(bestRealSession.lucro)}` : '—'}`,
+        `Melhor aposta real geral: ${bestRealGeneral ? `${bestRealGeneral.jogo} • €${fmt(bestRealGeneral.lucro)}` : '—'}`,
         `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
       ];
 
