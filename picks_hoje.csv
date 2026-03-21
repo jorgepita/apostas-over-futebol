@@ -1,1 +1,7 @@
-Date;League;HomeTeam;AwayTeam;Market;Odd;Edge;Stake;Score
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;Score;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-03-22;alemanha;Bundesliga;FC St. Pauli;SC Freiburg;1.882;1.652;3.534;O2.5;0.685;2.38;0.42;0.15;0.4573;0.26500000000000007;40.93;0.0915;0.0375;18.75;0.9375;500.0
+2026-03-21;alemanha;Bundesliga;1. FC Köln;Borussia Monchengladbach;1.882;1.652;3.534;O2.5;0.685;1.98;0.505;0.15;0.3643;0.18000000000000005;34.82;0.0729;0.0375;18.75;0.9375;500.0
+2026-03-21;premier;Premier League;Fulham;Burnley;2.2;1.461;3.661;BTTS;0.683;1.84;0.543;0.1395;0.3055;0.14;30.721000000000004;0.0611;0.04;20.0;1.0;500.0
+2026-03-21;alemanha;Bundesliga;Borussia Dortmund;Hamburger SV;1.882;1.652;3.534;BTTS;0.685;1.83;0.546;0.1388;0.3059;0.139;30.482;0.0612;0.04;20.0;1.0;500.0
+2026-03-21;portugal;Primeira Liga;Tondela;AVS Futebol SAD;1.62;1.344;2.964;O2.5;0.569;2.38;0.42;0.1486;0.2563;0.14899999999999997;30.4;0.0513;0.0375;18.75;0.9375;500.0
+2026-03-22;portugal;Primeira Liga;Braga;FC Porto;1.62;1.344;2.964;O2.5;0.569;2.36;0.424;0.1451;0.2517;0.14499999999999996;29.757999999999996;0.0503;0.0375;18.75;0.9375;500.0
