@@ -1,6 +1,6 @@
 {
   "run": {
-    "days_ahead": 7
+    "days_ahead": 20
   },
 
   "bankroll": {
