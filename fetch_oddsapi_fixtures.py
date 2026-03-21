@@ -30,6 +30,11 @@ DEFAULT_LEAGUE_IDS = {
     "franca": 61,
     "italia": 135,
     "paises_baixos": 88,
+    "championship": 40,
+    "alemanha2": 79,
+    "italia2": 136,
+    "franca2": 62,
+    "paises_baixos2": 89,
 }
 
 DEFAULT_INTERNATIONAL_LEAGUE_IDS = {
@@ -446,8 +451,6 @@ def build_candidate_international(
     if not fixture_id or not home or not away:
         return None
 
-    # Sem histórico local de seleções/competições internacionais,
-    # usamos score neutro só para não perder os jogos disponíveis.
     lam_h = 1.35
     lam_a = 1.10
     lam_t = lam_h + lam_a
@@ -487,9 +490,9 @@ def main():
     days_ahead = int(run_cfg.get("days_ahead", 7))
 
     api_cfg = cfg.get("api_football", {})
-    shortlist_total = int(api_cfg.get("shortlist_total", 12))
-    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 2))
-    shortlist_per_international_day = int(api_cfg.get("shortlist_per_international_day", 4))
+    shortlist_total = int(api_cfg.get("shortlist_total", 18))
+    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 3))
+    shortlist_per_international_day = int(api_cfg.get("shortlist_per_international_day", 5))
     fallback_to_internationals = bool(api_cfg.get("fallback_to_internationals", True))
 
     leagues_cfg = cfg.get("leagues", {})
