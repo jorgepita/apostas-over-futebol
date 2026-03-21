@@ -304,15 +304,26 @@ def try_load_history_csv(league_key: str) -> Optional[pd.DataFrame]:
 # API-Football helpers
 # =============================
 def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -> list[dict]:
-    data = http_get_json(
-        "/fixtures",
-        {
-            "league": league_id,
-            "season": season,
-            "date": date_iso,
-            "timezone": "Europe/Lisbon",
-        },
-    )
+    params = {
+        "league": league_id,
+        "season": season,
+        "date": date_iso,
+        "timezone": "Europe/Lisbon",
+    }
+
+    data = http_get_json("/fixtures", params)
+
+    try:
+        results = data.get("results", None)
+        errors = data.get("errors", None)
+        response_len = len(data.get("response", []) or []) if isinstance(data, dict) else -1
+        print(
+            f"[API-DBG] /fixtures league={league_id} season={season} date={date_iso} "
+            f"results={results} response_len={response_len} errors={errors}"
+        )
+    except Exception as e:
+        print(f"[API-DBG] erro a inspecionar resposta league={league_id} date={date_iso} -> {e}")
+
     return data.get("response", []) if isinstance(data, dict) else []
 
 
