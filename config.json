@@ -10,11 +10,7 @@
   "leagues": {
     "premier": { "name": "Premier League", "country": "ENG" },
     "portugal": { "name": "Primeira Liga", "country": "PRT" },
-    "alemanha": { "name": "Bundesliga", "country": "DEU" },
-    "espanha": { "name": "LaLiga", "country": "ESP" },
-    "franca": { "name": "Ligue 1", "country": "FRA" },
-    "italia": { "name": "Serie A", "country": "ITA" },
-    "paises_baixos": { "name": "Eredivisie", "country": "NED" }
+    "alemanha": { "name": "Bundesliga", "country": "DEU" }
   },
   "history": {
     "window": 12,
@@ -49,5 +45,15 @@
   "nba": {
     "window": 10,
     "sigma_total": 14.0
+  },
+  "api_football": {
+    "season": 2025,
+    "league_ids": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78
+    },
+    "shortlist_total": 10,
+    "shortlist_per_league_per_day": 3
   }
 }
