@@ -2,13 +2,12 @@ import os
 import json
 import csv
 import base64
-import math
 import urllib.parse
 import urllib.request
 from urllib import error
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional
 
 import pandas as pd
 
@@ -26,13 +25,13 @@ print(f"[DBG] API_FOOTBALL_BASE = {API_BASE}")
 # Mantemos as mesmas chaves internas do projeto
 # e ligamos cada uma ao league_id oficial da API-Football.
 DEFAULT_LEAGUE_IDS = {
-    "premier": 39,     # Premier League
-    "portugal": 94,    # Primeira Liga
-    "alemanha": 78,    # Bundesliga
-    "espanha": 140,    # LaLiga
-    "franca": 61,      # Ligue 1
-    "italia": 135,     # Serie A
-    "paises_baixos": 88,  # Eredivisie
+    "premier": 39,         # Premier League
+    "portugal": 94,        # Primeira Liga
+    "alemanha": 78,        # Bundesliga
+    "espanha": 140,        # LaLiga
+    "franca": 61,          # Ligue 1
+    "italia": 135,         # Serie A
+    "paises_baixos": 88,   # Eredivisie
 }
 
 
@@ -256,10 +255,17 @@ def build_league_map(cfg: dict) -> dict:
     return result
 
 
-def get_current_season() -> int:
-    # simples e suficiente para março de 2026; mais tarde pode ser afinado
-    now = datetime.now(timezone.utc)
-    return now.year
+def season_for_date(d: date) -> int:
+    """
+    Para ligas europeias de futebol:
+    - Jul-Dec -> season = ano atual
+    - Jan-Jun -> season = ano anterior
+
+    Exemplos:
+    2026-03-21 -> 2025
+    2026-08-10 -> 2026
+    """
+    return d.year if d.month >= 7 else (d.year - 1)
 
 
 def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -> list[dict]:
@@ -352,7 +358,9 @@ def main():
 
     leagues_cfg = cfg.get("leagues", {})
     league_map = build_league_map(cfg)
-    season = int(api_cfg.get("season", get_current_season()))
+
+    # season manual opcional no config; se não existir, calcula automaticamente por data
+    manual_season = api_cfg.get("season")
 
     try:
         from zoneinfo import ZoneInfo
@@ -360,11 +368,14 @@ def main():
     except Exception:
         now_pt = datetime.utcnow()
 
-    dates_to_fetch = [(now_pt.date() + timedelta(days=i)).isoformat() for i in range(days_ahead + 1)]
+    dates_to_fetch = [(now_pt.date() + timedelta(days=i)) for i in range(days_ahead + 1)]
 
-    print(f"[DBG] season={season}")
-    print(f"[DBG] dates_to_fetch={dates_to_fetch}")
+    print(f"[DBG] dates_to_fetch={[d.isoformat() for d in dates_to_fetch]}")
     print(f"[DBG] shortlist_total={shortlist_total} | shortlist_per_league_per_day={shortlist_per_league_per_day}")
+    if manual_season is not None:
+        print(f"[DBG] season manual override={manual_season}")
+    else:
+        print("[DBG] season automática por data ativada")
 
     fixture_candidates = []
     fixture_requests = 0
@@ -390,12 +401,15 @@ def main():
         df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
         df_hist = df_hist.dropna(subset=["Date"]).copy()
 
-        for date_iso in dates_to_fetch:
+        for target_date in dates_to_fetch:
+            date_iso = target_date.isoformat()
+            season = int(manual_season) if manual_season is not None else season_for_date(target_date)
+
             try:
                 resp = fetch_fixtures_for_league_date(league_id, season, date_iso)
                 fixture_requests += 1
             except Exception as e:
-                print(f"[WARN] fixtures falhou league={league_key} date={date_iso} -> {e}")
+                print(f"[WARN] fixtures falhou league={league_key} season={season} date={date_iso} -> {e}")
                 continue
 
             day_rows = []
@@ -435,6 +449,7 @@ def main():
                     {
                         "fixture_id": int(fixture_id),
                         "date": date_iso,
+                        "season": season,
                         "league_key": league_key,
                         "league_name": league_name,
                         "home": home,
@@ -452,7 +467,7 @@ def main():
             fixture_candidates.extend(kept_day)
 
             print(
-                f"[DBG] fixtures league={league_key} date={date_iso} "
+                f"[DBG] fixtures league={league_key} season={season} date={date_iso} "
                 f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
             )
 
@@ -493,7 +508,7 @@ def main():
         )
 
         print(
-            f"[DBG] odds fixture={fixture_id} | {fx['league_key']} | "
+            f"[DBG] odds fixture={fixture_id} | season={fx['season']} | {fx['league_key']} | "
             f"{fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
         )
 
