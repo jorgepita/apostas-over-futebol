@@ -1,6 +1,7 @@
 {
   "run": {
-    "days_ahead": 7
+    "days_ahead": 7,
+    "mode": "test"
   },
   "bankroll": {
     "over25": 500,
@@ -47,6 +48,7 @@
   "rules": {
     "over25": {
       "edge_min": -0.06,
+      "edge_max": 0.15,
       "kelly_fraction": 0.2,
       "cap_frac": 0.04,
       "daily_cap_frac": 0.15,
@@ -54,6 +56,7 @@
     },
     "btts": {
       "edge_min": -0.06,
+      "edge_max": 0.15,
       "kelly_fraction": 0.2,
       "cap_frac": 0.04,
       "daily_cap_frac": 0.15,
@@ -81,8 +84,8 @@
       "italia": 135,
       "paises_baixos": 88
     },
-    "shortlist_total": 12,
-    "shortlist_per_league_per_day": 2,
+    "shortlist_total": 18,
+    "shortlist_per_league_per_day": 3,
     "fallback_to_internationals": true,
     "international_league_ids": {
       "uefa_nations_league": 5,
@@ -90,6 +93,6 @@
       "euro_championship_qualification": 4,
       "international_friendlies": 10
     },
-    "shortlist_per_international_day": 4
+    "shortlist_per_international_day": 5
   }
 }
