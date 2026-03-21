@@ -13,9 +13,6 @@ SENT_STATE_PATH = BASE / "sent_state.json"
 HISTORY_PATH = BASE / "picks_history.csv"
 
 
-# =============================
-# Anti-duplicados (por dia)
-# =============================
 def load_sent_state(today_iso: str) -> set[str]:
     try:
         if not SENT_STATE_PATH.exists():
@@ -50,9 +47,6 @@ def history_pick_id_from_simple(row: pd.Series) -> str:
     )
 
 
-# =============================
-# Helpers
-# =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
@@ -221,8 +215,8 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
     simple_df = ensure_simple_columns(simple_df)
 
     existing_ids = {history_pick_id_from_simple(row) for _, row in history.iterrows()}
-
     new_rows = []
+
     for _, row in simple_df.iterrows():
         pid = history_pick_id_from_simple(row)
         if pid not in existing_ids:
@@ -244,9 +238,6 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
     return ensure_simple_columns(history)
 
 
-# =============================
-# Telegram
-# =============================
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
@@ -303,9 +294,6 @@ def build_message(rows: list[dict], titulo: str) -> str:
     return msg
 
 
-# =============================
-# Qualidade / score / correlação
-# =============================
 def market_quality_filter(row: dict) -> bool:
     market = str(row.get("Market", "")).strip().upper()
     odd = float(row.get("Odd", 0.0) or 0.0)
@@ -343,13 +331,8 @@ def compute_pick_score(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     df = df.copy()
-    df["ProbModel"] = pd.to_numeric(df["ProbModel"], errors="coerce").fillna(0.0)
-    df["ProbMarket"] = pd.to_numeric(df["ProbMarket"], errors="coerce").fillna(0.0)
-    df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
-    df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
-    df["LambdaHome"] = pd.to_numeric(df["LambdaHome"], errors="coerce").fillna(0.0)
-    df["LambdaAway"] = pd.to_numeric(df["LambdaAway"], errors="coerce").fillna(0.0)
-    df["LambdaTotal"] = pd.to_numeric(df["LambdaTotal"], errors="coerce").fillna(0.0)
+    for col in ["ProbModel", "ProbMarket", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
     df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
     df["Score"] = (
@@ -365,9 +348,7 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    df = df.copy()
-    df = compute_pick_score(df)
-
+    df = compute_pick_score(df.copy())
     game_cols = ["Date", "League", "HomeTeam", "AwayTeam"]
     keep_rows = []
 
@@ -376,7 +357,6 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
             ["Score", "Edge", "KellyTrue", "ProbModel"],
             ascending=[False, False, False, False],
         ).reset_index(drop=True)
-
         keep_rows.append(g.iloc[0].to_dict())
 
     out = pd.DataFrame(keep_rows)
@@ -387,25 +367,50 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-# =============================
-# Regras de mercado / stake
-# =============================
-def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.DataFrame:
+def debug_market_summary(name: str, rows: list[dict]) -> None:
+    print(f"[DBG] {name}: candidatos brutos = {len(rows)}")
     if not rows:
+        return
+
+    df = pd.DataFrame(rows).copy()
+    for col in ["Odd", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal", "ProbModel", "ProbMarket"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+
+    print(f"[DBG] {name}: edge max = {df['Edge'].max():.4f} | edge mean = {df['Edge'].mean():.4f}")
+    print(f"[DBG] {name}: kelly max = {df['KellyTrue'].max():.4f} | kelly mean = {df['KellyTrue'].mean():.4f}")
+    print(f"[DBG] {name}: lambda_total mean = {df['LambdaTotal'].mean():.3f}")
+
+    top = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).head(5)
+    for _, r in top.iterrows():
+        print(
+            f"[DBG] {name} TOP | {r['League']} | {r['HomeTeam']} vs {r['AwayTeam']} | "
+            f"{r['Market']} | odd={r['Odd']:.2f} | edge={r['Edge']:.4f} | "
+            f"kelly={r['KellyTrue']:.4f} | lamT={r['LambdaTotal']:.3f}"
+        )
+
+
+def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: str) -> pd.DataFrame:
+    if not rows:
+        print(f"[DBG] {label}: sem rows à entrada")
         return pd.DataFrame()
 
+    debug_market_summary(label, rows)
+
     filtered_rows = [r for r in rows if market_quality_filter(r)]
+    print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)}")
+
     if not filtered_rows:
         return pd.DataFrame()
 
-    df = pd.DataFrame(filtered_rows)
-
+    df = pd.DataFrame(filtered_rows).copy()
     df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
     df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
     df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 
     df = df[df["Odd"] > 1.01].copy()
     df = df[df["Edge"].notna()].copy()
+    print(f"[DBG] {label}: após odd/edge válidos = {len(df)}")
 
     if df.empty:
         return df
@@ -413,6 +418,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     edge_min = float(rules.get("edge_min", 0.0))
     edge_max = float(rules.get("edge_max", 0.15))
     df = df[(df["Edge"] >= edge_min) & (df["Edge"] <= edge_max)].copy()
+    print(f"[DBG] {label}: após edge_min/edge_max = {len(df)} | edge_min={edge_min} edge_max={edge_max}")
 
     if df.empty:
         return df
@@ -424,15 +430,13 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
 
     df = compute_pick_score(df)
     df = dedupe_correlated_picks(df)
+    print(f"[DBG] {label}: após dedupe = {len(df)}")
 
     if df.empty:
         return df
 
     df["StakeFracRaw"] = df["KellyTrue"] * kfrac
     df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
-
-    if len(df) < min_picks:
-        return df.iloc[0:0].copy()
 
     total_frac = float(df["StakeFrac"].sum())
     scale = 1.0
@@ -444,7 +448,15 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
+    stake_zero = int((df["Stake€"] <= 0).sum())
+    print(f"[DBG] {label}: stake zero = {stake_zero} | stake > 0 = {int((df['Stake€'] > 0).sum())}")
+
+    if len(df) < min_picks:
+        print(f"[DBG] {label}: abaixo de min_picks={min_picks}")
+        return df.iloc[0:0].copy()
+
     df = df[df["Stake€"] > 0].copy()
+    print(f"[DBG] {label}: final = {len(df)}")
 
     df = df.sort_values(
         ["Score", "Edge", "KellyTrue"],
@@ -472,9 +484,6 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     return df
 
 
-# =============================
-# GitHub upload
-# =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
@@ -554,9 +563,6 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
     print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
-# =============================
-# Main
-# =============================
 def main():
     cfg_path = BASE / "config.json"
     if not cfg_path.exists():
@@ -591,6 +597,8 @@ def main():
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
     fixtures["Date"] = fixtures["Date"].astype(str)
 
+    print(f"[DBG] fixtures no range {start} -> {end}: {len(fixtures)}")
+
     rows25 = []
     rows_btts = []
 
@@ -614,13 +622,7 @@ def main():
             return float(default)
 
     def get_btts_odd(fx_row) -> float:
-        candidates = [
-            "Odd_BTTS_Yes",
-            "Odd_BTTS",
-            "Odd_BTTSYes",
-            "Odd_Btts_Yes",
-            "Odd_Btts",
-        ]
+        candidates = ["Odd_BTTS_Yes", "Odd_BTTS", "Odd_BTTSYes", "Odd_Btts_Yes", "Odd_Btts"]
         for col in candidates:
             if col in fixtures.columns:
                 odd = _to_float(fx_row.get(col, 0.0), 0.0)
@@ -630,6 +632,7 @@ def main():
 
     for league_key, league_meta in leagues_cfg.items():
         league_fixt = fixtures[fixtures["League"] == league_key].copy()
+        print(f"[DBG] liga={league_key} | fixtures={len(league_fixt)}")
         if league_fixt.empty:
             continue
 
@@ -735,8 +738,8 @@ def main():
     rules_btts = dict(rules_cfg.get("btts", {}))
     rules_btts.setdefault("edge_max", 0.15)
 
-    out25 = apply_market_rules(rows25, bankroll25, rules25)
-    out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts)
+    out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5")
+    out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS")
 
     if not out25.empty:
         out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
@@ -797,7 +800,6 @@ def main():
         ]
         simple = simple[cols].copy()
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
-
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
         simple = pd.DataFrame(columns=[
