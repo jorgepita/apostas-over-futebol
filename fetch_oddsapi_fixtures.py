@@ -22,16 +22,21 @@ API_BASE = os.getenv("API_FOOTBALL_BASE", "https://v3.football.api-sports.io").s
 print(f"[DBG] API_FOOTBALL_KEY len = {len(API_KEY)}")
 print(f"[DBG] API_FOOTBALL_BASE = {API_BASE}")
 
-# Mantemos as mesmas chaves internas do projeto
-# e ligamos cada uma ao league_id oficial da API-Football.
 DEFAULT_LEAGUE_IDS = {
-    "premier": 39,         # Premier League
-    "portugal": 94,        # Primeira Liga
-    "alemanha": 78,        # Bundesliga
-    "espanha": 140,        # LaLiga
-    "franca": 61,          # Ligue 1
-    "italia": 135,         # Serie A
-    "paises_baixos": 88,   # Eredivisie
+    "premier": 39,
+    "portugal": 94,
+    "alemanha": 78,
+    "espanha": 140,
+    "franca": 61,
+    "italia": 135,
+    "paises_baixos": 88,
+}
+
+DEFAULT_INTERNATIONAL_LEAGUE_IDS = {
+    "uefa_nations_league": 5,
+    "world_cup_qualification_europe": 32,
+    "euro_championship_qualification": 4,
+    "international_friendlies": 10,
 }
 
 
@@ -134,7 +139,7 @@ def upload_file_to_github(file_path: Path, owner: str, repo: str, branch: str) -
 
 
 # =============================
-# Model helpers (shortlist local)
+# Model helpers
 # =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -227,14 +232,12 @@ def compute_lambdas(
 
 
 def fixture_shortlist_score(lam_home: float, lam_away: float, lam_total: float) -> float:
-    # score simples e adaptável a futuro plano pago
-    # favorece jogos com potencial ofensivo e equilíbrio mínimo para BTTS
     min_side = min(lam_home, lam_away)
     return (lam_total * 1.0) + (min_side * 0.75)
 
 
 # =============================
-# API-Football parsing
+# Config helpers
 # =============================
 def load_config() -> dict:
     if not CONFIG_PATH.exists():
@@ -255,19 +258,46 @@ def build_league_map(cfg: dict) -> dict:
     return result
 
 
-def season_for_date(d: date) -> int:
-    """
-    Para ligas europeias de futebol:
-    - Jul-Dec -> season = ano atual
-    - Jan-Jun -> season = ano anterior
+def build_international_map(cfg: dict) -> dict:
+    api_cfg = cfg.get("api_football", {})
+    raw = api_cfg.get("international_league_ids", {}) or {}
+    result = {}
 
-    Exemplos:
-    2026-03-21 -> 2025
-    2026-08-10 -> 2026
-    """
+    for key, value in DEFAULT_INTERNATIONAL_LEAGUE_IDS.items():
+        result[key] = int(raw.get(key, value))
+
+    return result
+
+
+def season_for_date(d: date) -> int:
     return d.year if d.month >= 7 else (d.year - 1)
 
 
+def try_load_history_csv(league_key: str) -> Optional[pd.DataFrame]:
+    hist_path = DATA_RAW_DIR / f"{league_key}.csv"
+    if not hist_path.exists():
+        return None
+
+    try:
+        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
+        df_hist = normalize_columns(df_hist)
+
+        need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
+        if not need_hist.issubset(set(df_hist.columns)):
+            print(f"[WARN] {league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
+            return None
+
+        df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
+        df_hist = df_hist.dropna(subset=["Date"]).copy()
+        return df_hist
+    except Exception as e:
+        print(f"[WARN] falhou leitura histórico {league_key} -> {e}")
+        return None
+
+
+# =============================
+# API-Football helpers
+# =============================
 def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -> list[dict]:
     data = http_get_json(
         "/fixtures",
@@ -305,7 +335,6 @@ def extract_best_market_prices(odds_response: list[dict]) -> tuple[Optional[floa
                 bet_name = str(bet.get("name", "")).strip().lower()
                 values = bet.get("values", []) or []
 
-                # Over/Under 2.5
                 if "over" in bet_name and "under" in bet_name and "2.5" in bet_name:
                     for v in values:
                         label = str(v.get("value", "")).strip().lower()
@@ -319,7 +348,6 @@ def extract_best_market_prices(odds_response: list[dict]) -> tuple[Optional[floa
                             if best_o25 is None or odd > best_o25:
                                 best_o25 = odd
 
-                # BTTS
                 if "both teams" in bet_name and "score" in bet_name:
                     for v in values:
                         label = str(v.get("value", "")).strip().lower()
@@ -337,6 +365,112 @@ def extract_best_market_prices(odds_response: list[dict]) -> tuple[Optional[floa
 
 
 # =============================
+# Candidate builders
+# =============================
+def build_candidate_from_history(
+    item: dict,
+    league_key: str,
+    league_name: str,
+    date_iso: str,
+    season: int,
+    df_hist: pd.DataFrame,
+    window: int,
+    decay: float,
+    min_games_home: int,
+    min_games_away: int,
+    lambda_boost: float,
+) -> Optional[dict]:
+    fixture = item.get("fixture", {}) or {}
+    teams = item.get("teams", {}) or {}
+
+    fixture_id = fixture.get("id")
+    fixture_date = str(fixture.get("date", ""))
+    home = ((teams.get("home") or {}).get("name") or "").strip()
+    away = ((teams.get("away") or {}).get("name") or "").strip()
+
+    if not fixture_id or not home or not away:
+        return None
+
+    try:
+        lam_h, lam_a, lam_t = compute_lambdas(
+            df_hist,
+            home,
+            away,
+            window=window,
+            decay=decay,
+            min_games_home=min_games_home,
+            min_games_away=min_games_away,
+        )
+    except Exception:
+        return None
+
+    if lambda_boost and lambda_boost != 1.0:
+        lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
+        lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
+        lam_t = lam_h + lam_a
+
+    score = fixture_shortlist_score(lam_h, lam_a, lam_t)
+
+    return {
+        "fixture_id": int(fixture_id),
+        "date": date_iso,
+        "season": season,
+        "league_key": league_key,
+        "league_name": league_name,
+        "home": home,
+        "away": away,
+        "lam_h": lam_h,
+        "lam_a": lam_a,
+        "lam_t": lam_t,
+        "score": score,
+        "api_fixture_date": fixture_date,
+        "source_type": "history_model",
+    }
+
+
+def build_candidate_international(
+    item: dict,
+    league_key: str,
+    league_name: str,
+    date_iso: str,
+    season: int,
+) -> Optional[dict]:
+    fixture = item.get("fixture", {}) or {}
+    teams = item.get("teams", {}) or {}
+
+    fixture_id = fixture.get("id")
+    fixture_date = str(fixture.get("date", ""))
+    home = ((teams.get("home") or {}).get("name") or "").strip()
+    away = ((teams.get("away") or {}).get("name") or "").strip()
+
+    if not fixture_id or not home or not away:
+        return None
+
+    # Sem histórico local de seleções/competições internacionais,
+    # usamos score neutro só para não perder os jogos disponíveis.
+    lam_h = 1.35
+    lam_a = 1.10
+    lam_t = lam_h + lam_a
+    score = fixture_shortlist_score(lam_h, lam_a, lam_t)
+
+    return {
+        "fixture_id": int(fixture_id),
+        "date": date_iso,
+        "season": season,
+        "league_key": league_key,
+        "league_name": league_name,
+        "home": home,
+        "away": away,
+        "lam_h": lam_h,
+        "lam_a": lam_a,
+        "lam_t": lam_t,
+        "score": score,
+        "api_fixture_date": fixture_date,
+        "source_type": "international_fallback",
+    }
+
+
+# =============================
 # Main
 # =============================
 def main():
@@ -350,16 +484,18 @@ def main():
     lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
 
     run_cfg = cfg.get("run", {})
-    days_ahead = int(run_cfg.get("days_ahead", 2))
+    days_ahead = int(run_cfg.get("days_ahead", 7))
 
     api_cfg = cfg.get("api_football", {})
-    shortlist_total = int(api_cfg.get("shortlist_total", 10))
-    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 3))
+    shortlist_total = int(api_cfg.get("shortlist_total", 12))
+    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 2))
+    shortlist_per_international_day = int(api_cfg.get("shortlist_per_international_day", 4))
+    fallback_to_internationals = bool(api_cfg.get("fallback_to_internationals", True))
 
     leagues_cfg = cfg.get("leagues", {})
     league_map = build_league_map(cfg)
+    international_map = build_international_map(cfg)
 
-    # season manual opcional no config; se não existir, calcula automaticamente por data
     manual_season = api_cfg.get("season")
 
     try:
@@ -372,34 +508,20 @@ def main():
 
     print(f"[DBG] dates_to_fetch={[d.isoformat() for d in dates_to_fetch]}")
     print(f"[DBG] shortlist_total={shortlist_total} | shortlist_per_league_per_day={shortlist_per_league_per_day}")
-    if manual_season is not None:
-        print(f"[DBG] season manual override={manual_season}")
-    else:
-        print("[DBG] season automática por data ativada")
+    print(f"[DBG] fallback_to_internationals={fallback_to_internationals}")
 
     fixture_candidates = []
     fixture_requests = 0
     odds_requests = 0
 
-    # 1) Fetch fixtures by league/date
+    # 1) Ligas domésticas
     for league_key, league_id in league_map.items():
         league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
-        hist_path = DATA_RAW_DIR / f"{league_key}.csv"
+        df_hist = try_load_history_csv(league_key)
 
-        if not hist_path.exists():
+        if df_hist is None:
             print(f"[WARN] histórico em falta para {league_key}")
             continue
-
-        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
-        df_hist = normalize_columns(df_hist)
-
-        need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
-        if not need_hist.issubset(set(df_hist.columns)):
-            print(f"[WARN] {league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
-            continue
-
-        df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
-        df_hist = df_hist.dropna(subset=["Date"]).copy()
 
         for target_date in dates_to_fetch:
             date_iso = target_date.isoformat()
@@ -414,53 +536,21 @@ def main():
 
             day_rows = []
             for item in resp:
-                fixture = item.get("fixture", {}) or {}
-                teams = item.get("teams", {}) or {}
-
-                fixture_id = fixture.get("id")
-                fixture_date = str(fixture.get("date", ""))
-                home = ((teams.get("home") or {}).get("name") or "").strip()
-                away = ((teams.get("away") or {}).get("name") or "").strip()
-
-                if not fixture_id or not home or not away:
-                    continue
-
-                try:
-                    lam_h, lam_a, lam_t = compute_lambdas(
-                        df_hist,
-                        home,
-                        away,
-                        window=window,
-                        decay=decay,
-                        min_games_home=min_games_home,
-                        min_games_away=min_games_away,
-                    )
-                except Exception:
-                    continue
-
-                if lambda_boost and lambda_boost != 1.0:
-                    lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
-                    lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
-                    lam_t = lam_h + lam_a
-
-                score = fixture_shortlist_score(lam_h, lam_a, lam_t)
-
-                day_rows.append(
-                    {
-                        "fixture_id": int(fixture_id),
-                        "date": date_iso,
-                        "season": season,
-                        "league_key": league_key,
-                        "league_name": league_name,
-                        "home": home,
-                        "away": away,
-                        "lam_h": lam_h,
-                        "lam_a": lam_a,
-                        "lam_t": lam_t,
-                        "score": score,
-                        "api_fixture_date": fixture_date,
-                    }
+                row = build_candidate_from_history(
+                    item=item,
+                    league_key=league_key,
+                    league_name=league_name,
+                    date_iso=date_iso,
+                    season=season,
+                    df_hist=df_hist,
+                    window=window,
+                    decay=decay,
+                    min_games_home=min_games_home,
+                    min_games_away=min_games_away,
+                    lambda_boost=lambda_boost,
                 )
+                if row:
+                    day_rows.append(row)
 
             day_rows.sort(key=lambda x: x["score"], reverse=True)
             kept_day = day_rows[:shortlist_per_league_per_day]
@@ -471,7 +561,51 @@ def main():
                 f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
             )
 
-    # 2) Global shortlist cap
+    # 2) Fallback internacional
+    if not fixture_candidates and fallback_to_internationals:
+        print("[DBG] sem jogos nas ligas domésticas -> a tentar fallback internacional")
+
+        for intl_key, intl_league_id in international_map.items():
+            intl_name = intl_key
+
+            for target_date in dates_to_fetch:
+                date_iso = target_date.isoformat()
+                season = int(manual_season) if manual_season is not None else season_for_date(target_date)
+
+                try:
+                    resp = fetch_fixtures_for_league_date(intl_league_id, season, date_iso)
+                    fixture_requests += 1
+                except Exception as e:
+                    print(f"[WARN] intl fixtures falhou league={intl_key} season={season} date={date_iso} -> {e}")
+                    continue
+
+                day_rows = []
+                for item in resp:
+                    row = build_candidate_international(
+                        item=item,
+                        league_key=intl_key,
+                        league_name=intl_name,
+                        date_iso=date_iso,
+                        season=season,
+                    )
+                    if row:
+                        day_rows.append(row)
+
+                day_rows.sort(key=lambda x: x["score"], reverse=True)
+                kept_day = day_rows[:shortlist_per_international_day]
+                fixture_candidates.extend(kept_day)
+
+                print(
+                    f"[DBG] intl fixtures league={intl_key} season={season} date={date_iso} "
+                    f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
+                )
+
+    # 3) Global shortlist
+    unique_candidates = {}
+    for row in fixture_candidates:
+        unique_candidates[row["fixture_id"]] = row
+
+    fixture_candidates = list(unique_candidates.values())
     fixture_candidates.sort(key=lambda x: x["score"], reverse=True)
     fixture_candidates = fixture_candidates[:shortlist_total]
 
@@ -480,7 +614,7 @@ def main():
 
     rows = []
 
-    # 3) Odds only for shortlist
+    # 4) Odds só para shortlist
     for fx in fixture_candidates:
         fixture_id = fx["fixture_id"]
 
@@ -508,8 +642,8 @@ def main():
         )
 
         print(
-            f"[DBG] odds fixture={fixture_id} | season={fx['season']} | {fx['league_key']} | "
-            f"{fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
+            f"[DBG] odds fixture={fixture_id} | source={fx['source_type']} | season={fx['season']} | "
+            f"{fx['league_key']} | {fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
         )
 
     rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
