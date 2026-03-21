@@ -63,5 +63,22 @@
     },
     "shortlist_total": 10,
     "shortlist_per_league_per_day": 3
+  },
+  "future": {
+    "paid_plan_ready": {
+      "enable_more_leagues": false,
+      "enable_more_days": false,
+      "enable_more_markets": false,
+      "enable_team_mapping": false,
+      "enable_bookmaker_filter": false
+    },
+    "markets": {
+      "over25": true,
+      "btts": true,
+      "over15": false,
+      "over35": false,
+      "home_win": false,
+      "draw_no_bet": false
+    }
   }
 }
