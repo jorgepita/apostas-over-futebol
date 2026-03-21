@@ -1,6 +1,18 @@
 {
   "bankrollInicial": 500,
   "localEdits": {},
-  "manualBets": [],
-  "updatedAt": "2026-03-21T13:23:07.738363+00:00"
+  "manualBets": [
+    {
+      "id": "manual_1774100699162_krbm8e",
+      "data": "2026-03-21",
+      "liga": "w",
+      "jogo": "a x b",
+      "mercado": "btts",
+      "odd": "2",
+      "stake": "10",
+      "resultado": "W",
+      "notas": ""
+    }
+  ],
+  "updatedAt": "2026-03-21T13:45:43.807598+00:00"
 }
