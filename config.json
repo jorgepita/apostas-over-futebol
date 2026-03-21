@@ -8,9 +8,18 @@
     "nba_over": 500
   },
   "leagues": {
-    "premier": { "name": "Premier League", "country": "ENG" },
-    "portugal": { "name": "Primeira Liga", "country": "PRT" },
-    "alemanha": { "name": "Bundesliga", "country": "DEU" }
+    "premier": {
+      "name": "Premier League",
+      "country": "ENG"
+    },
+    "portugal": {
+      "name": "Primeira Liga",
+      "country": "PRT"
+    },
+    "alemanha": {
+      "name": "Bundesliga",
+      "country": "DEU"
+    }
   },
   "history": {
     "window": 12,
@@ -47,7 +56,6 @@
     "sigma_total": 14.0
   },
   "api_football": {
-    "season": 2025,
     "league_ids": {
       "premier": 39,
       "portugal": 94,
