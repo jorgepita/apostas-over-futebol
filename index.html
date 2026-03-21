@@ -22,6 +22,8 @@
       --info-bg: #eff6ff;
       --manual: #6d28d9;
       --manual-bg: #f5f3ff;
+      --general-line: #0f172a;
+      --session-line: #2563eb;
     }
 
     * { box-sizing: border-box; }
@@ -59,6 +61,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .btn {
@@ -110,6 +113,11 @@
       color: #166534;
       font-weight: 600;
       font-size: 13px;
+    }
+
+    .pill.info {
+      background: var(--info-bg);
+      color: var(--info);
     }
 
     .toolbar {
@@ -240,6 +248,28 @@
       background: #fff;
     }
 
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .legend-line {
+      width: 22px;
+      height: 3px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
     canvas {
       width: 100%;
       max-width: 100%;
@@ -311,6 +341,7 @@
         <button class="btn" id="importManualBtn">Importar manuais JSON</button>
         <button class="btn" id="exportRealCsvBtn">Exportar CSV real</button>
         <a class="btn" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
+        <span class="pill info" id="sessionLabel">Sessão atual: —</span>
       </div>
       <input id="importManualFile" class="hidden" type="file" accept=".json,application/json" />
     </div>
@@ -384,11 +415,21 @@
       <div class="section-head">
         <div>
           <h2>Evolução da banca real</h2>
-          <p class="small">Inclui picks do bot executadas + apostas manuais fechadas.</p>
+          <p class="small">Linha geral + linha da sessão atual.</p>
         </div>
         <span class="pill" id="bankrollLabel">Banca inicial: €1000.00</span>
       </div>
       <div class="chart-wrap">
+        <div class="chart-legend">
+          <span class="legend-item">
+            <span class="legend-line" style="background: var(--general-line);"></span>
+            Geral
+          </span>
+          <span class="legend-item">
+            <span class="legend-line" style="background: var(--session-line);"></span>
+            Sessão atual
+          </span>
+        </div>
         <canvas id="bankrollChart" width="1200" height="320"></canvas>
       </div>
     </div>
@@ -637,7 +678,7 @@
           <div class="section-head">
             <div>
               <h2>Resumo rápido</h2>
-              <p class="small">Modelo + execução real total</p>
+              <p class="small">Sessão atual + geral</p>
             </div>
           </div>
           <div class="list" id="summaryList"></div>
@@ -656,7 +697,8 @@
     const STORAGE_KEYS = {
       bankroll: 'apostas_bot_bankroll_inicial',
       picks: 'apostas_bot_local_edits_v1',
-      manual: 'apostas_bot_manual_bets_v1'
+      manual: 'apostas_bot_manual_bets_v1',
+      sessionStartDate: 'apostas_bot_session_start_date_v1'
     };
 
     const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
@@ -673,7 +715,8 @@
       lastUpdated: null,
       bankrollInicial: 1000,
       localEdits: {},
-      manualBets: []
+      manualBets: [],
+      sessionStartDate: ''
     };
 
     function parseSemicolonCsv(text) {
@@ -723,6 +766,32 @@
       if (!normalized) return null;
       const d = new Date(normalized + 'T00:00:00');
       return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function todayIso() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getSessionStartDate() {
+      const s = normalizeDateString(state.sessionStartDate);
+      return s || todayIso();
+    }
+
+    function isOnOrAfterSession(dateStr) {
+      const d = normalizeDateString(dateStr);
+      const session = getSessionStartDate();
+      if (!d) return false;
+      return d >= session;
+    }
+
+    function formatDatePt(dateStr) {
+      const d = parseDateSafe(dateStr);
+      if (!d) return '—';
+      return d.toLocaleDateString('pt-PT');
     }
 
     function isWithinLastDays(dateStr, days) {
@@ -812,6 +881,7 @@
       const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
       const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
       const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
+      const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
 
       const bankrollParsed = num(savedBankroll);
       if (bankrollParsed !== null && bankrollParsed >= 0) {
@@ -829,12 +899,15 @@
       } catch {
         state.manualBets = [];
       }
+
+      state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
     }
 
     function saveLocalState() {
       localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
       localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
       localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
+      localStorage.setItem(STORAGE_KEYS.sessionStartDate, getSessionStartDate());
     }
 
     function ensureEditObject(pickKey) {
@@ -907,6 +980,14 @@
       return getResolvedHistory().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
     }
 
+    function getResolvedHistorySinceSession() {
+      return getResolvedHistory().filter(r => isOnOrAfterSession(r['Data']));
+    }
+
+    function getRealResolvedBotHistorySinceSession() {
+      return getRealResolvedBotHistory().filter(r => isOnOrAfterSession(r['Data']));
+    }
+
     function getManualRowsMerged() {
       return state.manualBets.map(b => {
         const lucro = calcProfitByResult(b.resultado, b.stake, b.odd);
@@ -929,6 +1010,10 @@
       return getManualRowsMerged().filter(b => b._lucro !== null);
     }
 
+    function getResolvedManualBetsSinceSession() {
+      return getResolvedManualBets().filter(b => isOnOrAfterSession(b.data));
+    }
+
     function getExecutionStats() {
       const history = getHistoryRowsMerged();
       const generated = history.length;
@@ -944,54 +1029,33 @@
       };
     }
 
-    function getMetrics() {
-      const history = getHistoryRowsMerged();
-      const daily = getDailyRowsMerged();
-      const resolved = getResolvedHistory();
-      const realResolvedBot = getRealResolvedBotHistory();
-      const resolvedManual = getResolvedManualBets();
-      const execution = getExecutionStats();
-
-      const leagues = new Set([
-        ...history.map(r => r['Liga']).filter(Boolean),
-        ...state.manualBets.map(b => b.liga).filter(Boolean)
-      ]);
-
-      const markets = new Set([
-        ...history.map(r => r['Mercado']).filter(Boolean),
-        ...state.manualBets.map(b => b.mercado).filter(Boolean)
-      ]);
-
-      const modelStake = sum(resolved.map(r => num(r['Stake€'])).filter(v => v !== null));
-      const modelProfit = sum(resolved.map(r => num(r['Lucro€'])).filter(v => v !== null));
-      const modelWins = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
-      const modelLosses = resolved.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
+    function buildMetricsBundle(botHistoryRows, botRealRows, manualRows) {
+      const modelStake = sum(botHistoryRows.map(r => num(r['Stake€'])).filter(v => v !== null));
+      const modelProfit = sum(botHistoryRows.map(r => num(r['Lucro€'])).filter(v => v !== null));
+      const modelWins = botHistoryRows.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
+      const modelLosses = botHistoryRows.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
       const modelCount = modelWins + modelLosses;
       const modelRoi = modelStake > 0 ? (modelProfit / modelStake) * 100 : 0;
       const modelWr = modelCount > 0 ? (modelWins / modelCount) * 100 : 0;
 
-      const realBotStake = sum(realResolvedBot.map(r => r._stakeRealNum).filter(v => v !== null));
-      const realBotProfit = sum(realResolvedBot.map(r => r._lucroRealLocal).filter(v => v !== null));
+      const realBotStake = sum(botRealRows.map(r => r._stakeRealNum).filter(v => v !== null));
+      const realBotProfit = sum(botRealRows.map(r => r._lucroRealLocal).filter(v => v !== null));
 
-      const manualStake = sum(resolvedManual.map(b => num(b.stake)).filter(v => v !== null));
-      const manualProfit = sum(resolvedManual.map(b => b._lucro).filter(v => v !== null));
-      const manualWins = resolvedManual.filter(b => String(b.resultado).toUpperCase() === 'W').length;
-      const manualLosses = resolvedManual.filter(b => String(b.resultado).toUpperCase() === 'L').length;
+      const manualStake = sum(manualRows.map(b => num(b.stake)).filter(v => v !== null));
+      const manualProfit = sum(manualRows.map(b => b._lucro).filter(v => v !== null));
+      const manualWins = manualRows.filter(b => String(b.resultado).toUpperCase() === 'W').length;
+      const manualLosses = manualRows.filter(b => String(b.resultado).toUpperCase() === 'L').length;
 
       const realStake = realBotStake + manualStake;
       const realProfit = realBotProfit + manualProfit;
-      const realResolvedCount = realResolvedBot.length + resolvedManual.length;
-      const realWins = realResolvedBot.filter(r => String(r['Resultado']).toUpperCase() === 'W').length + manualWins;
-      const realLosses = realResolvedBot.filter(r => String(r['Resultado']).toUpperCase() === 'L').length + manualLosses;
+      const realWins = botRealRows.filter(r => String(r['Resultado']).toUpperCase() === 'W').length + manualWins;
+      const realLosses = botRealRows.filter(r => String(r['Resultado']).toUpperCase() === 'L').length + manualLosses;
+      const realResolvedCount = botRealRows.length + manualRows.length;
       const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
       const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
       const realBankroll = state.bankrollInicial + realProfit;
 
       return {
-        dailyCount: daily.length,
-        totalHistory: history.length,
-        leagues: leagues.size,
-        markets: markets.size,
         modelStake,
         modelProfit,
         modelWins,
@@ -1007,12 +1071,47 @@
         realRoi,
         realWr,
         realBankroll,
-        manualCount: state.manualBets.length,
-        manualResolvedCount: resolvedManual.length,
+        manualCount: manualRows.length
+      };
+    }
+
+    function getMetrics() {
+      const history = getHistoryRowsMerged();
+      const daily = getDailyRowsMerged();
+      const resolved = getResolvedHistory();
+      const realResolvedBot = getRealResolvedBotHistory();
+      const resolvedManual = getResolvedManualBets();
+      const execution = getExecutionStats();
+
+      const sessionResolved = getResolvedHistorySinceSession();
+      const sessionRealResolvedBot = getRealResolvedBotHistorySinceSession();
+      const sessionResolvedManual = getResolvedManualBetsSinceSession();
+
+      const leagues = new Set([
+        ...history.map(r => r['Liga']).filter(Boolean),
+        ...state.manualBets.map(b => b.liga).filter(Boolean)
+      ]);
+
+      const markets = new Set([
+        ...history.map(r => r['Mercado']).filter(Boolean),
+        ...state.manualBets.map(b => b.mercado).filter(Boolean)
+      ]);
+
+      const geral = buildMetricsBundle(resolved, realResolvedBot, resolvedManual);
+      const sessao = buildMetricsBundle(sessionResolved, sessionRealResolvedBot, sessionResolvedManual);
+
+      return {
+        dailyCount: daily.length,
+        totalHistory: history.length,
+        leagues: leagues.size,
+        markets: markets.size,
         generatedCount: execution.generated,
         executedCount: execution.executed,
         notExecutedCount: execution.notExecuted,
-        executionRate: execution.executionRate
+        executionRate: execution.executionRate,
+        sessionStartDate: getSessionStartDate(),
+        geral,
+        sessao
       };
     }
 
@@ -1021,20 +1120,23 @@
 
       document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(state.bankrollInicial)}`;
       document.getElementById('bankrollInput').value = state.bankrollInicial;
+      document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(m.sessionStartDate)}`;
 
       const cards = [
         { label: 'Picks do dia', value: m.dailyCount, note: `Histórico bot: ${m.totalHistory}` },
         { label: 'Picks geradas', value: m.generatedCount, note: `${m.leagues} ligas • ${m.markets} mercados` },
         { label: 'Picks executadas', value: m.executedCount, note: 'Bot marcadas como executadas' },
-        { label: 'Não executadas', value: m.notExecutedCount, note: 'Picks do bot não apostadas' },
         { label: 'Taxa de execução', value: pct(m.executionRate), note: `${m.executedCount}/${m.generatedCount || 0}` },
-        { label: 'Lucro modelo', value: `€${fmt(m.modelProfit)}`, note: `Stake mod. €${fmt(m.modelStake)}` },
-        { label: 'ROI modelo', value: pct(m.modelRoi), note: `${m.modelWins}W / ${m.modelLosses}L` },
-        { label: 'Win rate mod.', value: pct(m.modelWr), note: `${m.modelCount} resolvidas` },
-        { label: 'Lucro real total', value: `€${fmt(m.realProfit)}`, note: `Stake real €${fmt(m.realStake)}` },
-        { label: 'ROI real total', value: pct(m.realRoi), note: `${m.realWins}W / ${m.realLosses}L` },
-        { label: 'Banca real', value: `€${fmt(m.realBankroll)}`, note: `Inicial €${fmt(state.bankrollInicial)}` },
-        { label: 'Manuais', value: m.manualCount, note: `${m.manualResolvedCount} fechadas` }
+
+        { label: 'Sessão • Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `Stake €${fmt(m.sessao.realStake)}` },
+        { label: 'Sessão • ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
+        { label: 'Sessão • Win rate', value: pct(m.sessao.realWr), note: `${m.sessao.realResolvedCount} fechadas` },
+        { label: 'Sessão • Banca', value: `€${fmt(m.sessao.realBankroll)}`, note: `Desde ${formatDatePt(m.sessionStartDate)}` },
+
+        { label: 'Geral • Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `Stake €${fmt(m.geral.realStake)}` },
+        { label: 'Geral • ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
+        { label: 'Geral • Win rate', value: pct(m.geral.realWr), note: `${m.geral.realResolvedCount} fechadas` },
+        { label: 'Geral • Banca', value: `€${fmt(m.geral.realBankroll)}`, note: `Base €${fmt(state.bankrollInicial)}` }
       ];
 
       document.getElementById('stats').innerHTML = cards.map(card => `
@@ -1491,25 +1593,25 @@
     function renderSummary() {
       const m = getMetrics();
 
-      const bestModel = [...getResolvedHistory()]
+      const bestModel = [...getResolvedHistorySinceSession()]
         .map(r => ({ jogo: r['Jogo'], lucro: num(r['Lucro€']) ?? -9999 }))
         .sort((a, b) => b.lucro - a.lucro)[0];
 
       const allRealClosed = [
-        ...getRealResolvedBotHistory().map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 })),
-        ...getResolvedManualBets().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
+        ...getRealResolvedBotHistorySinceSession().map(r => ({ jogo: r['Jogo'], lucro: r._lucroRealLocal ?? -9999 })),
+        ...getResolvedManualBetsSinceSession().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
       ];
 
       const bestReal = [...allRealClosed].sort((a, b) => b.lucro - a.lucro)[0];
 
       const items = [
-        `Modelo: lucro €${fmt(m.modelProfit)} | ROI ${pct(m.modelRoi)} | Win rate ${pct(m.modelWr)}`,
+        `Sessão atual desde ${formatDatePt(m.sessionStartDate)}`,
+        `Sessão: lucro €${fmt(m.sessao.realProfit)} | ROI ${pct(m.sessao.realRoi)} | WR ${pct(m.sessao.realWr)} | banca €${fmt(m.sessao.realBankroll)}`,
+        `Geral: lucro €${fmt(m.geral.realProfit)} | ROI ${pct(m.geral.realRoi)} | WR ${pct(m.geral.realWr)} | banca €${fmt(m.geral.realBankroll)}`,
+        `Modelo sessão: lucro €${fmt(m.sessao.modelProfit)} | ROI ${pct(m.sessao.modelRoi)} | Win rate ${pct(m.sessao.modelWr)}`,
         `Execução: ${m.executedCount} executadas | ${m.notExecutedCount} não executadas | taxa ${pct(m.executionRate)}`,
-        `Real total: lucro €${fmt(m.realProfit)} | ROI ${pct(m.realRoi)} | Banca €${fmt(m.realBankroll)}`,
-        `Fechadas reais: ${m.realResolvedCount} | Ganhas: ${m.realWins} | Perdidas: ${m.realLosses}`,
-        `Apostas manuais: ${m.manualCount} | Fechadas: ${m.manualResolvedCount}`,
-        `Melhor pick modelo: ${bestModel ? `${bestModel.jogo} • €${fmt(bestModel.lucro)}` : '—'}`,
-        `Melhor aposta real: ${bestReal ? `${bestReal.jogo} • €${fmt(bestReal.lucro)}` : '—'}`,
+        `Melhor pick modelo da sessão: ${bestModel ? `${bestModel.jogo} • €${fmt(bestModel.lucro)}` : '—'}`,
+        `Melhor aposta real da sessão: ${bestReal ? `${bestReal.jogo} • €${fmt(bestReal.lucro)}` : '—'}`,
         `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
       ];
 
@@ -1517,68 +1619,27 @@
         items.map(t => `<div class="item">${escapeHtml(t)}</div>`).join('');
     }
 
-    function drawBankrollChart() {
-      const canvas = document.getElementById('bankrollChart');
-      const ctx = canvas.getContext('2d');
+    function buildBankrollSeries(rows, initialValue) {
+      const points = [{ label: 'Inicial', value: initialValue }];
+      let acc = initialValue;
 
-      const botPoints = getRealResolvedBotHistory().map(r => ({
-        data: r['Data'] || '1970-01-01',
-        lucro: r._lucroRealLocal ?? 0
-      }));
-
-      const manualPoints = getResolvedManualBets().map(b => ({
-        data: b.data || '1970-01-01',
-        lucro: b._lucro ?? 0
-      }));
-
-      const combined = [...botPoints, ...manualPoints].sort((a, b) => {
-        return new Date(a.data).getTime() - new Date(b.data).getTime();
-      });
-
-      const points = [{ label: 'Inicial', value: state.bankrollInicial }];
-      let acc = state.bankrollInicial;
-
-      combined.forEach((r, idx) => {
-        acc += r.lucro;
+      rows.forEach((r, idx) => {
+        acc += r.lucro || 0;
         points.push({
-          label: r.data || `Aposta ${idx + 1}`,
+          label: r.date || `Aposta ${idx + 1}`,
           value: acc
         });
       });
 
-      const width = canvas.width;
-      const height = canvas.height;
-      ctx.clearRect(0, 0, width, height);
+      return points;
+    }
 
-      if (points.length < 2) {
-        ctx.fillStyle = '#475569';
-        ctx.font = '16px sans-serif';
-        ctx.fillText('Ainda não há apostas reais resolvidas suficientes para desenhar o gráfico.', 20, 40);
-        return;
-      }
+    function drawLine(ctx, points, width, height, padding, minVal, range, color) {
+      const xStep = points.length > 1 ? (width - padding * 2) / (points.length - 1) : 0;
+      const getX = i => padding + i * xStep;
+      const getY = v => height - padding - ((v - minVal) / range) * (height - padding * 2);
 
-      const padding = 40;
-      const values = points.map(p => p.value);
-      const minVal = Math.min(...values);
-      const maxVal = Math.max(...values);
-      const range = Math.max(maxVal - minVal, 1);
-      const xStep = (width - padding * 2) / (points.length - 1);
-
-      function getX(i) { return padding + i * xStep; }
-      function getY(v) { return height - padding - ((v - minVal) / range) * (height - padding * 2); }
-
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 1;
-
-      for (let i = 0; i < 5; i++) {
-        const y = padding + i * ((height - padding * 2) / 4);
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
-        ctx.stroke();
-      }
-
-      ctx.strokeStyle = '#0f172a';
+      ctx.strokeStyle = color;
       ctx.lineWidth = 3;
       ctx.beginPath();
 
@@ -1591,7 +1652,7 @@
 
       ctx.stroke();
 
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = color;
       points.forEach((p, i) => {
         const x = getX(i);
         const y = getY(p.value);
@@ -1599,16 +1660,69 @@
         ctx.arc(x, y, 4, 0, Math.PI * 2);
         ctx.fill();
       });
+    }
+
+    function drawBankrollChart() {
+      const canvas = document.getElementById('bankrollChart');
+      const ctx = canvas.getContext('2d');
+
+      const allRows = getFilteredRealClosedRows();
+      const sessionRows = allRows.filter(r => isOnOrAfterSession(r.date));
+
+      const generalPoints = buildBankrollSeries(allRows, state.bankrollInicial);
+      const sessionPoints = buildBankrollSeries(sessionRows, state.bankrollInicial);
+
+      const allValues = [...generalPoints.map(p => p.value), ...sessionPoints.map(p => p.value)];
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (generalPoints.length < 2 && sessionPoints.length < 2) {
+        ctx.fillStyle = '#475569';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Ainda não há apostas reais resolvidas suficientes para desenhar o gráfico.', 20, 40);
+        return;
+      }
+
+      const padding = 40;
+      const minVal = Math.min(...allValues);
+      const maxVal = Math.max(...allValues);
+      const range = Math.max(maxVal - minVal, 1);
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < 5; i++) {
+        const y = padding + i * ((height - padding * 2) / 4);
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+      }
+
+      if (generalPoints.length >= 2) {
+        drawLine(ctx, generalPoints, width, height, padding, minVal, range, '#0f172a');
+      }
+
+      if (sessionPoints.length >= 2) {
+        drawLine(ctx, sessionPoints, width, height, padding, minVal, range, '#2563eb');
+      }
 
       ctx.fillStyle = '#475569';
       ctx.font = '12px sans-serif';
       ctx.fillText(`€${fmt(maxVal)}`, 8, padding + 4);
       ctx.fillText(`€${fmt(minVal)}`, 8, height - padding + 4);
 
-      const last = points[points.length - 1];
+      const lastGeneral = generalPoints[generalPoints.length - 1];
+      const lastSession = sessionPoints[sessionPoints.length - 1];
+
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 13px sans-serif';
-      ctx.fillText(`Banca real: €${fmt(last.value)}`, width - 190, 24);
+      ctx.fillText(`Geral: €${fmt(lastGeneral.value)}`, width - 180, 24);
+
+      ctx.fillStyle = '#2563eb';
+      ctx.fillText(`Sessão: €${fmt(lastSession.value)}`, width - 180, 44);
     }
 
     function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
@@ -1715,6 +1829,7 @@
         state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
         state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
         state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
+        state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
 
         saveLocalState();
         hasPendingCloudChanges = false;
@@ -1735,7 +1850,8 @@
         const payload = {
           bankrollInicial: state.bankrollInicial,
           localEdits: state.localEdits,
-          manualBets: state.manualBets
+          manualBets: state.manualBets,
+          sessionStartDate: getSessionStartDate()
         };
 
         const res = await fetch(`${SYNC_API_BASE}/state`, {
@@ -1947,6 +2063,8 @@
       renderAnalytics();
       renderFootball();
       renderManualBets();
+      renderSummary();
+      drawBankrollChart();
     }
 
     document.getElementById('searchGlobal').addEventListener('input', rerenderFilteredSectionsOnly);
@@ -1970,8 +2088,10 @@
     document.getElementById('resetLocalBtn').addEventListener('click', () => {
       localStorage.removeItem(STORAGE_KEYS.bankroll);
       localStorage.removeItem(STORAGE_KEYS.picks);
+      localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
       state.bankrollInicial = 1000;
       state.localEdits = {};
+      state.sessionStartDate = todayIso();
       document.getElementById('bankrollInput').value = 1000;
       rerenderAll();
     });
