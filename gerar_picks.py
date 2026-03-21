@@ -11,8 +11,12 @@ import pandas as pd
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 HISTORY_PATH = BASE / "picks_history.csv"
+MAX_TOTAL_PICKS = 6
 
 
+# =============================
+# Anti-duplicados (por dia)
+# =============================
 def load_sent_state(today_iso: str) -> set[str]:
     try:
         if not SENT_STATE_PATH.exists():
@@ -47,6 +51,9 @@ def history_pick_id_from_simple(row: pd.Series) -> str:
     )
 
 
+# =============================
+# Helpers
+# =============================
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
@@ -238,6 +245,9 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
     return ensure_simple_columns(history)
 
 
+# =============================
+# Telegram
+# =============================
 def send_telegram_message(token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = parse.urlencode(
@@ -294,6 +304,9 @@ def build_message(rows: list[dict], titulo: str) -> str:
     return msg
 
 
+# =============================
+# Qualidade / score / correlação
+# =============================
 def market_quality_filter(row: dict) -> bool:
     market = str(row.get("Market", "")).strip().upper()
     odd = float(row.get("Odd", 0.0) or 0.0)
@@ -367,35 +380,24 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def debug_market_summary(name: str, rows: list[dict]) -> None:
-    print(f"[DBG] {name}: candidatos brutos = {len(rows)}")
-    if not rows:
-        return
-
-    df = pd.DataFrame(rows).copy()
-    for col in ["Odd", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal", "ProbModel", "ProbMarket"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
-
-    print(f"[DBG] {name}: edge max = {df['Edge'].max():.4f} | edge mean = {df['Edge'].mean():.4f}")
-    print(f"[DBG] {name}: kelly max = {df['KellyTrue'].max():.4f} | kelly mean = {df['KellyTrue'].mean():.4f}")
-    print(f"[DBG] {name}: lambda_total mean = {df['LambdaTotal'].mean():.3f}")
-
-    top = df.sort_values(["Edge", "KellyTrue"], ascending=[False, False]).head(5)
-    for _, r in top.iterrows():
-        print(
-            f"[DBG] {name} TOP | {r['League']} | {r['HomeTeam']} vs {r['AwayTeam']} | "
-            f"{r['Market']} | odd={r['Odd']:.2f} | edge={r['Edge']:.4f} | "
-            f"kelly={r['KellyTrue']:.4f} | lamT={r['LambdaTotal']:.3f}"
-        )
+def limit_total_picks(df: pd.DataFrame, max_picks: int = MAX_TOTAL_PICKS) -> pd.DataFrame:
+    if df.empty:
+        return df
+    df = compute_pick_score(df.copy())
+    df = df.sort_values(
+        ["Score", "Edge", "KellyTrue", "ProbModel"],
+        ascending=[False, False, False, False],
+    ).reset_index(drop=True)
+    return df.head(max_picks).copy()
 
 
+# =============================
+# Regras de mercado / stake
+# =============================
 def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: str) -> pd.DataFrame:
     if not rows:
         print(f"[DBG] {label}: sem rows à entrada")
         return pd.DataFrame()
-
-    debug_market_summary(label, rows)
 
     filtered_rows = [r for r in rows if market_quality_filter(r)]
     print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)}")
@@ -423,19 +425,24 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
+    df = compute_pick_score(df)
+    df = dedupe_correlated_picks(df)
+    print(f"[DBG] {label}: após dedupe = {len(df)}")
+
+    return df
+
+
+def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> pd.DataFrame:
+    if df.empty:
+        return df
+
     kfrac = float(rules.get("kelly_fraction", 0.25))
     cap_frac = float(rules.get("cap_frac", 0.05))
     daily_cap_frac = float(rules.get("daily_cap_frac", 0.15))
     min_picks = int(rules.get("min_picks", 1))
 
-    df = compute_pick_score(df)
-    df = dedupe_correlated_picks(df)
-    print(f"[DBG] {label}: após dedupe = {len(df)}")
-
-    if df.empty:
-        return df
-
-    df["StakeFracRaw"] = df["KellyTrue"] * kfrac
+    df = df.copy()
+    df["StakeFracRaw"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0) * kfrac
     df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
     total_frac = float(df["StakeFrac"].sum())
@@ -448,20 +455,12 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-    stake_zero = int((df["Stake€"] <= 0).sum())
-    print(f"[DBG] {label}: stake zero = {stake_zero} | stake > 0 = {int((df['Stake€'] > 0).sum())}")
-
     if len(df) < min_picks:
         print(f"[DBG] {label}: abaixo de min_picks={min_picks}")
         return df.iloc[0:0].copy()
 
     df = df[df["Stake€"] > 0].copy()
-    print(f"[DBG] {label}: final = {len(df)}")
-
-    df = df.sort_values(
-        ["Score", "Edge", "KellyTrue"],
-        ascending=[False, False, False],
-    ).reset_index(drop=True)
+    print(f"[DBG] {label}: final após stake = {len(df)}")
 
     round_cols = {
         "LambdaHome": 3,
@@ -484,6 +483,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     return df
 
 
+# =============================
+# GitHub upload
+# =============================
 def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
     headers = {
         "Accept": "application/vnd.github+json",
@@ -563,6 +565,9 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
     print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
+# =============================
+# Main
+# =============================
 def main():
     cfg_path = BASE / "config.json"
     if not cfg_path.exists():
@@ -741,27 +746,33 @@ def main():
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5")
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS")
 
-    if not out25.empty:
-        out25["Odd"] = pd.to_numeric(out25["Odd"], errors="coerce")
-        out25["Stake€"] = pd.to_numeric(out25["Stake€"], errors="coerce")
-        out25 = out25[(out25["Odd"] > 1.01) & (out25["Stake€"] > 0)].copy()
+    combo_pre = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
 
-    if not out_btts.empty:
-        out_btts["Odd"] = pd.to_numeric(out_btts["Odd"], errors="coerce")
-        out_btts["Stake€"] = pd.to_numeric(out_btts["Stake€"], errors="coerce")
-        out_btts = out_btts[(out_btts["Odd"] > 1.01) & (out_btts["Stake€"] > 0)].copy()
+    if not combo_pre.empty:
+        combo_pre = dedupe_correlated_picks(combo_pre)
+        combo_pre = limit_total_picks(combo_pre, MAX_TOTAL_PICKS)
+        print(f"[DBG] combo final limitado a {len(combo_pre)} picks (max={MAX_TOTAL_PICKS})")
+    else:
+        print("[DBG] combo final vazio antes do limite")
 
-    combo = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
-    if not combo.empty:
-        combo = dedupe_correlated_picks(combo)
-        combo = combo[combo["Stake€"] > 0].copy()
-        combo = combo.sort_values(
-            ["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"],
-            ascending=[True, True, True, True, False],
-        ).reset_index(drop=True)
+    if combo_pre.empty:
+        out25_final = pd.DataFrame()
+        out_btts_final = pd.DataFrame()
+        combo = pd.DataFrame()
+    else:
+        out25_candidates = combo_pre[combo_pre["Market"] == "O2.5"].copy()
+        out_btts_candidates = combo_pre[combo_pre["Market"] == "BTTS"].copy()
 
-    out25_final = combo[combo["Market"] == "O2.5"].copy() if not combo.empty else pd.DataFrame()
-    out_btts_final = combo[combo["Market"] == "BTTS"].copy() if not combo.empty else pd.DataFrame()
+        out25_final = apply_stakes(out25_candidates, bankroll25, rules25, "O2.5")
+        out_btts_final = apply_stakes(out_btts_candidates, bankroll_btts, rules_btts, "BTTS")
+
+        combo = pd.concat([out25_final, out_btts_final], ignore_index=True) if (len(out25_final) or len(out_btts_final)) else pd.DataFrame()
+        if not combo.empty:
+            combo = compute_pick_score(combo)
+            combo = combo.sort_values(
+                ["Score", "Edge", "KellyTrue", "ProbModel"],
+                ascending=[False, False, False, False],
+            ).head(MAX_TOTAL_PICKS).reset_index(drop=True)
 
     out25_path = BASE / "picks_over25.csv"
     out_btts_path = BASE / "picks_btts.csv"
