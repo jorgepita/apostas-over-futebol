@@ -32,7 +32,8 @@ def load_sent_state(today_iso: str) -> set[str]:
 def save_sent_state(today_iso: str, sent: set[str]) -> None:
     payload = {"date": today_iso, "sent": sorted(sent)}
     SENT_STATE_PATH.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
     )
 
 
@@ -191,7 +192,7 @@ def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
         "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€"
+        "Resultado", "Lucro€", "LucroReal€",
     ]
     for col in cols:
         if col not in df.columns:
@@ -203,7 +204,7 @@ def load_history() -> pd.DataFrame:
     cols = [
         "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
         "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€"
+        "Resultado", "Lucro€", "LucroReal€",
     ]
     if not HISTORY_PATH.exists():
         return pd.DataFrame(columns=cols)
@@ -235,7 +236,7 @@ def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
         history = history.sort_values(
             ["_sort_date", "Liga", "Jogo", "Mercado"],
             ascending=[True, True, True, True],
-            na_position="last"
+            na_position="last",
         )
         history = history.drop(columns=["_sort_date"])
 
@@ -316,23 +317,22 @@ def market_quality_filter(row: dict) -> bool:
     if odd <= 1.01:
         return False
 
-    # Filtros mais apertados para melhorar qualidade real
     if market == "O2.5":
-        if lam_t < 2.20:
+        if lam_t < 1.90:
             return False
-        if odd < 1.70 or odd > 2.30:
+        if odd < 1.55 or odd > 2.50:
             return False
-        if edge <= 0:
+        if edge < -0.03:
             return False
 
     elif market == "BTTS":
-        if lam_h < 0.85 or lam_a < 0.85:
+        if lam_h < 0.65 or lam_a < 0.65:
             return False
-        if lam_t < 2.10:
+        if lam_t < 1.85:
             return False
-        if odd < 1.65 or odd > 2.25:
+        if odd < 1.55 or odd > 2.50:
             return False
-        if edge <= 0:
+        if edge < -0.03:
             return False
 
     return True
@@ -352,16 +352,12 @@ def compute_pick_score(df: pd.DataFrame) -> pd.DataFrame:
     df["LambdaTotal"] = pd.to_numeric(df["LambdaTotal"], errors="coerce").fillna(0.0)
 
     df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
-
-    # Score simples mas forte:
-    # edge pesa mais, Kelly complementa, gap confirma, lambdas reforçam confiança
     df["Score"] = (
         (df["Edge"] * 100.0)
         + (df["KellyTrue"] * 20.0)
         + (df["ProbGap"] * 50.0)
         + (df["LambdaTotal"] * 1.0)
     )
-
     return df
 
 
@@ -378,16 +374,15 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
     for _, g in df.groupby(game_cols, dropna=False):
         g = g.sort_values(
             ["Score", "Edge", "KellyTrue", "ProbModel"],
-            ascending=[False, False, False, False]
+            ascending=[False, False, False, False],
         ).reset_index(drop=True)
 
-        # Mantém só a melhor pick por jogo para evitar correlação O2.5 + BTTS
         keep_rows.append(g.iloc[0].to_dict())
 
     out = pd.DataFrame(keep_rows)
     out = out.sort_values(
         ["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"],
-        ascending=[True, True, True, True, False]
+        ascending=[True, True, True, True, False],
     ).reset_index(drop=True)
     return out
 
@@ -449,12 +444,11 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict) -> pd.Dat
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-    # Remover picks com stake nula após scaling
     df = df[df["Stake€"] > 0].copy()
 
     df = df.sort_values(
         ["Score", "Edge", "KellyTrue"],
-        ascending=[False, False, False]
+        ascending=[False, False, False],
     ).reset_index(drop=True)
 
     round_cols = {
@@ -754,14 +748,15 @@ def main():
         out_btts["Stake€"] = pd.to_numeric(out_btts["Stake€"], errors="coerce")
         out_btts = out_btts[(out_btts["Odd"] > 1.01) & (out_btts["Stake€"] > 0)].copy()
 
-    # Junta tudo e remove correlação final entre mercados do mesmo jogo
     combo = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
     if not combo.empty:
         combo = dedupe_correlated_picks(combo)
         combo = combo[combo["Stake€"] > 0].copy()
-        combo = combo.sort_values(["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"], ascending=[True, True, True, True, False]).reset_index(drop=True)
+        combo = combo.sort_values(
+            ["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"],
+            ascending=[True, True, True, True, False],
+        ).reset_index(drop=True)
 
-    # Repartir combo final por mercado para manter CSV separados coerentes
     out25_final = combo[combo["Market"] == "O2.5"].copy() if not combo.empty else pd.DataFrame()
     out_btts_final = combo[combo["Market"] == "BTTS"].copy() if not combo.empty else pd.DataFrame()
 
@@ -798,7 +793,7 @@ def main():
         cols = [
             "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
             "Apostada", "OddReal", "StakeReal€",
-            "Resultado", "Lucro€", "LucroReal€"
+            "Resultado", "Lucro€", "LucroReal€",
         ]
         simple = simple[cols].copy()
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
@@ -808,7 +803,7 @@ def main():
         simple = pd.DataFrame(columns=[
             "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
             "Apostada", "OddReal", "StakeReal€",
-            "Resultado", "Lucro€", "LucroReal€"
+            "Resultado", "Lucro€", "LucroReal€",
         ])
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
