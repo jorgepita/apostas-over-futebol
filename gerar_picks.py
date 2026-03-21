@@ -305,9 +305,59 @@ def build_message(rows: list[dict], titulo: str) -> str:
 
 
 # =============================
+# Modo normal / teste
+# =============================
+def get_run_mode(cfg: dict) -> str:
+    mode = str(cfg.get("run", {}).get("mode", "normal")).strip().lower()
+    return mode if mode in {"normal", "test"} else "normal"
+
+
+def get_market_thresholds(mode: str, market: str) -> dict:
+    market = str(market).strip().upper()
+
+    if mode == "test":
+        if market == "O2.5":
+            return {
+                "lam_t_min": 1.75,
+                "odd_min": 1.45,
+                "odd_max": 2.80,
+                "edge_min_quality": -0.06,
+            }
+        if market == "BTTS":
+            return {
+                "lam_h_min": 0.55,
+                "lam_a_min": 0.55,
+                "lam_t_min": 1.70,
+                "odd_min": 1.45,
+                "odd_max": 2.80,
+                "edge_min_quality": -0.06,
+            }
+
+    # normal
+    if market == "O2.5":
+        return {
+            "lam_t_min": 1.90,
+            "odd_min": 1.55,
+            "odd_max": 2.50,
+            "edge_min_quality": -0.03,
+        }
+    if market == "BTTS":
+        return {
+            "lam_h_min": 0.65,
+            "lam_a_min": 0.65,
+            "lam_t_min": 1.85,
+            "odd_min": 1.55,
+            "odd_max": 2.50,
+            "edge_min_quality": -0.03,
+        }
+
+    return {}
+
+
+# =============================
 # Qualidade / score / correlação
 # =============================
-def market_quality_filter(row: dict) -> bool:
+def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     market = str(row.get("Market", "")).strip().upper()
     odd = float(row.get("Odd", 0.0) or 0.0)
     lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
@@ -318,22 +368,24 @@ def market_quality_filter(row: dict) -> bool:
     if odd <= 1.01:
         return False
 
+    th = get_market_thresholds(mode, market)
+
     if market == "O2.5":
-        if lam_t < 1.90:
+        if lam_t < th["lam_t_min"]:
             return False
-        if odd < 1.55 or odd > 2.50:
+        if odd < th["odd_min"] or odd > th["odd_max"]:
             return False
-        if edge < -0.03:
+        if edge < th["edge_min_quality"]:
             return False
 
     elif market == "BTTS":
-        if lam_h < 0.65 or lam_a < 0.65:
+        if lam_h < th["lam_h_min"] or lam_a < th["lam_a_min"]:
             return False
-        if lam_t < 1.85:
+        if lam_t < th["lam_t_min"]:
             return False
-        if odd < 1.55 or odd > 2.50:
+        if odd < th["odd_min"] or odd > th["odd_max"]:
             return False
-        if edge < -0.03:
+        if edge < th["edge_min_quality"]:
             return False
 
     return True
@@ -394,13 +446,13 @@ def limit_total_picks(df: pd.DataFrame, max_picks: int = MAX_TOTAL_PICKS) -> pd.
 # =============================
 # Regras de mercado / stake
 # =============================
-def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: str) -> pd.DataFrame:
+def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: str, mode: str = "normal") -> pd.DataFrame:
     if not rows:
         print(f"[DBG] {label}: sem rows à entrada")
         return pd.DataFrame()
 
-    filtered_rows = [r for r in rows if market_quality_filter(r)]
-    print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)}")
+    filtered_rows = [r for r in rows if market_quality_filter(r, mode=mode)]
+    print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)} | mode={mode}")
 
     if not filtered_rows:
         return pd.DataFrame()
@@ -574,6 +626,9 @@ def main():
         raise SystemExit("Falta config.json na pasta do projeto.")
     cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
 
+    run_mode = get_run_mode(cfg)
+    print(f"[DBG] gerar_picks mode={run_mode}")
+
     fixtures_path = BASE / "fixtures_today.csv"
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
@@ -743,8 +798,8 @@ def main():
     rules_btts = dict(rules_cfg.get("btts", {}))
     rules_btts.setdefault("edge_max", 0.15)
 
-    out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5")
-    out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS")
+    out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
+    out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
 
     combo_pre = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
 
