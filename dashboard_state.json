@@ -1,51 +1,6 @@
 {
   "bankrollInicial": 1000,
   "localEdits": {},
-  "manualBets": [
-    {
-      "data": "2026-03-15",
-      "id": "manual_1773589552242_8emqn2",
-      "jogo": "a x b",
-      "liga": "z",
-      "mercado": "btts",
-      "notas": "",
-      "odd": "1.8",
-      "resultado": "L",
-      "stake": "10"
-    },
-    {
-      "data": "2026-03-15",
-      "id": "manual_1773589680194_x2ivu1",
-      "jogo": "c x f",
-      "liga": "y",
-      "mercado": "total 2",
-      "notas": "",
-      "odd": "2.06",
-      "resultado": "W",
-      "stake": "20"
-    },
-    {
-      "data": "2026-03-15",
-      "id": "manual_1773589737044_mie7xu",
-      "jogo": "j x r",
-      "liga": "g",
-      "mercado": "total 1ª parte",
-      "notas": "",
-      "odd": "1.79",
-      "resultado": "W",
-      "stake": "15"
-    },
-    {
-      "data": "2026-03-15",
-      "id": "manual_1773605594799_lpt5s8",
-      "jogo": "a x v",
-      "liga": "teste",
-      "mercado": "btts",
-      "notas": "",
-      "odd": "1.76",
-      "resultado": "L",
-      "stake": "25"
-    }
-  ],
-  "updatedAt": "2026-03-21T12:02:24.852334+00:00"
+  "manualBets": [],
+  "updatedAt": "2026-03-21T12:03:28.042633+00:00"
 }
