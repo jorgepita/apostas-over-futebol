@@ -2,145 +2,62 @@ import os
 import json
 import csv
 import base64
+import math
 import urllib.parse
 import urllib.request
 from urllib import error
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
+
+import pandas as pd
 
 
 BASE_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = BASE_DIR / "config.json"
+DATA_RAW_DIR = BASE_DIR / "data_raw"
 
-API_KEY = os.getenv("ODDS_API_KEY", "").strip()
-print(f"[DBG] ODDS_API_KEY len = {len(API_KEY)}")
+API_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
+API_BASE = os.getenv("API_FOOTBALL_BASE", "https://v3.football.api-sports.io").strip()
 
-BASE_ODDS = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
-BASE_EVENT_ODDS = "https://api.the-odds-api.com/v4/sports/{sport}/events/{event_id}/odds"
+print(f"[DBG] API_FOOTBALL_KEY len = {len(API_KEY)}")
+print(f"[DBG] API_FOOTBALL_BASE = {API_BASE}")
 
-SPORTS = {
-    "premier": "soccer_epl",
-    "portugal": "soccer_portugal_primeira_liga",
-    "alemanha": "soccer_germany_bundesliga",
-    # "espanha": "soccer_spain_la_liga",
-    # "franca": "soccer_france_ligue_one",
-    # "italia": "soccer_italy_serie_a",
-    # "paises_baixos": "soccer_netherlands_eredivisie",
+# Mantemos as mesmas chaves internas do projeto
+# e ligamos cada uma ao league_id oficial da API-Football.
+DEFAULT_LEAGUE_IDS = {
+    "premier": 39,     # Premier League
+    "portugal": 94,    # Primeira Liga
+    "alemanha": 78,    # Bundesliga
+    "espanha": 140,    # LaLiga
+    "franca": 61,      # Ligue 1
+    "italia": 135,     # Serie A
+    "paises_baixos": 88,  # Eredivisie
 }
 
-REGIONS = "eu,uk"
-ODDS_FORMAT = "decimal"
 
+# =============================
+# HTTP helpers
+# =============================
+def http_get_json(path: str, params: dict) -> dict:
+    if not API_KEY:
+        raise SystemExit("Falta API_FOOTBALL_KEY (define no Render -> Environment).")
 
-def http_get_json(url: str):
+    query = urllib.parse.urlencode(params)
+    url = f"{API_BASE}{path}?{query}"
+
     req = urllib.request.Request(
         url,
         headers={
+            "x-apisports-key": API_KEY,
             "Accept": "application/json",
             "User-Agent": "apostas-over-futebol/1.0",
         },
     )
+
     with urllib.request.urlopen(req, timeout=40) as r:
-        return json.loads(r.read().decode("utf-8"))
-
-
-def build_totals_url(sport_key: str) -> str:
-    if not API_KEY:
-        raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
-
-    params = {
-        "apiKey": API_KEY,
-        "regions": REGIONS,
-        "markets": "totals",
-        "oddsFormat": ODDS_FORMAT,
-    }
-    return BASE_ODDS.format(sport=sport_key) + "?" + urllib.parse.urlencode(params)
-
-
-def build_btts_url(sport_key: str, event_id: str) -> str:
-    if not API_KEY:
-        raise SystemExit("Falta ODDS_API_KEY (define no Render -> Environment).")
-
-    params = {
-        "apiKey": API_KEY,
-        "regions": REGIONS,
-        "markets": "btts",
-        "oddsFormat": ODDS_FORMAT,
-    }
-    return BASE_EVENT_ODDS.format(sport=sport_key, event_id=event_id) + "?" + urllib.parse.urlencode(params)
-
-
-def pick_best_over25_price(bookmakers: List[Dict[str, Any]]) -> Optional[float]:
-    best_price = None
-
-    for bm in bookmakers or []:
-        for market in bm.get("markets", []) or []:
-            if market.get("key") != "totals":
-                continue
-
-            for outcome in market.get("outcomes", []) or []:
-                try:
-                    if outcome.get("name") != "Over":
-                        continue
-
-                    point = outcome.get("point")
-                    price = outcome.get("price")
-
-                    if point is None or price is None:
-                        continue
-
-                    if float(point) == 2.5:
-                        price = float(price)
-                        if price > 1.01:
-                            if best_price is None or price > best_price:
-                                best_price = price
-                except Exception:
-                    continue
-
-    return best_price
-
-
-def pick_best_btts_yes_price(bookmakers: List[Dict[str, Any]]) -> Optional[float]:
-    best_price = None
-
-    for bm in bookmakers or []:
-        for market in bm.get("markets", []) or []:
-            if market.get("key") != "btts":
-                continue
-
-            for outcome in market.get("outcomes", []) or []:
-                try:
-                    name = str(outcome.get("name", "")).strip().lower()
-                    price = outcome.get("price")
-
-                    if price is None:
-                        continue
-
-                    if name in {"yes", "sim"}:
-                        price = float(price)
-                        if price > 1.01:
-                            if best_price is None or price > best_price:
-                                best_price = price
-                except Exception:
-                    continue
-
-    return best_price
-
-
-def iso_to_date_utc(iso_utc: str) -> str:
-    dt = datetime.fromisoformat(iso_utc.replace("Z", "+00:00")).astimezone(timezone.utc)
-    return dt.date().isoformat()
-
-
-def fetch_btts_for_event(sport_key: str, event_id: str) -> Optional[float]:
-    try:
-        url = build_btts_url(sport_key, event_id)
-        data = http_get_json(url)
-        bookmakers = data.get("bookmakers", []) if isinstance(data, dict) else []
-        return pick_best_btts_yes_price(bookmakers)
-    except Exception as e:
-        print(f"[WARN] BTTS fetch falhou sport={sport_key} event={event_id} -> {e}")
-        return None
+        raw = r.read().decode("utf-8")
+        return json.loads(raw)
 
 
 # =============================
@@ -217,71 +134,370 @@ def upload_file_to_github(file_path: Path, owner: str, repo: str, branch: str) -
         print(f"GitHub: falhou upload de {file_path.name} -> {e}")
 
 
+# =============================
+# Model helpers (shortlist local)
+# =============================
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
+    return df
+
+
+def safe_mean(series) -> float:
+    if series is None:
+        return 0.0
+    s = pd.to_numeric(series, errors="coerce").dropna()
+    if len(s) == 0:
+        return 0.0
+    return float(s.mean())
+
+
+def weighted_mean(values, decay: float = 0.90) -> float:
+    v = pd.to_numeric(pd.Series(values), errors="coerce").dropna().tolist()
+    if not v:
+        return 0.0
+    n = len(v)
+    weights = [decay ** (n - 1 - i) for i in range(n)]
+    num = sum(v[i] * weights[i] for i in range(n))
+    den = sum(weights)
+    return float(num / den) if den > 0 else 0.0
+
+
+def league_avgs(df_hist: pd.DataFrame) -> tuple[float, float]:
+    return (
+        safe_mean(df_hist.get("FTHG", pd.Series(dtype=float))),
+        safe_mean(df_hist.get("FTAG", pd.Series(dtype=float))),
+    )
+
+
+def last_n_home(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
+    d = df_hist[df_hist["HomeTeam"] == team].sort_values("Date")
+    return d.tail(n)
+
+
+def last_n_away(df_hist: pd.DataFrame, team: str, n: int) -> pd.DataFrame:
+    d = df_hist[df_hist["AwayTeam"] == team].sort_values("Date")
+    return d.tail(n)
+
+
+def clamp_strength(x: float, lo: float = 0.80, hi: float = 1.30) -> float:
+    return float(max(lo, min(hi, x)))
+
+
+def compute_lambdas(
+    df_hist: pd.DataFrame,
+    home: str,
+    away: str,
+    window: int,
+    decay: float,
+    min_games_home: int,
+    min_games_away: int,
+) -> tuple[float, float, float]:
+    avg_home, avg_away = league_avgs(df_hist)
+
+    if avg_home <= 0:
+        avg_home = 1.20
+    if avg_away <= 0:
+        avg_away = 1.00
+
+    h_last = last_n_home(df_hist, home, window)
+    a_last = last_n_away(df_hist, away, window)
+
+    if len(h_last) < min_games_home or len(a_last) < min_games_away:
+        lam_home = float(max(0.25, min(2.20, avg_home)))
+        lam_away = float(max(0.20, min(1.90, avg_away)))
+        return lam_home, lam_away, lam_home + lam_away
+
+    home_scored = weighted_mean(h_last["FTHG"], decay=decay)
+    home_conceded = weighted_mean(h_last["FTAG"], decay=decay)
+    away_scored = weighted_mean(a_last["FTAG"], decay=decay)
+    away_conceded = weighted_mean(a_last["FTHG"], decay=decay)
+
+    home_attack = clamp_strength(home_scored / avg_home if avg_home > 0 else 1.0)
+    home_defense = clamp_strength(home_conceded / avg_away if avg_away > 0 else 1.0)
+    away_attack = clamp_strength(away_scored / avg_away if avg_away > 0 else 1.0)
+    away_defense = clamp_strength(away_conceded / avg_home if avg_home > 0 else 1.0)
+
+    lam_home = avg_home * home_attack * away_defense
+    lam_away = avg_away * away_attack * home_defense
+
+    lam_home = float(max(0.25, min(2.20, lam_home)))
+    lam_away = float(max(0.20, min(1.90, lam_away)))
+
+    return lam_home, lam_away, lam_home + lam_away
+
+
+def fixture_shortlist_score(lam_home: float, lam_away: float, lam_total: float) -> float:
+    # score simples e adaptável a futuro plano pago
+    # favorece jogos com potencial ofensivo e equilíbrio mínimo para BTTS
+    min_side = min(lam_home, lam_away)
+    return (lam_total * 1.0) + (min_side * 0.75)
+
+
+# =============================
+# API-Football parsing
+# =============================
+def load_config() -> dict:
+    if not CONFIG_PATH.exists():
+        raise SystemExit("Falta config.json na pasta do projeto.")
+    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+
+
+def build_league_map(cfg: dict) -> dict:
+    leagues_cfg = cfg.get("leagues", {})
+    api_cfg = cfg.get("api_football", {})
+    league_ids = api_cfg.get("league_ids", {}) or {}
+
+    result = {}
+    for key in leagues_cfg.keys():
+        league_id = league_ids.get(key, DEFAULT_LEAGUE_IDS.get(key))
+        if league_id:
+            result[key] = int(league_id)
+    return result
+
+
+def get_current_season() -> int:
+    # simples e suficiente para março de 2026; mais tarde pode ser afinado
+    now = datetime.now(timezone.utc)
+    return now.year
+
+
+def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -> list[dict]:
+    data = http_get_json(
+        "/fixtures",
+        {
+            "league": league_id,
+            "season": season,
+            "date": date_iso,
+            "timezone": "Europe/Lisbon",
+        },
+    )
+    return data.get("response", []) if isinstance(data, dict) else []
+
+
+def fetch_odds_for_fixture(fixture_id: int) -> list[dict]:
+    data = http_get_json(
+        "/odds",
+        {
+            "fixture": fixture_id,
+        },
+    )
+    return data.get("response", []) if isinstance(data, dict) else []
+
+
+def extract_best_market_prices(odds_response: list[dict]) -> tuple[Optional[float], Optional[float]]:
+    best_o25 = None
+    best_btts = None
+
+    for item in odds_response or []:
+        bookmakers = item.get("bookmakers", []) or []
+
+        for bm in bookmakers:
+            bets = bm.get("bets", []) or []
+
+            for bet in bets:
+                bet_name = str(bet.get("name", "")).strip().lower()
+                values = bet.get("values", []) or []
+
+                # Over/Under 2.5
+                if "over" in bet_name and "under" in bet_name and "2.5" in bet_name:
+                    for v in values:
+                        label = str(v.get("value", "")).strip().lower()
+                        odd = v.get("odd")
+                        try:
+                            odd = float(odd)
+                        except Exception:
+                            odd = None
+
+                        if label in {"over 2.5", "over"} and odd and odd > 1.01:
+                            if best_o25 is None or odd > best_o25:
+                                best_o25 = odd
+
+                # BTTS
+                if "both teams" in bet_name and "score" in bet_name:
+                    for v in values:
+                        label = str(v.get("value", "")).strip().lower()
+                        odd = v.get("odd")
+                        try:
+                            odd = float(odd)
+                        except Exception:
+                            odd = None
+
+                        if label in {"yes", "sim"} and odd and odd > 1.01:
+                            if best_btts is None or odd > best_btts:
+                                best_btts = odd
+
+    return best_o25, best_btts
+
+
+# =============================
+# Main
+# =============================
 def main():
-    rows = []
-    errors = []
-    unauthorized_count = 0
+    cfg = load_config()
 
-    count_o25_real = 0
-    count_btts_real = 0
-    count_both_real = 0
-    count_events_seen = 0
-    count_btts_requests = 0
+    history_cfg = cfg.get("history", {})
+    window = int(history_cfg.get("window", 12))
+    decay = float(history_cfg.get("decay", 0.88))
+    min_games_home = int(history_cfg.get("min_games_home", 8))
+    min_games_away = int(history_cfg.get("min_games_away", 8))
+    lambda_boost = float(history_cfg.get("lambda_boost", 1.0))
 
-    for league_key, sport_key in SPORTS.items():
-        try:
-            url = build_totals_url(sport_key)
-            data = http_get_json(url)
-            print(f"[DBG] FETCH TOTALS league={league_key} sport={sport_key} events={len(data or [])}")
-        except Exception as e:
-            msg = str(e)
-            if ("HTTP Error 401" in msg) or ("401" in msg and "Unauthorized" in msg):
-                unauthorized_count += 1
-            errors.append(f"{league_key}: {e}")
+    run_cfg = cfg.get("run", {})
+    days_ahead = int(run_cfg.get("days_ahead", 2))
+
+    api_cfg = cfg.get("api_football", {})
+    shortlist_total = int(api_cfg.get("shortlist_total", 10))
+    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 3))
+
+    leagues_cfg = cfg.get("leagues", {})
+    league_map = build_league_map(cfg)
+    season = int(api_cfg.get("season", get_current_season()))
+
+    try:
+        from zoneinfo import ZoneInfo
+        now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
+    except Exception:
+        now_pt = datetime.utcnow()
+
+    dates_to_fetch = [(now_pt.date() + timedelta(days=i)).isoformat() for i in range(days_ahead + 1)]
+
+    print(f"[DBG] season={season}")
+    print(f"[DBG] dates_to_fetch={dates_to_fetch}")
+    print(f"[DBG] shortlist_total={shortlist_total} | shortlist_per_league_per_day={shortlist_per_league_per_day}")
+
+    fixture_candidates = []
+    fixture_requests = 0
+    odds_requests = 0
+
+    # 1) Fetch fixtures by league/date
+    for league_key, league_id in league_map.items():
+        league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
+        hist_path = DATA_RAW_DIR / f"{league_key}.csv"
+
+        if not hist_path.exists():
+            print(f"[WARN] histórico em falta para {league_key}")
             continue
 
-        kept = 0
+        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
+        df_hist = normalize_columns(df_hist)
 
-        for ev in data or []:
-            count_events_seen += 1
+        need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
+        if not need_hist.issubset(set(df_hist.columns)):
+            print(f"[WARN] {league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
+            continue
 
-            event_id = ev.get("id")
-            home = ev.get("home_team")
-            away = ev.get("away_team")
-            commence = ev.get("commence_time")
-            bms = ev.get("bookmakers", [])
+        df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
+        df_hist = df_hist.dropna(subset=["Date"]).copy()
 
-            if not (event_id and home and away and commence):
+        for date_iso in dates_to_fetch:
+            try:
+                resp = fetch_fixtures_for_league_date(league_id, season, date_iso)
+                fixture_requests += 1
+            except Exception as e:
+                print(f"[WARN] fixtures falhou league={league_key} date={date_iso} -> {e}")
                 continue
 
-            odd25 = pick_best_over25_price(bms)
+            day_rows = []
+            for item in resp:
+                fixture = item.get("fixture", {}) or {}
+                teams = item.get("teams", {}) or {}
 
-            count_btts_requests += 1
-            odd_btts = fetch_btts_for_event(sport_key, event_id)
+                fixture_id = fixture.get("id")
+                fixture_date = str(fixture.get("date", ""))
+                home = ((teams.get("home") or {}).get("name") or "").strip()
+                away = ((teams.get("away") or {}).get("name") or "").strip()
 
-            if odd25 is None and odd_btts is None:
-                continue
+                if not fixture_id or not home or not away:
+                    continue
 
-            if odd25 is not None:
-                count_o25_real += 1
-            if odd_btts is not None:
-                count_btts_real += 1
-            if odd25 is not None and odd_btts is not None:
-                count_both_real += 1
+                try:
+                    lam_h, lam_a, lam_t = compute_lambdas(
+                        df_hist,
+                        home,
+                        away,
+                        window=window,
+                        decay=decay,
+                        min_games_home=min_games_home,
+                        min_games_away=min_games_away,
+                    )
+                except Exception:
+                    continue
 
-            rows.append(
-                {
-                    "Date": iso_to_date_utc(commence),
-                    "League": league_key,
-                    "HomeTeam": home,
-                    "AwayTeam": away,
-                    "Odd_Over25": (f"{odd25:.2f}" if odd25 is not None else ""),
-                    "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
-                }
+                if lambda_boost and lambda_boost != 1.0:
+                    lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
+                    lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
+                    lam_t = lam_h + lam_a
+
+                score = fixture_shortlist_score(lam_h, lam_a, lam_t)
+
+                day_rows.append(
+                    {
+                        "fixture_id": int(fixture_id),
+                        "date": date_iso,
+                        "league_key": league_key,
+                        "league_name": league_name,
+                        "home": home,
+                        "away": away,
+                        "lam_h": lam_h,
+                        "lam_a": lam_a,
+                        "lam_t": lam_t,
+                        "score": score,
+                        "api_fixture_date": fixture_date,
+                    }
+                )
+
+            day_rows.sort(key=lambda x: x["score"], reverse=True)
+            kept_day = day_rows[:shortlist_per_league_per_day]
+            fixture_candidates.extend(kept_day)
+
+            print(
+                f"[DBG] fixtures league={league_key} date={date_iso} "
+                f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
             )
-            kept += 1
 
-        print(f"[DBG] FETCH league={league_key} kept_rows={kept}")
+    # 2) Global shortlist cap
+    fixture_candidates.sort(key=lambda x: x["score"], reverse=True)
+    fixture_candidates = fixture_candidates[:shortlist_total]
+
+    print(f"[DBG] fixture_requests={fixture_requests}")
+    print(f"[DBG] shortlist_global={len(fixture_candidates)}")
+
+    rows = []
+
+    # 3) Odds only for shortlist
+    for fx in fixture_candidates:
+        fixture_id = fx["fixture_id"]
+
+        try:
+            odds_resp = fetch_odds_for_fixture(fixture_id)
+            odds_requests += 1
+        except Exception as e:
+            print(f"[WARN] odds falhou fixture={fixture_id} -> {e}")
+            continue
+
+        odd_o25, odd_btts = extract_best_market_prices(odds_resp)
+
+        if odd_o25 is None and odd_btts is None:
+            continue
+
+        rows.append(
+            {
+                "Date": fx["date"],
+                "League": fx["league_key"],
+                "HomeTeam": fx["home"],
+                "AwayTeam": fx["away"],
+                "Odd_Over25": (f"{odd_o25:.2f}" if odd_o25 is not None else ""),
+                "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
+            }
+        )
+
+        print(
+            f"[DBG] odds fixture={fixture_id} | {fx['league_key']} | "
+            f"{fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
+        )
+
+    rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
 
     fixtures_path = BASE_DIR / "fixtures_today.csv"
     with open(fixtures_path, "w", newline="", encoding="utf-8") as f:
@@ -292,20 +508,10 @@ def main():
         w.writeheader()
         w.writerows(rows)
 
-    print(f"OK fixtures_today.csv: {len(rows)} jogos (com O2.5 ou BTTS)")
-    print(f"[DBG] Eventos vistos: {count_events_seen}")
-    print(f"[DBG] Requests BTTS por evento: {count_btts_requests}")
-    print(f"[DBG] Jogos com O2.5 real: {count_o25_real}")
-    print(f"[DBG] Jogos com BTTS real: {count_btts_real}")
-    print(f"[DBG] Jogos com ambos os mercados: {count_both_real}")
-
-    if errors:
-        print("\nAvisos por liga:")
-        for e in errors:
-            print(" -", e)
-
-    if unauthorized_count == len(SPORTS):
-        raise SystemExit("ODDS_API_KEY inválida (401 em todas as ligas).")
+    print(f"OK fixtures_today.csv: {len(rows)} jogos shortlistados com odds")
+    print(f"[DBG] requests fixtures={fixture_requests}")
+    print(f"[DBG] requests odds={odds_requests}")
+    print(f"[DBG] requests total={fixture_requests + odds_requests}")
 
     owner = "jorgepita"
     repo = "apostas-over-futebol"
