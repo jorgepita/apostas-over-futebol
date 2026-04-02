@@ -11,7 +11,9 @@ import pandas as pd
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 HISTORY_PATH = BASE / "picks_history.csv"
-MAX_TOTAL_PICKS = 6
+
+DEFAULT_MAX_PICKS_PER_DAY = 6
+DEFAULT_MAX_PICKS_GLOBAL = 18
 
 
 # =============================
@@ -294,14 +296,45 @@ def df_to_rows(df: pd.DataFrame) -> list[dict]:
 def build_message(rows: list[dict], titulo: str) -> str:
     if not rows:
         return ""
+
+    def _sort_key(r: dict):
+        try:
+            score = float(r.get("Score", 0.0) or 0.0)
+        except Exception:
+            score = 0.0
+        try:
+            edge = float(r.get("Edge", 0.0) or 0.0)
+        except Exception:
+            edge = 0.0
+        return (str(r.get("Date", "")), -score, -edge, str(r.get("LeagueName", "")), str(r.get("HomeTeam", "")))
+
+    rows_sorted = sorted(rows, key=_sort_key)
+
+    grouped = {}
+    for r in rows_sorted:
+        grouped.setdefault(str(r.get("Date", "")), []).append(r)
+
     msg = f"📊 {titulo}\n\n"
-    for r in rows:
-        msg += (
-            f"{r['LeagueName']} | {r['HomeTeam']} vs {r['AwayTeam']}\n"
-            f"Market: {r['Market']} @ {r['Odd']}\n"
-            f"Edge: {float(r['Edge']):.2%} | Stake: {float(r.get('Stake€', 0.0)):.2f}€\n\n"
-        )
-    return msg
+
+    for date_key in sorted(grouped.keys()):
+        msg += f"📅 {date_key}\n"
+        for r in grouped[date_key]:
+            try:
+                edge_txt = f"{float(r['Edge']):.2%}"
+            except Exception:
+                edge_txt = "—"
+            try:
+                stake_txt = f"{float(r.get('Stake€', 0.0)):.2f}€"
+            except Exception:
+                stake_txt = "0.00€"
+
+            msg += (
+                f"{r['LeagueName']} | {r['HomeTeam']} vs {r['AwayTeam']}\n"
+                f"Market: {r['Market']} @ {r['Odd']}\n"
+                f"Edge: {edge_txt} | Stake: {stake_txt}\n\n"
+            )
+
+    return msg.strip()
 
 
 # =============================
@@ -333,7 +366,6 @@ def get_market_thresholds(mode: str, market: str) -> dict:
                 "edge_min_quality": -0.06,
             }
 
-    # normal
     if market == "O2.5":
         return {
             "lam_t_min": 1.90,
@@ -432,15 +464,30 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def limit_total_picks(df: pd.DataFrame, max_picks: int = MAX_TOTAL_PICKS) -> pd.DataFrame:
+def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | None = None) -> pd.DataFrame:
     if df.empty:
         return df
+
     df = compute_pick_score(df.copy())
-    df = df.sort_values(
-        ["Score", "Edge", "KellyTrue", "ProbModel"],
-        ascending=[False, False, False, False],
+    kept = []
+
+    for date_value, group in df.groupby("Date", sort=True, dropna=False):
+        group_sorted = group.sort_values(
+            ["Score", "Edge", "KellyTrue", "ProbModel"],
+            ascending=[False, False, False, False],
+        ).head(max_per_day)
+        kept.append(group_sorted)
+
+    out = pd.concat(kept, ignore_index=True) if kept else df.iloc[0:0].copy()
+    out = out.sort_values(
+        ["Date", "Score", "Edge", "KellyTrue", "ProbModel"],
+        ascending=[True, False, False, False, False],
     ).reset_index(drop=True)
-    return df.head(max_picks).copy()
+
+    if max_global is not None and max_global > 0:
+        out = out.head(max_global).copy()
+
+    return out
 
 
 # =============================
@@ -629,6 +676,11 @@ def main():
     run_mode = get_run_mode(cfg)
     print(f"[DBG] gerar_picks mode={run_mode}")
 
+    run_cfg = cfg.get("run", {})
+    max_picks_per_day = int(run_cfg.get("max_picks_per_day", DEFAULT_MAX_PICKS_PER_DAY))
+    max_picks_global = int(run_cfg.get("max_picks_global", DEFAULT_MAX_PICKS_GLOBAL))
+    print(f"[DBG] max_picks_per_day={max_picks_per_day} | max_picks_global={max_picks_global}")
+
     fixtures_path = BASE / "fixtures_today.csv"
     if not fixtures_path.exists():
         raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
@@ -805,8 +857,15 @@ def main():
 
     if not combo_pre.empty:
         combo_pre = dedupe_correlated_picks(combo_pre)
-        combo_pre = limit_total_picks(combo_pre, MAX_TOTAL_PICKS)
-        print(f"[DBG] combo final limitado a {len(combo_pre)} picks (max={MAX_TOTAL_PICKS})")
+        combo_pre = limit_picks_per_day(
+            combo_pre,
+            max_per_day=max_picks_per_day,
+            max_global=max_picks_global,
+        )
+        print(
+            f"[DBG] combo final limitado por dia | "
+            f"max_per_day={max_picks_per_day} | max_global={max_picks_global} | total={len(combo_pre)}"
+        )
     else:
         print("[DBG] combo final vazio antes do limite")
 
@@ -824,10 +883,11 @@ def main():
         combo = pd.concat([out25_final, out_btts_final], ignore_index=True) if (len(out25_final) or len(out_btts_final)) else pd.DataFrame()
         if not combo.empty:
             combo = compute_pick_score(combo)
-            combo = combo.sort_values(
-                ["Score", "Edge", "KellyTrue", "ProbModel"],
-                ascending=[False, False, False, False],
-            ).head(MAX_TOTAL_PICKS).reset_index(drop=True)
+            combo = limit_picks_per_day(
+                combo,
+                max_per_day=max_picks_per_day,
+                max_global=max_picks_global,
+            ).reset_index(drop=True)
 
     out25_path = BASE / "picks_over25.csv"
     out_btts_path = BASE / "picks_btts.csv"
