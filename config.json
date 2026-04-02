@@ -1,62 +1,103 @@
 {
   "run": {
-    "days_ahead": 3
+    "days_ahead": 3,
+    "mode": "test"
   },
-
   "bankroll": {
     "over25": 500,
     "btts": 500,
     "nba_over": 500
   },
-
+  "leagues": {
+    "premier": { "name": "Premier League", "country": "ENG" },
+    "portugal": { "name": "Primeira Liga", "country": "PRT" },
+    "alemanha": { "name": "Bundesliga", "country": "DEU" },
+    "espanha": { "name": "LaLiga", "country": "ESP" },
+    "franca": { "name": "Ligue 1", "country": "FRA" },
+    "italia": { "name": "Serie A", "country": "ITA" },
+    "paises_baixos": { "name": "Eredivisie", "country": "NLD" },
+    "championship": { "name": "Championship", "country": "ENG" },
+    "alemanha2": { "name": "2. Bundesliga", "country": "DEU" },
+    "italia2": { "name": "Serie B", "country": "ITA" },
+    "franca2": { "name": "Ligue 2", "country": "FRA" },
+    "belgica": { "name": "Jupiler Pro League", "country": "BEL" },
+    "turquia": { "name": "Super Lig", "country": "TUR" }
+  },
   "history": {
     "window": 12,
-    "decay": 0.90,
-    "min_games_home": 6,
-    "min_games_away": 6,
-    "lambda_boost": 1.0,
-    "league_lambda_boost": {
-      "alemanha2": 1.05,
-      "championship": 1.05,
-      "belgica": 1.05,
-      "turquia": 1.05
-    }
+    "decay": 0.88,
+    "min_games_home": 8,
+    "min_games_away": 8,
+    "lambda_boost": 1.12
   },
-
   "rules": {
     "over25": {
       "edge_min": -0.05,
       "edge_max": 0.15,
-      "kelly_fraction": 0.25,
-      "cap_frac": 0.05,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
       "daily_cap_frac": 0.15,
       "min_picks": 1
     },
     "btts": {
       "edge_min": -0.05,
       "edge_max": 0.15,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
+    },
+    "nba_over": {
+      "edge_min": -0.03,
       "kelly_fraction": 0.25,
       "cap_frac": 0.05,
       "daily_cap_frac": 0.15,
       "min_picks": 1
     }
   },
-
-  "leagues": {
-    "premier": { "name": "Premier League", "country": "ENG" },
-    "portugal": { "name": "Primeira Liga", "country": "PRT" },
-    "alemanha": { "name": "Bundesliga", "country": "GER" },
-    "espanha": { "name": "La Liga", "country": "ESP" },
-    "franca": { "name": "Ligue 1", "country": "FRA" },
-    "italia": { "name": "Serie A", "country": "ITA" },
-    "paises_baixos": { "name": "Eredivisie", "country": "NED" },
-
-    "championship": { "name": "Championship", "country": "ENG" },
-    "alemanha2": { "name": "2. Bundesliga", "country": "GER" },
-    "italia2": { "name": "Serie B", "country": "ITA" },
-    "franca2": { "name": "Ligue 2", "country": "FRA" },
-
-    "belgica": { "name": "Jupiler Pro League", "country": "BEL" },
-    "turquia": { "name": "Super Lig", "country": "TUR" }
+  "nba": {
+    "window": 10,
+    "sigma_total": 14.0
+  },
+  "api_football": {
+    "league_ids": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203
+    },
+    "shortlist_total": 18,
+    "shortlist_per_league_per_day": 3
+  },
+  "the_odds_api": {
+    "regions": "eu",
+    "markets": "totals,btts",
+    "odds_format": "decimal",
+    "date_format": "iso",
+    "shortlist_total": 18,
+    "sport_keys": {
+      "premier": "soccer_epl",
+      "championship": "soccer_england_championship",
+      "portugal": "soccer_portugal_primeira_liga",
+      "alemanha": "soccer_germany_bundesliga",
+      "alemanha2": "soccer_germany_bundesliga2",
+      "espanha": "soccer_spain_la_liga",
+      "franca": "soccer_france_ligue_one",
+      "franca2": "soccer_france_ligue_two",
+      "italia": "soccer_italy_serie_a",
+      "italia2": "soccer_italy_serie_b",
+      "paises_baixos": "soccer_netherlands_eredivisie",
+      "belgica": "soccer_belgium_first_div",
+      "turquia": "soccer_turkey_super_league"
+    }
   }
 }
