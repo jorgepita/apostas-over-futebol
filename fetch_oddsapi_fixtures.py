@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 import unicodedata
 import re
+import time
 from urllib import error
 from datetime import datetime, timedelta, timezone, date
 from pathlib import Path
@@ -286,7 +287,6 @@ def same_match(api_home: str, api_away: str, odds_home: str, odds_away: str) -> 
     aa = normalize_team_name(api_away)
     oh = normalize_team_name(odds_home)
     oa = normalize_team_name(odds_away)
-
     return ah == oh and aa == oa
 
 
@@ -355,6 +355,7 @@ def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -
     }
 
     data = http_get_json_api_football("/fixtures", params)
+
     try:
         results = data.get("results", None)
         errors = data.get("errors", None)
@@ -370,12 +371,49 @@ def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -
 
 
 # =============================
-# The Odds API odds
+# API-Football BTTS odds per fixture
+# =============================
+def fetch_btts_odds_for_fixture_api_football(fixture_id: int) -> Optional[float]:
+    try:
+        data = http_get_json_api_football("/odds", {"fixture": fixture_id})
+    except Exception as e:
+        print(f"[WARN] BTTS odds API-Football falhou fixture={fixture_id} -> {e}")
+        return None
+
+    response = data.get("response", []) if isinstance(data, dict) else []
+    best_btts = None
+
+    for item in response:
+        bookmakers = item.get("bookmakers", []) or []
+        for bm in bookmakers:
+            bets = bm.get("bets", []) or []
+            for bet in bets:
+                bet_name = str(bet.get("name", "")).strip().lower()
+                values = bet.get("values", []) or []
+
+                if "both teams" in bet_name and "score" in bet_name:
+                    for v in values:
+                        label = str(v.get("value", "")).strip().lower()
+                        odd = v.get("odd")
+                        try:
+                            odd = float(odd)
+                        except Exception:
+                            odd = None
+
+                        if label in {"yes", "sim"} and odd and odd > 1.01:
+                            if best_btts is None or odd > best_btts:
+                                best_btts = odd
+
+    return best_btts
+
+
+# =============================
+# The Odds API O2.5 odds grouped
 # =============================
 def fetch_odds_for_sport_date(sport_key: str, date_iso: str, cfg: dict) -> list[dict]:
     odds_cfg = cfg.get("the_odds_api", {})
     regions = odds_cfg.get("regions", "eu")
-    markets = odds_cfg.get("markets", "totals,btts")
+    markets = odds_cfg.get("markets", "totals")
     odds_format = odds_cfg.get("odds_format", "decimal")
     date_format = odds_cfg.get("date_format", "iso")
 
@@ -404,13 +442,12 @@ def fetch_odds_for_sport_date(sport_key: str, date_iso: str, cfg: dict) -> list[
         print(f"[ODDS-DBG] sport={sport_key} date={date_iso} resposta não-lista")
         return []
     except Exception as e:
-        print(f"[WARN] odds fetch falhou sport={sport_key} date={date_iso} -> {e}")
+        print(f"[WARN] O2.5 odds fetch falhou sport={sport_key} date={date_iso} -> {e}")
         return []
 
 
-def extract_best_market_prices_from_event(event: dict) -> tuple[Optional[float], Optional[float]]:
+def extract_best_over25_from_event(event: dict) -> Optional[float]:
     best_o25 = None
-    best_btts = None
 
     bookmakers = event.get("bookmakers", []) or []
     for bm in bookmakers:
@@ -439,21 +476,7 @@ def extract_best_market_prices_from_event(event: dict) -> tuple[Optional[float],
                         if best_o25 is None or price > best_o25:
                             best_o25 = price
 
-            elif key == "btts":
-                for o in outcomes:
-                    name = str(o.get("name", "")).strip().lower()
-                    price = o.get("price")
-
-                    try:
-                        price = float(price)
-                    except Exception:
-                        price = None
-
-                    if name in {"yes", "sim"} and price and price > 1.01:
-                        if best_btts is None or price > best_btts:
-                            best_btts = price
-
-    return best_o25, best_btts
+    return best_o25
 
 
 # =============================
@@ -540,6 +563,8 @@ def main():
     api_cfg = cfg.get("api_football", {})
     shortlist_total = int(api_cfg.get("shortlist_total", 18))
     shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 3))
+    sleep_between_requests = float(api_cfg.get("sleep_seconds_between_fixture_requests", 0.35))
+    use_api_football_for_btts_odds = bool(api_cfg.get("use_api_football_for_btts_odds", True))
 
     leagues_cfg = cfg.get("leagues", {})
     league_map = build_league_map(cfg)
@@ -560,7 +585,8 @@ def main():
 
     fixture_candidates = []
     fixture_requests = 0
-    odds_requests = 0
+    odds_requests_the_odds = 0
+    odds_requests_api_football = 0
 
     # 1) Fixtures via API-Football
     for league_key, league_id in league_map.items():
@@ -618,6 +644,9 @@ def main():
                 f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
             )
 
+            if sleep_between_requests > 0:
+                time.sleep(sleep_between_requests)
+
     # 2) Global shortlist
     unique_candidates = {}
     for row in fixture_candidates:
@@ -647,28 +676,30 @@ def main():
         upload_file_to_github(fixtures_path, owner, repo, branch)
         return
 
-    # 3) Fetch odds from The Odds API with minimal requests
+    # 3) Fetch O2.5 odds from The Odds API grouped by sport/date
     grouped = {}
     for fx in fixture_candidates:
         key = (fx["sport_key"], fx["date"])
         grouped.setdefault(key, []).append(fx)
 
-    rows = []
+    over25_map = {}
 
     for (sport_key, date_iso), candidates in grouped.items():
         odds_events = fetch_odds_for_sport_date(sport_key, date_iso, cfg)
-        odds_requests += 1
+        odds_requests_the_odds += 1
 
         for fx in candidates:
             matched_event = None
+
             for ev in odds_events:
                 home_team = str(ev.get("home_team", "")).strip()
                 away_team = ""
+
                 teams = ev.get("teams", []) or []
                 if len(teams) == 2:
                     away_team = teams[0] if teams[1] == home_team else teams[1]
+
                 if not away_team:
-                    # fallback
                     away_team = str(ev.get("away_team", "")).strip()
 
                 if same_match(fx["home"], fx["away"], home_team, away_team):
@@ -676,29 +707,52 @@ def main():
                     break
 
             if not matched_event:
-                print(f"[DBG] odds sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
+                print(f"[DBG] O2.5 sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
                 continue
 
-            odd_o25, odd_btts = extract_best_market_prices_from_event(matched_event)
-
-            if odd_o25 is None and odd_btts is None:
-                continue
-
-            rows.append(
-                {
-                    "Date": fx["date"],
-                    "League": fx["league_key"],
-                    "HomeTeam": fx["home"],
-                    "AwayTeam": fx["away"],
-                    "Odd_Over25": (f"{odd_o25:.2f}" if odd_o25 is not None else ""),
-                    "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
-                }
-            )
+            odd_o25 = extract_best_over25_from_event(matched_event)
+            over25_map[fx["fixture_id"]] = odd_o25
 
             print(
-                f"[DBG] odds match | sport={sport_key} | {fx['league_key']} | "
-                f"{fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
+                f"[DBG] O2.5 match | sport={sport_key} | {fx['league_key']} | "
+                f"{fx['home']} vs {fx['away']} | O2.5={odd_o25}"
             )
+
+    # 4) Fetch BTTS odds from API-Football only for shortlisted fixtures
+    btts_map = {}
+    if use_api_football_for_btts_odds:
+        for fx in fixture_candidates:
+            odd_btts = fetch_btts_odds_for_fixture_api_football(fx["fixture_id"])
+            odds_requests_api_football += 1
+            btts_map[fx["fixture_id"]] = odd_btts
+
+            print(
+                f"[DBG] BTTS fixture={fx['fixture_id']} | {fx['league_key']} | "
+                f"{fx['home']} vs {fx['away']} | BTTS={odd_btts}"
+            )
+
+            if sleep_between_requests > 0:
+                time.sleep(min(sleep_between_requests, 0.25))
+
+    # 5) Final rows
+    rows = []
+    for fx in fixture_candidates:
+        odd_o25 = over25_map.get(fx["fixture_id"])
+        odd_btts = btts_map.get(fx["fixture_id"])
+
+        if odd_o25 is None and odd_btts is None:
+            continue
+
+        rows.append(
+            {
+                "Date": fx["date"],
+                "League": fx["league_key"],
+                "HomeTeam": fx["home"],
+                "AwayTeam": fx["away"],
+                "Odd_Over25": (f"{odd_o25:.2f}" if odd_o25 is not None else ""),
+                "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
+            }
+        )
 
     rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
 
@@ -713,9 +767,10 @@ def main():
         w.writerows(rows)
 
     print(f"OK fixtures_today.csv: {len(rows)} jogos shortlistados com odds")
-    print(f"[DBG] requests fixtures={fixture_requests}")
-    print(f"[DBG] requests odds groups={odds_requests}")
-    print(f"[DBG] requests total aproximado={fixture_requests + odds_requests}")
+    print(f"[DBG] requests fixtures API-Football={fixture_requests}")
+    print(f"[DBG] requests odds TheOdds groups={odds_requests_the_odds}")
+    print(f"[DBG] requests odds API-Football BTTS={odds_requests_api_football}")
+    print(f"[DBG] requests total aproximado={fixture_requests + odds_requests_the_odds + odds_requests_api_football}")
 
     owner = "jorgepita"
     repo = "apostas-over-futebol"
