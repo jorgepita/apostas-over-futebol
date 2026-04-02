@@ -3,6 +3,8 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
 2026-04-04;alemanha;1899 Hoffenheim;FSV Mainz 05;;9.60
 2026-04-04;alemanha;Borussia Mönchengladbach;1. FC Heidenheim;1.67;10.75
 2026-04-04;alemanha;SC Freiburg;Bayern München;;8.10
+2026-04-04;alemanha2;1. FC Magdeburg;VfL Bochum;1.55;8.70
+2026-04-04;alemanha2;Arminia Bielefeld;SV Darmstadt 98;1.60;8.90
 2026-04-04;espanha;Mallorca;Real Madrid;1.73;11.50
 2026-04-04;paises_baixos;AZ Alkmaar;Fortuna Sittard;1.40;9.00
 2026-04-04;paises_baixos;Excelsior;NEC Nijmegen;1.50;7.50
@@ -15,5 +17,3 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
 2026-04-05;paises_baixos;FC Volendam;Feyenoord;1.40;8.50
 2026-04-05;paises_baixos;GO Ahead Eagles;PEC Zwolle;;8.60
 2026-04-05;paises_baixos;Heerenveen;Heracles;;8.00
-2026-04-06;portugal;Arouca;Estoril;1.80;10.25
-2026-04-06;portugal;Casa Pia;Benfica;1.50;5.15
