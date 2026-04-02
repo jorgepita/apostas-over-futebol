@@ -76,17 +76,18 @@
       "turquia": 203
     },
     "shortlist_total": 18,
-    "shortlist_per_league_per_day": 3
+    "shortlist_per_league_per_day": 3,
+    "sleep_seconds_between_fixture_requests": 0.35,
+    "use_api_football_for_btts_odds": true
   },
   "the_odds_api": {
     "regions": "eu",
-    "markets": "totals,btts",
+    "markets": "totals",
     "odds_format": "decimal",
     "date_format": "iso",
-    "shortlist_total": 18,
     "sport_keys": {
       "premier": "soccer_epl",
-      "championship": "soccer_england_championship",
+      "championship": "soccer_efl_champ",
       "portugal": "soccer_portugal_primeira_liga",
       "alemanha": "soccer_germany_bundesliga",
       "alemanha2": "soccer_germany_bundesliga2",
