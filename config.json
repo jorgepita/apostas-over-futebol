@@ -1,198 +1,106 @@
-2026-04-02T23:13:45.867132028Z ==> Running 'python run_job.py'
-2026-04-02T23:13:46.746737349Z >> /opt/render/project/src/.venv/bin/python fetch_oddsapi_fixtures.py
-2026-04-02T23:14:27.344525833Z [DBG] API_FOOTBALL_KEY len = 32
-2026-04-02T23:14:27.344554413Z [DBG] API_FOOTBALL_BASE = https://v3.football.api-sports.io
-2026-04-02T23:14:27.344558013Z [DBG] ODDS_API_KEY len = 32
-2026-04-02T23:14:27.344561423Z [DBG] dates_to_fetch=['2026-04-03', '2026-04-04', '2026-04-05', '2026-04-06']
-2026-04-02T23:14:27.344564203Z [DBG] shortlist_total=18 | shortlist_per_league_per_day=3
-2026-04-02T23:14:27.344569083Z [API-DBG] /fixtures league=39 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344574464Z [DBG] fixtures league=premier season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344577304Z [API-DBG] /fixtures league=39 season=2025 date=2026-04-04 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344580074Z [DBG] fixtures league=premier season=2025 date=2026-04-04 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344582804Z [API-DBG] /fixtures league=39 season=2025 date=2026-04-05 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344585484Z [DBG] fixtures league=premier season=2025 date=2026-04-05 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344588444Z [API-DBG] /fixtures league=39 season=2025 date=2026-04-06 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344591174Z [DBG] fixtures league=premier season=2025 date=2026-04-06 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344594154Z [API-DBG] /fixtures league=94 season=2025 date=2026-04-03 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344596964Z [DBG] fixtures league=portugal season=2025 date=2026-04-03 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344599724Z [API-DBG] /fixtures league=94 season=2025 date=2026-04-04 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344602454Z [DBG] fixtures league=portugal season=2025 date=2026-04-04 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344605134Z [API-DBG] /fixtures league=94 season=2025 date=2026-04-05 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344607854Z [DBG] fixtures league=portugal season=2025 date=2026-04-05 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344610534Z [API-DBG] /fixtures league=94 season=2025 date=2026-04-06 results=2 response_len=2 errors=[]
-2026-04-02T23:14:27.344613215Z [DBG] fixtures league=portugal season=2025 date=2026-04-06 raw=2 shortlist_day=2
-2026-04-02T23:14:27.344615995Z [API-DBG] /fixtures league=78 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344618664Z [DBG] fixtures league=alemanha season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344621335Z [API-DBG] /fixtures league=78 season=2025 date=2026-04-04 results=7 response_len=7 errors=[]
-2026-04-02T23:14:27.344624015Z [DBG] fixtures league=alemanha season=2025 date=2026-04-04 raw=7 shortlist_day=3
-2026-04-02T23:14:27.344626685Z [API-DBG] /fixtures league=78 season=2025 date=2026-04-05 results=2 response_len=2 errors=[]
-2026-04-02T23:14:27.344629585Z [DBG] fixtures league=alemanha season=2025 date=2026-04-05 raw=2 shortlist_day=2
-2026-04-02T23:14:27.344632305Z [API-DBG] /fixtures league=78 season=2025 date=2026-04-06 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344644635Z [DBG] fixtures league=alemanha season=2025 date=2026-04-06 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344647615Z [API-DBG] /fixtures league=140 season=2025 date=2026-04-03 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344650305Z [DBG] fixtures league=espanha season=2025 date=2026-04-03 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344652975Z [API-DBG] /fixtures league=140 season=2025 date=2026-04-04 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344655675Z [DBG] fixtures league=espanha season=2025 date=2026-04-04 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344673296Z [API-DBG] /fixtures league=140 season=2025 date=2026-04-05 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344675236Z [DBG] fixtures league=espanha season=2025 date=2026-04-05 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344676886Z [API-DBG] /fixtures league=140 season=2025 date=2026-04-06 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344678686Z [DBG] fixtures league=espanha season=2025 date=2026-04-06 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344680386Z [API-DBG] /fixtures league=61 season=2025 date=2026-04-03 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344682066Z [DBG] fixtures league=franca season=2025 date=2026-04-03 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344683736Z [API-DBG] /fixtures league=61 season=2025 date=2026-04-04 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344685396Z [DBG] fixtures league=franca season=2025 date=2026-04-04 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344687056Z [API-DBG] /fixtures league=61 season=2025 date=2026-04-05 results=5 response_len=5 errors=[]
-2026-04-02T23:14:27.344688806Z [DBG] fixtures league=franca season=2025 date=2026-04-05 raw=5 shortlist_day=3
-2026-04-02T23:14:27.344690636Z [API-DBG] /fixtures league=61 season=2025 date=2026-04-06 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344692356Z [DBG] fixtures league=franca season=2025 date=2026-04-06 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344694026Z [API-DBG] /fixtures league=135 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344695676Z [DBG] fixtures league=italia season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344697326Z [API-DBG] /fixtures league=135 season=2025 date=2026-04-04 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344698986Z [DBG] fixtures league=italia season=2025 date=2026-04-04 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344707206Z [API-DBG] /fixtures league=135 season=2025 date=2026-04-05 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344709096Z [DBG] fixtures league=italia season=2025 date=2026-04-05 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344710866Z [API-DBG] /fixtures league=135 season=2025 date=2026-04-06 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344712557Z [DBG] fixtures league=italia season=2025 date=2026-04-06 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344714226Z [API-DBG] /fixtures league=88 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344715877Z [DBG] fixtures league=paises_baixos season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344717537Z [API-DBG] /fixtures league=88 season=2025 date=2026-04-04 results=5 response_len=5 errors=[]
-2026-04-02T23:14:27.344719167Z [DBG] fixtures league=paises_baixos season=2025 date=2026-04-04 raw=5 shortlist_day=3
-2026-04-02T23:14:27.344720847Z [API-DBG] /fixtures league=88 season=2025 date=2026-04-05 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344722607Z [DBG] fixtures league=paises_baixos season=2025 date=2026-04-05 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344724307Z [API-DBG] /fixtures league=88 season=2025 date=2026-04-06 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344726007Z [DBG] fixtures league=paises_baixos season=2025 date=2026-04-06 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344727697Z [API-DBG] /fixtures league=40 season=2025 date=2026-04-03 results=11 response_len=11 errors=[]
-2026-04-02T23:14:27.344729387Z [DBG] fixtures league=championship season=2025 date=2026-04-03 raw=11 shortlist_day=3
-2026-04-02T23:14:27.344731027Z [API-DBG] /fixtures league=40 season=2025 date=2026-04-04 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344732677Z [DBG] fixtures league=championship season=2025 date=2026-04-04 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344737817Z [API-DBG] /fixtures league=40 season=2025 date=2026-04-05 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344739667Z [DBG] fixtures league=championship season=2025 date=2026-04-05 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344741317Z [API-DBG] /fixtures league=40 season=2025 date=2026-04-06 results=11 response_len=11 errors=[]
-2026-04-02T23:14:27.344743057Z [DBG] fixtures league=championship season=2025 date=2026-04-06 raw=11 shortlist_day=3
-2026-04-02T23:14:27.344744687Z [API-DBG] /fixtures league=79 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344746357Z [DBG] fixtures league=alemanha2 season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344747987Z [API-DBG] /fixtures league=79 season=2025 date=2026-04-04 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344749627Z [DBG] fixtures league=alemanha2 season=2025 date=2026-04-04 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344751267Z [API-DBG] /fixtures league=79 season=2025 date=2026-04-05 results=5 response_len=5 errors=[]
-2026-04-02T23:14:27.344754867Z [DBG] fixtures league=alemanha2 season=2025 date=2026-04-05 raw=5 shortlist_day=3
-2026-04-02T23:14:27.344756637Z [API-DBG] /fixtures league=79 season=2025 date=2026-04-06 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344758358Z [DBG] fixtures league=alemanha2 season=2025 date=2026-04-06 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344760018Z [API-DBG] /fixtures league=136 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344762027Z [DBG] fixtures league=italia2 season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344763967Z [API-DBG] /fixtures league=136 season=2025 date=2026-04-04 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344765678Z [DBG] fixtures league=italia2 season=2025 date=2026-04-04 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344767328Z [API-DBG] /fixtures league=136 season=2025 date=2026-04-05 results=2 response_len=2 errors=[]
-2026-04-02T23:14:27.344769018Z [DBG] fixtures league=italia2 season=2025 date=2026-04-05 raw=2 shortlist_day=2
-2026-04-02T23:14:27.344770658Z [API-DBG] /fixtures league=136 season=2025 date=2026-04-06 results=8 response_len=8 errors=[]
-2026-04-02T23:14:27.344772388Z [DBG] fixtures league=italia2 season=2025 date=2026-04-06 raw=8 shortlist_day=3
-2026-04-02T23:14:27.344774018Z [API-DBG] /fixtures league=62 season=2025 date=2026-04-03 results=5 response_len=5 errors=[]
-2026-04-02T23:14:27.344775708Z [DBG] fixtures league=franca2 season=2025 date=2026-04-03 raw=5 shortlist_day=3
-2026-04-02T23:14:27.344777358Z [API-DBG] /fixtures league=62 season=2025 date=2026-04-04 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344778998Z [DBG] fixtures league=franca2 season=2025 date=2026-04-04 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344780638Z [API-DBG] /fixtures league=62 season=2025 date=2026-04-05 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344782288Z [DBG] fixtures league=franca2 season=2025 date=2026-04-05 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344783988Z [API-DBG] /fixtures league=62 season=2025 date=2026-04-06 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344785658Z [DBG] fixtures league=franca2 season=2025 date=2026-04-06 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344787298Z [API-DBG] /fixtures league=144 season=2025 date=2026-04-03 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344788948Z [DBG] fixtures league=belgica season=2025 date=2026-04-03 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344795128Z [API-DBG] /fixtures league=144 season=2025 date=2026-04-04 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344798208Z [DBG] fixtures league=belgica season=2025 date=2026-04-04 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344805528Z [API-DBG] /fixtures league=144 season=2025 date=2026-04-05 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344808308Z [DBG] fixtures league=belgica season=2025 date=2026-04-05 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344810968Z [API-DBG] /fixtures league=144 season=2025 date=2026-04-06 results=3 response_len=3 errors=[]
-2026-04-02T23:14:27.344813839Z [DBG] fixtures league=belgica season=2025 date=2026-04-06 raw=3 shortlist_day=3
-2026-04-02T23:14:27.344816619Z [API-DBG] /fixtures league=203 season=2025 date=2026-04-03 results=0 response_len=0 errors=[]
-2026-04-02T23:14:27.344819139Z [DBG] fixtures league=turquia season=2025 date=2026-04-03 raw=0 shortlist_day=0
-2026-04-02T23:14:27.344821599Z [API-DBG] /fixtures league=203 season=2025 date=2026-04-04 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344823919Z [DBG] fixtures league=turquia season=2025 date=2026-04-04 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344826469Z [API-DBG] /fixtures league=203 season=2025 date=2026-04-05 results=4 response_len=4 errors=[]
-2026-04-02T23:14:27.344829159Z [DBG] fixtures league=turquia season=2025 date=2026-04-05 raw=4 shortlist_day=3
-2026-04-02T23:14:27.344831779Z [API-DBG] /fixtures league=203 season=2025 date=2026-04-06 results=1 response_len=1 errors=[]
-2026-04-02T23:14:27.344834289Z [DBG] fixtures league=turquia season=2025 date=2026-04-06 raw=1 shortlist_day=1
-2026-04-02T23:14:27.344837069Z [DBG] fixture_requests=52
-2026-04-02T23:14:27.344839889Z [DBG] shortlist_global=18
-2026-04-02T23:14:27.344842789Z [ODDS-DBG] sport=soccer_france_ligue_one date=2026-04-05 events=5
-2026-04-02T23:14:27.344845809Z [DBG] O2.5 sem match: franca | Monaco vs Marseille
-2026-04-02T23:14:27.344847509Z [ODDS-DBG] sport=soccer_portugal_primeira_liga date=2026-04-06 events=2
-2026-04-02T23:14:27.344849219Z [DBG] O2.5 match | sport=soccer_portugal_primeira_liga | portugal | Arouca vs Estoril | O2.5=1.8
-2026-04-02T23:14:27.344851519Z [DBG] O2.5 match | sport=soccer_portugal_primeira_liga | portugal | Casa Pia vs Benfica | O2.5=1.5
-2026-04-02T23:14:27.344853169Z [ODDS-DBG] sport=soccer_netherlands_eredivisie date=2026-04-04 events=5
-2026-04-02T23:14:27.344854789Z [DBG] O2.5 sem match: paises_baixos | PSV Eindhoven vs Utrecht
-2026-04-02T23:14:27.34485808Z [DBG] O2.5 match | sport=soccer_netherlands_eredivisie | paises_baixos | AZ Alkmaar vs Fortuna Sittard | O2.5=1.4
-2026-04-02T23:14:27.34485988Z [DBG] O2.5 match | sport=soccer_netherlands_eredivisie | paises_baixos | Excelsior vs NEC Nijmegen | O2.5=1.5
-2026-04-02T23:14:27.344861529Z [ODDS-DBG] sport=soccer_netherlands_eredivisie date=2026-04-05 events=4
-2026-04-02T23:14:27.34486324Z [DBG] O2.5 sem match: paises_baixos | Heerenveen vs Heracles
-2026-04-02T23:14:27.34486492Z [DBG] O2.5 sem match: paises_baixos | GO Ahead Eagles vs PEC Zwolle
-2026-04-02T23:14:27.34487496Z [DBG] O2.5 match | sport=soccer_netherlands_eredivisie | paises_baixos | FC Volendam vs Feyenoord | O2.5=1.4
-2026-04-02T23:14:27.34487716Z [ODDS-DBG] sport=soccer_spain_la_liga date=2026-04-04 events=4
-2026-04-02T23:14:27.34487881Z [DBG] O2.5 match | sport=soccer_spain_la_liga | espanha | Mallorca vs Real Madrid | O2.5=1.73
-2026-04-02T23:14:27.3448805Z [ODDS-DBG] sport=soccer_germany_bundesliga date=2026-04-04 events=7
-2026-04-02T23:14:27.34488226Z [DBG] O2.5 sem match: alemanha | SC Freiburg vs Bayern München
-2026-04-02T23:14:27.34488399Z [DBG] O2.5 match | sport=soccer_germany_bundesliga | alemanha | Borussia Mönchengladbach vs 1. FC Heidenheim | O2.5=1.67
-2026-04-02T23:14:27.34488786Z [DBG] O2.5 sem match: alemanha | 1899 Hoffenheim vs FSV Mainz 05
-2026-04-02T23:14:27.34488963Z [ODDS-DBG] sport=soccer_germany_bundesliga date=2026-04-05 events=2
-2026-04-02T23:14:27.34489506Z [DBG] O2.5 match | sport=soccer_germany_bundesliga | alemanha | Union Berlin vs FC St. Pauli | O2.5=2.63
-2026-04-02T23:14:27.34489689Z [DBG] O2.5 match | sport=soccer_germany_bundesliga | alemanha | Eintracht Frankfurt vs 1. FC Köln | O2.5=1.78
-2026-04-02T23:14:27.34489853Z [ODDS-DBG] sport=soccer_portugal_primeira_liga date=2026-04-04 events=4
-2026-04-02T23:14:27.34490016Z [DBG] O2.5 sem match: portugal | Nacional vs Estrela
-2026-04-02T23:14:27.34490192Z [ODDS-DBG] sport=soccer_efl_champ date=2026-04-03 events=11
-2026-04-02T23:14:27.344903541Z [DBG] O2.5 sem match: championship | QPR vs Watford
-2026-04-02T23:14:27.34490525Z [ODDS-DBG] sport=soccer_turkey_super_league date=2026-04-04 events=4
-2026-04-02T23:14:27.344907001Z [DBG] O2.5 match | sport=soccer_turkey_super_league | turquia | Trabzonspor vs Galatasaray | O2.5=1.62
-2026-04-02T23:14:27.34490867Z [DBG] BTTS fixture=1387947 | franca | Monaco vs Marseille | BTTS=8.7
-2026-04-02T23:14:27.34491037Z [DBG] BTTS fixture=1396480 | portugal | Arouca vs Estoril | BTTS=10.25
-2026-04-02T23:14:27.344912001Z [DBG] BTTS fixture=1381126 | paises_baixos | PSV Eindhoven vs Utrecht | BTTS=8.1
-2026-04-02T23:14:27.344913671Z [DBG] BTTS fixture=1381124 | paises_baixos | Heerenveen vs Heracles | BTTS=8.0
-2026-04-02T23:14:27.344915371Z [DBG] BTTS fixture=1391114 | espanha | Mallorca vs Real Madrid | BTTS=11.5
-2026-04-02T23:14:27.344917061Z [DBG] BTTS fixture=1388554 | alemanha | SC Freiburg vs Bayern München | BTTS=8.1
-2026-04-02T23:14:27.344918701Z [DBG] BTTS fixture=1388552 | alemanha | Borussia Mönchengladbach vs 1. FC Heidenheim | BTTS=10.75
-2026-04-02T23:14:27.344931801Z [DBG] BTTS fixture=1388556 | alemanha | 1899 Hoffenheim vs FSV Mainz 05 | BTTS=9.6
-2026-04-02T23:14:27.344934811Z [DBG] BTTS fixture=1388558 | alemanha | Union Berlin vs FC St. Pauli | BTTS=6.0
-2026-04-02T23:14:27.344936591Z [DBG] BTTS fixture=1388553 | alemanha | Eintracht Frankfurt vs 1. FC Köln | BTTS=9.4
-2026-04-02T23:14:27.344938281Z [DBG] BTTS fixture=1396485 | portugal | Nacional vs Estrela | BTTS=11.0
-2026-04-02T23:14:27.344939911Z [DBG] BTTS fixture=1387025 | championship | QPR vs Watford | BTTS=11.0
-2026-04-02T23:14:27.344941541Z [DBG] BTTS fixture=1394684 | turquia | Trabzonspor vs Galatasaray | BTTS=8.6
-2026-04-02T23:14:27.344943301Z [DBG] BTTS fixture=1381120 | paises_baixos | AZ Alkmaar vs Fortuna Sittard | BTTS=9.0
-2026-04-02T23:14:27.344944901Z [DBG] BTTS fixture=1381121 | paises_baixos | Excelsior vs NEC Nijmegen | BTTS=7.5
-2026-04-02T23:14:27.344946611Z [DBG] BTTS fixture=1381123 | paises_baixos | GO Ahead Eagles vs PEC Zwolle | BTTS=8.6
-2026-04-02T23:14:27.344948261Z [DBG] BTTS fixture=1381122 | paises_baixos | FC Volendam vs Feyenoord | BTTS=8.5
-2026-04-02T23:14:27.344949881Z [DBG] BTTS fixture=1396481 | portugal | Casa Pia vs Benfica | BTTS=5.15
-2026-04-02T23:14:27.344951511Z OK fixtures_today.csv: 18 jogos shortlistados com odds
-2026-04-02T23:14:27.344953631Z [DBG] requests fixtures API-Football=52
-2026-04-02T23:14:27.344955322Z [DBG] requests odds TheOdds groups=10
-2026-04-02T23:14:27.344956962Z [DBG] requests odds API-Football BTTS=18
-2026-04-02T23:14:27.344958571Z [DBG] requests total aproximado=80
-2026-04-02T23:14:27.344960252Z GitHub: upload concluído (fixtures_today.csv)
-2026-04-02T23:14:27.48417245Z >> /opt/render/project/src/.venv/bin/python gerar_picks.py
-2026-04-02T23:14:33.494360766Z [DBG] gerar_picks mode=test
-2026-04-02T23:14:33.494386697Z [DBG] fixtures no range 2026-04-03 -> 2026-04-06: 18
-2026-04-02T23:14:33.494391527Z [DBG] liga=premier | fixtures=0
-2026-04-02T23:14:33.494396337Z [DBG] liga=portugal | fixtures=3
-2026-04-02T23:14:33.494402047Z [DBG] liga=alemanha | fixtures=5
-2026-04-02T23:14:33.494405917Z [DBG] liga=espanha | fixtures=1
-2026-04-02T23:14:33.494419288Z [DBG] liga=franca | fixtures=1
-2026-04-02T23:14:33.494421178Z [DBG] liga=italia | fixtures=0
-2026-04-02T23:14:33.494423998Z [DBG] liga=paises_baixos | fixtures=6
-2026-04-02T23:14:33.494425688Z [DBG] liga=championship | fixtures=1
-2026-04-02T23:14:33.494427528Z [DBG] liga=alemanha2 | fixtures=0
-2026-04-02T23:14:33.494429268Z [DBG] liga=italia2 | fixtures=0
-2026-04-02T23:14:33.494431218Z [DBG] liga=franca2 | fixtures=0
-2026-04-02T23:14:33.494432888Z [DBG] liga=belgica | fixtures=0
-2026-04-02T23:14:33.494434538Z [DBG] liga=turquia | fixtures=1
-2026-04-02T23:14:33.494436338Z [DBG] O2.5: após quality_filter = 8 | mode=test
-2026-04-02T23:14:33.494438638Z [DBG] O2.5: após odd/edge válidos = 8
-2026-04-02T23:14:33.494440968Z [DBG] O2.5: após edge_min/edge_max = 8 | edge_min=-0.05 edge_max=0.15
-2026-04-02T23:14:33.494442728Z [DBG] O2.5: após dedupe = 8
-2026-04-02T23:14:33.494444388Z [DBG] BTTS: após quality_filter = 0 | mode=test
-2026-04-02T23:14:33.494446128Z [DBG] combo final limitado a 6 picks (max=6)
-2026-04-02T23:14:33.494447818Z [DBG] O2.5: final após stake = 6
-2026-04-02T23:14:33.494449568Z OK. Gerados:
-2026-04-02T23:14:33.494451298Z - picks_over25.csv (6 picks)
-2026-04-02T23:14:33.494452988Z - picks_btts.csv (0 picks)
-2026-04-02T23:14:33.494454638Z - picks_hoje.csv (6 picks)
-2026-04-02T23:14:33.494456308Z - picks_hoje_github.csv (6 picks)
-2026-04-02T23:14:33.494457988Z - picks_hoje_simplificado.csv (6 picks)
-2026-04-02T23:14:33.494459658Z - picks_history.csv (12 linhas de histórico)
-2026-04-02T23:14:33.494461329Z Telegram: enviei 6 novas O2.5.
-2026-04-02T23:14:33.494462978Z Telegram: sem novas picks BTTS.
-2026-04-02T23:14:33.494464669Z GitHub: upload concluído (6/6 ficheiros).
+{
+  "run": {
+    "days_ahead": 2,
+    "mode": "test",
+    "max_picks_per_day": 6,
+    "max_picks_global": 18
+  },
+  "bankroll": {
+    "over25": 500,
+    "btts": 500,
+    "nba_over": 500
+  },
+  "leagues": {
+    "premier": { "name": "Premier League", "country": "ENG" },
+    "portugal": { "name": "Primeira Liga", "country": "PRT" },
+    "alemanha": { "name": "Bundesliga", "country": "DEU" },
+    "espanha": { "name": "LaLiga", "country": "ESP" },
+    "franca": { "name": "Ligue 1", "country": "FRA" },
+    "italia": { "name": "Serie A", "country": "ITA" },
+    "paises_baixos": { "name": "Eredivisie", "country": "NLD" },
+    "championship": { "name": "Championship", "country": "ENG" },
+    "alemanha2": { "name": "2. Bundesliga", "country": "DEU" },
+    "italia2": { "name": "Serie B", "country": "ITA" },
+    "franca2": { "name": "Ligue 2", "country": "FRA" },
+    "belgica": { "name": "Jupiler Pro League", "country": "BEL" },
+    "turquia": { "name": "Super Lig", "country": "TUR" }
+  },
+  "history": {
+    "window": 12,
+    "decay": 0.88,
+    "min_games_home": 8,
+    "min_games_away": 8,
+    "lambda_boost": 1.12
+  },
+  "rules": {
+    "over25": {
+      "edge_min": -0.05,
+      "edge_max": 0.15,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
+    },
+    "btts": {
+      "edge_min": -0.05,
+      "edge_max": 0.15,
+      "kelly_fraction": 0.2,
+      "cap_frac": 0.04,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
+    },
+    "nba_over": {
+      "edge_min": -0.03,
+      "kelly_fraction": 0.25,
+      "cap_frac": 0.05,
+      "daily_cap_frac": 0.15,
+      "min_picks": 1
+    }
+  },
+  "nba": {
+    "window": 10,
+    "sigma_total": 14.0
+  },
+  "api_football": {
+    "league_ids": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203
+    },
+    "shortlist_total": 18,
+    "shortlist_per_league_per_day": 3,
+    "sleep_seconds_between_fixture_requests": 0.35,
+    "use_api_football_for_btts_odds": true
+  },
+  "the_odds_api": {
+    "regions": "eu",
+    "markets": "totals",
+    "odds_format": "decimal",
+    "date_format": "iso",
+    "sport_keys": {
+      "premier": "soccer_epl",
+      "championship": "soccer_efl_champ",
+      "portugal": "soccer_portugal_primeira_liga",
+      "alemanha": "soccer_germany_bundesliga",
+      "alemanha2": "soccer_germany_bundesliga2",
+      "espanha": "soccer_spain_la_liga",
+      "franca": "soccer_france_ligue_one",
+      "franca2": "soccer_france_ligue_two",
+      "italia": "soccer_italy_serie_a",
+      "italia2": "soccer_italy_serie_b",
+      "paises_baixos": "soccer_netherlands_eredivisie",
+      "belgica": "soccer_belgium_first_div",
+      "turquia": "soccer_turkey_super_league"
+    }
+  }
+}
