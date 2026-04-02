@@ -1,6 +1,12 @@
 {
   "bankrollInicial": 500,
-  "localEdits": {},
+  "localEdits": {
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
+      "apostada": false,
+      "oddReal": "",
+      "stakeReal": ""
+    }
+  },
   "manualBets": [],
-  "updatedAt": "2026-03-21T13:53:24.346232+00:00"
+  "updatedAt": "2026-04-02T23:22:19.043367+00:00"
 }
