@@ -1,1 +1,7 @@
-
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;Score;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-05;alemanha;Bundesliga;Union Berlin;FC St. Pauli;1.882;1.652;3.534;O2.5;0.685;2.63;0.38;0.15;0.4923;0.305;43.635;0.0985;0.0269;13.43;0.671295131203279;500.0
+2026-04-06;portugal;Primeira Liga;Arouca;Estoril;2.081;1.9;3.981;O2.5;0.7;1.8;0.556;0.1444;0.325;0.144;32.147;0.065;0.0269;13.43;0.671295131203279;500.0
+2026-04-05;alemanha;Bundesliga;Eintracht Frankfurt;1. FC Köln;1.882;1.652;3.534;O2.5;0.685;1.78;0.562;0.1235;0.2819;0.124;27.703;0.0564;0.0269;13.43;0.671295131203279;500.0
+2026-04-04;espanha;LaLiga;Mallorca;Real Madrid;1.673;1.9;3.573;O2.5;0.693;1.73;0.578;0.1145;0.2713;0.114;26.171;0.0543;0.0269;13.43;0.671295131203279;500.0
+2026-04-04;alemanha;Bundesliga;Borussia Mönchengladbach;1. FC Heidenheim;1.882;1.652;3.534;O2.5;0.685;1.67;0.599;0.0865;0.2157;0.087;20.828;0.0431;0.0269;13.43;0.671295131203279;500.0
+2026-04-04;turquia;Super Lig;Trabzonspor;Galatasaray;1.79;1.62;3.41;O2.5;0.662;1.62;0.617;0.0449;0.1172;0.045;12.485;0.0234;0.0157;7.87;0.671295131203279;500.0
