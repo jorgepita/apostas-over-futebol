@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apostas do Bot</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --blue: #38bdf8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      background: #1f2937;
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    select, input {
+      background: #0b1220;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .day-block {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .group-title {
+      color: var(--blue);
+      font-weight: bold;
+    }
+
+    .aposta-item {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 0;
+    }
+
+    .aposta-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .aposta-line-1 {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
+    }
+
+    .aposta-line-2 {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #243244;
+      border: 1px solid var(--border);
+    }
+
+    .pill.o25 { color: #93c5fd; }
+    .pill.btts { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1>Apostas do Bot</h1>
+        <div class="small">Página dedicada só para consulta das picks</div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Voltar ao dashboard</a>
+        <a href="apostas.html">Atualizar página</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="toolbar">
+        <label>
+          <div class="small">Filtrar mercado</div>
+          <select id="marketFilter">
+            <option value="">Todos</option>
+            <option value="O2.5">O2.5</option>
+            <option value="BTTS">BTTS</option>
+          </select>
+        </label>
+
+        <label>
+          <div class="small">Filtrar data</div>
+          <select id="dateFilter">
+            <option value="">Todas</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="apostasPage">A carregar...</div>
+    </div>
+  </div>
+
+  <script>
+    const RAW_BASE = "https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main";
+    const PICKS_URL = `${RAW_BASE}/picks_hoje_simplificado.csv`;
+
+    function parseCSV(text, delimiter = ";") {
+      const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return [];
+      const headers = lines[0].split(delimiter).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = line.split(delimiter);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (values[i] ?? "").trim());
+        return obj;
+      });
+    }
+
+    function toNum(v) {
+      if (v === null || v === undefined || v === "") return 0;
+      return Number(String(v).replace(",", ".")) || 0;
+    }
+
+    function groupBy(arr, keyFn) {
+      return arr.reduce((acc, item) => {
+        const k = keyFn(item);
+        if (!acc[k]) acc[k] = [];
+        acc[k].push(item);
+        return acc;
+      }, {});
+    }
+
+    function marketBadge(m) {
+      const cls = m === "BTTS" ? "btts" : "o25";
+      return `<span class="pill ${cls}">${m || "-"}</span>`;
+    }
+
+    function sortRows(rows) {
+      return [...rows].sort((a, b) => {
+        const d = String(a["Data"]).localeCompare(String(b["Data"]));
+        if (d !== 0) return d;
+        const e = toNum(b["Edge%"]) - toNum(a["Edge%"]);
+        if (e !== 0) return e;
+        return toNum(b["Stake€"]) - toNum(a["Stake€"]);
+      });
+    }
+
+    function render(rows) {
+      const marketFilter = document.getElementById("marketFilter").value;
+      const dateFilter = document.getElementById("dateFilter").value;
+
+      let filtered = [...rows];
+      if (marketFilter) filtered = filtered.filter(r => r["Mercado"] === marketFilter);
+      if (dateFilter) filtered = filtered.filter(r => r["Data"] === dateFilter);
+
+      const container = document.getElementById("apostasPage");
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="small">Sem apostas para os filtros escolhidos.</div>`;
+        return;
+      }
+
+      const grouped = groupBy(sortRows(filtered), r => r["Data"]);
+
+      container.innerHTML = Object.keys(grouped).sort().map(date => {
+        const itens = grouped[date];
+        return `
+          <div class="day-block">
+            <div class="day-header">
+              <div class="group-title">${date}</div>
+              <div class="small">${itens.length} aposta(s)</div>
+            </div>
+            ${itens.map(r => `
+              <div class="aposta-item">
+                <div class="aposta-line-1">
+                  <div><strong>${r["Jogo"] || "-"}</strong></div>
+                  <div>${marketBadge(r["Mercado"])}</div>
+                </div>
+                <div class="aposta-line-2">
+                  ${r["Liga"] || "-"} | Odd: ${r["Odd"] || "-"} | Stake: ${r["Stake€"] || "-"}€ | Edge: ${r["Edge%"] || "-"}%
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadData() {
+      const res = await fetch(PICKS_URL + `?t=${Date.now()}`);
+      const text = await res.text();
+      const rows = parseCSV(text, ";");
+
+      const dateFilter = document.getElementById("dateFilter");
+      const dates = [...new Set(rows.map(r => r["Data"]).filter(Boolean))].sort();
+      dateFilter.innerHTML = `<option value="">Todas</option>` + dates.map(d => `<option value="${d}">${d}</option>`).join("");
+
+      render(rows);
+
+      document.getElementById("marketFilter").addEventListener("change", () => render(rows));
+      document.getElementById("dateFilter").addEventListener("change", () => render(rows));
+    }
+
+    loadData().catch(err => {
+      console.error(err);
+      document.getElementById("apostasPage").innerHTML = `<div class="small">Erro ao carregar apostas.</div>`;
+    });
+  </script>
+</body>
+</html>
