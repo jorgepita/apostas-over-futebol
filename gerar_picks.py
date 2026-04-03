@@ -2,6 +2,7 @@ import base64
 import json
 import math
 import os
+from collections import Counter
 from pathlib import Path
 from urllib import request, parse, error
 from datetime import datetime, timedelta, timezone
@@ -99,24 +100,28 @@ def prob_over25(lam_total: float) -> float:
 
 def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
     """
-    BTTS ajustado para remover inflação típica do modelo Poisson puro.
+    BTTS ajustado para reduzir inflação do Poisson puro.
     """
     p_home0 = math.exp(-max(0.0, lam_home))
     p_away0 = math.exp(-max(0.0, lam_away))
     raw = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
 
-    # penalização estrutural leve
-    adj = raw * 0.92
+    adj = raw * 0.90
 
-    # penalização adicional se houver grande desequilíbrio ofensivo
     bigger = max(lam_home, lam_away)
     smaller = min(lam_home, lam_away)
     ratio = (bigger / smaller) if smaller > 0 else 99.0
+    gap = abs(lam_home - lam_away)
 
-    if ratio >= 2.8:
+    if ratio >= 2.50:
+        adj *= 0.90
+    elif ratio >= 2.10:
+        adj *= 0.94
+
+    if gap >= 1.10:
         adj *= 0.92
-    elif ratio >= 2.3:
-        adj *= 0.95
+    elif gap >= 0.90:
+        adj *= 0.96
 
     return float(max(0.0, min(1.0, adj)))
 
@@ -197,7 +202,7 @@ def clamp_prob_o25(prob: float) -> float:
 
 
 def clamp_prob_btts(prob: float) -> float:
-    return float(max(0.24, min(0.70, prob)))
+    return float(max(0.22, min(0.68, prob)))
 
 
 def clamp_edge_o25(edge: float) -> float:
@@ -205,7 +210,7 @@ def clamp_edge_o25(edge: float) -> float:
 
 
 def clamp_edge_btts(edge: float) -> float:
-    return float(max(-0.20, min(0.15, edge)))
+    return float(max(-0.20, min(0.14, edge)))
 
 
 def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -382,7 +387,6 @@ def get_run_mode(cfg: dict) -> str:
 def get_market_thresholds(mode: str, market: str) -> dict:
     market = str(market).strip().upper()
 
-    # fallback seguro para nunca crashar em market_quality_filter
     base = {
         "lam_h_min": 0.0,
         "lam_a_min": 0.0,
@@ -392,6 +396,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
         "edge_min_quality": -1.0,
         "max_lambda_ratio": 99.0,
         "max_lambda_gap": 99.0,
+        "min_lambda_product": 0.0,
     }
 
     if mode == "test":
@@ -403,17 +408,19 @@ def get_market_thresholds(mode: str, market: str) -> dict:
                 "odd_max": 2.90,
                 "edge_min_quality": -0.07,
             }
+
         if market == "BTTS":
             return {
                 **base,
-                "lam_h_min": 0.52,
-                "lam_a_min": 0.52,
-                "lam_t_min": 1.65,
-                "odd_min": 1.42,
-                "odd_max": 2.90,
-                "edge_min_quality": -0.07,
-                "max_lambda_ratio": 2.60,
-                "max_lambda_gap": 1.20,
+                "lam_h_min": 0.60,
+                "lam_a_min": 0.60,
+                "lam_t_min": 1.85,
+                "odd_min": 1.48,
+                "odd_max": 2.60,
+                "edge_min_quality": -0.04,
+                "max_lambda_ratio": 1.95,
+                "max_lambda_gap": 0.85,
+                "min_lambda_product": 0.62,
             }
 
     if market == "O2.5":
@@ -428,14 +435,15 @@ def get_market_thresholds(mode: str, market: str) -> dict:
     if market == "BTTS":
         return {
             **base,
-            "lam_h_min": 0.60,
-            "lam_a_min": 0.60,
-            "lam_t_min": 1.78,
+            "lam_h_min": 0.68,
+            "lam_a_min": 0.68,
+            "lam_t_min": 1.95,
             "odd_min": 1.50,
-            "odd_max": 2.60,
-            "edge_min_quality": -0.04,
-            "max_lambda_ratio": 2.25,
-            "max_lambda_gap": 1.00,
+            "odd_max": 2.45,
+            "edge_min_quality": -0.02,
+            "max_lambda_ratio": 1.80,
+            "max_lambda_gap": 0.75,
+            "min_lambda_product": 0.70,
         }
 
     return base
@@ -510,7 +518,7 @@ def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | No
 # =============================
 # Qualidade / correlação
 # =============================
-def btts_balance_filter(row: dict, th: dict) -> bool:
+def btts_balance_filter(row: dict, th: dict) -> tuple[bool, str]:
     lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
     lam_a = float(row.get("LambdaAway", 0.0) or 0.0)
 
@@ -518,16 +526,19 @@ def btts_balance_filter(row: dict, th: dict) -> bool:
     smaller = min(lam_h, lam_a)
     ratio = (bigger / smaller) if smaller > 0 else 99.0
     gap = abs(lam_h - lam_a)
+    product = lam_h * lam_a
 
     if ratio > float(th.get("max_lambda_ratio", 99.0)):
-        return False
+        return False, "btts_ratio"
     if gap > float(th.get("max_lambda_gap", 99.0)):
-        return False
+        return False, "btts_gap"
+    if product < float(th.get("min_lambda_product", 0.0)):
+        return False, "btts_product"
 
-    return True
+    return True, "ok"
 
 
-def market_quality_filter(row: dict, mode: str = "normal") -> bool:
+def evaluate_market_quality(row: dict, mode: str = "normal") -> tuple[bool, str]:
     market = str(row.get("Market", "")).strip().upper()
     odd = float(row.get("Odd", 0.0) or 0.0)
     lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
@@ -536,31 +547,47 @@ def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     edge = float(row.get("Edge", 0.0) or 0.0)
 
     if odd <= 1.01:
-        return False
+        return False, "odd_invalid"
 
     th = get_market_thresholds(mode, market)
 
     if market == "O2.5":
         if lam_t < float(th["lam_t_min"]):
-            return False
-        if odd < float(th["odd_min"]) or odd > float(th["odd_max"]):
-            return False
+            return False, "lam_t_low"
+        if odd < float(th["odd_min"]):
+            return False, "odd_low"
+        if odd > float(th["odd_max"]):
+            return False, "odd_high"
         if edge < float(th["edge_min_quality"]):
-            return False
+            return False, "edge_quality_low"
+        return True, "ok"
 
-    elif market == "BTTS":
-        if lam_h < float(th["lam_h_min"]) or lam_a < float(th["lam_a_min"]):
-            return False
+    if market == "BTTS":
+        if lam_h < float(th["lam_h_min"]):
+            return False, "lam_h_low"
+        if lam_a < float(th["lam_a_min"]):
+            return False, "lam_a_low"
         if lam_t < float(th["lam_t_min"]):
-            return False
-        if odd < float(th["odd_min"]) or odd > float(th["odd_max"]):
-            return False
+            return False, "lam_t_low"
+        if odd < float(th["odd_min"]):
+            return False, "odd_low"
+        if odd > float(th["odd_max"]):
+            return False, "odd_high"
         if edge < float(th["edge_min_quality"]):
-            return False
-        if not btts_balance_filter(row, th):
-            return False
+            return False, "edge_quality_low"
 
-    return True
+        ok_balance, reason = btts_balance_filter(row, th)
+        if not ok_balance:
+            return False, reason
+
+        return True, "ok"
+
+    return True, "ok"
+
+
+def market_quality_filter(row: dict, mode: str = "normal") -> bool:
+    ok, _ = evaluate_market_quality(row, mode=mode)
+    return ok
 
 
 # =============================
@@ -573,7 +600,17 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
     print(f"[DBG] {label}: rows iniciais = {len(rows)}")
 
-    filtered_rows = [r for r in rows if market_quality_filter(r, mode=mode)]
+    quality_counter = Counter()
+    filtered_rows = []
+
+    for r in rows:
+        ok, reason = evaluate_market_quality(r, mode=mode)
+        quality_counter[reason] += 1
+        if ok:
+            filtered_rows.append(r)
+
+    quality_parts = [f"{k}={v}" for k, v in sorted(quality_counter.items(), key=lambda x: (-x[1], x[0]))]
+    print(f"[DBG] {label}: quality reasons -> " + (" | ".join(quality_parts) if quality_parts else "sem dados"))
     print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)} | mode={mode}")
 
     if not filtered_rows:
@@ -946,7 +983,7 @@ def main():
 
     bankroll_btts = float(bankroll_cfg.get("btts", 0.0))
     rules_btts = dict(rules_cfg.get("btts", {}))
-    rules_btts.setdefault("edge_max", 0.15)
+    rules_btts.setdefault("edge_max", 0.14)
 
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
