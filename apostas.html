@@ -1,287 +1,803 @@
-<!DOCTYPE html>
-<html lang="pt">
+<!doctype html>
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apostas do Bot</title>
+  <title>Página de Apostas</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --panel-2: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: #374151;
-      --blue: #38bdf8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --accent: #0f172a;
+
+      --ok: #16a34a;
+      --ok-bg: #ecfdf5;
+
+      --bad: #dc2626;
+      --bad-bg: #fef2f2;
+
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+
+      --info: #2563eb;
+      --info-bg: #eff6ff;
+
+      --manual: #6d28d9;
+      --manual-bg: #f5f3ff;
+
+      --market-o25: #1d4ed8;
+      --market-o25-bg: #dbeafe;
+
+      --market-btts: #be123c;
+      --market-btts-bg: #ffe4e6;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-family: Arial, sans-serif;
     }
 
-    .container {
-      max-width: 1100px;
+    .wrap {
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 18px;
     }
 
-    .topbar {
+    .hero, .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .hero {
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .sub {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 14px;
+      padding: 10px 14px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .section {
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .nav-links a {
-      color: white;
-      text-decoration: none;
-      background: #1f2937;
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-    }
-
-    .section {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
       margin-bottom: 14px;
-    }
-
-    select, input {
-      background: #0b1220;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
+      flex-wrap: wrap;
     }
 
     .small {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
     }
 
-    .day-block {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 12px;
-      background: rgba(255,255,255,0.02);
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
     }
 
-    .day-header {
+    .input, .select {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .days {
+      display: grid;
+      gap: 14px;
+    }
+
+    .day-block {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .day-head {
+      padding: 14px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
     }
 
-    .group-title {
-      color: var(--blue);
-      font-weight: bold;
+    .day-title {
+      font-weight: 800;
+      font-size: 18px;
     }
 
-    .aposta-item {
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding: 10px 0;
-    }
-
-    .aposta-item:first-child {
-      border-top: none;
-      padding-top: 0;
-    }
-
-    .aposta-line-1 {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 5px;
-    }
-
-    .aposta-line-2 {
+    .day-sub {
       color: var(--muted);
       font-size: 13px;
     }
 
-    .pill {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-      background: #243244;
-      border: 1px solid var(--border);
+    .bets-grid {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .pill.o25 { color: #93c5fd; }
-    .pill.btts { color: #fca5a5; }
+    .bet-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bet-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .bet-game {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .bet-league {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge.market-o25 {
+      background: var(--market-o25-bg);
+      color: var(--market-o25);
+    }
+
+    .badge.market-btts {
+      background: var(--market-btts-bg);
+      color: var(--market-btts);
+    }
+
+    .badge.status-pending {
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .badge.status-win {
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+
+    .badge.status-loss {
+      background: var(--bad-bg);
+      color: var(--bad);
+    }
+
+    .badge.status-push {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .bet-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .metric .k {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .metric .v {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .bet-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .footer-left, .footer-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.source-bot {
+      background: var(--info-bg);
+      color: var(--info);
+    }
+
+    .tag.source-manual {
+      background: var(--manual-bg);
+      color: var(--manual);
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      color: var(--muted);
+      background: white;
+    }
+
+    .profit-pos { color: var(--ok); }
+    .profit-neg { color: var(--bad); }
+
+    @media (max-width: 1100px) {
+      .filters,
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .bets-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bet-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 12px; }
+
+      .filters,
+      .stats-grid,
+      .bet-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .hero, .section {
+        padding: 14px;
+      }
+
+      .bet-top {
+        flex-direction: column;
+      }
+
+      .badges {
+        justify-content: flex-start;
+      }
+
+      .day-head {
+        align-items: flex-start;
+      }
+
+      .day-title {
+        font-size: 16px;
+      }
+
+      .stat .value {
+        font-size: 24px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="topbar">
+  <div class="wrap">
+    <div class="hero">
       <div>
-        <h1>Apostas do Bot</h1>
-        <div class="small">Página dedicada só para consulta das picks</div>
+        <p class="small">Projeto Apostas Bot</p>
+        <h1>Página de Apostas</h1>
+        <p class="sub">Vista rápida, limpa e mobile-first das apostas do bot.</p>
       </div>
-      <div class="nav-links">
-        <a href="index.html">Voltar ao dashboard</a>
-        <a href="apostas.html">Atualizar página</a>
+      <div class="actions">
+        <button class="btn primary" id="refreshBtn">Atualizar</button>
+        <a class="btn" href="index.html">Voltar ao dashboard</a>
+        <a class="btn" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
       </div>
     </div>
 
-    <div class="section">
-      <div class="toolbar">
-        <label>
-          <div class="small">Filtrar mercado</div>
-          <select id="marketFilter">
-            <option value="">Todos</option>
-            <option value="O2.5">O2.5</option>
-            <option value="BTTS">BTTS</option>
-          </select>
-        </label>
-
-        <label>
-          <div class="small">Filtrar data</div>
-          <select id="dateFilter">
-            <option value="">Todas</option>
-          </select>
-        </label>
+    <div class="card section">
+      <div class="section-head">
+        <div>
+          <h2>Filtros</h2>
+          <p class="small">Filtra rapidamente por jogo, data, mercado e estado.</p>
+        </div>
       </div>
 
-      <div id="apostasPage">A carregar...</div>
+      <div class="filters">
+        <input id="searchInput" class="input" type="text" placeholder="Pesquisar jogo, liga ou mercado" />
+
+        <select id="marketFilter" class="select">
+          <option value="">Todos os mercados</option>
+          <option value="O2.5">O2.5</option>
+          <option value="BTTS">BTTS</option>
+        </select>
+
+        <select id="statusFilter" class="select">
+          <option value="">Todos os estados</option>
+          <option value="pending">Pendentes</option>
+          <option value="W">Ganhas</option>
+          <option value="L">Perdidas</option>
+          <option value="P">Push</option>
+        </select>
+
+        <select id="dateFilter" class="select">
+          <option value="">Todas as datas</option>
+          <option value="today">Hoje</option>
+          <option value="tomorrow">Amanhã</option>
+          <option value="future">Próximas</option>
+        </select>
+
+        <select id="sortFilter" class="select">
+          <option value="date_edge">Data ↑ / Edge ↓</option>
+          <option value="date_stake">Data ↑ / Stake ↓</option>
+          <option value="edge">Edge ↓</option>
+          <option value="stake">Stake ↓</option>
+          <option value="odd">Odd ↓</option>
+        </select>
+      </div>
     </div>
+
+    <div class="card section">
+      <div class="section-head">
+        <div>
+          <h2>Resumo rápido</h2>
+          <p class="small">Contadores da vista atual.</p>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <div class="days" id="betsContainer"></div>
   </div>
 
   <script>
-    const RAW_BASE = "https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main";
-    const PICKS_URL = `${RAW_BASE}/picks_hoje_simplificado.csv`;
+    const URLS = {
+      daily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+      history: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv'
+    };
 
-    function parseCSV(text, delimiter = ";") {
-      const lines = text.trim().split(/\r?\n/);
+    function parseSemicolonCsv(text) {
+      const trimmed = (text || '').trim();
+      if (!trimmed) return [];
+      const lines = trimmed.split(/\r?\n/).filter(Boolean);
       if (!lines.length) return [];
-      const headers = lines[0].split(delimiter).map(h => h.trim());
+      const headers = lines[0].split(';').map(h => h.trim());
+
       return lines.slice(1).map(line => {
-        const values = line.split(delimiter);
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = (values[i] ?? "").trim());
-        return obj;
+        const values = line.split(';');
+        const row = {};
+        headers.forEach((h, i) => row[h] = (values[i] ?? '').trim());
+        return row;
       });
     }
 
-    function toNum(v) {
-      if (v === null || v === undefined || v === "") return 0;
-      return Number(String(v).replace(",", ".")) || 0;
+    function num(v) {
+      const n = Number(String(v).replace(',', '.'));
+      return Number.isFinite(n) ? n : null;
     }
 
-    function groupBy(arr, keyFn) {
-      return arr.reduce((acc, item) => {
-        const k = keyFn(item);
-        if (!acc[k]) acc[k] = [];
-        acc[k].push(item);
-        return acc;
-      }, {});
+    function fmt(n, d = 2) {
+      return Number.isFinite(n) ? n.toFixed(d) : '—';
     }
 
-    function marketBadge(m) {
-      const cls = m === "BTTS" ? "btts" : "o25";
-      return `<span class="pill ${cls}">${m || "-"}</span>`;
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function normalizeDateString(value) {
+      const s = String(value || '').trim();
+      const match = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return match ? s : '';
+    }
+
+    function parseDateSafe(value) {
+      const s = normalizeDateString(value);
+      if (!s) return null;
+      const d = new Date(s + 'T00:00:00');
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function todayIso() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function tomorrowIso() {
+      const now = new Date();
+      now.setDate(now.getDate() + 1);
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDatePt(dateStr) {
+      const d = parseDateSafe(dateStr);
+      if (!d) return '—';
+      return d.toLocaleDateString('pt-PT', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+
+    function marketBadge(market) {
+      const m = String(market || '').trim().toUpperCase();
+      if (m === 'BTTS') return `<span class="badge market-btts">BTTS</span>`;
+      return `<span class="badge market-o25">${escapeHtml(m || '—')}</span>`;
+    }
+
+    function statusBadge(result) {
+      const r = String(result || '').trim().toUpperCase();
+
+      if (r === 'W') return `<span class="badge status-win">🟢 Ganha</span>`;
+      if (r === 'L') return `<span class="badge status-loss">🔴 Perdida</span>`;
+      if (r === 'P') return `<span class="badge status-push">⚪ Push</span>`;
+      return `<span class="badge status-pending">🟡 Pendente</span>`;
+    }
+
+    function sourceBadge(source) {
+      return source === 'manual'
+        ? `<span class="tag source-manual">Manual</span>`
+        : `<span class="tag source-bot">Bot</span>`;
+    }
+
+    function buildKey(row) {
+      return [
+        row['Data'] || '',
+        row['Liga'] || '',
+        row['Jogo'] || '',
+        row['Mercado'] || ''
+      ].join('|');
+    }
+
+    function mergeStatus(dailyRows, historyRows) {
+      const historyMap = new Map();
+      historyRows.forEach(r => historyMap.set(buildKey(r), r));
+
+      return dailyRows.map(r => {
+        const hist = historyMap.get(buildKey(r)) || {};
+        const result = String(hist['Resultado'] || r['Resultado'] || '').trim().toUpperCase();
+
+        return {
+          ...r,
+          Resultado: result,
+          _date: normalizeDateString(r['Data']),
+          _league: String(r['Liga'] || ''),
+          _market: String(r['Mercado'] || ''),
+          _game: String(r['Jogo'] || ''),
+          _search: `${r['Data'] || ''} ${r['Liga'] || ''} ${r['Jogo'] || ''} ${r['Mercado'] || ''}`.toLowerCase(),
+          _odd: num(r['Odd']),
+          _stake: num(r['Stake€']),
+          _edge: num(r['Edge%'])
+        };
+      });
+    }
+
+    function filterRows(rows) {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const market = document.getElementById('marketFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+
+      return rows.filter(r => {
+        const okQ = !q || r._search.includes(q);
+        const okMarket = !market || r['Mercado'] === market;
+        const okStatus = !status || (r['Resultado'] || 'pending') === status;
+        let okDate = true;
+
+        if (dateFilter === 'today') okDate = r._date === todayIso();
+        else if (dateFilter === 'tomorrow') okDate = r._date === tomorrowIso();
+        else if (dateFilter === 'future') okDate = !!r._date && r._date >= todayIso();
+
+        return okQ && okMarket && okStatus && okDate;
+      });
     }
 
     function sortRows(rows) {
+      const sortMode = document.getElementById('sortFilter').value;
+
       return [...rows].sort((a, b) => {
-        const d = String(a["Data"]).localeCompare(String(b["Data"]));
-        if (d !== 0) return d;
-        const e = toNum(b["Edge%"]) - toNum(a["Edge%"]);
+        const ad = a._date || '';
+        const bd = b._date || '';
+
+        if (sortMode === 'edge') {
+          const e = (b._edge ?? -9999) - (a._edge ?? -9999);
+          if (e !== 0) return e;
+          return ad.localeCompare(bd);
+        }
+
+        if (sortMode === 'stake') {
+          const s = (b._stake ?? -9999) - (a._stake ?? -9999);
+          if (s !== 0) return s;
+          return ad.localeCompare(bd);
+        }
+
+        if (sortMode === 'odd') {
+          const o = (b._odd ?? -9999) - (a._odd ?? -9999);
+          if (o !== 0) return o;
+          return ad.localeCompare(bd);
+        }
+
+        if (sortMode === 'date_stake') {
+          if (ad !== bd) return ad.localeCompare(bd);
+          const s = (b._stake ?? -9999) - (a._stake ?? -9999);
+          if (s !== 0) return s;
+          return (b._edge ?? -9999) - (a._edge ?? -9999);
+        }
+
+        if (ad !== bd) return ad.localeCompare(bd);
+        const e = (b._edge ?? -9999) - (a._edge ?? -9999);
         if (e !== 0) return e;
-        return toNum(b["Stake€"]) - toNum(a["Stake€"]);
+        return (b._stake ?? -9999) - (a._stake ?? -9999);
       });
     }
 
-    function render(rows) {
-      const marketFilter = document.getElementById("marketFilter").value;
-      const dateFilter = document.getElementById("dateFilter").value;
+    function groupByDate(rows) {
+      const map = new Map();
+      rows.forEach(r => {
+        const key = r._date || 'Sem data';
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(r);
+      });
+      return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    }
 
-      let filtered = [...rows];
-      if (marketFilter) filtered = filtered.filter(r => r["Mercado"] === marketFilter);
-      if (dateFilter) filtered = filtered.filter(r => r["Data"] === dateFilter);
+    function renderStats(rows) {
+      const total = rows.length;
+      const pending = rows.filter(r => !r['Resultado']).length;
+      const won = rows.filter(r => r['Resultado'] === 'W').length;
+      const lost = rows.filter(r => r['Resultado'] === 'L').length;
+      const push = rows.filter(r => r['Resultado'] === 'P').length;
 
-      const container = document.getElementById("apostasPage");
+      document.getElementById('statsGrid').innerHTML = [
+        { label: 'Total', value: total },
+        { label: 'Pendentes', value: pending },
+        { label: 'Ganhas', value: won },
+        { label: 'Perdidas', value: lost },
+        { label: 'Push', value: push }
+      ].map(card => `
+        <div class="stat">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+        </div>
+      `).join('');
+    }
 
-      if (!filtered.length) {
-        container.innerHTML = `<div class="small">Sem apostas para os filtros escolhidos.</div>`;
+    function renderBets(rows) {
+      const container = document.getElementById('betsContainer');
+
+      if (!rows.length) {
+        container.innerHTML = `<div class="empty">Sem apostas para os filtros atuais.</div>`;
         return;
       }
 
-      const grouped = groupBy(sortRows(filtered), r => r["Data"]);
+      const groups = groupByDate(rows);
 
-      container.innerHTML = Object.keys(grouped).sort().map(date => {
-        const itens = grouped[date];
-        return `
-          <div class="day-block">
-            <div class="day-header">
-              <div class="group-title">${date}</div>
-              <div class="small">${itens.length} aposta(s)</div>
+      container.innerHTML = groups.map(([date, bets]) => `
+        <div class="day-block">
+          <div class="day-head">
+            <div>
+              <div class="day-title">${escapeHtml(formatDatePt(date))}</div>
+              <div class="day-sub">${bets.length} aposta(s)</div>
             </div>
-            ${itens.map(r => `
-              <div class="aposta-item">
-                <div class="aposta-line-1">
-                  <div><strong>${r["Jogo"] || "-"}</strong></div>
-                  <div>${marketBadge(r["Mercado"])}</div>
+          </div>
+
+          <div class="bets-grid">
+            ${bets.map(r => `
+              <div class="bet-card">
+                <div class="bet-top">
+                  <div>
+                    <div class="bet-game">${escapeHtml(r['Jogo'] || '—')}</div>
+                    <div class="bet-league">${escapeHtml(r['Liga'] || '—')}</div>
+                  </div>
+                  <div class="badges">
+                    ${marketBadge(r['Mercado'])}
+                    ${statusBadge(r['Resultado'])}
+                  </div>
                 </div>
-                <div class="aposta-line-2">
-                  ${r["Liga"] || "-"} | Odd: ${r["Odd"] || "-"} | Stake: ${r["Stake€"] || "-"}€ | Edge: ${r["Edge%"] || "-"}%
+
+                <div class="bet-metrics">
+                  <div class="metric">
+                    <div class="k">Odd</div>
+                    <div class="v">${r._odd !== null ? fmt(r._odd) : '—'}</div>
+                  </div>
+                  <div class="metric">
+                    <div class="k">Stake</div>
+                    <div class="v">${r._stake !== null ? `€${fmt(r._stake)}` : '—'}</div>
+                  </div>
+                  <div class="metric">
+                    <div class="k">Edge</div>
+                    <div class="v ${((r._edge ?? 0) > 0) ? 'profit-pos' : ((r._edge ?? 0) < 0 ? 'profit-neg' : '')}">
+                      ${r._edge !== null ? `${fmt(r._edge)}%` : '—'}
+                    </div>
+                  </div>
+                  <div class="metric">
+                    <div class="k">Data</div>
+                    <div class="v">${escapeHtml(r._date || '—')}</div>
+                  </div>
+                </div>
+
+                <div class="bet-footer">
+                  <div class="footer-left">
+                    ${sourceBadge('bot')}
+                  </div>
+                  <div class="footer-right small">
+                    ${escapeHtml(r['Mercado'] || '—')}
+                  </div>
                 </div>
               </div>
-            `).join("")}
+            `).join('')}
           </div>
-        `;
-      }).join("");
+        </div>
+      `).join('');
+    }
+
+    let allRows = [];
+
+    function rerender() {
+      const filtered = filterRows(allRows);
+      const sorted = sortRows(filtered);
+      renderStats(sorted);
+      renderBets(sorted);
     }
 
     async function loadData() {
-      const res = await fetch(PICKS_URL + `?t=${Date.now()}`);
-      const text = await res.text();
-      const rows = parseCSV(text, ";");
+      try {
+        const [dailyRes, historyRes] = await Promise.all([
+          fetch(URLS.daily + '?t=' + Date.now()),
+          fetch(URLS.history + '?t=' + Date.now())
+        ]);
 
-      const dateFilter = document.getElementById("dateFilter");
-      const dates = [...new Set(rows.map(r => r["Data"]).filter(Boolean))].sort();
-      dateFilter.innerHTML = `<option value="">Todas</option>` + dates.map(d => `<option value="${d}">${d}</option>`).join("");
+        const dailyText = await dailyRes.text();
+        const historyText = await historyRes.text();
 
-      render(rows);
+        const dailyRows = parseSemicolonCsv(dailyText);
+        const historyRows = parseSemicolonCsv(historyText);
 
-      document.getElementById("marketFilter").addEventListener("change", () => render(rows));
-      document.getElementById("dateFilter").addEventListener("change", () => render(rows));
+        allRows = mergeStatus(dailyRows, historyRows);
+        rerender();
+      } catch (e) {
+        console.error(e);
+        document.getElementById('betsContainer').innerHTML =
+          `<div class="empty">Erro a carregar os dados das apostas.</div>`;
+      }
     }
 
-    loadData().catch(err => {
-      console.error(err);
-      document.getElementById("apostasPage").innerHTML = `<div class="small">Erro ao carregar apostas.</div>`;
-    });
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+    document.getElementById('searchInput').addEventListener('input', rerender);
+    document.getElementById('marketFilter').addEventListener('change', rerender);
+    document.getElementById('statusFilter').addEventListener('change', rerender);
+    document.getElementById('dateFilter').addEventListener('change', rerender);
+    document.getElementById('sortFilter').addEventListener('change', rerender);
+
+    loadData();
+    setInterval(loadData, 60000);
   </script>
 </body>
 </html>
