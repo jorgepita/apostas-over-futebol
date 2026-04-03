@@ -97,10 +97,28 @@ def prob_over25(lam_total: float) -> float:
     return 1.0 - poisson_cdf(2, lam_total)
 
 
-def prob_btts_yes(lam_home: float, lam_away: float) -> float:
+def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
+    """
+    BTTS ajustado para remover inflação típica do modelo Poisson puro.
+    """
     p_home0 = math.exp(-max(0.0, lam_home))
     p_away0 = math.exp(-max(0.0, lam_away))
-    return float(max(0.0, min(1.0, 1.0 - p_home0 - p_away0 + (p_home0 * p_away0))))
+    raw = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
+
+    # penalização estrutural leve
+    adj = raw * 0.92
+
+    # penalização adicional se houver grande desequilíbrio ofensivo
+    bigger = max(lam_home, lam_away)
+    smaller = min(lam_home, lam_away)
+    ratio = (bigger / smaller) if smaller > 0 else 99.0
+
+    if ratio >= 2.8:
+        adj *= 0.92
+    elif ratio >= 2.3:
+        adj *= 0.95
+
+    return float(max(0.0, min(1.0, adj)))
 
 
 def kelly_fraction(p: float, odd: float) -> float:
@@ -175,15 +193,15 @@ def compute_lambdas(
 
 
 def clamp_prob_o25(prob: float) -> float:
-    return float(max(0.22, min(0.70, prob)))
+    return float(max(0.22, min(0.72, prob)))
 
 
 def clamp_prob_btts(prob: float) -> float:
-    return float(max(0.25, min(0.72, prob)))
+    return float(max(0.24, min(0.70, prob)))
 
 
 def clamp_edge_o25(edge: float) -> float:
-    return float(max(-0.20, min(0.15, edge)))
+    return float(max(-0.20, min(0.16, edge)))
 
 
 def clamp_edge_btts(edge: float) -> float:
@@ -314,7 +332,15 @@ def build_message(rows: list[dict], titulo: str) -> str:
             odd = float(r.get("Odd", 0.0) or 0.0)
         except Exception:
             odd = 0.0
-        return (str(r.get("Date", "")), -edge, -kelly, -prob, -odd, str(r.get("LeagueName", "")), str(r.get("HomeTeam", "")))
+        return (
+            str(r.get("Date", "")),
+            -edge,
+            -kelly,
+            -prob,
+            -odd,
+            str(r.get("LeagueName", "")),
+            str(r.get("HomeTeam", "")),
+        )
 
     rows_sorted = sorted(rows, key=_sort_key)
 
@@ -356,42 +382,63 @@ def get_run_mode(cfg: dict) -> str:
 def get_market_thresholds(mode: str, market: str) -> dict:
     market = str(market).strip().upper()
 
+    # fallback seguro para nunca crashar em market_quality_filter
+    base = {
+        "lam_h_min": 0.0,
+        "lam_a_min": 0.0,
+        "lam_t_min": 0.0,
+        "odd_min": 1.01,
+        "odd_max": 99.0,
+        "edge_min_quality": -1.0,
+        "max_lambda_ratio": 99.0,
+        "max_lambda_gap": 99.0,
+    }
+
     if mode == "test":
         if market == "O2.5":
             return {
-                "lam_t_min": 1.75,
-                "odd_min": 1.45,
-                "odd_max": 2.80,
-                "edge_min_quality": -0.06,
+                **base,
+                "lam_t_min": 1.70,
+                "odd_min": 1.42,
+                "odd_max": 2.90,
+                "edge_min_quality": -0.07,
             }
         if market == "BTTS":
             return {
-                "lam_h_min": 0.55,
-                "lam_a_min": 0.55,
-                "lam_t_min": 1.70,
-                "odd_min": 1.45,
-                "odd_max": 2.80,
-                "edge_min_quality": -0.06,
+                **base,
+                "lam_h_min": 0.52,
+                "lam_a_min": 0.52,
+                "lam_t_min": 1.65,
+                "odd_min": 1.42,
+                "odd_max": 2.90,
+                "edge_min_quality": -0.07,
+                "max_lambda_ratio": 2.60,
+                "max_lambda_gap": 1.20,
             }
 
     if market == "O2.5":
         return {
-            "lam_t_min": 1.90,
-            "odd_min": 1.55,
-            "odd_max": 2.50,
-            "edge_min_quality": -0.03,
-        }
-    if market == "BTTS":
-        return {
-            "lam_h_min": 0.65,
-            "lam_a_min": 0.65,
-            "lam_t_min": 1.85,
-            "odd_min": 1.55,
-            "odd_max": 2.50,
-            "edge_min_quality": -0.03,
+            **base,
+            "lam_t_min": 1.80,
+            "odd_min": 1.50,
+            "odd_max": 2.65,
+            "edge_min_quality": -0.04,
         }
 
-    return {}
+    if market == "BTTS":
+        return {
+            **base,
+            "lam_h_min": 0.60,
+            "lam_a_min": 0.60,
+            "lam_t_min": 1.78,
+            "odd_min": 1.50,
+            "odd_max": 2.60,
+            "edge_min_quality": -0.04,
+            "max_lambda_ratio": 2.25,
+            "max_lambda_gap": 1.00,
+        }
+
+    return base
 
 
 # =============================
@@ -463,6 +510,23 @@ def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | No
 # =============================
 # Qualidade / correlação
 # =============================
+def btts_balance_filter(row: dict, th: dict) -> bool:
+    lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
+    lam_a = float(row.get("LambdaAway", 0.0) or 0.0)
+
+    bigger = max(lam_h, lam_a)
+    smaller = min(lam_h, lam_a)
+    ratio = (bigger / smaller) if smaller > 0 else 99.0
+    gap = abs(lam_h - lam_a)
+
+    if ratio > float(th.get("max_lambda_ratio", 99.0)):
+        return False
+    if gap > float(th.get("max_lambda_gap", 99.0)):
+        return False
+
+    return True
+
+
 def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     market = str(row.get("Market", "")).strip().upper()
     odd = float(row.get("Odd", 0.0) or 0.0)
@@ -477,21 +541,23 @@ def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     th = get_market_thresholds(mode, market)
 
     if market == "O2.5":
-        if lam_t < th["lam_t_min"]:
+        if lam_t < float(th["lam_t_min"]):
             return False
-        if odd < th["odd_min"] or odd > th["odd_max"]:
+        if odd < float(th["odd_min"]) or odd > float(th["odd_max"]):
             return False
-        if edge < th["edge_min_quality"]:
+        if edge < float(th["edge_min_quality"]):
             return False
 
     elif market == "BTTS":
-        if lam_h < th["lam_h_min"] or lam_a < th["lam_a_min"]:
+        if lam_h < float(th["lam_h_min"]) or lam_a < float(th["lam_a_min"]):
             return False
-        if lam_t < th["lam_t_min"]:
+        if lam_t < float(th["lam_t_min"]):
             return False
-        if odd < th["odd_min"] or odd > th["odd_max"]:
+        if odd < float(th["odd_min"]) or odd > float(th["odd_max"]):
             return False
-        if edge < th["edge_min_quality"]:
+        if edge < float(th["edge_min_quality"]):
+            return False
+        if not btts_balance_filter(row, th):
             return False
 
     return True
@@ -504,6 +570,8 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if not rows:
         print(f"[DBG] {label}: sem rows à entrada")
         return pd.DataFrame()
+
+    print(f"[DBG] {label}: rows iniciais = {len(rows)}")
 
     filtered_rows = [r for r in rows if market_quality_filter(r, mode=mode)]
     print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)} | mode={mode}")
@@ -749,109 +817,132 @@ def main():
                     return odd
         return 0.0
 
+    total_fixture_errors = 0
+
     for league_key, league_meta in leagues_cfg.items():
-        league_fixt = fixtures[fixtures["League"] == league_key].copy()
-        print(f"[DBG] liga={league_key} | fixtures={len(league_fixt)}")
-        if league_fixt.empty:
-            continue
+        try:
+            league_fixt = fixtures[fixtures["League"] == league_key].copy()
+            print(f"[DBG] liga={league_key} | fixtures={len(league_fixt)}")
+            if league_fixt.empty:
+                continue
 
-        hist_path = BASE / "data_raw" / f"{league_key}.csv"
-        if not hist_path.exists():
-            print(f"[WARN] histórico em falta para {league_key}")
-            continue
+            hist_path = BASE / "data_raw" / f"{league_key}.csv"
+            if not hist_path.exists():
+                print(f"[WARN] histórico em falta para {league_key}")
+                continue
 
-        df_hist = pd.read_csv(hist_path, sep=None, engine="python")
-        df_hist = normalize_columns(df_hist)
+            df_hist = pd.read_csv(hist_path, sep=None, engine="python")
+            df_hist = normalize_columns(df_hist)
 
-        need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
-        if not need_hist.issubset(set(df_hist.columns)):
-            print(f"{league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
-            continue
+            need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
+            if not need_hist.issubset(set(df_hist.columns)):
+                print(f"{league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
+                continue
 
-        df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
-        df_hist = df_hist.dropna(subset=["Date"]).copy()
+            df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
+            df_hist = df_hist.dropna(subset=["Date"]).copy()
 
-        league_name = league_meta.get("name", league_key)
+            league_name = league_meta.get("name", league_key)
 
-        league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
-        lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
+            league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
+            lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
 
-        for _, fx in league_fixt.iterrows():
-            home = str(fx["HomeTeam"])
-            away = str(fx["AwayTeam"])
+            for _, fx in league_fixt.iterrows():
+                try:
+                    home = str(fx["HomeTeam"])
+                    away = str(fx["AwayTeam"])
 
-            lam_h, lam_a, lam_t = compute_lambdas(
-                df_hist,
-                home,
-                away,
-                window=window,
-                decay=decay,
-                min_games_home=min_games_home,
-                min_games_away=min_games_away,
-            )
+                    lam_h, lam_a, lam_t = compute_lambdas(
+                        df_hist,
+                        home,
+                        away,
+                        window=window,
+                        decay=decay,
+                        min_games_home=min_games_home,
+                        min_games_away=min_games_away,
+                    )
 
-            if lambda_boost and lambda_boost != 1.0:
-                lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
-                lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
-                lam_t = lam_h + lam_a
+                    if lambda_boost and lambda_boost != 1.0:
+                        lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
+                        lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
+                        lam_t = lam_h + lam_a
 
-            base_row = {
-                "Date": fx["Date"],
-                "League": league_key,
-                "LeagueName": league_name,
-                "HomeTeam": home,
-                "AwayTeam": away,
-                "LambdaHome": lam_h,
-                "LambdaAway": lam_a,
-                "LambdaTotal": lam_t,
-            }
-
-            odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
-            if odd25 > 1.01:
-                p25_raw = prob_over25(lam_t)
-                p25 = clamp_prob_o25(p25_raw)
-                pm25 = 1.0 / odd25
-                edge25 = clamp_edge_o25(p25 - pm25)
-                k25 = kelly_fraction(p25, odd25)
-
-                rows25.append(
-                    {
-                        **base_row,
-                        "Market": "O2.5",
-                        "ProbModel": p25,
-                        "Odd": odd25,
-                        "ProbMarket": pm25,
-                        "Edge": edge25,
-                        "KellyTrue": k25,
+                    base_row = {
+                        "Date": fx["Date"],
+                        "League": league_key,
+                        "LeagueName": league_name,
+                        "HomeTeam": home,
+                        "AwayTeam": away,
+                        "LambdaHome": lam_h,
+                        "LambdaAway": lam_a,
+                        "LambdaTotal": lam_t,
                     }
-                )
 
-            odd_btts = get_btts_odd(fx)
-            if odd_btts > 1.01:
-                pbtts_raw = prob_btts_yes(lam_h, lam_a)
-                pbtts = clamp_prob_btts(pbtts_raw)
-                pmbtts = 1.0 / odd_btts
-                edgebtts = clamp_edge_btts(pbtts - pmbtts)
-                kbtts = kelly_fraction(pbtts, odd_btts)
+                    odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
+                    if odd25 > 1.01:
+                        p25_raw = prob_over25(lam_t)
+                        p25 = clamp_prob_o25(p25_raw)
+                        pm25 = 1.0 / odd25
+                        edge25 = clamp_edge_o25(p25 - pm25)
+                        k25 = kelly_fraction(p25, odd25)
 
-                rows_btts.append(
-                    {
-                        **base_row,
-                        "Market": "BTTS",
-                        "ProbModel": pbtts,
-                        "Odd": odd_btts,
-                        "ProbMarket": pmbtts,
-                        "Edge": edgebtts,
-                        "KellyTrue": kbtts,
-                    }
-                )
+                        rows25.append(
+                            {
+                                **base_row,
+                                "Market": "O2.5",
+                                "ProbModel": p25,
+                                "Odd": odd25,
+                                "ProbMarket": pm25,
+                                "Edge": edge25,
+                                "KellyTrue": k25,
+                            }
+                        )
+
+                    odd_btts = get_btts_odd(fx)
+                    if odd_btts > 1.01:
+                        pbtts_raw = prob_btts_yes_adjusted(lam_h, lam_a)
+                        pbtts = clamp_prob_btts(pbtts_raw)
+                        pmbtts = 1.0 / odd_btts
+                        edgebtts = clamp_edge_btts(pbtts - pmbtts)
+                        kbtts = kelly_fraction(pbtts, odd_btts)
+
+                        rows_btts.append(
+                            {
+                                **base_row,
+                                "Market": "BTTS",
+                                "ProbModel": pbtts,
+                                "Odd": odd_btts,
+                                "ProbMarket": pmbtts,
+                                "Edge": edgebtts,
+                                "KellyTrue": kbtts,
+                            }
+                        )
+
+                except Exception as e:
+                    total_fixture_errors += 1
+                    try:
+                        print(
+                            f"[ERR] fixture {league_key} | "
+                            f"{fx.get('HomeTeam', '?')} vs {fx.get('AwayTeam', '?')} -> {e}"
+                        )
+                    except Exception:
+                        print(f"[ERR] fixture {league_key}: erro ao processar jogo -> {e}")
+                    continue
+
+        except Exception as e:
+            print(f"[ERR] liga {league_key}: erro geral -> {e}")
+            continue
+
+    print(f"[DBG] candidatos O2.5 gerados = {len(rows25)}")
+    print(f"[DBG] candidatos BTTS gerados = {len(rows_btts)}")
+    print(f"[DBG] erros por fixture = {total_fixture_errors}")
 
     bankroll_cfg = cfg.get("bankroll", {})
     rules_cfg = cfg.get("rules", {})
 
     bankroll25 = float(bankroll_cfg.get("over25", 0.0))
     rules25 = dict(rules_cfg.get("over25", {}))
-    rules25.setdefault("edge_max", 0.15)
+    rules25.setdefault("edge_max", 0.16)
 
     bankroll_btts = float(bankroll_cfg.get("btts", 0.0))
     rules_btts = dict(rules_cfg.get("btts", {}))
