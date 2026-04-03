@@ -2,7 +2,7 @@
   "bankrollInicial": 500,
   "localEdits": {
     "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
-      "apostada": false,
+      "apostada": true,
       "oddReal": "",
       "stakeReal": "5"
     },
@@ -30,8 +30,33 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-03T09:46:54.447062+00:00"
+  "updatedAt": "2026-04-03T09:47:11.010899+00:00"
 }
