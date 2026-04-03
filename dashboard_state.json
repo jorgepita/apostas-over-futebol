@@ -100,8 +100,43 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|Bayer Leverkusen vs VfL Wolfsburg|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|2. Bundesliga|Eintracht Braunschweig vs 1. FC Nürnberg|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-03T10:33:01.582196+00:00"
+  "updatedAt": "2026-04-03T12:54:30.972583+00:00"
 }
