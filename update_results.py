@@ -27,7 +27,20 @@ LEAGUE_CODE_MAP = {
     "Premier League": "PL",
     "Primeira Liga": "PPL",
     "Bundesliga": "BL1",
+    "La Liga": "PD",
+    "Ligue 1": "FL1",
+    "Serie A": "SA",
+    "Eredivisie": "DED",
+    "Championship": "ELC",
+    "2. Bundesliga": "BL2",
+    "Serie B": "SB",
+    "Ligue 2": "FL2",
+    "Belgian Pro League": "BSA",
+    "Süper Lig": "PPL",  # fallback temporário inválido removido depois abaixo
 }
+
+# remover fallback errado, para não causar pedidos inválidos
+LEAGUE_CODE_MAP.pop("Süper Lig", None)
 
 
 # =============================
@@ -35,7 +48,10 @@ LEAGUE_CODE_MAP = {
 # =============================
 def parse_float(v, default=0.0) -> float:
     try:
-        return float(str(v).replace(",", "."))
+        s = str(v).strip().replace(",", ".")
+        if s == "":
+            return float(default)
+        return float(s)
     except Exception:
         return float(default)
 
@@ -44,7 +60,8 @@ def normalize_text(s: str) -> str:
     s = str(s).strip().lower()
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
     s = s.replace("&", " and ")
-    s = re.sub(r"\b(fc|cf|sc|sv|afc|sad|club|deportivo|futebol)\b", " ", s)
+    s = s.replace("-", " ")
+    s = re.sub(r"\b(fc|cf|sc|sv|afc|sad|club|deportivo|futebol|football|calcio|fk)\b", " ", s)
     s = re.sub(r"[^a-z0-9 ]+", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
@@ -62,6 +79,9 @@ def team_match_score(a: str, b: str) -> int:
     na = normalize_text(a)
     nb = normalize_text(b)
 
+    if not na or not nb:
+        return 0
+
     if na == nb:
         return 100
 
@@ -76,20 +96,46 @@ def team_match_score(a: str, b: str) -> int:
         return 0
 
     score = inter * 10
+
     if na in nb or nb in na:
         score += 20
+
+    # pequeno bónus para primeiro ou último token bater
+    try:
+        ta = na.split()
+        tb = nb.split()
+        if ta and tb and ta[0] == tb[0]:
+            score += 5
+        if ta and tb and ta[-1] == tb[-1]:
+            score += 5
+    except Exception:
+        pass
 
     return score
 
 
 def games_match(csv_home: str, csv_away: str, api_home: str, api_away: str) -> bool:
-    home_score = team_match_score(csv_home, api_home)
-    away_score = team_match_score(csv_away, api_away)
-    return home_score >= 10 and away_score >= 10
+    direct_home = team_match_score(csv_home, api_home)
+    direct_away = team_match_score(csv_away, api_away)
+
+    reverse_home = team_match_score(csv_home, api_away)
+    reverse_away = team_match_score(csv_away, api_home)
+
+    direct_ok = direct_home >= 10 and direct_away >= 10
+    reverse_ok = reverse_home >= 10 and reverse_away >= 10
+
+    if direct_ok and not reverse_ok:
+        return True
+    if reverse_ok and not direct_ok:
+        return False
+    if direct_ok and reverse_ok:
+        return (direct_home + direct_away) >= (reverse_home + reverse_away)
+
+    return False
 
 
 def market_result(market: str, home_goals: int, away_goals: int):
-    total = home_goals + away_goals
+    total = int(home_goals) + int(away_goals)
     m = str(market).strip().upper()
 
     if m == "O1.5":
@@ -100,6 +146,9 @@ def market_result(market: str, home_goals: int, away_goals: int):
 
     if m == "O3.5":
         return "W" if total >= 4 else "L"
+
+    if m == "BTTS":
+        return "W" if int(home_goals) >= 1 and int(away_goals) >= 1 else "L"
 
     return None
 
@@ -141,7 +190,7 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     for col in cols:
         if col not in df.columns:
             df[col] = ""
-    return df
+    return df[cols].copy()
 
 
 def safe_read_csv(path: Path) -> pd.DataFrame:
@@ -284,6 +333,10 @@ def update_dataframe(df: pd.DataFrame, label: str):
     updated = 0
     ignored = 0
     already_done = 0
+    unsupported_market = 0
+    missing_mapping = 0
+    no_match_found = 0
+    not_finished = 0
 
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
@@ -316,6 +369,7 @@ def update_dataframe(df: pd.DataFrame, label: str):
         league_code = LEAGUE_CODE_MAP.get(liga)
         if not league_code:
             print(f"[WARN] {label}: Liga sem mapping: {liga}")
+            missing_mapping += 1
             ignored += 1
             continue
 
@@ -338,22 +392,30 @@ def update_dataframe(df: pd.DataFrame, label: str):
         matches = matches_cache[cache_key]
 
         matched = None
+        best_score = -1
+
         for m in matches:
             api_home = m.get("homeTeam", {}).get("name", "")
             api_away = m.get("awayTeam", {}).get("name", "")
 
-            if games_match(home_csv, away_csv, api_home, api_away):
+            direct_home = team_match_score(home_csv, api_home)
+            direct_away = team_match_score(away_csv, api_away)
+            total_score = direct_home + direct_away
+
+            if games_match(home_csv, away_csv, api_home, api_away) and total_score > best_score:
                 matched = m
-                break
+                best_score = total_score
 
         if not matched:
             print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
+            no_match_found += 1
             ignored += 1
             continue
 
         status = str(matched.get("status", "")).upper()
         if status != "FINISHED":
             print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
+            not_finished += 1
             ignored += 1
             continue
 
@@ -370,6 +432,7 @@ def update_dataframe(df: pd.DataFrame, label: str):
         resultado = market_result(mercado, int(home_goals), int(away_goals))
         if resultado is None:
             print(f"[WARN] {label}: Mercado não suportado: {mercado}")
+            unsupported_market += 1
             ignored += 1
             continue
 
@@ -394,6 +457,13 @@ def update_dataframe(df: pd.DataFrame, label: str):
             f"=> {resultado} | Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
         )
 
+    print(
+        f"[DBG] {label} resumo -> "
+        f"updated={updated} | already_done={already_done} | ignored={ignored} | "
+        f"missing_mapping={missing_mapping} | unsupported_market={unsupported_market} | "
+        f"no_match_found={no_match_found} | not_finished={not_finished}"
+    )
+
     return df, updated, already_done, ignored
 
 
@@ -406,13 +476,13 @@ def main():
 
     daily_df = safe_read_csv(DAILY_FILE)
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
-    daily_df.to_csv(DAILY_FILE, index=False, sep=";")
+    daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
     print(f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}")
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
     history_df = safe_read_csv(HISTORY_FILE)
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
-    history_df.to_csv(HISTORY_FILE, index=False, sep=";")
+    history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
 
