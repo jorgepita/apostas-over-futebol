@@ -1,57 +1,12 @@
 {
   "bankrollInicial": 500,
   "localEdits": {
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "5"
+    },
     "2026-04-03|Championship|QPR vs Watford|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|2. Bundesliga|1. FC Magdeburg vs VfL Bochum|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -66,7 +21,22 @@
       "oddReal": "",
       "stakeReal": ""
     },
-    "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -76,12 +46,17 @@
       "oddReal": "",
       "stakeReal": ""
     },
-    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
+    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
       "apostada": true,
       "oddReal": "",
-      "stakeReal": "5"
+      "stakeReal": ""
     },
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -91,12 +66,37 @@
       "oddReal": "",
       "stakeReal": ""
     },
-    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
+    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
     },
-    "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
+    "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|2. Bundesliga|1. FC Magdeburg vs VfL Bochum|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -138,5 +138,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-03T12:55:36.860378+00:00"
+  "updatedAt": "2026-04-03T12:56:15.701833+00:00"
 }
