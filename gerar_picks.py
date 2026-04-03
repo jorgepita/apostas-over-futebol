@@ -12,8 +12,8 @@ BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 HISTORY_PATH = BASE / "picks_history.csv"
 
-DEFAULT_MAX_PICKS_PER_DAY = 6
-DEFAULT_MAX_PICKS_GLOBAL = 18
+DEFAULT_MAX_PICKS_PER_DAY = 12
+DEFAULT_MAX_PICKS_GLOBAL = 36
 
 
 # =============================
@@ -299,14 +299,22 @@ def build_message(rows: list[dict], titulo: str) -> str:
 
     def _sort_key(r: dict):
         try:
-            score = float(r.get("Score", 0.0) or 0.0)
-        except Exception:
-            score = 0.0
-        try:
             edge = float(r.get("Edge", 0.0) or 0.0)
         except Exception:
             edge = 0.0
-        return (str(r.get("Date", "")), -score, -edge, str(r.get("LeagueName", "")), str(r.get("HomeTeam", "")))
+        try:
+            kelly = float(r.get("KellyTrue", 0.0) or 0.0)
+        except Exception:
+            kelly = 0.0
+        try:
+            prob = float(r.get("ProbModel", 0.0) or 0.0)
+        except Exception:
+            prob = 0.0
+        try:
+            odd = float(r.get("Odd", 0.0) or 0.0)
+        except Exception:
+            odd = 0.0
+        return (str(r.get("Date", "")), -edge, -kelly, -prob, -odd, str(r.get("LeagueName", "")), str(r.get("HomeTeam", "")))
 
     rows_sorted = sorted(rows, key=_sort_key)
 
@@ -387,7 +395,73 @@ def get_market_thresholds(mode: str, market: str) -> dict:
 
 
 # =============================
-# Qualidade / score / correlação
+# Ranking limpo
+# =============================
+def add_rank_fields(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    df = df.copy()
+    for col in ["ProbModel", "ProbMarket", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal", "Odd"]:
+        if col not in df.columns:
+            df[col] = 0.0
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+
+    df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
+    return df
+
+
+def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    df = add_rank_fields(df.copy())
+    game_cols = ["Date", "League", "HomeTeam", "AwayTeam"]
+    keep_rows = []
+
+    for _, g in df.groupby(game_cols, dropna=False):
+        g = g.sort_values(
+            ["Edge", "KellyTrue", "ProbModel", "Odd"],
+            ascending=[False, False, False, False],
+        ).reset_index(drop=True)
+        keep_rows.append(g.iloc[0].to_dict())
+
+    out = pd.DataFrame(keep_rows)
+    out = out.sort_values(
+        ["Date", "Edge", "KellyTrue", "ProbModel", "Odd"],
+        ascending=[True, False, False, False, False],
+    ).reset_index(drop=True)
+    return out
+
+
+def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | None = None) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    df = add_rank_fields(df.copy())
+    kept = []
+
+    for _, group in df.groupby("Date", sort=True, dropna=False):
+        group_sorted = group.sort_values(
+            ["Edge", "KellyTrue", "ProbModel", "Odd"],
+            ascending=[False, False, False, False],
+        ).head(max_per_day)
+        kept.append(group_sorted)
+
+    out = pd.concat(kept, ignore_index=True) if kept else df.iloc[0:0].copy()
+    out = out.sort_values(
+        ["Date", "Edge", "KellyTrue", "ProbModel", "Odd"],
+        ascending=[True, False, False, False, False],
+    ).reset_index(drop=True)
+
+    if max_global is not None and max_global > 0:
+        out = out.head(max_global).copy()
+
+    return out
+
+
+# =============================
+# Qualidade / correlação
 # =============================
 def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     market = str(row.get("Market", "")).strip().upper()
@@ -423,73 +497,6 @@ def market_quality_filter(row: dict, mode: str = "normal") -> bool:
     return True
 
 
-def compute_pick_score(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = df.copy()
-    for col in ["ProbModel", "ProbMarket", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
-
-    df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
-    df["Score"] = (
-        (df["Edge"] * 100.0)
-        + (df["KellyTrue"] * 20.0)
-        + (df["ProbGap"] * 50.0)
-        + (df["LambdaTotal"] * 1.0)
-    )
-    return df
-
-
-def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = compute_pick_score(df.copy())
-    game_cols = ["Date", "League", "HomeTeam", "AwayTeam"]
-    keep_rows = []
-
-    for _, g in df.groupby(game_cols, dropna=False):
-        g = g.sort_values(
-            ["Score", "Edge", "KellyTrue", "ProbModel"],
-            ascending=[False, False, False, False],
-        ).reset_index(drop=True)
-        keep_rows.append(g.iloc[0].to_dict())
-
-    out = pd.DataFrame(keep_rows)
-    out = out.sort_values(
-        ["Date", "LeagueName", "HomeTeam", "AwayTeam", "Score"],
-        ascending=[True, True, True, True, False],
-    ).reset_index(drop=True)
-    return out
-
-
-def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | None = None) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = compute_pick_score(df.copy())
-    kept = []
-
-    for date_value, group in df.groupby("Date", sort=True, dropna=False):
-        group_sorted = group.sort_values(
-            ["Score", "Edge", "KellyTrue", "ProbModel"],
-            ascending=[False, False, False, False],
-        ).head(max_per_day)
-        kept.append(group_sorted)
-
-    out = pd.concat(kept, ignore_index=True) if kept else df.iloc[0:0].copy()
-    out = out.sort_values(
-        ["Date", "Score", "Edge", "KellyTrue", "ProbModel"],
-        ascending=[True, False, False, False, False],
-    ).reset_index(drop=True)
-
-    if max_global is not None and max_global > 0:
-        out = out.head(max_global).copy()
-
-    return out
-
-
 # =============================
 # Regras de mercado / stake
 # =============================
@@ -508,6 +515,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
     df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
     df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+    df["ProbModel"] = pd.to_numeric(df["ProbModel"], errors="coerce").fillna(0.0)
 
     df = df[df["Odd"] > 1.01].copy()
     df = df[df["Edge"].notna()].copy()
@@ -524,7 +532,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
-    df = compute_pick_score(df)
+    df = add_rank_fields(df)
     df = dedupe_correlated_picks(df)
     print(f"[DBG] {label}: após dedupe = {len(df)}")
 
@@ -570,7 +578,6 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
         "ProbGap": 3,
         "Edge": 4,
         "KellyTrue": 4,
-        "Score": 3,
         "StakeFracRaw": 4,
         "StakeFrac": 4,
         "Stake€": 2,
@@ -882,7 +889,7 @@ def main():
 
         combo = pd.concat([out25_final, out_btts_final], ignore_index=True) if (len(out25_final) or len(out_btts_final)) else pd.DataFrame()
         if not combo.empty:
-            combo = compute_pick_score(combo)
+            combo = add_rank_fields(combo)
             combo = limit_picks_per_day(
                 combo,
                 max_per_day=max_picks_per_day,
