@@ -383,26 +383,74 @@ def fetch_btts_odds_for_fixture_api_football(fixture_id: int) -> Optional[float]
     response = data.get("response", []) if isinstance(data, dict) else []
     best_btts = None
 
+    allowed_main_names = {
+        "both teams score",
+        "both teams to score",
+    }
+
+    blocked_terms = {
+        "first half",
+        "second half",
+        "1st half",
+        "2nd half",
+        "results/",
+        "result/",
+        "total goals/",
+        "total goals",
+    }
+
+    yes_labels = {"yes", "sim"}
+
     for item in response:
         bookmakers = item.get("bookmakers", []) or []
+
         for bm in bookmakers:
+            bm_name = str(bm.get("name", "")).strip()
             bets = bm.get("bets", []) or []
+
             for bet in bets:
-                bet_name = str(bet.get("name", "")).strip().lower()
+                raw_bet_name = str(bet.get("name", "")).strip()
+                bet_name = raw_bet_name.lower()
                 values = bet.get("values", []) or []
 
-                if "both teams" in bet_name and "score" in bet_name:
-                    for v in values:
-                        label = str(v.get("value", "")).strip().lower()
-                        odd = v.get("odd")
-                        try:
-                            odd = float(odd)
-                        except Exception:
-                            odd = None
+                if bet_name not in allowed_main_names:
+                    continue
 
-                        if label in {"yes", "sim"} and odd and odd > 1.01:
-                            if best_btts is None or odd > best_btts:
-                                best_btts = odd
+                if any(term in bet_name for term in blocked_terms):
+                    continue
+
+                for v in values:
+                    raw_label = str(v.get("value", "")).strip()
+                    label = raw_label.lower()
+                    odd = v.get("odd")
+
+                    try:
+                        odd = float(odd)
+                    except Exception:
+                        odd = None
+
+                    if label not in yes_labels:
+                        continue
+
+                    if odd is None or odd <= 1.01:
+                        continue
+
+                    if odd < 1.20 or odd > 3.50:
+                        print(
+                            f"[DBG] BTTS ignorado por faixa suspeita | "
+                            f"fixture={fixture_id} | bookmaker={bm_name} | "
+                            f"market={raw_bet_name} | label={raw_label} | odd={odd}"
+                        )
+                        continue
+
+                    print(
+                        f"[DBG] BTTS candidato | fixture={fixture_id} | "
+                        f"bookmaker={bm_name} | market={raw_bet_name} | "
+                        f"label={raw_label} | odd={odd}"
+                    )
+
+                    if best_btts is None or odd > best_btts:
+                        best_btts = odd
 
     return best_btts
 
