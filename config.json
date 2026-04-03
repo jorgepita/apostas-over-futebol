@@ -2,8 +2,8 @@
   "run": {
     "days_ahead": 2,
     "mode": "test",
-    "max_picks_per_day": 6,
-    "max_picks_global": 18
+    "max_picks_per_day": 12,
+    "max_picks_global": 36
   },
   "bankroll": {
     "over25": 500,
