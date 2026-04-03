@@ -65,8 +65,28 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-03T09:48:04.004539+00:00"
+  "updatedAt": "2026-04-03T10:14:00.868045+00:00"
 }
