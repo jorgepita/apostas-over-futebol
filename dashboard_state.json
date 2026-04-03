@@ -1,6 +1,17 @@
 {
-  "bankrollInicial": 1000,
-  "localEdits": {},
+  "bankrollInicial": 500,
+  "localEdits": {
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
+      "apostada": false,
+      "oddReal": "",
+      "stakeReal": "5"
+    },
+    "2026-04-03|Championship|QPR vs Watford|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    }
+  },
   "manualBets": [],
-  "updatedAt": "2026-04-03T01:03:07.399502+00:00"
+  "updatedAt": "2026-04-03T09:46:45.404058+00:00"
 }
