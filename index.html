@@ -186,6 +186,15 @@
       z-index: 1;
     }
 
+    .day-divider td {
+      background: #f8fafc;
+      color: var(--text);
+      font-weight: 700;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+    }
+
     .tag {
       display: inline-block;
       padding: 5px 10px;
@@ -645,7 +654,7 @@
           <div class="section-head">
             <div>
               <h2>Futebol</h2>
-              <p class="small">Fonte: picks_hoje_simplificado.csv</p>
+              <p class="small">Fonte: picks_hoje_simplificado.csv • agrupado por dia • ordenado por Data ↑, Edge% ↓ e Stake ↓</p>
             </div>
           </div>
 
@@ -654,7 +663,7 @@
               <thead>
                 <tr>
                   <th>Origem</th>
-                  <th>Data</th>
+                  <th>Data ↑</th>
                   <th>Liga</th>
                   <th>Jogo</th>
                   <th>Mercado</th>
@@ -678,7 +687,7 @@
           <div class="section-head">
             <div>
               <h2>Apostas manuais</h2>
-              <p class="small">Guardadas localmente neste browser.</p>
+              <p class="small">Guardadas localmente neste browser • agrupadas por dia.</p>
             </div>
           </div>
           <div style="overflow:auto;">
@@ -1024,6 +1033,54 @@
 
     function getHistoryRowsMerged() {
       return state.footballHistory.map(getRowWithLocalEdits);
+    }
+
+    function sortBotRowsForDisplay(rows) {
+      return [...rows].sort((a, b) => {
+        const ad = parseDateSafe(a['Data']);
+        const bd = parseDateSafe(b['Data']);
+        const at = ad ? ad.getTime() : 0;
+        const bt = bd ? bd.getTime() : 0;
+
+        if (at !== bt) return at - bt;
+
+        const aEdge = num(a['Edge%']) ?? -9999;
+        const bEdge = num(b['Edge%']) ?? -9999;
+        if (bEdge !== aEdge) return bEdge - aEdge;
+
+        const aStake = num(a['Stake€']) ?? -9999;
+        const bStake = num(b['Stake€']) ?? -9999;
+        if (bStake !== aStake) return bStake - aStake;
+
+        const aLeague = String(a['Liga'] || '');
+        const bLeague = String(b['Liga'] || '');
+        const leagueCmp = aLeague.localeCompare(bLeague, 'pt');
+        if (leagueCmp !== 0) return leagueCmp;
+
+        const aGame = String(a['Jogo'] || '');
+        const bGame = String(b['Jogo'] || '');
+        return aGame.localeCompare(bGame, 'pt');
+      });
+    }
+
+    function sortManualRowsForDisplay(rows) {
+      return [...rows].sort((a, b) => {
+        const ad = parseDateSafe(a.data);
+        const bd = parseDateSafe(b.data);
+        const at = ad ? ad.getTime() : 0;
+        const bt = bd ? bd.getTime() : 0;
+
+        if (at !== bt) return at - bt;
+
+        const aLiga = String(a.liga || '');
+        const bLiga = String(b.liga || '');
+        const ligaCmp = aLiga.localeCompare(bLiga, 'pt');
+        if (ligaCmp !== 0) return ligaCmp;
+
+        const aJogo = String(a.jogo || '');
+        const bJogo = String(b.jogo || '');
+        return aJogo.localeCompare(bJogo, 'pt');
+      });
     }
 
     function getResolvedHistory() {
@@ -1566,14 +1623,27 @@
 
     function renderFootball() {
       const filters = getGlobalFilters();
-      const rows = filterBotRows(getDailyRowsMerged(), filters);
+      const filteredRows = filterBotRows(getDailyRowsMerged(), filters);
+      const rows = sortBotRowsForDisplay(filteredRows);
 
-      document.getElementById('footballRows').innerHTML = rows.length ? rows.map(r => {
+      let lastDate = null;
+      const html = [];
+
+      rows.forEach(r => {
         const lucroModelo = num(r['Lucro€']);
         const lucroReal = r._lucroRealLocal;
         const checked = r._apostadaBool ? 'checked' : '';
 
-        return `
+        if (r['Data'] !== lastDate) {
+          lastDate = r['Data'];
+          html.push(`
+            <tr class="day-divider">
+              <td colspan="14">📅 ${escapeHtml(formatDatePt(r['Data']))}</td>
+            </tr>
+          `);
+        }
+
+        html.push(`
           <tr>
             <td><span class="tag source-bot">Bot</span></td>
             <td>${escapeHtml(r['Data'] || '—')}</td>
@@ -1614,19 +1684,34 @@
             <td class="mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
             <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
           </tr>
-        `;
-      }).join('') : `<tr><td colspan="14"><div class="empty">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>`;
+        `);
+      });
+
+      document.getElementById('footballRows').innerHTML = rows.length
+        ? html.join('')
+        : `<tr><td colspan="14"><div class="empty">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>`;
 
       bindBotTableControls();
     }
 
     function renderManualBets() {
       const filters = getGlobalFilters();
-      const rows = filterManualRows(getManualRowsMerged(), filters)
-        .sort((a, b) => String(b.data).localeCompare(String(a.data)));
+      const rows = sortManualRowsForDisplay(filterManualRows(getManualRowsMerged(), filters));
 
-      document.getElementById('manualRows').innerHTML = rows.length ? rows.map(b => {
-        return `
+      let lastDate = null;
+      const html = [];
+
+      rows.forEach(b => {
+        if (b.data !== lastDate) {
+          lastDate = b.data;
+          html.push(`
+            <tr class="day-divider">
+              <td colspan="12">📅 ${escapeHtml(formatDatePt(b.data))}</td>
+            </tr>
+          `);
+        }
+
+        html.push(`
           <tr>
             <td><span class="tag source-manual">Manual</span></td>
             <td><span class="tag exec-yes">Sim</span></td>
@@ -1650,8 +1735,12 @@
               <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
             </td>
           </tr>
-        `;
-      }).join('') : `<tr><td colspan="12"><div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>`;
+        `);
+      });
+
+      document.getElementById('manualRows').innerHTML = rows.length
+        ? html.join('')
+        : `<tr><td colspan="12"><div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>`;
 
       bindManualControls();
     }
