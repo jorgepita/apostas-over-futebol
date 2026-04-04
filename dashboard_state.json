@@ -4,13 +4,13 @@
     "2026-04-03|Championship|QPR vs Watford|BTTS": {
       "apostada": true,
       "oddReal": "",
-      "resultadoManual": "W",
+      "resultadoManual": "",
       "stakeReal": ""
     },
     "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
       "apostada": true,
       "oddReal": "",
-      "resultadoManual": "W",
+      "resultadoManual": "",
       "stakeReal": ""
     },
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
@@ -206,6 +206,18 @@
       "stakeReal": ""
     }
   },
-  "manualBets": [],
-  "updatedAt": "2026-04-04T19:21:56.455563+00:00"
+  "manualBets": [
+    {
+      "id": "manual_1775331413130_l2ks31",
+      "data": "2026-04-04",
+      "liga": "alemanha2",
+      "jogo": "sg dynamo dresden vs hertha bsc",
+      "mercado": "btts",
+      "odd": "1.53",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
+    }
+  ],
+  "updatedAt": "2026-04-04T19:36:56.331337+00:00"
 }
