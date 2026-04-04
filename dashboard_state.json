@@ -39,7 +39,7 @@
     },
     "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.65",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -75,5 +75,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:15:02.902998+00:00"
+  "updatedAt": "2026-04-04T15:15:09.989347+00:00"
 }
