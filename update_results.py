@@ -23,7 +23,6 @@ GITHUB_BRANCH = "main"
 REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
 
-# aliases -> código football-data.org
 LEAGUE_CODE_MAP = {
     "Premier League": "PL",
     "Primeira Liga": "PPL",
@@ -44,6 +43,17 @@ LEAGUE_CODE_MAP = {
 }
 
 SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
+
+CSV_COLUMNS = [
+    "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
+    "Apostada", "OddReal", "StakeReal€",
+    "Resultado", "Lucro€", "LucroReal€"
+]
+
+SYNC_RESULT_COLUMNS = [
+    "Apostada", "OddReal", "StakeReal€",
+    "Resultado", "Lucro€", "LucroReal€"
+]
 
 
 # =============================
@@ -187,40 +197,29 @@ def calc_real_profit(apostada: str, resultado: str, stake_real: float, odd_real:
 
 def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    cols = [
-        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-        "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€"
-    ]
-    for col in cols:
+    for col in CSV_COLUMNS:
         if col not in df.columns:
             df[col] = ""
-    return df[cols].copy()
+    return df[CSV_COLUMNS].fillna("").copy()
 
 
 def safe_read_csv(path: Path) -> pd.DataFrame:
-    cols = [
-        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-        "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€"
-    ]
-
     if not path.exists():
-        return pd.DataFrame(columns=cols)
+        return pd.DataFrame(columns=CSV_COLUMNS)
 
     try:
         if path.stat().st_size == 0:
-            return pd.DataFrame(columns=cols)
+            return pd.DataFrame(columns=CSV_COLUMNS)
 
         df = pd.read_csv(path, sep=";", dtype=str).fillna("")
         return ensure_columns(df)
 
     except pd.errors.EmptyDataError:
-        return pd.DataFrame(columns=cols)
+        return pd.DataFrame(columns=CSV_COLUMNS)
 
     except Exception as e:
         print(f"[WARN] Erro a ler {path.name}: {e}")
-        return pd.DataFrame(columns=cols)
+        return pd.DataFrame(columns=CSV_COLUMNS)
 
 
 def get_today_lisbon_iso() -> str:
@@ -236,6 +235,24 @@ def is_future_date(date_str: str, today_iso: str) -> bool:
         return pd.to_datetime(date_str, errors="coerce").date().isoformat() > today_iso
     except Exception:
         return False
+
+
+def make_row_key_from_values(data: str, liga: str, jogo: str, mercado: str) -> str:
+    return "||".join([
+        str(data or "").strip(),
+        str(liga or "").strip(),
+        str(jogo or "").strip(),
+        str(mercado or "").strip().upper(),
+    ])
+
+
+def make_row_key(row) -> str:
+    return make_row_key_from_values(
+        row.get("Data", ""),
+        row.get("Liga", ""),
+        row.get("Jogo", ""),
+        row.get("Mercado", ""),
+    )
 
 
 # =============================
@@ -340,6 +357,58 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
         msg,
     )
     print(f"GitHub: atualizado {remote_name}")
+
+
+# =============================
+# Sync history -> daily
+# =============================
+def sync_daily_from_history(daily_df: pd.DataFrame, history_df: pd.DataFrame):
+    daily_df = ensure_columns(daily_df)
+    history_df = ensure_columns(history_df)
+
+    history_map = {}
+    for _, row in history_df.iterrows():
+        key = make_row_key(row)
+        if not key.strip("|"):
+            continue
+        history_map[key] = row
+
+    synced = 0
+
+    for i, row in daily_df.iterrows():
+        key = make_row_key(row)
+        src = history_map.get(key)
+        if src is None:
+            continue
+
+        changed = False
+        for col in SYNC_RESULT_COLUMNS:
+            src_val = str(src.get(col, "")).strip()
+            dst_val = str(daily_df.at[i, col]).strip()
+
+            # copia sempre que history tiver valor e daily estiver diferente
+            if src_val != "" and src_val != dst_val:
+                daily_df.at[i, col] = src_val
+                changed = True
+
+        # se já houver resultado no history mas LucroReal€ estiver vazio, recalcula
+        resultado = str(daily_df.at[i, "Resultado"]).strip().upper()
+        if resultado in {"W", "L", "P"}:
+            lucro_real = calc_real_profit(
+                daily_df.at[i, "Apostada"],
+                resultado,
+                parse_float(daily_df.at[i, "StakeReal€"], 0.0),
+                parse_float(daily_df.at[i, "OddReal"], 0.0),
+            )
+            if lucro_real != "" and str(daily_df.at[i, "LucroReal€"]).strip() != lucro_real:
+                daily_df.at[i, "LucroReal€"] = lucro_real
+                changed = True
+
+        if changed:
+            synced += 1
+
+    print(f"[DBG] sync daily<-history: {synced} linhas sincronizadas")
+    return ensure_columns(daily_df), synced
 
 
 # =============================
@@ -523,7 +592,7 @@ def update_dataframe(df: pd.DataFrame, label: str):
         f"future_skipped={future_skipped} | api_403={api_403} | api_429={api_429} | api_other={api_other}"
     )
 
-    return df, updated, already_done, ignored
+    return ensure_columns(df), updated, already_done, ignored
 
 
 # =============================
@@ -533,17 +602,29 @@ def main():
     if not API_TOKEN:
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
+    # 1) Ler ambos
     daily_df = safe_read_csv(DAILY_FILE)
-    daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
-    daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
-    print(f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored}")
-    upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
-
     history_df = safe_read_csv(HISTORY_FILE)
+
+    # 2) Atualizar primeiro o history
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
+
+    # 3) Atualizar o daily por si mesmo
+    daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
+
+    # 4) Sincronizar daily com history
+    daily_df, d_synced = sync_daily_from_history(daily_df, history_df)
+    daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
+    print(
+        f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored} | "
+        f"sincronizados via history: {d_synced}"
+    )
+
+    # 5) Upload no fim, já com os dois coerentes
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
+    upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
 
 if __name__ == "__main__":
