@@ -1,6 +1,24 @@
 {
   "bankrollInicial": 500,
   "localEdits": {
+    "2026-04-03|Championship|QPR vs Watford|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -31,6 +49,18 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
       "apostada": true,
       "oddReal": "",
@@ -49,11 +79,23 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-04|LaLiga|Mallorca vs Real Madrid|BTTS": {
       "apostada": true,
       "oddReal": "1.70",
       "resultadoManual": "",
       "stakeReal": "7"
+    },
+    "2026-04-04|LaLiga|Mallorca vs Real Madrid|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
     },
     "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
       "apostada": true,
@@ -62,6 +104,12 @@
       "stakeReal": ""
     },
     "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
       "apostada": true,
       "oddReal": "",
       "resultadoManual": "",
@@ -156,56 +204,8 @@
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
-    },
-    "2026-04-03|Championship|QPR vs Watford|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-04|LaLiga|Mallorca vs Real Madrid|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:41:19.970294+00:00"
+  "updatedAt": "2026-04-04T17:17:57.068246+00:00"
 }
