@@ -111,12 +111,22 @@
       "oddReal": "",
       "stakeReal": ""
     },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
     "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
     },
     "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -146,12 +156,7 @@
       "oddReal": "",
       "stakeReal": ""
     },
-    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
-    },
-    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
+    "2026-04-06|Primeira Liga|Arouca vs Estoril|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
@@ -165,13 +170,20 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
-    },
-    "2026-04-06|Primeira Liga|Arouca vs Estoril|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": ""
     }
   },
-  "manualBets": [],
-  "updatedAt": "2026-04-04T05:51:01.185094+00:00"
+  "manualBets": [
+    {
+      "id": "manual_1775304354277_2mdh51",
+      "data": "2026-04-04",
+      "liga": "Liga Portugal Betclic",
+      "jogo": "Gil Vicente vs AFS",
+      "mercado": "O2.5",
+      "odd": "",
+      "stake": "",
+      "resultado": "",
+      "notas": ""
+    }
+  ],
+  "updatedAt": "2026-04-04T12:05:57.030209+00:00"
 }
