@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Apostas</title>
+
   <style>
     :root {
       --bg: #f8fafc;
@@ -12,222 +13,90 @@
       --muted: #475569;
       --line: #e2e8f0;
       --accent: #0f172a;
+
       --ok: #16a34a;
       --ok-bg: #ecfdf5;
+
       --bad: #dc2626;
       --bad-bg: #fef2f2;
+
       --warn: #b45309;
       --warn-bg: #fffbeb;
+
       --info: #2563eb;
       --info-bg: #eff6ff;
-      --manual: #6d28d9;
-      --manual-bg: #f5f3ff;
-      --general-line: #0f172a;
-      --session-line: #2563eb;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
     }
 
     .wrap {
-      max-width: 1540px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 20px;
     }
 
-    .hero, .card {
+    .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      border-radius: 20px;
+      padding: 18px;
     }
 
-    .hero {
-      padding: 24px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 18px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+    .grid {
+      display: grid;
+      gap: 12px;
     }
 
-    h1, h2, h3, p { margin: 0; }
-
-    .sub {
-      color: var(--muted);
-      margin-top: 8px;
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
     }
 
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
     }
 
-    .btn {
+    .stat {
       border: 1px solid var(--line);
-      background: white;
-      border-radius: 14px;
-      padding: 10px 14px;
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 600;
-      cursor: pointer;
-      font: inherit;
-      transition: all 0.18s ease;
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
     }
 
-    .btn.primary {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .btn.warn {
-      background: #fff7ed;
-      color: #9a3412;
-      border-color: #fed7aa;
-    }
-
-    .btn.danger {
-      background: #fef2f2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
-
-    .btn.apostas-neutral {
-      background: #f8fafc;
-      color: #475569;
-      border-color: #cbd5e1;
-    }
-
-    .btn.apostas-warn {
-      background: var(--warn-bg);
-      color: var(--warn);
-      border-color: #fcd34d;
-    }
-
-    .btn.apostas-info {
-      background: var(--info-bg);
-      color: var(--info);
-      border-color: #93c5fd;
-    }
-
-    .btn.apostas-good {
-      background: var(--ok-bg);
-      color: var(--ok);
-      border-color: #86efac;
-    }
-
-    .grid { display: grid; gap: 16px; }
-    .grid-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
-    .grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
-    .grid-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .grid-analytics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-streaks { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-
-    .stat { padding: 18px; }
-
-    .stat .label {
+    .label {
+      font-size: 12px;
       color: var(--muted);
-      font-size: 14px;
     }
 
-    .stat .value {
-      font-size: 28px;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-
-    .stat .note {
-      color: var(--muted);
-      font-size: 14px;
+    .value {
+      font-size: 22px;
+      font-weight: 800;
       margin-top: 6px;
     }
 
-    .section { padding: 20px; }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .subsection-title {
-      font-size: 14px;
-      font-weight: 700;
+    .note {
+      font-size: 12px;
       color: var(--muted);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
+      margin-top: 4px;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .decision-badge {
+      padding: 6px 10px;
       border-radius: 999px;
-      padding: 7px 12px;
-      background: #ecfdf5;
-      color: #166534;
-      font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
+      font-weight: 800;
     }
 
-    .pill.info {
-      background: var(--info-bg);
-      color: var(--info);
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .input, .select, .number, .textarea {
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: white;
-      min-width: 180px;
-      font: inherit;
-      width: 100%;
-    }
-
-    .number.small-input, .select.small-input {
-      min-width: 92px;
-      width: 92px;
-      padding: 8px 10px;
-      border-radius: 10px;
-    }
-
-    .check {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-
-    .field { display: grid; gap: 6px; }
-
-    .field label {
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .good { background: var(--ok-bg); color: var(--ok); }
+    .warn { background: var(--warn-bg); color: var(--warn); }
+    .bad { background: var(--bad-bg); color: var(--bad); }
+    .info { background: var(--info-bg); color: var(--info); }
 
     table {
       width: 100%;
@@ -235,546 +104,235 @@
     }
 
     th, td {
-      padding: 12px 10px;
+      padding: 10px;
       border-top: 1px solid var(--line);
-      text-align: left;
-      font-size: 14px;
-      vertical-align: top;
+      font-size: 13px;
     }
 
     th {
-      color: var(--muted);
-      font-weight: 600;
-      background: #fafafa;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    .day-divider td {
-      background: #f8fafc;
-      color: var(--text);
-      font-weight: 700;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      padding: 10px 12px;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .tag.source-bot {
-      background: var(--info-bg);
-      color: var(--info);
-    }
-
-    .tag.source-manual {
-      background: var(--manual-bg);
-      color: var(--manual);
-    }
-
-    .tag.exec-yes {
-      background: var(--ok-bg);
-      color: var(--ok);
-    }
-
-    .tag.exec-no {
-      background: #f8fafc;
-      color: #475569;
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-
-    .split {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    .small {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .item {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .item.compact {
-      padding: 12px;
-    }
-
-    .open-bet-grid {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .open-bet-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .open-bet-title {
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .open-bet-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .open-bet-values {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-      font-size: 13px;
-    }
-
-    .mobile-cards {
-      display: none;
-      gap: 12px;
-    }
-
-    .mobile-bet-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .mobile-bet-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .mobile-bet-title {
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-
-    .mobile-bet-sub {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .mobile-bet-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .mobile-bet-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .mobile-bet-cell {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px;
+      text-align: left;
       background: #fafafa;
     }
 
-    .mobile-bet-cell .k {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .mobile-bet-cell .v {
-      font-size: 14px;
+    .mini {
+      font-size: 11px;
       font-weight: 700;
-    }
-
-    .mobile-bet-actions {
-      display: grid;
-      gap: 10px;
-    }
-
-    .mobile-inline {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .mobile-inline-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-
-    .empty {
-      padding: 18px;
-      border: 1px dashed var(--line);
-      border-radius: 16px;
-      color: var(--muted);
-    }
-
-    .result-badge {
-      display: inline-block;
-      padding: 6px 10px;
+      padding: 4px 6px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
     }
 
-    .result-win { background: var(--ok-bg); color: var(--ok); }
-    .result-loss { background: var(--bad-bg); color: var(--bad); }
-    .result-pending { background: var(--warn-bg); color: var(--warn); }
-    .result-push { background: #f8fafc; color: #334155; }
-
-    .profit-pos { color: var(--ok); font-weight: 700; }
-    .profit-neg { color: var(--bad); font-weight: 700; }
-
-    .chart-wrap {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .chart-legend {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .legend-item {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .legend-line {
-      width: 22px;
-      height: 3px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-    canvas {
-      width: 100%;
-      max-width: 100%;
-      height: 320px;
-      display: block;
-    }
-
-    .control-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .inline-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 10px;
-      width: 100%;
-    }
-
-    .analytics-table-wrap {
-      overflow: auto;
-      max-height: 420px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .mobile-priority {
-      display: none;
-    }
-
-    @media (max-width: 1400px) {
-      .grid-8, .grid-6, .grid-4, .open-bet-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .grid-2, .grid-form, .filters-grid, .grid-analytics, .grid-streaks {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .grid-8, .grid-6, .grid-4, .open-bet-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .wrap { padding: 14px; }
-      .hero, .section, .stat { padding: 16px; }
-      th, td { font-size: 13px; }
-      canvas { height: 260px; }
-
-      .number.small-input, .select.small-input {
-        min-width: 82px;
-        width: 82px;
-      }
-
-      .mobile-priority {
-        display: block;
-      }
-
-      .desktop-secondary {
-        display: none;
-      }
-
-      .desktop-table-wrap {
-        display: none;
-      }
-
-      .mobile-cards {
-        display: grid;
-      }
-
-      .mobile-inline-3 {
+    @media (max-width: 900px) {
+      .grid-3, .grid-4 {
         grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
-<body>
+  <body>
   <div class="wrap">
-    <div class="hero">
-      <div>
-        <p class="small">Projeto Apostas Bot</p>
-        <h1>Dashboard GitHub Pages</h1>
-        <p class="sub">Modelo vs execução real, com apostas manuais, analytics, streaks e sync cloud.</p>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="refreshBtn">Atualizar agora</button>
-        <a class="btn primary" href="apostas.html" id="btnApostas">🔥 Apostas do dia</a>
-        <button class="btn" id="loadCloudBtn">Carregar cloud</button>
-        <button class="btn primary" id="saveCloudBtn">Guardar cloud</button>
-        <button class="btn warn" id="resetLocalBtn">Limpar controlos locais</button>
-        <button class="btn danger" id="clearManualBtn">Apagar apostas manuais</button>
-        <button class="btn" id="exportManualBtn">Exportar manuais JSON</button>
-        <button class="btn" id="importManualBtn">Importar manuais JSON</button>
-        <button class="btn" id="exportRealCsvBtn">Exportar CSV real</button>
-        <a class="btn" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
-        <span class="pill info" id="sessionLabel">Sessão atual: —</span>
-      </div>
-      <input id="importManualFile" class="hidden" type="file" accept=".json,application/json" />
-    </div>
-
-    <div class="card section mobile-priority" style="margin-bottom:16px;">
-      <div class="section-head">
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
         <div>
-          <h2>📱 Cockpit rápido</h2>
-          <p class="small">Para decidir no telemóvel em segundos.</p>
+          <div class="label">Projeto Apostas Bot</div>
+          <div class="value" style="font-size:30px;">Dashboard GitHub Pages</div>
+          <div class="note">Modelo vs execução real, com modo decisão, alertas automáticos e stake dinâmica.</div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button id="refreshBtn">Atualizar agora</button>
+          <a href="apostas.html" id="btnApostas">Apostas do dia</a>
+          <button id="loadCloudBtn">Carregar cloud</button>
+          <button id="saveCloudBtn">Guardar cloud</button>
+          <button id="resetLocalBtn">Limpar controlos locais</button>
+          <button id="clearManualBtn">Apagar manuais</button>
+          <button id="exportManualBtn">Exportar manuais</button>
+          <button id="importManualBtn">Importar manuais</button>
+          <button id="exportRealCsvBtn">Exportar CSV real</button>
+          <a href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
         </div>
       </div>
-      <div class="grid grid-4" id="mobileStats"></div>
+
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
+        <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
+      </div>
+
+      <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
     </div>
 
-    <div class="card section" style="margin-bottom:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Controlos locais</h2>
-          <p class="small">Guardados neste browser.</p>
-        </div>
-        <div class="toolbar">
-          <div class="control-box">
-            <label class="small" for="bankrollInput">Banca inicial</label>
-            <input id="bankrollInput" class="number" type="number" step="0.01" min="0" value="1000" />
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+          <div>
+            <div class="label">Modo decisão</div>
+            <div class="value" id="decisionModeValue">A analisar…</div>
           </div>
+          <span class="decision-badge info" id="decisionBadge">Neutro</span>
         </div>
+        <div class="note" id="decisionModeNote" style="margin-top:10px;">A aguardar cálculo do estado atual.</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+          <div>
+            <div class="label">Alertas automáticos</div>
+            <div class="value" id="autoAlertsValue">0 ativos</div>
+          </div>
+          <span class="decision-badge info" id="alertsBadge">OK</span>
+        </div>
+        <div class="note" id="autoAlertsNote" style="margin-top:10px;">Sem alertas relevantes neste momento.</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+          <div>
+            <div class="label">Stake dinâmica</div>
+            <div class="value" id="dynamicStakeValue">Normal</div>
+          </div>
+          <span class="decision-badge info" id="dynamicStakeBadge">x1.00</span>
+        </div>
+        <div class="note" id="dynamicStakeNote" style="margin-top:10px;">Sem ajuste automático.</div>
       </div>
     </div>
 
-    <div class="card section" style="margin-bottom:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Filtros globais</h2>
-          <p class="small">Aplicados às picks do bot e às apostas manuais.</p>
-        </div>
+    <div class="grid grid-4" style="margin-bottom:16px;">
+      <div class="stat">
+        <div class="label">Banca inicial</div>
+        <div class="value" id="bankrollLabelTop">€1000.00</div>
+        <div class="note">Base usada nos cálculos</div>
       </div>
 
-      <div class="filters-grid">
-        <input id="searchGlobal" class="input" placeholder="Pesquisar jogo, liga ou mercado" />
+      <div class="stat">
+        <div class="label">Banca atual</div>
+        <div class="value" id="currentBankrollTop">€—</div>
+        <div class="note">Resultado real fechado</div>
+      </div>
 
-        <select id="sourceFilter" class="select">
-          <option value="">Todas as origens</option>
-          <option value="bot">Só bot</option>
-          <option value="manual">Só manuais</option>
-        </select>
+      <div class="stat">
+        <div class="label">Exposição aberta</div>
+        <div class="value" id="openExposureTop">€—</div>
+        <div class="note">Stake em aberto</div>
+      </div>
 
-        <select id="leagueFilter" class="select">
-          <option value="">Todas as ligas</option>
-        </select>
-
-        <select id="marketFilter" class="select">
-          <option value="">Todos os mercados</option>
-        </select>
-
-        <select id="resultFilter" class="select">
-          <option value="">Todos os resultados</option>
-          <option value="pending">Pendentes</option>
-          <option value="W">Win</option>
-          <option value="L">Loss</option>
-          <option value="P">Push</option>
-        </select>
-
-        <select id="executionFilter" class="select">
-          <option value="">Toda a execução</option>
-          <option value="executed">Executadas</option>
-          <option value="not_executed">Não executadas</option>
-        </select>
-
-        <select id="dateFilter" class="select">
-          <option value="">Todas as datas</option>
-          <option value="today">Hoje</option>
-          <option value="7">Últimos 7 dias</option>
-          <option value="30">Últimos 30 dias</option>
-        </select>
+      <div class="stat">
+        <div class="label">Disponível</div>
+        <div class="value" id="availableBankrollTop">€—</div>
+        <div class="note">Banca após abertas</div>
       </div>
     </div>
 
-    <div class="card section" style="margin-bottom:16px;">
-      <div class="section-head">
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Controlos locais</div>
+      <div class="note" style="margin-bottom:12px;">Guardados neste browser.</div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
         <div>
-          <h2>Estado de risco</h2>
-          <p class="small">Visão rápida para decidir se segues ou não novas picks.</p>
+          <label class="label" for="bankrollInput">Banca inicial</label>
+          <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
-      </div>
-      <div class="grid grid-4" id="riskStats"></div>
-    </div>
 
-    <div class="card section" style="margin-bottom:16px;">
-      <div class="section-head">
         <div>
-          <h2>Apostas em aberto</h2>
-          <p class="small">Executadas, ainda sem resultado final.</p>
+          <label class="label" for="searchGlobal">Pesquisar</label>
+          <input id="searchGlobal" type="text" placeholder="Jogo, liga ou mercado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
-      </div>
-      <div id="openBetsWrap" class="open-bet-grid"></div>
-    </div>
 
-    <div class="card section desktop-secondary" style="margin-bottom:16px;">
-      <div class="section-head">
         <div>
-          <h2>Operacional</h2>
-          <p class="small">Estado do fluxo do bot e da execução.</p>
+          <label class="label" for="sourceFilter">Origem</label>
+          <select id="sourceFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Todas</option>
+            <option value="bot">Só bot</option>
+            <option value="manual">Só manuais</option>
+          </select>
         </div>
-      </div>
-      <div class="grid grid-4" id="operationalStats"></div>
-    </div>
 
-    <div class="card section desktop-secondary" style="margin-bottom:16px;">
-      <div class="section-head">
         <div>
-          <h2>Sessão atual vs Geral</h2>
-          <p class="small">A sessão atual começa na data definida no reset. O geral mostra o histórico ativo carregado.</p>
+          <label class="label" for="dateFilter">Data</label>
+          <select id="dateFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Todas</option>
+            <option value="today">Hoje</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+          </select>
         </div>
-      </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="subsection-title">Sessão atual</div>
-        <div class="grid grid-4" id="sessionStats"></div>
-      </div>
-
-      <div>
-        <div class="subsection-title">Geral</div>
-        <div class="grid grid-4" id="generalStats"></div>
-      </div>
-    </div>
-
-    <div class="card section desktop-secondary" style="margin-bottom:16px;">
-      <div class="section-head">
         <div>
-          <h2>Modelo vs Real</h2>
-          <p class="small">Separação clara entre desempenho teórico do modelo e execução real.</p>
+          <label class="label" for="leagueFilter">Liga</label>
+          <select id="leagueFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Todas as ligas</option>
+          </select>
         </div>
-      </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="subsection-title">Modelo</div>
-        <div class="grid grid-4" id="modelStats"></div>
-      </div>
-
-      <div>
-        <div class="subsection-title">Execução real</div>
-        <div class="grid grid-4" id="realStats"></div>
-      </div>
-    </div>
-
-    <div class="card section" style="margin-top:16px;">
-      <div class="section-head">
         <div>
-          <h2>Evolução da banca real</h2>
-          <p class="small">Linha geral + linha da sessão atual.</p>
+          <label class="label" for="marketFilter">Mercado</label>
+          <select id="marketFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Todos os mercados</option>
+          </select>
         </div>
-        <span class="pill" id="bankrollLabel">Banca inicial: €1000.00</span>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-legend">
-          <span class="legend-item">
-            <span class="legend-line" style="background: var(--general-line);"></span>
-            Geral
-          </span>
-          <span class="legend-item">
-            <span class="legend-line" style="background: var(--session-line);"></span>
-            Sessão atual
-          </span>
+
+        <div>
+          <label class="label" for="resultFilter">Resultado</label>
+          <select id="resultFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Todos</option>
+            <option value="pending">Pendentes</option>
+            <option value="W">Win</option>
+            <option value="L">Loss</option>
+            <option value="P">Push</option>
+          </select>
         </div>
-        <canvas id="bankrollChart" width="1200" height="320"></canvas>
+
+        <div>
+          <label class="label" for="executionFilter">Execução</label>
+          <select id="executionFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+            <option value="">Toda</option>
+            <option value="executed">Executadas</option>
+            <option value="not_executed">Não executadas</option>
+          </select>
+        </div>
       </div>
     </div>
-
-    <div class="card section" style="margin-top:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Picks do dia (bot)</h2>
-          <p class="small">Fonte: picks_hoje_simplificado.csv • foco na execução das picks novas.</p>
-        </div>
+        <div class="grid grid-4" style="margin-bottom:16px;">
+      <div class="stat">
+        <div class="label">Picks do dia</div>
+        <div class="value" id="dailyCountStat">0</div>
+        <div class="note">CSV diário do bot</div>
       </div>
 
-      <div class="desktop-table-wrap" style="overflow:auto;">
+      <div class="stat">
+        <div class="label">Executadas</div>
+        <div class="value" id="executedCountStat">0</div>
+        <div class="note">Marcadas como apostadas</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Não executadas</div>
+        <div class="value" id="notExecutedCountStat">0</div>
+        <div class="note">Ficaram de fora</div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Taxa de execução</div>
+        <div class="value" id="executionRateStat">0%</div>
+        <div class="note">Bot histórico ativo</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Centro de alertas</div>
+      <div class="note" style="margin-bottom:12px;">Leitura consolidada do estado atual.</div>
+      <div id="alertsCenter" class="grid"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Apostas em aberto</div>
+      <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
+      <div id="openBetsWrap" class="grid"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Picks do dia (bot)</div>
+      <div class="note" style="margin-bottom:12px;">Com stake recomendada, score e sinais por pick.</div>
+
+      <div style="overflow:auto;">
         <table>
           <thead>
             <tr>
@@ -784,7 +342,10 @@
               <th>Jogo</th>
               <th>Mercado</th>
               <th>Odd</th>
-              <th>Stake</th>
+              <th>Stake mod.</th>
+              <th>Stake rec.</th>
+              <th>Score</th>
+              <th>Sinais</th>
               <th>Executada</th>
               <th>Marcar</th>
               <th>Odd real</th>
@@ -797,19 +358,13 @@
           <tbody id="footballRows"></tbody>
         </table>
       </div>
-
-      <div class="mobile-cards" id="footballCards"></div>
     </div>
 
-    <div class="card section" style="margin-top:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Histórico / pendentes do bot</h2>
-          <p class="small">Fonte: picks_history.csv • aqui aparecem também as apostas de ontem e anteriores.</p>
-        </div>
-      </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Histórico / pendentes do bot</div>
+      <div class="note" style="margin-bottom:12px;">Inclui picks anteriores ainda úteis para análise e execução.</div>
 
-      <div class="desktop-table-wrap" style="overflow:auto;">
+      <div style="overflow:auto;">
         <table>
           <thead>
             <tr>
@@ -819,7 +374,10 @@
               <th>Jogo</th>
               <th>Mercado</th>
               <th>Odd</th>
-              <th>Stake</th>
+              <th>Stake mod.</th>
+              <th>Stake rec.</th>
+              <th>Score</th>
+              <th>Sinais</th>
               <th>Executada</th>
               <th>Marcar</th>
               <th>Odd real</th>
@@ -832,1756 +390,1413 @@
           <tbody id="historyRows"></tbody>
         </table>
       </div>
-
-      <div class="mobile-cards" id="historyCards"></div>
     </div>
 
-    <div class="card section" style="margin-top:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Analytics</h2>
-          <p class="small">Calculados com base nos filtros atuais e apenas em apostas reais fechadas.</p>
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="label">Resumo rápido</div>
+        <div class="note" style="margin-bottom:12px;">Sessão, risco e execução.</div>
+        <div id="summaryList" class="grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="label">Analytics por liga</div>
+        <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
+        <div style="overflow:auto;max-height:360px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Liga</th>
+                <th>Apostas</th>
+                <th>W</th>
+                <th>L</th>
+                <th>P</th>
+                <th>WR</th>
+                <th>Stake</th>
+                <th>Lucro</th>
+                <th>ROI</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsLeagueRows"></tbody>
+          </table>
         </div>
       </div>
 
-      <div class="grid grid-streaks" style="margin-bottom:16px;" id="streakCards"></div>
-
-      <div class="grid grid-analytics">
-        <div class="card section" style="padding:16px;">
-          <div class="section-head">
-            <div>
-              <h3>Por liga</h3>
-              <p class="small">ROI e lucro por competição</p>
-            </div>
-          </div>
-          <div class="analytics-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Liga</th>
-                  <th>Apostas</th>
-                  <th>W</th>
-                  <th>L</th>
-                  <th>P</th>
-                  <th>WR</th>
-                  <th>Stake</th>
-                  <th>Lucro</th>
-                  <th>ROI</th>
-                </tr>
-              </thead>
-              <tbody id="analyticsLeagueRows"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card section" style="padding:16px;">
-          <div class="section-head">
-            <div>
-              <h3>Por mercado</h3>
-              <p class="small">Onde estás a performar melhor</p>
-            </div>
-          </div>
-          <div class="analytics-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Mercado</th>
-                  <th>Apostas</th>
-                  <th>W</th>
-                  <th>L</th>
-                  <th>P</th>
-                  <th>WR</th>
-                  <th>Stake</th>
-                  <th>Lucro</th>
-                  <th>ROI</th>
-                </tr>
-              </thead>
-              <tbody id="analyticsMarketRows"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card section" style="padding:16px;">
-          <div class="section-head">
-            <div>
-              <h3>Por origem</h3>
-              <p class="small">Bot vs manual</p>
-            </div>
-          </div>
-          <div class="analytics-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Origem</th>
-                  <th>Apostas</th>
-                  <th>W</th>
-                  <th>L</th>
-                  <th>P</th>
-                  <th>WR</th>
-                  <th>Stake</th>
-                  <th>Lucro</th>
-                  <th>ROI</th>
-                </tr>
-              </thead>
-              <tbody id="analyticsSourceRows"></tbody>
-            </table>
-          </div>
+      <div class="card">
+        <div class="label">Analytics por mercado</div>
+        <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
+        <div style="overflow:auto;max-height:360px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Mercado</th>
+                <th>Apostas</th>
+                <th>W</th>
+                <th>L</th>
+                <th>P</th>
+                <th>WR</th>
+                <th>Stake</th>
+                <th>Lucro</th>
+                <th>ROI</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsMarketRows"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="card section" style="margin-top:16px;">
-      <div class="section-head">
-        <div>
-          <h2>Adicionar aposta manual</h2>
-          <p class="small">Para jogos/mercados que não fazem parte das picks geradas.</p>
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="label">Analytics por origem</div>
+        <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
+        <div style="overflow:auto;max-height:360px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Origem</th>
+                <th>Apostas</th>
+                <th>W</th>
+                <th>L</th>
+                <th>P</th>
+                <th>WR</th>
+                <th>Stake</th>
+                <th>Lucro</th>
+                <th>ROI</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsSourceRows"></tbody>
+          </table>
         </div>
       </div>
 
-      <div class="grid grid-form">
-        <div class="field">
-          <label for="manualData">Data</label>
-          <input id="manualData" class="input" type="date" />
+      <div class="card">
+        <div class="label">Streaks</div>
+        <div class="note" style="margin-bottom:12px;">Sequências reais com base nos filtros atuais.</div>
+        <div id="streakCards" class="grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="label">NBA</div>
+        <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
+        <div style="overflow:auto;max-height:360px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Jogo</th>
+                <th>Mercado</th>
+                <th>Linha</th>
+                <th>Odd</th>
+                <th>Stake€</th>
+              </tr>
+            </thead>
+            <tbody id="nbaRows"></tbody>
+          </table>
         </div>
-        <div class="field">
-          <label for="manualLiga">Liga</label>
-          <input id="manualLiga" class="input" type="text" placeholder="Ex: Premier League" />
-        </div>
-        <div class="field">
-          <label for="manualJogo">Jogo</label>
-          <input id="manualJogo" class="input" type="text" placeholder="Ex: Benfica vs Porto" />
-        </div>
-        <div class="field">
-          <label for="manualMercado">Mercado</label>
-          <input id="manualMercado" class="input" type="text" placeholder="Ex: BTTS, AH -0.5, O2.5" />
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Adicionar aposta manual</div>
+      <div class="note" style="margin-bottom:12px;">Para jogos ou mercados fora das picks geradas.</div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
+        <div>
+          <label class="label" for="manualData">Data</label>
+          <input id="manualData" type="date" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
 
-        <div class="field">
-          <label for="manualOdd">Odd</label>
-          <input id="manualOdd" class="number" type="number" step="0.01" min="1" placeholder="1.90" />
+        <div>
+          <label class="label" for="manualLiga">Liga</label>
+          <input id="manualLiga" type="text" placeholder="Premier League" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
-        <div class="field">
-          <label for="manualStake">Stake</label>
-          <input id="manualStake" class="number" type="number" step="0.01" min="0" placeholder="10" />
+
+        <div>
+          <label class="label" for="manualJogo">Jogo</label>
+          <input id="manualJogo" type="text" placeholder="Benfica vs Porto" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
-        <div class="field">
-          <label for="manualResultado">Resultado</label>
-          <select id="manualResultado" class="select">
+
+        <div>
+          <label class="label" for="manualMercado">Mercado</label>
+          <input id="manualMercado" type="text" placeholder="BTTS, AH -0.5, O2.5" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        </div>
+
+        <div>
+          <label class="label" for="manualOdd">Odd</label>
+          <input id="manualOdd" type="number" step="0.01" min="1" placeholder="1.90" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        </div>
+
+        <div>
+          <label class="label" for="manualStake">Stake</label>
+          <input id="manualStake" type="number" step="0.01" min="0" placeholder="10" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        </div>
+
+        <div>
+          <label class="label" for="manualResultado">Resultado</label>
+          <select id="manualResultado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
             <option value="">Pendente</option>
             <option value="W">Win</option>
             <option value="L">Loss</option>
             <option value="P">Push</option>
           </select>
         </div>
-        <div class="field">
-          <label for="manualNotas">Notas</label>
-          <input id="manualNotas" class="input" type="text" placeholder="Opcional" />
+
+        <div>
+          <label class="label" for="manualNotas">Notas</label>
+          <input id="manualNotas" type="text" placeholder="Opcional" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
         </div>
       </div>
 
-      <div class="inline-actions" style="margin-top:14px;">
-        <button class="btn primary" id="addManualBetBtn">Adicionar aposta manual</button>
+      <div style="margin-top:12px;">
+        <button id="addManualBetBtn">Adicionar aposta manual</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="label">Apostas manuais</div>
+      <div class="note" style="margin-bottom:12px;">Guardadas localmente neste browser.</div>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Origem</th>
+              <th>Data</th>
+              <th>Liga</th>
+              <th>Jogo</th>
+              <th>Mercado</th>
+              <th>Odd</th>
+              <th>Stake</th>
+              <th>Resultado</th>
+              <th>Lucro</th>
+              <th>Notas</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="manualRows"></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="grid grid-2" style="margin-top:16px; align-items:start;">
-      <div class="split">
-        <div class="card section">
-          <div class="section-head">
-            <div>
-              <h2>Apostas manuais</h2>
-              <p class="small">Guardadas localmente neste browser • agrupadas por dia.</p>
-            </div>
-          </div>
-
-          <div class="desktop-table-wrap" style="overflow:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Origem</th>
-                  <th>Executada</th>
-                  <th>Data</th>
-                  <th>Liga</th>
-                  <th>Jogo</th>
-                  <th>Mercado</th>
-                  <th>Odd</th>
-                  <th>Stake</th>
-                  <th>Resultado</th>
-                  <th>Lucro</th>
-                  <th>Notas</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="manualRows"></tbody>
-            </table>
-          </div>
-
-          <div class="mobile-cards" id="manualCards"></div>
-        </div>
-      </div>
-
-      <div class="split">
-        <div class="card section desktop-secondary">
-          <div class="section-head">
-            <div>
-              <h2>NBA</h2>
-              <p class="small">Fonte: picks_nba_over.csv</p>
-            </div>
-            <span class="pill">Atualização automática</span>
-          </div>
-          <div style="overflow:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Jogo</th>
-                  <th>Mercado</th>
-                  <th>Linha</th>
-                  <th>Odd</th>
-                  <th>Stake€</th>
-                </tr>
-              </thead>
-              <tbody id="nbaRows"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card section">
-          <div class="section-head">
-            <div>
-              <h2>Resumo rápido</h2>
-              <p class="small">Sessão atual + geral + modelo vs real</p>
-            </div>
-          </div>
-          <div class="list" id="summaryList"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const URLS = {
-      footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
-      footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
-      nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
-    };
-
-    const STORAGE_KEYS = {
-      bankroll: 'apostas_bot_bankroll_inicial',
-      picks: 'apostas_bot_local_edits_v3',
-      manual: 'apostas_bot_manual_bets_v1',
-      sessionStartDate: 'apostas_bot_session_start_date_v1'
-    };
-
-    const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
-
-    let autoSaveTimer = null;
-    let autoSaveEnabled = true;
-    let autoSaveInFlight = false;
-    let hasPendingCloudChanges = false;
-
-    const state = {
-      footballDaily: [],
-      footballHistory: [],
-      nba: [],
-      lastUpdated: null,
-      bankrollInicial: 1000,
-      localEdits: {},
-      manualBets: [],
-      sessionStartDate: ''
-    };
-
-    function parseSemicolonCsv(text) {
-      const trimmed = (text || '').trim();
-      if (!trimmed) return [];
-      const lines = trimmed.split(/\r?\n/).filter(Boolean);
-      if (!lines.length) return [];
-      const headers = lines[0].split(';').map(h => h.trim());
-
-      return lines.slice(1).map(line => {
-        const values = line.split(';');
-        const row = {};
-        headers.forEach((h, i) => row[h] = (values[i] ?? '').trim());
-        return row;
-      });
-    }
-
-    function num(v) {
-      const n = Number(String(v).replace(',', '.'));
-      return Number.isFinite(n) ? n : null;
-    }
-
-    function sum(arr) {
-      return arr
-        .filter(v => typeof v === 'number' && !Number.isNaN(v))
-        .reduce((a, b) => a + b, 0);
-    }
-
-    function fmt(n, d = 2) {
-      return Number.isFinite(n) ? n.toFixed(d) : '—';
-    }
-
-    function pct(n, d = 2) {
-      return Number.isFinite(n) ? `${n.toFixed(d)}%` : '—';
-    }
-
-    function normalizeDateString(value) {
-      const s = String(value || '').trim();
-      if (!s) return '';
-      const match = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (match) return s;
-      return '';
-    }
-
-    function parseDateSafe(value) {
-      const normalized = normalizeDateString(value);
-      if (!normalized) return null;
-      const d = new Date(normalized + 'T00:00:00');
-      return Number.isNaN(d.getTime()) ? null : d;
-    }
-
-    function todayIso() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function getSessionStartDate() {
-      const s = normalizeDateString(state.sessionStartDate);
-      return s || todayIso();
-    }
-
-    function isOnOrAfterSession(dateStr) {
-      const d = normalizeDateString(dateStr);
-      const session = getSessionStartDate();
-      if (!d) return false;
-      return d >= session;
-    }
-
-    function formatDatePt(dateStr) {
-      const d = parseDateSafe(dateStr);
-      if (!d) return '—';
-      return d.toLocaleDateString('pt-PT');
-    }
-
-    function isWithinLastDays(dateStr, days) {
-      const d = parseDateSafe(dateStr);
-      if (!d) return false;
-
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const minDate = new Date(today);
-      minDate.setDate(today.getDate() - (days - 1));
-
-      return d >= minDate && d <= today;
-    }
-
-    function isToday(dateStr) {
-      const d = parseDateSafe(dateStr);
-      if (!d) return false;
-
-      const now = new Date();
-      return (
-        d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate()
-      );
-    }
-
-    function resultLabel(r) {
-      const x = String(r || '').trim().toUpperCase();
-      if (x === 'W') return '<span class="result-badge result-win">🟢 Win</span>';
-      if (x === 'L') return '<span class="result-badge result-loss">🔴 Loss</span>';
-      if (x === 'P') return '<span class="result-badge result-push">⚪ Push</span>';
-      return '<span class="result-badge result-pending">🟡 Pendente</span>';
-    }
-
-    function resultKey(r) {
-      const x = String(r || '').trim().toUpperCase();
-      if (x === 'W' || x === 'L' || x === 'P') return x;
-      return 'pending';
-    }
-
-    function profitClass(v) {
-      if (v > 0) return 'profit-pos';
-      if (v < 0) return 'profit-neg';
-      return '';
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function makePickKey(row) {
-      return [
-        row['Data'] || '',
-        row['Liga'] || '',
-        row['Jogo'] || '',
-        row['Mercado'] || ''
-      ].join('|');
-    }
-
-    function makeManualId() {
-      return `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    }
-
-    function calcProfitByResult(resultado, stake, odd) {
-      const r = String(resultado || '').trim().toUpperCase();
-      const stakeNum = num(stake);
-      const oddNum = num(odd);
-
-      if (stakeNum === null || stakeNum <= 0) return null;
-
-      if (r === 'W') {
-        if (oddNum === null || oddNum <= 1.01) return null;
-        return stakeNum * (oddNum - 1);
-      }
-
-      if (r === 'L') return -stakeNum;
-      if (r === 'P') return 0;
-      return null;
-    }
-
-    function loadLocalState() {
-      const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
-      const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
-      const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
-      const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
-
-      const bankrollParsed = num(savedBankroll);
-      if (bankrollParsed !== null && bankrollParsed >= 0) {
-        state.bankrollInicial = bankrollParsed;
-      }
-
-      try {
-        state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
-      } catch {
-        state.localEdits = {};
-      }
-
-      try {
-        state.manualBets = savedManual ? JSON.parse(savedManual) : [];
-      } catch {
-        state.manualBets = [];
-      }
-
-      state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-    }
-
-    function saveLocalState() {
-      localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
-      localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
-      localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
-      localStorage.setItem(STORAGE_KEYS.sessionStartDate, getSessionStartDate());
-    }
-
-    function ensureEditObject(pickKey) {
-      if (!state.localEdits[pickKey]) {
-        state.localEdits[pickKey] = {
-          apostada: false,
-          oddReal: '',
-          stakeReal: '',
-          resultadoManual: ''
-        };
-      }
-      return state.localEdits[pickKey];
-    }
-
-    function getRowWithLocalEdits(row) {
-      const key = makePickKey(row);
-      const edit = state.localEdits[key] || {};
-
-      const apostada = !!edit.apostada;
-      const oddReal = edit.oddReal ?? row['OddReal'] ?? '';
-      const stakeReal = edit.stakeReal ?? row['StakeReal€'] ?? '';
-      const resultadoBase = String(row['Resultado'] || '').trim().toUpperCase();
-      const resultadoManual = String(edit.resultadoManual || '').trim().toUpperCase();
-      const resultadoFinal = ['W', 'L', 'P'].includes(resultadoManual) ? resultadoManual : resultadoBase;
-
-      const merged = {
-        ...row,
-        source: 'bot',
-        sourceLabel: 'Bot',
-        Apostada: apostada ? 'Sim' : '',
-        OddReal: oddReal,
-        'StakeReal€': stakeReal,
-        Resultado: resultadoFinal
+    <script>
+            const URLS = {
+        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+        footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
+        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
       };
 
-      const oddModelo = num(merged['Odd']);
-      const stakeModelo = num(merged['Stake€']);
-      const lucroModeloLocal = calcProfitByResult(resultadoFinal, stakeModelo, oddModelo);
+      const STORAGE_KEYS = {
+        bankroll: 'apostas_bot_bankroll_inicial',
+        picks: 'apostas_bot_local_edits_v4',
+        manual: 'apostas_bot_manual_bets_v2',
+        sessionStartDate: 'apostas_bot_session_start_date_v2'
+      };
 
-      const oddRealNum = num(oddReal);
-      const stakeRealNum = num(stakeReal);
+      const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
 
-      let lucroRealLocal = null;
-      if (apostada && oddRealNum !== null && stakeRealNum !== null && stakeRealNum > 0) {
-        lucroRealLocal = calcProfitByResult(resultadoFinal, stakeRealNum, oddRealNum);
+      let autoSaveTimer = null;
+      let autoSaveInFlight = false;
+      let hasPendingCloudChanges = false;
+
+      const state = {
+        footballDaily: [],
+        footballHistory: [],
+        nba: [],
+        bankrollInicial: 1000,
+        localEdits: {},
+        manualBets: [],
+        sessionStartDate: '',
+        lastUpdated: null
+      };
+
+      function parseSemicolonCsv(text) {
+        const trimmed = String(text || '').trim();
+        if (!trimmed) return [];
+        const lines = trimmed.split(/\r?\n/).filter(Boolean);
+        if (!lines.length) return [];
+
+        const headers = lines[0].split(';').map(h => h.trim().replace(/^\uFEFF/, ''));
+
+        return lines.slice(1).map(line => {
+          const values = line.split(';');
+          const row = {};
+          headers.forEach((h, i) => row[h] = String(values[i] ?? '').trim());
+          return row;
+        });
       }
 
-      merged._pickKey = key;
-      merged._apostadaBool = apostada;
-      merged._oddRealNum = oddRealNum;
-      merged._stakeRealNum = stakeRealNum;
-      merged._lucroRealLocal = lucroRealLocal;
-      merged._lucroModeloLocal = lucroModeloLocal;
-      merged._resultadoManual = resultadoManual;
-      merged._resultKey = resultKey(merged['Resultado']);
-      merged._dateNormalized = normalizeDateString(merged['Data']);
-      merged._league = merged['Liga'] || '';
-      merged._market = merged['Mercado'] || '';
-      merged._searchText = `${merged['Liga'] || ''} ${merged['Jogo'] || ''} ${merged['Mercado'] || ''}`.toLowerCase();
+      function num(v) {
+        const n = Number(String(v ?? '').replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+      }
 
-      return merged;
-    }
+      function sum(arr) {
+        return arr.filter(v => typeof v === 'number' && !Number.isNaN(v)).reduce((a, b) => a + b, 0);
+      }
 
-    function getDailyRowsMerged() {
-      return state.footballDaily.map(getRowWithLocalEdits);
-    }
+      function fmt(n, d = 2) {
+        return Number.isFinite(n) ? Number(n).toFixed(d) : '—';
+      }
 
-    function getHistoryRowsMerged() {
-      return state.footballHistory.map(getRowWithLocalEdits);
-    }
+      function pct(n, d = 2) {
+        return Number.isFinite(n) ? `${Number(n).toFixed(d)}%` : '—';
+      }
 
-    function sortBotRowsForDisplay(rows) {
-      return [...rows].sort((a, b) => {
-        const ad = parseDateSafe(a['Data']);
-        const bd = parseDateSafe(b['Data']);
-        const at = ad ? ad.getTime() : 0;
-        const bt = bd ? bd.getTime() : 0;
+      function escapeHtml(str) {
+        return String(str ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
 
-        if (at !== bt) return at - bt;
+      function normalizeDateString(value) {
+        const s = String(value || '').trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        return '';
+      }
 
-        const aPending = a._resultKey === 'pending' ? 0 : 1;
-        const bPending = b._resultKey === 'pending' ? 0 : 1;
-        if (aPending !== bPending) return aPending - bPending;
+      function parseDateSafe(value) {
+        const normalized = normalizeDateString(value);
+        if (!normalized) return null;
+        const d = new Date(normalized + 'T00:00:00');
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
 
-        const aEdge = num(a['Edge%']) ?? -9999;
-        const bEdge = num(b['Edge%']) ?? -9999;
-        if (bEdge !== aEdge) return bEdge - aEdge;
+      function todayIso() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
 
-        const aStake = num(a['Stake€']) ?? -9999;
-        const bStake = num(b['Stake€']) ?? -9999;
-        if (bStake !== aStake) return bStake - aStake;
+      function formatDatePt(dateStr) {
+        const d = parseDateSafe(dateStr);
+        if (!d) return '—';
+        return d.toLocaleDateString('pt-PT');
+      }
 
-        const aLeague = String(a['Liga'] || '');
-        const bLeague = String(b['Liga'] || '');
-        const leagueCmp = aLeague.localeCompare(bLeague, 'pt');
-        if (leagueCmp !== 0) return leagueCmp;
+      function formatDateTimePt(dateObj) {
+        if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return '—';
+        return dateObj.toLocaleString('pt-PT');
+      }
 
-        const aGame = String(a['Jogo'] || '');
-        const bGame = String(b['Jogo'] || '');
-        return aGame.localeCompare(bGame, 'pt');
-      });
-    }
+      function isToday(dateStr) {
+        return normalizeDateString(dateStr) === todayIso();
+      }
 
-    function sortManualRowsForDisplay(rows) {
-      return [...rows].sort((a, b) => {
-        const ad = parseDateSafe(a.data);
-        const bd = parseDateSafe(b.data);
-        const at = ad ? ad.getTime() : 0;
-        const bt = bd ? bd.getTime() : 0;
+      function isWithinLastDays(dateStr, days) {
+        const d = parseDateSafe(dateStr);
+        if (!d) return false;
 
-        if (at !== bt) return at - bt;
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() - (days - 1));
 
-        const aLiga = String(a.liga || '');
-        const bLiga = String(b.liga || '');
-        const ligaCmp = aLiga.localeCompare(bLiga, 'pt');
-        if (ligaCmp !== 0) return ligaCmp;
+        return d >= minDate && d <= today;
+      }
 
-        const aJogo = String(a.jogo || '');
-        const bJogo = String(b.jogo || '');
-        return aJogo.localeCompare(bJogo, 'pt');
-      });
-    }
+      function resultKey(r) {
+        const x = String(r || '').trim().toUpperCase();
+        if (x === 'W' || x === 'L' || x === 'P') return x;
+        return 'pending';
+      }
 
-    function getResolvedHistory() {
-      return getHistoryRowsMerged().filter(r => {
-        const res = String(r['Resultado'] || '').trim().toUpperCase();
-        return res === 'W' || res === 'L' || res === 'P';
-      });
-    }
+      function resultBadge(r) {
+        const k = resultKey(r);
+        if (k === 'W') return '<span class="mini good">W</span>';
+        if (k === 'L') return '<span class="mini bad">L</span>';
+        if (k === 'P') return '<span class="mini info">P</span>';
+        return '<span class="mini warn">Pend.</span>';
+      }
 
-    function getRealResolvedBotHistory() {
-      return getResolvedHistory().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
-    }
+      function profitClass(v) {
+        if (v > 0) return 'style="color:var(--ok);font-weight:800;"';
+        if (v < 0) return 'style="color:var(--bad);font-weight:800;"';
+        return '';
+      }
 
-    function getResolvedHistorySinceSession() {
-      return getResolvedHistory().filter(r => isOnOrAfterSession(r['Data']));
-    }
+      function makePickKey(row) {
+        return [
+          row['Data'] || '',
+          row['Liga'] || '',
+          row['Jogo'] || '',
+          row['Mercado'] || ''
+        ].join('|');
+      }
 
-    function getRealResolvedBotHistorySinceSession() {
-      return getRealResolvedBotHistory().filter(r => isOnOrAfterSession(r['Data']));
-    }
+      function makeManualId() {
+        return `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      }
 
-    function getManualRowsMerged() {
-      return state.manualBets.map(b => {
-        const lucro = calcProfitByResult(b.resultado, b.stake, b.odd);
+      function calcProfitByResult(resultado, stake, odd) {
+        const r = String(resultado || '').trim().toUpperCase();
+        const stakeNum = num(stake);
+        const oddNum = num(odd);
+
+        if (stakeNum === null || stakeNum <= 0) return null;
+        if (r === 'W') {
+          if (oddNum === null || oddNum <= 1.01) return null;
+          return stakeNum * (oddNum - 1);
+        }
+        if (r === 'L') return -stakeNum;
+        if (r === 'P') return 0;
+        return null;
+      }
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function roundTo(value, step = 0.5) {
+        if (!Number.isFinite(value)) return null;
+        return Math.round(value / step) * step;
+      }
+
+      function loadLocalState() {
+        const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
+        const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
+        const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
+        const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+
+        const bankrollParsed = num(savedBankroll);
+        if (bankrollParsed !== null && bankrollParsed >= 0) {
+          state.bankrollInicial = bankrollParsed;
+        }
+
+        try {
+          state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
+        } catch {
+          state.localEdits = {};
+        }
+
+        try {
+          state.manualBets = savedManual ? JSON.parse(savedManual) : [];
+        } catch {
+          state.manualBets = [];
+        }
+
+        state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
+      }
+
+      function saveLocalState() {
+        localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+        localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
+        localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
+        localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || todayIso());
+      }
+
+      function ensureEditObject(pickKey) {
+        if (!state.localEdits[pickKey]) {
+          state.localEdits[pickKey] = {
+            apostada: false,
+            oddReal: '',
+            stakeReal: '',
+            resultadoManual: ''
+          };
+        }
+        return state.localEdits[pickKey];
+      }
+
+      function getRowWithLocalEdits(row) {
+        const key = makePickKey(row);
+        const edit = state.localEdits[key] || {};
+
+        const apostada = !!edit.apostada;
+        const oddReal = edit.oddReal ?? '';
+        const stakeReal = edit.stakeReal ?? '';
+        const resultadoBase = String(row['Resultado'] || '').trim().toUpperCase();
+        const resultadoManual = String(edit.resultadoManual || '').trim().toUpperCase();
+        const resultadoFinal = ['W', 'L', 'P'].includes(resultadoManual) ? resultadoManual : resultadoBase;
+
+        const oddModelo = num(row['Odd']);
+        const stakeModelo = num(row['Stake€']);
+        const oddRealNum = num(oddReal);
+        const stakeRealNum = num(stakeReal);
+
         return {
+          ...row,
+          source: 'bot',
+          sourceLabel: 'Bot',
+          _pickKey: key,
+          _apostadaBool: apostada,
+          _oddModeloNum: oddModelo,
+          _stakeModeloNum: stakeModelo,
+          _oddRealNum: oddRealNum,
+          _stakeRealNum: stakeRealNum,
+          _resultadoFinal: resultadoFinal,
+          _resultKey: resultKey(resultadoFinal),
+          _lucroModeloLocal: calcProfitByResult(resultadoFinal, stakeModelo, oddModelo),
+          _lucroRealLocal: apostada ? calcProfitByResult(resultadoFinal, stakeRealNum, oddRealNum) : null,
+          _league: row['Liga'] || '',
+          _market: row['Mercado'] || '',
+          _searchText: `${row['Liga'] || ''} ${row['Jogo'] || ''} ${row['Mercado'] || ''}`.toLowerCase(),
+          OddReal: oddReal,
+          StakeReal: stakeReal
+        };
+      }
+
+      function getDailyRowsMerged() {
+        return state.footballDaily.map(getRowWithLocalEdits);
+      }
+
+      function getHistoryRowsMerged() {
+        return state.footballHistory.map(getRowWithLocalEdits);
+      }
+
+      function getManualRowsMerged() {
+        return state.manualBets.map(b => ({
           ...b,
           source: 'manual',
           sourceLabel: 'Manual',
-          executada: true,
-          _lucro: lucro,
+          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd),
           _resultKey: resultKey(b.resultado),
-          _dateNormalized: normalizeDateString(b.data),
-          _league: b.liga || '',
-          _market: b.mercado || '',
           _searchText: `${b.liga || ''} ${b.jogo || ''} ${b.mercado || ''}`.toLowerCase()
-        };
-      });
-    }
-
-    function getResolvedManualBets() {
-      return getManualRowsMerged().filter(b => b._lucro !== null);
-    }
-
-    function getResolvedManualBetsSinceSession() {
-      return getResolvedManualBets().filter(b => isOnOrAfterSession(b.data));
-    }
-
-    function getExecutionStats() {
-      const history = getHistoryRowsMerged();
-      const generated = history.length;
-      const executed = history.filter(r => r._apostadaBool).length;
-      const notExecuted = generated - executed;
-      const executionRate = generated > 0 ? (executed / generated) * 100 : 0;
-
-      return {
-        generated,
-        executed,
-        notExecuted,
-        executionRate
-      };
-    }
-
-    function buildMetricsBundle(botHistoryRows, botRealRows, manualRows) {
-      const modelStake = sum(botHistoryRows.map(r => num(r['Stake€'])).filter(v => v !== null));
-      const modelProfit = sum(botHistoryRows.map(r => r._lucroModeloLocal).filter(v => v !== null));
-      const modelWins = botHistoryRows.filter(r => String(r['Resultado']).toUpperCase() === 'W').length;
-      const modelLosses = botHistoryRows.filter(r => String(r['Resultado']).toUpperCase() === 'L').length;
-      const modelCount = modelWins + modelLosses;
-      const modelRoi = modelStake > 0 ? (modelProfit / modelStake) * 100 : 0;
-      const modelWr = modelCount > 0 ? (modelWins / modelCount) * 100 : 0;
-
-      const realBotStake = sum(botRealRows.map(r => r._stakeRealNum).filter(v => v !== null));
-      const realBotProfit = sum(botRealRows.map(r => r._lucroRealLocal).filter(v => v !== null));
-
-      const manualStake = sum(manualRows.map(b => num(b.stake)).filter(v => v !== null));
-      const manualProfit = sum(manualRows.map(b => b._lucro).filter(v => v !== null));
-      const manualWins = manualRows.filter(b => String(b.resultado).toUpperCase() === 'W').length;
-      const manualLosses = manualRows.filter(b => String(b.resultado).toUpperCase() === 'L').length;
-
-      const realStake = realBotStake + manualStake;
-      const realProfit = realBotProfit + manualProfit;
-      const realWins = botRealRows.filter(r => String(r['Resultado']).toUpperCase() === 'W').length + manualWins;
-      const realLosses = botRealRows.filter(r => String(r['Resultado']).toUpperCase() === 'L').length + manualLosses;
-      const realResolvedCount = botRealRows.length + manualRows.length;
-      const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
-      const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
-      const realBankroll = state.bankrollInicial + realProfit;
-
-      return {
-        modelStake,
-        modelProfit,
-        modelWins,
-        modelLosses,
-        modelCount,
-        modelRoi,
-        modelWr,
-        realStake,
-        realProfit,
-        realWins,
-        realLosses,
-        realResolvedCount,
-        realRoi,
-        realWr,
-        realBankroll,
-        manualCount: manualRows.length
-      };
-    }
-
-    function getMetrics() {
-      const history = getHistoryRowsMerged();
-      const daily = getDailyRowsMerged();
-      const resolved = getResolvedHistory();
-      const realResolvedBot = getRealResolvedBotHistory();
-      const resolvedManual = getResolvedManualBets();
-      const execution = getExecutionStats();
-
-      const sessionResolved = getResolvedHistorySinceSession();
-      const sessionRealResolvedBot = getRealResolvedBotHistorySinceSession();
-      const sessionResolvedManual = getResolvedManualBetsSinceSession();
-
-      const leagues = new Set([
-        ...history.map(r => r['Liga']).filter(Boolean),
-        ...state.manualBets.map(b => b.liga).filter(Boolean)
-      ]);
-
-      const markets = new Set([
-        ...history.map(r => r['Mercado']).filter(Boolean),
-        ...state.manualBets.map(b => b.mercado).filter(Boolean)
-      ]);
-
-      const geral = buildMetricsBundle(resolved, realResolvedBot, resolvedManual);
-      const sessao = buildMetricsBundle(sessionResolved, sessionRealResolvedBot, sessionResolvedManual);
-
-      return {
-        dailyCount: daily.length,
-        totalHistory: history.length,
-        leagues: leagues.size,
-        markets: markets.size,
-        generatedCount: execution.generated,
-        executedCount: execution.executed,
-        notExecutedCount: execution.notExecuted,
-        executionRate: execution.executionRate,
-        sessionStartDate: getSessionStartDate(),
-        geral,
-        sessao
-      };
-    }
-
-    function getRiskMetrics() {
-      const history = getHistoryRowsMerged();
-
-      const openBets = history.filter(r =>
-        r._apostadaBool && r._resultKey === 'pending'
-      );
-
-      const stakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
-      const potencialLucro = sum(
-        openBets.map(r => {
-          const stake = r._stakeRealNum;
-          const odd = r._oddRealNum;
-          if (stake === null || odd === null || odd <= 1.01) return null;
-          return stake * (odd - 1);
-        }).filter(v => v !== null)
-      );
-
-      const realResolved = getRealResolvedBotHistory();
-      const manualResolved = getResolvedManualBets();
-
-      const lucroReal =
-        sum(realResolved.map(r => r._lucroRealLocal)) +
-        sum(manualResolved.map(b => b._lucro));
-
-      const bancaAtual = state.bankrollInicial + lucroReal;
-      const bancaDisponivel = bancaAtual - stakeOpen;
-      const picksHoje = getDailyRowsMerged().length;
-
-      return {
-        openCount: openBets.length,
-        stakeOpen,
-        potencialLucro,
-        bancaAtual,
-        bancaDisponivel,
-        lucroReal,
-        picksHoje,
-        openBets
-      };
-    }
-
-    function renderCardGrid(targetId, cards) {
-      document.getElementById(targetId).innerHTML = cards.map(card => `
-        <div class="card stat">
-          <div class="label">${card.label}</div>
-          <div class="value">${card.value}</div>
-          <div class="note">${card.note}</div>
-        </div>
-      `).join('');
-    }
-
-    function renderStats() {
-      const m = getMetrics();
-
-      document.getElementById('bankrollLabel').textContent = `Banca inicial: €${fmt(state.bankrollInicial)}`;
-      document.getElementById('bankrollInput').value = state.bankrollInicial;
-      document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(m.sessionStartDate)}`;
-
-      renderCardGrid('operationalStats', [
-        { label: 'Picks do dia', value: m.dailyCount, note: `Histórico bot: ${m.totalHistory}` },
-        { label: 'Picks geradas', value: m.generatedCount, note: `${m.leagues} ligas • ${m.markets} mercados` },
-        { label: 'Picks executadas', value: m.executedCount, note: 'Bot marcadas como executadas' },
-        { label: 'Não executadas', value: m.notExecutedCount, note: 'Picks do bot não apostadas' },
-        { label: 'Taxa de execução', value: pct(m.executionRate), note: `${m.executedCount}/${m.generatedCount || 0}` },
-        { label: 'Início da sessão', value: formatDatePt(m.sessionStartDate), note: 'Base da sessão atual' }
-      ]);
-
-      renderCardGrid('sessionStats', [
-        { label: 'Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `Stake €${fmt(m.sessao.realStake)}` },
-        { label: 'ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
-        { label: 'Win rate', value: pct(m.sessao.realWr), note: `${m.sessao.realResolvedCount} fechadas` },
-        { label: 'Banca', value: `€${fmt(m.sessao.realBankroll)}`, note: `Desde ${formatDatePt(m.sessionStartDate)}` }
-      ]);
-
-      renderCardGrid('generalStats', [
-        { label: 'Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `Stake €${fmt(m.geral.realStake)}` },
-        { label: 'ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
-        { label: 'Win rate', value: pct(m.geral.realWr), note: `${m.geral.realResolvedCount} fechadas` },
-        { label: 'Banca', value: `€${fmt(m.geral.realBankroll)}`, note: `Base €${fmt(state.bankrollInicial)}` }
-      ]);
-
-      renderCardGrid('modelStats', [
-        { label: 'Sessão • Lucro modelo', value: `€${fmt(m.sessao.modelProfit)}`, note: `Stake €${fmt(m.sessao.modelStake)}` },
-        { label: 'Sessão • ROI modelo', value: pct(m.sessao.modelRoi), note: `${m.sessao.modelWins}W / ${m.sessao.modelLosses}L` },
-        { label: 'Geral • Lucro modelo', value: `€${fmt(m.geral.modelProfit)}`, note: `Stake €${fmt(m.geral.modelStake)}` },
-        { label: 'Geral • ROI modelo', value: pct(m.geral.modelRoi), note: `${m.geral.modelWins}W / ${m.geral.modelLosses}L` }
-      ]);
-
-      renderCardGrid('realStats', [
-        { label: 'Sessão • Lucro real', value: `€${fmt(m.sessao.realProfit)}`, note: `${m.sessao.realWins}W / ${m.sessao.realLosses}L` },
-        { label: 'Sessão • ROI real', value: pct(m.sessao.realRoi), note: `${m.sessao.realResolvedCount} fechadas` },
-        { label: 'Geral • Lucro real', value: `€${fmt(m.geral.realProfit)}`, note: `${m.geral.realWins}W / ${m.geral.realLosses}L` },
-        { label: 'Geral • ROI real', value: pct(m.geral.realRoi), note: `${m.geral.realResolvedCount} fechadas` }
-      ]);
-    }
-
-    function renderRiskStats() {
-      const r = getRiskMetrics();
-
-      renderCardGrid('riskStats', [
-        {
-          label: 'Banca atual',
-          value: `€${fmt(r.bancaAtual)}`,
-          note: `Disponível: €${fmt(r.bancaDisponivel)}`
-        },
-        {
-          label: 'Lucro real',
-          value: `€${fmt(r.lucroReal)}`,
-          note: 'Fechado'
-        },
-        {
-          label: 'Abertas',
-          value: r.openCount,
-          note: `€${fmt(r.stakeOpen)} expostos`
-        },
-        {
-          label: 'Potencial aberto',
-          value: `€${fmt(r.potencialLucro)}`,
-          note: 'Lucro máximo das abertas'
-        }
-      ]);
-    }
-
-    function renderMobileCockpit() {
-      const r = getRiskMetrics();
-
-      renderCardGrid('mobileStats', [
-        {
-          label: '💰 Banca',
-          value: `€${fmt(r.bancaAtual)}`,
-          note: `Livre: €${fmt(r.bancaDisponivel)}`
-        },
-        {
-          label: '📈 Lucro',
-          value: `€${fmt(r.lucroReal)}`,
-          note: 'Real fechado'
-        },
-        {
-          label: '⏳ Em aberto',
-          value: r.openCount,
-          note: `€${fmt(r.stakeOpen)} em risco`
-        },
-        {
-          label: '🎯 Potencial',
-          value: `€${fmt(r.potencialLucro)}`,
-          note: 'Se tudo ganhar'
-        }
-      ]);
-    }
-
-    function renderOpenBets() {
-      const filters = getGlobalFilters();
-
-      const rows = sortBotRowsForDisplay(
-        filterBotRows(getHistoryRowsMerged(), filters).filter(r => r._apostadaBool && r._resultKey === 'pending')
-      );
-
-      const wrap = document.getElementById('openBetsWrap');
-
-      if (!rows.length) {
-        wrap.innerHTML = `<div class="empty">Sem apostas em aberto com os filtros atuais.</div>`;
-        return;
+        }));
       }
 
-      wrap.innerHTML = rows.map(r => {
-        const stake = r._stakeRealNum;
-        const odd = r._oddRealNum;
-        const potencial = (stake !== null && odd !== null && odd > 1.01) ? stake * (odd - 1) : null;
+      function getSessionStartDate() {
+        return state.sessionStartDate || todayIso();
+      }
 
-        return `
-          <div class="item compact">
-            <div class="open-bet-top">
-              <div>
-                <div class="open-bet-title">${escapeHtml(r['Jogo'] || '—')}</div>
-                <div class="open-bet-meta">
-                  <span>${escapeHtml(formatDatePt(r['Data']))}</span>
-                  <span>•</span>
-                  <span>${escapeHtml(r['Liga'] || '—')}</span>
-                  <span>•</span>
-                  <span>${escapeHtml(r['Mercado'] || '—')}</span>
-                </div>
-              </div>
-              <span class="result-badge result-pending">🟡 Aberta</span>
-            </div>
-            <div class="open-bet-values">
-              <span><strong>Stake real:</strong> ${stake === null ? '—' : `€${fmt(stake)}`}</span>
-              <span><strong>Odd real:</strong> ${odd === null ? '—' : fmt(odd)}</span>
-              <span><strong>Potencial:</strong> ${potencial === null ? '—' : `€${fmt(potencial)}`}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+      function isOnOrAfterSession(dateStr) {
+        const d = normalizeDateString(dateStr);
+        return !!d && d >= getSessionStartDate();
+      }
 
-    function getFilterSourceRows() {
-      return [
-        ...getHistoryRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
-        ...getManualRowsMerged().map(r => ({ league: r.liga || '', market: r.mercado || '' }))
-      ];
-    }
+      function sortBotRowsForDisplay(rows) {
+        return [...rows].sort((a, b) => {
+          const ad = parseDateSafe(a['Data'])?.getTime() || 0;
+          const bd = parseDateSafe(b['Data'])?.getTime() || 0;
+          if (ad !== bd) return ad - bd;
 
-    function fillFilters() {
-      const leagueSelect = document.getElementById('leagueFilter');
-      const marketSelect = document.getElementById('marketFilter');
+          const aEdge = num(a['Edge%']) ?? -9999;
+          const bEdge = num(b['Edge%']) ?? -9999;
+          if (aEdge !== bEdge) return bEdge - aEdge;
 
-      const currentLeague = leagueSelect.value;
-      const currentMarket = marketSelect.value;
+          return String(a['Jogo'] || '').localeCompare(String(b['Jogo'] || ''), 'pt');
+        });
+      }
 
-      const rows = getFilterSourceRows();
+      function sortManualRowsForDisplay(rows) {
+        return [...rows].sort((a, b) => {
+          const ad = parseDateSafe(a.data)?.getTime() || 0;
+          const bd = parseDateSafe(b.data)?.getTime() || 0;
+          if (ad !== bd) return ad - bd;
+          return String(a.jogo || '').localeCompare(String(b.jogo || ''), 'pt');
+        });
+      }
 
-      const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-      const markets = [...new Set(rows.map(r => r.market).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      function getResolvedHistory() {
+        return getHistoryRowsMerged().filter(r => ['W', 'L', 'P'].includes(r._resultKey));
+      }
 
-      leagueSelect.innerHTML =
-        '<option value="">Todas as ligas</option>' +
-        leagues.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+      function getRealResolvedBotHistory() {
+        return getHistoryRowsMerged().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
+      }
 
-      marketSelect.innerHTML =
-        '<option value="">Todos os mercados</option>' +
-        markets.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+      function getResolvedManualBets() {
+        return getManualRowsMerged().filter(b => b._lucro !== null);
+      }
 
-      leagueSelect.value = leagues.includes(currentLeague) ? currentLeague : '';
-      marketSelect.value = markets.includes(currentMarket) ? currentMarket : '';
-    }
+      function getExecutionStats() {
+        const history = getHistoryRowsMerged();
+        const generated = history.length;
+        const executed = history.filter(r => r._apostadaBool).length;
+        const notExecuted = generated - executed;
+        const executionRate = generated > 0 ? (executed / generated) * 100 : 0;
 
-    function getGlobalFilters() {
-      return {
-        q: document.getElementById('searchGlobal').value.trim().toLowerCase(),
-        source: document.getElementById('sourceFilter').value,
-        league: document.getElementById('leagueFilter').value,
-        market: document.getElementById('marketFilter').value,
-        result: document.getElementById('resultFilter').value,
-        execution: document.getElementById('executionFilter').value,
-        date: document.getElementById('dateFilter').value
-      };
-    }
+        return { generated, executed, notExecuted, executionRate };
+      }
 
-    function matchDateFilter(dateStr, dateFilterValue) {
-      if (!dateFilterValue) return true;
-      if (dateFilterValue === 'today') return isToday(dateStr);
-      if (dateFilterValue === '7') return isWithinLastDays(dateStr, 7);
-      if (dateFilterValue === '30') return isWithinLastDays(dateStr, 30);
-      return true;
-    }
+      function buildMetricsBundle(botHistoryRows, botRealRows, manualRows) {
+        const modelStake = sum(botHistoryRows.map(r => r._stakeModeloNum).filter(v => v !== null));
+        const modelProfit = sum(botHistoryRows.map(r => r._lucroModeloLocal).filter(v => v !== null));
+        const modelWins = botHistoryRows.filter(r => r._resultKey === 'W').length;
+        const modelLosses = botHistoryRows.filter(r => r._resultKey === 'L').length;
+        const modelCount = modelWins + modelLosses;
+        const modelRoi = modelStake > 0 ? (modelProfit / modelStake) * 100 : 0;
+        const modelWr = modelCount > 0 ? (modelWins / modelCount) * 100 : 0;
 
-    function filterBotRows(rows, filters) {
-      return rows.filter(r => {
-        const okSearch = !filters.q || r._searchText.includes(filters.q);
-        const okSource = !filters.source || filters.source === 'bot';
-        const okLeague = !filters.league || r['Liga'] === filters.league;
-        const okMarket = !filters.market || r['Mercado'] === filters.market;
-        const okResult = !filters.result || r._resultKey === filters.result;
-        const okExecution =
-          !filters.execution ||
-          (filters.execution === 'executed' && r._apostadaBool) ||
-          (filters.execution === 'not_executed' && !r._apostadaBool);
-        const okDate = matchDateFilter(r['Data'], filters.date);
+        const realBotStake = sum(botRealRows.map(r => r._stakeRealNum).filter(v => v !== null));
+        const realBotProfit = sum(botRealRows.map(r => r._lucroRealLocal).filter(v => v !== null));
 
-        return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
-      });
-    }
+        const manualStake = sum(manualRows.map(b => num(b.stake)).filter(v => v !== null));
+        const manualProfit = sum(manualRows.map(b => b._lucro).filter(v => v !== null));
+        const manualWins = manualRows.filter(b => b._resultKey === 'W').length;
+        const manualLosses = manualRows.filter(b => b._resultKey === 'L').length;
 
-    function filterManualRows(rows, filters) {
-      return rows.filter(r => {
-        const okSearch = !filters.q || r._searchText.includes(filters.q);
-        const okSource = !filters.source || filters.source === 'manual';
-        const okLeague = !filters.league || (r.liga || '') === filters.league;
-        const okMarket = !filters.market || (r.mercado || '') === filters.market;
-        const okResult = !filters.result || r._resultKey === filters.result;
-        const okExecution =
-          !filters.execution ||
-          (filters.execution === 'executed') ||
-          (filters.execution === 'not_executed' ? false : true);
-        const okDate = matchDateFilter(r.data, filters.date);
+        const realStake = realBotStake + manualStake;
+        const realProfit = realBotProfit + manualProfit;
+        const realWins = botRealRows.filter(r => r._resultKey === 'W').length + manualWins;
+        const realLosses = botRealRows.filter(r => r._resultKey === 'L').length + manualLosses;
+        const realResolvedCount = botRealRows.length + manualRows.length;
+        const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
+        const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
+        const realBankroll = state.bankrollInicial + realProfit;
 
-        return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
-      });
-    }
+        return {
+          modelStake,
+          modelProfit,
+          modelWins,
+          modelLosses,
+          modelRoi,
+          modelWr,
+          realStake,
+          realProfit,
+          realWins,
+          realLosses,
+          realResolvedCount,
+          realRoi,
+          realWr,
+          realBankroll
+        };
+      }
 
-    function getFilteredRealClosedRows() {
-      const filters = getGlobalFilters();
+      function getMetrics() {
+        const historyResolved = getResolvedHistory();
+        const realResolvedBot = getRealResolvedBotHistory();
+        const resolvedManual = getResolvedManualBets();
 
-      const botClosed = filterBotRows(getHistoryRowsMerged(), filters)
-        .filter(r => r._apostadaBool && r._lucroRealLocal !== null)
-        .map(r => ({
-          source: 'bot',
-          sourceLabel: 'Bot',
-          league: r['Liga'] || '—',
-          market: r['Mercado'] || '—',
-          game: r['Jogo'] || '—',
-          date: r['Data'] || '',
-          result: String(r['Resultado'] || '').trim().toUpperCase(),
-          odd: r._oddRealNum ?? null,
-          stake: r._stakeRealNum ?? 0,
-          lucro: r._lucroRealLocal ?? 0
-        }));
+        const sessionHistoryResolved = historyResolved.filter(r => isOnOrAfterSession(r['Data']));
+        const sessionRealResolvedBot = realResolvedBot.filter(r => isOnOrAfterSession(r['Data']));
+        const sessionResolvedManual = resolvedManual.filter(r => isOnOrAfterSession(r.data));
 
-      const manualClosed = filterManualRows(getManualRowsMerged(), filters)
-        .filter(r => r._lucro !== null)
-        .map(r => ({
-          source: 'manual',
-          sourceLabel: 'Manual',
-          league: r.liga || '—',
-          market: r.mercado || '—',
-          game: r.jogo || '—',
-          date: r.data || '',
-          result: String(r.resultado || '').trim().toUpperCase(),
-          odd: num(r.odd),
-          stake: num(r.stake) ?? 0,
-          lucro: r._lucro ?? 0
-        }));
+        return {
+          geral: buildMetricsBundle(historyResolved, realResolvedBot, resolvedManual),
+          sessao: buildMetricsBundle(sessionHistoryResolved, sessionRealResolvedBot, sessionResolvedManual),
+          execution: getExecutionStats()
+        };
+      }
 
-      return [...botClosed, ...manualClosed].sort((a, b) => {
-        const ad = parseDateSafe(a.date);
-        const bd = parseDateSafe(b.date);
-        const at = ad ? ad.getTime() : 0;
-        const bt = bd ? bd.getTime() : 0;
-        return at - bt;
-      });
-    }
+      function getRiskMetrics() {
+        const openBets = getHistoryRowsMerged().filter(r => r._apostadaBool && r._resultKey === 'pending');
+        const stakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
+        const potencialLucro = sum(openBets.map(r => {
+          if (r._stakeRealNum === null || r._oddRealNum === null || r._oddRealNum <= 1.01) return null;
+          return r._stakeRealNum * (r._oddRealNum - 1);
+        }).filter(v => v !== null));
 
-    function buildAnalytics(rows, field) {
-      const map = new Map();
+        const lucroReal =
+          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
+          sum(getResolvedManualBets().map(b => b._lucro));
 
-      rows.forEach(r => {
-        const key = r[field] || '—';
+        const bancaAtual = state.bankrollInicial + lucroReal;
+        const bancaDisponivel = bancaAtual - stakeOpen;
 
-        if (!map.has(key)) {
-          map.set(key, {
-            key,
-            apostas: 0,
-            wins: 0,
-            losses: 0,
-            pushes: 0,
-            stake: 0,
-            lucro: 0
+        return {
+          openCount: openBets.length,
+          stakeOpen,
+          potencialLucro,
+          lucroReal,
+          bancaAtual,
+          bancaDisponivel,
+          picksHoje: getDailyRowsMerged().length
+        };
+      }
+
+      function getAdvancedMetrics() {
+        const m = getMetrics();
+        const r = getRiskMetrics();
+        const exposurePct = r.bancaAtual > 0 ? (r.stakeOpen / r.bancaAtual) * 100 : 0;
+
+        return {
+          roi: m.sessao.realRoi,
+          wr: m.sessao.realWr,
+          lucro: m.sessao.realProfit,
+          exposurePct,
+          openCount: r.openCount,
+          picksHoje: r.picksHoje
+        };
+      }
+
+      function computeDecisionMode() {
+        const m = getAdvancedMetrics();
+
+        if (m.exposurePct > 25) {
+          return { label: 'STOP', badge: 'bad', note: `Exposição elevada (${fmt(m.exposurePct)}%)` };
+        }
+        if (m.roi < -10) {
+          return { label: 'REDUZIR', badge: 'warn', note: `ROI negativo (${fmt(m.roi)}%)` };
+        }
+        if (m.roi > 8 && m.wr > 55) {
+          return { label: 'AGRESSIVO', badge: 'good', note: `Boa performance (${fmt(m.roi)}% ROI)` };
+        }
+        if (m.roi > 0) {
+          return { label: 'NORMAL', badge: 'info', note: 'Situação estável' };
+        }
+        return { label: 'CUIDADO', badge: 'warn', note: 'Sem edge claro' };
+      }
+
+      function computeAlerts() {
+        const m = getAdvancedMetrics();
+        const alerts = [];
+
+        if (m.exposurePct > 20) alerts.push({ type: 'risk', text: `Exposição alta (${fmt(m.exposurePct)}%)`, cls: 'bad' });
+        if (m.openCount >= 6) alerts.push({ type: 'volume', text: `Muitas apostas abertas (${m.openCount})`, cls: 'warn' });
+        if (m.roi < -10) alerts.push({ type: 'performance', text: 'ROI muito negativo', cls: 'bad' });
+        if (m.picksHoje === 0) alerts.push({ type: 'empty', text: 'Sem picks hoje', cls: 'info' });
+
+        return alerts;
+      }
+
+      function computeDynamicStake() {
+        const m = getAdvancedMetrics();
+
+        if (m.roi > 10 && m.wr > 58) {
+          return { multiplier: 1.25, label: 'Aumentada', badge: 'good', note: 'Performance forte' };
+        }
+        if (m.roi < -10) {
+          return { multiplier: 0.60, label: 'Reduzida', badge: 'bad', note: 'Drawdown ativo' };
+        }
+        if (m.roi < 0) {
+          return { multiplier: 0.80, label: 'Conservadora', badge: 'warn', note: 'Ajuste defensivo' };
+        }
+        return { multiplier: 1.00, label: 'Normal', badge: 'info', note: 'Sem ajuste' };
+      }
+
+      function getStakeContext() {
+        const dynamicStake = computeDynamicStake();
+        const risk = getRiskMetrics();
+        const bankroll = risk.bancaAtual > 0 ? risk.bancaAtual : state.bankrollInicial;
+
+        return {
+          bankroll,
+          dynamicMultiplier: dynamicStake.multiplier,
+          dynamicLabel: dynamicStake.label,
+          exposurePct: bankroll > 0 ? (risk.stakeOpen / bankroll) * 100 : 0
+        };
+      }
+
+      function computePickScore(row) {
+        const edge = num(row['Edge%']) ?? 0;
+        const odd = num(row['Odd']) ?? 0;
+        const stakeModelo = num(row['Stake€']) ?? 0;
+
+        let score = 50;
+        score += clamp(edge * 3, -20, 30);
+
+        if (odd >= 1.7 && odd <= 2.2) score += 8;
+        else if (odd > 2.2 && odd <= 2.6) score += 4;
+        else if (odd > 2.6) score -= 4;
+
+        if (stakeModelo >= 3) score += 6;
+        if (stakeModelo >= 5) score += 6;
+        if (row._apostadaBool) score += 2;
+        if (row._resultKey === 'W') score += 2;
+        if (row._resultKey === 'L') score -= 4;
+
+        return clamp(Math.round(score), 0, 100);
+      }
+
+      function getScoreBadge(score) {
+        if (score >= 75) return { label: `Score ${score}`, cls: 'good' };
+        if (score >= 60) return { label: `Score ${score}`, cls: 'info' };
+        if (score >= 45) return { label: `Score ${score}`, cls: 'warn' };
+        return { label: `Score ${score}`, cls: 'bad' };
+      }
+
+      function computeRecommendedStake(row) {
+        const ctx = getStakeContext();
+        const stakeModelo = num(row['Stake€']);
+        const edge = num(row['Edge%']) ?? 0;
+        const odd = num(row['Odd']) ?? 0;
+        const score = computePickScore(row);
+
+        let recommended = stakeModelo && stakeModelo > 0 ? stakeModelo : Math.max(1, ctx.bankroll * 0.01);
+
+        recommended *= ctx.dynamicMultiplier;
+        if (edge >= 8) recommended *= 1.15;
+        else if (edge < 4) recommended *= 0.85;
+
+        if (score >= 75) recommended *= 1.10;
+        else if (score < 45) recommended *= 0.80;
+
+        if (odd > 2.35) recommended *= 0.90;
+        if (ctx.exposurePct > 20) recommended *= 0.85;
+        if (ctx.exposurePct > 25) recommended *= 0.75;
+
+        const maxCap = Math.max(2, ctx.bankroll * 0.04);
+        recommended = clamp(recommended, 1, maxCap);
+        recommended = roundTo(recommended, 0.5);
+
+        return {
+          value: recommended,
+          pctBankroll: ctx.bankroll > 0 ? (recommended / ctx.bankroll) * 100 : 0,
+          dynamicLabel: ctx.dynamicLabel
+        };
+      }
+
+      function computePickAlerts(row) {
+        const alerts = [];
+        const edge = num(row['Edge%']) ?? null;
+        const odd = num(row['Odd']) ?? null;
+        const recommendedStake = computeRecommendedStake(row);
+        const realStake = row._stakeRealNum;
+        const realOdd = row._oddRealNum;
+
+        if (edge !== null && edge >= 8) alerts.push({ level: 'good', text: `Edge forte (${fmt(edge)}%)` });
+        else if (edge !== null && edge < 4) alerts.push({ level: 'warn', text: `Edge curto (${fmt(edge)}%)` });
+
+        if (odd !== null && odd > 2.5) alerts.push({ level: 'warn', text: `Odd alta (${fmt(odd)})` });
+
+        if (row._apostadaBool && realStake !== null && recommendedStake.value !== null) {
+          const ratio = recommendedStake.value > 0 ? realStake / recommendedStake.value : 1;
+          if (ratio >= 1.5) alerts.push({ level: 'bad', text: 'Stake acima do recomendado' });
+          else if (ratio <= 0.6) alerts.push({ level: 'info', text: 'Stake abaixo do recomendado' });
+        }
+
+        if (row._apostadaBool && realOdd !== null && odd !== null) {
+          if (realOdd + 0.01 < odd) alerts.push({ level: 'bad', text: `Odd real pior (${fmt(realOdd)} vs ${fmt(odd)})` });
+          else if (realOdd > odd) alerts.push({ level: 'good', text: 'Odd real melhor' });
+        }
+
+        if (!alerts.length) alerts.push({ level: 'info', text: 'Sem alertas' });
+        return alerts.slice(0, 3);
+      }
+
+      function getPrimaryPickSignal(row) {
+        const score = computePickScore(row);
+        return {
+          score,
+          scoreBadge: getScoreBadge(score),
+          alerts: computePickAlerts(row),
+          recStake: computeRecommendedStake(row)
+        };
+      }
+
+      function getGlobalFilters() {
+        return {
+          q: document.getElementById('searchGlobal').value.trim().toLowerCase(),
+          source: document.getElementById('sourceFilter').value,
+          league: document.getElementById('leagueFilter').value,
+          market: document.getElementById('marketFilter').value,
+          result: document.getElementById('resultFilter').value,
+          execution: document.getElementById('executionFilter').value,
+          date: document.getElementById('dateFilter').value
+        };
+      }
+
+      function matchDateFilter(dateStr, dateFilterValue) {
+        if (!dateFilterValue) return true;
+        if (dateFilterValue === 'today') return isToday(dateStr);
+        if (dateFilterValue === '7') return isWithinLastDays(dateStr, 7);
+        if (dateFilterValue === '30') return isWithinLastDays(dateStr, 30);
+        return true;
+      }
+
+      function filterBotRows(rows, filters) {
+        return rows.filter(r => {
+          const okSearch = !filters.q || r._searchText.includes(filters.q);
+          const okSource = !filters.source || filters.source === 'bot';
+          const okLeague = !filters.league || r['Liga'] === filters.league;
+          const okMarket = !filters.market || r['Mercado'] === filters.market;
+          const okResult = !filters.result || r._resultKey === filters.result;
+          const okExecution =
+            !filters.execution ||
+            (filters.execution === 'executed' && r._apostadaBool) ||
+            (filters.execution === 'not_executed' && !r._apostadaBool);
+          const okDate = matchDateFilter(r['Data'], filters.date);
+
+          return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+        });
+      }
+
+      function filterManualRows(rows, filters) {
+        return rows.filter(r => {
+          const okSearch = !filters.q || r._searchText.includes(filters.q);
+          const okSource = !filters.source || filters.source === 'manual';
+          const okLeague = !filters.league || r.liga === filters.league;
+          const okMarket = !filters.market || r.mercado === filters.market;
+          const okResult = !filters.result || r._resultKey === filters.result;
+          const okDate = matchDateFilter(r.data, filters.date);
+          return okSearch && okSource && okLeague && okMarket && okResult && okDate;
+        });
+      }
+
+      function getFilteredRealClosedRows() {
+        const filters = getGlobalFilters();
+
+        const botClosed = filterBotRows(getHistoryRowsMerged(), filters)
+          .filter(r => r._apostadaBool && r._lucroRealLocal !== null)
+          .map(r => ({
+            source: 'bot',
+            sourceLabel: 'Bot',
+            league: r['Liga'] || '—',
+            market: r['Mercado'] || '—',
+            game: r['Jogo'] || '—',
+            date: r['Data'] || '',
+            result: r._resultKey,
+            odd: r._oddRealNum,
+            stake: r._stakeRealNum ?? 0,
+            lucro: r._lucroRealLocal ?? 0
+          }));
+
+        const manualClosed = filterManualRows(getManualRowsMerged(), filters)
+          .filter(r => r._lucro !== null)
+          .map(r => ({
+            source: 'manual',
+            sourceLabel: 'Manual',
+            league: r.liga || '—',
+            market: r.mercado || '—',
+            game: r.jogo || '—',
+            date: r.data || '',
+            result: r._resultKey,
+            odd: num(r.odd),
+            stake: num(r.stake) ?? 0,
+            lucro: r._lucro ?? 0
+          }));
+
+        return [...botClosed, ...manualClosed].sort((a, b) => {
+          const ad = parseDateSafe(a.date)?.getTime() || 0;
+          const bd = parseDateSafe(b.date)?.getTime() || 0;
+          return ad - bd;
+        });
+      }
+
+      function fillFilters() {
+        const rows = [
+          ...getHistoryRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
+          ...getManualRowsMerged().map(r => ({ league: r.liga || '', market: r.mercado || '' }))
+        ];
+
+        const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const markets = [...new Set(rows.map(r => r.market).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+        const leagueSelect = document.getElementById('leagueFilter');
+        const marketSelect = document.getElementById('marketFilter');
+        const currentLeague = leagueSelect.value;
+        const currentMarket = marketSelect.value;
+
+        leagueSelect.innerHTML =
+          '<option value="">Todas as ligas</option>' +
+          leagues.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+
+        marketSelect.innerHTML =
+          '<option value="">Todos os mercados</option>' +
+          markets.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+
+        leagueSelect.value = leagues.includes(currentLeague) ? currentLeague : '';
+        marketSelect.value = markets.includes(currentMarket) ? currentMarket : '';
+      }
+
+      function renderTopDecisionBlock() {
+        const decision = computeDecisionMode();
+        const alerts = computeAlerts();
+        const stake = computeDynamicStake();
+        const risk = getRiskMetrics();
+
+        document.getElementById('decisionModeValue').textContent = decision.label;
+        document.getElementById('decisionBadge').className = `decision-badge ${decision.badge}`;
+        document.getElementById('decisionBadge').textContent = decision.label;
+        document.getElementById('decisionModeNote').textContent = decision.note;
+
+        document.getElementById('autoAlertsValue').textContent = `${alerts.length} ativos`;
+        const alertsBadge = document.getElementById('alertsBadge');
+        alertsBadge.className = `decision-badge ${alerts.length === 0 ? 'info' : alerts.length >= 2 ? 'bad' : 'warn'}`;
+        alertsBadge.textContent = alerts.length === 0 ? 'OK' : alerts.length >= 2 ? 'Alerta' : 'Atenção';
+        document.getElementById('autoAlertsNote').textContent = alerts.length ? alerts.map(a => a.text).join(' • ') : 'Sem alertas relevantes neste momento.';
+
+        document.getElementById('dynamicStakeValue').textContent = stake.label;
+        document.getElementById('dynamicStakeBadge').className = `decision-badge ${stake.badge}`;
+        document.getElementById('dynamicStakeBadge').textContent = `x${fmt(stake.multiplier)}`;
+        document.getElementById('dynamicStakeNote').textContent = stake.note;
+
+        document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(getSessionStartDate())}`;
+        document.getElementById('lastUpdateLabel').textContent = `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`;
+
+        document.getElementById('bankrollLabelTop').textContent = `€${fmt(state.bankrollInicial)}`;
+        document.getElementById('currentBankrollTop').textContent = `€${fmt(risk.bancaAtual)}`;
+        document.getElementById('openExposureTop').textContent = `€${fmt(risk.stakeOpen)}`;
+        document.getElementById('availableBankrollTop').textContent = `€${fmt(risk.bancaDisponivel)}`;
+      }
+
+      function renderQuickStats() {
+        const m = getMetrics();
+        document.getElementById('dailyCountStat').textContent = String(getDailyRowsMerged().length);
+        document.getElementById('executedCountStat').textContent = String(m.execution.executed);
+        document.getElementById('notExecutedCountStat').textContent = String(m.execution.notExecuted);
+        document.getElementById('executionRateStat').textContent = pct(m.execution.executionRate);
+      }
+
+      function renderAlertsCenter() {
+        const items = [];
+        const decision = computeDecisionMode();
+        const stake = computeDynamicStake();
+        const alerts = computeAlerts();
+        const risk = getRiskMetrics();
+        const exposurePct = risk.bancaAtual > 0 ? (risk.stakeOpen / risk.bancaAtual) * 100 : 0;
+
+        items.push({
+          cls: decision.badge,
+          title: 'Modo decisão',
+          text: decision.label,
+          sub: decision.note
+        });
+
+        items.push({
+          cls: exposurePct > 20 ? 'bad' : exposurePct > 10 ? 'warn' : 'good',
+          title: 'Risco atual',
+          text: `Exposição ${fmt(exposurePct)}%`,
+          sub: `Stake aberta €${fmt(risk.stakeOpen)} • abertas ${risk.openCount}`
+        });
+
+        items.push({
+          cls: stake.badge,
+          title: 'Stake dinâmica',
+          text: `${stake.label} • x${fmt(stake.multiplier)}`,
+          sub: stake.note
+        });
+
+        if (alerts.length) {
+          alerts.forEach(a => {
+            items.push({
+              cls: a.cls,
+              title: 'Alerta automático',
+              text: a.text,
+              sub: 'Verificar execução e exposição'
+            });
+          });
+        } else {
+          items.push({
+            cls: 'good',
+            title: 'Alertas automáticos',
+            text: 'Sem alertas relevantes',
+            sub: 'Fluxo estável neste momento'
           });
         }
 
-        const item = map.get(key);
-        item.apostas += 1;
-        item.stake += r.stake || 0;
-        item.lucro += r.lucro || 0;
+        document.getElementById('alertsCenter').innerHTML = items.map(item => `
+          <div class="stat">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div>
+                <div class="label">${escapeHtml(item.title)}</div>
+                <div class="value" style="font-size:18px;">${escapeHtml(item.text)}</div>
+              </div>
+              <span class="decision-badge ${item.cls}">${escapeHtml(item.title)}</span>
+            </div>
+            <div class="note">${escapeHtml(item.sub)}</div>
+          </div>
+        `).join('');
+      }
 
-        if (r.result === 'W') item.wins += 1;
-        else if (r.result === 'L') item.losses += 1;
-        else if (r.result === 'P') item.pushes += 1;
-      });
+      function renderOpenBets() {
+        const filters = getGlobalFilters();
+        const rows = sortBotRowsForDisplay(
+          filterBotRows(getHistoryRowsMerged(), filters).filter(r => r._apostadaBool && r._resultKey === 'pending')
+        );
 
-      return [...map.values()]
-        .map(item => {
+        const wrap = document.getElementById('openBetsWrap');
+
+        if (!rows.length) {
+          wrap.innerHTML = '<div class="stat"><div class="note">Sem apostas em aberto com os filtros atuais.</div></div>';
+          return;
+        }
+
+        wrap.innerHTML = rows.map(r => {
+          const potencial = (r._stakeRealNum !== null && r._oddRealNum !== null && r._oddRealNum > 1.01)
+            ? r._stakeRealNum * (r._oddRealNum - 1)
+            : null;
+
+          return `
+            <div class="stat">
+              <div class="label">${escapeHtml(r['Liga'] || '—')} • ${escapeHtml(formatDatePt(r['Data']))}</div>
+              <div class="value" style="font-size:18px;">${escapeHtml(r['Jogo'] || '—')}</div>
+              <div class="note">${escapeHtml(r['Mercado'] || '—')}</div>
+              <div class="note">Stake real: €${fmt(r._stakeRealNum)} • Odd real: ${fmt(r._oddRealNum)} • Potencial: €${fmt(potencial)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function buildAnalytics(rows, field) {
+        const map = new Map();
+
+        rows.forEach(r => {
+          const key = r[field] || '—';
+          if (!map.has(key)) {
+            map.set(key, { key, apostas: 0, wins: 0, losses: 0, pushes: 0, stake: 0, lucro: 0 });
+          }
+
+          const item = map.get(key);
+          item.apostas += 1;
+          item.stake += r.stake || 0;
+          item.lucro += r.lucro || 0;
+          if (r.result === 'W') item.wins += 1;
+          else if (r.result === 'L') item.losses += 1;
+          else if (r.result === 'P') item.pushes += 1;
+        });
+
+        return [...map.values()].map(item => {
           const decisionCount = item.wins + item.losses;
-          const winRate = decisionCount > 0 ? (item.wins / decisionCount) * 100 : 0;
-          const roi = item.stake > 0 ? (item.lucro / item.stake) * 100 : 0;
-
           return {
             ...item,
-            winRate,
-            roi
+            winRate: decisionCount > 0 ? (item.wins / decisionCount) * 100 : 0,
+            roi: item.stake > 0 ? (item.lucro / item.stake) * 100 : 0
           };
-        })
-        .sort((a, b) => {
+        }).sort((a, b) => {
           if (b.lucro !== a.lucro) return b.lucro - a.lucro;
           return b.roi - a.roi;
         });
-    }
+      }
 
-    function renderAnalyticsTable(targetId, rows, labelField) {
-      const html = rows.length ? rows.map(r => `
-        <tr>
-          <td>${escapeHtml(r[labelField])}</td>
-          <td class="mono">${r.apostas}</td>
-          <td class="mono">${r.wins}</td>
-          <td class="mono">${r.losses}</td>
-          <td class="mono">${r.pushes}</td>
-          <td class="mono">${pct(r.winRate)}</td>
-          <td class="mono">€${fmt(r.stake)}</td>
-          <td class="mono ${profitClass(r.lucro)}">€${fmt(r.lucro)}</td>
-          <td class="mono ${profitClass(r.roi)}">${pct(r.roi)}</td>
-        </tr>
-      `).join('') : `<tr><td colspan="9"><div class="empty">Sem dados suficientes com os filtros atuais.</div></td></tr>`;
+      function renderAnalyticsTable(targetId, rows, labelField) {
+        document.getElementById(targetId).innerHTML = rows.length
+          ? rows.map(r => `
+              <tr>
+                <td>${escapeHtml(r[labelField])}</td>
+                <td>${r.apostas}</td>
+                <td>${r.wins}</td>
+                <td>${r.losses}</td>
+                <td>${r.pushes}</td>
+                <td>${pct(r.winRate)}</td>
+                <td>€${fmt(r.stake)}</td>
+                <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
+                <td ${profitClass(r.roi)}>${pct(r.roi)}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="9"><div class="note">Sem dados suficientes com os filtros atuais.</div></td></tr>';
+      }
 
-      document.getElementById(targetId).innerHTML = html;
-    }
+      function computeStreaks(rows) {
+        const decisionRows = rows.filter(r => r.result === 'W' || r.result === 'L');
+        if (!decisionRows.length) {
+          return {
+            currentWin: 0,
+            currentLoss: 0,
+            longestWin: 0,
+            longestLoss: 0
+          };
+        }
 
-    function computeStreaks(rows) {
-      const decisionRows = rows.filter(r => r.result === 'W' || r.result === 'L');
+        let longestWin = 0;
+        let longestLoss = 0;
+        let currentWin = 0;
+        let currentLoss = 0;
 
-      if (!decisionRows.length) {
+        decisionRows.forEach(row => {
+          if (row.result === 'W') {
+            currentWin += 1;
+            currentLoss = 0;
+            if (currentWin > longestWin) longestWin = currentWin;
+          } else {
+            currentLoss += 1;
+            currentWin = 0;
+            if (currentLoss > longestLoss) longestLoss = currentLoss;
+          }
+        });
+
+        let tailWin = 0;
+        let tailLoss = 0;
+        for (let i = decisionRows.length - 1; i >= 0; i--) {
+          if (decisionRows[i].result === 'W' && tailLoss === 0) tailWin++;
+          else if (decisionRows[i].result === 'L' && tailWin === 0) tailLoss++;
+          else break;
+        }
+
         return {
-          currentWin: 0,
-          currentLoss: 0,
-          longestWin: { count: 0, profit: 0 },
-          longestLoss: { count: 0, profit: 0 },
-          bestRun: { count: 0, profit: 0 },
-          worstRun: { count: 0, profit: 0 },
-          currentProfit: 0
+          currentWin: tailWin,
+          currentLoss: tailLoss,
+          longestWin,
+          longestLoss
         };
       }
 
-      let currentType = null;
-      let currentCount = 0;
-      let currentProfit = 0;
+      function renderStreaks() {
+        const rows = getFilteredRealClosedRows();
+        const s = computeStreaks(rows);
 
-      let longestWin = { count: 0, profit: 0 };
-      let longestLoss = { count: 0, profit: 0 };
-      let bestRun = { count: 0, profit: -Infinity };
-      let worstRun = { count: 0, profit: Infinity };
-
-      function finalizeRun() {
-        if (!currentType || currentCount === 0) return;
-
-        if (currentType === 'W' && currentCount > longestWin.count) {
-          longestWin = { count: currentCount, profit: currentProfit };
-        }
-
-        if (currentType === 'L' && currentCount > longestLoss.count) {
-          longestLoss = { count: currentCount, profit: currentProfit };
-        }
-
-        if (currentProfit > bestRun.profit) {
-          bestRun = { count: currentCount, profit: currentProfit };
-        }
-
-        if (currentProfit < worstRun.profit) {
-          worstRun = { count: currentCount, profit: currentProfit };
-        }
-      }
-
-      decisionRows.forEach(row => {
-        if (row.result !== currentType) {
-          finalizeRun();
-          currentType = row.result;
-          currentCount = 1;
-          currentProfit = row.lucro || 0;
-        } else {
-          currentCount += 1;
-          currentProfit += row.lucro || 0;
-        }
-      });
-
-      finalizeRun();
-
-      let currentWin = 0;
-      let currentLoss = 0;
-      let rollingProfit = 0;
-
-      for (let i = decisionRows.length - 1; i >= 0; i--) {
-        const row = decisionRows[i];
-
-        if (row.result === 'W') {
-          if (currentLoss > 0) break;
-          currentWin += 1;
-          rollingProfit += row.lucro || 0;
-        } else if (row.result === 'L') {
-          if (currentWin > 0) break;
-          currentLoss += 1;
-          rollingProfit += row.lucro || 0;
-        }
-      }
-
-      return {
-        currentWin,
-        currentLoss,
-        currentProfit: rollingProfit,
-        longestWin: longestWin.count ? longestWin : { count: 0, profit: 0 },
-        longestLoss: longestLoss.count ? longestLoss : { count: 0, profit: 0 },
-        bestRun: Number.isFinite(bestRun.profit) ? bestRun : { count: 0, profit: 0 },
-        worstRun: Number.isFinite(worstRun.profit) ? worstRun : { count: 0, profit: 0 }
-      };
-    }
-
-    function renderStreaks() {
-      const rows = getFilteredRealClosedRows();
-      const s = computeStreaks(rows);
-
-      const cards = [
-        {
-          label: 'Win streak atual',
-          value: s.currentWin,
-          note: s.currentWin > 0 ? `Lucro da sequência: €${fmt(s.currentProfit)}` : 'Sem sequência de ganhos ativa'
-        },
-        {
-          label: 'Loss streak atual',
-          value: s.currentLoss,
-          note: s.currentLoss > 0 ? `Lucro da sequência: €${fmt(s.currentProfit)}` : 'Sem sequência de perdas ativa'
-        },
-        {
-          label: 'Maior win streak',
-          value: s.longestWin.count,
-          note: s.longestWin.count > 0 ? `Lucro: €${fmt(s.longestWin.profit)}` : 'Sem dados'
-        },
-        {
-          label: 'Maior loss streak',
-          value: s.longestLoss.count,
-          note: s.longestLoss.count > 0 ? `Lucro: €${fmt(s.longestLoss.profit)}` : 'Sem dados'
-        },
-        {
-          label: 'Melhor run',
-          value: s.bestRun.count,
-          note: s.bestRun.count > 0 ? `Lucro: €${fmt(s.bestRun.profit)}` : 'Sem dados'
-        },
-        {
-          label: 'Pior run',
-          value: s.worstRun.count,
-          note: s.worstRun.count > 0 ? `Lucro: €${fmt(s.worstRun.profit)}` : 'Sem dados'
-        }
-      ];
-
-      document.getElementById('streakCards').innerHTML = cards.map(card => `
-        <div class="card stat">
-          <div class="label">${card.label}</div>
-          <div class="value">${card.value}</div>
-          <div class="note">${card.note}</div>
-        </div>
-      `).join('');
-    }
-
-    function renderAnalytics() {
-      const rows = getFilteredRealClosedRows();
-
-      const byLeague = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
-      const byMarket = buildAnalytics(rows, 'market').map(r => ({ ...r, market: r.key }));
-      const bySource = buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key }));
-
-      renderStreaks();
-      renderAnalyticsTable('analyticsLeagueRows', byLeague, 'league');
-      renderAnalyticsTable('analyticsMarketRows', byMarket, 'market');
-      renderAnalyticsTable('analyticsSourceRows', bySource, 'sourceLabel');
-    }
-
-    function buildBotRowHtml(rows) {
-      let lastDate = null;
-      const html = [];
-
-      rows.forEach(r => {
-        const lucroModelo = r._lucroModeloLocal;
-        const lucroReal = r._lucroRealLocal;
-        const checked = r._apostadaBool ? 'checked' : '';
-        const resultadoAtual = ['W', 'L', 'P'].includes(String(r['Resultado'] || '').toUpperCase())
-          ? String(r['Resultado']).toUpperCase()
-          : '';
-
-        if (r['Data'] !== lastDate) {
-          lastDate = r['Data'];
-          html.push(`
-            <tr class="day-divider">
-              <td colspan="14">📅 ${escapeHtml(formatDatePt(r['Data']))}</td>
-            </tr>
-          `);
-        }
-
-        html.push(`
-          <tr>
-            <td><span class="tag source-bot">Bot</span></td>
-            <td>${escapeHtml(r['Data'] || '—')}</td>
-            <td><span class="tag">${escapeHtml(r['Liga'] || '—')}</span></td>
-            <td>${escapeHtml(r['Jogo'] || '—')}</td>
-            <td>${escapeHtml(r['Mercado'] || '—')}</td>
-            <td class="mono">${escapeHtml(r['Odd'] || '—')}</td>
-            <td class="mono">${escapeHtml(r['Stake€'] || '—')}</td>
-            <td>
-              ${r._apostadaBool
-                ? '<span class="tag exec-yes">Sim</span>'
-                : '<span class="tag exec-no">Não</span>'}
-            </td>
-            <td>
-              <input class="check js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} />
-            </td>
-            <td>
-              <input
-                class="number small-input js-odd-real"
-                type="text"
-                inputmode="decimal"
-                data-pick-key="${escapeHtml(r._pickKey)}"
-                value="${escapeHtml(r['OddReal'] || '')}"
-                placeholder="1.85"
-              />
-            </td>
-            <td>
-              <input
-                class="number small-input js-stake-real"
-                type="text"
-                inputmode="decimal"
-                data-pick-key="${escapeHtml(r._pickKey)}"
-                value="${escapeHtml(r['StakeReal€'] || '')}"
-                placeholder="10"
-              />
-            </td>
-            <td>
-              <select class="select small-input js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}">
-                <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
-                <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
-                <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
-                <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
-              </select>
-            </td>
-            <td class="mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
-            <td class="mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
-          </tr>
-        `);
-      });
-
-      return html;
-    }
-
-    function buildBotCardsHtml(rows) {
-      if (!rows.length) {
-        return `<div class="empty">Nenhuma pick encontrada com os filtros atuais.</div>`;
-      }
-
-      return rows.map(r => {
-        const resultadoAtual = ['W', 'L', 'P'].includes(String(r['Resultado'] || '').toUpperCase())
-          ? String(r['Resultado']).toUpperCase()
-          : '';
-        const checked = r._apostadaBool ? 'checked' : '';
-        const lucroModelo = r._lucroModeloLocal;
-        const lucroReal = r._lucroRealLocal;
-
-        return `
-          <div class="mobile-bet-card">
-            <div class="mobile-bet-top">
-              <div>
-                <div class="mobile-bet-title">${escapeHtml(r['Jogo'] || '—')}</div>
-                <div class="mobile-bet-sub">${escapeHtml(formatDatePt(r['Data']))} • ${escapeHtml(r['Liga'] || '—')}</div>
-              </div>
-              <div class="mobile-bet-tags">
-                <span class="tag source-bot">Bot</span>
-                ${resultLabel(r['Resultado'])}
-              </div>
-            </div>
-
-            <div class="mobile-bet-grid">
-              <div class="mobile-bet-cell">
-                <div class="k">Mercado</div>
-                <div class="v">${escapeHtml(r['Mercado'] || '—')}</div>
-              </div>
-              <div class="mobile-bet-cell">
-                <div class="k">Odd modelo</div>
-                <div class="v mono">${escapeHtml(r['Odd'] || '—')}</div>
-              </div>
-              <div class="mobile-bet-cell">
-                <div class="k">Stake modelo</div>
-                <div class="v mono">${escapeHtml(r['Stake€'] || '—')}</div>
-              </div>
-              <div class="mobile-bet-cell">
-                <div class="k">Executada</div>
-                <div class="v">${r._apostadaBool ? 'Sim' : 'Não'}</div>
-              </div>
-              <div class="mobile-bet-cell">
-                <div class="k">Lucro modelo</div>
-                <div class="v mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</div>
-              </div>
-              <div class="mobile-bet-cell">
-                <div class="k">Lucro real</div>
-                <div class="v mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</div>
-              </div>
-            </div>
-
-            <div class="mobile-bet-actions">
-              <div class="mobile-inline">
-                <label class="item compact" style="display:flex;align-items:center;gap:10px;">
-                  <input class="check js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} />
-                  <span>Marcar executada</span>
-                </label>
-
-                <div>
-                  <label class="small">Resultado</label>
-                  <select class="select js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}">
-                    <option value="" ${!resultadoAtual ? 'selected' : ''}>Pendente</option>
-                    <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>Win</option>
-                    <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>Loss</option>
-                    <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>Push</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="mobile-inline">
-                <div>
-                  <label class="small">Odd real</label>
-                  <input
-                    class="number js-odd-real"
-                    type="text"
-                    inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r['OddReal'] || '')}"
-                    placeholder="1.85"
-                  />
-                </div>
-                <div>
-                  <label class="small">Stake real</label>
-                  <input
-                    class="number js-stake-real"
-                    type="text"
-                    inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r['StakeReal€'] || '')}"
-                    placeholder="10"
-                  />
-                </div>
-              </div>
-            </div>
+        document.getElementById('streakCards').innerHTML = [
+          { label: 'Win streak atual', value: s.currentWin, note: 'Sequência ativa de ganhos' },
+          { label: 'Loss streak atual', value: s.currentLoss, note: 'Sequência ativa de perdas' },
+          { label: 'Maior win streak', value: s.longestWin, note: 'Melhor sequência histórica filtrada' },
+          { label: 'Maior loss streak', value: s.longestLoss, note: 'Pior sequência histórica filtrada' }
+        ].map(card => `
+          <div class="stat">
+            <div class="label">${card.label}</div>
+            <div class="value">${card.value}</div>
+            <div class="note">${card.note}</div>
           </div>
-        `;
-      }).join('');
-    }
-
-    function renderFootball() {
-      const filters = getGlobalFilters();
-      const filteredRows = filterBotRows(getDailyRowsMerged(), filters);
-      const rows = sortBotRowsForDisplay(filteredRows);
-
-      document.getElementById('footballRows').innerHTML = rows.length
-        ? buildBotRowHtml(rows).join('')
-        : `<tr><td colspan="14"><div class="empty">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>`;
-
-      document.getElementById('footballCards').innerHTML = buildBotCardsHtml(rows);
-
-      bindBotTableControls();
-    }
-
-    function renderBotHistoryOperational() {
-      const filters = getGlobalFilters();
-      const filteredRows = filterBotRows(getHistoryRowsMerged(), filters);
-      const rows = sortBotRowsForDisplay(filteredRows);
-
-      document.getElementById('historyRows').innerHTML = rows.length
-        ? buildBotRowHtml(rows).join('')
-        : `<tr><td colspan="14"><div class="empty">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>`;
-
-      document.getElementById('historyCards').innerHTML = buildBotCardsHtml(rows);
-
-      bindBotTableControls();
-    }
-
-    function buildManualCardsHtml(rows) {
-      if (!rows.length) {
-        return `<div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div>`;
+        `).join('');
       }
 
-      return rows.map(b => `
-        <div class="mobile-bet-card">
-          <div class="mobile-bet-top">
-            <div>
-              <div class="mobile-bet-title">${escapeHtml(b.jogo || '—')}</div>
-              <div class="mobile-bet-sub">${escapeHtml(formatDatePt(b.data))} • ${escapeHtml(b.liga || '—')}</div>
-            </div>
-            <div class="mobile-bet-tags">
-              <span class="tag source-manual">Manual</span>
-              ${resultLabel(b.resultado)}
-            </div>
-          </div>
-
-          <div class="mobile-bet-grid">
-            <div class="mobile-bet-cell">
-              <div class="k">Mercado</div>
-              <div class="v">${escapeHtml(b.mercado || '—')}</div>
-            </div>
-            <div class="mobile-bet-cell">
-              <div class="k">Odd</div>
-              <div class="v mono">${escapeHtml(b.odd || '—')}</div>
-            </div>
-            <div class="mobile-bet-cell">
-              <div class="k">Stake</div>
-              <div class="v mono">${escapeHtml(b.stake || '—')}</div>
-            </div>
-            <div class="mobile-bet-cell">
-              <div class="k">Lucro</div>
-              <div class="v mono ${profitClass(b._lucro)}">${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</div>
-            </div>
-          </div>
-
-          <div class="mobile-bet-actions">
-            <div>
-              <label class="small">Resultado</label>
-              <select class="select js-manual-resultado" data-id="${escapeHtml(b.id)}">
-                <option value="" ${!b.resultado ? 'selected' : ''}>Pendente</option>
-                <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>Win</option>
-                <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>Loss</option>
-                <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
-              </select>
-            </div>
-
-            <div class="mobile-inline">
-              <div class="item compact">${escapeHtml(b.notas || 'Sem notas')}</div>
-              <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderManualBets() {
-      const filters = getGlobalFilters();
-      const rows = sortManualRowsForDisplay(filterManualRows(getManualRowsMerged(), filters));
-
-      let lastDate = null;
-      const html = [];
-
-      rows.forEach(b => {
-        if (b.data !== lastDate) {
-          lastDate = b.data;
-          html.push(`
-            <tr class="day-divider">
-              <td colspan="12">📅 ${escapeHtml(formatDatePt(b.data))}</td>
-            </tr>
-          `);
-        }
-
-        html.push(`
-          <tr>
-            <td><span class="tag source-manual">Manual</span></td>
-            <td><span class="tag exec-yes">Sim</span></td>
-            <td>${escapeHtml(b.data || '—')}</td>
-            <td>${escapeHtml(b.liga || '—')}</td>
-            <td>${escapeHtml(b.jogo || '—')}</td>
-            <td>${escapeHtml(b.mercado || '—')}</td>
-            <td class="mono">${escapeHtml(b.odd || '—')}</td>
-            <td class="mono">${escapeHtml(b.stake || '—')}</td>
-            <td>
-              <select class="select js-manual-resultado" data-id="${escapeHtml(b.id)}">
-                <option value="" ${!b.resultado ? 'selected' : ''}>Pendente</option>
-                <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>Win</option>
-                <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>Loss</option>
-                <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
-              </select>
-            </td>
-            <td class="mono ${profitClass(b._lucro)}">${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
-            <td>${escapeHtml(b.notas || '—')}</td>
-            <td>
-              <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
-            </td>
-          </tr>
-        `);
-      });
-
-      document.getElementById('manualRows').innerHTML = rows.length
-        ? html.join('')
-        : `<tr><td colspan="12"><div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>`;
-
-      document.getElementById('manualCards').innerHTML = buildManualCardsHtml(rows);
-
-      bindManualControls();
-    }
-
-    function renderNba() {
-      document.getElementById('nbaRows').innerHTML = state.nba.length ? state.nba.map(r => `
-        <tr>
-          <td>${escapeHtml(r['Date'] || '—')}</td>
-          <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${escapeHtml(r['HomeTeam'])} vs ${escapeHtml(r['AwayTeam'])}` : '—'}</td>
-          <td>${escapeHtml(r['Market'] || '—')}</td>
-          <td class="mono">${escapeHtml(r['Line'] || '—')}</td>
-          <td class="mono">${escapeHtml(r['Odd'] || '—')}</td>
-          <td class="mono">${escapeHtml(r['Stake€'] || '—')}</td>
-        </tr>
-      `).join('') : `<tr><td colspan="6"><div class="empty">Sem picks NBA neste momento.</div></td></tr>`;
-    }
-
-    function renderSummary() {
-      const m = getMetrics();
-      const r = getRiskMetrics();
-
-      const bestModelSession = [...getResolvedHistorySinceSession()]
-        .map(row => ({ jogo: row['Jogo'], lucro: row._lucroModeloLocal ?? -9999 }))
-        .sort((a, b) => b.lucro - a.lucro)[0];
-
-      const bestModelGeneral = [...getResolvedHistory()]
-        .map(row => ({ jogo: row['Jogo'], lucro: row._lucroModeloLocal ?? -9999 }))
-        .sort((a, b) => b.lucro - a.lucro)[0];
-
-      const allRealClosedSession = [
-        ...getRealResolvedBotHistorySinceSession().map(row => ({ jogo: row['Jogo'], lucro: row._lucroRealLocal ?? -9999 })),
-        ...getResolvedManualBetsSinceSession().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
-      ];
-
-      const allRealClosedGeneral = [
-        ...getRealResolvedBotHistory().map(row => ({ jogo: row['Jogo'], lucro: row._lucroRealLocal ?? -9999 })),
-        ...getResolvedManualBets().map(b => ({ jogo: `${b.jogo} (${b.mercado})`, lucro: b._lucro ?? -9999 }))
-      ];
-
-      const bestRealSession = [...allRealClosedSession].sort((a, b) => b.lucro - a.lucro)[0];
-      const bestRealGeneral = [...allRealClosedGeneral].sort((a, b) => b.lucro - a.lucro)[0];
-
-      const items = [
-        `Sessão atual desde ${formatDatePt(m.sessionStartDate)}`,
-        `Banca atual: €${fmt(r.bancaAtual)} | Disponível estimada: €${fmt(r.bancaDisponivel)}`,
-        `Em aberto: ${r.openCount} apostas | Stake em risco: €${fmt(r.stakeOpen)} | Potencial: €${fmt(r.potencialLucro)}`,
-        `Sessão • Real: lucro €${fmt(m.sessao.realProfit)} | ROI ${pct(m.sessao.realRoi)} | WR ${pct(m.sessao.realWr)} | banca €${fmt(m.sessao.realBankroll)}`,
-        `Geral • Real: lucro €${fmt(m.geral.realProfit)} | ROI ${pct(m.geral.realRoi)} | WR ${pct(m.geral.realWr)} | banca €${fmt(m.geral.realBankroll)}`,
-        `Sessão • Modelo: lucro €${fmt(m.sessao.modelProfit)} | ROI ${pct(m.sessao.modelRoi)} | WR ${pct(m.sessao.modelWr)}`,
-        `Geral • Modelo: lucro €${fmt(m.geral.modelProfit)} | ROI ${pct(m.geral.modelRoi)} | WR ${pct(m.geral.modelWr)}`,
-        `Melhor pick modelo sessão: ${bestModelSession ? `${bestModelSession.jogo} • €${fmt(bestModelSession.lucro)}` : '—'}`,
-        `Melhor pick modelo geral: ${bestModelGeneral ? `${bestModelGeneral.jogo} • €${fmt(bestModelGeneral.lucro)}` : '—'}`,
-        `Melhor aposta real sessão: ${bestRealSession ? `${bestRealSession.jogo} • €${fmt(bestRealSession.lucro)}` : '—'}`,
-        `Melhor aposta real geral: ${bestRealGeneral ? `${bestRealGeneral.jogo} • €${fmt(bestRealGeneral.lucro)}` : '—'}`,
-        `Última pick NBA: ${state.nba[0] ? `${state.nba[0]['HomeTeam']} vs ${state.nba[0]['AwayTeam']} • ${state.nba[0]['Market']} ${state.nba[0]['Line']}` : '—'}`
-      ];
-
-      document.getElementById('summaryList').innerHTML =
-        items.map(t => `<div class="item">${escapeHtml(t)}</div>`).join('');
-    }
-
-    function buildBankrollSeries(rows, initialValue) {
-      const points = [{ label: 'Inicial', value: initialValue }];
-      let acc = initialValue;
-
-      rows.forEach((r, idx) => {
-        acc += r.lucro || 0;
-        points.push({
-          label: r.date || `Aposta ${idx + 1}`,
-          value: acc
-        });
-      });
-
-      return points;
-    }
-
-    function drawLine(ctx, points, width, height, padding, minVal, range, color) {
-      const xStep = points.length > 1 ? (width - padding * 2) / (points.length - 1) : 0;
-      const getX = i => padding + i * xStep;
-      const getY = v => height - padding - ((v - minVal) / range) * (height - padding * 2);
-
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-
-      points.forEach((p, i) => {
-        const x = getX(i);
-        const y = getY(p.value);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-
-      ctx.stroke();
-
-      ctx.fillStyle = color;
-      points.forEach((p, i) => {
-        const x = getX(i);
-        const y = getY(p.value);
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-
-    function drawBankrollChart() {
-      const canvas = document.getElementById('bankrollChart');
-      const ctx = canvas.getContext('2d');
-
-      const allRows = getFilteredRealClosedRows();
-      const sessionRows = allRows.filter(r => isOnOrAfterSession(r.date));
-
-      const generalPoints = buildBankrollSeries(allRows, state.bankrollInicial);
-      const sessionPoints = buildBankrollSeries(sessionRows, state.bankrollInicial);
-
-      const allValues = [...generalPoints.map(p => p.value), ...sessionPoints.map(p => p.value)];
-      const width = canvas.width;
-      const height = canvas.height;
-
-      ctx.clearRect(0, 0, width, height);
-
-      if (generalPoints.length < 2 && sessionPoints.length < 2) {
-        ctx.fillStyle = '#475569';
-        ctx.font = '16px sans-serif';
-        ctx.fillText('Ainda não há apostas reais resolvidas suficientes para desenhar o gráfico.', 20, 40);
-        return;
+      function renderAnalytics() {
+        const rows = getFilteredRealClosedRows();
+        renderAnalyticsTable('analyticsLeagueRows', buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key })), 'league');
+        renderAnalyticsTable('analyticsMarketRows', buildAnalytics(rows, 'market').map(r => ({ ...r, market: r.key })), 'market');
+        renderAnalyticsTable('analyticsSourceRows', buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key })), 'sourceLabel');
+        renderStreaks();
       }
 
-      const padding = 40;
-      const minVal = Math.min(...allValues);
-      const maxVal = Math.max(...allValues);
-      const range = Math.max(maxVal - minVal, 1);
-
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 1;
-
-      for (let i = 0; i < 5; i++) {
-        const y = padding + i * ((height - padding * 2) / 4);
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(width - padding, y);
-        ctx.stroke();
-      }
-
-      if (generalPoints.length >= 2) {
-        drawLine(ctx, generalPoints, width, height, padding, minVal, range, '#0f172a');
-      }
-
-      if (sessionPoints.length >= 2) {
-        drawLine(ctx, sessionPoints, width, height, padding, minVal, range, '#2563eb');
-      }
-
-      ctx.fillStyle = '#475569';
-      ctx.font = '12px sans-serif';
-      ctx.fillText(`€${fmt(maxVal)}`, 8, padding + 4);
-      ctx.fillText(`€${fmt(minVal)}`, 8, height - padding + 4);
-
-      const lastGeneral = generalPoints[generalPoints.length - 1];
-      const lastSession = sessionPoints[sessionPoints.length - 1];
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillText(`Geral: €${fmt(lastGeneral.value)}`, width - 180, 24);
-
-      ctx.fillStyle = '#2563eb';
-      ctx.fillText(`Sessão: €${fmt(lastSession.value)}`, width - 180, 44);
-    }
-
-    function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    function exportManualJson() {
-      const filename = `apostas_manuais_${new Date().toISOString().slice(0, 10)}.json`;
-      downloadTextFile(filename, JSON.stringify(state.manualBets, null, 2), 'application/json;charset=utf-8');
-    }
-
-    function validateImportedManualBets(data) {
-      if (!Array.isArray(data)) throw new Error('O ficheiro JSON tem de ser uma lista de apostas.');
-
-      return data.map((item, index) => {
-        if (typeof item !== 'object' || item === null) {
-          throw new Error(`Aposta inválida na posição ${index + 1}.`);
-        }
-
+      function formatPickSignalHtml(row) {
+        const signal = getPrimaryPickSignal(row);
         return {
+          recStake: `
+            <div>
+              <div><strong>€${fmt(signal.recStake.value)}</strong></div>
+              <div class="note">${pct(signal.recStake.pctBankroll)} da banca</div>
+            </div>
+          `,
+          score: `<span class="mini ${signal.scoreBadge.cls}">${escapeHtml(signal.scoreBadge.label)}</span>`,
+          alerts: signal.alerts.map(a => `<span class="mini ${a.level === 'good' ? 'good' : a.level === 'bad' ? 'bad' : a.level === 'warn' ? 'warn' : 'info'}">${escapeHtml(a.text)}</span>`).join(' ')
+        };
+      }
+
+      function buildBotRowHtml(rows) {
+        return rows.map(r => {
+          const checked = r._apostadaBool ? 'checked' : '';
+          const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
+          const signal = formatPickSignalHtml(r);
+
+          return `
+            <tr>
+              <td><span class="mini info">Bot</span></td>
+              <td>${escapeHtml(r['Data'] || '—')}</td>
+              <td>${escapeHtml(r['Liga'] || '—')}</td>
+              <td>${escapeHtml(r['Jogo'] || '—')}</td>
+              <td>${escapeHtml(r['Mercado'] || '—')}</td>
+              <td>${r._oddModeloNum === null ? '—' : fmt(r._oddModeloNum)}</td>
+              <td>${r._stakeModeloNum === null ? '—' : `€${fmt(r._stakeModeloNum)}`}</td>
+              <td>${signal.recStake}</td>
+              <td>${signal.score}</td>
+              <td>${signal.alerts}</td>
+              <td>${r._apostadaBool ? '<span class="mini good">Sim</span>' : '<span class="mini warn">Não</span>'}</td>
+              <td>
+                <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} />
+              </td>
+              <td>
+                <input class="js-odd-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.OddReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
+              </td>
+              <td>
+                <input class="js-stake-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.StakeReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
+              </td>
+              <td>
+                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;">
+                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
+                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
+                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
+                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
+                </select>
+              </td>
+              <td ${profitClass(r._lucroModeloLocal)}>${r._lucroModeloLocal === null ? '—' : `€${fmt(r._lucroModeloLocal)}`}</td>
+              <td ${profitClass(r._lucroRealLocal)}>${r._lucroRealLocal === null ? '—' : `€${fmt(r._lucroRealLocal)}`}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function renderFootball() {
+        const filters = getGlobalFilters();
+        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
+        document.getElementById('footballRows').innerHTML = rows.length
+          ? buildBotRowHtml(rows)
+          : '<tr><td colspan="17"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderBotHistoryOperational() {
+        const filters = getGlobalFilters();
+        const rows = sortBotRowsForDisplay(filterBotRows(getHistoryRowsMerged(), filters));
+        document.getElementById('historyRows').innerHTML = rows.length
+          ? buildBotRowHtml(rows)
+          : '<tr><td colspan="17"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderManualBets() {
+        const filters = getGlobalFilters();
+        const rows = sortManualRowsForDisplay(filterManualRows(getManualRowsMerged(), filters));
+
+        document.getElementById('manualRows').innerHTML = rows.length
+          ? rows.map(b => `
+              <tr>
+                <td><span class="mini warn">Manual</span></td>
+                <td>${escapeHtml(b.data || '—')}</td>
+                <td>${escapeHtml(b.liga || '—')}</td>
+                <td>${escapeHtml(b.jogo || '—')}</td>
+                <td>${escapeHtml(b.mercado || '—')}</td>
+                <td>${escapeHtml(b.odd || '—')}</td>
+                <td>${escapeHtml(b.stake || '—')}</td>
+                <td>
+                  <select class="js-manual-resultado" data-id="${escapeHtml(b.id)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;">
+                    <option value="" ${!b.resultado ? 'selected' : ''}>Pend.</option>
+                    <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>W</option>
+                    <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>L</option>
+                    <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>P</option>
+                  </select>
+                </td>
+                <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
+                <td>${escapeHtml(b.notas || '—')}</td>
+                <td><button class="js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button></td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="11"><div class="note">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderNba() {
+        document.getElementById('nbaRows').innerHTML = state.nba.length
+          ? state.nba.map(r => `
+              <tr>
+                <td>${escapeHtml(r['Date'] || '—')}</td>
+                <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${escapeHtml(r['HomeTeam'])} vs ${escapeHtml(r['AwayTeam'])}` : '—'}</td>
+                <td>${escapeHtml(r['Market'] || '—')}</td>
+                <td>${escapeHtml(r['Line'] || '—')}</td>
+                <td>${escapeHtml(r['Odd'] || '—')}</td>
+                <td>${escapeHtml(r['Stake€'] || '—')}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="6"><div class="note">Sem picks NBA neste momento.</div></td></tr>';
+      }
+
+      function renderSummary() {
+        const m = getMetrics();
+        const r = getRiskMetrics();
+        const decision = computeDecisionMode();
+        const stake = computeDynamicStake();
+
+        const items = [
+          `Decisão atual: ${decision.label} • ${decision.note}`,
+          `Stake dinâmica: ${stake.label} (x${fmt(stake.multiplier)}) • ${stake.note}`,
+          `Banca atual: €${fmt(r.bancaAtual)} • disponível: €${fmt(r.bancaDisponivel)}`,
+          `Sessão real: lucro €${fmt(m.sessao.realProfit)} • ROI ${pct(m.sessao.realRoi)} • WR ${pct(m.sessao.realWr)}`,
+          `Geral real: lucro €${fmt(m.geral.realProfit)} • ROI ${pct(m.geral.realRoi)} • WR ${pct(m.geral.realWr)}`,
+          `Abertas: ${r.openCount} • stake exposta €${fmt(r.stakeOpen)} • potencial €${fmt(r.potencialLucro)}`
+        ];
+
+        document.getElementById('summaryList').innerHTML = items.map(t => `
+          <div class="stat">
+            <div class="note">${escapeHtml(t)}</div>
+          </div>
+        `).join('');
+      }
+
+      function bindBotTableControls() {
+        document.querySelectorAll('.js-apostada').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('change', e => {
+            const key = e.target.dataset.pickKey;
+            const edit = ensureEditObject(key);
+            edit.apostada = e.target.checked;
+
+            if (edit.apostada) {
+              const sourceRow =
+                getDailyRowsMerged().find(r => r._pickKey === key) ||
+                getHistoryRowsMerged().find(r => r._pickKey === key);
+
+              if (sourceRow) {
+                if (!String(edit.stakeReal || '').trim()) {
+                  const recStake = computeRecommendedStake(sourceRow);
+                  edit.stakeReal = recStake.value != null ? String(recStake.value) : '';
+                }
+                if (!String(edit.oddReal || '').trim()) {
+                  edit.oddReal = sourceRow['Odd'] || '';
+                }
+              }
+            }
+
+            rerenderAll();
+          });
+        });
+
+        document.querySelectorAll('.js-odd-real').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('input', e => {
+            const key = e.target.dataset.pickKey;
+            ensureEditObject(key).oddReal = e.target.value;
+            saveLocalState();
+            markDirty();
+          });
+
+          el.addEventListener('blur', e => {
+            const key = e.target.dataset.pickKey;
+            ensureEditObject(key).oddReal = e.target.value;
+            rerenderAll();
+          });
+        });
+
+        document.querySelectorAll('.js-stake-real').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('input', e => {
+            const key = e.target.dataset.pickKey;
+            ensureEditObject(key).stakeReal = e.target.value;
+            saveLocalState();
+            markDirty();
+          });
+
+          el.addEventListener('blur', e => {
+            const key = e.target.dataset.pickKey;
+            ensureEditObject(key).stakeReal = e.target.value;
+            rerenderAll();
+          });
+        });
+
+        document.querySelectorAll('.js-bot-resultado').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('change', e => {
+            const key = e.target.dataset.pickKey;
+            ensureEditObject(key).resultadoManual = e.target.value;
+            rerenderAll();
+          });
+        });
+      }
+
+      function bindManualControls() {
+        document.querySelectorAll('.js-manual-resultado').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('change', e => {
+            const id = e.target.dataset.id;
+            const bet = state.manualBets.find(b => b.id === id);
+            if (!bet) return;
+            bet.resultado = e.target.value;
+            rerenderAll();
+          });
+        });
+
+        document.querySelectorAll('.js-delete-manual').forEach(el => {
+          if (el.dataset.bound === '1') return;
+          el.dataset.bound = '1';
+
+          el.addEventListener('click', e => {
+            const id = e.target.dataset.id;
+            state.manualBets = state.manualBets.filter(b => b.id !== id);
+            rerenderAll();
+          });
+        });
+      }
+
+      function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportManualJson() {
+        const filename = `apostas_manuais_${todayIso()}.json`;
+        downloadTextFile(filename, JSON.stringify(state.manualBets, null, 2), 'application/json;charset=utf-8');
+      }
+
+      function validateImportedManualBets(data) {
+        if (!Array.isArray(data)) throw new Error('O ficheiro JSON tem de ser uma lista.');
+
+        return data.map((item) => ({
           id: String(item.id || makeManualId()),
           data: String(item.data || ''),
           liga: String(item.liga || ''),
@@ -2593,453 +1808,298 @@
             ? String(item.resultado || '').toUpperCase()
             : '',
           notas: String(item.notas || '')
-        };
-      });
-    }
-
-    async function importManualJsonFromFile(file) {
-      try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        const validated = validateImportedManualBets(parsed);
-
-        const shouldReplace = confirm('Queres substituir as apostas manuais atuais pelas do ficheiro importado?');
-        if (!shouldReplace) return;
-
-        state.manualBets = validated;
-        rerenderAll();
-        alert(`Importação concluída. ${validated.length} apostas manuais carregadas.`);
-      } catch (error) {
-        alert(`Erro ao importar JSON: ${error.message}`);
-      }
-    }
-
-    function exportRealCsv() {
-      const rows = getFilteredRealClosedRows();
-
-      if (!rows.length) {
-        alert('Não há apostas reais fechadas para exportar com os filtros atuais.');
-        return;
+        }));
       }
 
-      const headers = ['Data', 'Origem', 'Liga', 'Jogo', 'Mercado', 'Resultado', 'Odd', 'Stake', 'Lucro'];
-      const lines = [headers.join(';')];
+      async function importManualJsonFromFile(file) {
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          const validated = validateImportedManualBets(parsed);
+          state.manualBets = validated;
+          rerenderAll();
+          alert(`Importação concluída. ${validated.length} apostas manuais carregadas.`);
+        } catch (error) {
+          alert(`Erro ao importar JSON: ${error.message}`);
+        }
+      }
 
-      rows.forEach(r => {
-        const values = [
-          r.date || '',
-          r.sourceLabel || '',
-          r.league || '',
-          r.game || '',
-          r.market || '',
-          r.result || '',
-          r.odd ?? '',
-          fmt(r.stake),
-          fmt(r.lucro)
-        ].map(v => `"${String(v).replaceAll('"', '""')}"`);
-
-        lines.push(values.join(';'));
-      });
-
-      const filename = `historico_real_${new Date().toISOString().slice(0, 10)}.csv`;
-      downloadTextFile(filename, lines.join('\n'), 'text/csv;charset=utf-8');
-    }
-
-    async function loadCloudState() {
-      try {
-        const res = await fetch(`${SYNC_API_BASE}/state`, { cache: 'no-store' });
-        const data = await res.json();
-
-        if (!data.ok) {
-          alert('Erro ao carregar estado cloud.');
-          console.error(data);
+      function exportRealCsv() {
+        const rows = getFilteredRealClosedRows();
+        if (!rows.length) {
+          alert('Não há apostas reais fechadas para exportar com os filtros atuais.');
           return;
         }
 
-        const cloud = data.state || {};
-        state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
-        state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
-        state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
-        state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
+        const headers = ['Data', 'Origem', 'Liga', 'Jogo', 'Mercado', 'Resultado', 'Odd', 'Stake', 'Lucro'];
+        const lines = [headers.join(';')];
 
-        saveLocalState();
-        hasPendingCloudChanges = false;
-        rerenderAll(false);
-        alert('Estado cloud carregado com sucesso.');
-      } catch (e) {
-        alert('Erro de ligação ao serviço cloud.');
-        console.error(e);
-      }
-    }
+        rows.forEach(r => {
+          const values = [
+            r.date || '',
+            r.sourceLabel || '',
+            r.league || '',
+            r.game || '',
+            r.market || '',
+            r.result || '',
+            r.odd ?? '',
+            fmt(r.stake),
+            fmt(r.lucro)
+          ].map(v => `"${String(v).replaceAll('"', '""')}"`);
 
-    async function saveCloudState(showSuccess = true) {
-      try {
-        if (autoSaveInFlight) return false;
-
-        autoSaveInFlight = true;
-
-        const payload = {
-          bankrollInicial: state.bankrollInicial,
-          localEdits: state.localEdits,
-          manualBets: state.manualBets,
-          sessionStartDate: getSessionStartDate()
-        };
-
-        const res = await fetch(`${SYNC_API_BASE}/state`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          lines.push(values.join(';'));
         });
 
-        const data = await res.json();
+        downloadTextFile(`historico_real_${todayIso()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8');
+      }
 
-        if (!data.ok) {
-          if (showSuccess) alert('Erro ao guardar estado cloud.');
-          console.error(data);
+      async function loadCloudState() {
+        try {
+          const res = await fetch(`${SYNC_API_BASE}/state`, { cache: 'no-store' });
+          const data = await res.json();
+
+          if (!data.ok) {
+            alert('Erro ao carregar estado cloud.');
+            return;
+          }
+
+          const cloud = data.state || {};
+          state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
+          state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
+          state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
+          state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
+
+          saveLocalState();
+          hasPendingCloudChanges = false;
+          rerenderAll(false);
+          alert('Estado cloud carregado com sucesso.');
+        } catch (e) {
+          alert('Erro de ligação ao serviço cloud.');
+        }
+      }
+
+      async function saveCloudState(showSuccess = true) {
+        try {
+          if (autoSaveInFlight) return false;
+          autoSaveInFlight = true;
+
+          const payload = {
+            bankrollInicial: state.bankrollInicial,
+            localEdits: state.localEdits,
+            manualBets: state.manualBets,
+            sessionStartDate: getSessionStartDate()
+          };
+
+          const res = await fetch(`${SYNC_API_BASE}/state`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (!data.ok) {
+            if (showSuccess) alert('Erro ao guardar estado cloud.');
+            return false;
+          }
+
+          hasPendingCloudChanges = false;
+          if (showSuccess) alert('Estado guardado na cloud com sucesso.');
+          return true;
+        } catch (e) {
+          if (showSuccess) alert('Erro de ligação ao serviço cloud.');
           return false;
+        } finally {
+          autoSaveInFlight = false;
+        }
+      }
+
+      function markDirty() {
+        hasPendingCloudChanges = true;
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+          if (hasPendingCloudChanges) saveCloudState(false);
+        }, 2000);
+      }
+
+      function updateApostasButton() {
+        const btn = document.getElementById('btnApostas');
+        const today = todayIso();
+        const todaysPicks = state.footballDaily.filter(r => normalizeDateString(r['Data']) === today);
+        const count = todaysPicks.length;
+
+        if (count === 0) {
+          btn.textContent = 'Sem picks hoje';
+          return;
         }
 
-        hasPendingCloudChanges = false;
+        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : 0;
+        btn.textContent = `${count} pick${count > 1 ? 's' : ''} hoje • edge méd. ${fmt(avgEdge)}%`;
+      }
 
-        if (showSuccess) {
-          alert('Estado guardado na cloud com sucesso.');
+      function rerenderAll(triggerAutoSave = true) {
+        saveLocalState();
+        fillFilters();
+        renderTopDecisionBlock();
+        renderQuickStats();
+        renderAlertsCenter();
+        renderOpenBets();
+        renderFootball();
+        renderBotHistoryOperational();
+        renderManualBets();
+        renderAnalytics();
+        renderNba();
+        renderSummary();
+        bindBotTableControls();
+        bindManualControls();
+        updateApostasButton();
+
+        if (triggerAutoSave) markDirty();
+      }
+
+      function addManualBet() {
+        const data = document.getElementById('manualData').value;
+        const liga = document.getElementById('manualLiga').value.trim();
+        const jogo = document.getElementById('manualJogo').value.trim();
+        const mercado = document.getElementById('manualMercado').value.trim();
+        const odd = document.getElementById('manualOdd').value.trim();
+        const stake = document.getElementById('manualStake').value.trim();
+        const resultado = document.getElementById('manualResultado').value;
+        const notas = document.getElementById('manualNotas').value.trim();
+
+        if (!data || !jogo || !mercado || num(odd) === null || num(stake) === null) {
+          alert('Preenche pelo menos Data, Jogo, Mercado, Odd e Stake.');
+          return;
         }
 
-        return true;
-      } catch (e) {
-        if (showSuccess) alert('Erro de ligação ao serviço cloud.');
-        console.error(e);
-        return false;
-      } finally {
-        autoSaveInFlight = false;
+        state.manualBets.push({
+          id: makeManualId(),
+          data,
+          liga,
+          jogo,
+          mercado,
+          odd,
+          stake,
+          resultado,
+          notas
+        });
+
+        document.getElementById('manualData').value = '';
+        document.getElementById('manualLiga').value = '';
+        document.getElementById('manualJogo').value = '';
+        document.getElementById('manualMercado').value = '';
+        document.getElementById('manualOdd').value = '';
+        document.getElementById('manualStake').value = '';
+        document.getElementById('manualResultado').value = '';
+        document.getElementById('manualNotas').value = '';
+
+        rerenderAll();
       }
-    }
 
-    function markDirty() {
-      hasPendingCloudChanges = true;
-      scheduleAutoSaveCloud();
-    }
+      async function loadData() {
+        try {
+          const [dailyRes, historyRes, nbaRes] = await Promise.all([
+            fetch(URLS.footballDaily + '?t=' + Date.now()),
+            fetch(URLS.footballHistory + '?t=' + Date.now()),
+            fetch(URLS.nba + '?t=' + Date.now())
+          ]);
 
-    function scheduleAutoSaveCloud() {
-      if (!autoSaveEnabled) return;
+          const dailyText = await dailyRes.text();
+          const historyText = await historyRes.text();
+          const nbaText = await nbaRes.text();
 
-      if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
+          state.footballDaily = parseSemicolonCsv(dailyText);
+          state.footballHistory = parseSemicolonCsv(historyText);
+          state.nba = parseSemicolonCsv(nbaText);
+          state.lastUpdated = new Date();
+
+          hasPendingCloudChanges = false;
+          rerenderAll(false);
+        } catch (e) {
+          alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
+        }
       }
 
-      autoSaveTimer = setTimeout(async () => {
-        if (!hasPendingCloudChanges) return;
-        await saveCloudState(false);
-      }, 2000);
-    }
+      function rerenderFilteredSectionsOnly() {
+        renderTopDecisionBlock();
+        renderQuickStats();
+        renderAlertsCenter();
+        renderOpenBets();
+        renderFootball();
+        renderBotHistoryOperational();
+        renderManualBets();
+        renderAnalytics();
+        renderSummary();
+      }
 
-    function updateApostasButton() {
-      const btn = document.getElementById('btnApostas');
-      if (!btn) return;
+      document.getElementById('searchGlobal').addEventListener('input', rerenderFilteredSectionsOnly);
+      document.getElementById('sourceFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+      document.getElementById('leagueFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+      document.getElementById('marketFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+      document.getElementById('resultFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+      document.getElementById('executionFilter').addEventListener('change', rerenderFilteredSectionsOnly);
+      document.getElementById('dateFilter').addEventListener('change', rerenderFilteredSectionsOnly);
 
-      btn.classList.remove('apostas-neutral', 'apostas-warn', 'apostas-info', 'apostas-good', 'primary');
+      document.getElementById('refreshBtn').addEventListener('click', loadData);
+      document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
+      document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
 
-      const today = todayIso();
-
-      const todaysPicks = state.footballDaily.filter(r => {
-        const d = normalizeDateString(r['Data']);
-        return d === today;
+      document.getElementById('bankrollInput').addEventListener('input', e => {
+        const v = num(e.target.value);
+        state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+        rerenderAll();
       });
 
-      const count = todaysPicks.length;
-
-      if (count === 0) {
-        btn.textContent = '🔥 Sem picks hoje';
-        btn.classList.add('apostas-neutral');
-        return;
-      }
-
-      const validEdges = todaysPicks
-        .map(r => num(r['Edge%']))
-        .filter(v => v !== null);
-
-      const avgEdge = validEdges.length
-        ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length
-        : 0;
-
-      btn.textContent = `🔥 ${count} pick${count > 1 ? 's' : ''} hoje`;
-
-      if (avgEdge >= 8) {
-        btn.classList.add('apostas-good');
-      } else if (avgEdge >= 5) {
-        btn.classList.add('apostas-info');
-      } else {
-        btn.classList.add('apostas-warn');
-      }
-    }
-
-    function rerenderAll(triggerAutoSave = true) {
-      saveLocalState();
-      fillFilters();
-      renderStats();
-      renderRiskStats();
-      renderMobileCockpit();
-      renderOpenBets();
-      renderAnalytics();
-      renderFootball();
-      renderBotHistoryOperational();
-      renderManualBets();
-      renderNba();
-      renderSummary();
-      drawBankrollChart();
-      updateApostasButton();
-
-      if (triggerAutoSave) {
-        markDirty();
-      }
-    }
-
-    function bindBotTableControls() {
-      document.querySelectorAll('.js-apostada').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
-
-        el.addEventListener('change', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.apostada = e.target.checked;
-          rerenderAll();
-        });
+      document.getElementById('resetLocalBtn').addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEYS.bankroll);
+        localStorage.removeItem(STORAGE_KEYS.picks);
+        localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
+        state.bankrollInicial = 1000;
+        state.localEdits = {};
+        state.sessionStartDate = todayIso();
+        document.getElementById('bankrollInput').value = 1000;
+        rerenderAll();
       });
 
-      document.querySelectorAll('.js-odd-real').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
-
-        el.addEventListener('input', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.oddReal = e.target.value;
-          saveLocalState();
-          markDirty();
-        });
-
-        el.addEventListener('blur', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.oddReal = e.target.value;
-          rerenderAll();
-        });
-
-        el.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.target.blur();
-          }
-        });
+      document.getElementById('clearManualBtn').addEventListener('click', () => {
+        if (!confirm('Queres apagar todas as apostas manuais deste browser?')) return;
+        state.manualBets = [];
+        rerenderAll();
       });
 
-      document.querySelectorAll('.js-stake-real').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
+      document.getElementById('addManualBetBtn').addEventListener('click', addManualBet);
+      document.getElementById('exportManualBtn').addEventListener('click', exportManualJson);
+      document.getElementById('exportRealCsvBtn').addEventListener('click', exportRealCsv);
 
-        el.addEventListener('input', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.stakeReal = e.target.value;
-          saveLocalState();
-          markDirty();
-        });
-
-        el.addEventListener('blur', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.stakeReal = e.target.value;
-          rerenderAll();
-        });
-
-        el.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.target.blur();
-          }
-        });
+      document.getElementById('importManualBtn').addEventListener('click', () => {
+        document.getElementById('importManualFile').click();
       });
 
-      document.querySelectorAll('.js-bot-resultado').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
-
-        el.addEventListener('change', e => {
-          const key = e.target.dataset.pickKey;
-          const edit = ensureEditObject(key);
-          edit.resultadoManual = e.target.value;
-          rerenderAll();
-        });
-      });
-    }
-
-    function bindManualControls() {
-      document.querySelectorAll('.js-manual-resultado').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
-
-        el.addEventListener('change', e => {
-          const id = e.target.dataset.id;
-          const bet = state.manualBets.find(b => b.id === id);
-          if (!bet) return;
-          bet.resultado = e.target.value;
-          rerenderAll();
-        });
+      document.getElementById('importManualFile').addEventListener('change', async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await importManualJsonFromFile(file);
+        e.target.value = '';
       });
 
-      document.querySelectorAll('.js-delete-manual').forEach(el => {
-        if (el.dataset.bound === '1') return;
-        el.dataset.bound = '1';
-
-        el.addEventListener('click', e => {
-          const id = e.target.dataset.id;
-          state.manualBets = state.manualBets.filter(b => b.id !== id);
-          rerenderAll();
-        });
-      });
-    }
-
-    function addManualBet() {
-      const data = document.getElementById('manualData').value;
-      const liga = document.getElementById('manualLiga').value.trim();
-      const jogo = document.getElementById('manualJogo').value.trim();
-      const mercado = document.getElementById('manualMercado').value.trim();
-      const odd = document.getElementById('manualOdd').value.trim();
-      const stake = document.getElementById('manualStake').value.trim();
-      const resultado = document.getElementById('manualResultado').value;
-      const notas = document.getElementById('manualNotas').value.trim();
-
-      if (!data || !jogo || !mercado || num(odd) === null || num(stake) === null) {
-        alert('Preenche pelo menos Data, Jogo, Mercado, Odd e Stake.');
-        return;
-      }
-
-      state.manualBets.push({
-        id: makeManualId(),
-        data,
-        liga,
-        jogo,
-        mercado,
-        odd,
-        stake,
-        resultado,
-        notas
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && hasPendingCloudChanges) {
+          saveCloudState(false);
+        }
       });
 
-      document.getElementById('manualData').value = '';
-      document.getElementById('manualLiga').value = '';
-      document.getElementById('manualJogo').value = '';
-      document.getElementById('manualMercado').value = '';
-      document.getElementById('manualOdd').value = '';
-      document.getElementById('manualStake').value = '';
-      document.getElementById('manualResultado').value = '';
-      document.getElementById('manualNotas').value = '';
+      window.addEventListener('beforeunload', () => {
+        if (hasPendingCloudChanges) {
+          saveCloudState(false);
+        }
+      });
 
-      rerenderAll();
-    }
-
-    async function loadData() {
-      try {
-        const [dailyRes, historyRes, nbaRes] = await Promise.all([
-          fetch(URLS.footballDaily + '?t=' + Date.now()),
-          fetch(URLS.footballHistory + '?t=' + Date.now()),
-          fetch(URLS.nba + '?t=' + Date.now())
-        ]);
-
-        const dailyText = await dailyRes.text();
-        const historyText = await historyRes.text();
-        const nbaText = await nbaRes.text();
-
-        state.footballDaily = parseSemicolonCsv(dailyText);
-        state.footballHistory = parseSemicolonCsv(historyText);
-        state.nba = parseSemicolonCsv(nbaText);
-        state.lastUpdated = new Date().toISOString();
-
-        hasPendingCloudChanges = false;
-        rerenderAll(false);
-      } catch (e) {
-        alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
-        console.error(e);
-      }
-    }
-
-    function rerenderFilteredSectionsOnly() {
-      renderRiskStats();
-      renderMobileCockpit();
-      renderOpenBets();
-      renderAnalytics();
-      renderFootball();
-      renderBotHistoryOperational();
-      renderManualBets();
-      renderSummary();
-      drawBankrollChart();
-    }
-
-    document.getElementById('searchGlobal').addEventListener('input', rerenderFilteredSectionsOnly);
-    document.getElementById('sourceFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-    document.getElementById('leagueFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-    document.getElementById('marketFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-    document.getElementById('resultFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-    document.getElementById('executionFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-    document.getElementById('dateFilter').addEventListener('change', rerenderFilteredSectionsOnly);
-
-    document.getElementById('refreshBtn').addEventListener('click', loadData);
-    document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
-    document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
-
-    document.getElementById('bankrollInput').addEventListener('input', e => {
-      const v = num(e.target.value);
-      state.bankrollInicial = v !== null && v >= 0 ? v : 0;
-      rerenderAll();
-    });
-
-    document.getElementById('resetLocalBtn').addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEYS.bankroll);
-      localStorage.removeItem(STORAGE_KEYS.picks);
-      localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
-      state.bankrollInicial = 1000;
-      state.localEdits = {};
-      state.sessionStartDate = todayIso();
-      document.getElementById('bankrollInput').value = 1000;
-      rerenderAll();
-    });
-
-    document.getElementById('clearManualBtn').addEventListener('click', () => {
-      if (!confirm('Queres apagar todas as apostas manuais deste browser?')) return;
-      state.manualBets = [];
-      rerenderAll();
-    });
-
-    document.getElementById('addManualBetBtn').addEventListener('click', addManualBet);
-    document.getElementById('exportManualBtn').addEventListener('click', exportManualJson);
-    document.getElementById('exportRealCsvBtn').addEventListener('click', exportRealCsv);
-
-    document.getElementById('importManualBtn').addEventListener('click', () => {
-      document.getElementById('importManualFile').click();
-    });
-
-    document.getElementById('importManualFile').addEventListener('change', async e => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      await importManualJsonFromFile(file);
-      e.target.value = '';
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && hasPendingCloudChanges) {
-        saveCloudState(false);
-      }
-    });
-
-    window.addEventListener('beforeunload', () => {
-      if (hasPendingCloudChanges) {
-        saveCloudState(false);
-      }
-    });
-
-    loadLocalState();
-    document.getElementById('bankrollInput').value = state.bankrollInicial;
-    loadData();
-    setInterval(loadData, 60000);
-  </script>
+      loadLocalState();
+      document.getElementById('bankrollInput').value = state.bankrollInicial;
+      loadData();
+      setInterval(loadData, 60000);
+    </script>
+  </div>
 </body>
 </html>
