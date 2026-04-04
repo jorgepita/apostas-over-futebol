@@ -204,31 +204,37 @@
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|O2.5": {
+      "apostada": true,
+      "oddReal": "1.66",
+      "stakeReal": "20.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
     {
-      "id": "manual_1775331413130_l2ks31",
       "data": "2026-04-04",
-      "liga": "alemanha2",
+      "id": "manual_1775331413130_l2ks31",
       "jogo": "sg dynamo dresden vs hertha bsc",
+      "liga": "alemanha2",
       "mercado": "btts",
+      "notas": "",
       "odd": "1.53",
-      "stake": "10",
       "resultado": "",
-      "notas": ""
+      "stake": "10"
     },
     {
-      "id": "manual_1775331480564_x92epa",
       "data": "2026-04-04",
-      "liga": "turquia",
+      "id": "manual_1775331480564_x92epa",
       "jogo": "gaziantep fk vs alannyaspor",
+      "liga": "turquia",
       "mercado": "btts",
+      "notas": "",
       "odd": "1.7",
-      "stake": "10",
       "resultado": "",
-      "notas": ""
+      "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T19:38:16.438980+00:00"
+  "updatedAt": "2026-04-04T21:38:58.936785+00:00"
 }
