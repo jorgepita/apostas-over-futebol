@@ -217,7 +217,18 @@
       "stake": "10",
       "resultado": "",
       "notas": ""
+    },
+    {
+      "id": "manual_1775331480564_x92epa",
+      "data": "2026-04-04",
+      "liga": "turquia",
+      "jogo": "gaziantep fk vs alannyaspor",
+      "mercado": "btts",
+      "odd": "1.7",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T19:36:56.331337+00:00"
+  "updatedAt": "2026-04-04T19:38:03.483637+00:00"
 }
