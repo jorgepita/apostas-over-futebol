@@ -69,7 +69,7 @@
     },
     "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
       "apostada": true,
-      "oddReal": "1.",
+      "oddReal": "1.57",
       "resultadoManual": "L",
       "stakeReal": ""
     },
@@ -236,5 +236,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T22:03:27.376514+00:00"
+  "updatedAt": "2026-04-04T22:03:35.255790+00:00"
 }
