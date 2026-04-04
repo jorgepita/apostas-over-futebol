@@ -172,18 +172,6 @@
       "stakeReal": ""
     }
   },
-  "manualBets": [
-    {
-      "id": "manual_1775304354277_2mdh51",
-      "data": "2026-04-04",
-      "liga": "Liga Portugal Betclic",
-      "jogo": "Gil Vicente vs AFS",
-      "mercado": "O2.5",
-      "odd": "",
-      "stake": "",
-      "resultado": "",
-      "notas": ""
-    }
-  ],
-  "updatedAt": "2026-04-04T12:05:57.030209+00:00"
+  "manualBets": [],
+  "updatedAt": "2026-04-04T12:07:13.359812+00:00"
 }
