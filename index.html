@@ -35,7 +35,11 @@
       color: var(--text);
     }
 
-    .wrap { max-width: 1540px; margin: 0 auto; padding: 24px; }
+    .wrap {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 24px;
+    }
 
     .hero, .card {
       background: var(--card);
@@ -55,7 +59,11 @@
     }
 
     h1, h2, h3, p { margin: 0; }
-    .sub { color: var(--muted); margin-top: 8px; }
+
+    .sub {
+      color: var(--muted);
+      margin-top: 8px;
+    }
 
     .actions {
       display: flex;
@@ -77,9 +85,23 @@
       transition: all 0.18s ease;
     }
 
-    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .btn.warn { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
-    .btn.danger { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn.warn {
+      background: #fff7ed;
+      color: #9a3412;
+      border-color: #fed7aa;
+    }
+
+    .btn.danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
 
     .btn.apostas-neutral {
       background: #f8fafc;
@@ -113,12 +135,25 @@
     .grid-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .grid-analytics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .grid-streaks { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .grid-mobile-cockpit { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
     .stat { padding: 18px; }
-    .stat .label { color: var(--muted); font-size: 14px; }
-    .stat .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
-    .stat .note { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .stat .note {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
 
     .section { padding: 20px; }
 
@@ -175,8 +210,8 @@
     }
 
     .number.small-input, .select.small-input {
-      min-width: 96px;
-      width: 96px;
+      min-width: 92px;
+      width: 92px;
       padding: 8px 10px;
       border-radius: 10px;
     }
@@ -188,7 +223,11 @@
     }
 
     .field { display: grid; gap: 6px; }
-    .field label { font-size: 13px; color: var(--muted); }
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+    }
 
     table {
       width: 100%;
@@ -250,11 +289,25 @@
       color: #475569;
     }
 
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
 
-    .split { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .small { font-size: 13px; color: var(--muted); }
-    .list { display: grid; gap: 10px; }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
 
     .item {
       border: 1px solid var(--line);
@@ -300,6 +353,86 @@
       flex-wrap: wrap;
       margin-top: 8px;
       font-size: 13px;
+    }
+
+    .mobile-cards {
+      display: none;
+      gap: 12px;
+    }
+
+    .mobile-bet-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .mobile-bet-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .mobile-bet-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .mobile-bet-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .mobile-bet-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mobile-bet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mobile-bet-cell {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .mobile-bet-cell .k {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .mobile-bet-cell .v {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .mobile-bet-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mobile-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mobile-inline-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
     }
 
     .empty {
@@ -399,20 +532,48 @@
     }
 
     @media (max-width: 1400px) {
-      .grid-8, .grid-6, .grid-4, .open-bet-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid-2, .grid-form, .filters-grid, .grid-analytics, .grid-streaks, .grid-mobile-cockpit { grid-template-columns: 1fr; }
+      .grid-8, .grid-6, .grid-4, .open-bet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2, .grid-form, .filters-grid, .grid-analytics, .grid-streaks {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 760px) {
-      .grid-8, .grid-6, .grid-4, .open-bet-grid { grid-template-columns: 1fr; }
+      .grid-8, .grid-6, .grid-4, .open-bet-grid {
+        grid-template-columns: 1fr;
+      }
+
       .wrap { padding: 14px; }
       .hero, .section, .stat { padding: 16px; }
       th, td { font-size: 13px; }
       canvas { height: 260px; }
-      .number.small-input, .select.small-input { min-width: 82px; width: 82px; }
-      .mobile-priority { display: block; }
+
+      .number.small-input, .select.small-input {
+        min-width: 82px;
+        width: 82px;
+      }
+
+      .mobile-priority {
+        display: block;
+      }
+
       .desktop-secondary {
         display: none;
+      }
+
+      .desktop-table-wrap {
+        display: none;
+      }
+
+      .mobile-cards {
+        display: grid;
+      }
+
+      .mobile-inline-3 {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -613,7 +774,7 @@
         </div>
       </div>
 
-      <div style="overflow:auto;">
+      <div class="desktop-table-wrap" style="overflow:auto;">
         <table>
           <thead>
             <tr>
@@ -636,17 +797,19 @@
           <tbody id="footballRows"></tbody>
         </table>
       </div>
+
+      <div class="mobile-cards" id="footballCards"></div>
     </div>
 
     <div class="card section" style="margin-top:16px;">
       <div class="section-head">
         <div>
           <h2>Histórico / pendentes do bot</h2>
-          <p class="small">Fonte: picks_history.csv • aqui devem aparecer também as apostas de ontem e anteriores.</p>
+          <p class="small">Fonte: picks_history.csv • aqui aparecem também as apostas de ontem e anteriores.</p>
         </div>
       </div>
 
-      <div style="overflow:auto;">
+      <div class="desktop-table-wrap" style="overflow:auto;">
         <table>
           <thead>
             <tr>
@@ -669,6 +832,8 @@
           <tbody id="historyRows"></tbody>
         </table>
       </div>
+
+      <div class="mobile-cards" id="historyCards"></div>
     </div>
 
     <div class="card section" style="margin-top:16px;">
@@ -828,7 +993,8 @@
               <p class="small">Guardadas localmente neste browser • agrupadas por dia.</p>
             </div>
           </div>
-          <div style="overflow:auto;">
+
+          <div class="desktop-table-wrap" style="overflow:auto;">
             <table>
               <thead>
                 <tr>
@@ -849,6 +1015,8 @@
               <tbody id="manualRows"></tbody>
             </table>
           </div>
+
+          <div class="mobile-cards" id="manualCards"></div>
         </div>
       </div>
 
@@ -900,7 +1068,7 @@
 
     const STORAGE_KEYS = {
       bankroll: 'apostas_bot_bankroll_inicial',
-      picks: 'apostas_bot_local_edits_v2',
+      picks: 'apostas_bot_local_edits_v3',
       manual: 'apostas_bot_manual_bets_v1',
       sessionStartDate: 'apostas_bot_session_start_date_v1'
     };
@@ -1986,6 +2154,107 @@
       return html;
     }
 
+    function buildBotCardsHtml(rows) {
+      if (!rows.length) {
+        return `<div class="empty">Nenhuma pick encontrada com os filtros atuais.</div>`;
+      }
+
+      return rows.map(r => {
+        const resultadoAtual = ['W', 'L', 'P'].includes(String(r['Resultado'] || '').toUpperCase())
+          ? String(r['Resultado']).toUpperCase()
+          : '';
+        const checked = r._apostadaBool ? 'checked' : '';
+        const lucroModelo = r._lucroModeloLocal;
+        const lucroReal = r._lucroRealLocal;
+
+        return `
+          <div class="mobile-bet-card">
+            <div class="mobile-bet-top">
+              <div>
+                <div class="mobile-bet-title">${escapeHtml(r['Jogo'] || '—')}</div>
+                <div class="mobile-bet-sub">${escapeHtml(formatDatePt(r['Data']))} • ${escapeHtml(r['Liga'] || '—')}</div>
+              </div>
+              <div class="mobile-bet-tags">
+                <span class="tag source-bot">Bot</span>
+                ${resultLabel(r['Resultado'])}
+              </div>
+            </div>
+
+            <div class="mobile-bet-grid">
+              <div class="mobile-bet-cell">
+                <div class="k">Mercado</div>
+                <div class="v">${escapeHtml(r['Mercado'] || '—')}</div>
+              </div>
+              <div class="mobile-bet-cell">
+                <div class="k">Odd modelo</div>
+                <div class="v mono">${escapeHtml(r['Odd'] || '—')}</div>
+              </div>
+              <div class="mobile-bet-cell">
+                <div class="k">Stake modelo</div>
+                <div class="v mono">${escapeHtml(r['Stake€'] || '—')}</div>
+              </div>
+              <div class="mobile-bet-cell">
+                <div class="k">Executada</div>
+                <div class="v">${r._apostadaBool ? 'Sim' : 'Não'}</div>
+              </div>
+              <div class="mobile-bet-cell">
+                <div class="k">Lucro modelo</div>
+                <div class="v mono ${profitClass(lucroModelo)}">${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</div>
+              </div>
+              <div class="mobile-bet-cell">
+                <div class="k">Lucro real</div>
+                <div class="v mono ${profitClass(lucroReal)}">${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</div>
+              </div>
+            </div>
+
+            <div class="mobile-bet-actions">
+              <div class="mobile-inline">
+                <label class="item compact" style="display:flex;align-items:center;gap:10px;">
+                  <input class="check js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} />
+                  <span>Marcar executada</span>
+                </label>
+
+                <div>
+                  <label class="small">Resultado</label>
+                  <select class="select js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}">
+                    <option value="" ${!resultadoAtual ? 'selected' : ''}>Pendente</option>
+                    <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>Win</option>
+                    <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>Loss</option>
+                    <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>Push</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mobile-inline">
+                <div>
+                  <label class="small">Odd real</label>
+                  <input
+                    class="number js-odd-real"
+                    type="text"
+                    inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r['OddReal'] || '')}"
+                    placeholder="1.85"
+                  />
+                </div>
+                <div>
+                  <label class="small">Stake real</label>
+                  <input
+                    class="number js-stake-real"
+                    type="text"
+                    inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r['StakeReal€'] || '')}"
+                    placeholder="10"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function renderFootball() {
       const filters = getGlobalFilters();
       const filteredRows = filterBotRows(getDailyRowsMerged(), filters);
@@ -1994,6 +2263,8 @@
       document.getElementById('footballRows').innerHTML = rows.length
         ? buildBotRowHtml(rows).join('')
         : `<tr><td colspan="14"><div class="empty">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>`;
+
+      document.getElementById('footballCards').innerHTML = buildBotCardsHtml(rows);
 
       bindBotTableControls();
     }
@@ -2007,7 +2278,66 @@
         ? buildBotRowHtml(rows).join('')
         : `<tr><td colspan="14"><div class="empty">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>`;
 
+      document.getElementById('historyCards').innerHTML = buildBotCardsHtml(rows);
+
       bindBotTableControls();
+    }
+
+    function buildManualCardsHtml(rows) {
+      if (!rows.length) {
+        return `<div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div>`;
+      }
+
+      return rows.map(b => `
+        <div class="mobile-bet-card">
+          <div class="mobile-bet-top">
+            <div>
+              <div class="mobile-bet-title">${escapeHtml(b.jogo || '—')}</div>
+              <div class="mobile-bet-sub">${escapeHtml(formatDatePt(b.data))} • ${escapeHtml(b.liga || '—')}</div>
+            </div>
+            <div class="mobile-bet-tags">
+              <span class="tag source-manual">Manual</span>
+              ${resultLabel(b.resultado)}
+            </div>
+          </div>
+
+          <div class="mobile-bet-grid">
+            <div class="mobile-bet-cell">
+              <div class="k">Mercado</div>
+              <div class="v">${escapeHtml(b.mercado || '—')}</div>
+            </div>
+            <div class="mobile-bet-cell">
+              <div class="k">Odd</div>
+              <div class="v mono">${escapeHtml(b.odd || '—')}</div>
+            </div>
+            <div class="mobile-bet-cell">
+              <div class="k">Stake</div>
+              <div class="v mono">${escapeHtml(b.stake || '—')}</div>
+            </div>
+            <div class="mobile-bet-cell">
+              <div class="k">Lucro</div>
+              <div class="v mono ${profitClass(b._lucro)}">${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</div>
+            </div>
+          </div>
+
+          <div class="mobile-bet-actions">
+            <div>
+              <label class="small">Resultado</label>
+              <select class="select js-manual-resultado" data-id="${escapeHtml(b.id)}">
+                <option value="" ${!b.resultado ? 'selected' : ''}>Pendente</option>
+                <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>Win</option>
+                <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>Loss</option>
+                <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>Push</option>
+              </select>
+            </div>
+
+            <div class="mobile-inline">
+              <div class="item compact">${escapeHtml(b.notas || 'Sem notas')}</div>
+              <button class="btn danger js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
     function renderManualBets() {
@@ -2057,6 +2387,8 @@
       document.getElementById('manualRows').innerHTML = rows.length
         ? html.join('')
         : `<tr><td colspan="12"><div class="empty">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>`;
+
+      document.getElementById('manualCards').innerHTML = buildManualCardsHtml(rows);
 
       bindManualControls();
     }
