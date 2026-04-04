@@ -84,8 +84,32 @@
       "oddReal": "1.57",
       "stakeReal": "6",
       "resultadoManual": ""
+    },
+    "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
+      "apostada": true,
+      "oddReal": "1.65",
+      "stakeReal": "13.5",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
+      "apostada": true,
+      "oddReal": "1.67",
+      "stakeReal": "2",
+      "resultadoManual": ""
+    },
+    "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
+      "apostada": true,
+      "oddReal": "1.62",
+      "stakeReal": "5.5",
+      "resultadoManual": ""
+    },
+    "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
+      "apostada": true,
+      "oddReal": "1.6",
+      "stakeReal": "3",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T17:19:16.915270+00:00"
+  "updatedAt": "2026-04-04T17:19:29.395690+00:00"
 }
