@@ -60,8 +60,32 @@
       "oddReal": "1.55",
       "stakeReal": "9.5",
       "resultadoManual": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "2",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
+      "apostada": true,
+      "oddReal": "1.75",
+      "stakeReal": "1",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
+      "apostada": true,
+      "oddReal": "1.65",
+      "stakeReal": "2",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
+      "apostada": true,
+      "oddReal": "1.57",
+      "stakeReal": "6",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T17:19:09.794063+00:00"
+  "updatedAt": "2026-04-04T17:19:16.915270+00:00"
 }
