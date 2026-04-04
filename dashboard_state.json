@@ -39,7 +39,7 @@
     },
     "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.57",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -236,5 +236,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T22:03:35.255790+00:00"
+  "updatedAt": "2026-04-04T22:04:12.376901+00:00"
 }
