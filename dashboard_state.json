@@ -42,6 +42,48 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|Eintracht Braunschweig vs 1. FC Nürnberg|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-06|Primeira Liga|Casa Pia vs Benfica|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -57,5 +99,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T14:55:40.379332+00:00"
+  "updatedAt": "2026-04-04T14:56:06.434355+00:00"
 }
