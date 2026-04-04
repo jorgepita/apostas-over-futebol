@@ -27,9 +27,9 @@
     },
     "2026-04-04|LaLiga|Mallorca vs Real Madrid|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.70",
       "resultadoManual": "",
-      "stakeReal": ""
+      "stakeReal": "7"
     },
     "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
       "apostada": true,
@@ -75,5 +75,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:15:27.292137+00:00"
+  "updatedAt": "2026-04-04T15:15:39.103952+00:00"
 }
