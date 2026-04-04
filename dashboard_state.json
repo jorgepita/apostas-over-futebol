@@ -30,8 +30,20 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:12:48.720914+00:00"
+  "updatedAt": "2026-04-04T15:12:52.778260+00:00"
 }
