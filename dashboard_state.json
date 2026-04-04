@@ -160,8 +160,18 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": ""
+    },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-03T23:08:29.929118+00:00"
+  "updatedAt": "2026-04-04T00:04:36.897278+00:00"
 }
