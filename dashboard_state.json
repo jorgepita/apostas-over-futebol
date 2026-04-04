@@ -144,6 +144,30 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -159,5 +183,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T14:56:31.963332+00:00"
+  "updatedAt": "2026-04-04T14:56:45.472709+00:00"
 }
