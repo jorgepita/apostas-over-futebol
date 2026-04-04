@@ -168,6 +168,18 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-04|2. Bundesliga|1. FC Magdeburg vs VfL Bochum|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -183,5 +195,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T14:56:45.472709+00:00"
+  "updatedAt": "2026-04-04T14:56:54.902907+00:00"
 }
