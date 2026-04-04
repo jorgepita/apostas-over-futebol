@@ -42,8 +42,20 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:12:52.778260+00:00"
+  "updatedAt": "2026-04-04T15:12:57.312824+00:00"
 }
