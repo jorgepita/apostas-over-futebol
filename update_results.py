@@ -23,11 +23,13 @@ GITHUB_BRANCH = "main"
 REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
 
+# aliases -> código football-data.org
 LEAGUE_CODE_MAP = {
     "Premier League": "PL",
     "Primeira Liga": "PPL",
     "Bundesliga": "BL1",
     "La Liga": "PD",
+    "LaLiga": "PD",
     "Ligue 1": "FL1",
     "Serie A": "SA",
     "Eredivisie": "DED",
@@ -36,11 +38,12 @@ LEAGUE_CODE_MAP = {
     "Serie B": "SB",
     "Ligue 2": "FL2",
     "Belgian Pro League": "BSA",
-    "Süper Lig": "PPL",  # fallback temporário inválido removido depois abaixo
+    "Jupiler Pro League": "BSA",
+    "Super Lig": "TSL",
+    "Süper Lig": "TSL",
 }
 
-# remover fallback errado, para não causar pedidos inválidos
-LEAGUE_CODE_MAP.pop("Süper Lig", None)
+SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
 
 
 # =============================
@@ -61,7 +64,7 @@ def normalize_text(s: str) -> str:
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
     s = s.replace("&", " and ")
     s = s.replace("-", " ")
-    s = re.sub(r"\b(fc|cf|sc|sv|afc|sad|club|deportivo|futebol|football|calcio|fk)\b", " ", s)
+    s = re.sub(r"\b(fc|cf|sc|sv|afc|sad|club|deportivo|futebol|football|calcio|fk|ac)\b", " ", s)
     s = re.sub(r"[^a-z0-9 ]+", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
@@ -100,38 +103,40 @@ def team_match_score(a: str, b: str) -> int:
     if na in nb or nb in na:
         score += 20
 
-    # pequeno bónus para primeiro ou último token bater
-    try:
-        ta = na.split()
-        tb = nb.split()
-        if ta and tb and ta[0] == tb[0]:
-            score += 5
-        if ta and tb and ta[-1] == tb[-1]:
-            score += 5
-    except Exception:
-        pass
+    ta = na.split()
+    tb = nb.split()
+
+    if ta and tb and ta[0] == tb[0]:
+        score += 5
+    if ta and tb and ta[-1] == tb[-1]:
+        score += 5
 
     return score
 
 
-def games_match(csv_home: str, csv_away: str, api_home: str, api_away: str) -> bool:
-    direct_home = team_match_score(csv_home, api_home)
-    direct_away = team_match_score(csv_away, api_away)
+def choose_best_match(csv_home: str, csv_away: str, matches: list[dict]):
+    best = None
+    best_score = -1
 
-    reverse_home = team_match_score(csv_home, api_away)
-    reverse_away = team_match_score(csv_away, api_home)
+    for m in matches:
+        api_home = str(m.get("homeTeam", {}).get("name", "")).strip()
+        api_away = str(m.get("awayTeam", {}).get("name", "")).strip()
 
-    direct_ok = direct_home >= 10 and direct_away >= 10
-    reverse_ok = reverse_home >= 10 and reverse_away >= 10
+        direct_home = team_match_score(csv_home, api_home)
+        direct_away = team_match_score(csv_away, api_away)
+        direct_total = direct_home + direct_away
 
-    if direct_ok and not reverse_ok:
-        return True
-    if reverse_ok and not direct_ok:
-        return False
-    if direct_ok and reverse_ok:
-        return (direct_home + direct_away) >= (reverse_home + reverse_away)
+        reverse_home = team_match_score(csv_home, api_away)
+        reverse_away = team_match_score(csv_away, api_home)
+        reverse_total = reverse_home + reverse_away
 
-    return False
+        total = max(direct_total, reverse_total)
+
+        if direct_home >= 10 and direct_away >= 10 and total > best_score:
+            best = m
+            best_score = total
+
+    return best, best_score
 
 
 def market_result(market: str, home_goals: int, away_goals: int):
@@ -216,6 +221,21 @@ def safe_read_csv(path: Path) -> pd.DataFrame:
     except Exception as e:
         print(f"[WARN] Erro a ler {path.name}: {e}")
         return pd.DataFrame(columns=cols)
+
+
+def get_today_lisbon_iso() -> str:
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("Europe/Lisbon")).date().isoformat()
+    except Exception:
+        return datetime.utcnow().date().isoformat()
+
+
+def is_future_date(date_str: str, today_iso: str) -> bool:
+    try:
+        return pd.to_datetime(date_str, errors="coerce").date().isoformat() > today_iso
+    except Exception:
+        return False
 
 
 # =============================
@@ -328,7 +348,8 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
 def update_dataframe(df: pd.DataFrame, label: str):
     df = ensure_columns(df)
 
-    matches_cache = {}
+    matches_cache: dict[tuple[str, str], dict] = {}
+    today_iso = get_today_lisbon_iso()
 
     updated = 0
     ignored = 0
@@ -337,6 +358,10 @@ def update_dataframe(df: pd.DataFrame, label: str):
     missing_mapping = 0
     no_match_found = 0
     not_finished = 0
+    future_skipped = 0
+    api_403 = 0
+    api_429 = 0
+    api_other = 0
 
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
@@ -366,6 +391,17 @@ def update_dataframe(df: pd.DataFrame, label: str):
             ignored += 1
             continue
 
+        if str(mercado).strip().upper() not in SUPPORTED_MARKETS:
+            print(f"[WARN] {label}: Mercado não suportado: {mercado}")
+            unsupported_market += 1
+            ignored += 1
+            continue
+
+        if is_future_date(data, today_iso):
+            future_skipped += 1
+            ignored += 1
+            continue
+
         league_code = LEAGUE_CODE_MAP.get(liga)
         if not league_code:
             print(f"[WARN] {label}: Liga sem mapping: {liga}")
@@ -380,31 +416,52 @@ def update_dataframe(df: pd.DataFrame, label: str):
             continue
 
         cache_key = (league_code, data)
+
         if cache_key not in matches_cache:
             try:
-                matches_cache[cache_key] = fetch_matches_for_league_date(league_code, data)
-                print(f"[DBG] {label}: {liga} {data}: {len(matches_cache[cache_key])} jogos encontrados")
+                matches = fetch_matches_for_league_date(league_code, data)
+                matches_cache[cache_key] = {
+                    "ok": True,
+                    "matches": matches,
+                    "reason": "",
+                }
+                print(f"[DBG] {label}: {liga} {data}: {len(matches)} jogos encontrados")
+
+            except error.HTTPError as e:
+                code = getattr(e, "code", None)
+                reason = f"HTTP {code}" if code is not None else "HTTP"
+                matches_cache[cache_key] = {
+                    "ok": False,
+                    "matches": [],
+                    "reason": reason,
+                }
+
+                if code == 403:
+                    api_403 += 1
+                    print(f"[ERR] {label}: API {liga} {data}: HTTP Error 403")
+                elif code == 429:
+                    api_429 += 1
+                    print(f"[ERR] {label}: API {liga} {data}: HTTP Error 429")
+                else:
+                    api_other += 1
+                    print(f"[ERR] {label}: API {liga} {data}: HTTP Error {code}")
+
             except Exception as e:
+                matches_cache[cache_key] = {
+                    "ok": False,
+                    "matches": [],
+                    "reason": "OTHER",
+                }
+                api_other += 1
                 print(f"[ERR] {label}: API {liga} {data}: {e}")
-                ignored += 1
-                continue
 
-        matches = matches_cache[cache_key]
+        cache_entry = matches_cache[cache_key]
+        if not cache_entry["ok"]:
+            ignored += 1
+            continue
 
-        matched = None
-        best_score = -1
-
-        for m in matches:
-            api_home = m.get("homeTeam", {}).get("name", "")
-            api_away = m.get("awayTeam", {}).get("name", "")
-
-            direct_home = team_match_score(home_csv, api_home)
-            direct_away = team_match_score(away_csv, api_away)
-            total_score = direct_home + direct_away
-
-            if games_match(home_csv, away_csv, api_home, api_away) and total_score > best_score:
-                matched = m
-                best_score = total_score
+        matches = cache_entry["matches"]
+        matched, best_score = choose_best_match(home_csv, away_csv, matches)
 
         if not matched:
             print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
@@ -454,14 +511,16 @@ def update_dataframe(df: pd.DataFrame, label: str):
 
         print(
             f"[OK] {label}: {jogo} | {mercado} | {home_goals}-{away_goals} "
-            f"=> {resultado} | Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
+            f"=> {resultado} | score_match={best_score} | "
+            f"Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
         )
 
     print(
         f"[DBG] {label} resumo -> "
         f"updated={updated} | already_done={already_done} | ignored={ignored} | "
         f"missing_mapping={missing_mapping} | unsupported_market={unsupported_market} | "
-        f"no_match_found={no_match_found} | not_finished={not_finished}"
+        f"no_match_found={no_match_found} | not_finished={not_finished} | "
+        f"future_skipped={future_skipped} | api_403={api_403} | api_429={api_429} | api_other={api_other}"
     )
 
     return df, updated, already_done, ignored
