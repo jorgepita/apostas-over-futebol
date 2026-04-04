@@ -45,7 +45,7 @@
     },
     "2026-04-04|Bundesliga|Bayer Leverkusen vs VfL Wolfsburg|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.55",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -236,5 +236,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T22:01:11.904895+00:00"
+  "updatedAt": "2026-04-04T22:01:48.242782+00:00"
 }
