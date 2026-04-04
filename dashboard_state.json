@@ -73,6 +73,12 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|O2.5": {
+      "apostada": true,
+      "oddReal": "1.66",
+      "resultadoManual": "",
+      "stakeReal": "20.5"
+    },
     "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -111,7 +117,7 @@
     },
     "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.62",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -204,12 +210,6 @@
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
-    },
-    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|O2.5": {
-      "apostada": true,
-      "oddReal": "1.66",
-      "stakeReal": "20.5",
-      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -236,5 +236,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T21:39:02.491355+00:00"
+  "updatedAt": "2026-04-04T21:59:52.139892+00:00"
 }
