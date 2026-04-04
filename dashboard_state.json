@@ -84,6 +84,36 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-06|Serie B|Cesena vs Sudtirol|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-06|Primeira Liga|Arouca vs Estoril|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-03|Championship|QPR vs Watford|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -99,5 +129,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T14:56:06.434355+00:00"
+  "updatedAt": "2026-04-04T14:56:15.227102+00:00"
 }
