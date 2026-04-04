@@ -114,8 +114,20 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T15:17:00.469330+00:00"
+  "updatedAt": "2026-04-04T15:17:04.313296+00:00"
 }
