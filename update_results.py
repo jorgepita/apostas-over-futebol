@@ -70,10 +70,9 @@ AF_BASE_SLEEP = 1.2
 AF_CALL_MIN_INTERVAL = 0.50
 AF_BASE_URL = "https://v3.football.api-sports.io"
 
-# Confirmado pelos teus testes: estas ligas dão 403 na football-data
+# Confirmado pelos teus testes
 BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL"}
 
-# Mapeamento para fallback na API-Football
 API_FOOTBALL_FALLBACK_COMPETITIONS = {
     "BL2": {
         "country": "Germany",
@@ -315,10 +314,6 @@ def make_row_key(row) -> str:
 
 
 def api_football_season_from_date(date_str: str) -> int:
-    """
-    Para ligas europeias, a season na API-Football normalmente é o ano de arranque da época.
-    Ex.: jogo em 2026-04-04 pertence à season 2025.
-    """
     dt = pd.to_datetime(date_str, errors="coerce")
     if pd.isna(dt):
         now = datetime.utcnow()
@@ -493,7 +488,7 @@ def api_football_get(path: str, params: dict | None = None):
     return {}
 
 
-def get_api_football_league_id(fd_league_code: str, date_str: str, league_id_cache: dict) -> int | None:
+def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state: dict) -> int | None:
     if not API_FOOTBALL_KEY:
         return None
 
@@ -503,6 +498,8 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, league_id_cac
 
     season = api_football_season_from_date(date_str)
     cache_key = (fd_league_code, season)
+
+    league_id_cache = shared_state["af_league_id_cache"]
     if cache_key in league_id_cache:
         return league_id_cache[cache_key]
 
@@ -532,7 +529,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, league_id_cac
         league_name = str(league.get("name", "")).strip()
 
         if not league_id or not league_name:
-            continue
+          continue
 
         score = team_match_score(target_name, league_name)
         if score > best_score:
@@ -547,16 +544,18 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, league_id_cac
     return best_id
 
 
-def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: str, fixtures_cache: dict, league_id_cache: dict):
+def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: str, shared_state: dict):
     if not API_FOOTBALL_KEY:
         return None, "NO_API_KEY"
 
-    league_id = get_api_football_league_id(fd_league_code, date_str, league_id_cache)
+    league_id = get_api_football_league_id(fd_league_code, date_str, shared_state)
     if not league_id:
         return None, "NO_LEAGUE_ID"
 
     season = api_football_season_from_date(date_str)
     cache_key = (fd_league_code, date_str, league_id, season)
+
+    fixtures_cache = shared_state["af_fixtures_cache"]
     if cache_key in fixtures_cache:
         return fixtures_cache[cache_key]
 
@@ -734,8 +733,7 @@ def try_update_row_via_api_football(
     row,
     league_code: str,
     label: str,
-    af_fixtures_cache: dict,
-    af_league_id_cache: dict,
+    shared_state: dict,
 ):
     data = str(row.get("Data", "")).strip()
     jogo = str(row.get("Jogo", "")).strip()
@@ -751,8 +749,7 @@ def try_update_row_via_api_football(
     fixtures, reason = fetch_api_football_fixtures_for_league_date(
         league_code,
         data,
-        af_fixtures_cache,
-        af_league_id_cache,
+        shared_state,
     )
     if fixtures is None:
         print(f"[WARN] {label}: API-Football sem fixtures para {jogo} | {league_code} | {data} | reason={reason}")
@@ -806,14 +803,25 @@ def try_update_row_via_api_football(
 
 
 # =============================
+# Shared state
+# =============================
+def make_shared_runtime_state():
+    return {
+        "fd_matches_cache": {},
+        "af_fixtures_cache": {},
+        "af_league_id_cache": {},
+        "blocked_fd_leagues_seen": set(),
+    }
+
+
+# =============================
 # Core update
 # =============================
-def update_dataframe(df: pd.DataFrame, label: str):
+def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     df = ensure_columns(df)
 
-    fd_matches_cache: dict[tuple[str, str], dict] = {}
-    af_fixtures_cache: dict = {}
-    af_league_id_cache: dict = {}
+    fd_matches_cache = shared_state["fd_matches_cache"]
+    blocked_fd_leagues_seen = shared_state["blocked_fd_leagues_seen"]
 
     today_iso = get_today_lisbon_iso()
 
@@ -833,8 +841,6 @@ def update_dataframe(df: pd.DataFrame, label: str):
     af_used = 0
     af_updated = 0
     af_failed = 0
-
-    blocked_fd_leagues_seen = set()
 
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
@@ -894,7 +900,7 @@ def update_dataframe(df: pd.DataFrame, label: str):
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
             ok, _ = try_update_row_via_api_football(
-                df, i, row, league_code, label, af_fixtures_cache, af_league_id_cache
+                df, i, row, league_code, label, shared_state
             )
             if ok:
                 updated += 1
@@ -946,12 +952,11 @@ def update_dataframe(df: pd.DataFrame, label: str):
 
         cache_entry = fd_matches_cache[cache_key]
 
-        # fallback para API-Football se a football-data devolver 403 e houver mapping
         if not cache_entry["ok"] and cache_entry["reason"] == "HTTP 403" and league_code in API_FOOTBALL_FALLBACK_COMPETITIONS:
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
             ok, _ = try_update_row_via_api_football(
-                df, i, row, league_code, label, af_fixtures_cache, af_league_id_cache
+                df, i, row, league_code, label, shared_state
             )
             if ok:
                 updated += 1
@@ -1043,18 +1048,17 @@ def main():
     if not API_FOOTBALL_KEY:
         print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL não vai funcionar.")
 
+    shared_state = make_shared_runtime_state()
+
     daily_df = safe_read_csv(DAILY_FILE)
     history_df = safe_read_csv(HISTORY_FILE)
 
-    # 1) Atualizar primeiro o history
-    history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
+    history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
 
-    # 2) Atualizar daily
-    daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
+    daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily", shared_state)
 
-    # 3) Sincronizar daily com history
     daily_df, d_synced = sync_daily_from_history(daily_df, history_df)
     daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
     print(
@@ -1062,7 +1066,6 @@ def main():
         f"sincronizados via history: {d_synced}"
     )
 
-    # 4) Upload no fim
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
