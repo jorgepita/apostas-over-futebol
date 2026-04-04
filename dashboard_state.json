@@ -132,6 +132,18 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -147,5 +159,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-04T14:56:21.706320+00:00"
+  "updatedAt": "2026-04-04T14:56:31.963332+00:00"
 }
