@@ -206,18 +206,6 @@
       "resultadoManual": ""
     }
   },
-  "manualBets": [
-    {
-      "id": "manual_1775304489351_82rw0t",
-      "data": "2026-04-03",
-      "liga": "Liga Portugal",
-      "jogo": "Gil Vicente vs AFS",
-      "mercado": "O2.5",
-      "odd": "",
-      "stake": "",
-      "resultado": "",
-      "notas": ""
-    }
-  ],
-  "updatedAt": "2026-04-04T14:57:05.651032+00:00"
+  "manualBets": [],
+  "updatedAt": "2026-04-04T14:57:37.206591+00:00"
 }
