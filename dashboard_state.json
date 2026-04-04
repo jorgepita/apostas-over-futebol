@@ -10,7 +10,7 @@
     "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
       "apostada": true,
       "oddReal": "",
-      "resultadoManual": "",
+      "resultadoManual": "W",
       "stakeReal": ""
     },
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
@@ -207,5 +207,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-04T19:20:47.209983+00:00"
+  "updatedAt": "2026-04-04T19:21:18.819273+00:00"
 }
