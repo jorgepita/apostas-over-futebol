@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import re
+import time
 import unicodedata
 from pathlib import Path
 from urllib import request, parse, error
@@ -54,6 +55,11 @@ SYNC_RESULT_COLUMNS = [
     "Apostada", "OddReal", "StakeReal€",
     "Resultado", "Lucro€", "LucroReal€"
 ]
+
+HTTP_TIMEOUT = 30
+API_MAX_RETRIES = 4
+API_BASE_SLEEP = 1.5
+API_CALL_MIN_INTERVAL = 0.65
 
 
 # =============================
@@ -258,6 +264,18 @@ def make_row_key(row) -> str:
 # =============================
 # football-data.org
 # =============================
+_last_api_call_ts = 0.0
+
+
+def _respect_api_spacing():
+    global _last_api_call_ts
+    now = time.monotonic()
+    elapsed = now - _last_api_call_ts
+    if elapsed < API_CALL_MIN_INTERVAL:
+        time.sleep(API_CALL_MIN_INTERVAL - elapsed)
+    _last_api_call_ts = time.monotonic()
+
+
 def http_get_json(url: str, token: str):
     req = request.Request(
         url,
@@ -267,7 +285,7 @@ def http_get_json(url: str, token: str):
             "User-Agent": "apostas-over-futebol/1.0",
         },
     )
-    with request.urlopen(req, timeout=30) as resp:
+    with request.urlopen(req, timeout=HTTP_TIMEOUT) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
@@ -276,8 +294,53 @@ def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]
         f"https://api.football-data.org/v4/competitions/{league_code}/matches"
         f"?dateFrom={parse.quote(date_str)}&dateTo={parse.quote(date_str)}"
     )
-    data = http_get_json(url, API_TOKEN)
-    return data.get("matches", []) or []
+
+    last_error = None
+
+    for attempt in range(1, API_MAX_RETRIES + 1):
+        try:
+            _respect_api_spacing()
+            data = http_get_json(url, API_TOKEN)
+            matches = data.get("matches", []) or []
+
+            if attempt > 1:
+                print(f"[DBG] API retry sucesso | league={league_code} | date={date_str} | tentativa={attempt}")
+
+            return matches
+
+        except error.HTTPError as e:
+            last_error = e
+            code = getattr(e, "code", None)
+
+            if code == 429 and attempt < API_MAX_RETRIES:
+                wait_s = API_BASE_SLEEP * (2 ** (attempt - 1))
+                print(
+                    f"[WARN] API rate limit 429 | league={league_code} | date={date_str} | "
+                    f"tentativa={attempt}/{API_MAX_RETRIES} | espera={wait_s:.1f}s"
+                )
+                time.sleep(wait_s)
+                continue
+
+            raise
+
+        except Exception as e:
+            last_error = e
+
+            if attempt < API_MAX_RETRIES:
+                wait_s = API_BASE_SLEEP * attempt
+                print(
+                    f"[WARN] API erro temporário | league={league_code} | date={date_str} | "
+                    f"tentativa={attempt}/{API_MAX_RETRIES} | espera={wait_s:.1f}s | erro={e}"
+                )
+                time.sleep(wait_s)
+                continue
+
+            raise
+
+    if last_error:
+        raise last_error
+
+    return []
 
 
 # =============================
@@ -296,7 +359,7 @@ def github_request(url: str, token: str, method: str = "GET", data: dict | None 
         headers["Content-Type"] = "application/json"
 
     req = request.Request(url, data=body, headers=headers, method=method)
-    with request.urlopen(req, timeout=30) as resp:
+    with request.urlopen(req, timeout=HTTP_TIMEOUT) as resp:
         raw = resp.read().decode("utf-8")
         return json.loads(raw) if raw else {}
 
@@ -386,12 +449,10 @@ def sync_daily_from_history(daily_df: pd.DataFrame, history_df: pd.DataFrame):
             src_val = str(src.get(col, "")).strip()
             dst_val = str(daily_df.at[i, col]).strip()
 
-            # copia sempre que history tiver valor e daily estiver diferente
             if src_val != "" and src_val != dst_val:
                 daily_df.at[i, col] = src_val
                 changed = True
 
-        # se já houver resultado no history mas LucroReal€ estiver vazio, recalcula
         resultado = str(daily_df.at[i, "Resultado"]).strip().upper()
         if resultado in {"W", "L", "P"}:
             lucro_real = calc_real_profit(
@@ -431,6 +492,7 @@ def update_dataframe(df: pd.DataFrame, label: str):
     api_403 = 0
     api_429 = 0
     api_other = 0
+    api_retry_success = 0
 
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
@@ -602,19 +664,14 @@ def main():
     if not API_TOKEN:
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
-    # 1) Ler ambos
     daily_df = safe_read_csv(DAILY_FILE)
     history_df = safe_read_csv(HISTORY_FILE)
 
-    # 2) Atualizar primeiro o history
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history")
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
 
-    # 3) Atualizar o daily por si mesmo
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily")
-
-    # 4) Sincronizar daily com history
     daily_df, d_synced = sync_daily_from_history(daily_df, history_df)
     daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
     print(
@@ -622,7 +679,6 @@ def main():
         f"sincronizados via history: {d_synced}"
     )
 
-    # 5) Upload no fim, já com os dois coerentes
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
 
