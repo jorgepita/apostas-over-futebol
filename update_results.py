@@ -1418,6 +1418,74 @@ def try_update_row_via_api_football(
     )
     return True, "UPDATED"
 
+def try_update_manual_row_via_api_football(
+    df: pd.DataFrame,
+    idx: int,
+    row,
+    league_code: str,
+    label: str,
+    shared_state: dict,
+):
+    data = str(row.get("Data", "")).strip()
+    jogo = str(row.get("Jogo", "")).strip()
+    mercado = str(row.get("Mercado", "")).strip().upper()
+    odd = parse_float(row.get("Odd", ""), 0.0)
+    stake = parse_float(row.get("Stake€", ""), 0.0)
+
+    home_csv, away_csv = split_game(jogo)
+    if not home_csv or not away_csv:
+        print(f"[WARN] {label}: Jogo manual mal formatado para fallback API-Football: {jogo}")
+        return False, "BAD_GAME"
+
+    fixtures, reason = fetch_api_football_fixtures_for_league_date(
+        league_code,
+        data,
+        shared_state,
+    )
+    if fixtures is None:
+        print(f"[WARN] {label}: API-Football sem fixtures para manual {jogo} | {league_code} | {data} | reason={reason}")
+        return False, reason or "NO_FIXTURES"
+
+    matched, best_score, meta = find_best_fixture_match(
+        home_csv,
+        away_csv,
+        fixtures,
+        shared_state,
+        min_total_score=MATCH_MIN_TOTAL_SCORE,
+        min_side_score=MATCH_MIN_SIDE_SCORE,
+    )
+    if not matched:
+        print(f"[WARN] {label}: API-Football sem match para manual: {jogo} | {league_code} | {data}")
+        log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
+        return False, "NO_MATCH"
+
+    status = str(get_fixture_status(matched)).upper()
+    if status not in AF_FINISHED_STATUS:
+        print(f"[DBG] {label}: Manual API-Football ainda não terminado: {jogo} | status={status}")
+        return False, "NOT_FINISHED"
+
+    home_goals, away_goals = get_fixture_score(matched)
+    if home_goals is None or away_goals is None:
+        print(f"[WARN] {label}: API-Football sem goals finais para manual: {jogo}")
+        return False, "NO_SCORE"
+
+    resultado = market_result(mercado, int(home_goals), int(away_goals))
+    if resultado is None:
+        print(f"[WARN] {label}: Mercado manual não suportado no fallback API-Football: {mercado}")
+        return False, "UNSUPPORTED_MARKET"
+
+    lucro = calc_profit(resultado, stake, odd)
+    df.at[idx, "Resultado"] = resultado
+    df.at[idx, "Lucro€"] = str(lucro)
+
+    print(
+        f"[OK] {label}: manual API-Football | {jogo} | {mercado} | "
+        f"{home_goals}-{away_goals} => {resultado} | score_match={best_score} | "
+        f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
+        f"Lucro {lucro}"
+    )
+    return True, "UPDATED"
+
 
 # =============================
 # Shared state
@@ -1675,6 +1743,209 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
     return ensure_columns(df), updated, already_done, ignored
 
+def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
+    df = ensure_manual_columns(df)
+    shared_state = ensure_shared_state_defaults(shared_state)
+
+    fd_matches_cache = shared_state["fd_matches_cache"]
+    blocked_fd_leagues_seen = shared_state["blocked_fd_leagues_seen"]
+
+    today_iso = get_today_lisbon_iso()
+
+    updated = 0
+    ignored = 0
+    already_done = 0
+    unsupported_market = 0
+    missing_mapping = 0
+    no_match_found = 0
+    not_finished = 0
+    future_skipped = 0
+
+    af_used = 0
+    af_updated = 0
+    af_failed = 0
+
+    for i, row in df.iterrows():
+        resultado_atual = str(row.get("Resultado", "")).strip().upper()
+
+        if resultado_atual in {"W", "L", "P"}:
+            already_done += 1
+            continue
+
+        data = str(row.get("Data", "")).strip()
+        liga = str(row.get("Liga", "")).strip()
+        jogo = str(row.get("Jogo", "")).strip()
+        mercado = str(row.get("Mercado", "")).strip().upper()
+        odd = parse_float(row.get("Odd", ""), 0.0)
+        stake = parse_float(row.get("Stake€", ""), 0.0)
+
+        if not data or not liga or not jogo or not mercado or odd <= 1.01 or stake <= 0:
+            ignored += 1
+            continue
+
+        if mercado not in SUPPORTED_MARKETS:
+            print(f"[WARN] {label}: Mercado manual não suportado: {mercado}")
+            unsupported_market += 1
+            ignored += 1
+            continue
+
+        if is_future_date(data, today_iso):
+            future_skipped += 1
+            ignored += 1
+            continue
+
+        league_code = LEAGUE_CODE_MAP.get(liga)
+        if not league_code:
+            print(f"[WARN] {label}: Liga manual sem mapping: {liga}")
+            missing_mapping += 1
+            ignored += 1
+            continue
+
+        home_csv, away_csv = split_game(jogo)
+        if not home_csv or not away_csv:
+            print(f"[WARN] {label}: Jogo manual mal formatado: {jogo}")
+            ignored += 1
+            continue
+
+        use_api_football_direct = league_code in BLOCKED_FOOTBALL_DATA_CODES
+
+        if use_api_football_direct:
+            blocked_fd_leagues_seen.add(league_code)
+            af_used += 1
+
+            ok, reason = try_update_manual_row_via_api_football(
+                df, i, row, league_code, label, shared_state
+            )
+            if ok:
+                updated += 1
+                af_updated += 1
+            else:
+                if reason == "NOT_FINISHED":
+                    not_finished += 1
+                elif reason == "NO_MATCH":
+                    no_match_found += 1
+                elif reason == "UNSUPPORTED_MARKET":
+                    unsupported_market += 1
+                af_failed += 1
+                ignored += 1
+            continue
+
+        cache_key = (league_code, data)
+
+        if cache_key not in fd_matches_cache:
+            try:
+                matches = fetch_matches_for_league_date(league_code, data)
+                fd_matches_cache[cache_key] = {
+                    "ok": True,
+                    "matches": matches,
+                    "reason": "",
+                }
+                print(f"[DBG] {label}: {liga} {data}: {len(matches)} jogos encontrados")
+            except error.HTTPError as e:
+                code = getattr(e, "code", None)
+                reason = f"HTTP {code}" if code is not None else "HTTP"
+                fd_matches_cache[cache_key] = {
+                    "ok": False,
+                    "matches": [],
+                    "reason": reason,
+                }
+                print(f"[ERR] {label}: football-data manual {liga} {data}: {reason}")
+            except Exception as e:
+                fd_matches_cache[cache_key] = {
+                    "ok": False,
+                    "matches": [],
+                    "reason": "OTHER",
+                }
+                print(f"[ERR] {label}: football-data manual {liga} {data}: {e}")
+
+        cache_entry = fd_matches_cache[cache_key]
+
+        if not cache_entry["ok"] and cache_entry["reason"] == "HTTP 403" and league_code in API_FOOTBALL_FALLBACK_COMPETITIONS:
+            blocked_fd_leagues_seen.add(league_code)
+            af_used += 1
+
+            ok, reason = try_update_manual_row_via_api_football(
+                df, i, row, league_code, label, shared_state
+            )
+            if ok:
+                updated += 1
+                af_updated += 1
+            else:
+                if reason == "NOT_FINISHED":
+                    not_finished += 1
+                elif reason == "NO_MATCH":
+                    no_match_found += 1
+                elif reason == "UNSUPPORTED_MARKET":
+                    unsupported_market += 1
+                af_failed += 1
+                ignored += 1
+            continue
+
+        if not cache_entry["ok"]:
+            ignored += 1
+            continue
+
+        matches = cache_entry["matches"]
+        matched, best_score, meta = find_best_fixture_match(
+            home_csv,
+            away_csv,
+            matches,
+            shared_state,
+            min_total_score=MATCH_MIN_TOTAL_SCORE,
+            min_side_score=MATCH_MIN_SIDE_SCORE,
+        )
+
+        if not matched:
+            print(f"[WARN] {label}: Sem match API para manual: {jogo} | {liga} | {data}")
+            log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
+            no_match_found += 1
+            ignored += 1
+            continue
+
+        status = str(get_fixture_status(matched)).upper()
+        if status not in FD_FINISHED_STATUS:
+            print(f"[DBG] {label}: Manual ainda não terminado: {jogo} | status={status}")
+            not_finished += 1
+            ignored += 1
+            continue
+
+        home_goals, away_goals = get_fixture_score(matched)
+        if home_goals is None or away_goals is None:
+            print(f"[WARN] {label}: Manual sem fullTime score para: {jogo}")
+            ignored += 1
+            continue
+
+        resultado = market_result(mercado, int(home_goals), int(away_goals))
+        if resultado is None:
+            print(f"[WARN] {label}: Mercado manual não suportado: {mercado}")
+            unsupported_market += 1
+            ignored += 1
+            continue
+
+        lucro = calc_profit(resultado, stake, odd)
+        df.at[i, "Resultado"] = resultado
+        df.at[i, "Lucro€"] = str(lucro)
+
+        updated += 1
+
+        print(
+            f"[OK] {label}: manual football-data | {jogo} | {mercado} | "
+            f"{home_goals}-{away_goals} => {resultado} | score_match={best_score} | "
+            f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
+            f"Lucro {lucro}"
+        )
+
+    print(
+        f"[DBG] {label} resumo -> "
+        f"updated={updated} | already_done={already_done} | ignored={ignored} | "
+        f"missing_mapping={missing_mapping} | unsupported_market={unsupported_market} | "
+        f"no_match_found={no_match_found} | not_finished={not_finished} | future_skipped={future_skipped} | "
+        f"af_used={af_used} | af_updated={af_updated} | af_failed={af_failed} | "
+        f"blocked_fd_leagues={sorted(blocked_fd_leagues_seen) if blocked_fd_leagues_seen else []}"
+    )
+
+    return ensure_manual_columns(df), updated, already_done, ignored
+
 
 # =============================
 # Main
@@ -1705,9 +1976,13 @@ def main():
         f"sincronizados via history: {d_synced}"
     )
 
-    manual_df = ensure_manual_columns(manual_df)
+    manual_df, m_updated, m_done, m_ignored = update_manual_dataframe(
+    manual_df, "manual", shared_state
+    )
     manual_df.to_csv(MANUAL_FILE, index=False, sep=";", encoding="utf-8")
-    print(f"Manual carregado: {len(manual_df)} linhas")
+    print(
+    f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | ignorados: {m_ignored}"
+    )
 
     save_team_alias_cache(shared_state)
 
