@@ -121,6 +121,49 @@
       border-radius: 999px;
     }
 
+        .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tooltip-box {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 240px;
+      max-width: 300px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.10);
+      display: none;
+      z-index: 30;
+    }
+
+    .tooltip-wrap:hover .tooltip-box {
+      display: block;
+    }
+
+    .tooltip-title {
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .tooltip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .tooltip-row strong {
+      font-weight: 800;
+    }
+    
     @media (max-width: 900px) {
       .grid-3, .grid-4 {
         grid-template-columns: 1fr;
@@ -140,7 +183,16 @@
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <button id="refreshBtn">Atualizar agora</button>
-          <a href="apostas.html" id="btnApostas">Apostas do dia</a>
+          <div class="tooltip-wrap">
+  <a href="apostas.html" id="btnApostas">Apostas do dia</a>
+  <div class="tooltip-box" id="btnApostasTooltip">
+    <div class="tooltip-title">Resumo das picks do dia</div>
+    <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
+    <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
+    <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
+    <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
+  </div>
+</div>
           <button id="loadCloudBtn">Carregar cloud</button>
           <button id="saveCloudBtn">Guardar cloud</button>
           <button id="resetLocalBtn">Limpar controlos locais</button>
@@ -1922,6 +1974,25 @@
         }, 2000);
       }
 
+            function updateApostasTooltip() {
+        const today = todayIso();
+        const todaysPicks = state.footballDaily.filter(r => normalizeDateString(r['Data']) === today);
+
+        const count = todaysPicks.length;
+        const validOdds = todaysPicks.map(r => num(r['Odd'])).filter(v => v !== null);
+        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const validStakes = todaysPicks.map(r => num(r['Stake€'])).filter(v => v !== null);
+
+        const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
+        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : null;
+        const totalStake = validStakes.length ? validStakes.reduce((a, b) => a + b, 0) : 0;
+
+        document.getElementById('tooltipPicksCount').textContent = String(count);
+        document.getElementById('tooltipAvgOdd').textContent = avgOdd !== null ? fmt(avgOdd) : '—';
+        document.getElementById('tooltipAvgEdge').textContent = avgEdge !== null ? `${fmt(avgEdge)}%` : '—';
+        document.getElementById('tooltipStakeTotal').textContent = `€${fmt(totalStake)}`;
+      }
+      
       function updateApostasButton() {
         const btn = document.getElementById('btnApostas');
         const today = todayIso();
@@ -1954,6 +2025,7 @@
         bindBotTableControls();
         bindManualControls();
         updateApostasButton();
+        updateApostasTooltip();
 
         if (triggerAutoSave) markDirty();
       }
