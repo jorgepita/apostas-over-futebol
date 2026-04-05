@@ -39,8 +39,8 @@ LEAGUE_CODE_MAP = {
     "2. Bundesliga": "BL2",
     "Serie B": "SB",
     "Ligue 2": "FL2",
-    "Belgian Pro League": "BSA",
-    "Jupiler Pro League": "BSA",
+    "Belgian Pro League": "BJL",
+    "Jupiler Pro League": "BJL",
     "Super Lig": "TSL",
     "Süper Lig": "TSL",
 }
@@ -91,7 +91,7 @@ AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
 TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
 MATCH_MIN_TOTAL_SCORE = 140
-MATCH_MIN_SIDE_SCORE = 65
+MATCH_MIN_SIDE_SCORE = 62
 
 BASE_TEAM_ALIASES = {
     # Championship
