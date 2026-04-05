@@ -12,11 +12,11 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-04;Bundesliga;SC Freiburg vs Bayern München;BTTS;1.57;5.25;4.83;;;;W;2.99;
 2026-04-04;Eredivisie;AZ Alkmaar vs Fortuna Sittard;BTTS;1.68;7.65;7.3;;;;W;5.2;
 2026-04-04;Eredivisie;AZ Alkmaar vs Fortuna Sittard;O2.5;1.66;17.03;6.77;;;;W;11.24;
-2026-04-04;Eredivisie;Excelsior vs NEC Nijmegen;O2.5;1.5;0.79;0.35;;;;;;
+2026-04-04;Eredivisie;Excelsior vs NEC Nijmegen;O2.5;1.5;0.79;0.35;;;;L;-0.79;
 2026-04-04;Eredivisie;PSV Eindhoven vs Utrecht;BTTS;1.55;8.49;7.48;;;;W;4.67;
 2026-04-04;LaLiga;Mallorca vs Real Madrid;BTTS;1.77;8.49;12.59;;;;W;6.54;
 2026-04-04;LaLiga;Mallorca vs Real Madrid;O2.5;1.73;15.18;11.45;;;;W;11.08;
-2026-04-04;Ligue 1;Lille vs Lens;BTTS;1.67;2.46;3.82;;;;;;
+2026-04-04;Ligue 1;Lille vs Lens;BTTS;1.67;2.46;3.82;;;;L;-2.46;
 2026-04-04;Ligue 1;Stade Brestois 29 vs Rennes;BTTS;1.7;3.32;5.3;;;;;;
 2026-04-04;Primeira Liga;Nacional vs Estrela;BTTS;1.77;8.49;11.37;;;;L;-8.49;
 2026-04-04;Super Lig;Trabzonspor vs Galatasaray;O2.5;1.62;8.9;4.49;;;;W;5.52;
