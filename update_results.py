@@ -14,6 +14,7 @@ import pandas as pd
 BASE = Path(__file__).resolve().parent
 DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
 HISTORY_FILE = BASE / "picks_history.csv"
+MANUAL_FILE = BASE / "manual_bets.csv"
 
 API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
@@ -25,6 +26,7 @@ GITHUB_BRANCH = "main"
 
 REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
+REMOTE_MANUAL_NAME = "manual_bets.csv"
 
 LEAGUE_CODE_MAP = {
     "Premier League": "PL",
@@ -56,6 +58,11 @@ CSV_COLUMNS = [
 SYNC_RESULT_COLUMNS = [
     "Apostada", "OddReal", "StakeReal€",
     "Resultado", "Lucro€", "LucroReal€"
+]
+
+MANUAL_COLUMNS = [
+    "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€",
+    "Resultado", "Lucro€", "Notas", "Origem"
 ]
 
 HTTP_TIMEOUT = 30
@@ -838,6 +845,33 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = ""
     return df[CSV_COLUMNS].fillna("").copy()
+
+
+def ensure_manual_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    for col in MANUAL_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    return df[MANUAL_COLUMNS].fillna("").copy()
+
+
+def safe_read_manual_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame(columns=MANUAL_COLUMNS)
+
+    try:
+        if path.stat().st_size == 0:
+            return pd.DataFrame(columns=MANUAL_COLUMNS)
+
+        df = pd.read_csv(path, sep=";", dtype=str).fillna("")
+        return ensure_manual_columns(df)
+
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame(columns=MANUAL_COLUMNS)
+
+    except Exception as e:
+        print(f"[WARN] Erro a ler {path.name}: {e}")
+        return pd.DataFrame(columns=MANUAL_COLUMNS)
 
 
 def safe_read_csv(path: Path) -> pd.DataFrame:
@@ -1656,6 +1690,7 @@ def main():
 
     daily_df = safe_read_csv(DAILY_FILE)
     history_df = safe_read_csv(HISTORY_FILE)
+    manual_df = safe_read_manual_csv(MANUAL_FILE)
 
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
@@ -1670,10 +1705,15 @@ def main():
         f"sincronizados via history: {d_synced}"
     )
 
+    manual_df = ensure_manual_columns(manual_df)
+    manual_df.to_csv(MANUAL_FILE, index=False, sep=";", encoding="utf-8")
+    print(f"Manual carregado: {len(manual_df)} linhas")
+
     save_team_alias_cache(shared_state)
 
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
+    upload_csv_to_github(MANUAL_FILE, REMOTE_MANUAL_NAME)
 
 
 if __name__ == "__main__":
