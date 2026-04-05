@@ -1,5 +1,5 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-03;Championship;QPR vs Watford;BTTS;1.73;8.49;9.55;;;;;;
+2026-04-03;Championship;QPR vs Watford;BTTS;1.73;8.49;9.55;;;;W;6.2;
 2026-04-03;Jupiler Pro League;Antwerp vs Genk;BTTS;1.71;3.12;5.01;;;;;;
 2026-04-03;Ligue 1;Paris Saint Germain vs Toulouse;BTTS;1.91;5.16;11.77;;;;W;4.7;
 2026-04-04;2. Bundesliga;1. FC Kaiserslautern vs Fortuna Düsseldorf;O2.5;1.62;7.36;2.91;;;;W;4.56;
@@ -17,7 +17,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-04;LaLiga;Mallorca vs Real Madrid;BTTS;1.77;8.49;12.59;;;;W;6.54;
 2026-04-04;LaLiga;Mallorca vs Real Madrid;O2.5;1.73;15.18;11.45;;;;W;11.08;
 2026-04-04;Ligue 1;Lille vs Lens;BTTS;1.67;2.46;3.82;;;;L;-2.46;
-2026-04-04;Ligue 1;Stade Brestois 29 vs Rennes;BTTS;1.7;3.32;5.3;;;;;;
+2026-04-04;Ligue 1;Stade Brestois 29 vs Rennes;BTTS;1.7;3.32;5.3;;;;W;2.32;
 2026-04-04;Primeira Liga;Nacional vs Estrela;BTTS;1.77;8.49;11.37;;;;L;-8.49;
 2026-04-04;Super Lig;Trabzonspor vs Galatasaray;O2.5;1.62;8.9;4.49;;;;W;5.52;
 2026-04-05;2. Bundesliga;Eintracht Braunschweig vs 1. FC Nürnberg;O2.5;1.76;17.54;7.82;;;;;;
