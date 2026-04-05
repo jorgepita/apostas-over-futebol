@@ -15,6 +15,7 @@ GITHUB_OWNER = os.environ.get("GITHUB_OWNER", "jorgepita").strip()
 GITHUB_REPO = os.environ.get("GITHUB_REPO", "apostas-over-futebol").strip()
 GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main").strip()
 STATE_PATH = os.environ.get("STATE_PATH", "dashboard_state.json").strip()
+MANUAL_BETS_PATH = os.environ.get("MANUAL_BETS_PATH", "manual_bets.csv").strip()
 
 if not GITHUB_TOKEN:
     raise RuntimeError("GITHUB_TOKEN em falta")
@@ -102,6 +103,38 @@ def validate_state(payload):
     }
 
 
+def manual_bets_to_csv(manual_bets):
+    headers = [
+        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€",
+        "Resultado", "Lucro€", "Notas", "Origem"
+    ]
+
+    lines = [";".join(headers)]
+
+    for item in manual_bets or []:
+        row = [
+            str(item.get("data", "")).strip(),
+            str(item.get("liga", "")).strip(),
+            str(item.get("jogo", "")).strip(),
+            str(item.get("mercado", "")).strip().upper(),
+            str(item.get("odd", "")).strip(),
+            str(item.get("stake", "")).strip(),
+            str(item.get("resultado", "")).strip().upper(),
+            "",
+            str(item.get("notas", "")).strip(),
+            "Manual",
+        ]
+
+        escaped = []
+        for v in row:
+            v = str(v).replace('"', '""')
+            escaped.append(f'"{v}"')
+
+        lines.append(";".join(escaped))
+
+    return "\n".join(lines) + "\n"
+
+
 @app.get("/")
 def root():
     return jsonify({
@@ -158,6 +191,16 @@ def save_state():
             json.dumps(state, ensure_ascii=False, indent=2),
             "update dashboard state",
             sha=sha,
+        )
+
+        manual_csv = manual_bets_to_csv(state.get("manualBets", []))
+        _old_manual_content, manual_sha = get_file_from_github(MANUAL_BETS_PATH)
+
+        put_file_to_github(
+            MANUAL_BETS_PATH,
+            manual_csv,
+            "update manual bets csv",
+            sha=manual_sha,
         )
 
         return jsonify({"ok": True, "state": state})
