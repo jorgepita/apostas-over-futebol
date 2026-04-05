@@ -7,6 +7,7 @@ import unicodedata
 from pathlib import Path
 from urllib import request, parse, error
 from datetime import datetime, timezone
+from difflib import SequenceMatcher
 
 import pandas as pd
 
@@ -87,21 +88,10 @@ API_FOOTBALL_FALLBACK_COMPETITIONS = {
 FD_FINISHED_STATUS = {"FINISHED"}
 AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
 
+TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
-# =============================
-# Helpers
-# =============================
-# =========================
-# MATCHING / NORMALIZATION
-# =========================
-
-import json
-import os
-import re
-import unicodedata
-from difflib import SequenceMatcher
-
-TEAM_ALIAS_CACHE_FILE = "team_alias_cache.json"
+MATCH_MIN_TOTAL_SCORE = 140
+MATCH_MIN_SIDE_SCORE = 65
 
 BASE_TEAM_ALIASES = {
     # Championship
@@ -227,7 +217,7 @@ BASE_TEAM_ALIASES = {
     "eyupspor istanbul": "eyupspor",
     "eyupspor fk": "eyupspor",
     "eyupspor kulubu": "eyupspor",
-    "eyuspor": "eyupspor",  # typo defensivo
+    "eyuspor": "eyupspor",
 
     # genéricos frequentes
     "spvgg greuther furth": "greuther furth",
@@ -254,12 +244,17 @@ SHARED_STATE_DEFAULTS = {
 }
 
 
+# =============================
+# Helpers
+# =============================
 def ensure_shared_state_defaults(shared_state: dict | None) -> dict:
     if shared_state is None:
         shared_state = {}
+
     for k, v in SHARED_STATE_DEFAULTS.items():
         if k not in shared_state:
             shared_state[k] = v.copy() if isinstance(v, dict) else v
+
     return shared_state
 
 
@@ -293,15 +288,13 @@ def _pre_clean_team_name(text: str) -> str:
     s = s.replace("-", " ")
     s = s.replace("/", " ")
 
-    # manter números mas limpar pontuação geral
     s = re.sub(r"[^\w\s]", " ", s)
 
-    # normalizações frequentes
     s = s.replace("1 fc", "1 fc ")
     s = s.replace("1  fc", "1 fc ")
     s = s.replace("st.", "saint")
     s = s.replace("st ", "saint ")
-    s = s.replace("mtz", "metz")  # defensivo
+    s = s.replace("mtz", "metz")
 
     s = normalize_whitespace(s)
     return s
@@ -310,9 +303,11 @@ def _pre_clean_team_name(text: str) -> str:
 def load_team_alias_cache() -> dict:
     if not os.path.exists(TEAM_ALIAS_CACHE_FILE):
         return {}
+
     try:
         with open(TEAM_ALIAS_CACHE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
+
         if isinstance(data, dict):
             out = {}
             for k, v in data.items():
@@ -323,17 +318,22 @@ def load_team_alias_cache() -> dict:
             return out
     except Exception as e:
         warn_log(f"team alias cache: erro ao ler {TEAM_ALIAS_CACHE_FILE}: {e}")
+
     return {}
 
 
 def save_team_alias_cache(shared_state: dict | None = None):
     shared_state = ensure_shared_state_defaults(shared_state)
+
     if not shared_state.get("team_aliases_dirty"):
         return
+
     aliases = shared_state.get("team_aliases_runtime", {})
+
     try:
         with open(TEAM_ALIAS_CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(dict(sorted(aliases.items())), f, ensure_ascii=False, indent=2)
+
         shared_state["team_aliases_dirty"] = False
         debug_log(f"team alias cache: guardado {len(aliases)} aliases em {TEAM_ALIAS_CACHE_FILE}")
     except Exception as e:
@@ -342,19 +342,18 @@ def save_team_alias_cache(shared_state: dict | None = None):
 
 def get_team_aliases(shared_state: dict | None = None) -> dict:
     shared_state = ensure_shared_state_defaults(shared_state)
+
     if shared_state["team_aliases_runtime"]:
         return shared_state["team_aliases_runtime"]
 
     aliases = {}
 
-    # base
     for k, v in BASE_TEAM_ALIASES.items():
         k2 = normalize_whitespace(_pre_clean_team_name(k))
         v2 = normalize_whitespace(_pre_clean_team_name(v))
         if k2 and v2:
             aliases[k2] = v2
 
-    # cache persistente por cima
     for k, v in load_team_alias_cache().items():
         aliases[k] = v
 
@@ -366,23 +365,18 @@ def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
     aliases = get_team_aliases(shared_state)
 
     s = _pre_clean_team_name(text)
-
     if not s:
         return ""
 
-    # alias direto
     if s in aliases:
         return aliases[s]
 
-    # remover palavras pouco úteis
     tokens = [t for t in s.split() if t not in TEAM_STOPWORDS]
     s2 = normalize_whitespace(" ".join(tokens))
 
-    # alias após limpeza
     if s2 in aliases:
         return aliases[s2]
 
-    # heurísticas adicionais
     s2 = s2.replace("saint ", "st ")
     s2 = normalize_whitespace(s2)
 
@@ -402,7 +396,6 @@ def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
     if na == nb:
         return 100
 
-    # contains forte
     if na in nb or nb in na:
         shorter = min(len(na), len(nb))
         longer = max(len(na), len(nb))
@@ -413,9 +406,9 @@ def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
             if frac >= 0.55:
                 return 90
 
-    # token overlap
     ta = set(na.split())
     tb = set(nb.split())
+
     if ta and tb:
         inter = len(ta & tb)
         union = len(ta | tb)
@@ -445,9 +438,6 @@ def maybe_learn_team_alias(
 ):
     """
     Aprende alias apenas quando há confiança alta.
-    Exemplo:
-    raw='Angers' -> api='Angers SCO'
-    raw='Lyon' -> api='Olympique Lyonnais'
     """
     shared_state = ensure_shared_state_defaults(shared_state)
     aliases = get_team_aliases(shared_state)
@@ -458,11 +448,9 @@ def maybe_learn_team_alias(
     if not raw_clean or not api_canon:
         return
 
-    # não aprender lixo
     if len(raw_clean) < 3 or len(api_canon) < 3:
         return
 
-    # já conhecido
     if raw_clean in aliases and aliases[raw_clean] == api_canon:
         return
 
@@ -477,12 +465,18 @@ def extract_fixture_team_names(fixture: dict) -> tuple[str, str]:
     Compatível com diferentes formatos:
     - {"home_name": "...", "away_name": "..."}
     - {"teams": {"home": {"name": "..."}, "away": {"name": "..."}}}
+    - football-data: {"homeTeam": {"name": "..."}, "awayTeam": {"name": "..."}}
     """
     if not isinstance(fixture, dict):
         return "", ""
 
     home = fixture.get("home_name", "") or fixture.get("homeTeam", "") or fixture.get("home", "")
     away = fixture.get("away_name", "") or fixture.get("awayTeam", "") or fixture.get("away", "")
+
+    if isinstance(home, dict):
+        home = home.get("name", "")
+    if isinstance(away, dict):
+        away = away.get("name", "")
 
     if not home or not away:
         teams = fixture.get("teams", {}) or {}
@@ -496,14 +490,12 @@ def get_fixture_status(fixture: dict) -> str:
     if not isinstance(fixture, dict):
         return ""
 
-    # API-Football
     fx = fixture.get("fixture") or {}
     status = fx.get("status") or {}
     short = status.get("short")
     if short:
         return str(short)
 
-    # football-data style
     if fixture.get("status"):
         return str(fixture.get("status"))
 
@@ -514,7 +506,6 @@ def get_fixture_score(fixture: dict) -> tuple[int | None, int | None]:
     if not isinstance(fixture, dict):
         return None, None
 
-    # API-Football
     goals = fixture.get("goals")
     if isinstance(goals, dict):
         home = goals.get("home")
@@ -522,7 +513,6 @@ def get_fixture_score(fixture: dict) -> tuple[int | None, int | None]:
         if home is not None or away is not None:
             return home, away
 
-    # football-data style
     score = fixture.get("score") or {}
     full_time = score.get("fullTime") or {}
     home = full_time.get("home")
@@ -540,12 +530,6 @@ def score_fixture_match(
     api_away: str,
     shared_state: dict | None = None,
 ) -> tuple[int, int, int]:
-    """
-    devolve:
-    - total_score
-    - home_score
-    - away_score
-    """
     hs = similarity_score(row_home, api_home, shared_state)
     aws = similarity_score(row_away, api_away, shared_state)
 
@@ -554,13 +538,11 @@ def score_fixture_match(
 
     bonus = 0
 
-    # match canonical exato
     if row_home_c == api_home_c:
         bonus += 10
     if row_away_c == api_away_c:
         bonus += 10
 
-    # contains canonical
     if row_home_c and api_home_c and (row_home_c in api_home_c or api_home_c in row_home_c):
         bonus += 3
     if row_away_c and api_away_c and (row_away_c in api_away_c or api_away_c in row_away_c):
@@ -575,8 +557,8 @@ def find_best_fixture_match(
     row_away: str,
     fixtures: list,
     shared_state: dict | None = None,
-    min_total_score: int = 150,
-    min_side_score: int = 60,
+    min_total_score: int = MATCH_MIN_TOTAL_SCORE,
+    min_side_score: int = MATCH_MIN_SIDE_SCORE,
 ):
     """
     Procura o melhor match dentro de uma lista de fixtures da mesma liga/data.
@@ -593,7 +575,6 @@ def find_best_fixture_match(
 
     row_home_c, row_away_c = canonical_pair(row_home, row_away, shared_state)
 
-    # 1) canonical exato primeiro
     exact_candidates = []
     for fx in fixtures:
         api_home, api_away = extract_fixture_team_names(fx)
@@ -620,7 +601,6 @@ def find_best_fixture_match(
             "mode": "canonical_exact",
         }
 
-    # 2) melhor score global
     best = None
     best_meta = None
     best_score = -1
@@ -645,7 +625,6 @@ def find_best_fixture_match(
     if best is None:
         return None, 0, None
 
-    # rejeição por lado fraco
     if best_meta["home_score"] < min_side_score or best_meta["away_score"] < min_side_score:
         return None, best_score, best_meta
 
@@ -666,9 +645,6 @@ def log_no_match_candidates(
     shared_state: dict | None = None,
     top_n: int = 3,
 ):
-    """
-    Ajuda de debug quando não há match.
-    """
     scored = []
     for fx in fixtures or []:
         api_home, api_away = extract_fixture_team_names(fx)
@@ -676,12 +652,15 @@ def log_no_match_candidates(
         scored.append((total, hs, aws, api_home, api_away, get_fixture_status(fx)))
 
     scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+
     for total, hs, aws, api_home, api_away, status in scored[:top_n]:
         debug_log(
             f"{prefix}: candidato match | "
             f"row='{row_home} vs {row_away}' | api='{api_home} vs {api_away}' | "
             f"score={total} | hs={hs} | as={aws} | status={status}"
         )
+
+
 def parse_float(v, default=0.0) -> float:
     try:
         s = str(v).strip().replace(",", ".")
@@ -712,6 +691,9 @@ def split_game(game: str):
 
 
 def team_match_score(a: str, b: str) -> int:
+    """
+    Mantido por compatibilidade noutros pontos auxiliares.
+    """
     na = normalize_text(a)
     nb = normalize_text(b)
 
@@ -748,6 +730,9 @@ def team_match_score(a: str, b: str) -> int:
 
 
 def choose_best_match(csv_home: str, csv_away: str, matches: list[dict]):
+    """
+    Mantido por compatibilidade, mas o fluxo principal já não usa esta função.
+    """
     best = None
     best_score = -1
 
@@ -773,6 +758,9 @@ def choose_best_match(csv_home: str, csv_away: str, matches: list[dict]):
 
 
 def choose_best_api_football_match(csv_home: str, csv_away: str, fixtures: list[dict]):
+    """
+    Mantido por compatibilidade, mas o fluxo principal já não usa esta função.
+    """
     best = None
     best_score = -1
 
@@ -1120,7 +1108,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
         league_name = str(league.get("name", "")).strip()
 
         if not league_id or not league_name:
-          continue
+            continue
 
         score = team_match_score(target_name, league_name)
         if score > best_score:
@@ -1197,6 +1185,7 @@ def github_request(url: str, token: str, method: str = "GET", data: dict | None 
         "User-Agent": "render-apostas-bot",
     }
     body = None
+
     if data is not None:
         body = json.dumps(data).encode("utf-8")
         headers["Content-Type"] = "application/json"
@@ -1346,23 +1335,25 @@ def try_update_row_via_api_football(
         print(f"[WARN] {label}: API-Football sem fixtures para {jogo} | {league_code} | {data} | reason={reason}")
         return False, reason or "NO_FIXTURES"
 
-    matched, best_score = choose_best_api_football_match(home_csv, away_csv, fixtures)
+    matched, best_score, meta = find_best_fixture_match(
+        home_csv,
+        away_csv,
+        fixtures,
+        shared_state,
+        min_total_score=MATCH_MIN_TOTAL_SCORE,
+        min_side_score=MATCH_MIN_SIDE_SCORE,
+    )
     if not matched:
         print(f"[WARN] {label}: API-Football sem match para: {jogo} | {league_code} | {data}")
+        log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
         return False, "NO_MATCH"
 
-    fixture = matched.get("fixture", {}) or {}
-    status = (fixture.get("status", {}) or {}).get("short", "")
-    status = str(status).upper()
-
+    status = str(get_fixture_status(matched)).upper()
     if status not in AF_FINISHED_STATUS:
         print(f"[DBG] {label}: API-Football ainda não terminado: {jogo} | status={status}")
         return False, "NOT_FINISHED"
 
-    goals = matched.get("goals", {}) or {}
-    home_goals = goals.get("home")
-    away_goals = goals.get("away")
-
+    home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
         print(f"[WARN] {label}: API-Football sem goals finais para: {jogo}")
         return False, "NO_SCORE"
@@ -1388,6 +1379,7 @@ def try_update_row_via_api_football(
     print(
         f"[OK] {label}: API-Football fallback | {jogo} | {mercado} | "
         f"{home_goals}-{away_goals} => {resultado} | score_match={best_score} | "
+        f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
         f"Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
     )
     return True, "UPDATED"
@@ -1397,12 +1389,13 @@ def try_update_row_via_api_football(
 # Shared state
 # =============================
 def make_shared_runtime_state():
-    return {
+    shared_state = {
         "fd_matches_cache": {},
         "af_fixtures_cache": {},
         "af_league_id_cache": {},
         "blocked_fd_leagues_seen": set(),
     }
+    return ensure_shared_state_defaults(shared_state)
 
 
 # =============================
@@ -1410,6 +1403,7 @@ def make_shared_runtime_state():
 # =============================
 def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     df = ensure_columns(df)
+    shared_state = ensure_shared_state_defaults(shared_state)
 
     fd_matches_cache = shared_state["fd_matches_cache"]
     blocked_fd_leagues_seen = shared_state["blocked_fd_leagues_seen"]
@@ -1490,13 +1484,20 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         if use_api_football_direct:
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
-            ok, _ = try_update_row_via_api_football(
+
+            ok, reason = try_update_row_via_api_football(
                 df, i, row, league_code, label, shared_state
             )
             if ok:
                 updated += 1
                 af_updated += 1
             else:
+                if reason == "NOT_FINISHED":
+                    not_finished += 1
+                elif reason == "NO_MATCH":
+                    no_match_found += 1
+                elif reason == "UNSUPPORTED_MARKET":
+                    unsupported_market += 1
                 af_failed += 1
                 ignored += 1
             continue
@@ -1546,13 +1547,20 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         if not cache_entry["ok"] and cache_entry["reason"] == "HTTP 403" and league_code in API_FOOTBALL_FALLBACK_COMPETITIONS:
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
-            ok, _ = try_update_row_via_api_football(
+
+            ok, reason = try_update_row_via_api_football(
                 df, i, row, league_code, label, shared_state
             )
             if ok:
                 updated += 1
                 af_updated += 1
             else:
+                if reason == "NOT_FINISHED":
+                    not_finished += 1
+                elif reason == "NO_MATCH":
+                    no_match_found += 1
+                elif reason == "UNSUPPORTED_MARKET":
+                    unsupported_market += 1
                 af_failed += 1
                 ignored += 1
             continue
@@ -1562,26 +1570,30 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             continue
 
         matches = cache_entry["matches"]
-        matched, best_score = choose_best_match(home_csv, away_csv, matches)
+        matched, best_score, meta = find_best_fixture_match(
+            home_csv,
+            away_csv,
+            matches,
+            shared_state,
+            min_total_score=MATCH_MIN_TOTAL_SCORE,
+            min_side_score=MATCH_MIN_SIDE_SCORE,
+        )
 
         if not matched:
             print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
+            log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
             no_match_found += 1
             ignored += 1
             continue
 
-        status = str(matched.get("status", "")).upper()
+        status = str(get_fixture_status(matched)).upper()
         if status not in FD_FINISHED_STATUS:
             print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
             not_finished += 1
             ignored += 1
             continue
 
-        score = matched.get("score", {}) or {}
-        ft = score.get("fullTime", {}) or {}
-        home_goals = ft.get("home")
-        away_goals = ft.get("away")
-
+        home_goals, away_goals = get_fixture_score(matched)
         if home_goals is None or away_goals is None:
             print(f"[WARN] {label}: Sem fullTime score para: {jogo}")
             ignored += 1
@@ -1613,6 +1625,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         print(
             f"[OK] {label}: football-data | {jogo} | {mercado} | {home_goals}-{away_goals} "
             f"=> {resultado} | score_match={best_score} | "
+            f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
             f"Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
         )
 
@@ -1656,6 +1669,8 @@ def main():
         f"Daily atualizado: {d_updated} | já resolvidos: {d_done} | ignorados: {d_ignored} | "
         f"sincronizados via history: {d_synced}"
     )
+
+    save_team_alias_cache(shared_state)
 
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
     upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
