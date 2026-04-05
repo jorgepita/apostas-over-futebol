@@ -91,6 +91,597 @@ AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
 # =============================
 # Helpers
 # =============================
+# =========================
+# MATCHING / NORMALIZATION
+# =========================
+
+import json
+import os
+import re
+import unicodedata
+from difflib import SequenceMatcher
+
+TEAM_ALIAS_CACHE_FILE = "team_alias_cache.json"
+
+BASE_TEAM_ALIASES = {
+    # Championship
+    "qpr": "queens park rangers",
+    "queens park rangers": "queens park rangers",
+
+    # Bélgica
+    "antwerp": "royal antwerp",
+    "royal antwerp": "royal antwerp",
+    "royal antwerp fc": "royal antwerp",
+    "antwerp fc": "royal antwerp",
+
+    "genk": "krc genk",
+    "krc genk": "krc genk",
+    "racing genk": "krc genk",
+
+    "charleroi": "sporting charleroi",
+    "sporting charleroi": "sporting charleroi",
+    "royal charleroi": "sporting charleroi",
+
+    "gent": "kaa gent",
+    "kaa gent": "kaa gent",
+
+    "kv mechelen": "mechelen",
+    "mechelen": "mechelen",
+
+    "club brugge": "club brugge",
+    "club brugge kv": "club brugge",
+    "anderlecht": "anderlecht",
+    "rsc anderlecht": "anderlecht",
+
+    # França
+    "lyon": "olympique lyonnais",
+    "olympique lyon": "olympique lyonnais",
+    "olympique lyonnais": "olympique lyonnais",
+
+    "angers": "angers sco",
+    "angers sco": "angers sco",
+
+    "stade brestois 29": "brest",
+    "stade brestois": "brest",
+    "brest": "brest",
+
+    "rennes": "stade rennais",
+    "stade rennais": "stade rennais",
+    "stade rennais fc": "stade rennais",
+
+    "paris sg": "paris saint germain",
+    "psg": "paris saint germain",
+    "paris saint germain": "paris saint germain",
+
+    # Alemanha
+    "1 fc nurnberg": "nurnberg",
+    "1. fc nurnberg": "nurnberg",
+    "fc nurnberg": "nurnberg",
+    "nurnberg": "nurnberg",
+    "nuernberg": "nurnberg",
+
+    "fc schalke 04": "schalke",
+    "schalke 04": "schalke",
+    "schalke": "schalke",
+
+    "hannover 96": "hannover",
+    "hannover": "hannover",
+
+    "eintracht braunschweig": "braunschweig",
+    "braunschweig": "braunschweig",
+
+    "hertha bsc": "hertha berlin",
+    "hertha": "hertha berlin",
+    "hertha berlin": "hertha berlin",
+
+    "1 fc koln": "koln",
+    "1. fc koln": "koln",
+    "fc koln": "koln",
+    "koln": "koln",
+    "koeln": "koln",
+
+    "bayer leverkusen": "leverkusen",
+    "leverkusen": "leverkusen",
+
+    "vfl wolfsburg": "wolfsburg",
+    "wolfsburg": "wolfsburg",
+
+    # Holanda
+    "az alkmaar": "az",
+    "az": "az",
+    "fortuna sittard": "fortuna sittard",
+
+    "nec nijmegen": "nec",
+    "nec": "nec",
+
+    "go ahead eagles": "go ahead eagles",
+    "pec zwolle": "pec zwolle",
+
+    # Portugal
+    "benfica": "benfica",
+    "sport lisboa e benfica": "benfica",
+    "sporting": "sporting cp",
+    "sporting cp": "sporting cp",
+    "porto": "fc porto",
+    "fc porto": "fc porto",
+
+    # Itália
+    "inter": "inter",
+    "inter milan": "inter",
+    "internazionale": "inter",
+    "internazionale milano": "inter",
+
+    "milan": "ac milan",
+    "ac milan": "ac milan",
+
+    # Turquia
+    "galatasaray": "galatasaray",
+    "fenerbahce": "fenerbahce",
+    "besiktas": "besiktas",
+    "trabzonspor": "trabzonspor",
+    "gaziantep": "gaziantep fk",
+    "gaziantep fk": "gaziantep fk",
+    "alanyaspor": "alanyaspor",
+    "antalyaspor": "antalyaspor",
+    "eyupspor": "eyupspor",
+    "eyupspor istanbul": "eyupspor",
+    "eyupspor fk": "eyupspor",
+    "eyupspor kulubu": "eyupspor",
+    "eyuspor": "eyupspor",  # typo defensivo
+
+    # genéricos frequentes
+    "spvgg greuther furth": "greuther furth",
+    "greuther furth": "greuther furth",
+    "fortuna dusseldorf": "fortuna dusseldorf",
+    "dusseldorf": "fortuna dusseldorf",
+    "kaiserslautern": "kaiserslautern",
+    "1 fc kaiserslautern": "kaiserslautern",
+    "magdeburg": "magdeburg",
+    "1 fc magdeburg": "magdeburg",
+    "paderborn": "paderborn",
+    "sc paderborn 07": "paderborn",
+}
+
+TEAM_STOPWORDS = {
+    "fc", "cf", "sc", "sv", "fk", "ac", "as", "rc", "kv", "kvc",
+    "afc", "sco", "calcio", "club", "de", "the", "nk", "sk", "if",
+    "bk", "jk", "cd", "ud", "sd", "real", "sporting", "athletic"
+}
+
+SHARED_STATE_DEFAULTS = {
+    "team_aliases_runtime": {},
+    "team_aliases_dirty": False,
+}
+
+
+def ensure_shared_state_defaults(shared_state: dict | None) -> dict:
+    if shared_state is None:
+        shared_state = {}
+    for k, v in SHARED_STATE_DEFAULTS.items():
+        if k not in shared_state:
+            shared_state[k] = v.copy() if isinstance(v, dict) else v
+    return shared_state
+
+
+def debug_log(msg: str):
+    print(f"[DBG] {msg}")
+
+
+def warn_log(msg: str):
+    print(f"[WARN] {msg}")
+
+
+def ok_log(msg: str):
+    print(f"[OK] {msg}")
+
+
+def strip_accents(text: str) -> str:
+    text = unicodedata.normalize("NFKD", str(text or ""))
+    return "".join(ch for ch in text if not unicodedata.combining(ch))
+
+
+def normalize_whitespace(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip()
+
+
+def _pre_clean_team_name(text: str) -> str:
+    s = strip_accents(text).lower()
+
+    s = s.replace("&", " and ")
+    s = s.replace("'", " ")
+    s = s.replace("’", " ")
+    s = s.replace("-", " ")
+    s = s.replace("/", " ")
+
+    # manter números mas limpar pontuação geral
+    s = re.sub(r"[^\w\s]", " ", s)
+
+    # normalizações frequentes
+    s = s.replace("1 fc", "1 fc ")
+    s = s.replace("1  fc", "1 fc ")
+    s = s.replace("st.", "saint")
+    s = s.replace("st ", "saint ")
+    s = s.replace("mtz", "metz")  # defensivo
+
+    s = normalize_whitespace(s)
+    return s
+
+
+def load_team_alias_cache() -> dict:
+    if not os.path.exists(TEAM_ALIAS_CACHE_FILE):
+        return {}
+    try:
+        with open(TEAM_ALIAS_CACHE_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            out = {}
+            for k, v in data.items():
+                k2 = normalize_whitespace(_pre_clean_team_name(k))
+                v2 = normalize_whitespace(_pre_clean_team_name(v))
+                if k2 and v2:
+                    out[k2] = v2
+            return out
+    except Exception as e:
+        warn_log(f"team alias cache: erro ao ler {TEAM_ALIAS_CACHE_FILE}: {e}")
+    return {}
+
+
+def save_team_alias_cache(shared_state: dict | None = None):
+    shared_state = ensure_shared_state_defaults(shared_state)
+    if not shared_state.get("team_aliases_dirty"):
+        return
+    aliases = shared_state.get("team_aliases_runtime", {})
+    try:
+        with open(TEAM_ALIAS_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(dict(sorted(aliases.items())), f, ensure_ascii=False, indent=2)
+        shared_state["team_aliases_dirty"] = False
+        debug_log(f"team alias cache: guardado {len(aliases)} aliases em {TEAM_ALIAS_CACHE_FILE}")
+    except Exception as e:
+        warn_log(f"team alias cache: erro ao guardar {TEAM_ALIAS_CACHE_FILE}: {e}")
+
+
+def get_team_aliases(shared_state: dict | None = None) -> dict:
+    shared_state = ensure_shared_state_defaults(shared_state)
+    if shared_state["team_aliases_runtime"]:
+        return shared_state["team_aliases_runtime"]
+
+    aliases = {}
+
+    # base
+    for k, v in BASE_TEAM_ALIASES.items():
+        k2 = normalize_whitespace(_pre_clean_team_name(k))
+        v2 = normalize_whitespace(_pre_clean_team_name(v))
+        if k2 and v2:
+            aliases[k2] = v2
+
+    # cache persistente por cima
+    for k, v in load_team_alias_cache().items():
+        aliases[k] = v
+
+    shared_state["team_aliases_runtime"] = aliases
+    return aliases
+
+
+def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
+    aliases = get_team_aliases(shared_state)
+
+    s = _pre_clean_team_name(text)
+
+    if not s:
+        return ""
+
+    # alias direto
+    if s in aliases:
+        return aliases[s]
+
+    # remover palavras pouco úteis
+    tokens = [t for t in s.split() if t not in TEAM_STOPWORDS]
+    s2 = normalize_whitespace(" ".join(tokens))
+
+    # alias após limpeza
+    if s2 in aliases:
+        return aliases[s2]
+
+    # heurísticas adicionais
+    s2 = s2.replace("saint ", "st ")
+    s2 = normalize_whitespace(s2)
+
+    if s2 in aliases:
+        return aliases[s2]
+
+    return s2
+
+
+def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
+    na = normalize_team_name(a, shared_state)
+    nb = normalize_team_name(b, shared_state)
+
+    if not na or not nb:
+        return 0
+
+    if na == nb:
+        return 100
+
+    # contains forte
+    if na in nb or nb in na:
+        shorter = min(len(na), len(nb))
+        longer = max(len(na), len(nb))
+        if longer > 0:
+            frac = shorter / longer
+            if frac >= 0.70:
+                return 94
+            if frac >= 0.55:
+                return 90
+
+    # token overlap
+    ta = set(na.split())
+    tb = set(nb.split())
+    if ta and tb:
+        inter = len(ta & tb)
+        union = len(ta | tb)
+        jacc = inter / union if union else 0.0
+        if jacc >= 0.80:
+            return 92
+        if jacc >= 0.60:
+            return 88
+
+    ratio = SequenceMatcher(None, na, nb).ratio()
+    return int(round(ratio * 100))
+
+
+def canonical_pair(home: str, away: str, shared_state: dict | None = None) -> tuple[str, str]:
+    return (
+        normalize_team_name(home, shared_state),
+        normalize_team_name(away, shared_state),
+    )
+
+
+def maybe_learn_team_alias(
+    raw_name: str,
+    api_name: str,
+    score: int,
+    shared_state: dict | None = None,
+    min_learn_score: int = 94,
+):
+    """
+    Aprende alias apenas quando há confiança alta.
+    Exemplo:
+    raw='Angers' -> api='Angers SCO'
+    raw='Lyon' -> api='Olympique Lyonnais'
+    """
+    shared_state = ensure_shared_state_defaults(shared_state)
+    aliases = get_team_aliases(shared_state)
+
+    raw_clean = normalize_whitespace(_pre_clean_team_name(raw_name))
+    api_canon = normalize_team_name(api_name, shared_state)
+
+    if not raw_clean or not api_canon:
+        return
+
+    # não aprender lixo
+    if len(raw_clean) < 3 or len(api_canon) < 3:
+        return
+
+    # já conhecido
+    if raw_clean in aliases and aliases[raw_clean] == api_canon:
+        return
+
+    if score >= min_learn_score:
+        aliases[raw_clean] = api_canon
+        shared_state["team_aliases_dirty"] = True
+        debug_log(f"team alias learned | '{raw_clean}' -> '{api_canon}' | score={score}")
+
+
+def extract_fixture_team_names(fixture: dict) -> tuple[str, str]:
+    """
+    Compatível com diferentes formatos:
+    - {"home_name": "...", "away_name": "..."}
+    - {"teams": {"home": {"name": "..."}, "away": {"name": "..."}}}
+    """
+    if not isinstance(fixture, dict):
+        return "", ""
+
+    home = fixture.get("home_name", "") or fixture.get("homeTeam", "") or fixture.get("home", "")
+    away = fixture.get("away_name", "") or fixture.get("awayTeam", "") or fixture.get("away", "")
+
+    if not home or not away:
+        teams = fixture.get("teams", {}) or {}
+        home = home or ((teams.get("home") or {}).get("name", ""))
+        away = away or ((teams.get("away") or {}).get("name", ""))
+
+    return str(home or ""), str(away or "")
+
+
+def get_fixture_status(fixture: dict) -> str:
+    if not isinstance(fixture, dict):
+        return ""
+
+    # API-Football
+    fx = fixture.get("fixture") or {}
+    status = fx.get("status") or {}
+    short = status.get("short")
+    if short:
+        return str(short)
+
+    # football-data style
+    if fixture.get("status"):
+        return str(fixture.get("status"))
+
+    return ""
+
+
+def get_fixture_score(fixture: dict) -> tuple[int | None, int | None]:
+    if not isinstance(fixture, dict):
+        return None, None
+
+    # API-Football
+    goals = fixture.get("goals")
+    if isinstance(goals, dict):
+        home = goals.get("home")
+        away = goals.get("away")
+        if home is not None or away is not None:
+            return home, away
+
+    # football-data style
+    score = fixture.get("score") or {}
+    full_time = score.get("fullTime") or {}
+    home = full_time.get("home")
+    away = full_time.get("away")
+    if home is not None or away is not None:
+        return home, away
+
+    return None, None
+
+
+def score_fixture_match(
+    row_home: str,
+    row_away: str,
+    api_home: str,
+    api_away: str,
+    shared_state: dict | None = None,
+) -> tuple[int, int, int]:
+    """
+    devolve:
+    - total_score
+    - home_score
+    - away_score
+    """
+    hs = similarity_score(row_home, api_home, shared_state)
+    aws = similarity_score(row_away, api_away, shared_state)
+
+    row_home_c, row_away_c = canonical_pair(row_home, row_away, shared_state)
+    api_home_c, api_away_c = canonical_pair(api_home, api_away, shared_state)
+
+    bonus = 0
+
+    # match canonical exato
+    if row_home_c == api_home_c:
+        bonus += 10
+    if row_away_c == api_away_c:
+        bonus += 10
+
+    # contains canonical
+    if row_home_c and api_home_c and (row_home_c in api_home_c or api_home_c in row_home_c):
+        bonus += 3
+    if row_away_c and api_away_c and (row_away_c in api_away_c or api_away_c in row_away_c):
+        bonus += 3
+
+    total = hs + aws + bonus
+    return total, hs, aws
+
+
+def find_best_fixture_match(
+    row_home: str,
+    row_away: str,
+    fixtures: list,
+    shared_state: dict | None = None,
+    min_total_score: int = 150,
+    min_side_score: int = 60,
+):
+    """
+    Procura o melhor match dentro de uma lista de fixtures da mesma liga/data.
+
+    Critérios:
+    - primeiro tenta canonical exato
+    - depois score total
+    - rejeita scores laterais demasiado fracos
+    """
+    shared_state = ensure_shared_state_defaults(shared_state)
+
+    if not fixtures:
+        return None, 0, None
+
+    row_home_c, row_away_c = canonical_pair(row_home, row_away, shared_state)
+
+    # 1) canonical exato primeiro
+    exact_candidates = []
+    for fx in fixtures:
+        api_home, api_away = extract_fixture_team_names(fx)
+        api_home_c, api_away_c = canonical_pair(api_home, api_away, shared_state)
+
+        if row_home_c == api_home_c and row_away_c == api_away_c:
+            total, hs, aws = score_fixture_match(
+                row_home, row_away, api_home, api_away, shared_state
+            )
+            exact_candidates.append((total, hs, aws, fx, api_home, api_away))
+
+    if exact_candidates:
+        exact_candidates.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+        total, hs, aws, fx, api_home, api_away = exact_candidates[0]
+
+        maybe_learn_team_alias(row_home, api_home, hs, shared_state)
+        maybe_learn_team_alias(row_away, api_away, aws, shared_state)
+
+        return fx, total, {
+            "api_home": api_home,
+            "api_away": api_away,
+            "home_score": hs,
+            "away_score": aws,
+            "mode": "canonical_exact",
+        }
+
+    # 2) melhor score global
+    best = None
+    best_meta = None
+    best_score = -1
+
+    for fx in fixtures:
+        api_home, api_away = extract_fixture_team_names(fx)
+        total, hs, aws = score_fixture_match(
+            row_home, row_away, api_home, api_away, shared_state
+        )
+
+        if total > best_score:
+            best_score = total
+            best = fx
+            best_meta = {
+                "api_home": api_home,
+                "api_away": api_away,
+                "home_score": hs,
+                "away_score": aws,
+                "mode": "scored",
+            }
+
+    if best is None:
+        return None, 0, None
+
+    # rejeição por lado fraco
+    if best_meta["home_score"] < min_side_score or best_meta["away_score"] < min_side_score:
+        return None, best_score, best_meta
+
+    if best_score < min_total_score:
+        return None, best_score, best_meta
+
+    maybe_learn_team_alias(row_home, best_meta["api_home"], best_meta["home_score"], shared_state)
+    maybe_learn_team_alias(row_away, best_meta["api_away"], best_meta["away_score"], shared_state)
+
+    return best, best_score, best_meta
+
+
+def log_no_match_candidates(
+    prefix: str,
+    row_home: str,
+    row_away: str,
+    fixtures: list,
+    shared_state: dict | None = None,
+    top_n: int = 3,
+):
+    """
+    Ajuda de debug quando não há match.
+    """
+    scored = []
+    for fx in fixtures or []:
+        api_home, api_away = extract_fixture_team_names(fx)
+        total, hs, aws = score_fixture_match(row_home, row_away, api_home, api_away, shared_state)
+        scored.append((total, hs, aws, api_home, api_away, get_fixture_status(fx)))
+
+    scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+    for total, hs, aws, api_home, api_away, status in scored[:top_n]:
+        debug_log(
+            f"{prefix}: candidato match | "
+            f"row='{row_home} vs {row_away}' | api='{api_home} vs {api_away}' | "
+            f"score={total} | hs={hs} | as={aws} | status={status}"
+        )
 def parse_float(v, default=0.0) -> float:
     try:
         s = str(v).strip().replace(",", ".")
