@@ -26,8 +26,10 @@
       --info: #2563eb;
       --info-bg: #eff6ff;
 
-      --chip: #f1f5f9;
-      --chip-hover: #e2e8f0;
+      --chip-bg: #f8fafc;
+      --chip-border: #cbd5e1;
+      --chip-active-bg: #0f172a;
+      --chip-active-text: #ffffff;
     }
 
     * { box-sizing: border-box; }
@@ -98,7 +100,6 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 800;
-      white-space: nowrap;
     }
 
     .good { background: var(--ok-bg); color: var(--ok); }
@@ -106,54 +107,47 @@
     .bad { background: var(--bad-bg); color: var(--bad); }
     .info { background: var(--info-bg); color: var(--info); }
 
-    .soft-chip {
+    .mini {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 6px;
+      border-radius: 999px;
+    }
+
+    .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--chip);
-      border: 1px solid var(--line);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      transition: all .15s ease;
-    }
-
-    .soft-chip:hover {
-      background: var(--chip-hover);
-    }
-
-    .soft-chip.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .market-quick-filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .status-pill {
       padding: 5px 8px;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
       white-space: nowrap;
+    }
+
+    .market-quick-wrap {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .market-chip {
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .market-chip.active {
+      background: var(--chip-active-bg);
+      color: var(--chip-active-text);
+      border-color: var(--chip-active-bg);
     }
 
     .tooltip-wrap {
@@ -164,37 +158,48 @@
 
     .tooltip-box {
       position: absolute;
-      top: calc(100% + 10px);
+      top: calc(100% + 8px);
       left: 0;
       min-width: 240px;
-      max-width: 320px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
+      max-width: 300px;
       background: #fff;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-      font-size: 12px;
-      line-height: 1.45;
-      color: var(--text);
-      z-index: 20;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.10);
       display: none;
+      z-index: 30;
     }
 
-    .tooltip-wrap:hover .tooltip-box,
-    .tooltip-wrap:focus-within .tooltip-box {
+    .tooltip-wrap:hover .tooltip-box {
       display: block;
     }
 
     .tooltip-title {
+      font-size: 12px;
       font-weight: 800;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .tooltip-row {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      font-size: 12px;
       margin-top: 4px;
+    }
+
+    .tooltip-row strong {
+      font-weight: 800;
+    }
+
+    .subsection-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     table {
@@ -206,88 +211,16 @@
       padding: 10px;
       border-top: 1px solid var(--line);
       font-size: 13px;
-      vertical-align: top;
     }
 
     th {
       text-align: left;
       background: #fafafa;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    .mini {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 6px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-    }
-
-    .market-filter-label {
-      margin-bottom: 10px;
-    }
-
-    .kpi-top .value {
-      font-size: 24px;
-    }
-
-    .subtle-divider {
-      height: 1px;
-      background: var(--line);
-      margin: 14px 0;
-      border: 0;
-    }
-
-    .section-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .muted-inline {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    button,
-    a[id="btnApostas"] {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      font: inherit;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    button:hover,
-    a[id="btnApostas"]:hover {
-      background: #f8fafc;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="date"],
-    select {
-      font: inherit;
     }
 
     @media (max-width: 1100px) {
       .grid-5 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1fr;
       }
     }
 
@@ -295,32 +228,27 @@
       .grid-3, .grid-4, .grid-5 {
         grid-template-columns: 1fr;
       }
-
-      .tooltip-box {
-        left: auto;
-        right: 0;
-      }
     }
   </style>
 </head>
-<body>
+  <body>
   <div class="wrap">
     <div class="card" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
         <div>
           <div class="label">Projeto Apostas Bot</div>
           <div class="value" style="font-size:30px;">Dashboard GitHub Pages</div>
-          <div class="note">Modelo vs execução real, com modo decisão, alertas automáticos, stake dinâmica e controlo operacional.</div>
+          <div class="note">Modelo vs execução real, com modo decisão, alertas automáticos e stake dinâmica.</div>
         </div>
 
-        <div class="toolbar">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <button id="refreshBtn">Atualizar agora</button>
 
           <div class="tooltip-wrap">
             <a href="apostas.html" id="btnApostas">Apostas do dia</a>
-            <div class="tooltip-box" id="apostasTooltip">
+            <div class="tooltip-box" id="btnApostasTooltip">
               <div class="tooltip-title">Resumo das picks do dia</div>
-              <div class="tooltip-row"><span>Picks hoje</span><strong id="tooltipDailyCount">—</strong></div>
+              <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
               <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
               <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
               <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
@@ -341,7 +269,6 @@
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
         <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
         <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
-        <span class="decision-badge info" id="manualCloudLabel">Cloud manuais: —</span>
       </div>
 
       <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
@@ -382,7 +309,7 @@
       </div>
     </div>
 
-    <div class="grid grid-5 kpi-top" style="margin-bottom:16px;">
+    <div class="grid grid-5" style="margin-bottom:16px;">
       <div class="stat">
         <div class="label">Banca inicial</div>
         <div class="value" id="bankrollLabelTop">€1000.00</div>
@@ -397,26 +324,26 @@
 
       <div class="stat">
         <div class="label">Lucro hoje</div>
-        <div class="value" id="todayProfitTop">€—</div>
-        <div class="note">Fechado no dia atual</div>
+        <div class="value" id="profitTodayTop">€—</div>
+        <div class="note">Fechado nas apostas reais de hoje</div>
       </div>
 
       <div class="stat">
         <div class="label">ROI hoje</div>
-        <div class="value" id="todayRoiTop">—</div>
-        <div class="note">Só resultados reais fechados</div>
+        <div class="value" id="roiTodayTop">—</div>
+        <div class="note">Apenas resolvidas hoje</div>
       </div>
 
       <div class="stat">
-        <div class="label">Exposição aberta</div>
-        <div class="value" id="openExposureTop">€—</div>
-        <div class="note">Stake em aberto</div>
+        <div class="label">Disponível</div>
+        <div class="value" id="availableBankrollTop">€—</div>
+        <div class="note">Banca após abertas</div>
       </div>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
       <div class="label">Controlos locais</div>
-      <div class="note" style="margin-bottom:12px;">Mantidos neste browser, com sincronização cloud disponível.</div>
+      <div class="note" style="margin-bottom:12px;">Guardados neste browser.</div>
 
       <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
         <div>
@@ -483,23 +410,20 @@
         </div>
       </div>
 
-      <div class="subtle-divider"></div>
-
-      <div class="market-filter-label label">Filtro rápido por mercado</div>
-      <div class="market-quick-filters">
-        <button type="button" class="soft-chip active js-market-quick" data-market="">Todos</button>
-        <button type="button" class="soft-chip js-market-quick" data-market="O2.5">O2.5</button>
-        <button type="button" class="soft-chip js-market-quick" data-market="BTTS">BTTS</button>
-        <button type="button" class="soft-chip js-market-quick" data-market="O3.5">O3.5</button>
-        <button type="button" class="soft-chip js-market-quick" data-market="O1.5">O1.5</button>
+      <div class="market-quick-wrap">
+        <span class="label">Filtro rápido:</span>
+        <button type="button" class="market-chip active" data-market-quick="">Todos</button>
+        <button type="button" class="market-chip" data-market-quick="O2.5">O2.5</button>
+        <button type="button" class="market-chip" data-market-quick="BTTS">BTTS</button>
+        <button type="button" class="market-chip" data-market-quick="O3.5">O3.5</button>
+        <button type="button" class="market-chip" data-market-quick="O1.5">O1.5</button>
       </div>
     </div>
-
         <div class="card" style="margin-bottom:16px;">
-      <div class="section-title-row">
+      <div class="subsection-title">
         <div>
           <div class="label">Resumo global</div>
-          <div class="note">Modelo vs execução real (apenas apostas executadas contam para o real)</div>
+          <div class="note">Modelo vs execução real</div>
         </div>
       </div>
 
@@ -527,7 +451,7 @@
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-      <div class="section-title-row">
+      <div class="subsection-title">
         <div>
           <div class="label">Distribuição por mercado</div>
           <div class="note">Performance por tipo de aposta</div>
@@ -538,7 +462,7 @@
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-      <div class="section-title-row">
+      <div class="subsection-title">
         <div>
           <div class="label">Tabela de apostas</div>
           <div class="note">Inclui bot + apostas manuais</div>
@@ -608,7 +532,6 @@
       function getRowKey(r) {
         return [r.Data, r.Liga, r.Jogo, r.Mercado].join("|");
       }
-
             function loadLocalData() {
         try {
           manualBets = JSON.parse(localStorage.getItem(LOCAL_KEYS.manual) || "[]");
@@ -628,6 +551,79 @@
           ...row,
           ...edit
         };
+      }
+
+      function escapeHtml(text) {
+        return String(text || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function calcProfitFromRow(row) {
+        const res = (row.Resultado || "").toUpperCase();
+        const odd = toNumber(row.Odd);
+        const stake = toNumber(row["Stake€"]);
+
+        if (!stake) return 0;
+        if (res === "W") return stake * (odd - 1);
+        if (res === "L") return -stake;
+        return 0;
+      }
+
+      function normalizeManualBet(bet) {
+        const jogo = String(bet.jogo || "")
+          .replace(/\s+/g, " ")
+          .replace(/\s+vs\s+/i, " vs ")
+          .trim();
+
+        const mercado = String(bet.mercado || "").toUpperCase().trim();
+        const resultado = String(bet.resultado || "").toUpperCase().trim();
+        const odd = String(bet.odd || "").trim();
+        const stake = String(bet.stake || "").trim();
+
+        const lucro = resultado ? calcProfitFromRow({
+          Resultado: resultado,
+          Odd: odd,
+          "Stake€": stake
+        }) : "";
+
+        return {
+          Data: String(bet.data || "").trim(),
+          Liga: String(bet.liga || "").trim(),
+          Jogo: jogo,
+          Mercado: mercado,
+          Odd: odd,
+          "Stake€": stake,
+          "Edge%": "",
+          Apostada: "Sim",
+          OddReal: odd,
+          "StakeReal€": stake,
+          Resultado: resultado,
+          "Lucro€": lucro === "" ? "" : String(lucro),
+          "LucroReal€": lucro === "" ? "" : String(lucro),
+          _source: "manual"
+        };
+      }
+
+      function statusBadge(row) {
+        const r = (row.Resultado || "").toUpperCase();
+
+        if (r === "W") return `<span class="status-badge good">🟢 Ganha</span>`;
+        if (r === "L") return `<span class="status-badge bad">🔴 Perdida</span>`;
+        if (r === "P") return `<span class="status-badge info">🔵 Push</span>`;
+        return `<span class="status-badge warn">🟡 Pendente</span>`;
+      }
+
+      function marketBadgeClass(market) {
+        const m = String(market || "").toUpperCase();
+        if (m === "BTTS") return "info";
+        if (m === "O2.5") return "good";
+        if (m === "O3.5") return "warn";
+        if (m === "O1.5") return "info";
+        return "info";
       }
 
       function computeStats(data) {
@@ -686,7 +682,18 @@
         const container = document.getElementById("marketBreakdown");
         container.innerHTML = "";
 
-        Object.keys(map).forEach(m => {
+        const entries = Object.keys(map).sort((a, b) => a.localeCompare(b, "pt"));
+
+        if (!entries.length) {
+          container.innerHTML = `
+            <div class="stat">
+              <div class="note">Sem dados suficientes com os filtros atuais.</div>
+            </div>
+          `;
+          return;
+        }
+
+        entries.forEach(m => {
           const d = map[m];
           const wr = d.total > 0 ? (d.wins / d.total) * 100 : 0;
 
@@ -694,7 +701,7 @@
           div.className = "stat";
 
           div.innerHTML = `
-            <div class="label">${m}</div>
+            <div class="label">${escapeHtml(m)}</div>
             <div class="value">${d.total} | ${wr.toFixed(0)}%</div>
             <div class="note">${format€(d.profit)}</div>
           `;
@@ -702,55 +709,8 @@
           container.appendChild(div);
         });
       }
-            function statusBadge(row) {
-        const r = (row.Resultado || "").toUpperCase();
 
-        if (r === "W") return `<span class="status-pill good">🟢 Ganha</span>`;
-        if (r === "L") return `<span class="status-pill bad">🔴 Perdida</span>`;
-        if (r === "P") return `<span class="status-pill info">🔵 Push</span>`;
-
-        return `<span class="status-pill warn">🟡 Pendente</span>`;
-      }
-
-      function normalizeManualBet(bet) {
-        return {
-          Data: (bet.data || "").trim(),
-          Liga: (bet.liga || "").trim(),
-          Jogo: String(bet.jogo || "").replace(/\s+/g, " ").trim(),
-          Mercado: String(bet.mercado || "").toUpperCase().trim(),
-          Odd: bet.odd || "",
-          "Stake€": bet.stake || "",
-          "Edge%": "",
-          Apostada: "Sim",
-          OddReal: bet.odd || "",
-          "StakeReal€": bet.stake || "",
-          Resultado: bet.resultado || "",
-          "Lucro€": bet.resultado ? String(calcProfitFromRow({
-            Resultado: bet.resultado,
-            Odd: bet.odd,
-            "Stake€": bet.stake
-          })) : "",
-          "LucroReal€": bet.resultado ? String(calcProfitFromRow({
-            Resultado: bet.resultado,
-            Odd: bet.odd,
-            "Stake€": bet.stake
-          })) : "",
-          _source: "manual"
-        };
-      }
-
-      function calcProfitFromRow(row) {
-        const res = (row.Resultado || "").toUpperCase();
-        const odd = toNumber(row.Odd);
-        const stake = toNumber(row["Stake€"]);
-
-        if (!stake) return 0;
-        if (res === "W") return stake * (odd - 1);
-        if (res === "L") return -stake;
-        return 0;
-      }
-
-      function getFilteredData() {
+            function getFilteredData() {
         const q = document.getElementById("searchGlobal").value.trim().toLowerCase();
         const sourceFilter = document.getElementById("sourceFilter").value;
         const leagueFilter = document.getElementById("leagueFilter").value;
@@ -782,9 +742,11 @@
           }
 
           if (dateFilter) {
-            const d = new Date(r.Data + "T00:00:00");
+            const d = new Date((r.Data || "") + "T00:00:00");
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            if (Number.isNaN(d.getTime())) return false;
 
             if (dateFilter === "today") {
               const sameDay = d.getFullYear() === today.getFullYear()
@@ -804,49 +766,7 @@
         });
       }
 
-      function renderTable(data) {
-        const tbody = document.querySelector("#table tbody");
-        tbody.innerHTML = "";
-
-        data.forEach(row => {
-          const tr = document.createElement("tr");
-
-          const edge = row["Edge%"] ? row["Edge%"] + "%" : "—";
-          const source = row._source === "manual"
-            ? `<span class="mini warn">Manual</span>`
-            : `<span class="mini info">Bot</span>`;
-
-          tr.innerHTML = `
-            <td>${row.Data || "—"}</td>
-            <td>${row.Liga || "—"}</td>
-            <td>${row.Jogo || "—"}</td>
-            <td>${row.Mercado || "—"}</td>
-            <td>${row.Odd || "—"}</td>
-            <td>${row["Stake€"] || "—"}</td>
-            <td>${edge}</td>
-            <td>${row.Apostada || "—"}</td>
-            <td>${row.OddReal || "—"}</td>
-            <td>${row["StakeReal€"] || "—"}</td>
-            <td>${statusBadge(row)}</td>
-            <td>${row["Lucro€"] || "—"}</td>
-            <td>${row["LucroReal€"] || "—"}</td>
-            <td>${source}</td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-
-        if (!data.length) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="14">
-                <div class="note">Sem linhas para mostrar com os filtros atuais.</div>
-              </td>
-            </tr>
-          `;
-        }
-      }
-            function fillSelectOptions(data) {
+      function fillSelectOptions(data) {
         const leagueSelect = document.getElementById("leagueFilter");
         const marketSelect = document.getElementById("marketFilter");
 
@@ -856,10 +776,12 @@
         const leagues = [...new Set(data.map(r => r.Liga).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt"));
         const markets = [...new Set(data.map(r => r.Mercado).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt"));
 
-        leagueSelect.innerHTML = `<option value="">Todas as ligas</option>` +
+        leagueSelect.innerHTML =
+          `<option value="">Todas as ligas</option>` +
           leagues.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
 
-        marketSelect.innerHTML = `<option value="">Todos os mercados</option>` +
+        marketSelect.innerHTML =
+          `<option value="">Todos os mercados</option>` +
           markets.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
 
         if (leagues.includes(currentLeague)) leagueSelect.value = currentLeague;
@@ -877,24 +799,27 @@
         const roiToday = stakeToday > 0 ? (profitToday / stakeToday) * 100 : 0;
 
         const currentBankroll = toNumber(localStorage.getItem(LOCAL_KEYS.bankroll)) || 1000;
-        const exposure = data
+        const openExposure = data
           .filter(r => !r.Resultado && ["sim", "s", "yes", "y", "1", "true"].includes(String(r.Apostada || "").toLowerCase()))
           .reduce((acc, r) => acc + toNumber(r["StakeReal€"]), 0);
 
+        const totalRealProfit = data.reduce((acc, r) => acc + toNumber(r["LucroReal€"]), 0);
+        const available = currentBankroll + totalRealProfit - openExposure;
+
         document.getElementById("bankrollLabelTop").textContent = format€(currentBankroll);
-        document.getElementById("currentBankrollTop").textContent = format€(currentBankroll + data.reduce((acc, r) => acc + toNumber(r["LucroReal€"]), 0));
-        document.getElementById("todayProfitTop").textContent = format€(profitToday);
-        document.getElementById("todayRoiTop").textContent = stakeToday > 0 ? roiToday.toFixed(1) + "%" : "—";
-        document.getElementById("openExposureTop").textContent = format€(exposure);
+        document.getElementById("currentBankrollTop").textContent = format€(currentBankroll + totalRealProfit);
+        document.getElementById("profitTodayTop").textContent = format€(profitToday);
+        document.getElementById("roiTodayTop").textContent = stakeToday > 0 ? roiToday.toFixed(1) + "%" : "—";
+        document.getElementById("availableBankrollTop").textContent = format€(available);
       }
 
       function updateTopCards(data) {
-        const allResolved = data.filter(r => ["W", "L", "P"].includes((r.Resultado || "").toUpperCase()));
+        const resolved = data.filter(r => ["W", "L", "P"].includes((r.Resultado || "").toUpperCase()));
         const openRows = data.filter(r => !["W", "L", "P"].includes((r.Resultado || "").toUpperCase()));
         const alerts = [];
 
-        const realProfit = allResolved.reduce((acc, r) => acc + toNumber(r["LucroReal€"]), 0);
-        const realStake = allResolved.reduce((acc, r) => acc + toNumber(r["StakeReal€"]), 0);
+        const realProfit = resolved.reduce((acc, r) => acc + toNumber(r["LucroReal€"]), 0);
+        const realStake = resolved.reduce((acc, r) => acc + toNumber(r["StakeReal€"]), 0);
         const roi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
 
         let mode = "NORMAL";
@@ -923,7 +848,9 @@
         document.getElementById("autoAlertsValue").textContent = `${alerts.length} ativos`;
         document.getElementById("alertsBadge").className = `decision-badge ${alerts.length ? "warn" : "info"}`;
         document.getElementById("alertsBadge").textContent = alerts.length ? "Atenção" : "OK";
-        document.getElementById("autoAlertsNote").textContent = alerts.length ? alerts.join(" • ") : "Sem alertas relevantes neste momento.";
+        document.getElementById("autoAlertsNote").textContent = alerts.length
+          ? alerts.join(" • ")
+          : "Sem alertas relevantes neste momento.";
 
         const dynamicMult = roi > 8 ? 1.15 : roi < -10 ? 0.75 : 1.00;
         const dynCls = dynamicMult > 1 ? "good" : dynamicMult < 1 ? "warn" : "info";
@@ -932,18 +859,18 @@
         document.getElementById("dynamicStakeValue").textContent = dynLabel;
         document.getElementById("dynamicStakeBadge").className = `decision-badge ${dynCls}`;
         document.getElementById("dynamicStakeBadge").textContent = `x${dynamicMult.toFixed(2)}`;
-        document.getElementById("dynamicStakeNote").textContent = dynamicMult > 1
-          ? "Sessão positiva, stake ligeiramente reforçada."
-          : dynamicMult < 1
-            ? "Proteção ativa por performance recente."
-            : "Sem ajuste automático.";
+        document.getElementById("dynamicStakeNote").textContent =
+          dynamicMult > 1
+            ? "Sessão positiva, stake ligeiramente reforçada."
+            : dynamicMult < 1
+              ? "Proteção ativa por performance recente."
+              : "Sem ajuste automático.";
       }
 
       function updateSessionLabels() {
         const now = new Date();
         document.getElementById("lastUpdateLabel").textContent = `Última atualização: ${now.toLocaleString("pt-PT")}`;
         document.getElementById("sessionLabel").textContent = `Sessão atual: ${now.toLocaleDateString("pt-PT")}`;
-        document.getElementById("manualCloudLabel").textContent = `Cloud manuais: ativa`;
       }
 
       function updateApostasTooltip(data) {
@@ -955,7 +882,7 @@
         const avgEdge = count ? todayRows.reduce((a, r) => a + toNumber(r["Edge%"]), 0) / count : 0;
         const totalStake = todayRows.reduce((a, r) => a + toNumber(r["Stake€"]), 0);
 
-        document.getElementById("tooltipDailyCount").textContent = String(count);
+        document.getElementById("tooltipPicksCount").textContent = String(count);
         document.getElementById("tooltipAvgOdd").textContent = count ? avgOdd.toFixed(2) : "—";
         document.getElementById("tooltipAvgEdge").textContent = count ? avgEdge.toFixed(2) + "%" : "—";
         document.getElementById("tooltipStakeTotal").textContent = format€(totalStake);
@@ -968,16 +895,52 @@
         }
       }
 
-      function escapeHtml(text) {
-        return String(text || "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
+      function renderTable(data) {
+        const tbody = document.querySelector("#table tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          const edge = row["Edge%"] ? row["Edge%"] + "%" : "—";
+          const source = row._source === "manual"
+            ? `<span class="mini warn">Manual</span>`
+            : `<span class="mini info">Bot</span>`;
+
+          const marketBadge = `<span class="mini ${marketBadgeClass(row.Mercado)}">${escapeHtml(row.Mercado || "—")}</span>`;
+
+          tr.innerHTML = `
+            <td>${row.Data || "—"}</td>
+            <td>${escapeHtml(row.Liga || "—")}</td>
+            <td>${escapeHtml(row.Jogo || "—")}</td>
+            <td>${marketBadge}</td>
+            <td>${row.Odd || "—"}</td>
+            <td>${row["Stake€"] || "—"}</td>
+            <td>${edge}</td>
+            <td>${row.Apostada || "—"}</td>
+            <td>${row.OddReal || "—"}</td>
+            <td>${row["StakeReal€"] || "—"}</td>
+            <td>${statusBadge(row)}</td>
+            <td>${row["Lucro€"] || "—"}</td>
+            <td>${row["LucroReal€"] || "—"}</td>
+            <td>${source}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+
+        if (!data.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="14">
+                <div class="note">Sem linhas para mostrar com os filtros atuais.</div>
+              </td>
+            </tr>
+          `;
+        }
       }
 
-      function renderAll() {
+            function renderAll() {
         const filtered = getFilteredData();
         renderTable(filtered);
         computeStats(filtered);
@@ -988,7 +951,30 @@
         updateSessionLabels();
         updateApostasTooltip(rawData);
       }
-            async function loadData() {
+
+      function setQuickMarketFilter(value) {
+        const marketSelect = document.getElementById("marketFilter");
+        marketSelect.value = value;
+
+        document.querySelectorAll("[data-market-quick]").forEach(btn => {
+          btn.classList.toggle("active", (btn.dataset.marketQuick || "") === value);
+        });
+
+        renderAll();
+      }
+
+      function bindQuickMarketButtons() {
+        document.querySelectorAll("[data-market-quick]").forEach(btn => {
+          if (btn.dataset.bound === "1") return;
+          btn.dataset.bound = "1";
+
+          btn.addEventListener("click", () => {
+            setQuickMarketFilter(btn.dataset.marketQuick || "");
+          });
+        });
+      }
+
+      async function loadData() {
         loadLocalData();
 
         try {
@@ -1001,12 +987,12 @@
           const historyRows = parseCSV(historyText).map(r => ({ ...r, _source: "bot" }));
 
           const mergedBot = [...dailyRows, ...historyRows].map(applyLocalEdits);
-
           const normalizedManuals = manualBets.map(normalizeManualBet);
 
           const map = new Map();
           [...mergedBot, ...normalizedManuals].forEach(r => {
-            const key = getRowKey(r) + "|" + (r._source || "bot");
+            const source = r._source || "bot";
+            const key = getRowKey(r) + "|" + source;
             map.set(key, r);
           });
 
@@ -1017,46 +1003,30 @@
             return String(a.Jogo || "").localeCompare(String(b.Jogo || ""), "pt");
           });
 
+          bindQuickMarketButtons();
           renderAll();
         } catch (e) {
-          console.error("Erro ao carregar CSVs:", e);
+          console.error("Erro a carregar CSVs:", e);
           alert("Erro a carregar os ficheiros do GitHub.");
         }
       }
-
-      function applyQuickMarketFilter(value) {
-        const marketSelect = document.getElementById("marketFilter");
-        marketSelect.value = value;
-
-        document.querySelectorAll(".js-market-quick").forEach(btn => {
-          btn.classList.toggle("active", btn.dataset.market === value);
-        });
-
-        renderAll();
-      }
-
-      document.addEventListener("click", (e) => {
-        const quickBtn = e.target.closest(".js-market-quick");
-        if (quickBtn) {
-          applyQuickMarketFilter(quickBtn.dataset.market || "");
-        }
-      });
 
       document.getElementById("refreshBtn").addEventListener("click", loadData);
 
       document.getElementById("searchGlobal").addEventListener("input", renderAll);
       document.getElementById("sourceFilter").addEventListener("change", renderAll);
       document.getElementById("leagueFilter").addEventListener("change", renderAll);
-      document.getElementById("marketFilter").addEventListener("change", () => {
-        const current = document.getElementById("marketFilter").value;
-        document.querySelectorAll(".js-market-quick").forEach(btn => {
-          btn.classList.toggle("active", btn.dataset.market === current);
-        });
-        renderAll();
-      });
       document.getElementById("resultFilter").addEventListener("change", renderAll);
       document.getElementById("executionFilter").addEventListener("change", renderAll);
       document.getElementById("dateFilter").addEventListener("change", renderAll);
+
+      document.getElementById("marketFilter").addEventListener("change", () => {
+        const current = document.getElementById("marketFilter").value;
+        document.querySelectorAll("[data-market-quick]").forEach(btn => {
+          btn.classList.toggle("active", (btn.dataset.marketQuick || "") === current);
+        });
+        renderAll();
+      });
 
       loadData();
       setInterval(loadData, 60000);
