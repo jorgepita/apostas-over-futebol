@@ -276,6 +276,12 @@
       "oddReal": "1.7",
       "resultadoManual": "",
       "stakeReal": "17"
+    },
+    "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
+      "apostada": true,
+      "oddReal": "1.91",
+      "stakeReal": "1.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -291,16 +297,16 @@
       "stake": "10"
     },
     {
-      "id": "manual_1775410086026_z3nmon",
       "data": "2026-04-05",
-      "liga": "Serie A",
+      "id": "manual_1775410086026_z3nmon",
       "jogo": "Pisa vs Torino",
+      "liga": "Serie A",
       "mercado": "BTTS",
+      "notas": "",
       "odd": "1.90",
-      "stake": "10",
       "resultado": "",
-      "notas": ""
+      "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-05T17:28:45.101348+00:00"
+  "updatedAt": "2026-04-05T18:49:15.013102+00:00"
 }
