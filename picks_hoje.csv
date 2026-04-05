@@ -1,1 +1,10 @@
-Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-05;alemanha;Bundesliga;Union Berlin;FC St. Pauli;1.882;1.652;3.534;BTTS;0.617;2.17;0.461;0.14;0.2891;0.15599999999999997;0.0578;0.04;20.0;1.0;500.0
+2026-04-05;alemanha;Bundesliga;Eintracht Frankfurt;1. FC Köln;1.882;1.652;3.534;O2.5;0.685;1.73;0.578;0.1073;0.2543;0.1070000000000001;0.0509;0.04;20.0;1.0;500.0
+2026-04-05;alemanha2;2. Bundesliga;Eintracht Braunschweig;1. FC Nürnberg;1.802;1.527;3.329;O2.5;0.646;1.81;0.552;0.0939;0.2097;0.09399999999999997;0.0419;0.04;20.0;1.0;500.0
+2026-04-05;alemanha2;2. Bundesliga;FC Schalke 04;Karlsruher SC;1.802;1.527;3.329;O2.5;0.646;1.6;0.625;0.0213;0.0569;0.02100000000000002;0.0114;0.0114;5.69;1.0;500.0
+2026-04-05;franca;Ligue 1;Monaco;Marseille;2.2;1.9;4.1;BTTS;0.68;1.51;0.662;0.0177;0.0525;0.018000000000000016;0.0105;0.0105;5.25;1.0;500.0
+2026-04-05;paises_baixos;Eredivisie;Heerenveen;Heracles;2.2;1.6;3.8;BTTS;0.639;1.57;0.637;0.0018;0.005;0.0020000000000000018;0.001;0.001;0.5;1.0;500.0
+2026-04-06;portugal;Primeira Liga;Casa Pia;Benfica;1.473;1.9;3.373;BTTS;0.59;2.12;0.472;0.1182;0.2237;0.118;0.0447;0.04;20.0;1.0;500.0
+2026-04-06;italia2;Serie B;Cesena;Sudtirol;1.434;1.884;3.318;BTTS;0.581;1.91;0.524;0.0578;0.1213;0.05699999999999994;0.0243;0.0243;12.13;1.0;500.0
+2026-04-06;portugal;Primeira Liga;Arouca;Estoril;2.081;1.9;3.981;BTTS;0.67;1.62;0.617;0.0525;0.1373;0.05300000000000005;0.0275;0.0275;13.73;1.0;500.0
