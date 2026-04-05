@@ -281,17 +281,6 @@
   "manualBets": [
     {
       "data": "2026-04-04",
-      "id": "manual_1775331413130_l2ks31",
-      "jogo": "sg dynamo dresden vs hertha bsc",
-      "liga": "alemanha2",
-      "mercado": "btts",
-      "notas": "",
-      "odd": "1.53",
-      "resultado": "",
-      "stake": "10"
-    },
-    {
-      "data": "2026-04-04",
       "id": "manual_1775388133582_hf59oq",
       "jogo": "gaziantep fk vs alanyaspor",
       "liga": "Super Lig",
@@ -302,5 +291,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-05T13:36:10.674165+00:00"
+  "updatedAt": "2026-04-05T17:26:38.664407+00:00"
 }
