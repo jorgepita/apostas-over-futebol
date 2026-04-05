@@ -270,6 +270,12 @@
       "oddReal": "1.7",
       "stakeReal": "17",
       "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
+      "apostada": true,
+      "oddReal": "2.19",
+      "stakeReal": "11",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -296,5 +302,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-05T11:22:42.324741+00:00"
+  "updatedAt": "2026-04-05T11:23:53.733412+00:00"
 }
