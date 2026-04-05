@@ -289,7 +289,18 @@
       "odd": "1.90",
       "resultado": "",
       "stake": "10"
+    },
+    {
+      "id": "manual_1775410086026_z3nmon",
+      "data": "2026-04-05",
+      "liga": "Serie A",
+      "jogo": "Pisa vs Torino",
+      "mercado": "BTTS",
+      "odd": "1.90",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
     }
   ],
-  "updatedAt": "2026-04-05T17:26:38.664407+00:00"
+  "updatedAt": "2026-04-05T17:28:09.464335+00:00"
 }
