@@ -187,11 +187,59 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-05|Eredivisie|NAC Breda vs Sparta Rotterdam|O2.5": {
+      "apostada": true,
+      "oddReal": "1.94",
+      "resultadoManual": "",
+      "stakeReal": "12.5"
+    },
+    "2026-04-05|Ligue 1|Angers vs Lyon|O2.5": {
+      "apostada": true,
+      "oddReal": "1.93",
+      "resultadoManual": "",
+      "stakeReal": "7.5"
+    },
+    "2026-04-05|Ligue 1|Metz vs Nantes|BTTS": {
+      "apostada": true,
+      "oddReal": "1.86",
+      "resultadoManual": "",
+      "stakeReal": "3"
+    },
+    "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
+      "apostada": true,
+      "oddReal": "2.19",
+      "resultadoManual": "",
+      "stakeReal": "11"
+    },
     "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
       "apostada": true,
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
+    },
+    "2026-04-05|Serie A|Cremonese vs Bologna|O2.5": {
+      "apostada": true,
+      "oddReal": "2.12",
+      "resultadoManual": "",
+      "stakeReal": "12.5"
+    },
+    "2026-04-05|Serie A|Pisa vs Torino|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "resultadoManual": "",
+      "stakeReal": "5"
+    },
+    "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "resultadoManual": "",
+      "stakeReal": "6.5"
+    },
+    "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|O2.5": {
+      "apostada": true,
+      "oddReal": "2.18",
+      "resultadoManual": "",
+      "stakeReal": "12.5"
     },
     "2026-04-06|Primeira Liga|Arouca vs Estoril|BTTS": {
       "apostada": true,
@@ -211,71 +259,23 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
-    "2026-04-05|Serie A|Cremonese vs Bologna|O2.5": {
+    "2026-04-06|Serie B|Reggiana vs Pescara|O2.5": {
       "apostada": true,
-      "oddReal": "2.12",
-      "stakeReal": "12.5",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Eredivisie|NAC Breda vs Sparta Rotterdam|O2.5": {
-      "apostada": true,
-      "oddReal": "1.94",
-      "stakeReal": "12.5",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Ligue 1|Angers vs Lyon|O2.5": {
-      "apostada": true,
-      "oddReal": "1.93",
-      "stakeReal": "7.5",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
-      "apostada": true,
-      "oddReal": "1.95",
-      "stakeReal": "6.5",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Serie A|Pisa vs Torino|BTTS": {
-      "apostada": true,
-      "oddReal": "1.95",
-      "stakeReal": "5",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Ligue 1|Metz vs Nantes|BTTS": {
-      "apostada": true,
-      "oddReal": "1.86",
-      "stakeReal": "3",
-      "resultadoManual": ""
+      "oddReal": "1.87",
+      "resultadoManual": "",
+      "stakeReal": "5.5"
     },
     "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|O2.5": {
       "apostada": true,
       "oddReal": "2.09",
-      "stakeReal": "12.5",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|O2.5": {
-      "apostada": true,
-      "oddReal": "2.18",
-      "stakeReal": "12.5",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Serie B|Reggiana vs Pescara|O2.5": {
-      "apostada": true,
-      "oddReal": "1.87",
-      "stakeReal": "5.5",
-      "resultadoManual": ""
+      "resultadoManual": "",
+      "stakeReal": "12.5"
     },
     "2026-04-07|Championship|Wrexham vs Southampton|BTTS": {
       "apostada": true,
       "oddReal": "1.7",
-      "stakeReal": "17",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
-      "apostada": true,
-      "oddReal": "2.19",
-      "stakeReal": "11",
-      "resultadoManual": ""
+      "resultadoManual": "",
+      "stakeReal": "17"
     }
   },
   "manualBets": [
@@ -291,16 +291,16 @@
       "stake": "10"
     },
     {
-      "id": "manual_1775388133582_hf59oq",
       "data": "2026-04-04",
-      "liga": "Super Lig",
+      "id": "manual_1775388133582_hf59oq",
       "jogo": "gaziantep fk vs alanyaspor",
+      "liga": "Super Lig",
       "mercado": "BTTS",
+      "notas": "",
       "odd": "1.90",
-      "stake": "10",
       "resultado": "",
-      "notas": ""
+      "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-05T11:23:53.733412+00:00"
+  "updatedAt": "2026-04-05T13:36:10.674165+00:00"
 }
