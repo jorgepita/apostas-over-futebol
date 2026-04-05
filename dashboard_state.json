@@ -294,7 +294,18 @@
       "odd": "1.7",
       "resultado": "",
       "stake": "10"
+    },
+    {
+      "id": "manual_1775388133582_hf59oq",
+      "data": "2026-04-04",
+      "liga": "Super Lig",
+      "jogo": "gaziantep fk vs alanyaspor",
+      "mercado": "BTTS",
+      "odd": "1.90",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
     }
   ],
-  "updatedAt": "2026-04-05T11:07:27.151761+00:00"
+  "updatedAt": "2026-04-05T11:22:18.135187+00:00"
 }
