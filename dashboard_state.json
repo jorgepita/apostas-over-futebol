@@ -210,6 +210,12 @@
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
+    },
+    "2026-04-05|Serie A|Cremonese vs Bologna|O2.5": {
+      "apostada": true,
+      "oddReal": "2.12",
+      "stakeReal": "12.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [
@@ -236,5 +242,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-04T22:04:12.376901+00:00"
+  "updatedAt": "2026-04-05T11:07:08.922856+00:00"
 }
