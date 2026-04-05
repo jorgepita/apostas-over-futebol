@@ -1,14 +1,14 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-05;Bundesliga;Union Berlin vs FC St. Pauli;BTTS;2.16;12.34;14.0;;;;;;
-2026-04-05;Super Lig;Antalyaspor vs Eyüpspor;BTTS;1.95;5.67;4.48;;;;;;
-2026-04-05;Serie A;Pisa vs Torino;BTTS;1.95;4.83;3.81;;;;;;
-2026-04-05;Ligue 1;Metz vs Nantes;BTTS;1.86;3.39;2.54;;;;;;
-2026-04-05;Ligue 1;Angers vs Lyon;BTTS;1.91;2.99;2.31;;;;;;
-2026-04-05;Ligue 1;Monaco vs Marseille;BTTS;1.5;2.47;1.33;;;;;;
-2026-04-05;2. Bundesliga;FC Schalke 04 vs Karlsruher SC;BTTS;1.73;1.5;1.02;;;;;;
-2026-04-05;Bundesliga;Eintracht Frankfurt vs 1. FC Köln;BTTS;1.63;0.51;0.32;;;;;;
-2026-04-05;Eredivisie;FC Volendam vs Feyenoord;BTTS;1.67;0.4;0.26;;;;;;
-2026-04-05;Eredivisie;Heerenveen vs Heracles;BTTS;1.57;0.31;0.18;;;;;;
+2026-04-05;Bundesliga;Union Berlin vs FC St. Pauli;BTTS;2.16;12.34;14.0;;;;W;14.92;
+2026-04-05;Super Lig;Antalyaspor vs Eyüpspor;BTTS;1.95;5.67;4.48;;;;L;-6.13;
+2026-04-05;Serie A;Pisa vs Torino;BTTS;1.95;4.83;3.81;;;;L;-5.22;
+2026-04-05;Ligue 1;Metz vs Nantes;BTTS;1.86;3.39;2.54;;;;L;-3.65;
+2026-04-05;Ligue 1;Angers vs Lyon;BTTS;1.91;2.99;2.31;;;;L;-2.99;
+2026-04-05;Ligue 1;Monaco vs Marseille;BTTS;1.5;2.47;1.33;;;;W;2.48;
+2026-04-05;2. Bundesliga;FC Schalke 04 vs Karlsruher SC;BTTS;1.73;1.5;1.02;;;;L;-4.62;
+2026-04-05;Bundesliga;Eintracht Frankfurt vs 1. FC Köln;BTTS;1.63;0.51;0.32;;;;W;0.32;
+2026-04-05;Eredivisie;FC Volendam vs Feyenoord;BTTS;1.67;0.4;0.26;;;;L;-4.89;
+2026-04-05;Eredivisie;Heerenveen vs Heracles;BTTS;1.57;0.31;0.18;;;;W;4.84;
 2026-04-06;Super Lig;Kocaelispor vs Başakşehir;O2.5;2.09;20.0;12.59;;;;;;
 2026-04-06;Primeira Liga;Casa Pia vs Benfica;BTTS;2.14;12.34;12.26;;;;;;
 2026-04-06;Jupiler Pro League;RAAL La Louvière vs Dender;O2.5;2.16;20.0;11.42;;;;;;
