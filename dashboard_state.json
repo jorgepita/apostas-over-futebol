@@ -227,7 +227,7 @@
       "apostada": true,
       "oddReal": "1.95",
       "resultadoManual": "",
-      "stakeReal": "5"
+      "stakeReal": ""
     },
     "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:08:50.622566+00:00"
+  "updatedAt": "2026-04-06T01:08:56.508437+00:00"
 }
