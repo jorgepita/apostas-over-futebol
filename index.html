@@ -1729,17 +1729,10 @@
                 <td>${escapeHtml(b.mercado || '—')}</td>
                 <td>${escapeHtml(b.odd || '—')}</td>
                 <td>${escapeHtml(b.stake || '—')}</td>
-                <td>
-                  <select class="js-manual-resultado" data-id="${escapeHtml(b.id)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;">
-                    <option value="" ${!b.resultado ? 'selected' : ''}>Pend.</option>
-                    <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>W</option>
-                    <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>L</option>
-                    <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>P</option>
-                  </select>
-                </td>
+                <td>${resultBadge(b.resultado)}</td>
                 <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
                 <td>${escapeHtml(b.notas || '—')}</td>
-                <td><button class="js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button></td>
+                <td><span class="note">Auto</span></td>
               </tr>
             `).join('')
           : '<tr><td colspan="11"><div class="note">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>';
