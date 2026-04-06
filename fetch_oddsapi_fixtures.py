@@ -756,17 +756,17 @@ def main():
                     matched_event = ev
                     break
 
-        if not matched_event:
-            print(f"[DBG] O2.5 sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
-            continue
+            if not matched_event:
+                print(f"[DBG] O2.5 sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
+                continue
 
-        odd_o25 = extract_best_over25_from_event(matched_event)
-        over25_map[fx["fixture_id"]] = odd_o25
+            odd_o25 = extract_best_over25_from_event(matched_event)
+            over25_map[fx["fixture_id"]] = odd_o25
 
-        print(
-            f"[DBG] O2.5 match | sport={sport_key} | {fx['league_key']} | "
-            f"{fx['home']} vs {fx['away']} | O2.5={odd_o25}"
-        )
+            print(
+                f"[DBG] O2.5 match | sport={sport_key} | {fx['league_key']} | "
+                f"{fx['home']} vs {fx['away']} | O2.5={odd_o25}"
+            )
             if not matched_event:
                 print(f"[DBG] O2.5 sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
                 continue
