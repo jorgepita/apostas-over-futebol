@@ -275,7 +275,7 @@
       "apostada": true,
       "oddReal": "1.7",
       "resultadoManual": "",
-      "stakeReal": "17"
+      "stakeReal": ""
     },
     "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:09:17.398758+00:00"
+  "updatedAt": "2026-04-06T01:09:23.022841+00:00"
 }
