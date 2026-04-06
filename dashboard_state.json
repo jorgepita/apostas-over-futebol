@@ -77,7 +77,7 @@
       "apostada": true,
       "oddReal": "1.66",
       "resultadoManual": "",
-      "stakeReal": "20.5"
+      "stakeReal": ""
     },
     "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:09:30.968650+00:00"
+  "updatedAt": "2026-04-06T01:09:38.723929+00:00"
 }
