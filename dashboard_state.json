@@ -298,7 +298,7 @@
     "2026-04-06|Championship|Portsmouth vs Oxford United|BTTS": {
       "apostada": true,
       "oddReal": "2.1",
-      "stakeReal": "5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|BTTS": {
@@ -315,5 +315,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-06T22:13:09.457096+00:00"
+  "updatedAt": "2026-04-06T22:13:17.164524+00:00"
 }
