@@ -233,7 +233,7 @@
       "apostada": true,
       "oddReal": "1.95",
       "resultadoManual": "",
-      "stakeReal": "6.5"
+      "stakeReal": ""
     },
     "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|O2.5": {
       "apostada": true,
@@ -269,7 +269,7 @@
       "apostada": true,
       "oddReal": "2.09",
       "resultadoManual": "",
-      "stakeReal": "12.5"
+      "stakeReal": ""
     },
     "2026-04-07|Championship|Wrexham vs Southampton|BTTS": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:08:41.187365+00:00"
+  "updatedAt": "2026-04-06T01:08:50.622566+00:00"
 }
