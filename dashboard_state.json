@@ -296,29 +296,6 @@
       "resultadoManual": ""
     }
   },
-  "manualBets": [
-    {
-      "data": "2026-04-04",
-      "id": "manual_1775388133582_hf59oq",
-      "jogo": "gaziantep fk vs alanyaspor",
-      "liga": "Super Lig",
-      "mercado": "BTTS",
-      "notas": "",
-      "odd": "1.90",
-      "resultado": "",
-      "stake": "10"
-    },
-    {
-      "data": "2026-04-05",
-      "id": "manual_1775410086026_z3nmon",
-      "jogo": "Pisa vs Torino",
-      "liga": "Serie A",
-      "mercado": "BTTS",
-      "notas": "",
-      "odd": "1.90",
-      "resultado": "",
-      "stake": "10"
-    }
-  ],
-  "updatedAt": "2026-04-06T03:15:12.086408+00:00"
+  "manualBets": [],
+  "updatedAt": "2026-04-06T03:15:27.203842+00:00"
 }
