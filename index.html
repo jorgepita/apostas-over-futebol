@@ -2007,8 +2007,10 @@
           }
 
           hasPendingCloudChanges = false;
+          await loadData();
+
           if (showSuccess) alert('Estado guardado na cloud com sucesso.');
-          return true;
+          return true;   
         } catch (e) {
           if (showSuccess) alert('Erro de ligação ao serviço cloud.');
           return false;
