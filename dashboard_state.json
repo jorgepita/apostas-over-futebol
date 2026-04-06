@@ -221,7 +221,7 @@
       "apostada": true,
       "oddReal": "2.12",
       "resultadoManual": "",
-      "stakeReal": "12.5"
+      "stakeReal": ""
     },
     "2026-04-05|Serie A|Pisa vs Torino|BTTS": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:09:50.304678+00:00"
+  "updatedAt": "2026-04-06T01:09:54.536890+00:00"
 }
