@@ -307,7 +307,18 @@
       "stake": "10",
       "resultado": "",
       "notas": ""
+    },
+    {
+      "id": "manual_1775446793988_lmu0g4",
+      "data": "2026-04-06",
+      "liga": "Primeira Liga",
+      "jogo": "Benfica vs Casa Pia",
+      "mercado": "O2.5",
+      "odd": "1.79",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
     }
   ],
-  "updatedAt": "2026-04-06T03:38:10.020821+00:00"
+  "updatedAt": "2026-04-06T03:39:56.435992+00:00"
 }
