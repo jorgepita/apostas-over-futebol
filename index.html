@@ -940,16 +940,35 @@
       }
 
       function getManualRowsMerged() {
-        return state.manualBets.map(b => ({
-          ...b,
-          source: 'manual',
-          sourceLabel: 'Manual',
-          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd),
-          _resultKey: resultKey(b.resultado),
-          _searchText: `${b.liga || ''} ${b.jogo || ''} ${b.mercado || ''}`.toLowerCase()
-        }));
-      }
+        return state.manualBetsRemote.map(b => {
+          const data = String(b['Data'] || '').trim();
+          const liga = String(b['Liga'] || '').trim();
+          const jogo = String(b['Jogo'] || '').trim();
+          const mercado = String(b['Mercado'] || '').trim();
+          const odd = String(b['Odd'] || '').trim();
+          const stake = String(b['Stake'] || '').trim();
+          const resultado = String(b['Resultado'] || '').trim().toUpperCase();
+          const lucroCsv = num(b['Lucro€']);
+          const notas = String(b['Notas'] || '').trim();
 
+          return {
+            id: makeManualId(),
+            data,
+            liga,
+            jogo,
+            mercado,
+            odd,
+            stake,
+            resultado,
+            notas,
+            source: 'manual',
+            sourceLabel: 'Manual',
+            _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+            _resultKey: resultKey(resultado),
+            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+          };
+        });
+      }
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
       }
