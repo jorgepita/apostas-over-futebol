@@ -742,19 +742,19 @@ def main():
             matched_event = None
 
             for ev in odds_events:
-            home_team = str(ev.get("home_team", "")).strip()
-            away_team = str(ev.get("away_team", "")).strip()
+                home_team = str(ev.get("home_team", "")).strip()
+                away_team = str(ev.get("away_team", "")).strip()
 
-            if not away_team:
-                teams = ev.get("teams", []) or []
-                if len(teams) == 2:
-                    away_team = teams[0] if teams[1] == home_team else teams[1]
+                if not away_team:
+                    teams = ev.get("teams", []) or []
+                    if len(teams) == 2:
+                        away_team = teams[0] if teams[1] == home_team else teams[1]
 
-            if same_match(fx["home"], fx["away"], home_team, away_team):
-                print(f"[DBG] MATCH TheOdds | sport={sport_key} | {fx['league_key']} | {fx['home']} vs {fx['away']}")
-                print(json.dumps(ev, ensure_ascii=False, indent=2)[:12000])
-                matched_event = ev
-                break
+                if same_match(fx["home"], fx["away"], home_team, away_team):
+                    print(f"[DBG] MATCH TheOdds | sport={sport_key} | {fx['league_key']} | {fx['home']} vs {fx['away']}")
+                    print(json.dumps(ev, ensure_ascii=False, indent=2)[:12000])
+                    matched_event = ev
+                    break
 
         if not matched_event:
             print(f"[DBG] O2.5 sem match: {fx['league_key']} | {fx['home']} vs {fx['away']}")
