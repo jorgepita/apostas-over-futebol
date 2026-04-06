@@ -2143,10 +2143,12 @@
           const dailyText = await dailyRes.text();
           const historyText = await historyRes.text();
           const nbaText = await nbaRes.text();
+          const manualText = await manualRes.text();
 
           state.footballDaily = parseSemicolonCsv(dailyText);
           state.footballHistory = parseSemicolonCsv(historyText);
           state.nba = parseSemicolonCsv(nbaText);
+          state.manualBetsRemote = parseSemicolonCsv(manualText);
           state.lastUpdated = new Date();
 
           hasPendingCloudChanges = false;
