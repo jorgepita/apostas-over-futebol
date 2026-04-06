@@ -203,7 +203,7 @@
       "apostada": true,
       "oddReal": "1.86",
       "resultadoManual": "",
-      "stakeReal": "3"
+      "stakeReal": ""
     },
     "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
       "apostada": true,
@@ -320,5 +320,5 @@
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:08:56.508437+00:00"
+  "updatedAt": "2026-04-06T01:09:03.380327+00:00"
 }
