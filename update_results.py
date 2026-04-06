@@ -1781,7 +1781,7 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         jogo = str(row.get("Jogo", "")).strip()
         mercado = str(row.get("Mercado", "")).strip().upper()
         odd = parse_float(row.get("Odd", ""), 0.0)
-        stake = parse_float(row.get("Stake€", ""), 0.0)
+        stake = parse_float(row.get("Stake", row.get("Stake€", "")), 0.0)
 
         if not data or not liga or not jogo or not mercado or odd <= 1.01 or stake <= 0:
             ignored += 1
