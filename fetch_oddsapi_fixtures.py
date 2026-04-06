@@ -733,15 +733,15 @@ def main():
     over25_map = {}
 
     for (sport_key, date_iso), candidates in grouped.items():
-    odds_events = fetch_odds_for_sport_date(sport_key, date_iso, cfg)
-    odds_requests_the_odds += 1
+        odds_events = fetch_odds_for_sport_date(sport_key, date_iso, cfg)
+        odds_requests_the_odds += 1
 
-    print(f"[DBG] odds_events recebidos | sport={sport_key} | date={date_iso} | total={len(odds_events)}")
+        print(f"[DBG] odds_events recebidos | sport={sport_key} | date={date_iso} | total={len(odds_events)}")
 
-    for fx in candidates:
+        for fx in candidates:
         matched_event = None
 
-        for ev in odds_events:
+            for ev in odds_events:
             home_team = str(ev.get("home_team", "")).strip()
             away_team = str(ev.get("away_team", "")).strip()
 
