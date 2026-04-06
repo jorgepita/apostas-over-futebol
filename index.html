@@ -669,10 +669,11 @@
     </div>
 
     <script>
-            const URLS = {
+      const URLS = {
         footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
-        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
+        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
+        manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
       };
 
       const STORAGE_KEYS = {
@@ -692,6 +693,7 @@
         footballDaily: [],
         footballHistory: [],
         nba: [],
+        manualBetsRemote: [],
         bankrollInicial: 1000,
         localEdits: {},
         manualBets: [],
