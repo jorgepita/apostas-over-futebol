@@ -739,7 +739,7 @@ def main():
         print(f"[DBG] odds_events recebidos | sport={sport_key} | date={date_iso} | total={len(odds_events)}")
 
         for fx in candidates:
-        matched_event = None
+            matched_event = None
 
             for ev in odds_events:
             home_team = str(ev.get("home_team", "")).strip()
