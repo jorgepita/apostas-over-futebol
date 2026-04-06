@@ -2133,11 +2133,12 @@
 
       async function loadData() {
         try {
-          const [dailyRes, historyRes, nbaRes] = await Promise.all([
-            fetch(URLS.footballDaily + '?t=' + Date.now()),
-            fetch(URLS.footballHistory + '?t=' + Date.now()),
-            fetch(URLS.nba + '?t=' + Date.now())
-          ]);
+          const [dailyRes, historyRes, nbaRes, manualRes] = await Promise.all([
+           fetch(URLS.footballDaily + '?t=' + Date.now()),
+           fetch(URLS.footballHistory + '?t=' + Date.now()),
+           fetch(URLS.nba + '?t=' + Date.now()),
+           fetch(URLS.manual + '?t=' + Date.now())
+      ]);
 
           const dailyText = await dailyRes.text();
           const historyText = await historyRes.text();
