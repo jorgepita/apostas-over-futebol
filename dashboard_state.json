@@ -305,7 +305,7 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.90",
-      "resultado": "L",
+      "resultado": "W",
       "stake": "10"
     },
     {
@@ -316,9 +316,9 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.90",
-      "resultado": "L",
+      "resultado": "",
       "stake": "10"
     }
   ],
-  "updatedAt": "2026-04-06T01:46:17.135782+00:00"
+  "updatedAt": "2026-04-06T01:46:19.210128+00:00"
 }
