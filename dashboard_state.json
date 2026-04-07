@@ -141,7 +141,7 @@
     },
     "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.47",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:24:51.536724+00:00"
+  "updatedAt": "2026-04-07T23:25:01.623750+00:00"
 }
