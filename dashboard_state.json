@@ -129,7 +129,7 @@
     },
     "2026-04-05|2. Bundesliga|Eintracht Braunschweig vs 1. FC Nürnberg|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.63",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:22:11.617531+00:00"
+  "updatedAt": "2026-04-07T23:22:36.082768+00:00"
 }
