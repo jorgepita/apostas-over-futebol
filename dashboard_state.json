@@ -189,7 +189,7 @@
     },
     "2026-04-05|Eredivisie|GO Ahead Eagles vs PEC Zwolle|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.44",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:25:29.062228+00:00"
+  "updatedAt": "2026-04-07T23:25:51.508802+00:00"
 }
