@@ -57,7 +57,7 @@
     },
     "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.52",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:14:25.048607+00:00"
+  "updatedAt": "2026-04-07T23:14:41.554515+00:00"
 }
