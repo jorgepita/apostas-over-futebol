@@ -177,7 +177,7 @@
     },
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.55",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:23:45.268484+00:00"
+  "updatedAt": "2026-04-07T23:24:05.897374+00:00"
 }
