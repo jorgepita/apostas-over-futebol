@@ -147,7 +147,7 @@
     },
     "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.44",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:25:06.790510+00:00"
+  "updatedAt": "2026-04-07T23:25:24.374847+00:00"
 }
