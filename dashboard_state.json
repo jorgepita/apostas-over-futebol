@@ -15,7 +15,7 @@
     },
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.66",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -384,8 +384,20 @@
       "oddReal": "1.65",
       "stakeReal": "5.5",
       "resultadoManual": ""
+    },
+    "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
+      "apostada": true,
+      "oddReal": "1.62",
+      "stakeReal": "3",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Serie B|Frosinone vs Palermo|O2.5": {
+      "apostada": true,
+      "oddReal": "1.65",
+      "stakeReal": "3",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:09:19.803559+00:00"
+  "updatedAt": "2026-04-07T23:11:37.064268+00:00"
 }
