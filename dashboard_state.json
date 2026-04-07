@@ -159,7 +159,7 @@
     },
     "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
       "apostada": true,
-      "oddReal": "1.5",
+      "oddReal": "1.53",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:22:01.400040+00:00"
+  "updatedAt": "2026-04-07T23:22:06.706299+00:00"
 }
