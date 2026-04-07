@@ -151,6 +151,12 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|BTTS": {
+      "apostada": true,
+      "oddReal": "1.63",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -175,6 +181,12 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|O2.5": {
+      "apostada": true,
+      "oddReal": "1.5",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-05|Eredivisie|GO Ahead Eagles vs PEC Zwolle|BTTS": {
       "apostada": true,
       "oddReal": "",
@@ -190,6 +202,12 @@
     "2026-04-05|Eredivisie|NAC Breda vs Sparta Rotterdam|O2.5": {
       "apostada": true,
       "oddReal": "1.94",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
+      "apostada": true,
+      "oddReal": "1.91",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -277,55 +295,54 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
-    "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
-      "apostada": true,
-      "oddReal": "1.91",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|BTTS": {
-      "apostada": true,
-      "oddReal": "1.63",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|O2.5": {
-      "apostada": true,
-      "oddReal": "1.5",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-06|Championship|Portsmouth vs Oxford United|BTTS": {
       "apostada": true,
       "oddReal": "2.1",
-      "stakeReal": "",
+      "stakeReal": "5",
       "resultadoManual": ""
     },
     "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|BTTS": {
       "apostada": true,
       "oddReal": "1.95",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|BTTS": {
-      "apostada": true,
-      "oddReal": "1.8",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
-      "apostada": true,
-      "oddReal": "1.78",
-      "stakeReal": "",
+      "stakeReal": "5",
       "resultadoManual": ""
     },
     "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
       "apostada": true,
       "oddReal": "1.98",
-      "stakeReal": "",
+      "stakeReal": "1",
+      "resultadoManual": ""
+    },
+    "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|BTTS": {
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1",
       "resultadoManual": ""
     }
   },
-  "manualBets": [],
-  "updatedAt": "2026-04-07T00:51:50.066751+00:00"
+  "manualBets": [
+    {
+      "id": "manual_1775446687402_1n5dh5",
+      "data": "2026-04-06",
+      "liga": "Primeira Liga",
+      "jogo": "Benfica vs Casa Pia",
+      "mercado": "O2.5",
+      "odd": "1.65",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
+    },
+    {
+      "id": "manual_1775446793988_lmu0g4",
+      "data": "2026-04-06",
+      "liga": "Primeira Liga",
+      "jogo": "Benfica vs Casa Pia",
+      "mercado": "O2.5",
+      "odd": "1.79",
+      "stake": "10",
+      "resultado": "",
+      "notas": ""
+    }
+  ],
+  "updatedAt": "2026-04-07T01:42:17.021206+00:00"
 }
