@@ -195,7 +195,7 @@
     },
     "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.45",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:23:08.617698+00:00"
+  "updatedAt": "2026-04-07T23:23:40.326463+00:00"
 }
