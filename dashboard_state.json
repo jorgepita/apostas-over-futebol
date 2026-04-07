@@ -105,7 +105,7 @@
     },
     "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
       "apostada": true,
-      "oddReal": "1.",
+      "oddReal": "1.53",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:16:51.609523+00:00"
+  "updatedAt": "2026-04-07T23:16:56.446036+00:00"
 }
