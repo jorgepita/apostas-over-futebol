@@ -63,7 +63,7 @@
     },
     "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.49",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:15:51.673043+00:00"
+  "updatedAt": "2026-04-07T23:16:25.832972+00:00"
 }
