@@ -9,7 +9,7 @@
     },
     "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.56",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:12:19.815793+00:00"
+  "updatedAt": "2026-04-07T23:12:59.491056+00:00"
 }
