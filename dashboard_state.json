@@ -318,8 +318,14 @@
       "oddReal": "1.78",
       "stakeReal": "10.5",
       "resultadoManual": ""
+    },
+    "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
+      "apostada": true,
+      "oddReal": "1.98",
+      "stakeReal": "1",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T00:50:34.132271+00:00"
+  "updatedAt": "2026-04-07T00:50:55.808040+00:00"
 }
