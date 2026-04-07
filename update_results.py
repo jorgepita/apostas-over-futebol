@@ -103,6 +103,9 @@ TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
 MATCH_MIN_TOTAL_SCORE = 140
 MATCH_MIN_SIDE_SCORE = 62
+MATCH_STRONG_SIDE_SCORE = 95
+MATCH_REASONABLE_SIDE_SCORE = 58
+MATCH_STRONG_TOTAL_SCORE = 170
 
 BASE_TEAM_ALIASES = {
     # Championship
@@ -205,6 +208,14 @@ BASE_TEAM_ALIASES = {
     "sporting cp": "sporting cp",
     "porto": "fc porto",
     "fc porto": "fc porto",
+    "arouca": "arouca",
+    "fc arouca": "arouca",
+    "estoril": "estoril praia",
+    "gd estoril praia": "estoril praia",
+    "estoril praia": "estoril praia",
+    "grupo desportivo estoril praia": "estoril praia",
+    "casa pia": "casa pia",
+    "casa pia ac": "casa pia",
 
     # Itália
     "inter": "inter",
@@ -447,9 +458,6 @@ def maybe_learn_team_alias(
     shared_state: dict | None = None,
     min_learn_score: int = 94,
 ):
-    """
-    Aprende alias apenas quando há confiança alta.
-    """
     shared_state = ensure_shared_state_defaults(shared_state)
     aliases = get_team_aliases(shared_state)
 
@@ -472,12 +480,6 @@ def maybe_learn_team_alias(
 
 
 def extract_fixture_team_names(fixture: dict) -> tuple[str, str]:
-    """
-    Compatível com diferentes formatos:
-    - {"home_name": "...", "away_name": "..."}
-    - {"teams": {"home": {"name": "..."}, "away": {"name": "..."}}}
-    - football-data: {"homeTeam": {"name": "..."}, "awayTeam": {"name": "..."}}
-    """
     if not isinstance(fixture, dict):
         return "", ""
 
@@ -563,6 +565,16 @@ def score_fixture_match(
     return total, hs, aws
 
 
+def _passes_strong_reasonable_match(total: int, hs: int, aws: int) -> bool:
+    best_side = max(hs, aws)
+    worst_side = min(hs, aws)
+    return (
+        total >= MATCH_STRONG_TOTAL_SCORE
+        and best_side >= MATCH_STRONG_SIDE_SCORE
+        and worst_side >= MATCH_REASONABLE_SIDE_SCORE
+    )
+
+
 def find_best_fixture_match(
     row_home: str,
     row_away: str,
@@ -571,14 +583,6 @@ def find_best_fixture_match(
     min_total_score: int = MATCH_MIN_TOTAL_SCORE,
     min_side_score: int = MATCH_MIN_SIDE_SCORE,
 ):
-    """
-    Procura o melhor match dentro de uma lista de fixtures da mesma liga/data.
-
-    Critérios:
-    - primeiro tenta canonical exato
-    - depois score total
-    - rejeita scores laterais demasiado fracos
-    """
     shared_state = ensure_shared_state_defaults(shared_state)
 
     if not fixtures:
@@ -619,7 +623,11 @@ def find_best_fixture_match(
     for fx in fixtures:
         api_home, api_away = extract_fixture_team_names(fx)
         total, hs, aws = score_fixture_match(
-            row_home, row_away, api_home, api_away, shared_state
+            row_home,
+            row_away,
+            api_home,
+            api_away,
+            shared_state,
         )
 
         if total > best_score:
@@ -636,14 +644,24 @@ def find_best_fixture_match(
     if best is None:
         return None, 0, None
 
-    if best_meta["home_score"] < min_side_score or best_meta["away_score"] < min_side_score:
+    hs = int(best_meta["home_score"])
+    aws = int(best_meta["away_score"])
+
+    accepted = False
+    if hs >= min_side_score and aws >= min_side_score and best_score >= min_total_score:
+        accepted = True
+    elif _passes_strong_reasonable_match(best_score, hs, aws):
+        best_meta["mode"] = "strong_reasonable"
+
+        maybe_learn_team_alias(row_home, best_meta["api_home"], hs, shared_state)
+        maybe_learn_team_alias(row_away, best_meta["api_away"], aws, shared_state)
+        return best, best_score, best_meta
+
+    if not accepted:
         return None, best_score, best_meta
 
-    if best_score < min_total_score:
-        return None, best_score, best_meta
-
-    maybe_learn_team_alias(row_home, best_meta["api_home"], best_meta["home_score"], shared_state)
-    maybe_learn_team_alias(row_away, best_meta["api_away"], best_meta["away_score"], shared_state)
+    maybe_learn_team_alias(row_home, best_meta["api_home"], hs, shared_state)
+    maybe_learn_team_alias(row_away, best_meta["api_away"], aws, shared_state)
 
     return best, best_score, best_meta
 
@@ -702,9 +720,6 @@ def split_game(game: str):
 
 
 def team_match_score(a: str, b: str) -> int:
-    """
-    Mantido por compatibilidade noutros pontos auxiliares.
-    """
     na = normalize_text(a)
     nb = normalize_text(b)
 
@@ -741,9 +756,6 @@ def team_match_score(a: str, b: str) -> int:
 
 
 def choose_best_match(csv_home: str, csv_away: str, matches: list[dict]):
-    """
-    Mantido por compatibilidade, mas o fluxo principal já não usa esta função.
-    """
     best = None
     best_score = -1
 
@@ -769,9 +781,6 @@ def choose_best_match(csv_home: str, csv_away: str, matches: list[dict]):
 
 
 def choose_best_api_football_match(csv_home: str, csv_away: str, fixtures: list[dict]):
-    """
-    Mantido por compatibilidade, mas o fluxo principal já não usa esta função.
-    """
     best = None
     best_score = -1
 
@@ -1422,6 +1431,7 @@ def try_update_row_via_api_football(
     )
     return True, "UPDATED"
 
+
 def try_update_manual_row_via_api_football(
     df: pd.DataFrame,
     idx: int,
@@ -1434,7 +1444,7 @@ def try_update_manual_row_via_api_football(
     jogo = str(row.get("Jogo", "")).strip()
     mercado = str(row.get("Mercado", "")).strip().upper()
     odd = parse_float(row.get("Odd", ""), 0.0)
-    stake = parse_float(row.get("Stake€", ""), 0.0)
+    stake = parse_float(row.get("Stake", row.get("Stake€", "")), 0.0)
 
     home_csv, away_csv = split_game(jogo)
     if not home_csv or not away_csv:
@@ -1747,6 +1757,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
     return ensure_columns(df), updated, already_done, ignored
 
+
 def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     df = ensure_manual_columns(df)
     shared_state = ensure_shared_state_defaults(shared_state)
@@ -1981,11 +1992,11 @@ def main():
     )
 
     manual_df, m_updated, m_done, m_ignored = update_manual_dataframe(
-    manual_df, "manual", shared_state
+        manual_df, "manual", shared_state
     )
     manual_df.to_csv(MANUAL_FILE, index=False, sep=";", encoding="utf-8")
     print(
-    f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | ignorados: {m_ignored}"
+        f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | ignorados: {m_ignored}"
     )
 
     save_team_alias_cache(shared_state)
