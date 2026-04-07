@@ -107,9 +107,6 @@ TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
 MATCH_MIN_TOTAL_SCORE = 140
 MATCH_MIN_SIDE_SCORE = 62
-MATCH_STRONG_SIDE_SCORE = 95
-MATCH_REASONABLE_SIDE_SCORE = 58
-MATCH_STRONG_TOTAL_SCORE = 170
 
 BASE_TEAM_ALIASES = {
     # Championship
@@ -212,14 +209,6 @@ BASE_TEAM_ALIASES = {
     "sporting cp": "sporting cp",
     "porto": "fc porto",
     "fc porto": "fc porto",
-    "arouca": "arouca",
-    "fc arouca": "arouca",
-    "estoril": "estoril praia",
-    "gd estoril praia": "estoril praia",
-    "estoril praia": "estoril praia",
-    "grupo desportivo estoril praia": "estoril praia",
-    "casa pia": "casa pia",
-    "casa pia ac": "casa pia",
 
     # Itália
     "inter": "inter",
@@ -267,6 +256,10 @@ TEAM_STOPWORDS = {
 SHARED_STATE_DEFAULTS = {
     "team_aliases_runtime": {},
     "team_aliases_dirty": False,
+    "normalized_team_cache": {},
+    "similarity_cache": {},
+    "canonical_pair_cache": {},
+    "date_parse_cache": {},
 }
 
 
@@ -388,38 +381,59 @@ def get_team_aliases(shared_state: dict | None = None) -> dict:
 
 
 def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
+    shared_state = ensure_shared_state_defaults(shared_state)
+    cache = shared_state["normalized_team_cache"]
+
+    cache_key = str(text or "")
+    if cache_key in cache:
+        return cache[cache_key]
+
     aliases = get_team_aliases(shared_state)
 
     s = _pre_clean_team_name(text)
     if not s:
+        cache[cache_key] = ""
         return ""
 
     if s in aliases:
-        return aliases[s]
+        cache[cache_key] = aliases[s]
+        return cache[cache_key]
 
     tokens = [t for t in s.split() if t not in TEAM_STOPWORDS]
     s2 = normalize_whitespace(" ".join(tokens))
 
     if s2 in aliases:
-        return aliases[s2]
+        cache[cache_key] = aliases[s2]
+        return cache[cache_key]
 
     s2 = s2.replace("saint ", "st ")
     s2 = normalize_whitespace(s2)
 
     if s2 in aliases:
-        return aliases[s2]
+        cache[cache_key] = aliases[s2]
+        return cache[cache_key]
 
-    return s2
+    cache[cache_key] = s2
+    return cache[cache_key]
 
 
 def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
+    shared_state = ensure_shared_state_defaults(shared_state)
+    cache = shared_state["similarity_cache"]
+
+    cache_key = (str(a or ""), str(b or ""))
+    if cache_key in cache:
+        return cache[cache_key]
+
     na = normalize_team_name(a, shared_state)
     nb = normalize_team_name(b, shared_state)
 
     if not na or not nb:
+        cache[cache_key] = 0
         return 0
 
     if na == nb:
+        cache[cache_key] = 100
         return 100
 
     if na in nb or nb in na:
@@ -428,8 +442,10 @@ def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
         if longer > 0:
             frac = shorter / longer
             if frac >= 0.70:
+                cache[cache_key] = 94
                 return 94
             if frac >= 0.55:
+                cache[cache_key] = 90
                 return 90
 
     ta = set(na.split())
@@ -440,19 +456,32 @@ def similarity_score(a: str, b: str, shared_state: dict | None = None) -> int:
         union = len(ta | tb)
         jacc = inter / union if union else 0.0
         if jacc >= 0.80:
+            cache[cache_key] = 92
             return 92
         if jacc >= 0.60:
+            cache[cache_key] = 88
             return 88
 
     ratio = SequenceMatcher(None, na, nb).ratio()
-    return int(round(ratio * 100))
+    score = int(round(ratio * 100))
+    cache[cache_key] = score
+    return score
 
 
 def canonical_pair(home: str, away: str, shared_state: dict | None = None) -> tuple[str, str]:
-    return (
+    shared_state = ensure_shared_state_defaults(shared_state)
+    cache = shared_state["canonical_pair_cache"]
+
+    cache_key = (str(home or ""), str(away or ""))
+    if cache_key in cache:
+        return cache[cache_key]
+
+    result = (
         normalize_team_name(home, shared_state),
         normalize_team_name(away, shared_state),
     )
+    cache[cache_key] = result
+    return result
 
 
 def maybe_learn_team_alias(
@@ -480,6 +509,9 @@ def maybe_learn_team_alias(
     if score >= min_learn_score:
         aliases[raw_clean] = api_canon
         shared_state["team_aliases_dirty"] = True
+        shared_state["normalized_team_cache"].clear()
+        shared_state["similarity_cache"].clear()
+        shared_state["canonical_pair_cache"].clear()
         debug_log(f"team alias learned | '{raw_clean}' -> '{api_canon}' | score={score}")
 
 
@@ -569,16 +601,6 @@ def score_fixture_match(
     return total, hs, aws
 
 
-def _passes_strong_reasonable_match(total: int, hs: int, aws: int) -> bool:
-    best_side = max(hs, aws)
-    worst_side = min(hs, aws)
-    return (
-        total >= MATCH_STRONG_TOTAL_SCORE
-        and best_side >= MATCH_STRONG_SIDE_SCORE
-        and worst_side >= MATCH_REASONABLE_SIDE_SCORE
-    )
-
-
 def find_best_fixture_match(
     row_home: str,
     row_away: str,
@@ -627,11 +649,7 @@ def find_best_fixture_match(
     for fx in fixtures:
         api_home, api_away = extract_fixture_team_names(fx)
         total, hs, aws = score_fixture_match(
-            row_home,
-            row_away,
-            api_home,
-            api_away,
-            shared_state,
+            row_home, row_away, api_home, api_away, shared_state
         )
 
         if total > best_score:
@@ -648,24 +666,14 @@ def find_best_fixture_match(
     if best is None:
         return None, 0, None
 
-    hs = int(best_meta["home_score"])
-    aws = int(best_meta["away_score"])
-
-    accepted = False
-    if hs >= min_side_score and aws >= min_side_score and best_score >= min_total_score:
-        accepted = True
-    elif _passes_strong_reasonable_match(best_score, hs, aws):
-        best_meta["mode"] = "strong_reasonable"
-
-        maybe_learn_team_alias(row_home, best_meta["api_home"], hs, shared_state)
-        maybe_learn_team_alias(row_away, best_meta["api_away"], aws, shared_state)
-        return best, best_score, best_meta
-
-    if not accepted:
+    if best_meta["home_score"] < min_side_score or best_meta["away_score"] < min_side_score:
         return None, best_score, best_meta
 
-    maybe_learn_team_alias(row_home, best_meta["api_home"], hs, shared_state)
-    maybe_learn_team_alias(row_away, best_meta["api_away"], aws, shared_state)
+    if best_score < min_total_score:
+        return None, best_score, best_meta
+
+    maybe_learn_team_alias(row_home, best_meta["api_home"], best_meta["home_score"], shared_state)
+    maybe_learn_team_alias(row_away, best_meta["api_away"], best_meta["away_score"], shared_state)
 
     return best, best_score, best_meta
 
@@ -918,11 +926,23 @@ def get_today_lisbon_iso() -> str:
         return datetime.utcnow().date().isoformat()
 
 
-def is_future_date(date_str: str, today_iso: str) -> bool:
-    try:
-        return pd.to_datetime(date_str, errors="coerce").date().isoformat() > today_iso
-    except Exception:
+def _cached_date_obj(date_str: str, shared_state: dict | None = None):
+    shared_state = ensure_shared_state_defaults(shared_state)
+    cache = shared_state["date_parse_cache"]
+    key = str(date_str or "")
+
+    if key not in cache:
+        dt = pd.to_datetime(key, errors="coerce")
+        cache[key] = None if pd.isna(dt) else dt.date()
+
+    return cache[key]
+
+
+def is_future_date(date_str: str, today_iso: str, shared_state: dict | None = None) -> bool:
+    d = _cached_date_obj(date_str, shared_state)
+    if d is None:
         return False
+    return d.isoformat() > today_iso
 
 
 def make_row_key_from_values(data: str, liga: str, jogo: str, mercado: str) -> str:
@@ -943,15 +963,35 @@ def make_row_key(row) -> str:
     )
 
 
-def api_football_season_from_date(date_str: str) -> int:
-    dt = pd.to_datetime(date_str, errors="coerce")
-    if pd.isna(dt):
+def api_football_season_from_date(date_str: str, shared_state: dict | None = None) -> int:
+    d = _cached_date_obj(date_str, shared_state)
+    if d is None:
         now = datetime.utcnow()
         return now.year if now.month >= 7 else now.year - 1
 
-    if dt.month >= 7:
-        return int(dt.year)
-    return int(dt.year) - 1
+    if d.month >= 7:
+        return int(d.year)
+    return int(d.year) - 1
+
+
+def should_use_api_football_fallback(league_code: str, reason: str = "") -> bool:
+    if league_code not in API_FOOTBALL_FALLBACK_COMPETITIONS:
+        return False
+
+    if league_code in BLOCKED_FOOTBALL_DATA_CODES:
+        return True
+
+    reason = str(reason or "").upper().strip()
+    if not reason:
+        return False
+
+    if reason.startswith("HTTP"):
+        return True
+
+    if reason in {"OTHER", "NO_FIXTURES", "NO_LEAGUE_ID"}:
+        return True
+
+    return False
 
 
 # =============================
@@ -1126,7 +1166,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
     if not conf:
         return None
 
-    season = api_football_season_from_date(date_str)
+    season = api_football_season_from_date(date_str, shared_state)
     cache_key = (fd_league_code, season)
 
     league_id_cache = shared_state["af_league_id_cache"]
@@ -1182,7 +1222,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
     if not league_id:
         return None, "NO_LEAGUE_ID"
 
-    season = api_football_season_from_date(date_str)
+    season = api_football_season_from_date(date_str, shared_state)
     cache_key = (fd_league_code, date_str, league_id, season)
 
     fixtures_cache = shared_state["af_fixtures_cache"]
@@ -1448,7 +1488,7 @@ def try_update_manual_row_via_api_football(
     jogo = str(row.get("Jogo", "")).strip()
     mercado = str(row.get("Mercado", "")).strip().upper()
     odd = parse_float(row.get("Odd", ""), 0.0)
-    stake = parse_float(row.get("Stake", row.get("Stake€", "")), 0.0)
+    stake = parse_float(row.get("Stake€", ""), 0.0)
 
     home_csv, away_csv = split_game(jogo)
     if not home_csv or not away_csv:
@@ -1581,7 +1621,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
-        if is_future_date(data, today_iso):
+        if is_future_date(data, today_iso, shared_state):
             future_skipped += 1
             ignored += 1
             continue
@@ -1599,7 +1639,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
-        use_api_football_direct = league_code in BLOCKED_FOOTBALL_DATA_CODES
+        use_api_football_direct = should_use_api_football_fallback(league_code)
 
         if use_api_football_direct:
             blocked_fd_leagues_seen.add(league_code)
@@ -1664,7 +1704,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         cache_entry = fd_matches_cache[cache_key]
 
-        if not cache_entry["ok"] and cache_entry["reason"] == "HTTP 403" and league_code in API_FOOTBALL_FALLBACK_COMPETITIONS:
+        if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
 
@@ -1808,7 +1848,7 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
-        if is_future_date(data, today_iso):
+        if is_future_date(data, today_iso, shared_state):
             future_skipped += 1
             ignored += 1
             continue
@@ -1826,7 +1866,7 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
-        use_api_football_direct = league_code in BLOCKED_FOOTBALL_DATA_CODES
+        use_api_football_direct = should_use_api_football_fallback(league_code)
 
         if use_api_football_direct:
             blocked_fd_leagues_seen.add(league_code)
@@ -1879,7 +1919,7 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         cache_entry = fd_matches_cache[cache_key]
 
-        if not cache_entry["ok"] and cache_entry["reason"] == "HTTP 403" and league_code in API_FOOTBALL_FALLBACK_COMPETITIONS:
+        if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
 
@@ -1974,7 +2014,7 @@ def main():
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
     if not API_FOOTBALL_KEY:
-        print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL não vai funcionar.")
+        print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL/BJL/SB não vai funcionar.")
 
     shared_state = make_shared_runtime_state()
 
