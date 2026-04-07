@@ -40,16 +40,32 @@ DEFAULT_LEAGUE_IDS = {
     "turquia": 203,
 }
 
+API_CALL_MIN_INTERVAL = 0.28
+_api_last_call_ts = 0.0
+
 
 # =============================
 # HTTP helpers
 # =============================
+def _respect_api_spacing():
+    global _api_last_call_ts
+
+    now = time.monotonic()
+    elapsed = now - _api_last_call_ts
+    if elapsed < API_CALL_MIN_INTERVAL:
+        time.sleep(API_CALL_MIN_INTERVAL - elapsed)
+
+    _api_last_call_ts = time.monotonic()
+
+
 def http_get_json_api_football(path: str, params: dict) -> dict:
     if not API_FOOTBALL_KEY:
         raise SystemExit("Falta API_FOOTBALL_KEY (define no Render -> Environment).")
 
     query = urllib.parse.urlencode(params)
     url = f"{API_FOOTBALL_BASE}{path}?{query}"
+
+    _respect_api_spacing()
 
     req = urllib.request.Request(
         url,
@@ -301,7 +317,17 @@ def try_load_history_csv(league_key: str) -> Optional[pd.DataFrame]:
 # =============================
 # API-Football fixtures
 # =============================
-def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -> list[dict]:
+def fetch_fixtures_for_league_date(
+    league_id: int,
+    season: int,
+    date_iso: str,
+    fixtures_cache: dict | None = None,
+) -> tuple[list[dict], bool]:
+    cache_key = (int(league_id), int(season), str(date_iso))
+
+    if fixtures_cache is not None and cache_key in fixtures_cache:
+        return fixtures_cache[cache_key], True
+
     params = {
         "league": league_id,
         "season": season,
@@ -322,20 +348,40 @@ def fetch_fixtures_for_league_date(league_id: int, season: int, date_iso: str) -
     except Exception:
         pass
 
-    return data.get("response", []) if isinstance(data, dict) else []
+    response = data.get("response", []) if isinstance(data, dict) else []
+
+    if fixtures_cache is not None:
+        fixtures_cache[cache_key] = response
+
+    return response, False
 
 
 # =============================
 # API-Football odds per fixture
 # =============================
-def fetch_fixture_odds_response_api_football(fixture_id: int) -> list[dict]:
+def fetch_fixture_odds_response_api_football(
+    fixture_id: int,
+    odds_cache: dict | None = None,
+) -> tuple[list[dict], bool]:
+    fixture_id = int(fixture_id)
+
+    if odds_cache is not None and fixture_id in odds_cache:
+        return odds_cache[fixture_id], True
+
     try:
         data = http_get_json_api_football("/odds", {"fixture": fixture_id})
     except Exception as e:
         print(f"[WARN] odds API-Football falhou fixture={fixture_id} -> {e}")
-        return []
+        if odds_cache is not None:
+            odds_cache[fixture_id] = []
+        return [], False
 
-    return data.get("response", []) if isinstance(data, dict) else []
+    response = data.get("response", []) if isinstance(data, dict) else []
+
+    if odds_cache is not None:
+        odds_cache[fixture_id] = response
+
+    return response, False
 
 
 def extract_best_btts_from_api_football_response(response: list[dict], fixture_id: int) -> Optional[float]:
@@ -617,12 +663,23 @@ def main():
     fixture_candidates = []
     fixture_requests = 0
     odds_requests_api_football = 0
+    fixture_cache_hits = 0
+    odds_cache_hits = 0
+
+    fixtures_cache = {}
+    odds_cache = {}
+    history_cache = {}
 
     # 1) Fixtures via API-Football
     for league_key, league_id in league_map.items():
         league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
 
-        df_hist = try_load_history_csv(league_key)
+        if league_key in history_cache:
+            df_hist = history_cache[league_key]
+        else:
+            df_hist = try_load_history_csv(league_key)
+            history_cache[league_key] = df_hist
+
         if df_hist is None:
             print(f"[WARN] histórico em falta para {league_key}")
             continue
@@ -635,8 +692,16 @@ def main():
             season = int(manual_season) if manual_season is not None else season_for_date(target_date)
 
             try:
-                resp = fetch_fixtures_for_league_date(league_id, season, date_iso)
-                fixture_requests += 1
+                resp, from_cache = fetch_fixtures_for_league_date(
+                    league_id=league_id,
+                    season=season,
+                    date_iso=date_iso,
+                    fixtures_cache=fixtures_cache,
+                )
+                if from_cache:
+                    fixture_cache_hits += 1
+                else:
+                    fixture_requests += 1
             except Exception as e:
                 print(f"[WARN] fixtures falhou league={league_key} season={season} date={date_iso} -> {e}")
                 continue
@@ -668,7 +733,7 @@ def main():
                 f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
             )
 
-            if sleep_between_requests > 0:
+            if (not from_cache) and sleep_between_requests > 0:
                 time.sleep(sleep_between_requests)
 
     # 2) Global shortlist
@@ -681,6 +746,7 @@ def main():
     fixture_candidates = fixture_candidates[:shortlist_total]
 
     print(f"[DBG] fixture_requests={fixture_requests}")
+    print(f"[DBG] fixture_cache_hits={fixture_cache_hits}")
     print(f"[DBG] shortlist_global={len(fixture_candidates)}")
 
     if not fixture_candidates:
@@ -705,8 +771,14 @@ def main():
     btts_map = {}
 
     for fx in fixture_candidates:
-        response = fetch_fixture_odds_response_api_football(fx["fixture_id"])
-        odds_requests_api_football += 1
+        response, from_cache = fetch_fixture_odds_response_api_football(
+            fx["fixture_id"],
+            odds_cache=odds_cache,
+        )
+        if from_cache:
+            odds_cache_hits += 1
+        else:
+            odds_requests_api_football += 1
 
         odd_o25 = extract_best_over25_from_api_football_response(response, fx["fixture_id"])
         over25_map[fx["fixture_id"]] = odd_o25
@@ -721,7 +793,7 @@ def main():
             f"{fx['home']} vs {fx['away']} | O2.5={odd_o25} | BTTS={odd_btts}"
         )
 
-        if sleep_between_requests > 0:
+        if (not from_cache) and sleep_between_requests > 0:
             time.sleep(min(sleep_between_requests, 0.25))
 
     # 4) Final rows
@@ -758,7 +830,9 @@ def main():
 
     print(f"OK fixtures_today.csv: {len(rows)} jogos shortlistados com odds")
     print(f"[DBG] requests fixtures API-Football={fixture_requests}")
+    print(f"[DBG] cache hits fixtures API-Football={fixture_cache_hits}")
     print(f"[DBG] requests odds API-Football={odds_requests_api_football}")
+    print(f"[DBG] cache hits odds API-Football={odds_cache_hits}")
     print(f"[DBG] requests total aproximado={fixture_requests + odds_requests_api_football}")
 
     owner = "jorgepita"
