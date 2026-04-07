@@ -454,16 +454,6 @@ def fetch_btts_odds_for_fixture_api_football(fixture_id: int) -> Optional[float]
 
     return best_btts
 
-    def debug_odds_payload_for_fixture_api_football(fixture_id: int) -> None:
-        try:
-            data = http_get_json_api_football("/odds", {"fixture": fixture_id})
-        except Exception as e:
-            print(f"[WARN] DEBUG odds API-Football falhou fixture={fixture_id} -> {e}")
-            return
-
-        print(f"[DBG] DEBUG odds payload fixture={fixture_id}")
-        print(json.dumps(data, ensure_ascii=False, indent=2)[:20000])
-
 # =============================
 # The Odds API O2.5 odds grouped
 # =============================
@@ -789,7 +779,13 @@ def main():
             )
 
     debug_fixture_id = 1387037
-    debug_odds_payload_for_fixture_api_football(debug_fixture_id)
+    try:
+        debug_data = http_get_json_api_football("/odds", {"fixture": debug_fixture_id})
+        print(f"[DBG] DEBUG odds payload fixture={debug_fixture_id}")
+        print(json.dumps(debug_data, ensure_ascii=False, indent=2)[:20000])
+    except Exception as e:
+        print(f"[WARN] DEBUG odds API-Football falhou fixture={debug_fixture_id} -> {e}")
+    
     return
     
     # 4) Fetch BTTS odds from API-Football only for shortlisted fixtures
