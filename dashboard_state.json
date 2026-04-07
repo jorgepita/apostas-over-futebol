@@ -279,7 +279,7 @@
     },
     "2026-04-06|Primeira Liga|Casa Pia vs Benfica|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.92",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:25:56.861159+00:00"
+  "updatedAt": "2026-04-07T23:26:20.053178+00:00"
 }
