@@ -322,7 +322,7 @@
     "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
       "apostada": true,
       "oddReal": "1.78",
-      "stakeReal": "6.5",
+      "stakeReal": "",
       "resultadoManual": ""
     }
   },
@@ -350,5 +350,5 @@
       "notas": ""
     }
   ],
-  "updatedAt": "2026-04-07T01:43:01.289640+00:00"
+  "updatedAt": "2026-04-07T01:43:10.986694+00:00"
 }
