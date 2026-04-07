@@ -21,7 +21,7 @@
     },
     "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.3",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:17:01.524199+00:00"
+  "updatedAt": "2026-04-07T23:17:51.797107+00:00"
 }
