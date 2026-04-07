@@ -253,6 +253,18 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-06|Championship|Portsmouth vs Oxford United|BTTS": {
+      "apostada": true,
+      "oddReal": "2.1",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|O2.5": {
       "apostada": true,
       "oddReal": "2.18",
@@ -271,6 +283,12 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
+    "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
+      "apostada": true,
+      "oddReal": "1.98",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
     "2026-04-06|Serie B|Cesena vs Sudtirol|BTTS": {
       "apostada": true,
       "oddReal": "",
@@ -280,6 +298,12 @@
     "2026-04-06|Serie B|Reggiana vs Pescara|O2.5": {
       "apostada": true,
       "oddReal": "1.87",
+      "resultadoManual": "",
+      "stakeReal": ""
+    },
+    "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|BTTS": {
+      "apostada": true,
+      "oddReal": "1.8",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -295,60 +319,13 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
-    "2026-04-06|Championship|Portsmouth vs Oxford United|BTTS": {
-      "apostada": true,
-      "oddReal": "2.1",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|BTTS": {
-      "apostada": true,
-      "oddReal": "1.95",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
-      "apostada": true,
-      "oddReal": "1.98",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|BTTS": {
-      "apostada": true,
-      "oddReal": "1.8",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
       "apostada": true,
       "oddReal": "1.78",
-      "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "",
+      "stakeReal": ""
     }
   },
-  "manualBets": [
-    {
-      "id": "manual_1775446687402_1n5dh5",
-      "data": "2026-04-06",
-      "liga": "Primeira Liga",
-      "jogo": "Benfica vs Casa Pia",
-      "mercado": "O2.5",
-      "odd": "1.65",
-      "stake": "10",
-      "resultado": "",
-      "notas": ""
-    },
-    {
-      "id": "manual_1775446793988_lmu0g4",
-      "data": "2026-04-06",
-      "liga": "Primeira Liga",
-      "jogo": "Benfica vs Casa Pia",
-      "mercado": "O2.5",
-      "odd": "1.79",
-      "stake": "10",
-      "resultado": "",
-      "notas": ""
-    }
-  ],
-  "updatedAt": "2026-04-07T01:43:45.720003+00:00"
+  "manualBets": [],
+  "updatedAt": "2026-04-07T06:23:17.446217+00:00"
 }
