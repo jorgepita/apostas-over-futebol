@@ -432,6 +432,13 @@ def extract_best_over25_from_api_football_response(response: list[dict], fixture
         "both teams",
         "winner",
         "handicap",
+        "yellow",
+        "red",
+        "bookings",
+        "fouls",
+        "offsides",
+        "shots",
+        "throw-ins",
     }
 
     allowed_market_markers = {
