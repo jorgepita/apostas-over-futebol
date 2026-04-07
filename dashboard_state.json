@@ -27,7 +27,7 @@
     },
     "2026-04-04|2. Bundesliga|1. FC Magdeburg vs VfL Bochum|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.45",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:19:27.072966+00:00"
+  "updatedAt": "2026-04-07T23:19:57.485901+00:00"
 }
