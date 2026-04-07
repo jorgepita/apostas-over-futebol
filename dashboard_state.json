@@ -316,7 +316,7 @@
     "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
       "apostada": true,
       "oddReal": "1.78",
-      "stakeReal": "10.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
@@ -327,5 +327,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T00:50:55.808040+00:00"
+  "updatedAt": "2026-04-07T00:51:08.306383+00:00"
 }
