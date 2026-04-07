@@ -231,7 +231,7 @@
     },
     "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.42",
       "resultadoManual": "",
       "stakeReal": ""
     },
@@ -399,5 +399,5 @@
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-07T23:24:11.204128+00:00"
+  "updatedAt": "2026-04-07T23:24:29.057614+00:00"
 }
