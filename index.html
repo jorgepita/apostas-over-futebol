@@ -471,27 +471,41 @@
 
         <div class="grid grid-4">
           <div class="stat">
-            <div class="label">Banca inicial</div>
-            <div class="value" id="bankrollLabelTop">€1000.00</div>
-            <div class="note">Base usada nos cálculos</div>
+            <div class="label">Banca real inicial</div>
+            <div class="value" id="bankrollRealLabelTop">€1000.00</div>
+            <div class="note">Usada na execução real</div>
           </div>
 
           <div class="stat">
-            <div class="label">Banca atual</div>
+            <div class="label">Banca real atual</div>
             <div class="value" id="currentBankrollTop">€—</div>
-            <div class="note">Resultado real fechado</div>
+            <div class="note">Bot executado + manuais</div>
           </div>
 
+          <div class="stat">
+            <div class="label">Banca simulação</div>
+            <div class="value" id="simBankrollTop">€—</div>
+            <div class="note">Modelo / picks do bot</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Disponível real</div>
+            <div class="value" id="availableBankrollTop">€—</div>
+            <div class="note">Banca real após abertas</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
           <div class="stat">
             <div class="label">Exposição aberta</div>
             <div class="value" id="openExposureTop">€—</div>
-            <div class="note">Stake em aberto</div>
+            <div class="note">Stake real em aberto</div>
           </div>
 
           <div class="stat">
-            <div class="label">Disponível</div>
-            <div class="value" id="availableBankrollTop">€—</div>
-            <div class="note">Banca após abertas</div>
+            <div class="label">Banca simulação inicial</div>
+            <div class="value" id="bankrollSimLabelTop">€1000.00</div>
+            <div class="note">Base do modo simulação</div>
           </div>
         </div>
 
@@ -549,7 +563,7 @@
 
         <div class="grid grid-2">
           <div class="card">
-            <div class="label">Evolução da banca</div>
+            <div class="label">Evolução da banca real</div>
             <div class="note" style="margin-bottom:12px;">Baseada nas apostas reais fechadas.</div>
             <div class="chart-box">
               <div id="bankrollChartWrap"></div>
@@ -558,7 +572,7 @@
 
           <div class="card">
             <div class="label">Resumo rápido</div>
-            <div class="note" style="margin-bottom:12px;">Sessão, risco e execução.</div>
+            <div class="note" style="margin-bottom:12px;">Sessão, risco, execução e comparação real vs simulação.</div>
             <div id="summaryList" class="grid"></div>
           </div>
         </div>
@@ -677,7 +691,7 @@
             <div class="label">Notas operacionais</div>
             <div class="note" style="margin-bottom:12px;">Leitura rápida do estado do dashboard.</div>
             <div class="muted-box">
-              <div class="note">Este separador concentra banca, ROI, lucro, alertas, abertas, analytics, streaks e gráfico.</div>
+              <div class="note">Este separador concentra banca real, banca simulação, ROI, lucro, alertas, abertas, analytics, streaks e gráfico.</div>
               <div class="note">As operações de consulta detalhada ficam separadas nas tabs de dia, histórico e manuais.</div>
             </div>
           </div>
@@ -832,6 +846,20 @@
           </div>
         </div>
 
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="label">Resumo Bot</div>
+            <div class="note" style="margin-bottom:12px;">Fechadas do bot com os filtros atuais.</div>
+            <div id="historyBotSummary" class="grid grid-4"></div>
+          </div>
+
+          <div class="card">
+            <div class="label">Resumo Manuais</div>
+            <div class="note" style="margin-bottom:12px;">Fechadas manuais com os filtros atuais.</div>
+            <div id="historyManualSummary" class="grid grid-4"></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="label">Filtros desta página</div>
           <div class="note" style="margin-bottom:12px;">Inclui Execução.</div>
@@ -966,10 +994,19 @@
         </div>
 
         <div class="card">
-          <div class="label">Banca inicial</div>
-          <div class="note" style="margin-bottom:12px;">Guardada neste browser e usada nos cálculos globais.</div>
-          <div style="max-width:260px;">
-            <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" />
+          <div class="label">Bancas iniciais</div>
+          <div class="note" style="margin-bottom:12px;">Separadas para execução real e simulação do modelo.</div>
+
+          <div class="toolbar-grid">
+            <div style="max-width:260px;">
+              <label class="label" for="bankrollRealInput">Banca real inicial</label>
+              <input id="bankrollRealInput" type="number" step="0.01" min="0" value="1000" />
+            </div>
+
+            <div style="max-width:260px;">
+              <label class="label" for="bankrollSimInput">Banca simulação inicial</label>
+              <input id="bankrollSimInput" type="number" step="0.01" min="0" value="1000" />
+            </div>
           </div>
         </div>
 
@@ -1066,7 +1103,8 @@
       };
 
       const STORAGE_KEYS = {
-        bankroll: 'apostas_bot_bankroll_inicial',
+        bankrollReal: 'apostas_bot_bankroll_real_inicial',
+        bankrollSim: 'apostas_bot_bankroll_sim_inicial',
         picks: 'apostas_bot_local_edits_v4',
         manual: 'apostas_bot_manual_bets_v2',
         sessionStartDate: 'apostas_bot_session_start_date_v2',
@@ -1084,7 +1122,8 @@
         footballHistory: [],
         nba: [],
         manualBetsRemote: [],
-        bankrollInicial: 1000,
+        bankrollRealInicial: 1000,
+        bankrollSimInicial: 1000,
         localEdits: {},
         manualBets: [],
         sessionStartDate: '',
@@ -1240,15 +1279,22 @@
       }
 
       function loadLocalState() {
-        const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
+        const savedBankrollReal = localStorage.getItem(STORAGE_KEYS.bankrollReal);
+        const savedBankrollSim = localStorage.getItem(STORAGE_KEYS.bankrollSim);
         const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
         const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
         const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
         const savedActiveTab = localStorage.getItem(STORAGE_KEYS.activeTab);
 
-        const bankrollParsed = num(savedBankroll);
-        if (bankrollParsed !== null && bankrollParsed >= 0) {
-          state.bankrollInicial = bankrollParsed;
+        const bankrollRealParsed = num(savedBankrollReal);
+        const bankrollSimParsed = num(savedBankrollSim);
+
+        if (bankrollRealParsed !== null && bankrollRealParsed >= 0) {
+          state.bankrollRealInicial = bankrollRealParsed;
+        }
+
+        if (bankrollSimParsed !== null && bankrollSimParsed >= 0) {
+          state.bankrollSimInicial = bankrollSimParsed;
         }
 
         try {
@@ -1268,7 +1314,8 @@
       }
 
       function saveLocalState() {
-        localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+        localStorage.setItem(STORAGE_KEYS.bankrollReal, String(state.bankrollRealInicial));
+        localStorage.setItem(STORAGE_KEYS.bankrollSim, String(state.bankrollSimInicial));
         localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
         localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
         localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || todayIso());
@@ -1450,9 +1497,11 @@
         const modelProfit = sum(botHistoryRows.map(r => r._lucroModeloLocal).filter(v => v !== null));
         const modelWins = botHistoryRows.filter(r => r._resultKey === 'W').length;
         const modelLosses = botHistoryRows.filter(r => r._resultKey === 'L').length;
+        const modelPushes = botHistoryRows.filter(r => r._resultKey === 'P').length;
         const modelCount = modelWins + modelLosses;
         const modelRoi = modelStake > 0 ? (modelProfit / modelStake) * 100 : 0;
         const modelWr = modelCount > 0 ? (modelWins / modelCount) * 100 : 0;
+        const simBankroll = state.bankrollSimInicial + modelProfit;
 
         const realBotStake = sum(botRealRows.map(r => r._stakeRealNum).filter(v => v !== null));
         const realBotProfit = sum(botRealRows.map(r => r._lucroRealLocal).filter(v => v !== null));
@@ -1461,27 +1510,32 @@
         const manualProfit = sum(manualRows.map(b => b._lucro).filter(v => v !== null));
         const manualWins = manualRows.filter(b => b._resultKey === 'W').length;
         const manualLosses = manualRows.filter(b => b._resultKey === 'L').length;
+        const manualPushes = manualRows.filter(b => b._resultKey === 'P').length;
 
         const realStake = realBotStake + manualStake;
         const realProfit = realBotProfit + manualProfit;
         const realWins = botRealRows.filter(r => r._resultKey === 'W').length + manualWins;
         const realLosses = botRealRows.filter(r => r._resultKey === 'L').length + manualLosses;
+        const realPushes = botRealRows.filter(r => r._resultKey === 'P').length + manualPushes;
         const realResolvedCount = botRealRows.length + manualRows.length;
         const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
         const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
-        const realBankroll = state.bankrollInicial + realProfit;
+        const realBankroll = state.bankrollRealInicial + realProfit;
 
         return {
           modelStake,
           modelProfit,
           modelWins,
           modelLosses,
+          modelPushes,
           modelRoi,
           modelWr,
+          simBankroll,
           realStake,
           realProfit,
           realWins,
           realLosses,
+          realPushes,
           realResolvedCount,
           realRoi,
           realWr,
@@ -1517,7 +1571,7 @@
           sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
           sum(getResolvedManualBets().map(b => b._lucro));
 
-        const bancaAtual = state.bankrollInicial + lucroReal;
+        const bancaAtual = state.bankrollRealInicial + lucroReal;
         const bancaDisponivel = bancaAtual - stakeOpen;
 
         return {
@@ -1594,7 +1648,7 @@
       function getStakeContext() {
         const dynamicStake = computeDynamicStake();
         const risk = getRiskMetrics();
-        const bankroll = risk.bancaAtual > 0 ? risk.bancaAtual : state.bankrollInicial;
+        const bankroll = risk.bancaAtual > 0 ? risk.bancaAtual : state.bankrollRealInicial;
 
         return {
           bankroll,
@@ -1856,6 +1910,7 @@
         const alerts = computeAlerts();
         const stake = computeDynamicStake();
         const risk = getRiskMetrics();
+        const metrics = getMetrics();
 
         document.getElementById('decisionModeValue').textContent = decision.label;
         document.getElementById('decisionBadge').className = `decision-badge ${decision.badge}`;
@@ -1876,8 +1931,10 @@
         document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(getSessionStartDate())}`;
         document.getElementById('lastUpdateLabel').textContent = `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`;
 
-        document.getElementById('bankrollLabelTop').textContent = `€${fmt(state.bankrollInicial)}`;
+        document.getElementById('bankrollRealLabelTop').textContent = `€${fmt(state.bankrollRealInicial)}`;
+        document.getElementById('bankrollSimLabelTop').textContent = `€${fmt(state.bankrollSimInicial)}`;
         document.getElementById('currentBankrollTop').textContent = `€${fmt(risk.bancaAtual)}`;
+        document.getElementById('simBankrollTop').textContent = `€${fmt(metrics.geral.simBankroll)}`;
         document.getElementById('openExposureTop').textContent = `€${fmt(risk.stakeOpen)}`;
         document.getElementById('availableBankrollTop').textContent = `€${fmt(risk.bancaDisponivel)}`;
       }
@@ -2268,9 +2325,12 @@
         const items = [
           `Decisão atual: ${decision.label} • ${decision.note}`,
           `Stake dinâmica: ${stake.label} (x${fmt(stake.multiplier)}) • ${stake.note}`,
-          `Banca atual: €${fmt(r.bancaAtual)} • disponível: €${fmt(r.bancaDisponivel)}`,
+          `Banca real atual: €${fmt(r.bancaAtual)} • disponível: €${fmt(r.bancaDisponivel)}`,
+          `Banca simulação: €${fmt(m.geral.simBankroll)} • lucro modelo: €${fmt(m.geral.modelProfit)}`,
           `Sessão real: lucro €${fmt(m.sessao.realProfit)} • ROI ${pct(m.sessao.realRoi)} • WR ${pct(m.sessao.realWr)}`,
+          `Sessão simulação: lucro €${fmt(m.sessao.modelProfit)} • ROI ${pct(m.sessao.modelRoi)} • WR ${pct(m.sessao.modelWr)}`,
           `Geral real: lucro €${fmt(m.geral.realProfit)} • ROI ${pct(m.geral.realRoi)} • WR ${pct(m.geral.realWr)}`,
+          `Geral simulação: lucro €${fmt(m.geral.modelProfit)} • ROI ${pct(m.geral.modelRoi)} • WR ${pct(m.geral.modelWr)}`,
           `Abertas: ${r.openCount} • stake exposta €${fmt(r.stakeOpen)} • potencial €${fmt(r.potencialLucro)}`
         ];
 
@@ -2290,7 +2350,7 @@
           return;
         }
 
-        let running = state.bankrollInicial;
+        let running = state.bankrollRealInicial;
         const pointsData = rows.map((r, i) => {
           running += (r.lucro || 0);
           return {
@@ -2301,7 +2361,7 @@
           };
         });
 
-        const values = [state.bankrollInicial, ...pointsData.map(p => p.y)];
+        const values = [state.bankrollRealInicial, ...pointsData.map(p => p.y)];
         const minY = Math.min(...values);
         const maxY = Math.max(...values);
         const width = 900;
@@ -2346,13 +2406,51 @@
         }).join('');
 
         wrap.innerHTML = `
-          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolução da banca">
+          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolução da banca real">
             ${gridHtml}
             <line x1="${padX}" y1="${height - padBottom}" x2="${width - padX}" y2="${height - padBottom}" stroke="#cbd5e1" stroke-width="1.2" />
             <path d="${path}" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
             ${pointsHtml}
           </svg>
-          <div class="note" style="margin-top:8px;">Início: €${fmt(state.bankrollInicial)} • Final: €${fmt(pointsData[pointsData.length - 1].y)}</div>
+          <div class="note" style="margin-top:8px;">Início: €${fmt(state.bankrollRealInicial)} • Final: €${fmt(pointsData[pointsData.length - 1].y)}</div>
+        `;
+      }
+
+      function renderHistorySummaries() {
+        const filters = getHistoryFilters();
+
+        const botRows = filterBotRows(getHistoryRowsMerged(), filters)
+          .filter(r => r._resultKey === 'W' || r._resultKey === 'L' || r._resultKey === 'P');
+
+        const manualRows = filterManualRows(getManualRowsMerged(), filters)
+          .filter(r => r._resultKey === 'W' || r._resultKey === 'L' || r._resultKey === 'P');
+
+        const botSummary = {
+          total: botRows.length,
+          wins: botRows.filter(r => r._resultKey === 'W').length,
+          losses: botRows.filter(r => r._resultKey === 'L').length,
+          pushes: botRows.filter(r => r._resultKey === 'P').length
+        };
+
+        const manualSummary = {
+          total: manualRows.length,
+          wins: manualRows.filter(r => r._resultKey === 'W').length,
+          losses: manualRows.filter(r => r._resultKey === 'L').length,
+          pushes: manualRows.filter(r => r._resultKey === 'P').length
+        };
+
+        document.getElementById('historyBotSummary').innerHTML = `
+          <div class="stat"><div class="label">Total apostas bot</div><div class="value">${botSummary.total}</div></div>
+          <div class="stat"><div class="label">Total win</div><div class="value">${botSummary.wins}</div></div>
+          <div class="stat"><div class="label">Total loss</div><div class="value">${botSummary.losses}</div></div>
+          <div class="stat"><div class="label">Total push</div><div class="value">${botSummary.pushes}</div></div>
+        `;
+
+        document.getElementById('historyManualSummary').innerHTML = `
+          <div class="stat"><div class="label">Total apostas manuais</div><div class="value">${manualSummary.total}</div></div>
+          <div class="stat"><div class="label">Total win</div><div class="value">${manualSummary.wins}</div></div>
+          <div class="stat"><div class="label">Total loss</div><div class="value">${manualSummary.losses}</div></div>
+          <div class="stat"><div class="label">Total push</div><div class="value">${manualSummary.pushes}</div></div>
         `;
       }
 
@@ -2561,13 +2659,16 @@
           }
 
           const cloud = data.state || {};
-          state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
+          state.bankrollRealInicial = num(cloud.bankrollRealInicial ?? cloud.bankrollInicial) ?? 1000;
+          state.bankrollSimInicial = num(cloud.bankrollSimInicial ?? cloud.bankrollInicial) ?? 1000;
           state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
           state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets : [];
           state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
 
           saveLocalState();
           hasPendingCloudChanges = false;
+          document.getElementById('bankrollRealInput').value = state.bankrollRealInicial;
+          document.getElementById('bankrollSimInput').value = state.bankrollSimInicial;
           rerenderAll(false);
           alert('Estado cloud carregado com sucesso.');
         } catch (e) {
@@ -2581,7 +2682,8 @@
           autoSaveInFlight = true;
 
           const payload = {
-            bankrollInicial: state.bankrollInicial,
+            bankrollRealInicial: state.bankrollRealInicial,
+            bankrollSimInicial: state.bankrollSimInicial,
             localEdits: state.localEdits,
             manualBets: state.manualBets,
             sessionStartDate: getSessionStartDate()
@@ -2693,15 +2795,19 @@
         renderFootball();
         renderBotHistoryOperational();
         syncQuickMarketButtons();
+        bindBotTableControls();
       }
 
       function rerenderHistoryOnly() {
+        renderHistorySummaries();
         renderBotHistoryOperational();
         renderClosedRealTable();
+        bindBotTableControls();
       }
 
       function rerenderManualOnly() {
         renderManualBets();
+        bindManualControls();
       }
 
       function rerenderAll(triggerAutoSave = true) {
@@ -2771,15 +2877,18 @@
             fetch(URLS.manual + '?t=' + Date.now())
           ]);
 
+          if (!dailyRes.ok) throw new Error('Falha ao carregar picks_hoje_simplificado.csv');
+          if (!historyRes.ok) throw new Error('Falha ao carregar picks_history.csv');
+
           const dailyText = await dailyRes.text();
           const historyText = await historyRes.text();
-          const nbaText = await nbaRes.text();
-          const manualText = await manualRes.text();
+          const nbaText = nbaRes.ok ? await nbaRes.text() : '';
+          const manualText = manualRes.ok ? await manualRes.text() : '';
 
           state.footballDaily = parseSemicolonCsv(dailyText);
           state.footballHistory = parseSemicolonCsv(historyText);
-          state.nba = parseSemicolonCsv(nbaText);
-          state.manualBetsRemote = parseSemicolonCsv(manualText);
+          state.nba = nbaText.trim() ? parseSemicolonCsv(nbaText) : [];
+          state.manualBetsRemote = manualText.trim() ? parseSemicolonCsv(manualText) : [];
           state.lastUpdated = new Date();
 
           hasPendingCloudChanges = false;
@@ -2791,7 +2900,10 @@
 
       document.getElementById('daySearch').addEventListener('input', rerenderDayOnly);
       document.getElementById('dayLeagueFilter').addEventListener('change', rerenderDayOnly);
-      document.getElementById('dayMarketFilter').addEventListener('change', rerenderDayOnly);
+      document.getElementById('dayMarketFilter').addEventListener('change', () => {
+        syncQuickMarketButtons();
+        rerenderDayOnly();
+      });
       document.getElementById('dayResultFilter').addEventListener('change', rerenderDayOnly);
       document.getElementById('dayExecutionFilter').addEventListener('change', rerenderDayOnly);
 
@@ -2807,22 +2919,35 @@
       document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
       document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
 
-      document.getElementById('bankrollInput').addEventListener('input', e => {
+      document.getElementById('bankrollRealInput').addEventListener('input', e => {
         const v = num(e.target.value);
-        state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+        state.bankrollRealInicial = v !== null && v >= 0 ? v : 0;
+        rerenderAll();
+      });
+
+      document.getElementById('bankrollSimInput').addEventListener('input', e => {
+        const v = num(e.target.value);
+        state.bankrollSimInicial = v !== null && v >= 0 ? v : 0;
         rerenderAll();
       });
 
       document.getElementById('resetLocalBtn').addEventListener('click', () => {
-        localStorage.removeItem(STORAGE_KEYS.bankroll);
+        localStorage.removeItem(STORAGE_KEYS.bankrollReal);
+        localStorage.removeItem(STORAGE_KEYS.bankrollSim);
         localStorage.removeItem(STORAGE_KEYS.picks);
+        localStorage.removeItem(STORAGE_KEYS.manual);
         localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
         localStorage.removeItem(STORAGE_KEYS.activeTab);
-        state.bankrollInicial = 1000;
+
+        state.bankrollRealInicial = 1000;
+        state.bankrollSimInicial = 1000;
         state.localEdits = {};
+        state.manualBets = [];
         state.sessionStartDate = todayIso();
         state.activeTab = 'tab-summary';
-        document.getElementById('bankrollInput').value = 1000;
+
+        document.getElementById('bankrollRealInput').value = 1000;
+        document.getElementById('bankrollSimInput').value = 1000;
         rerenderAll();
       });
 
@@ -2860,7 +2985,8 @@
       });
 
       loadLocalState();
-      document.getElementById('bankrollInput').value = state.bankrollInicial;
+      document.getElementById('bankrollRealInput').value = state.bankrollRealInicial;
+      document.getElementById('bankrollSimInput').value = state.bankrollSimInicial;
       bindTabButtons();
       bindQuickMarketButtons();
       setActiveTab(state.activeTab);
@@ -2869,4 +2995,4 @@
     </script>
   </div>
 </body>
-                </html>
+</html>
