@@ -2627,37 +2627,37 @@
       }
 
       function setActiveTab(tabId, skipScroll = false) {
-  state.activeTab = tabId;
-  saveLocalState();
+      state.activeTab = tabId;
+      saveLocalState();
 
-  document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
-  });
+      document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
+      });
 
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.classList.toggle('active', panel.id === tabId);
-  });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === tabId);
+      });
 
-  const top = document.getElementById('topSection');
-  const compactBar = document.getElementById('compactTopBar');
+      const top = document.getElementById('topSection');
+      const compactBar = document.getElementById('compactTopBar');
 
-  if (tabId === 'tab-summary') {
-    top.classList.remove('is-collapsed');
-    compactBar.classList.remove('active');
-  } else {
-    top.classList.add('is-collapsed');
-    compactBar.classList.add('active');
-  }
+      if (tabId === 'tab-summary') {
+        top.classList.remove('is-collapsed');
+        compactBar.classList.remove('active');
+      } else {
+        top.classList.add('is-collapsed');
+        compactBar.classList.add('active');
+      }
 
-  if (!skipScroll) {
-    const target = getTabScrollTarget(tabId);
-    if (target) {
-      setTimeout(() => {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 60);
+      if (!skipScroll) {
+        const target = getTabScrollTarget(tabId);
+        if (target) {
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        }
+      }
     }
-  }
-}
 
       function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
         const blob = new Blob([content], { type: mimeType });
