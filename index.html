@@ -29,6 +29,10 @@
 
     * { box-sizing: border-box; }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: Inter, system-ui, sans-serif;
@@ -55,15 +59,15 @@
     }
 
     .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .grid-3 {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .grid-4 {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .toolbar-grid {
@@ -182,6 +186,7 @@
 
     .tab-panel {
       display: none;
+      scroll-margin-top: 16px;
     }
 
     .tab-panel.active {
@@ -286,15 +291,6 @@
       font-size: 13px;
     }
 
-    .page-title {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
     .table-wrap {
       overflow: auto;
       max-width: 100%;
@@ -317,6 +313,33 @@
       color: var(--muted);
       font-size: 11px;
       font-weight: 700;
+    }
+
+    .panel-anchor {
+      scroll-margin-top: 18px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .card-head-compact {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .summary-pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     input, select {
@@ -431,10 +454,9 @@
         <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
       </div>
     </div>
-
-    <div id="tab-summary" class="tab-panel active">
+        <div id="tab-summary" class="tab-panel active panel-anchor">
       <div class="section-stack">
-        <div class="grid grid-3">
+        <div class="grid grid-3" id="summaryAnchor">
           <div class="card">
             <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
               <div>
@@ -491,7 +513,7 @@
           <div class="stat">
             <div class="label">Disponível real</div>
             <div class="value" id="availableBankrollTop">€—</div>
-            <div class="note">Banca real após abertas</div>
+            <div class="note">Banca real líquida</div>
           </div>
         </div>
 
@@ -499,7 +521,7 @@
           <div class="stat">
             <div class="label">Exposição aberta</div>
             <div class="value" id="openExposureTop">€—</div>
-            <div class="note">Stake real em aberto</div>
+            <div class="note">Stake real ainda por resolver</div>
           </div>
 
           <div class="stat">
@@ -513,7 +535,7 @@
           <div class="stat">
             <div class="label">ROI real</div>
             <div class="value" id="summaryRoiStat">—</div>
-            <div class="note">Fechadas reais</div>
+            <div class="note">Só fechadas reais</div>
           </div>
 
           <div class="stat">
@@ -525,13 +547,13 @@
           <div class="stat">
             <div class="label">Win rate</div>
             <div class="value" id="summaryWrStat">—</div>
-            <div class="note">Decisões reais</div>
+            <div class="note">Só decisões reais</div>
           </div>
 
           <div class="stat">
             <div class="label">Apostas fechadas</div>
             <div class="value" id="summaryResolvedCountStat">0</div>
-            <div class="note">Total resolvido real</div>
+            <div class="note">Nunca inclui pendentes</div>
           </div>
         </div>
 
@@ -557,14 +579,14 @@
           <div class="stat">
             <div class="label">Pendentes abertas</div>
             <div class="value" id="summaryPendingOpenStat">0</div>
-            <div class="note">Executadas sem resultado</div>
+            <div class="note">Só para risco, fora do cálculo do resumo</div>
           </div>
         </div>
 
         <div class="grid grid-2">
           <div class="card">
             <div class="label">Evolução da banca real</div>
-            <div class="note" style="margin-bottom:12px;">Baseada nas apostas reais fechadas.</div>
+            <div class="note" style="margin-bottom:12px;">Baseada apenas em fechadas reais.</div>
             <div class="chart-box">
               <div id="bankrollChartWrap"></div>
             </div>
@@ -572,7 +594,7 @@
 
           <div class="card">
             <div class="label">Resumo rápido</div>
-            <div class="note" style="margin-bottom:12px;">Sessão, risco, execução e comparação real vs simulação.</div>
+            <div class="note" style="margin-bottom:12px;">Leitura consolidada de real vs simulação.</div>
             <div id="summaryList" class="grid"></div>
           </div>
         </div>
@@ -581,12 +603,6 @@
           <div class="label">Centro de alertas</div>
           <div class="note" style="margin-bottom:12px;">Leitura consolidada do estado atual.</div>
           <div id="alertsCenter" class="grid"></div>
-        </div>
-
-        <div class="card">
-          <div class="label">Apostas em aberto</div>
-          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
-          <div id="openBetsWrap" class="grid"></div>
         </div>
 
         <div class="grid grid-3">
@@ -615,7 +631,7 @@
 
           <div class="card">
             <div class="label">Analytics por mercado</div>
-            <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
+            <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
             <div class="table-wrap" style="max-height:360px;">
               <table>
                 <thead>
@@ -689,31 +705,33 @@
 
           <div class="card">
             <div class="label">Notas operacionais</div>
-            <div class="note" style="margin-bottom:12px;">Leitura rápida do estado do dashboard.</div>
+            <div class="note" style="margin-bottom:12px;">Sem pendentes no resumo financeiro.</div>
             <div class="muted-box">
-              <div class="note">Este separador concentra banca real, banca simulação, ROI, lucro, alertas, abertas, analytics, streaks e gráfico.</div>
-              <div class="note">As operações de consulta detalhada ficam separadas nas tabs de dia, histórico e manuais.</div>
+              <div class="note">A tab de resumo usa apenas fechadas reais para lucro, ROI, WR e analytics.</div>
+              <div class="note">As pendentes influenciam apenas o risco, a exposição e os alertas operacionais.</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="tab-day" class="tab-panel">
+    <div id="tab-day" class="tab-panel panel-anchor">
       <div class="section-stack">
-        <div class="page-title">
-          <div>
-            <div class="label">Página 2</div>
-            <div class="value" style="font-size:28px;">Apostas do dia / pendentes</div>
-            <div class="note">Picks do dia, pendentes, stake recomendada, score e sinais por pick.</div>
+        <div class="card" id="dayMainAnchor">
+          <div class="card-head">
+            <div>
+              <div class="label">Apostas do dia</div>
+              <div class="value" style="font-size:28px;">Picks do dia (bot)</div>
+              <div class="note">Com stake recomendada, score e sinais por pick.</div>
+            </div>
+            <div class="summary-pill-row">
+              <span class="decision-badge info" id="dayCountBadge">0 picks</span>
+              <span class="decision-badge info" id="dayStakeBadge">Stake €0</span>
+              <span class="decision-badge info" id="dayEdgeBadge">Edge médio —</span>
+            </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="label">Filtros desta página</div>
-          <div class="note" style="margin-bottom:12px;">Sem filtro de data.</div>
-
-          <div class="toolbar-grid">
+          <div class="toolbar-grid" style="margin-bottom:14px;">
             <div>
               <label class="label" for="daySearch">Pesquisar</label>
               <input id="daySearch" type="text" placeholder="Jogo, liga ou mercado" />
@@ -754,7 +772,7 @@
             </div>
           </div>
 
-          <div class="market-quick-wrap" style="margin-top:14px;">
+          <div class="market-quick-wrap" style="margin-bottom:14px;">
             <span class="label">Filtro rápido:</span>
             <button type="button" class="market-chip active" data-day-market-quick="">Todos</button>
             <button type="button" class="market-chip" data-day-market-quick="O2.5">O2.5</button>
@@ -762,17 +780,6 @@
             <button type="button" class="market-chip" data-day-market-quick="O3.5">O3.5</button>
             <button type="button" class="market-chip" data-day-market-quick="O1.5">O1.5</button>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Apostas em aberto</div>
-          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
-          <div id="openBetsWrapDay" class="grid"></div>
-        </div>
-
-        <div class="card">
-          <div class="label">Picks do dia (bot)</div>
-          <div class="note" style="margin-bottom:12px;">Com stake recomendada, score e sinais por pick.</div>
 
           <div class="table-wrap">
             <table>
@@ -801,12 +808,19 @@
             </table>
           </div>
         </div>
+                <div class="card">
+          <div class="card-head-compact">
+            <div>
+              <div class="label">Pendentes do bot</div>
+              <div class="value" style="font-size:24px;">Histórico / pendentes do bot</div>
+              <div class="note">Aqui aparecem apenas apostas ainda por resolver.</div>
+            </div>
+            <div class="summary-pill-row">
+              <span class="decision-badge warn" id="dayPendingCountBadge">0 pendentes</span>
+            </div>
+          </div>
 
-        <div class="card">
-          <div class="label">Histórico / pendentes do bot</div>
-          <div class="note" style="margin-bottom:12px;">Inclui picks anteriores ainda úteis para análise e execução.</div>
-
-          <div class="table-wrap">
+          <div class="table-wrap" style="margin-top:12px;">
             <table>
               <thead>
                 <tr>
@@ -836,35 +850,35 @@
       </div>
     </div>
 
-    <div id="tab-history" class="tab-panel">
+    <div id="tab-history" class="tab-panel panel-anchor">
       <div class="section-stack">
-        <div class="page-title">
-          <div>
-            <div class="label">Página 3</div>
-            <div class="value" style="font-size:28px;">Histórico (fechadas)</div>
-            <div class="note">Consulta operacional do histórico do bot e das fechadas reais.</div>
-          </div>
-        </div>
-
-        <div class="grid grid-2">
+        <div class="grid grid-2" id="historyMainAnchor">
           <div class="card">
             <div class="label">Resumo Bot</div>
-            <div class="note" style="margin-bottom:12px;">Fechadas do bot com os filtros atuais.</div>
+            <div class="note" style="margin-bottom:12px;">Aqui contam apenas apostas do bot já fechadas.</div>
             <div id="historyBotSummary" class="grid grid-4"></div>
           </div>
 
           <div class="card">
             <div class="label">Resumo Manuais</div>
-            <div class="note" style="margin-bottom:12px;">Fechadas manuais com os filtros atuais.</div>
+            <div class="note" style="margin-bottom:12px;">Aqui contam apenas apostas manuais já fechadas.</div>
             <div id="historyManualSummary" class="grid grid-4"></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="label">Filtros desta página</div>
-          <div class="note" style="margin-bottom:12px;">Inclui Execução.</div>
+          <div class="card-head">
+            <div>
+              <div class="label">Histórico do bot</div>
+              <div class="value" style="font-size:28px;">Histórico (fechadas)</div>
+              <div class="note">Aqui aparecem apenas W / L / P.</div>
+            </div>
+            <div class="summary-pill-row">
+              <span class="decision-badge info" id="historyClosedCountBadge">0 fechadas</span>
+            </div>
+          </div>
 
-          <div class="toolbar-grid">
+          <div class="toolbar-grid" style="margin-bottom:14px;">
             <div>
               <label class="label" for="historySearch">Pesquisar</label>
               <input id="historySearch" type="text" placeholder="Jogo, liga ou mercado" />
@@ -907,7 +921,6 @@
               <label class="label" for="historyResultFilter">Resultado</label>
               <select id="historyResultFilter">
                 <option value="">Todos</option>
-                <option value="pending">Pendentes</option>
                 <option value="W">Win</option>
                 <option value="L">Loss</option>
                 <option value="P">Push</option>
@@ -923,11 +936,6 @@
               </select>
             </div>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Histórico operacional do bot</div>
-          <div class="note" style="margin-bottom:12px;">Mantém os mesmos campos editáveis da versão anterior.</div>
 
           <div class="table-wrap">
             <table>
@@ -959,7 +967,7 @@
 
         <div class="card">
           <div class="label">Fechadas reais filtradas</div>
-          <div class="note" style="margin-bottom:12px;">Bot executado + manuais.</div>
+          <div class="note" style="margin-bottom:12px;">Só bot executado + manuais fechadas. Nunca inclui pendentes.</div>
 
           <div class="table-wrap">
             <table>
@@ -983,17 +991,9 @@
       </div>
     </div>
 
-    <div id="tab-manual" class="tab-panel">
+    <div id="tab-manual" class="tab-panel panel-anchor">
       <div class="section-stack">
-        <div class="page-title">
-          <div>
-            <div class="label">Página 4</div>
-            <div class="value" style="font-size:28px;">Apostas manuais</div>
-            <div class="note">Criação, listagem e gestão de apostas manuais locais, com leitura adicional das remotas.</div>
-          </div>
-        </div>
-
-        <div class="card">
+        <div class="card" id="manualMainAnchor">
           <div class="label">Bancas iniciais</div>
           <div class="note" style="margin-bottom:12px;">Separadas para execução real e simulação do modelo.</div>
 
@@ -1130,8 +1130,7 @@
         lastUpdated: null,
         activeTab: 'tab-summary'
       };
-
-      function parseSemicolonCsv(text) {
+            function parseSemicolonCsv(text) {
         const trimmed = String(text || '').trim();
         if (!trimmed) return [];
         const lines = trimmed.split(/\r?\n/).filter(Boolean);
@@ -1469,17 +1468,16 @@
           return String(a.jogo || '').localeCompare(String(b.jogo || ''), 'pt');
         });
       }
-
-      function getResolvedHistory() {
+            function getResolvedHistory() {
         return getHistoryRowsMerged().filter(r => ['W', 'L', 'P'].includes(r._resultKey));
       }
 
       function getRealResolvedBotHistory() {
-        return getHistoryRowsMerged().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
+        return getHistoryRowsMerged().filter(r => r._apostadaBool && r._lucroRealLocal !== null && ['W', 'L', 'P'].includes(r._resultKey));
       }
 
       function getResolvedManualBets() {
-        return getManualRowsMerged().filter(b => b._lucro !== null);
+        return getManualRowsMerged().filter(b => b._lucro !== null && ['W', 'L', 'P'].includes(b._resultKey));
       }
 
       function getExecutionStats() {
@@ -1799,20 +1797,29 @@
         return true;
       }
 
-      function filterBotRows(rows, filters) {
+      function filterBotRows(rows, filters, mode = 'all') {
         return rows.filter(r => {
           const okSearch = !filters.q || r._searchText.includes(filters.q);
-          const okSource = !filters.source || filters.source === 'bot';
           const okLeague = !filters.league || r['Liga'] === filters.league;
           const okMarket = !filters.market || r['Mercado'] === filters.market;
-          const okResult = !filters.result || r._resultKey === filters.result;
           const okExecution =
             !filters.execution ||
             (filters.execution === 'executed' && r._apostadaBool) ||
             (filters.execution === 'not_executed' && !r._apostadaBool);
           const okDate = matchDateFilter(r['Data'], filters.date);
 
-          return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+          let okResult = true;
+
+          if (mode === 'pending') {
+            okResult = r._resultKey === 'pending';
+          } else if (mode === 'closed') {
+            okResult = ['W', 'L', 'P'].includes(r._resultKey);
+            if (filters.result) okResult = okResult && r._resultKey === filters.result;
+          } else {
+            okResult = !filters.result || r._resultKey === filters.result;
+          }
+
+          return okSearch && okLeague && okMarket && okExecution && okDate && okResult;
         });
       }
 
@@ -1831,7 +1838,7 @@
       function getFilteredRealClosedRows(filters) {
         const activeFilters = filters || getSummaryFilters();
 
-        const botClosed = filterBotRows(getHistoryRowsMerged(), activeFilters)
+        const botClosed = filterBotRows(getHistoryRowsMerged(), activeFilters, 'closed')
           .filter(r => r._apostadaBool && r._lucroRealLocal !== null)
           .map(r => ({
             source: 'bot',
@@ -1847,7 +1854,7 @@
           }));
 
         const manualClosed = filterManualRows(getManualRowsMerged(), activeFilters)
-          .filter(r => r._lucro !== null)
+          .filter(r => ['W', 'L', 'P'].includes(r._resultKey))
           .map(r => ({
             source: 'manual',
             sourceLabel: r.isRemote ? 'Manual CSV' : 'Manual Local',
@@ -1867,8 +1874,7 @@
           return ad - bd;
         });
       }
-
-      function fillFilters() {
+            function fillFilters() {
         const rows = [
           ...getHistoryRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
           ...getDailyRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
@@ -2023,40 +2029,6 @@
         `).join('');
       }
 
-      function buildOpenBetsHtml(rows) {
-        if (!rows.length) {
-          return '<div class="stat"><div class="note">Sem apostas em aberto com os filtros atuais.</div></div>';
-        }
-
-        return rows.map(r => {
-          const potencial = (r._stakeRealNum !== null && r._oddRealNum !== null && r._oddRealNum > 1.01)
-            ? r._stakeRealNum * (r._oddRealNum - 1)
-            : null;
-
-          return `
-            <div class="stat">
-              <div class="label">${escapeHtml(r['Liga'] || '—')} • ${escapeHtml(formatDatePt(r['Data']))}</div>
-              <div class="value" style="font-size:18px;">${escapeHtml(r['Jogo'] || '—')}</div>
-              <div class="note">${escapeHtml(r['Mercado'] || '—')}</div>
-              <div class="note">Stake real: €${fmt(r._stakeRealNum)} • Odd real: ${fmt(r._oddRealNum)} • Potencial: €${fmt(potencial)}</div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      function renderOpenBets() {
-        const summaryRows = sortBotRowsForDisplay(
-          filterBotRows(getHistoryRowsMerged(), getSummaryFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
-        );
-
-        const dayRows = sortBotRowsForDisplay(
-          filterBotRows(getHistoryRowsMerged(), getDayFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
-        );
-
-        document.getElementById('openBetsWrap').innerHTML = buildOpenBetsHtml(summaryRows);
-        document.getElementById('openBetsWrapDay').innerHTML = buildOpenBetsHtml(dayRows);
-      }
-
       function buildAnalytics(rows, field) {
         const map = new Map();
 
@@ -2176,131 +2148,6 @@
         renderStreaks();
       }
 
-      function formatPickSignalHtml(row) {
-        const signal = getPrimaryPickSignal(row);
-        return {
-          recStake: `
-            <div>
-              <div><strong>€${fmt(signal.recStake.value)}</strong></div>
-              <div class="note">${pct(signal.recStake.pctBankroll)} da banca</div>
-            </div>
-          `,
-          score: `<span class="mini ${signal.scoreBadge.cls}">${escapeHtml(signal.scoreBadge.label)}</span>`,
-          alerts: signal.alerts.map(a => `<span class="mini ${a.level === 'good' ? 'good' : a.level === 'bad' ? 'bad' : a.level === 'warn' ? 'warn' : 'info'}">${escapeHtml(a.text)}</span>`).join(' ')
-        };
-      }
-
-      function buildBotRowHtml(rows) {
-        return rows.map(r => {
-          const checked = r._apostadaBool ? 'checked' : '';
-          const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
-          const signal = formatPickSignalHtml(r);
-
-          return `
-            <tr>
-              <td><span class="mini info">Bot</span></td>
-              <td>${escapeHtml(r['Data'] || '—')}</td>
-              <td>${escapeHtml(r['Liga'] || '—')}</td>
-              <td>${escapeHtml(r['Jogo'] || '—')}</td>
-              <td>${escapeHtml(r['Mercado'] || '—')}</td>
-              <td>${r._oddModeloNum === null ? '—' : fmt(r._oddModeloNum)}</td>
-              <td>${r._stakeModeloNum === null ? '—' : `€${fmt(r._stakeModeloNum)}`}</td>
-              <td>${signal.recStake}</td>
-              <td>${signal.score}</td>
-              <td>${signal.alerts}</td>
-              <td>${r._apostadaBool ? '<span class="mini good">Sim</span>' : '<span class="mini warn">Não</span>'}</td>
-              <td>
-                <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
-              </td>
-              <td>
-                <input class="js-odd-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.OddReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
-              </td>
-              <td>
-                <input class="js-stake-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.StakeReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
-              </td>
-              <td>
-                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;width:auto;">
-                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
-                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
-                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
-                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
-                </select>
-              </td>
-              <td ${profitClass(r._lucroModeloLocal)}>${r._lucroModeloLocal === null ? '—' : `€${fmt(r._lucroModeloLocal)}`}</td>
-              <td ${profitClass(r._lucroRealLocal)}>${r._lucroRealLocal === null ? '—' : `€${fmt(r._lucroRealLocal)}`}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      function renderFootball() {
-        const filters = getDayFilters();
-        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
-        document.getElementById('footballRows').innerHTML = rows.length
-          ? buildBotRowHtml(rows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
-      }
-
-      function renderBotHistoryOperational() {
-        const dayRows = sortBotRowsForDisplay(filterBotRows(getHistoryRowsMerged(), getDayFilters()));
-        const historyRows = sortBotRowsForDisplay(filterBotRows(getHistoryRowsMerged(), getHistoryFilters()));
-
-        document.getElementById('historyRowsDay').innerHTML = dayRows.length
-          ? buildBotRowHtml(dayRows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
-
-        document.getElementById('historyRows').innerHTML = historyRows.length
-          ? buildBotRowHtml(historyRows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
-      }
-
-      function renderClosedRealTable() {
-        const rows = getFilteredRealClosedRows(getHistoryFilters());
-        document.getElementById('closedRealRows').innerHTML = rows.length
-          ? rows.map(r => `
-              <tr>
-                <td>${escapeHtml(r.sourceLabel || '—')}</td>
-                <td>${escapeHtml(r.date || '—')}</td>
-                <td>${escapeHtml(r.league || '—')}</td>
-                <td>${escapeHtml(r.game || '—')}</td>
-                <td>${escapeHtml(r.market || '—')}</td>
-                <td>${resultBadge(r.result)}</td>
-                <td>${r.odd === null ? '—' : fmt(r.odd)}</td>
-                <td>€${fmt(r.stake)}</td>
-                <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
-              </tr>
-            `).join('')
-          : '<tr><td colspan="9"><div class="note">Sem fechadas reais com os filtros atuais.</div></td></tr>';
-      }
-
-      function renderManualBets() {
-        const rows = sortManualRowsForDisplay(getManualRowsMerged());
-
-        document.getElementById('manualRows').innerHTML = rows.length
-          ? rows.map(b => `
-              <tr>
-                <td>
-                  <span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span>
-                </td>
-                <td>${escapeHtml(b.data || '—')}</td>
-                <td>${escapeHtml(b.liga || '—')}</td>
-                <td>${escapeHtml(b.jogo || '—')}</td>
-                <td>${escapeHtml(b.mercado || '—')}</td>
-                <td>${escapeHtml(b.odd || '—')}</td>
-                <td>${escapeHtml(b.stake || '—')}</td>
-                <td>${resultBadge(b.resultado)}</td>
-                <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
-                <td>${escapeHtml(b.notas || '—')}</td>
-                <td>
-                  ${b.isLocal
-                    ? `<button class="js-delete-manual" data-id="${escapeHtml(b.id)}" style="padding:8px 10px;width:auto;">Remover</button>`
-                    : `<span class="manual-remote-note">CSV</span>`}
-                </td>
-              </tr>
-            `).join('')
-          : '<tr><td colspan="11"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
-      }
-
       function renderNba() {
         document.getElementById('nbaRows').innerHTML = state.nba.length
           ? state.nba.map(r => `
@@ -2331,7 +2178,7 @@
           `Sessão simulação: lucro €${fmt(m.sessao.modelProfit)} • ROI ${pct(m.sessao.modelRoi)} • WR ${pct(m.sessao.modelWr)}`,
           `Geral real: lucro €${fmt(m.geral.realProfit)} • ROI ${pct(m.geral.realRoi)} • WR ${pct(m.geral.realWr)}`,
           `Geral simulação: lucro €${fmt(m.geral.modelProfit)} • ROI ${pct(m.geral.modelRoi)} • WR ${pct(m.geral.modelWr)}`,
-          `Abertas: ${r.openCount} • stake exposta €${fmt(r.stakeOpen)} • potencial €${fmt(r.potencialLucro)}`
+          `Pendentes abertas: ${r.openCount} • stake exposta €${fmt(r.stakeOpen)} • potencial €${fmt(r.potencialLucro)}`
         ];
 
         document.getElementById('summaryList').innerHTML = items.map(t => `
@@ -2419,11 +2266,9 @@
       function renderHistorySummaries() {
         const filters = getHistoryFilters();
 
-        const botRows = filterBotRows(getHistoryRowsMerged(), filters)
-          .filter(r => r._resultKey === 'W' || r._resultKey === 'L' || r._resultKey === 'P');
-
+        const botRows = filterBotRows(getHistoryRowsMerged(), filters, 'closed');
         const manualRows = filterManualRows(getManualRowsMerged(), filters)
-          .filter(r => r._resultKey === 'W' || r._resultKey === 'L' || r._resultKey === 'P');
+          .filter(r => ['W', 'L', 'P'].includes(r._resultKey));
 
         const botSummary = {
           total: botRows.length,
@@ -2452,6 +2297,149 @@
           <div class="stat"><div class="label">Total loss</div><div class="value">${manualSummary.losses}</div></div>
           <div class="stat"><div class="label">Total push</div><div class="value">${manualSummary.pushes}</div></div>
         `;
+      }
+
+      function formatPickSignalHtml(row) {
+        const signal = getPrimaryPickSignal(row);
+        return {
+          recStake: `
+            <div>
+              <div><strong>€${fmt(signal.recStake.value)}</strong></div>
+              <div class="note">${pct(signal.recStake.pctBankroll)} da banca</div>
+            </div>
+          `,
+          score: `<span class="mini ${signal.scoreBadge.cls}">${escapeHtml(signal.scoreBadge.label)}</span>`,
+          alerts: signal.alerts.map(a => `<span class="mini ${a.level === 'good' ? 'good' : a.level === 'bad' ? 'bad' : a.level === 'warn' ? 'warn' : 'info'}">${escapeHtml(a.text)}</span>`).join(' ')
+        };
+      }
+
+      function buildBotRowHtml(rows) {
+        return rows.map(r => {
+          const checked = r._apostadaBool ? 'checked' : '';
+          const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
+          const signal = formatPickSignalHtml(r);
+
+          return `
+            <tr>
+              <td><span class="mini info">Bot</span></td>
+              <td>${escapeHtml(r['Data'] || '—')}</td>
+              <td>${escapeHtml(r['Liga'] || '—')}</td>
+              <td>${escapeHtml(r['Jogo'] || '—')}</td>
+              <td>${escapeHtml(r['Mercado'] || '—')}</td>
+              <td>${r._oddModeloNum === null ? '—' : fmt(r._oddModeloNum)}</td>
+              <td>${r._stakeModeloNum === null ? '—' : `€${fmt(r._stakeModeloNum)}`}</td>
+              <td>${signal.recStake}</td>
+              <td>${signal.score}</td>
+              <td>${signal.alerts}</td>
+              <td>${r._apostadaBool ? '<span class="mini good">Sim</span>' : '<span class="mini warn">Não</span>'}</td>
+              <td>
+                <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
+              </td>
+              <td>
+                <input class="js-odd-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.OddReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
+              </td>
+              <td>
+                <input class="js-stake-real" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.StakeReal || '')}" style="width:86px;padding:8px;border:1px solid var(--line);border-radius:10px;" />
+              </td>
+              <td>
+                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;width:auto;">
+                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
+                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
+                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
+                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
+                </select>
+              </td>
+              <td ${profitClass(r._lucroModeloLocal)}>${r._lucroModeloLocal === null ? '—' : `€${fmt(r._lucroModeloLocal)}`}</td>
+              <td ${profitClass(r._lucroRealLocal)}>${r._lucroRealLocal === null ? '—' : `€${fmt(r._lucroRealLocal)}`}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function renderFootball() {
+        const filters = getDayFilters();
+        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters, 'all'));
+
+        const validEdges = rows.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const validStakes = rows.map(r => num(r['Stake€'])).filter(v => v !== null);
+        const avgEdge = validEdges.length ? sum(validEdges) / validEdges.length : null;
+        const totalStake = sum(validStakes);
+
+        document.getElementById('dayCountBadge').textContent = `${rows.length} pick${rows.length === 1 ? '' : 's'}`;
+        document.getElementById('dayStakeBadge').textContent = `Stake €${fmt(totalStake)}`;
+        document.getElementById('dayEdgeBadge').textContent = avgEdge === null ? 'Edge médio —' : `Edge médio ${fmt(avgEdge)}%`;
+
+        document.getElementById('footballRows').innerHTML = rows.length
+          ? buildBotRowHtml(rows)
+          : '<tr><td colspan="17"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderBotHistoryOperational() {
+        const dayRows = sortBotRowsForDisplay(
+          filterBotRows(getHistoryRowsMerged(), getDayFilters(), 'pending')
+        );
+
+        const historyRows = sortBotRowsForDisplay(
+          filterBotRows(getHistoryRowsMerged(), getHistoryFilters(), 'closed')
+        );
+
+        document.getElementById('dayPendingCountBadge').textContent = `${dayRows.length} pendente${dayRows.length === 1 ? '' : 's'}`;
+        document.getElementById('historyClosedCountBadge').textContent = `${historyRows.length} fechada${historyRows.length === 1 ? '' : 's'}`;
+
+        document.getElementById('historyRowsDay').innerHTML = dayRows.length
+          ? buildBotRowHtml(dayRows)
+          : '<tr><td colspan="17"><div class="note">Sem pendentes do bot com os filtros atuais.</div></td></tr>';
+
+        document.getElementById('historyRows').innerHTML = historyRows.length
+          ? buildBotRowHtml(historyRows)
+          : '<tr><td colspan="17"><div class="note">Nenhuma fechada do histórico encontrada com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderClosedRealTable() {
+        const rows = getFilteredRealClosedRows(getHistoryFilters());
+        document.getElementById('closedRealRows').innerHTML = rows.length
+          ? rows.map(r => `
+              <tr>
+                <td>${escapeHtml(r.sourceLabel || '—')}</td>
+                <td>${escapeHtml(r.date || '—')}</td>
+                <td>${escapeHtml(r.league || '—')}</td>
+                <td>${escapeHtml(r.game || '—')}</td>
+                <td>${escapeHtml(r.market || '—')}</td>
+                <td>${resultBadge(r.result)}</td>
+                <td>${r.odd === null ? '—' : fmt(r.odd)}</td>
+                <td>€${fmt(r.stake)}</td>
+                <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="9"><div class="note">Sem fechadas reais com os filtros atuais.</div></td></tr>';
+      }
+
+      function renderManualBets() {
+        const rows = sortManualRowsForDisplay(getManualRowsMerged());
+
+        document.getElementById('manualRows').innerHTML = rows.length
+          ? rows.map(b => `
+              <tr>
+                <td>
+                  <span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span>
+                </td>
+                <td>${escapeHtml(b.data || '—')}</td>
+                <td>${escapeHtml(b.liga || '—')}</td>
+                <td>${escapeHtml(b.jogo || '—')}</td>
+                <td>${escapeHtml(b.mercado || '—')}</td>
+                <td>${escapeHtml(b.odd || '—')}</td>
+                <td>${escapeHtml(b.stake || '—')}</td>
+                <td>${resultBadge(b.resultado)}</td>
+                <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
+                <td>${escapeHtml(b.notas || '—')}</td>
+                <td>
+                  ${b.isLocal
+                    ? `<button class="js-delete-manual" data-id="${escapeHtml(b.id)}" style="padding:8px 10px;width:auto;">Remover</button>`
+                    : `<span class="manual-remote-note">CSV</span>`}
+                </td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="11"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
       }
 
       function bindBotTableControls() {
@@ -2553,12 +2541,22 @@
           btn.addEventListener('click', () => {
             const target = btn.dataset.tabTarget;
             if (!target) return;
-            setActiveTab(target);
+            setActiveTab(target, false);
           });
         });
       }
 
-      function setActiveTab(tabId) {
+      function getTabScrollTarget(tabId) {
+        const map = {
+          'tab-summary': 'summaryAnchor',
+          'tab-day': 'dayMainAnchor',
+          'tab-history': 'historyMainAnchor',
+          'tab-manual': 'manualMainAnchor'
+        };
+        return document.getElementById(map[tabId] || tabId);
+      }
+
+      function setActiveTab(tabId, skipScroll = false) {
         state.activeTab = tabId;
         saveLocalState();
 
@@ -2569,6 +2567,15 @@
         document.querySelectorAll('.tab-panel').forEach(panel => {
           panel.classList.toggle('active', panel.id === tabId);
         });
+
+        if (!skipScroll) {
+          const target = getTabScrollTarget(tabId);
+          if (target) {
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
+          }
+        }
       }
 
       function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
@@ -2783,7 +2790,6 @@
         renderTopDecisionBlock();
         renderSummaryHeadlineStats();
         renderAlertsCenter();
-        renderOpenBets();
         renderAnalytics();
         renderNba();
         renderSummary();
@@ -2791,7 +2797,6 @@
       }
 
       function rerenderDayOnly() {
-        renderOpenBets();
         renderFootball();
         renderBotHistoryOperational();
         syncQuickMarketButtons();
@@ -2823,7 +2828,7 @@
         bindQuickMarketButtons();
         updateApostasButton();
         updateApostasTooltip();
-        setActiveTab(state.activeTab);
+        setActiveTab(state.activeTab, true);
 
         if (triggerAutoSave) markDirty();
       }
@@ -2864,7 +2869,7 @@
         document.getElementById('manualResultado').value = '';
         document.getElementById('manualNotas').value = '';
 
-        setActiveTab('tab-manual');
+        setActiveTab('tab-manual', false);
         rerenderAll();
       }
 
@@ -2989,7 +2994,7 @@
       document.getElementById('bankrollSimInput').value = state.bankrollSimInicial;
       bindTabButtons();
       bindQuickMarketButtons();
-      setActiveTab(state.activeTab);
+      setActiveTab(state.activeTab, true);
       loadData();
       setInterval(loadData, 60000);
     </script>
