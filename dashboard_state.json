@@ -378,8 +378,26 @@
       "oddReal": "1.67",
       "stakeReal": "7",
       "resultadoManual": ""
+    },
+    "2026-04-10|Serie B|Frosinone vs Palermo|O2.5": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "6",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Super Lig|Beşiktaş vs Antalyaspor|BTTS": {
+      "apostada": true,
+      "oddReal": "1.94",
+      "stakeReal": "8",
+      "resultadoManual": ""
+    },
+    "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
+      "apostada": true,
+      "oddReal": "1.65",
+      "stakeReal": "5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-08T11:43:24.815212+00:00"
+  "updatedAt": "2026-04-08T11:43:30.734294+00:00"
 }
