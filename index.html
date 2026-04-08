@@ -399,11 +399,83 @@
         text-align: center;
       }
     }
+ .top-collapsible {
+  overflow: hidden;
+  max-height: 520px;
+  opacity: 1;
+  transition: max-height 0.28s ease, opacity 0.22s ease, margin 0.22s ease, padding 0.22s ease;
+}
+
+.top-collapsible.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.compact-top-bar {
+  display: none;
+  margin-bottom: 12px;
+}
+
+.compact-top-bar.active {
+  display: block;
+}
+
+.compact-top-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.compact-top-title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.compact-top-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .compact-top-inner {
+    align-items: stretch;
+  }
+
+  .compact-top-actions {
+    width: 100%;
+  }
+
+  .compact-top-actions > * {
+    width: 100%;
+  }
+} 
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="sticky-tabs">
+    <div id="compactTopBar" class="compact-top-bar">
+  <div class="card">
+    <div class="compact-top-inner">
+      <div>
+        <div class="label">Projeto Apostas Bot</div>
+        <div class="compact-top-title">Dashboard GitHub Pages</div>
+      </div>
+
+      <div class="compact-top-actions">
+        <button type="button" id="expandTopBtn">Mostrar topo</button>
+        <button type="button" id="compactRefreshBtn">Atualizar agora</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="sticky-tabs top-collapsible" id="topSection">
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
           <div>
@@ -777,8 +849,6 @@
             <button type="button" class="market-chip active" data-day-market-quick="">Todos</button>
             <button type="button" class="market-chip" data-day-market-quick="O2.5">O2.5</button>
             <button type="button" class="market-chip" data-day-market-quick="BTTS">BTTS</button>
-            <button type="button" class="market-chip" data-day-market-quick="O3.5">O3.5</button>
-            <button type="button" class="market-chip" data-day-market-quick="O1.5">O1.5</button>
           </div>
 
           <div class="table-wrap">
@@ -1798,30 +1868,30 @@
       }
 
       function filterBotRows(rows, filters, mode = 'all') {
-        return rows.filter(r => {
-          const okSearch = !filters.q || r._searchText.includes(filters.q);
-          const okLeague = !filters.league || r['Liga'] === filters.league;
-          const okMarket = !filters.market || r['Mercado'] === filters.market;
-          const okExecution =
-            !filters.execution ||
-            (filters.execution === 'executed' && r._apostadaBool) ||
-            (filters.execution === 'not_executed' && !r._apostadaBool);
-          const okDate = matchDateFilter(r['Data'], filters.date);
+  return rows.filter(r => {
+    const okSearch = !filters.q || r._searchText.includes(filters.q);
+    const okLeague = !filters.league || r['Liga'] === filters.league;
+    const okMarket = !filters.market || r['Mercado'] === filters.market;
+    const okExecution =
+      !filters.execution ||
+      (filters.execution === 'executed' && r._apostadaBool) ||
+      (filters.execution === 'not_executed' && !r._apostadaBool);
+    const okDate = matchDateFilter(r['Data'], filters.date);
 
-          let okResult = true;
+    let okResult = true;
 
-          if (mode === 'pending') {
-            okResult = r._resultKey === 'pending';
-          } else if (mode === 'closed') {
-            okResult = ['W', 'L', 'P'].includes(r._resultKey);
-            if (filters.result) okResult = okResult && r._resultKey === filters.result;
-          } else {
-            okResult = !filters.result || r._resultKey === filters.result;
-          }
+    if (mode === 'pending') {
+      okResult = r._resultKey === 'pending';
+    } else if (mode === 'closed') {
+      okResult = ['W', 'L', 'P'].includes(r._resultKey);
+      if (filters.result) okResult = okResult && r._resultKey === filters.result;
+    } else {
+      okResult = !filters.result || r._resultKey === filters.result;
+    }
 
-          return okSearch && okLeague && okMarket && okExecution && okDate && okResult;
-        });
-      }
+    return okSearch && okLeague && okMarket && okExecution && okDate && okResult;
+  });
+}
 
       function filterManualRows(rows, filters) {
         return rows.filter(r => {
@@ -2557,26 +2627,37 @@
       }
 
       function setActiveTab(tabId, skipScroll = false) {
-        state.activeTab = tabId;
-        saveLocalState();
+  state.activeTab = tabId;
+  saveLocalState();
 
-        document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
-        });
+  document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
+  });
 
-        document.querySelectorAll('.tab-panel').forEach(panel => {
-          panel.classList.toggle('active', panel.id === tabId);
-        });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === tabId);
+  });
 
-        if (!skipScroll) {
-          const target = getTabScrollTarget(tabId);
-          if (target) {
-            setTimeout(() => {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 60);
-          }
-        }
-      }
+  const top = document.getElementById('topSection');
+  const compactBar = document.getElementById('compactTopBar');
+
+  if (tabId === 'tab-summary') {
+    top.classList.remove('is-collapsed');
+    compactBar.classList.remove('active');
+  } else {
+    top.classList.add('is-collapsed');
+    compactBar.classList.add('active');
+  }
+
+  if (!skipScroll) {
+    const target = getTabScrollTarget(tabId);
+    if (target) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    }
+  }
+}
 
       function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
         const blob = new Blob([content], { type: mimeType });
@@ -2921,6 +3002,19 @@
       document.getElementById('historyExecutionFilter').addEventListener('change', rerenderHistoryOnly);
 
       document.getElementById('refreshBtn').addEventListener('click', loadData);
+      document.getElementById('compactRefreshBtn').addEventListener('click', loadData);
+
+      document.getElementById('expandTopBtn').addEventListener('click', () => {
+        const top = document.getElementById('topSection');
+        const compactBar = document.getElementById('compactTopBar');
+
+        top.classList.remove('is-collapsed');
+        compactBar.classList.remove('active');
+ 
+        setTimeout(() => {
+        top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
+      });
       document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
       document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
 
