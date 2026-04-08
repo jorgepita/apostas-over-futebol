@@ -435,7 +435,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
                 "lam_t_min": 1.70,
                 "odd_min": 1.42,
                 "odd_max": 2.90,
-                "edge_min_quality": -0.07,
+                "edge_min_quality": -0.03,
             }
 
         if market == "BTTS":
