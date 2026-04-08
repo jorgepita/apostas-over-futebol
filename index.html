@@ -54,6 +54,10 @@
       gap: 12px;
     }
 
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
     .grid-3 {
       grid-template-columns: repeat(3, 1fr);
     }
@@ -91,6 +95,7 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 800;
+      white-space: nowrap;
     }
 
     .good { background: var(--ok-bg); color: var(--ok); }
@@ -107,11 +112,15 @@
       padding: 10px;
       border-top: 1px solid var(--line);
       font-size: 13px;
+      vertical-align: top;
     }
 
     th {
       text-align: left;
       background: #fafafa;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
     .mini {
@@ -119,9 +128,67 @@
       font-weight: 700;
       padding: 4px 6px;
       border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 2px 2px 2px 0;
     }
 
-        .tooltip-wrap {
+    button,
+    a.button-link,
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: 0.15s ease;
+    }
+
+    button:hover,
+    a.button-link:hover,
+    .tab-btn:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .section-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .tooltip-wrap {
       position: relative;
       display: inline-flex;
       align-items: center;
@@ -164,8 +231,7 @@
       font-weight: 800;
     }
 
-        .market-quick-wrap {
-      margin-top: 14px;
+    .market-quick-wrap {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
@@ -188,483 +254,698 @@
       color: #ffffff;
       border-color: var(--accent);
     }
-    
+
+    .chart-box {
+      width: 100%;
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      padding: 12px;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 260px;
+      display: block;
+    }
+
+    .chart-empty {
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .page-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-width: 100%;
+    }
+
+    .sticky-tabs {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      padding-bottom: 12px;
+    }
+
+    .divider-note {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .muted-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .manual-remote-note {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    input, select {
+      font: inherit;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-4,
+      .toolbar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 900px) {
-      .grid-3, .grid-4 {
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .toolbar-grid {
         grid-template-columns: 1fr;
+      }
+
+      .wrap {
+        padding: 14px;
+      }
+
+      .value {
+        font-size: 20px;
       }
     }
   </style>
 </head>
-  <body>
+<body>
   <div class="wrap">
-    <div class="card" style="margin-bottom:16px;">
-      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-        <div>
-          <div class="label">Projeto Apostas Bot</div>
-          <div class="value" style="font-size:30px;">Dashboard GitHub Pages</div>
-          <div class="note">Modelo vs execução real, com modo decisão, alertas automáticos e stake dinâmica.</div>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <button id="refreshBtn">Atualizar agora</button>
-          <div class="tooltip-wrap">
-  <a href="apostas.html" id="btnApostas">Apostas do dia</a>
-  <div class="tooltip-box" id="btnApostasTooltip">
-    <div class="tooltip-title">Resumo das picks do dia</div>
-    <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
-    <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
-    <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
-    <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
-  </div>
-</div>
-          <button id="loadCloudBtn">Carregar cloud</button>
-          <button id="saveCloudBtn">Guardar cloud</button>
-          <button id="resetLocalBtn">Limpar controlos locais</button>
-          <button id="clearManualBtn">Apagar manuais</button>
-          <button id="exportManualBtn">Exportar manuais</button>
-          <button id="importManualBtn">Importar manuais</button>
-          <button id="exportRealCsvBtn">Exportar CSV real</button>
-          <a href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
-        </div>
-      </div>
-
-      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
-        <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
-      </div>
-
-      <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
-    </div>
-
-    <div class="grid grid-3" style="margin-bottom:16px;">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-          <div>
-            <div class="label">Modo decisão</div>
-            <div class="value" id="decisionModeValue">A analisar…</div>
-          </div>
-          <span class="decision-badge info" id="decisionBadge">Neutro</span>
-        </div>
-        <div class="note" id="decisionModeNote" style="margin-top:10px;">A aguardar cálculo do estado atual.</div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-          <div>
-            <div class="label">Alertas automáticos</div>
-            <div class="value" id="autoAlertsValue">0 ativos</div>
-          </div>
-          <span class="decision-badge info" id="alertsBadge">OK</span>
-        </div>
-        <div class="note" id="autoAlertsNote" style="margin-top:10px;">Sem alertas relevantes neste momento.</div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-          <div>
-            <div class="label">Stake dinâmica</div>
-            <div class="value" id="dynamicStakeValue">Normal</div>
-          </div>
-          <span class="decision-badge info" id="dynamicStakeBadge">x1.00</span>
-        </div>
-        <div class="note" id="dynamicStakeNote" style="margin-top:10px;">Sem ajuste automático.</div>
-      </div>
-    </div>
-
-    <div class="grid grid-4" style="margin-bottom:16px;">
-      <div class="stat">
-        <div class="label">Banca inicial</div>
-        <div class="value" id="bankrollLabelTop">€1000.00</div>
-        <div class="note">Base usada nos cálculos</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Banca atual</div>
-        <div class="value" id="currentBankrollTop">€—</div>
-        <div class="note">Resultado real fechado</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Exposição aberta</div>
-        <div class="value" id="openExposureTop">€—</div>
-        <div class="note">Stake em aberto</div>
-      </div>
-
-      <div class="stat">
-        <div class="label">Disponível</div>
-        <div class="value" id="availableBankrollTop">€—</div>
-        <div class="note">Banca após abertas</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Controlos locais</div>
-      <div class="note" style="margin-bottom:12px;">Guardados neste browser.</div>
-
-      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
-        <div>
-          <label class="label" for="bankrollInput">Banca inicial</label>
-          <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
-        </div>
-
-        <div>
-          <label class="label" for="searchGlobal">Pesquisar</label>
-          <input id="searchGlobal" type="text" placeholder="Jogo, liga ou mercado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
-        </div>
-
-        <div>
-          <label class="label" for="sourceFilter">Origem</label>
-          <select id="sourceFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Todas</option>
-            <option value="bot">Só bot</option>
-            <option value="manual">Só manuais</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="label" for="dateFilter">Data</label>
-          <select id="dateFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Todas</option>
-            <option value="today">Hoje</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="label" for="leagueFilter">Liga</label>
-          <select id="leagueFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Todas as ligas</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="label" for="marketFilter">Mercado</label>
-          <select id="marketFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Todos os mercados</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="label" for="resultFilter">Resultado</label>
-          <select id="resultFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Todos</option>
-            <option value="pending">Pendentes</option>
-            <option value="W">Win</option>
-            <option value="L">Loss</option>
-            <option value="P">Push</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="label" for="executionFilter">Execução</label>
-          <select id="executionFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Toda</option>
-            <option value="executed">Executadas</option>
-            <option value="not_executed">Não executadas</option>
-          </select>
-        </div>
-      </div>
-    </div>
-        
+    <div class="sticky-tabs">
       <div class="card" style="margin-bottom:16px;">
-        <div class="market-quick-wrap">  
-          <span class="label">Filtro rápido:</span>
-          <button type="button" class="market-chip active" data-market-quick="">Todos</button>
-          <button type="button" class="market-chip" data-market-quick="O2.5">O2.5</button>
-          <button type="button" class="market-chip" data-market-quick="BTTS">BTTS</button>
-          <button type="button" class="market-chip" data-market-quick="O3.5">O3.5</button>
-          <button type="button" class="market-chip" data-market-quick="O1.5">O1.5</button>
+        <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+          <div>
+            <div class="label">Projeto Apostas Bot</div>
+            <div class="value" style="font-size:30px;">Dashboard GitHub Pages</div>
+            <div class="note">Modelo vs execução real, com modo decisão, alertas automáticos, stake dinâmica e navegação por separadores.</div>
+          </div>
+
+          <div class="top-actions">
+            <button id="refreshBtn">Atualizar agora</button>
+
+            <div class="tooltip-wrap">
+              <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">Apostas do dia</button>
+              <div class="tooltip-box" id="btnApostasTooltip">
+                <div class="tooltip-title">Resumo das picks do dia</div>
+                <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
+                <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
+                <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
+                <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
+              </div>
+            </div>
+
+            <button id="loadCloudBtn">Carregar cloud</button>
+            <button id="saveCloudBtn">Guardar cloud</button>
+            <button id="resetLocalBtn">Limpar controlos locais</button>
+            <button id="clearManualBtn">Apagar manuais locais</button>
+            <button id="exportManualBtn">Exportar manuais</button>
+            <button id="importManualBtn">Importar manuais</button>
+            <button id="exportRealCsvBtn">Exportar CSV real</button>
+            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
+          </div>
         </div>
-      </div>
-    
-      <div class="grid grid-4" style="margin-bottom:16px;">
-      <div class="stat">
-        <div class="label">Picks do dia</div>
-        <div class="value" id="dailyCountStat">0</div>
-        <div class="note">CSV diário do bot</div>
-      </div>
 
-      <div class="stat">
-        <div class="label">Executadas</div>
-        <div class="value" id="executedCountStat">0</div>
-        <div class="note">Marcadas como apostadas</div>
-      </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
+          <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
+        </div>
 
-      <div class="stat">
-        <div class="label">Não executadas</div>
-        <div class="value" id="notExecutedCountStat">0</div>
-        <div class="note">Ficaram de fora</div>
-      </div>
+        <div class="divider-note">
+          <div class="market-quick-wrap" style="margin-bottom:12px;">
+            <button type="button" class="tab-btn active" data-tab-target="tab-summary">Resumo financeiro</button>
+            <button type="button" class="tab-btn" data-tab-target="tab-day">Apostas do dia / pendentes</button>
+            <button type="button" class="tab-btn" data-tab-target="tab-history">Histórico (fechadas)</button>
+            <button type="button" class="tab-btn" data-tab-target="tab-manual">Apostas manuais</button>
+          </div>
 
-      <div class="stat">
-        <div class="label">Taxa de execução</div>
-        <div class="value" id="executionRateStat">0%</div>
-        <div class="note">Bot histórico ativo</div>
+          <div class="toolbar-grid">
+            <div>
+              <label class="label" for="bankrollInput">Banca inicial</label>
+              <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="searchGlobal">Pesquisar</label>
+              <input id="searchGlobal" type="text" placeholder="Jogo, liga ou mercado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="sourceFilter">Origem</label>
+              <select id="sourceFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Todas</option>
+                <option value="bot">Só bot</option>
+                <option value="manual">Só manuais</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="dateFilter">Data</label>
+              <select id="dateFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Todas</option>
+                <option value="today">Hoje</option>
+                <option value="7">Últimos 7 dias</option>
+                <option value="30">Últimos 30 dias</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="leagueFilter">Liga</label>
+              <select id="leagueFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Todas as ligas</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="marketFilter">Mercado</label>
+              <select id="marketFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Todos os mercados</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="resultFilter">Resultado</label>
+              <select id="resultFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Todos</option>
+                <option value="pending">Pendentes</option>
+                <option value="W">Win</option>
+                <option value="L">Loss</option>
+                <option value="P">Push</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="executionFilter">Execução</label>
+              <select id="executionFilter" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Toda</option>
+                <option value="executed">Executadas</option>
+                <option value="not_executed">Não executadas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="market-quick-wrap" style="margin-top:14px;">
+            <span class="label">Filtro rápido:</span>
+            <button type="button" class="market-chip active" data-market-quick="">Todos</button>
+            <button type="button" class="market-chip" data-market-quick="O2.5">O2.5</button>
+            <button type="button" class="market-chip" data-market-quick="BTTS">BTTS</button>
+            <button type="button" class="market-chip" data-market-quick="O3.5">O3.5</button>
+            <button type="button" class="market-chip" data-market-quick="O1.5">O1.5</button>
+          </div>
+        </div>
+
+        <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Centro de alertas</div>
-      <div class="note" style="margin-bottom:12px;">Leitura consolidada do estado atual.</div>
-      <div id="alertsCenter" class="grid"></div>
-    </div>
+    <div id="tab-summary" class="tab-panel active">
+      <div class="section-stack">
+        <div class="grid grid-3">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div>
+                <div class="label">Modo decisão</div>
+                <div class="value" id="decisionModeValue">A analisar…</div>
+              </div>
+              <span class="decision-badge info" id="decisionBadge">Neutro</span>
+            </div>
+            <div class="note" id="decisionModeNote" style="margin-top:10px;">A aguardar cálculo do estado atual.</div>
+          </div>
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Apostas em aberto</div>
-      <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
-      <div id="openBetsWrap" class="grid"></div>
-    </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div>
+                <div class="label">Alertas automáticos</div>
+                <div class="value" id="autoAlertsValue">0 ativos</div>
+              </div>
+              <span class="decision-badge info" id="alertsBadge">OK</span>
+            </div>
+            <div class="note" id="autoAlertsNote" style="margin-top:10px;">Sem alertas relevantes neste momento.</div>
+          </div>
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Picks do dia (bot)</div>
-      <div class="note" style="margin-bottom:12px;">Com stake recomendada, score e sinais por pick.</div>
-
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Origem</th>
-              <th>Data</th>
-              <th>Liga</th>
-              <th>Jogo</th>
-              <th>Mercado</th>
-              <th>Odd</th>
-              <th>Stake mod.</th>
-              <th>Stake rec.</th>
-              <th>Score</th>
-              <th>Sinais</th>
-              <th>Executada</th>
-              <th>Marcar</th>
-              <th>Odd real</th>
-              <th>Stake real</th>
-              <th>Resultado</th>
-              <th>Lucro mod.</th>
-              <th>Lucro real</th>
-            </tr>
-          </thead>
-          <tbody id="footballRows"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Histórico / pendentes do bot</div>
-      <div class="note" style="margin-bottom:12px;">Inclui picks anteriores ainda úteis para análise e execução.</div>
-
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Origem</th>
-              <th>Data</th>
-              <th>Liga</th>
-              <th>Jogo</th>
-              <th>Mercado</th>
-              <th>Odd</th>
-              <th>Stake mod.</th>
-              <th>Stake rec.</th>
-              <th>Score</th>
-              <th>Sinais</th>
-              <th>Executada</th>
-              <th>Marcar</th>
-              <th>Odd real</th>
-              <th>Stake real</th>
-              <th>Resultado</th>
-              <th>Lucro mod.</th>
-              <th>Lucro real</th>
-            </tr>
-          </thead>
-          <tbody id="historyRows"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="grid grid-3" style="margin-bottom:16px;">
-      <div class="card">
-        <div class="label">Resumo rápido</div>
-        <div class="note" style="margin-bottom:12px;">Sessão, risco e execução.</div>
-        <div id="summaryList" class="grid"></div>
-      </div>
-
-      <div class="card">
-        <div class="label">Analytics por liga</div>
-        <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
-        <div style="overflow:auto;max-height:360px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Liga</th>
-                <th>Apostas</th>
-                <th>W</th>
-                <th>L</th>
-                <th>P</th>
-                <th>WR</th>
-                <th>Stake</th>
-                <th>Lucro</th>
-                <th>ROI</th>
-              </tr>
-            </thead>
-            <tbody id="analyticsLeagueRows"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="label">Analytics por mercado</div>
-        <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
-        <div style="overflow:auto;max-height:360px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Mercado</th>
-                <th>Apostas</th>
-                <th>W</th>
-                <th>L</th>
-                <th>P</th>
-                <th>WR</th>
-                <th>Stake</th>
-                <th>Lucro</th>
-                <th>ROI</th>
-              </tr>
-            </thead>
-            <tbody id="analyticsMarketRows"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-3" style="margin-bottom:16px;">
-      <div class="card">
-        <div class="label">Analytics por origem</div>
-        <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
-        <div style="overflow:auto;max-height:360px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Origem</th>
-                <th>Apostas</th>
-                <th>W</th>
-                <th>L</th>
-                <th>P</th>
-                <th>WR</th>
-                <th>Stake</th>
-                <th>Lucro</th>
-                <th>ROI</th>
-              </tr>
-            </thead>
-            <tbody id="analyticsSourceRows"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="label">Streaks</div>
-        <div class="note" style="margin-bottom:12px;">Sequências reais com base nos filtros atuais.</div>
-        <div id="streakCards" class="grid"></div>
-      </div>
-
-      <div class="card">
-        <div class="label">NBA</div>
-        <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
-        <div style="overflow:auto;max-height:360px;">
-          <table>
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Jogo</th>
-                <th>Mercado</th>
-                <th>Linha</th>
-                <th>Odd</th>
-                <th>Stake€</th>
-              </tr>
-            </thead>
-            <tbody id="nbaRows"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Adicionar aposta manual</div>
-      <div class="note" style="margin-bottom:12px;">Para jogos ou mercados fora das picks geradas.</div>
-
-      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;">
-        <div>
-          <label class="label" for="manualData">Data</label>
-          <input id="manualData" type="date" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+              <div>
+                <div class="label">Stake dinâmica</div>
+                <div class="value" id="dynamicStakeValue">Normal</div>
+              </div>
+              <span class="decision-badge info" id="dynamicStakeBadge">x1.00</span>
+            </div>
+            <div class="note" id="dynamicStakeNote" style="margin-top:10px;">Sem ajuste automático.</div>
+          </div>
         </div>
 
-        <div>
-          <label class="label" for="manualLiga">Liga</label>
-          <input id="manualLiga" type="text" placeholder="Premier League" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        <div class="grid grid-4">
+          <div class="stat">
+            <div class="label">Banca inicial</div>
+            <div class="value" id="bankrollLabelTop">€1000.00</div>
+            <div class="note">Base usada nos cálculos</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Banca atual</div>
+            <div class="value" id="currentBankrollTop">€—</div>
+            <div class="note">Resultado real fechado</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Exposição aberta</div>
+            <div class="value" id="openExposureTop">€—</div>
+            <div class="note">Stake em aberto</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Disponível</div>
+            <div class="value" id="availableBankrollTop">€—</div>
+            <div class="note">Banca após abertas</div>
+          </div>
         </div>
 
-        <div>
-          <label class="label" for="manualJogo">Jogo</label>
-          <input id="manualJogo" type="text" placeholder="Benfica vs Porto" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        <div class="grid grid-4">
+          <div class="stat">
+            <div class="label">Picks do dia</div>
+            <div class="value" id="dailyCountStat">0</div>
+            <div class="note">CSV diário do bot</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Executadas</div>
+            <div class="value" id="executedCountStat">0</div>
+            <div class="note">Marcadas como apostadas</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Não executadas</div>
+            <div class="value" id="notExecutedCountStat">0</div>
+            <div class="note">Ficaram de fora</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Taxa de execução</div>
+            <div class="value" id="executionRateStat">0%</div>
+            <div class="note">Bot histórico ativo</div>
+          </div>
         </div>
 
-        <div>
-          <label class="label" for="manualMercado">Mercado</label>
-          <input id="manualMercado" type="text" placeholder="BTTS, AH -0.5, O2.5" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="label">Evolução da banca</div>
+            <div class="note" style="margin-bottom:12px;">Baseada nas apostas reais fechadas e nos filtros atuais.</div>
+            <div class="chart-box">
+              <div id="bankrollChartWrap"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Resumo rápido</div>
+            <div class="note" style="margin-bottom:12px;">Sessão, risco e execução.</div>
+            <div id="summaryList" class="grid"></div>
+          </div>
         </div>
 
-        <div>
-          <label class="label" for="manualOdd">Odd</label>
-          <input id="manualOdd" type="number" step="0.01" min="1" placeholder="1.90" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        <div class="card">
+          <div class="label">Centro de alertas</div>
+          <div class="note" style="margin-bottom:12px;">Leitura consolidada do estado atual.</div>
+          <div id="alertsCenter" class="grid"></div>
         </div>
 
-        <div>
-          <label class="label" for="manualStake">Stake</label>
-          <input id="manualStake" type="number" step="0.01" min="0" placeholder="10" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+        <div class="card">
+          <div class="label">Apostas em aberto</div>
+          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
+          <div id="openBetsWrap" class="grid"></div>
         </div>
 
-        <div>
-          <label class="label" for="manualResultado">Resultado</label>
-          <select id="manualResultado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
-            <option value="">Pendente</option>
-            <option value="W">Win</option>
-            <option value="L">Loss</option>
-            <option value="P">Push</option>
-          </select>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="label">Analytics por liga</div>
+            <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Liga</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsLeagueRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Analytics por mercado</div>
+            <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mercado</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsMarketRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Analytics por origem</div>
+            <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Origem</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsSourceRows"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label class="label" for="manualNotas">Notas</label>
-          <input id="manualNotas" type="text" placeholder="Opcional" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
-        </div>
-      </div>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="label">Streaks</div>
+            <div class="note" style="margin-bottom:12px;">Sequências reais com base nos filtros atuais.</div>
+            <div id="streakCards" class="grid"></div>
+          </div>
 
-      <div style="margin-top:12px;">
-        <button id="addManualBetBtn">Adicionar aposta manual</button>
+          <div class="card">
+            <div class="label">NBA</div>
+            <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Jogo</th>
+                    <th>Mercado</th>
+                    <th>Linha</th>
+                    <th>Odd</th>
+                    <th>Stake€</th>
+                  </tr>
+                </thead>
+                <tbody id="nbaRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Notas operacionais</div>
+            <div class="note" style="margin-bottom:12px;">Leitura rápida do estado do dashboard.</div>
+            <div class="muted-box">
+              <div class="note">O separador “Resumo financeiro” concentra banca, ROI, estatísticas, alertas, gráfico e analytics.</div>
+              <div class="note">O separador “Apostas do dia / pendentes” concentra operação diária e picks do bot.</div>
+              <div class="note">O separador “Histórico” foca as fechadas e a consulta operacional do histórico do bot.</div>
+              <div class="note">O separador “Apostas manuais” junta criação, gestão e listagem de manuais locais e remotas.</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="label">Apostas manuais</div>
-      <div class="note" style="margin-bottom:12px;">Guardadas localmente neste browser.</div>
+    <div id="tab-day" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div class="label">Página 2</div>
+            <div class="value" style="font-size:28px;">Apostas do dia / pendentes</div>
+            <div class="note">Picks do dia, pendentes, stake recomendada, sinais por pick e exposição aberta.</div>
+          </div>
+        </div>
 
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Origem</th>
-              <th>Data</th>
-              <th>Liga</th>
-              <th>Jogo</th>
-              <th>Mercado</th>
-              <th>Odd</th>
-              <th>Stake</th>
-              <th>Resultado</th>
-              <th>Lucro</th>
-              <th>Notas</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="manualRows"></tbody>
-        </table>
+        <div class="card">
+          <div class="label">Apostas em aberto</div>
+          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
+          <div id="openBetsWrapDay" class="grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="label">Picks do dia (bot)</div>
+          <div class="note" style="margin-bottom:12px;">Com stake recomendada, score e sinais por pick.</div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Odd</th>
+                  <th>Stake mod.</th>
+                  <th>Stake rec.</th>
+                  <th>Score</th>
+                  <th>Sinais</th>
+                  <th>Executada</th>
+                  <th>Marcar</th>
+                  <th>Odd real</th>
+                  <th>Stake real</th>
+                  <th>Resultado</th>
+                  <th>Lucro mod.</th>
+                  <th>Lucro real</th>
+                </tr>
+              </thead>
+              <tbody id="footballRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Histórico / pendentes do bot</div>
+          <div class="note" style="margin-bottom:12px;">Inclui picks anteriores ainda úteis para análise e execução.</div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Odd</th>
+                  <th>Stake mod.</th>
+                  <th>Stake rec.</th>
+                  <th>Score</th>
+                  <th>Sinais</th>
+                  <th>Executada</th>
+                  <th>Marcar</th>
+                  <th>Odd real</th>
+                  <th>Stake real</th>
+                  <th>Resultado</th>
+                  <th>Lucro mod.</th>
+                  <th>Lucro real</th>
+                </tr>
+              </thead>
+              <tbody id="historyRowsDay"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-history" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div class="label">Página 3</div>
+            <div class="value" style="font-size:28px;">Histórico (fechadas)</div>
+            <div class="note">Consulta operacional do histórico do bot e resumo das fechadas reais.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Histórico operacional do bot</div>
+          <div class="note" style="margin-bottom:12px;">Mantém os mesmos controlos e campos editáveis do dashboard original.</div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Odd</th>
+                  <th>Stake mod.</th>
+                  <th>Stake rec.</th>
+                  <th>Score</th>
+                  <th>Sinais</th>
+                  <th>Executada</th>
+                  <th>Marcar</th>
+                  <th>Odd real</th>
+                  <th>Stake real</th>
+                  <th>Resultado</th>
+                  <th>Lucro mod.</th>
+                  <th>Lucro real</th>
+                </tr>
+              </thead>
+              <tbody id="historyRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Fechadas reais filtradas</div>
+          <div class="note" style="margin-bottom:12px;">Bot executado + manuais fechadas.</div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Resultado</th>
+                  <th>Odd</th>
+                  <th>Stake</th>
+                  <th>Lucro</th>
+                </tr>
+              </thead>
+              <tbody id="closedRealRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-manual" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div class="label">Página 4</div>
+            <div class="value" style="font-size:28px;">Apostas manuais</div>
+            <div class="note">Criação, listagem e gestão de apostas manuais locais, com leitura adicional das remotas.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Adicionar aposta manual</div>
+          <div class="note" style="margin-bottom:12px;">Para jogos ou mercados fora das picks geradas.</div>
+
+          <div class="toolbar-grid">
+            <div>
+              <label class="label" for="manualData">Data</label>
+              <input id="manualData" type="date" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualLiga">Liga</label>
+              <input id="manualLiga" type="text" placeholder="Premier League" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualJogo">Jogo</label>
+              <input id="manualJogo" type="text" placeholder="Benfica vs Porto" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualMercado">Mercado</label>
+              <input id="manualMercado" type="text" placeholder="BTTS, AH -0.5, O2.5" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualOdd">Odd</label>
+              <input id="manualOdd" type="number" step="0.01" min="1" placeholder="1.90" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualStake">Stake</label>
+              <input id="manualStake" type="number" step="0.01" min="0" placeholder="10" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+
+            <div>
+              <label class="label" for="manualResultado">Resultado</label>
+              <select id="manualResultado" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;">
+                <option value="">Pendente</option>
+                <option value="W">Win</option>
+                <option value="L">Loss</option>
+                <option value="P">Push</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="label" for="manualNotas">Notas</label>
+              <input id="manualNotas" type="text" placeholder="Opcional" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <button id="addManualBetBtn">Adicionar aposta manual</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Apostas manuais</div>
+          <div class="note" style="margin-bottom:12px;">As locais ficam neste browser; as remotas são lidas do CSV manual_bets.csv.</div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Odd</th>
+                  <th>Stake</th>
+                  <th>Resultado</th>
+                  <th>Lucro</th>
+                  <th>Notas</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="manualRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -680,7 +961,8 @@
         bankroll: 'apostas_bot_bankroll_inicial',
         picks: 'apostas_bot_local_edits_v4',
         manual: 'apostas_bot_manual_bets_v2',
-        sessionStartDate: 'apostas_bot_session_start_date_v2'
+        sessionStartDate: 'apostas_bot_session_start_date_v2',
+        activeTab: 'apostas_bot_active_tab_v1'
       };
 
       const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
@@ -698,7 +980,8 @@
         localEdits: {},
         manualBets: [],
         sessionStartDate: '',
-        lastUpdated: null
+        lastUpdated: null,
+        activeTab: 'tab-summary'
       };
 
       function parseSemicolonCsv(text) {
@@ -853,6 +1136,7 @@
         const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
         const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
         const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+        const savedActiveTab = localStorage.getItem(STORAGE_KEYS.activeTab);
 
         const bankrollParsed = num(savedBankroll);
         if (bankrollParsed !== null && bankrollParsed >= 0) {
@@ -872,6 +1156,7 @@
         }
 
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
+        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
       }
 
       function saveLocalState() {
@@ -879,6 +1164,7 @@
         localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
         localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
         localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || todayIso());
+        localStorage.setItem(STORAGE_KEYS.activeTab, state.activeTab || 'tab-summary');
       }
 
       function ensureEditObject(pickKey) {
@@ -940,7 +1226,7 @@
       }
 
       function getManualRowsMerged() {
-        return state.manualBetsRemote.map(b => {
+        const remoteRows = state.manualBetsRemote.map(b => {
           const data = String(b['Data'] || '').trim();
           const liga = String(b['Liga'] || '').trim();
           const jogo = String(b['Jogo'] || '').trim();
@@ -952,7 +1238,7 @@
           const notas = String(b['Notas'] || '').trim();
 
           return {
-            id: makeManualId(),
+            id: `remote_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
             data,
             liga,
             jogo,
@@ -963,12 +1249,39 @@
             notas,
             source: 'manual',
             sourceLabel: 'Manual',
+            isRemote: true,
+            isLocal: false,
             _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
             _resultKey: resultKey(resultado),
             _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
           };
         });
+
+        const localRows = state.manualBets.map(b => {
+          const resultado = String(b.resultado || '').trim().toUpperCase();
+          return {
+            id: String(b.id || makeManualId()),
+            data: String(b.data || '').trim(),
+            liga: String(b.liga || '').trim(),
+            jogo: String(b.jogo || '').trim(),
+            mercado: String(b.mercado || '').trim(),
+            odd: String(b.odd || '').trim(),
+            stake: String(b.stake || '').trim(),
+            resultado,
+            notas: String(b.notas || '').trim(),
+            source: 'manual',
+            sourceLabel: 'Manual',
+            isRemote: false,
+            isLocal: true,
+            _lucro: calcProfitByResult(resultado, b.stake, b.odd),
+            _resultKey: resultKey(resultado),
+            _searchText: `${b.liga || ''} ${b.jogo || ''} ${b.mercado || ''}`.toLowerCase()
+          };
+        });
+
+        return [...remoteRows, ...localRows];
       }
+
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
       }
@@ -997,6 +1310,7 @@
           const ad = parseDateSafe(a.data)?.getTime() || 0;
           const bd = parseDateSafe(b.data)?.getTime() || 0;
           if (ad !== bd) return ad - bd;
+          if (a.isRemote !== b.isRemote) return a.isRemote ? -1 : 1;
           return String(a.jogo || '').localeCompare(String(b.jogo || ''), 'pt');
         });
       }
@@ -1350,7 +1664,7 @@
           .filter(r => r._lucro !== null)
           .map(r => ({
             source: 'manual',
-            sourceLabel: 'Manual',
+            sourceLabel: r.isRemote ? 'Manual CSV' : 'Manual Local',
             league: r.liga || '—',
             market: r.mercado || '—',
             game: r.jogo || '—',
@@ -1371,6 +1685,7 @@
       function fillFilters() {
         const rows = [
           ...getHistoryRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
+          ...getDailyRowsMerged().map(r => ({ league: r['Liga'] || '', market: r['Mercado'] || '' })),
           ...getManualRowsMerged().map(r => ({ league: r.liga || '', market: r.mercado || '' }))
         ];
 
@@ -1494,20 +1809,12 @@
         `).join('');
       }
 
-      function renderOpenBets() {
-        const filters = getGlobalFilters();
-        const rows = sortBotRowsForDisplay(
-          filterBotRows(getHistoryRowsMerged(), filters).filter(r => r._apostadaBool && r._resultKey === 'pending')
-        );
-
-        const wrap = document.getElementById('openBetsWrap');
-
+      function buildOpenBetsHtml(rows) {
         if (!rows.length) {
-          wrap.innerHTML = '<div class="stat"><div class="note">Sem apostas em aberto com os filtros atuais.</div></div>';
-          return;
+          return '<div class="stat"><div class="note">Sem apostas em aberto com os filtros atuais.</div></div>';
         }
 
-        wrap.innerHTML = rows.map(r => {
+        return rows.map(r => {
           const potencial = (r._stakeRealNum !== null && r._oddRealNum !== null && r._oddRealNum > 1.01)
             ? r._stakeRealNum * (r._oddRealNum - 1)
             : null;
@@ -1521,6 +1828,16 @@
             </div>
           `;
         }).join('');
+      }
+
+      function renderOpenBets() {
+        const filters = getGlobalFilters();
+        const rows = sortBotRowsForDisplay(
+          filterBotRows(getHistoryRowsMerged(), filters).filter(r => r._apostadaBool && r._resultKey === 'pending')
+        );
+
+        document.getElementById('openBetsWrap').innerHTML = buildOpenBetsHtml(rows);
+        document.getElementById('openBetsWrapDay').innerHTML = buildOpenBetsHtml(rows);
       }
 
       function buildAnalytics(rows, field) {
@@ -1710,9 +2027,32 @@
       function renderBotHistoryOperational() {
         const filters = getGlobalFilters();
         const rows = sortBotRowsForDisplay(filterBotRows(getHistoryRowsMerged(), filters));
-        document.getElementById('historyRows').innerHTML = rows.length
+
+        const html = rows.length
           ? buildBotRowHtml(rows)
           : '<tr><td colspan="17"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
+
+        document.getElementById('historyRows').innerHTML = html;
+        document.getElementById('historyRowsDay').innerHTML = html;
+      }
+
+      function renderClosedRealTable() {
+        const rows = getFilteredRealClosedRows();
+        document.getElementById('closedRealRows').innerHTML = rows.length
+          ? rows.map(r => `
+              <tr>
+                <td>${escapeHtml(r.sourceLabel || '—')}</td>
+                <td>${escapeHtml(r.date || '—')}</td>
+                <td>${escapeHtml(r.league || '—')}</td>
+                <td>${escapeHtml(r.game || '—')}</td>
+                <td>${escapeHtml(r.market || '—')}</td>
+                <td>${resultBadge(r.result)}</td>
+                <td>${r.odd === null ? '—' : fmt(r.odd)}</td>
+                <td>€${fmt(r.stake)}</td>
+                <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="9"><div class="note">Sem fechadas reais com os filtros atuais.</div></td></tr>';
       }
 
       function renderManualBets() {
@@ -1722,7 +2062,9 @@
         document.getElementById('manualRows').innerHTML = rows.length
           ? rows.map(b => `
               <tr>
-                <td><span class="mini warn">Manual</span></td>
+                <td>
+                  <span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span>
+                </td>
                 <td>${escapeHtml(b.data || '—')}</td>
                 <td>${escapeHtml(b.liga || '—')}</td>
                 <td>${escapeHtml(b.jogo || '—')}</td>
@@ -1732,7 +2074,11 @@
                 <td>${resultBadge(b.resultado)}</td>
                 <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
                 <td>${escapeHtml(b.notas || '—')}</td>
-                <td><span class="note">Auto</span></td>
+                <td>
+                  ${b.isLocal
+                    ? `<button class="js-delete-manual" data-id="${escapeHtml(b.id)}" style="padding:8px 10px;">Remover</button>`
+                    : `<span class="manual-remote-note">CSV</span>`}
+                </td>
               </tr>
             `).join('')
           : '<tr><td colspan="11"><div class="note">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>';
@@ -1773,6 +2119,81 @@
             <div class="note">${escapeHtml(t)}</div>
           </div>
         `).join('');
+      }
+
+      function renderBankrollChart() {
+        const wrap = document.getElementById('bankrollChartWrap');
+        const rows = getFilteredRealClosedRows();
+
+        if (!rows.length) {
+          wrap.innerHTML = `<div class="chart-empty">Sem fechadas reais suficientes para desenhar o gráfico.</div>`;
+          return;
+        }
+
+        let running = state.bankrollInicial;
+        const pointsData = rows.map((r, i) => {
+          running += (r.lucro || 0);
+          return {
+            xIndex: i,
+            y: running,
+            date: r.date || '',
+            label: `${r.date || '—'} • ${r.game || '—'} • banca €${fmt(running)}`
+          };
+        });
+
+        const values = [state.bankrollInicial, ...pointsData.map(p => p.y)];
+        const minY = Math.min(...values);
+        const maxY = Math.max(...values);
+        const width = 900;
+        const height = 240;
+        const padX = 34;
+        const padTop = 18;
+        const padBottom = 28;
+        const usableW = width - padX * 2;
+        const usableH = height - padTop - padBottom;
+        const yRange = maxY === minY ? 1 : (maxY - minY);
+
+        function xPos(i) {
+          if (pointsData.length === 1) return width / 2;
+          return padX + (i / (pointsData.length - 1)) * usableW;
+        }
+
+        function yPos(v) {
+          return padTop + ((maxY - v) / yRange) * usableH;
+        }
+
+        const path = pointsData.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(p.y)}`).join(' ');
+        const gridLines = 5;
+        const gridHtml = Array.from({ length: gridLines }, (_, i) => {
+          const yValue = minY + ((gridLines - 1 - i) / (gridLines - 1)) * yRange;
+          const y = padTop + (i / (gridLines - 1)) * usableH;
+          return `
+            <line x1="${padX}" y1="${y}" x2="${width - padX}" y2="${y}" stroke="#e2e8f0" stroke-width="1" />
+            <text x="6" y="${y + 4}" font-size="11" fill="#64748b">€${fmt(yValue)}</text>
+          `;
+        }).join('');
+
+        const pointsHtml = pointsData.map((p, i) => {
+          const cx = xPos(i);
+          const cy = yPos(p.y);
+          return `
+            <g>
+              <circle cx="${cx}" cy="${cy}" r="4" fill="#0f172a">
+                <title>${escapeHtml(p.label)}</title>
+              </circle>
+            </g>
+          `;
+        }).join('');
+
+        wrap.innerHTML = `
+          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolução da banca">
+            ${gridHtml}
+            <line x1="${padX}" y1="${height - padBottom}" x2="${width - padX}" y2="${height - padBottom}" stroke="#cbd5e1" stroke-width="1.2" />
+            <path d="${path}" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+            ${pointsHtml}
+          </svg>
+          <div class="note" style="margin-top:8px;">Início: €${fmt(state.bankrollInicial)} • Final filtrado: €${fmt(pointsData[pointsData.length - 1].y)}</div>
+        `;
       }
 
       function bindBotTableControls() {
@@ -1854,28 +2275,41 @@
       }
 
       function bindManualControls() {
-        document.querySelectorAll('.js-manual-resultado').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
-
-          el.addEventListener('change', e => {
-            const id = e.target.dataset.id;
-            const bet = state.manualBets.find(b => b.id === id);
-            if (!bet) return;
-            bet.resultado = e.target.value;
-            rerenderAll();
-          });
-        });
-
         document.querySelectorAll('.js-delete-manual').forEach(el => {
           if (el.dataset.bound === '1') return;
           el.dataset.bound = '1';
 
           el.addEventListener('click', e => {
             const id = e.target.dataset.id;
-            state.manualBets = state.manualBets.filter(b => b.id !== id);
+            state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
             rerenderAll();
           });
+        });
+      }
+
+      function bindTabButtons() {
+        document.querySelectorAll('[data-tab-target]').forEach(btn => {
+          if (btn.dataset.bound === '1') return;
+          btn.dataset.bound = '1';
+
+          btn.addEventListener('click', () => {
+            const target = btn.dataset.tabTarget;
+            if (!target) return;
+            setActiveTab(target);
+          });
+        });
+      }
+
+      function setActiveTab(tabId) {
+        state.activeTab = tabId;
+        saveLocalState();
+
+        document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
+        });
+
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.classList.toggle('active', panel.id === tabId);
         });
       }
 
@@ -2010,7 +2444,7 @@
           await loadData();
 
           if (showSuccess) alert('Estado guardado na cloud com sucesso.');
-          return true;   
+          return true;
         } catch (e) {
           if (showSuccess) alert('Erro de ligação ao serviço cloud.');
           return false;
@@ -2027,7 +2461,7 @@
         }, 2000);
       }
 
-            function updateApostasTooltip() {
+      function updateApostasTooltip() {
         const today = todayIso();
         const todaysPicks = state.footballDaily.filter(r => normalizeDateString(r['Data']) === today);
 
@@ -2045,9 +2479,9 @@
         document.getElementById('tooltipAvgEdge').textContent = avgEdge !== null ? `${fmt(avgEdge)}%` : '—';
         document.getElementById('tooltipStakeTotal').textContent = `€${fmt(totalStake)}`;
       }
-      
+
       function updateApostasButton() {
-        const btn = document.getElementById('btnApostas');
+        const btn = document.getElementById('btnApostasTab');
         const today = todayIso();
         const todaysPicks = state.footballDaily.filter(r => normalizeDateString(r['Data']) === today);
         const count = todaysPicks.length;
@@ -2062,7 +2496,7 @@
         btn.textContent = `${count} pick${count > 1 ? 's' : ''} hoje • edge méd. ${fmt(avgEdge)}%`;
       }
 
-            function syncQuickMarketButtons() {
+      function syncQuickMarketButtons() {
         const current = document.getElementById('marketFilter').value || '';
         document.querySelectorAll('[data-market-quick]').forEach(btn => {
           btn.classList.toggle('active', (btn.dataset.marketQuick || '') === current);
@@ -2082,7 +2516,7 @@
           });
         });
       }
-      
+
       function rerenderAll(triggerAutoSave = true) {
         saveLocalState();
         fillFilters();
@@ -2092,16 +2526,20 @@
         renderOpenBets();
         renderFootball();
         renderBotHistoryOperational();
+        renderClosedRealTable();
         renderManualBets();
         renderAnalytics();
         renderNba();
         renderSummary();
+        renderBankrollChart();
         bindBotTableControls();
         bindManualControls();
+        bindTabButtons();
         updateApostasButton();
         updateApostasTooltip();
         syncQuickMarketButtons();
         bindQuickMarketButtons();
+        setActiveTab(state.activeTab);
 
         if (triggerAutoSave) markDirty();
       }
@@ -2142,17 +2580,18 @@
         document.getElementById('manualResultado').value = '';
         document.getElementById('manualNotas').value = '';
 
+        setActiveTab('tab-manual');
         rerenderAll();
       }
 
       async function loadData() {
         try {
           const [dailyRes, historyRes, nbaRes, manualRes] = await Promise.all([
-           fetch(URLS.footballDaily + '?t=' + Date.now()),
-           fetch(URLS.footballHistory + '?t=' + Date.now()),
-           fetch(URLS.nba + '?t=' + Date.now()),
-           fetch(URLS.manual + '?t=' + Date.now())
-      ]);
+            fetch(URLS.footballDaily + '?t=' + Date.now()),
+            fetch(URLS.footballHistory + '?t=' + Date.now()),
+            fetch(URLS.nba + '?t=' + Date.now()),
+            fetch(URLS.manual + '?t=' + Date.now())
+          ]);
 
           const dailyText = await dailyRes.text();
           const historyText = await historyRes.text();
@@ -2179,9 +2618,14 @@
         renderOpenBets();
         renderFootball();
         renderBotHistoryOperational();
+        renderClosedRealTable();
         renderManualBets();
         renderAnalytics();
         renderSummary();
+        renderBankrollChart();
+        updateApostasButton();
+        updateApostasTooltip();
+        syncQuickMarketButtons();
       }
 
       document.getElementById('searchGlobal').addEventListener('input', rerenderFilteredSectionsOnly);
@@ -2192,23 +2636,6 @@
       document.getElementById('executionFilter').addEventListener('change', rerenderFilteredSectionsOnly);
       document.getElementById('dateFilter').addEventListener('change', rerenderFilteredSectionsOnly);
 
-      document.querySelectorAll('.market-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-
-      document.querySelectorAll('.market-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const value = btn.getAttribute('data-market-quick') || '';
-
-      const select = document.getElementById('marketFilter');
-      if (select) {
-      select.value = value;
-      }
-
-    rerenderFilteredSectionsOnly();
-  });
-});
-      
       document.getElementById('refreshBtn').addEventListener('click', loadData);
       document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
       document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
@@ -2223,15 +2650,17 @@
         localStorage.removeItem(STORAGE_KEYS.bankroll);
         localStorage.removeItem(STORAGE_KEYS.picks);
         localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
+        localStorage.removeItem(STORAGE_KEYS.activeTab);
         state.bankrollInicial = 1000;
         state.localEdits = {};
         state.sessionStartDate = todayIso();
+        state.activeTab = 'tab-summary';
         document.getElementById('bankrollInput').value = 1000;
         rerenderAll();
       });
 
       document.getElementById('clearManualBtn').addEventListener('click', () => {
-        if (!confirm('Queres apagar todas as apostas manuais deste browser?')) return;
+        if (!confirm('Queres apagar todas as apostas manuais locais deste browser?')) return;
         state.manualBets = [];
         rerenderAll();
       });
@@ -2265,9 +2694,12 @@
 
       loadLocalState();
       document.getElementById('bankrollInput').value = state.bankrollInicial;
+      bindTabButtons();
+      bindQuickMarketButtons();
+      setActiveTab(state.activeTab);
       loadData();
       setInterval(loadData, 60000);
     </script>
   </div>
 </body>
-</html>
+              </html>
