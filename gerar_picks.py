@@ -101,27 +101,45 @@ def prob_over25(lam_total: float) -> float:
 def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
     """
     BTTS ajustado para reduzir inflação do Poisson puro.
+    Versão intermédia: menos agressiva, sem matar demasiado volume.
     """
-    p_home0 = math.exp(-max(0.0, lam_home))
-    p_away0 = math.exp(-max(0.0, lam_away))
+    lam_home = max(0.0, float(lam_home))
+    lam_away = max(0.0, float(lam_away))
+
+    p_home0 = math.exp(-lam_home)
+    p_away0 = math.exp(-lam_away)
     raw = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
 
-    adj = raw * 0.90
+    # ligeiramente mais conservador que a versão atual
+    adj = raw * 0.885
 
     bigger = max(lam_home, lam_away)
     smaller = min(lam_home, lam_away)
     ratio = (bigger / smaller) if smaller > 0 else 99.0
     gap = abs(lam_home - lam_away)
+    product = lam_home * lam_away
 
     if ratio >= 2.50:
-        adj *= 0.90
+        adj *= 0.88
     elif ratio >= 2.10:
-        adj *= 0.94
+        adj *= 0.93
 
     if gap >= 1.10:
-        adj *= 0.92
+        adj *= 0.90
     elif gap >= 0.90:
+        adj *= 0.95
+
+    # travão leve quando uma equipa tem pouco peso ofensivo
+    if smaller < 0.55:
+        adj *= 0.91
+    elif smaller < 0.70:
         adj *= 0.96
+
+    # travão leve para combinações pouco equilibradas
+    if product < 0.55:
+        adj *= 0.92
+    elif product < 0.70:
+        adj *= 0.97
 
     return float(max(0.0, min(1.0, adj)))
 
@@ -423,15 +441,15 @@ def get_market_thresholds(mode: str, market: str) -> dict:
         if market == "BTTS":
             return {
                 **base,
-                "lam_h_min": 0.60,
-                "lam_a_min": 0.60,
-                "lam_t_min": 1.85,
+                "lam_h_min": 0.62,
+                "lam_a_min": 0.62,
+                "lam_t_min": 1.88,
                 "odd_min": 1.48,
                 "odd_max": 2.60,
                 "edge_min_quality": -0.04,
-                "max_lambda_ratio": 1.95,
-                "max_lambda_gap": 0.85,
-                "min_lambda_product": 0.62,
+                "max_lambda_ratio": 1.90,
+                "max_lambda_gap": 0.83,
+                "min_lambda_product": 0.65,
             }
 
     if market == "O2.5":
@@ -446,15 +464,15 @@ def get_market_thresholds(mode: str, market: str) -> dict:
     if market == "BTTS":
         return {
             **base,
-            "lam_h_min": 0.68,
-            "lam_a_min": 0.68,
-            "lam_t_min": 1.95,
+            "lam_h_min": 0.72,
+            "lam_a_min": 0.72,
+            "lam_t_min": 1.98,
             "odd_min": 1.50,
             "odd_max": 2.45,
             "edge_min_quality": -0.02,
-            "max_lambda_ratio": 1.80,
-            "max_lambda_gap": 0.75,
-            "min_lambda_product": 0.70,
+            "max_lambda_ratio": 1.75,
+            "max_lambda_gap": 0.72,
+            "min_lambda_product": 0.74,
         }
 
     return base
