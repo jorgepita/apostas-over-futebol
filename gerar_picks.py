@@ -298,10 +298,21 @@ def _send_in_chunks(token: str, chat_id: str, text: str, title: str) -> None:
     parts = []
     cur = ""
     for line in text.splitlines(True):
+        if len(line) > max_len:
+            if cur:
+                parts.append(cur)
+                cur = ""
+            for i in range(0, len(line), max_len):
+                parts.append(line[i:i + max_len])
+            continue
+
         if len(cur) + len(line) > max_len:
-            parts.append(cur)
-            cur = ""
-        cur += line
+            if cur:
+                parts.append(cur)
+            cur = line
+        else:
+            cur += line
+
     if cur:
         parts.append(cur)
 
@@ -767,7 +778,8 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
 
         try:
             content = fp.read_bytes()
-            msg = f"Update {fp.name} ({datetime.now(timezone.utc).isoformat()}Z)"
+            ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            msg = f"Update {fp.name} ({ts})"
             github_put_file(owner, repo, rel_path, content, branch, token, msg)
             ok += 1
         except Exception as e:
@@ -814,8 +826,9 @@ def main():
         now_pt = datetime.utcnow()
 
     days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
+    days_ahead = max(1, days_ahead)
     start = now_pt.date()
-    end = start + timedelta(days=days_ahead)
+    end = start + timedelta(days=days_ahead - 1)
     today_iso = start.isoformat()
 
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
