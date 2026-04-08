@@ -330,8 +330,26 @@
       "oddReal": "2.15",
       "stakeReal": "13.5",
       "resultadoManual": ""
+    },
+    "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
+      "apostada": true,
+      "oddReal": "2.12",
+      "stakeReal": "13.5",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
+      "apostada": true,
+      "oddReal": "2.37",
+      "stakeReal": "18",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
+      "apostada": true,
+      "oddReal": "1.93",
+      "stakeReal": "20",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-08T11:43:04.374389+00:00"
+  "updatedAt": "2026-04-08T11:43:13.356948+00:00"
 }
