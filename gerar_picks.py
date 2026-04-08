@@ -508,7 +508,49 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
             ["Edge", "KellyTrue", "ProbModel", "Odd"],
             ascending=[False, False, False, False],
         ).reset_index(drop=True)
-        keep_rows.append(g.iloc[0].to_dict())
+
+        winner = g.iloc[0].to_dict()
+        keep_rows.append(winner)
+
+        try:
+            date_txt = str(winner.get("Date", ""))
+            league_txt = str(winner.get("LeagueName", winner.get("League", "")))
+            game_txt = f"{winner.get('HomeTeam', '?')} vs {winner.get('AwayTeam', '?')}"
+            winner_market = str(winner.get("Market", ""))
+            winner_edge = float(winner.get("Edge", 0.0) or 0.0)
+            winner_kelly = float(winner.get("KellyTrue", 0.0) or 0.0)
+            winner_prob = float(winner.get("ProbModel", 0.0) or 0.0)
+            winner_odd = float(winner.get("Odd", 0.0) or 0.0)
+
+            if len(g) == 1:
+                print(
+                    f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
+                    f"única pick={winner_market} | "
+                    f"edge={winner_edge:.4f} | kelly={winner_kelly:.4f} | "
+                    f"prob={winner_prob:.4f} | odd={winner_odd:.2f}"
+                )
+            else:
+                losers = []
+                for i in range(1, len(g)):
+                    row = g.iloc[i]
+                    loser_market = str(row.get("Market", ""))
+                    loser_edge = float(row.get("Edge", 0.0) or 0.0)
+                    loser_kelly = float(row.get("KellyTrue", 0.0) or 0.0)
+                    loser_prob = float(row.get("ProbModel", 0.0) or 0.0)
+                    loser_odd = float(row.get("Odd", 0.0) or 0.0)
+                    losers.append(
+                        f"{loser_market}(edge={loser_edge:.4f}, kelly={loser_kelly:.4f}, "
+                        f"prob={loser_prob:.4f}, odd={loser_odd:.2f})"
+                    )
+
+                print(
+                    f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
+                    f"winner={winner_market}(edge={winner_edge:.4f}, kelly={winner_kelly:.4f}, "
+                    f"prob={winner_prob:.4f}, odd={winner_odd:.2f}) | "
+                    f"discarded=" + " ; ".join(losers)
+                )
+        except Exception as e:
+            print(f"[DBG] dedupe jogo | erro a construir log: {e}")
 
     out = pd.DataFrame(keep_rows)
     out = out.sort_values(
