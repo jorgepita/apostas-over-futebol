@@ -121,6 +121,74 @@
       border-radius: 999px;
     }
 
+        .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tooltip-box {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 240px;
+      max-width: 300px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.10);
+      display: none;
+      z-index: 30;
+    }
+
+    .tooltip-wrap:hover .tooltip-box {
+      display: block;
+    }
+
+    .tooltip-title {
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .tooltip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .tooltip-row strong {
+      font-weight: 800;
+    }
+
+        .market-quick-wrap {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .market-chip {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .market-chip.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+    
     @media (max-width: 900px) {
       .grid-3, .grid-4 {
         grid-template-columns: 1fr;
@@ -140,7 +208,16 @@
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <button id="refreshBtn">Atualizar agora</button>
-          <a href="apostas.html" id="btnApostas">Apostas do dia</a>
+          <div class="tooltip-wrap">
+  <a href="apostas.html" id="btnApostas">Apostas do dia</a>
+  <div class="tooltip-box" id="btnApostasTooltip">
+    <div class="tooltip-title">Resumo das picks do dia</div>
+    <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
+    <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
+    <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
+    <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
+  </div>
+</div>
           <button id="loadCloudBtn">Carregar cloud</button>
           <button id="saveCloudBtn">Guardar cloud</button>
           <button id="resetLocalBtn">Limpar controlos locais</button>
@@ -290,7 +367,19 @@
         </div>
       </div>
     </div>
-        <div class="grid grid-4" style="margin-bottom:16px;">
+        
+      <div class="card" style="margin-bottom:16px;">
+        <div class="market-quick-wrap">  
+          <span class="label">Filtro rápido:</span>
+          <button type="button" class="market-chip active" data-market-quick="">Todos</button>
+          <button type="button" class="market-chip" data-market-quick="O2.5">O2.5</button>
+          <button type="button" class="market-chip" data-market-quick="BTTS">BTTS</button>
+          <button type="button" class="market-chip" data-market-quick="O3.5">O3.5</button>
+          <button type="button" class="market-chip" data-market-quick="O1.5">O1.5</button>
+        </div>
+      </div>
+    
+      <div class="grid grid-4" style="margin-bottom:16px;">
       <div class="stat">
         <div class="label">Picks do dia</div>
         <div class="value" id="dailyCountStat">0</div>
@@ -580,10 +669,11 @@
     </div>
 
     <script>
-            const URLS = {
+      const URLS = {
         footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
-        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv'
+        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
+        manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
       };
 
       const STORAGE_KEYS = {
@@ -603,6 +693,7 @@
         footballDaily: [],
         footballHistory: [],
         nba: [],
+        manualBetsRemote: [],
         bankrollInicial: 1000,
         localEdits: {},
         manualBets: [],
@@ -849,16 +940,35 @@
       }
 
       function getManualRowsMerged() {
-        return state.manualBets.map(b => ({
-          ...b,
-          source: 'manual',
-          sourceLabel: 'Manual',
-          _lucro: calcProfitByResult(b.resultado, b.stake, b.odd),
-          _resultKey: resultKey(b.resultado),
-          _searchText: `${b.liga || ''} ${b.jogo || ''} ${b.mercado || ''}`.toLowerCase()
-        }));
-      }
+        return state.manualBetsRemote.map(b => {
+          const data = String(b['Data'] || '').trim();
+          const liga = String(b['Liga'] || '').trim();
+          const jogo = String(b['Jogo'] || '').trim();
+          const mercado = String(b['Mercado'] || '').trim();
+          const odd = String(b['Odd'] || '').trim();
+          const stake = String(b['Stake'] || '').trim();
+          const resultado = String(b['Resultado'] || '').trim().toUpperCase();
+          const lucroCsv = num(b['Lucro€']);
+          const notas = String(b['Notas'] || '').trim();
 
+          return {
+            id: makeManualId(),
+            data,
+            liga,
+            jogo,
+            mercado,
+            odd,
+            stake,
+            resultado,
+            notas,
+            source: 'manual',
+            sourceLabel: 'Manual',
+            _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+            _resultKey: resultKey(resultado),
+            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+          };
+        });
+      }
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
       }
@@ -1619,17 +1729,10 @@
                 <td>${escapeHtml(b.mercado || '—')}</td>
                 <td>${escapeHtml(b.odd || '—')}</td>
                 <td>${escapeHtml(b.stake || '—')}</td>
-                <td>
-                  <select class="js-manual-resultado" data-id="${escapeHtml(b.id)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;">
-                    <option value="" ${!b.resultado ? 'selected' : ''}>Pend.</option>
-                    <option value="W" ${b.resultado === 'W' ? 'selected' : ''}>W</option>
-                    <option value="L" ${b.resultado === 'L' ? 'selected' : ''}>L</option>
-                    <option value="P" ${b.resultado === 'P' ? 'selected' : ''}>P</option>
-                  </select>
-                </td>
+                <td>${resultBadge(b.resultado)}</td>
                 <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
                 <td>${escapeHtml(b.notas || '—')}</td>
-                <td><button class="js-delete-manual" data-id="${escapeHtml(b.id)}">Apagar</button></td>
+                <td><span class="note">Auto</span></td>
               </tr>
             `).join('')
           : '<tr><td colspan="11"><div class="note">Nenhuma aposta manual encontrada com os filtros atuais.</div></td></tr>';
@@ -1904,8 +2007,10 @@
           }
 
           hasPendingCloudChanges = false;
+          await loadData();
+
           if (showSuccess) alert('Estado guardado na cloud com sucesso.');
-          return true;
+          return true;   
         } catch (e) {
           if (showSuccess) alert('Erro de ligação ao serviço cloud.');
           return false;
@@ -1922,6 +2027,25 @@
         }, 2000);
       }
 
+            function updateApostasTooltip() {
+        const today = todayIso();
+        const todaysPicks = state.footballDaily.filter(r => normalizeDateString(r['Data']) === today);
+
+        const count = todaysPicks.length;
+        const validOdds = todaysPicks.map(r => num(r['Odd'])).filter(v => v !== null);
+        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const validStakes = todaysPicks.map(r => num(r['Stake€'])).filter(v => v !== null);
+
+        const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
+        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : null;
+        const totalStake = validStakes.length ? validStakes.reduce((a, b) => a + b, 0) : 0;
+
+        document.getElementById('tooltipPicksCount').textContent = String(count);
+        document.getElementById('tooltipAvgOdd').textContent = avgOdd !== null ? fmt(avgOdd) : '—';
+        document.getElementById('tooltipAvgEdge').textContent = avgEdge !== null ? `${fmt(avgEdge)}%` : '—';
+        document.getElementById('tooltipStakeTotal').textContent = `€${fmt(totalStake)}`;
+      }
+      
       function updateApostasButton() {
         const btn = document.getElementById('btnApostas');
         const today = todayIso();
@@ -1938,6 +2062,27 @@
         btn.textContent = `${count} pick${count > 1 ? 's' : ''} hoje • edge méd. ${fmt(avgEdge)}%`;
       }
 
+            function syncQuickMarketButtons() {
+        const current = document.getElementById('marketFilter').value || '';
+        document.querySelectorAll('[data-market-quick]').forEach(btn => {
+          btn.classList.toggle('active', (btn.dataset.marketQuick || '') === current);
+        });
+      }
+
+      function bindQuickMarketButtons() {
+        document.querySelectorAll('[data-market-quick]').forEach(btn => {
+          if (btn.dataset.bound === '1') return;
+          btn.dataset.bound = '1';
+
+          btn.addEventListener('click', () => {
+            const value = btn.dataset.marketQuick || '';
+            document.getElementById('marketFilter').value = value;
+            syncQuickMarketButtons();
+            rerenderFilteredSectionsOnly();
+          });
+        });
+      }
+      
       function rerenderAll(triggerAutoSave = true) {
         saveLocalState();
         fillFilters();
@@ -1954,6 +2099,9 @@
         bindBotTableControls();
         bindManualControls();
         updateApostasButton();
+        updateApostasTooltip();
+        syncQuickMarketButtons();
+        bindQuickMarketButtons();
 
         if (triggerAutoSave) markDirty();
       }
@@ -1999,19 +2147,22 @@
 
       async function loadData() {
         try {
-          const [dailyRes, historyRes, nbaRes] = await Promise.all([
-            fetch(URLS.footballDaily + '?t=' + Date.now()),
-            fetch(URLS.footballHistory + '?t=' + Date.now()),
-            fetch(URLS.nba + '?t=' + Date.now())
-          ]);
+          const [dailyRes, historyRes, nbaRes, manualRes] = await Promise.all([
+           fetch(URLS.footballDaily + '?t=' + Date.now()),
+           fetch(URLS.footballHistory + '?t=' + Date.now()),
+           fetch(URLS.nba + '?t=' + Date.now()),
+           fetch(URLS.manual + '?t=' + Date.now())
+      ]);
 
           const dailyText = await dailyRes.text();
           const historyText = await historyRes.text();
           const nbaText = await nbaRes.text();
+          const manualText = await manualRes.text();
 
           state.footballDaily = parseSemicolonCsv(dailyText);
           state.footballHistory = parseSemicolonCsv(historyText);
           state.nba = parseSemicolonCsv(nbaText);
+          state.manualBetsRemote = parseSemicolonCsv(manualText);
           state.lastUpdated = new Date();
 
           hasPendingCloudChanges = false;
@@ -2041,6 +2192,23 @@
       document.getElementById('executionFilter').addEventListener('change', rerenderFilteredSectionsOnly);
       document.getElementById('dateFilter').addEventListener('change', rerenderFilteredSectionsOnly);
 
+      document.querySelectorAll('.market-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+
+      document.querySelectorAll('.market-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const value = btn.getAttribute('data-market-quick') || '';
+
+      const select = document.getElementById('marketFilter');
+      if (select) {
+      select.value = value;
+      }
+
+    rerenderFilteredSectionsOnly();
+  });
+});
+      
       document.getElementById('refreshBtn').addEventListener('click', loadData);
       document.getElementById('loadCloudBtn').addEventListener('click', loadCloudState);
       document.getElementById('saveCloudBtn').addEventListener('click', () => saveCloudState(true));
