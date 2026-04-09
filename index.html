@@ -2103,31 +2103,6 @@ async function loadCloudState() {
   }
 }
 
-async function loadCloudState() {
-  try {
-    const res = await fetch(`${CLOUD_URL}/load`);
-
-    if (!res.ok) throw new Error("Erro ao carregar");
-
-    const data = await res.json();
-
-    if (data.localStorage) {
-      Object.entries(data.localStorage).forEach(([k, v]) => {
-        localStorage.setItem(k, v);
-      });
-    }
-
-    alert("Cloud carregada com sucesso");
-
-    loadLocalState();
-    renderAll();
-
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao carregar cloud");
-  }
-}
-
       function addManualBet() {
         alert('Adicionar aposta manual ainda não está disponível nesta versão.');
       }
