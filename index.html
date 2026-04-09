@@ -1729,7 +1729,15 @@
         if (!container) return;
 
         // manter só os essenciais visíveis
-        const keep = ['refreshBtn', 'loadCloudBtn', 'btnApostasTab'];
+        const keep = [
+          'refreshBtn',
+          'compactRefreshBtn',
+          'refreshBtnMobile',
+          'loadCloudBtn',
+          'loadCloudBtnMobile',
+          'btnApostasTab',
+          'btnApostasTabMobile'
+        ];
 
         [...container.children].forEach(child => {
           if (!keep.includes(child.id)) {
@@ -1738,7 +1746,52 @@
         });
 
         injectMoreActionsButton();
-      }
+}
+    
+        function injectMoreActionsButton() {
+          const container = document.querySelector('.top-actions');
+          if (!container) return;
+
+          let btn = document.getElementById('toggleMoreActionsBtn');
+          let panel = document.getElementById('mobileActionsPanel');
+
+          if (!btn) {
+            btn = document.createElement('button');
+            btn.id = 'toggleMoreActionsBtn';
+            btn.textContent = 'Mais ações';
+            btn.type = 'button';
+            btn.style.marginTop = '8px';
+            container.appendChild(btn);
+          }
+
+          if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'mobileActionsPanel';
+            panel.style.display = 'none';
+            panel.style.width = '100%';
+            panel.style.marginTop = '8px';
+            container.appendChild(panel);
+          }
+
+          const extraIds = [
+            'saveCloudBtn',
+            'resetLocalBtn',
+            'clearManualBtn',
+            'exportManualBtn',
+            'importManualBtn',
+            'exportRealCsvBtn'
+          ];
+
+          extraIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            panel.appendChild(el);
+            el.style.display = '';
+            el.style.width = '100%';
+            el.style.marginTop = '8px';
+          });
+        }
 
       /* =========================
          TOOLTIP + BOTÃO PICKS
@@ -1970,6 +2023,18 @@ function bindTabButtons() {
     applyMobileTopOptimization();
     bindQuickMarketButtons();
   }, 200);
+
+  document.addEventListener('click', (e) => {
+    if (e.target?.id === 'toggleMoreActionsBtn') {
+      const panel = document.getElementById('mobileActionsPanel');
+      if (!panel) return;
+
+      panel.style.display =
+        panel.style.display === 'none' || !panel.style.display
+          ? 'block'
+          : 'none';
+      }
+    });
 }
 
             const CLOUD_URL = "https://apostas-dashboard-sync.onrender.com";
