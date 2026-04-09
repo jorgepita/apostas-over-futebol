@@ -325,79 +325,79 @@
       "resultadoManual": "",
       "stakeReal": ""
     },
-    "2026-04-10|Championship|West Brom vs Millwall|O2.5": {
+    "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
       "apostada": true,
-      "oddReal": "2.14",
-      "stakeReal": "14.5",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
-      "apostada": true,
-      "oddReal": "2.07",
-      "stakeReal": "13",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
-      "apostada": true,
-      "oddReal": "2.37",
-      "stakeReal": "18",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
-      "apostada": true,
-      "oddReal": "1.95",
-      "stakeReal": "20",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Bundesliga|FC Augsburg vs 1899 Hoffenheim|O2.5": {
-      "apostada": true,
-      "oddReal": "1.65",
-      "stakeReal": "13",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Ligue 2|Laval vs Reims|O2.5": {
-      "apostada": true,
-      "oddReal": "2.18",
-      "stakeReal": "8",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
-      "apostada": true,
-      "oddReal": "1.91",
-      "stakeReal": "8",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Ligue 2|Clermont Foot vs Nancy|O2.5": {
-      "apostada": true,
-      "oddReal": "2.07",
-      "stakeReal": "6.5",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Super Lig|Beşiktaş vs Antalyaspor|BTTS": {
-      "apostada": true,
-      "oddReal": "1.94",
-      "stakeReal": "8",
-      "resultadoManual": ""
+      "oddReal": "1.62",
+      "resultadoManual": "",
+      "stakeReal": "3"
     },
     "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
       "apostada": true,
       "oddReal": "1.65",
-      "stakeReal": "5.5",
-      "resultadoManual": ""
+      "resultadoManual": "",
+      "stakeReal": "5.5"
     },
-    "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
+    "2026-04-10|Bundesliga|FC Augsburg vs 1899 Hoffenheim|O2.5": {
       "apostada": true,
-      "oddReal": "1.62",
-      "stakeReal": "3",
-      "resultadoManual": ""
+      "oddReal": "1.65",
+      "resultadoManual": "",
+      "stakeReal": "13"
+    },
+    "2026-04-10|Championship|West Brom vs Millwall|O2.5": {
+      "apostada": true,
+      "oddReal": "2.14",
+      "resultadoManual": "",
+      "stakeReal": "14.5"
+    },
+    "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "resultadoManual": "",
+      "stakeReal": "20"
+    },
+    "2026-04-10|Ligue 2|Clermont Foot vs Nancy|O2.5": {
+      "apostada": true,
+      "oddReal": "2.07",
+      "resultadoManual": "",
+      "stakeReal": "6.5"
+    },
+    "2026-04-10|Ligue 2|Laval vs Reims|O2.5": {
+      "apostada": true,
+      "oddReal": "2.18",
+      "resultadoManual": "",
+      "stakeReal": "8"
+    },
+    "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
+      "apostada": true,
+      "oddReal": "1.91",
+      "resultadoManual": "",
+      "stakeReal": "8"
+    },
+    "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
+      "apostada": true,
+      "oddReal": "2.07",
+      "resultadoManual": "",
+      "stakeReal": "13"
+    },
+    "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
+      "apostada": true,
+      "oddReal": "2.37",
+      "resultadoManual": "",
+      "stakeReal": "18"
     },
     "2026-04-10|Serie B|Frosinone vs Palermo|O2.5": {
       "apostada": true,
       "oddReal": "1.65",
-      "stakeReal": "3",
-      "resultadoManual": ""
+      "resultadoManual": "",
+      "stakeReal": "3"
+    },
+    "2026-04-10|Super Lig|Beşiktaş vs Antalyaspor|BTTS": {
+      "apostada": true,
+      "oddReal": "1.94",
+      "resultadoManual": "",
+      "stakeReal": "8"
     }
   },
   "manualBets": [],
-  "updatedAt": "2026-04-08T20:47:13.777941+00:00"
+  "updatedAt": "2026-04-09T22:10:57.527340+00:00"
 }
