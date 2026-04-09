@@ -1913,13 +1913,53 @@
         }, 200);
       }
 
-            async function loadCloudState() {
-        alert('Carregar cloud ainda não está disponível nesta versão.');
-      }
+            const CLOUD_URL = "https://apostas-dashboard-sync.onrender.com";
 
-      async function saveCloudState() {
-        alert('Guardar cloud ainda não está disponível nesta versão.');
-      }
+async function saveCloudState() {
+  try {
+    const payload = {
+      localStorage: { ...localStorage },
+    };
+
+    const res = await fetch(`${CLOUD_URL}/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error("Erro ao guardar");
+
+    alert("Cloud guardada com sucesso");
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao guardar cloud");
+  }
+}
+
+async function loadCloudState() {
+  try {
+    const res = await fetch(`${CLOUD_URL}/load`);
+
+    if (!res.ok) throw new Error("Erro ao carregar");
+
+    const data = await res.json();
+
+    if (data.localStorage) {
+      Object.entries(data.localStorage).forEach(([k, v]) => {
+        localStorage.setItem(k, v);
+      });
+    }
+
+    alert("Cloud carregada com sucesso");
+
+    loadLocalState();
+    renderAll();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao carregar cloud");
+  }
+}
 
       function addManualBet() {
         alert('Adicionar aposta manual ainda não está disponível nesta versão.');
