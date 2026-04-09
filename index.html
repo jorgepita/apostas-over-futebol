@@ -1736,7 +1736,8 @@
           'loadCloudBtn',
           'loadCloudBtnMobile',
           'btnApostasTab',
-          'btnApostasTabMobile'
+          'btnApostasTabMobile',
+          'toggleMoreActionsBtn'   // 👈 IMPORTANTE
         ];
 
         [...container.children].forEach(child => {
@@ -1932,6 +1933,14 @@ function bindTabButtons() {
   document.getElementById('loadCloudBtnMobile')?.addEventListener('click', loadCloudState);
   document.getElementById('saveCloudBtnMobile')?.addEventListener('click', saveCloudState);
 
+  document.getElementById('toggleMoreActionsBtn')?.addEventListener('click', () => {
+    const panel = document.getElementById('mobileActionsPanel');
+    if (!panel) return;
+
+    panel.style.display =
+      panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+  });
+        
   document.getElementById('addManualBetBtn')?.addEventListener('click', addManualBet);
 
   document.getElementById('importManualBtn')?.addEventListener('click', () => {
