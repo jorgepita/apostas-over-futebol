@@ -1844,6 +1844,65 @@
 
         window.addEventListener('resize', applyMobileTopOptimization);
 
+          document.getElementById('refreshBtnMobile')?.addEventListener('click', loadData);
+
+  document.getElementById('btnApostasTab')?.addEventListener('click', () => {
+    document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('btnApostasTabMobile')?.addEventListener('click', () => {
+    document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('resetLocalBtn')?.addEventListener('click', () => {
+    alert('Limpar controlos locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('clearManualBtn')?.addEventListener('click', () => {
+    alert('Apagar manuais locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('exportManualBtn')?.addEventListener('click', () => {
+    alert('Exportar manuais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('importManualBtn')?.addEventListener('click', () => {
+    document.getElementById('importManualFile')?.click();
+  });
+
+  document.getElementById('exportRealCsvBtn')?.addEventListener('click', () => {
+    alert('Exportar CSV real ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('loadCloudBtnMobile')?.addEventListener('click', loadCloudState);
+  document.getElementById('saveCloudBtnMobile')?.addEventListener('click', saveCloudState);
+
+  document.getElementById('resetLocalBtnMobile')?.addEventListener('click', () => {
+    alert('Limpar controlos locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('clearManualBtnMobile')?.addEventListener('click', () => {
+    alert('Apagar manuais locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('exportManualBtnMobile')?.addEventListener('click', () => {
+    alert('Exportar manuais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('importManualBtnMobile')?.addEventListener('click', () => {
+    document.getElementById('importManualFile')?.click();
+  });
+
+  document.getElementById('exportRealCsvBtnMobile')?.addEventListener('click', () => {
+    alert('Exportar CSV real ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('toggleMoreActionsBtn')?.addEventListener('click', () => {
+    const panel = document.getElementById('mobileActionsPanel');
+    if (!panel) return;
+    panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+  });
+        
         loadData();
 
         setInterval(loadData, 60000);
@@ -1868,6 +1927,14 @@
 
       function applyMobileTopOptimization() {
         // sem ação, placeholder
+      }
+      
+      function bindBotTableEvents() {
+        // placeholder
+      }
+
+      function bindManualEvents() {
+        // placeholder
       }
       
       document.addEventListener('DOMContentLoaded', init);
