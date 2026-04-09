@@ -1828,23 +1828,62 @@
          INIT
       ========================= */
       function init() {
-        loadLocalState();
+  loadLocalState();
 
-        document.getElementById('refreshBtn')?.addEventListener('click', loadData);
-        document.getElementById('loadCloudBtn')?.addEventListener('click', loadCloudState);
-        document.getElementById('saveCloudBtn')?.addEventListener('click', saveCloudState);
+  document.getElementById('refreshBtn')?.addEventListener('click', loadData);
+  document.getElementById('compactRefreshBtn')?.addEventListener('click', loadData);
+  document.getElementById('refreshBtnMobile')?.addEventListener('click', loadData);
 
-        document.getElementById('addManualBetBtn')?.addEventListener('click', addManualBet);
+  document.getElementById('loadCloudBtn')?.addEventListener('click', loadCloudState);
+  document.getElementById('saveCloudBtn')?.addEventListener('click', saveCloudState);
+  document.getElementById('loadCloudBtnMobile')?.addEventListener('click', loadCloudState);
+  document.getElementById('saveCloudBtnMobile')?.addEventListener('click', saveCloudState);
 
-        document.getElementById('daySearch')?.addEventListener('input', renderAll);
-        document.getElementById('dayLeagueFilter')?.addEventListener('change', renderAll);
-        document.getElementById('dayMarketFilter')?.addEventListener('change', renderAll);
+  document.getElementById('addManualBetBtn')?.addEventListener('click', addManualBet);
 
-        document.getElementById('historySearch')?.addEventListener('input', renderAll);
+  document.getElementById('importManualBtn')?.addEventListener('click', () => {
+    document.getElementById('importManualFile')?.click();
+  });
 
-        window.addEventListener('resize', applyMobileTopOptimization);
+  document.getElementById('importManualBtnMobile')?.addEventListener('click', () => {
+    document.getElementById('importManualFile')?.click();
+  });
 
-          document.getElementById('refreshBtnMobile')?.addEventListener('click', loadData);
+  document.getElementById('exportManualBtn')?.addEventListener('click', () => {
+    alert('Exportar manuais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('exportManualBtnMobile')?.addEventListener('click', () => {
+    alert('Exportar manuais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('exportRealCsvBtn')?.addEventListener('click', () => {
+    alert('Exportar CSV real ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('exportRealCsvBtnMobile')?.addEventListener('click', () => {
+    alert('Exportar CSV real ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('resetLocalBtn')?.addEventListener('click', () => {
+    alert('Limpar controlos locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('resetLocalBtnMobile')?.addEventListener('click', () => {
+    alert('Limpar controlos locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('clearManualBtn')?.addEventListener('click', () => {
+    alert('Apagar manuais locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('clearManualBtnMobile')?.addEventListener('click', () => {
+    alert('Apagar manuais locais ainda não está disponível nesta versão.');
+  });
+
+  document.getElementById('expandTopBtn')?.addEventListener('click', () => {
+    document.getElementById('topSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   document.getElementById('btnApostasTab')?.addEventListener('click', () => {
     document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1854,64 +1893,37 @@
     document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  document.getElementById('resetLocalBtn')?.addEventListener('click', () => {
-    alert('Limpar controlos locais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('clearManualBtn')?.addEventListener('click', () => {
-    alert('Apagar manuais locais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('exportManualBtn')?.addEventListener('click', () => {
-    alert('Exportar manuais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('importManualBtn')?.addEventListener('click', () => {
-    document.getElementById('importManualFile')?.click();
-  });
-
-  document.getElementById('exportRealCsvBtn')?.addEventListener('click', () => {
-    alert('Exportar CSV real ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('loadCloudBtnMobile')?.addEventListener('click', loadCloudState);
-  document.getElementById('saveCloudBtnMobile')?.addEventListener('click', saveCloudState);
-
-  document.getElementById('resetLocalBtnMobile')?.addEventListener('click', () => {
-    alert('Limpar controlos locais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('clearManualBtnMobile')?.addEventListener('click', () => {
-    alert('Apagar manuais locais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('exportManualBtnMobile')?.addEventListener('click', () => {
-    alert('Exportar manuais ainda não está disponível nesta versão.');
-  });
-
-  document.getElementById('importManualBtnMobile')?.addEventListener('click', () => {
-    document.getElementById('importManualFile')?.click();
-  });
-
-  document.getElementById('exportRealCsvBtnMobile')?.addEventListener('click', () => {
-    alert('Exportar CSV real ainda não está disponível nesta versão.');
-  });
-
   document.getElementById('toggleMoreActionsBtn')?.addEventListener('click', () => {
     const panel = document.getElementById('mobileActionsPanel');
     if (!panel) return;
-    panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+    panel.style.display =
+      panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
   });
-        
-        loadData();
 
-        setInterval(loadData, 60000);
+  document.getElementById('daySearch')?.addEventListener('input', renderAll);
+  document.getElementById('dayLeagueFilter')?.addEventListener('change', renderAll);
+  document.getElementById('dayMarketFilter')?.addEventListener('change', renderAll);
+  document.getElementById('dayResultFilter')?.addEventListener('change', renderAll);
+  document.getElementById('dayExecutionFilter')?.addEventListener('change', renderAll);
 
-        setTimeout(() => {
-          applyMobileTopOptimization();
-          bindQuickMarketButtons();
-        }, 200);
-      }
+  document.getElementById('historySearch')?.addEventListener('input', renderAll);
+  document.getElementById('historySourceFilter')?.addEventListener('change', renderAll);
+  document.getElementById('historyDateFilter')?.addEventListener('change', renderAll);
+  document.getElementById('historyLeagueFilter')?.addEventListener('change', renderAll);
+  document.getElementById('historyMarketFilter')?.addEventListener('change', renderAll);
+  document.getElementById('historyResultFilter')?.addEventListener('change', renderAll);
+  document.getElementById('historyExecutionFilter')?.addEventListener('change', renderAll);
+
+  window.addEventListener('resize', applyMobileTopOptimization);
+
+  loadData();
+  setInterval(loadData, 60000);
+
+  setTimeout(() => {
+    applyMobileTopOptimization();
+    bindQuickMarketButtons();
+  }, 200);
+}
 
             const CLOUD_URL = "https://apostas-dashboard-sync.onrender.com";
 
