@@ -1827,12 +1827,52 @@
       /* =========================
          INIT
       ========================= */
+      function setActiveTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === tabId);
+  });
+
+  document.querySelectorAll('[data-tab-target]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
+  });
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.activeTab, tabId);
+  } catch {}
+}
+
+function bindTabButtons() {
+  document.querySelectorAll('[data-tab-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tabTarget;
+      if (!tabId) return;
+      setActiveTab(tabId);
+
+      const panel = document.getElementById(tabId);
+      if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+}
+      
       function init() {
   loadLocalState();
 
-  document.getElementById('refreshBtn')?.addEventListener('click', loadData);
-  document.getElementById('compactRefreshBtn')?.addEventListener('click', loadData);
-  document.getElementById('refreshBtnMobile')?.addEventListener('click', loadData);
+  document.getElementById('refreshBtn')?.addEventListener('click', async () => {
+    await loadData();
+    renderAll();
+  });
+
+  document.getElementById('compactRefreshBtn')?.addEventListener('click', async () => {
+    await loadData();
+    renderAll();
+  });
+
+  document.getElementById('refreshBtnMobile')?.addEventListener('click', async () => {
+    await loadData();
+    renderAll();
+  });
 
   document.getElementById('loadCloudBtn')?.addEventListener('click', loadCloudState);
   document.getElementById('saveCloudBtn')?.addEventListener('click', saveCloudState);
@@ -1886,10 +1926,12 @@
   });
 
   document.getElementById('btnApostasTab')?.addEventListener('click', () => {
+    setActiveTab('tab-day');
     document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   document.getElementById('btnApostasTabMobile')?.addEventListener('click', () => {
+    setActiveTab('tab-day');
     document.getElementById('tab-day')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
@@ -1913,6 +1955,11 @@
   document.getElementById('historyMarketFilter')?.addEventListener('change', renderAll);
   document.getElementById('historyResultFilter')?.addEventListener('change', renderAll);
   document.getElementById('historyExecutionFilter')?.addEventListener('change', renderAll);
+
+  bindTabButtons();
+
+  const savedTab = localStorage.getItem(STORAGE_KEYS.activeTab) || 'tab-summary';
+  setActiveTab(savedTab);
 
   window.addEventListener('resize', applyMobileTopOptimization);
 
