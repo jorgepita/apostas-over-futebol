@@ -1918,21 +1918,64 @@
 async function saveCloudState() {
   try {
     const payload = {
-      localStorage: { ...localStorage },
+      bankrollInicial: Number(localStorage.getItem(STORAGE_KEYS.bankrollReal) || 1000),
+      localEdits: JSON.parse(localStorage.getItem(STORAGE_KEYS.picks) || '{}'),
+      manualBets: JSON.parse(localStorage.getItem(STORAGE_KEYS.manual) || '[]')
     };
 
-    const res = await fetch(`${CLOUD_URL}/save`, {
+    const res = await fetch(`${CLOUD_URL}/state`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error("Erro ao guardar");
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Erro ao guardar");
+    }
 
     alert("Cloud guardada com sucesso");
   } catch (err) {
     console.error(err);
     alert("Erro ao guardar cloud");
+  }
+}
+
+async function loadCloudState() {
+  try {
+    const res = await fetch(`${CLOUD_URL}/state`);
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Erro ao carregar");
+    }
+
+    const state = data.state || {};
+
+    localStorage.setItem(
+      STORAGE_KEYS.bankrollReal,
+      String(state.bankrollInicial ?? 1000)
+    );
+
+    localStorage.setItem(
+      STORAGE_KEYS.picks,
+      JSON.stringify(state.localEdits || {})
+    );
+
+    localStorage.setItem(
+      STORAGE_KEYS.manual,
+      JSON.stringify(state.manualBets || [])
+    );
+
+    alert("Cloud carregada com sucesso");
+
+    loadLocalState();
+    renderAll();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao carregar cloud");
   }
 }
 
