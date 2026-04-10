@@ -453,7 +453,7 @@
     },
     "2026-04-11|2. Bundesliga|SV Darmstadt 98 vs Hannover 96|O2.5": {
       "apostada": true,
-      "oddReal": "1.6",
+      "oddReal": "1",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:43:58.062516+00:00"
+  "updatedAt": "2026-04-10T21:44:25.339532+00:00"
 }
