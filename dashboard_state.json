@@ -154,13 +154,13 @@
     "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
       "apostada": true,
       "oddReal": "2.2",
-      "stakeReal": "11.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
       "apostada": true,
       "oddReal": "2.63",
-      "stakeReal": "12",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:37:07.872757+00:00"
+  "updatedAt": "2026-04-10T21:37:19.351507+00:00"
 }
