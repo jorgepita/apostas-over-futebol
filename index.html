@@ -3293,6 +3293,7 @@ table {
       }
 
       async function boot() {
+        loadCompactMode();
         loadLocalState();
         document.getElementById('bankrollInput').value = state.bankrollInicial;
 
