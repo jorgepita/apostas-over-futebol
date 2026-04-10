@@ -339,13 +339,13 @@
     },
     "2026-04-07|Championship|Wrexham vs Southampton|BTTS": {
       "apostada": true,
-      "oddReal": "1.7",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
       "apostada": true,
-      "oddReal": "1.78",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:47:05.985754+00:00"
+  "updatedAt": "2026-04-10T21:47:13.586309+00:00"
 }
