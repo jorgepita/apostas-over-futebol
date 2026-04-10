@@ -213,13 +213,13 @@
     },
     "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
       "apostada": true,
-      "oddReal": "1.95",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
       "apostada": true,
-      "oddReal": "1.6",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:48:58.662322+00:00"
+  "updatedAt": "2026-04-10T21:49:06.365749+00:00"
 }
