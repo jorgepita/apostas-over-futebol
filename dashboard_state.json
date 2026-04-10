@@ -81,7 +81,7 @@
     },
     "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
       "apostada": true,
-      "oddReal": "1.55",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:50:43.670390+00:00"
+  "updatedAt": "2026-04-10T21:50:50.604758+00:00"
 }
