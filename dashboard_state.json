@@ -360,9 +360,15 @@
       "oddReal": "2.07",
       "stakeReal": "10.5",
       "resultadoManual": ""
+    },
+    "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
+      "apostada": true,
+      "oddReal": "2.37",
+      "stakeReal": "10.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:24:34.045169+00:00"
+  "updatedAt": "2026-04-10T19:24:46.318136+00:00"
 }
