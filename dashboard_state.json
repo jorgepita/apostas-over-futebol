@@ -375,7 +375,7 @@
     },
     "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
       "apostada": true,
-      "oddReal": "1.91",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:46:06.379923+00:00"
+  "updatedAt": "2026-04-10T21:46:16.377009+00:00"
 }
