@@ -352,13 +352,13 @@
     "2026-04-10|Championship|West Brom vs Millwall|O2.5": {
       "apostada": true,
       "oddReal": "2.14",
-      "stakeReal": "10.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
       "apostada": true,
       "oddReal": "2.07",
-      "stakeReal": "10.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:03.271151+00:00"
+  "updatedAt": "2026-04-10T21:41:13.694994+00:00"
 }
