@@ -202,13 +202,13 @@
     "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|BTTS": {
       "apostada": true,
       "oddReal": "1.73",
-      "stakeReal": "6.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
       "apostada": true,
       "oddReal": "1.57",
-      "stakeReal": "10.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:37:57.886491+00:00"
+  "updatedAt": "2026-04-10T21:38:06.980999+00:00"
 }
