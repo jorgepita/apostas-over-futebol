@@ -27,7 +27,7 @@
     },
     "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
       "apostada": true,
-      "oddReal": "1.83",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -363,7 +363,7 @@
     },
     "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
       "apostada": true,
-      "oddReal": "2.37",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:46:28.596609+00:00"
+  "updatedAt": "2026-04-10T21:46:40.408064+00:00"
 }
