@@ -76,7 +76,7 @@
     "2026-04-04|Bundesliga|Bayer Leverkusen vs VfL Wolfsburg|BTTS": {
       "apostada": true,
       "oddReal": "1.66",
-      "stakeReal": "8",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:35:14.490521+00:00"
+  "updatedAt": "2026-04-10T21:35:46.909170+00:00"
 }
