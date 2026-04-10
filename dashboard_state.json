@@ -112,13 +112,13 @@
     "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
       "apostada": true,
       "oddReal": "1.57",
-      "stakeReal": "7",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
       "apostada": true,
       "oddReal": "1.62",
-      "stakeReal": "11",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:36:23.692314+00:00"
+  "updatedAt": "2026-04-10T21:36:34.220858+00:00"
 }
