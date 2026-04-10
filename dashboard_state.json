@@ -1,15 +1,9 @@
 {
   "bankrollInicial": 200.0,
   "localEdits": {
-    "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
+    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
       "apostada": true,
-      "oddReal": "1.62",
-      "stakeReal": "3",
-      "resultadoManual": ""
-    },
-    "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
-      "apostada": true,
-      "oddReal": "1.83",
+      "oddReal": "1.91",
       "stakeReal": "8",
       "resultadoManual": ""
     },
@@ -19,20 +13,32 @@
       "stakeReal": "8",
       "resultadoManual": ""
     },
+    "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
+      "apostada": true,
+      "oddReal": "1.62",
+      "stakeReal": "3",
+      "resultadoManual": ""
+    },
     "2026-04-10|Bundesliga|FC Augsburg vs 1899 Hoffenheim|O2.5": {
       "apostada": true,
       "oddReal": "1.57",
       "stakeReal": "8.5",
       "resultadoManual": ""
     },
-    "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
+    "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
       "apostada": true,
-      "oddReal": "1.91",
+      "oddReal": "1.83",
       "stakeReal": "8",
+      "resultadoManual": ""
+    },
+    "2026-04-03|Championship|QPR vs Watford|BTTS": {
+      "apostada": true,
+      "oddReal": "1.73",
+      "stakeReal": "8.5",
       "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:20:23.258306+00:00"
+  "updatedAt": "2026-04-10T19:20:35.992716+00:00"
 }
