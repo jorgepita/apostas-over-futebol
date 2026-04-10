@@ -28,7 +28,7 @@
     "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
       "apostada": true,
       "oddReal": "1.83",
-      "stakeReal": "8",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-03|Championship|QPR vs Watford|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:24.645138+00:00"
+  "updatedAt": "2026-04-10T21:41:31.104247+00:00"
 }
