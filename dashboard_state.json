@@ -436,7 +436,7 @@
     "2026-04-11|Eredivisie|Heracles vs Ajax|O2.5": {
       "apostada": true,
       "oddReal": "1.53",
-      "stakeReal": "6.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Bundesliga|Borussia Dortmund vs Bayer Leverkusen|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:43:08.211160+00:00"
+  "updatedAt": "2026-04-10T21:43:13.378160+00:00"
 }
