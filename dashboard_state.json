@@ -40,7 +40,7 @@
     "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
       "apostada": true,
       "oddReal": "1.71",
-      "stakeReal": "4.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|LaLiga|Mallorca vs Real Madrid|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:34:42.400544+00:00"
+  "updatedAt": "2026-04-10T21:34:51.379383+00:00"
 }
