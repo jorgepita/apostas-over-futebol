@@ -102,9 +102,21 @@
       "oddReal": "1.7",
       "stakeReal": "4.5",
       "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|1899 Hoffenheim vs FSV Mainz 05|BTTS": {
+      "apostada": true,
+      "oddReal": "1.58",
+      "stakeReal": "8.5",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|SC Freiburg vs Bayern München|BTTS": {
+      "apostada": true,
+      "oddReal": "1.57",
+      "stakeReal": "7",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:21:38.832556+00:00"
+  "updatedAt": "2026-04-10T19:21:46.042936+00:00"
 }
