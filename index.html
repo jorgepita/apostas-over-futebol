@@ -2711,6 +2711,17 @@ table {
         `;
       }
 
+      function toggleCompactMode() {
+        document.body.classList.toggle('compact');
+        localStorage.setItem('compact_mode', document.body.classList.contains('compact') ? '1' : '0');
+      }
+
+    function loadCompactMode() {
+      if (localStorage.getItem('compact_mode') === '1') {
+        document.body.classList.add('compact');
+      }
+    }
+      
       function bindBotTableControls() {
         document.querySelectorAll('.js-apostada').forEach(el => {
           if (el.dataset.bound === '1') return;
