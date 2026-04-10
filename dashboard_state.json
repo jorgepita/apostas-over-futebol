@@ -412,13 +412,13 @@
     "2026-04-11|Premier League|Arsenal vs Bournemouth|O2.5": {
       "apostada": true,
       "oddReal": "1.69",
-      "stakeReal": "9.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|2. Bundesliga|1. FC Nürnberg vs Dynamo Dresden|O2.5": {
       "apostada": true,
       "oddReal": "1.78",
-      "stakeReal": "9",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Bundesliga|VfL Wolfsburg vs Eintracht Frankfurt|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:42:42.758160+00:00"
+  "updatedAt": "2026-04-10T21:42:51.080710+00:00"
 }
