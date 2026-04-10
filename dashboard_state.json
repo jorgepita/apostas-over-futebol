@@ -34,7 +34,7 @@
     "2026-04-03|Championship|QPR vs Watford|BTTS": {
       "apostada": true,
       "oddReal": "1.73",
-      "stakeReal": "8.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-03|Jupiler Pro League|Antwerp vs Genk|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:34:34.664166+00:00"
+  "updatedAt": "2026-04-10T21:34:42.400544+00:00"
 }
