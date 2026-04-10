@@ -135,7 +135,7 @@
     },
     "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
       "apostada": true,
-      "oddReal": "1.6",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:51:38.007492+00:00"
+  "updatedAt": "2026-04-10T21:51:44.284233+00:00"
 }
