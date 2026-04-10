@@ -57,7 +57,7 @@
     },
     "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
       "apostada": true,
-      "oddReal": "1.77",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:50:24.915462+00:00"
+  "updatedAt": "2026-04-10T21:50:32.084876+00:00"
 }
