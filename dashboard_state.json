@@ -22,7 +22,7 @@
     "2026-04-10|Bundesliga|FC Augsburg vs 1899 Hoffenheim|O2.5": {
       "apostada": true,
       "oddReal": "1.57",
-      "stakeReal": "8.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Eredivisie|Twente vs FC Volendam|BTTS": {
@@ -370,7 +370,7 @@
     "2026-04-10|Ligue 2|Laval vs Reims|O2.5": {
       "apostada": true,
       "oddReal": "2.18",
-      "stakeReal": "9.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:31.104247+00:00"
+  "updatedAt": "2026-04-10T21:41:44.248493+00:00"
 }
