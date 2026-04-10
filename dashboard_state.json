@@ -448,7 +448,7 @@
     "2026-04-11|Bundesliga|1. FC Heidenheim vs Union Berlin|BTTS": {
       "apostada": true,
       "oddReal": "1.67",
-      "stakeReal": "1.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|2. Bundesliga|SV Darmstadt 98 vs Hannover 96|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:43:22.928867+00:00"
+  "updatedAt": "2026-04-10T21:43:29.924802+00:00"
 }
