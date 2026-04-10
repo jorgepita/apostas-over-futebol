@@ -9,7 +9,7 @@
     },
     "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
       "apostada": true,
-      "oddReal": "1.7",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -393,19 +393,19 @@
     },
     "2026-04-10|Serie B|Frosinone vs Palermo|O2.5": {
       "apostada": true,
-      "oddReal": "1.65",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|2. Bundesliga|Preußen Münster vs SpVgg Greuther Fürth|O2.5": {
       "apostada": true,
-      "oddReal": "1.93",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Ligue 2|Boulogne vs Le Mans|BTTS": {
       "apostada": true,
-      "oddReal": "2.03",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:45:23.648393+00:00"
+  "updatedAt": "2026-04-10T21:45:47.668518+00:00"
 }
