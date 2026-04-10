@@ -2645,6 +2645,13 @@ table {
           `Abertas: ${r.openCount} • stake exposta €${fmt(r.stakeOpen)} • potencial €${fmt(r.potencialLucro)}`
         ];
 
+        const sess = m.sessao;
+
+        items.push(
+          `O2.5 → ${sess.o25Stats.total} apostas • ${sess.o25Stats.wins}W / ${sess.o25Stats.losses}L`,
+          `BTTS → ${sess.bttsStats.total} apostas • ${sess.bttsStats.wins}W / ${sess.bttsStats.losses}L`
+        );
+
         document.getElementById('summaryList').innerHTML = items.map(t => `
           <div class="stat">
             <div class="note">${escapeHtml(t)}</div>
