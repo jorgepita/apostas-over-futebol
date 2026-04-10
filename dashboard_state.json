@@ -180,9 +180,21 @@
       "oddReal": "1.78",
       "stakeReal": "11.5",
       "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|NAC Breda vs Sparta Rotterdam|O2.5": {
+      "apostada": true,
+      "oddReal": "1.86",
+      "stakeReal": "12",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Angers vs Lyon|O2.5": {
+      "apostada": true,
+      "oddReal": "1.98",
+      "stakeReal": "11",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:22:30.193032+00:00"
+  "updatedAt": "2026-04-10T19:22:37.628801+00:00"
 }
