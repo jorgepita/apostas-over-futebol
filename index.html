@@ -1585,27 +1585,40 @@
       }
 
       function renderAll() {
-        const historyMerged = getHistoryRowsMerged();
-        const manualMerged = getManualRowsMerged();
+  const historyMerged = getHistoryRowsMerged();
+  const manualMerged = getManualRowsMerged();
+  const dailyMerged = getDailyRowsMerged();
 
-        populateHistoryFilters(historyMerged);
+  populateHistoryFilters(historyMerged);
 
-        const filteredHistory = applyHistoryFilters(historyMerged);
-        renderHistoryTable(filteredHistory);
+  const filteredHistory = applyHistoryFilters(historyMerged);
+  renderHistoryTable(filteredHistory);
 
-        renderClosedRealTable(historyMerged, manualMerged);
-        renderManualTable(manualMerged);
+  renderClosedRealTable(historyMerged, manualMerged);
+  renderManualTable(manualMerged);
 
-        const statsBot = calcSummaryStats(getResolvedHistory(), r => r._lucroModeloLocal);
-        const statsManual = calcSummaryStats(getResolvedManualBets(), r => r._lucro);
+  if (typeof renderFootball === 'function') {
+    renderFootball(dailyMerged);
+  }
 
-        renderSummaryCards('historyBotSummary', statsBot, 'Bot');
-        renderSummaryCards('historyManualSummary', statsManual, 'Manuais');
+  if (typeof renderBotHistoryOperational === 'function') {
+    renderBotHistoryOperational();
+  }
 
-        const closedCount = filteredHistory.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
-        const badge = document.getElementById('historyClosedCountBadge');
-        if (badge) badge.textContent = `${closedCount} fechadas`;
-      }
+  if (typeof renderSummary === 'function') {
+    renderSummary();
+  }
+
+  const statsBot = calcSummaryStats(getResolvedHistory(), r => r._lucroModeloLocal);
+  const statsManual = calcSummaryStats(getResolvedManualBets(), r => r._lucro);
+
+  renderSummaryCards('historyBotSummary', statsBot, 'Bot');
+  renderSummaryCards('historyManualSummary', statsManual, 'Manuais');
+
+  const closedCount = filteredHistory.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
+  const badge = document.getElementById('historyClosedCountBadge');
+  if (badge) badge.textContent = `${closedCount} fechadas`;
+}
             /* =========================
          EVENTOS TABELAS (BOT)
       ========================= */
@@ -1683,7 +1696,10 @@
          MOBILE — MAIS AÇÕES (UX NOVO)
       ========================= */
       function injectMoreActionsButton() {
-  const container = document.querySelector('.top-actions');
+  const container =
+    document.querySelector('#mobileTopActions .top-actions') ||
+    document.querySelector('.top-actions');
+
   if (!container) return;
 
   let btn = document.getElementById('toggleMoreActionsBtn');
@@ -1732,31 +1748,50 @@
   btn.onclick = () => {
     panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
   };
-}
+      }
 
       function applyMobileTopOptimization() {
-        if (window.innerWidth > 900) return;
+  const container =
+    document.querySelector('#mobileTopActions .top-actions') ||
+    document.querySelector('.top-actions');
 
-        const container = document.querySelector('.top-actions');
-        if (!container) return;
+  if (!container) return;
 
-        // manter só os essenciais visíveis
-        const keep = [
-          'refreshBtn',
-          'compactRefreshBtn',
-          'refreshBtnMobile',
-          'loadCloudBtn',
-          'loadCloudBtnMobile',
-          'btnApostasTab',
-          'btnApostasTabMobile',
-          'toggleMoreActionsBtn'   // 👈 IMPORTANTE
-        ];
+  const isMobile = window.innerWidth <= 900;
 
-        [...container.children].forEach(child => {
-          if (!keep.includes(child.id)) {
-            child.style.display = 'none';
-          }
-        });
+  if (!isMobile) {
+    const btn = document.getElementById('toggleMoreActionsBtn');
+    const panel = document.getElementById('mobileActionsPanel');
+
+    if (panel) panel.style.display = 'none';
+    if (btn) btn.style.display = 'none';
+    return;
+  }
+
+  injectMoreActionsButton();
+
+  const keep = [
+    'refreshBtn',
+    'refreshBtnMobile',
+    'loadCloudBtn',
+    'loadCloudBtnMobile',
+    'btnApostasTab',
+    'btnApostasTabMobile',
+    'toggleMoreActionsBtn',
+    'mobileActionsPanel'
+  ];
+
+  [...container.children].forEach(child => {
+    if (!keep.includes(child.id)) {
+      child.style.display = 'none';
+    } else {
+      child.style.display = '';
+      child.style.width = '100%';
+      child.style.marginTop = '8px';
+    }
+  });
+}
+      
 
         
 
