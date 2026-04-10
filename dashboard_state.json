@@ -72,9 +72,27 @@
       "oddReal": "1.67",
       "stakeReal": "9.5",
       "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|Bayer Leverkusen vs VfL Wolfsburg|BTTS": {
+      "apostada": true,
+      "oddReal": "1.66",
+      "stakeReal": "8",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Eredivisie|PSV Eindhoven vs Utrecht|BTTS": {
+      "apostada": true,
+      "oddReal": "1.55",
+      "stakeReal": "10",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|BTTS": {
+      "apostada": true,
+      "oddReal": "1.68",
+      "stakeReal": "10",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:21:11.730382+00:00"
+  "updatedAt": "2026-04-10T19:21:31.093645+00:00"
 }
