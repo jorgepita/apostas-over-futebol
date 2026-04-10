@@ -364,7 +364,7 @@
     "2026-04-10|Serie A|AS Roma vs Pisa|BTTS": {
       "apostada": true,
       "oddReal": "2.37",
-      "stakeReal": "10.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Ligue 2|Laval vs Reims|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:13.694994+00:00"
+  "updatedAt": "2026-04-10T21:41:24.645138+00:00"
 }
