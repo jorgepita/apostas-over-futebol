@@ -462,9 +462,15 @@
       "oddReal": "1.5",
       "stakeReal": "2",
       "resultadoManual": ""
+    },
+    "2026-04-11|Eredivisie|Groningen vs GO Ahead Eagles|O2.5": {
+      "apostada": true,
+      "oddReal": "1.57",
+      "stakeReal": "3",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:25:51.217312+00:00"
+  "updatedAt": "2026-04-10T19:26:02.788698+00:00"
 }
