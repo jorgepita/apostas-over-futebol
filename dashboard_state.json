@@ -4,7 +4,7 @@
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
       "apostada": true,
       "oddReal": "1.91",
-      "stakeReal": "8",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:32:38.844777+00:00"
+  "updatedAt": "2026-04-10T21:34:34.664166+00:00"
 }
