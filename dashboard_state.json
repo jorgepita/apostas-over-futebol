@@ -142,13 +142,13 @@
     "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
       "apostada": true,
       "oddReal": "1.5",
-      "stakeReal": "1",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|2. Bundesliga|1. FC Magdeburg vs VfL Bochum|O2.5": {
       "apostada": true,
       "oddReal": "1.55",
-      "stakeReal": "1",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:37:00.358599+00:00"
+  "updatedAt": "2026-04-10T21:37:07.872757+00:00"
 }
