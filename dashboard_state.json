@@ -346,7 +346,7 @@
     "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
       "apostada": true,
       "oddReal": "1.78",
-      "stakeReal": "10",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Championship|West Brom vs Millwall|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:40:57.835410+00:00"
+  "updatedAt": "2026-04-10T21:41:03.271151+00:00"
 }
