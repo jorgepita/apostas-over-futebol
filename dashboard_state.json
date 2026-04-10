@@ -406,7 +406,7 @@
     "2026-04-11|Ligue 2|Boulogne vs Le Mans|BTTS": {
       "apostada": true,
       "oddReal": "2.03",
-      "stakeReal": "11",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Premier League|Arsenal vs Bournemouth|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:42:35.153850+00:00"
+  "updatedAt": "2026-04-10T21:42:42.758160+00:00"
 }
