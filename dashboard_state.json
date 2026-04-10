@@ -228,9 +228,39 @@
       "oddReal": "1.47",
       "stakeReal": "6",
       "resultadoManual": ""
+    },
+    "2026-04-05|Serie A|Pisa vs Torino|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "stakeReal": "6",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Metz vs Nantes|BTTS": {
+      "apostada": true,
+      "oddReal": "1.86",
+      "stakeReal": "4",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
+      "apostada": true,
+      "oddReal": "1.91",
+      "stakeReal": "3",
+      "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
+      "apostada": true,
+      "oddReal": "1.6",
+      "stakeReal": "4",
+      "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
+      "apostada": true,
+      "oddReal": "1.57",
+      "stakeReal": "1.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:23:04.647370+00:00"
+  "updatedAt": "2026-04-10T19:23:21.015246+00:00"
 }
