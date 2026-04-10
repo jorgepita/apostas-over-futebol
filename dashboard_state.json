@@ -330,9 +330,39 @@
       "oddReal": "1.98",
       "stakeReal": "1.5",
       "resultadoManual": ""
+    },
+    "2026-04-06|Super Lig|Kocaelispor vs Başakşehir|BTTS": {
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1",
+      "resultadoManual": ""
+    },
+    "2026-04-07|Championship|Wrexham vs Southampton|BTTS": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "10",
+      "resultadoManual": ""
+    },
+    "2026-04-08|Super Lig|Göztepe vs Galatasaray|O2.5": {
+      "apostada": true,
+      "oddReal": "1.78",
+      "stakeReal": "10",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Championship|West Brom vs Millwall|O2.5": {
+      "apostada": true,
+      "oddReal": "2.14",
+      "stakeReal": "10.5",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
+      "apostada": true,
+      "oddReal": "2.07",
+      "stakeReal": "10.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:24:13.192950+00:00"
+  "updatedAt": "2026-04-10T19:24:34.045169+00:00"
 }
