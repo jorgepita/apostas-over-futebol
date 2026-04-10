@@ -237,13 +237,13 @@
     },
     "2026-04-05|Ligue 1|Metz vs Nantes|BTTS": {
       "apostada": true,
-      "oddReal": "1.86",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Ligue 1|Angers vs Lyon|BTTS": {
       "apostada": true,
-      "oddReal": "1.91",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:48:32.676944+00:00"
+  "updatedAt": "2026-04-10T21:48:40.315810+00:00"
 }
