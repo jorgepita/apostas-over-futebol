@@ -54,9 +54,21 @@
       "oddReal": "1.73",
       "stakeReal": "9",
       "resultadoManual": ""
+    },
+    "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
+      "apostada": true,
+      "oddReal": "1.77",
+      "stakeReal": "9.5",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
+      "apostada": true,
+      "oddReal": "1.71",
+      "stakeReal": "9",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:20:54.482040+00:00"
+  "updatedAt": "2026-04-10T19:21:03.876574+00:00"
 }
