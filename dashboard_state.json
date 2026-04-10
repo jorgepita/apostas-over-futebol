@@ -130,13 +130,13 @@
     "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
       "apostada": true,
       "oddReal": "1.62",
-      "stakeReal": "8.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|2. Bundesliga|Arminia Bielefeld vs SV Darmstadt 98|O2.5": {
       "apostada": true,
       "oddReal": "1.6",
-      "stakeReal": "4.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Eredivisie|Excelsior vs NEC Nijmegen|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:36:40.837180+00:00"
+  "updatedAt": "2026-04-10T21:37:00.358599+00:00"
 }
