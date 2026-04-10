@@ -3,7 +3,7 @@
   "localEdits": {
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
       "apostada": true,
-      "oddReal": "1.91",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:49:54.888159+00:00"
+  "updatedAt": "2026-04-10T21:50:01.791732+00:00"
 }
