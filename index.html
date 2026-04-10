@@ -954,6 +954,9 @@
     </div>
 
     <script>
+    window.onerror = function (msg, url, line, col, error) {
+      alert("ERRO:\n" + msg + "\nLinha: " + line);
+    };
       const URLS = {
         footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
