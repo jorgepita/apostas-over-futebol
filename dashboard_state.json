@@ -10,7 +10,7 @@
     "2026-04-10|2. Bundesliga|Fortuna Düsseldorf vs Holstein Kiel|O2.5": {
       "apostada": true,
       "oddReal": "1.7",
-      "stakeReal": "8",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:42:14.258848+00:00"
+  "updatedAt": "2026-04-10T21:42:23.813635+00:00"
 }
