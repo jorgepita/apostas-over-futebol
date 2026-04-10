@@ -255,19 +255,19 @@
     },
     "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
       "apostada": true,
-      "oddReal": "1.57",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|O2.5": {
       "apostada": true,
-      "oddReal": "1.5",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|BTTS": {
       "apostada": true,
-      "oddReal": "1.63",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:48:09.739495+00:00"
+  "updatedAt": "2026-04-10T21:48:25.425086+00:00"
 }
