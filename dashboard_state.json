@@ -33,7 +33,7 @@
     },
     "2026-04-03|Championship|QPR vs Watford|BTTS": {
       "apostada": true,
-      "oddReal": "1.73",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:50:01.791732+00:00"
+  "updatedAt": "2026-04-10T21:50:08.340914+00:00"
 }
