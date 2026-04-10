@@ -15,7 +15,7 @@
     },
     "2026-04-10|2. Bundesliga|Karlsruher SC vs Arminia Bielefeld|O2.5": {
       "apostada": true,
-      "oddReal": "1.62",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:45:47.668518+00:00"
+  "updatedAt": "2026-04-10T21:45:57.669850+00:00"
 }
