@@ -220,19 +220,19 @@
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
       "apostada": true,
       "oddReal": "1.6",
-      "stakeReal": "6",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
       "apostada": true,
       "oddReal": "1.47",
-      "stakeReal": "6",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Serie A|Pisa vs Torino|BTTS": {
       "apostada": true,
       "oddReal": "1.95",
-      "stakeReal": "6",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Ligue 1|Metz vs Nantes|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:38:14.029800+00:00"
+  "updatedAt": "2026-04-10T21:38:32.564517+00:00"
 }
