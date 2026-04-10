@@ -376,7 +376,7 @@
     "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
       "apostada": true,
       "oddReal": "1.91",
-      "stakeReal": "8.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Ligue 2|Clermont Foot vs Nancy|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:44.248493+00:00"
+  "updatedAt": "2026-04-10T21:41:56.470978+00:00"
 }
