@@ -192,9 +192,33 @@
       "oddReal": "1.98",
       "stakeReal": "11",
       "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|Eintracht Braunschweig vs 1. FC Nürnberg|O2.5": {
+      "apostada": true,
+      "oddReal": "1.76",
+      "stakeReal": "11",
+      "resultadoManual": ""
+    },
+    "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|BTTS": {
+      "apostada": true,
+      "oddReal": "1.73",
+      "stakeReal": "6.5",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|Heerenveen vs Heracles|BTTS": {
+      "apostada": true,
+      "oddReal": "1.57",
+      "stakeReal": "10.5",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Super Lig|Antalyaspor vs Eyüpspor|BTTS": {
+      "apostada": true,
+      "oddReal": "1.95",
+      "stakeReal": "8.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:22:37.628801+00:00"
+  "updatedAt": "2026-04-10T19:22:55.587071+00:00"
 }
