@@ -1683,43 +1683,56 @@
          MOBILE — MAIS AÇÕES (UX NOVO)
       ========================= */
       function injectMoreActionsButton() {
-        const container = document.querySelector('.top-actions');
-        if (!container) return;
+  const container = document.querySelector('.top-actions');
+  if (!container) return;
 
-        if (document.getElementById('toggleMoreActionsBtn')) return;
+  let btn = document.getElementById('toggleMoreActionsBtn');
+  let panel = document.getElementById('mobileActionsPanel');
 
-        const btn = document.createElement('button');
-        btn.id = 'toggleMoreActionsBtn';
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'toggleMoreActionsBtn';
+    btn.textContent = 'Mais ações';
+    btn.type = 'button';
+    btn.style.width = '100%';
+    btn.style.marginTop = '8px';
+    container.appendChild(btn);
+  }
 
-        const panel = document.createElement('div');
-        panel.id = 'mobileActionsPanel';
-        panel.style.display = 'none';
-        panel.style.flexDirection = 'column';
-        panel.style.gap = '8px';
-        panel.style.marginTop = '8px';
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'mobileActionsPanel';
+    panel.style.display = 'none';
+    panel.style.flexDirection = 'column';
+    panel.style.gap = '8px';
+    panel.style.width = '100%';
+    panel.style.marginTop = '8px';
+    container.appendChild(panel);
+  }
 
-        // mover botões extra para dentro do painel
-        const moveIds = [
-          'saveCloudBtn',
-          'resetLocalBtn',
-          'clearManualBtn',
-          'exportManualBtn',
-          'importManualBtn',
-          'exportRealCsvBtn'
-        ];
+  const extraIds = [
+    'saveCloudBtn',
+    'resetLocalBtn',
+    'clearManualBtn',
+    'exportManualBtn',
+    'importManualBtn',
+    'exportRealCsvBtn'
+  ];
 
-        moveIds.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) panel.appendChild(el);
-        });
+  extraIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-        btn.addEventListener('click', () => {
-          panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
-        });
+    panel.appendChild(el);
+    el.style.display = '';
+    el.style.width = '100%';
+    el.style.marginTop = '8px';
+  });
 
-        container.appendChild(btn);
-        container.appendChild(panel);
-      }
+  btn.onclick = () => {
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  };
+}
 
       function applyMobileTopOptimization() {
         if (window.innerWidth > 900) return;
@@ -1745,42 +1758,7 @@
           }
         });
 
-        injectMoreActionsButton();
-}
-    
-        function injectMoreActionsButton() {
-          const container = document.querySelector('.top-actions');
-          if (!container) return;
-
-          let btn = document.getElementById('toggleMoreActionsBtn');
-          let panel = document.getElementById('mobileActionsPanel');
-
-          if (!btn) {
-            btn = document.createElement('button');
-            btn.id = 'toggleMoreActionsBtn';
-            btn.textContent = 'Mais ações';
-            btn.type = 'button';
-            btn.style.marginTop = '8px';
-            container.appendChild(btn);
-          }
-
-          if (!panel) {
-            panel = document.createElement('div');
-            panel.id = 'mobileActionsPanel';
-            panel.style.display = 'none';
-            panel.style.width = '100%';
-            panel.style.marginTop = '8px';
-            container.appendChild(panel);
-          }
-
-          const extraIds = [
-            'saveCloudBtn',
-            'resetLocalBtn',
-            'clearManualBtn',
-            'exportManualBtn',
-            'importManualBtn',
-            'exportRealCsvBtn'
-          ];
+        
 
           
         }
