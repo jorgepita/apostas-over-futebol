@@ -117,19 +117,19 @@
     },
     "2026-04-04|Super Lig|Trabzonspor vs Galatasaray|O2.5": {
       "apostada": true,
-      "oddReal": "1.62",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Ligue 1|Lille vs Lens|BTTS": {
       "apostada": true,
-      "oddReal": "1.67",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|2. Bundesliga|1. FC Kaiserslautern vs Fortuna Düsseldorf|O2.5": {
       "apostada": true,
-      "oddReal": "1.62",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:51:22.291064+00:00"
+  "updatedAt": "2026-04-10T21:51:38.007492+00:00"
 }
