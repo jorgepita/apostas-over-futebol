@@ -165,13 +165,13 @@
     },
     "2026-04-05|Ligue 1|Metz vs Nantes|O2.5": {
       "apostada": true,
-      "oddReal": "2.19",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Serie A|Cremonese vs Bologna|O2.5": {
       "apostada": true,
-      "oddReal": "2.14",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:52:09.839797+00:00"
+  "updatedAt": "2026-04-10T21:52:17.984690+00:00"
 }
