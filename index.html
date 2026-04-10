@@ -2720,23 +2720,6 @@ table {
             const key = e.target.dataset.pickKey;
             const edit = ensureEditObject(key);
             edit.apostada = e.target.checked;
-
-            if (edit.apostada) {
-              const sourceRow =
-                getDailyRowsMerged().find(r => r._pickKey === key) ||
-                getHistoryRowsMerged().find(r => r._pickKey === key);
-
-              if (sourceRow) {
-                if (!cleanString(edit.stakeReal)) {
-                  const recStake = computeRecommendedStake(sourceRow);
-                  edit.stakeReal = recStake.value != null ? String(recStake.value) : '';
-                }
-                if (!cleanString(edit.oddReal)) {
-                  edit.oddReal = sourceRow['Odd'] || '';
-                }
-              }
-            }
-
             rerenderAll();
           });
         });
