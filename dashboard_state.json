@@ -250,19 +250,19 @@
     "2026-04-05|2. Bundesliga|FC Schalke 04 vs Karlsruher SC|O2.5": {
       "apostada": true,
       "oddReal": "1.6",
-      "stakeReal": "4",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|2. Bundesliga|Hannover 96 vs SV Elversberg|BTTS": {
       "apostada": true,
       "oddReal": "1.57",
-      "stakeReal": "1.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|O2.5": {
       "apostada": true,
       "oddReal": "1.5",
-      "stakeReal": "1",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:38:40.552059+00:00"
+  "updatedAt": "2026-04-10T21:39:01.352789+00:00"
 }
