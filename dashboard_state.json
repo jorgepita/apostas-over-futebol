@@ -216,9 +216,21 @@
       "oddReal": "1.95",
       "stakeReal": "8.5",
       "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|BTTS": {
+      "apostada": true,
+      "oddReal": "1.6",
+      "stakeReal": "6",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Ligue 1|Monaco vs Marseille|BTTS": {
+      "apostada": true,
+      "oddReal": "1.47",
+      "stakeReal": "6",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:22:55.587071+00:00"
+  "updatedAt": "2026-04-10T19:23:04.647370+00:00"
 }
