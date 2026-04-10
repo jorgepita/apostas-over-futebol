@@ -90,9 +90,21 @@
       "oddReal": "1.68",
       "stakeReal": "10",
       "resultadoManual": ""
+    },
+    "2026-04-04|Eredivisie|AZ Alkmaar vs Fortuna Sittard|O2.5": {
+      "apostada": true,
+      "oddReal": "1.66",
+      "stakeReal": "10.5",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Ligue 1|Stade Brestois 29 vs Rennes|BTTS": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "4.5",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:21:31.093645+00:00"
+  "updatedAt": "2026-04-10T19:21:38.832556+00:00"
 }
