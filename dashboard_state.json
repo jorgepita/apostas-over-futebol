@@ -429,13 +429,13 @@
     },
     "2026-04-11|Serie B|Avellino vs Catanzaro|BTTS": {
       "apostada": true,
-      "oddReal": "1.8",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Eredivisie|Heracles vs Ajax|O2.5": {
       "apostada": true,
-      "oddReal": "1.53",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:44:52.181689+00:00"
+  "updatedAt": "2026-04-10T21:45:09.483242+00:00"
 }
