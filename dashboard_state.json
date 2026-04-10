@@ -159,7 +159,7 @@
     },
     "2026-04-05|Bundesliga|Union Berlin vs FC St. Pauli|O2.5": {
       "apostada": true,
-      "oddReal": "2.63",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:52:04.073406+00:00"
+  "updatedAt": "2026-04-10T21:52:09.839797+00:00"
 }
