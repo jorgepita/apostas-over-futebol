@@ -1809,6 +1809,20 @@ table {
         const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
         const realBankroll = state.bankrollInicial + realProfit;
 
+        const modelO25 = botHistoryRows.filter(r => (r._market || '').toUpperCase().includes('o2.5'));
+        const modelBTTS = botHistoryRows.filter(r => (r._market || '').toUpperCase().includes('BTTS'));
+
+        function splitWL(rows) {
+          return {
+            total: rows.length,
+            wins: rows.filter(r => r._resultKey === 'W').length,
+            losses: rows.filter(r => r._resultKey === 'L').length
+          };
+        }
+
+        const o25Stats = splitWL(modelO25);
+        const bttsStats = splitWL(modelBTTS);
+
         return {
           modelStake,
           modelProfit,
@@ -1823,7 +1837,9 @@ table {
           realResolvedCount,
           realRoi,
           realWr,
-          realBankroll
+          realBankroll,
+          o25Stats,
+          bttsStats
         };
       }
 
