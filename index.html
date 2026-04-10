@@ -3244,7 +3244,10 @@ table {
         bindElementAction('exportManualBtnMobile', exportManualJson);
         bindElementAction('importManualBtnMobile', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtnMobile', exportRealCsv);
-      }
+        const btnCompact = document.getElementById('toggleCompactBtn');
+        if (btnCompact) {
+          btnCompact.addEventListener('click', toggleCompactMode);
+        }
 
       function bindStaticInputs() {
         document.getElementById('daySearch').addEventListener('input', rerenderDayOnly);
