@@ -441,25 +441,25 @@
     },
     "2026-04-11|Bundesliga|Borussia Dortmund vs Bayer Leverkusen|O2.5": {
       "apostada": true,
-      "oddReal": "1.56",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Bundesliga|1. FC Heidenheim vs Union Berlin|BTTS": {
       "apostada": true,
-      "oddReal": "1.67",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|2. Bundesliga|SV Darmstadt 98 vs Hannover 96|O2.5": {
       "apostada": true,
-      "oddReal": "1",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-11|Bundesliga|RB Leipzig vs Borussia Mönchengladbach|O2.5": {
       "apostada": true,
-      "oddReal": "1.5",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:44:25.339532+00:00"
+  "updatedAt": "2026-04-10T21:44:45.436497+00:00"
 }
