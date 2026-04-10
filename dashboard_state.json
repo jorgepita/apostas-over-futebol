@@ -45,13 +45,13 @@
     },
     "2026-04-04|LaLiga|Mallorca vs Real Madrid|BTTS": {
       "apostada": true,
-      "oddReal": "1.77",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|LaLiga|Mallorca vs Real Madrid|O2.5": {
       "apostada": true,
-      "oddReal": "1.73",
+      "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:50:13.997314+00:00"
+  "updatedAt": "2026-04-10T21:50:24.915462+00:00"
 }
