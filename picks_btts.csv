@@ -1,3 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-04-10;paises_baixos;Eredivisie;Twente;FC Volendam;1.93;1.522;3.452;BTTS;0.591;1.91;0.524;0.0678;0.1423;0.068;0.0285;0.0285;14.23;1.0;500.0
-2026-04-10;turquia;Super Lig;Beşiktaş;Antalyaspor;1.721;1.404;3.126;BTTS;0.548;1.92;0.521;0.0275;0.0573;0.027;0.0115;0.0115;5.73;1.0;500.0
+2026-04-11;franca2;Ligue 2;Boulogne;Le Mans;1.725;1.9;3.625;BTTS;0.619;2.03;0.493;0.126;0.2483;0.126;0.0497;0.04;20.0;1.0;500.0
+2026-04-11;italia2;Serie B;Avellino;Catanzaro;1.749;1.9;3.649;BTTS;0.622;1.8;0.556;0.0661;0.1487;0.066;0.0297;0.0297;14.87;1.0;500.0
+2026-04-11;alemanha;Bundesliga;1. FC Heidenheim;Union Berlin;1.882;1.652;3.534;BTTS;0.606;1.71;0.585;0.0216;0.052;0.022;0.0104;0.0104;5.2;1.0;500.0
