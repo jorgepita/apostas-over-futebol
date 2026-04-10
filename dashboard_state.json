@@ -298,13 +298,13 @@
     "2026-04-06|Serie B|Cesena vs Sudtirol|BTTS": {
       "apostada": true,
       "oddReal": "1.91",
-      "stakeReal": "9",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-06|Primeira Liga|Arouca vs Estoril|BTTS": {
       "apostada": true,
       "oddReal": "1.62",
-      "stakeReal": "9.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-06|Serie B|Reggiana vs Pescara|O2.5": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:39:30.507297+00:00"
+  "updatedAt": "2026-04-10T21:39:41.075618+00:00"
 }
