@@ -70,7 +70,7 @@
     "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|O2.5": {
       "apostada": true,
       "oddReal": "1.67",
-      "stakeReal": "9.5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-04|Bundesliga|Bayer Leverkusen vs VfL Wolfsburg|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:35:09.826076+00:00"
+  "updatedAt": "2026-04-10T21:35:14.490521+00:00"
 }
