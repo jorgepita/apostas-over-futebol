@@ -322,7 +322,7 @@
     "2026-04-06|Jupiler Pro League|RAAL La Louvière vs Dender|BTTS": {
       "apostada": true,
       "oddReal": "1.95",
-      "stakeReal": "5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-06|Serie A|Napoli vs AC Milan|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:39:51.618497+00:00"
+  "updatedAt": "2026-04-10T21:40:39.045725+00:00"
 }
