@@ -382,7 +382,7 @@
     "2026-04-10|Ligue 2|Clermont Foot vs Nancy|O2.5": {
       "apostada": true,
       "oddReal": "2.07",
-      "stakeReal": "5",
+      "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-10|Super Lig|Beşiktaş vs Antalyaspor|BTTS": {
@@ -472,5 +472,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T21:41:56.470978+00:00"
+  "updatedAt": "2026-04-10T21:42:03.656567+00:00"
 }
