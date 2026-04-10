@@ -396,9 +396,21 @@
       "oddReal": "1.65",
       "stakeReal": "3",
       "resultadoManual": ""
+    },
+    "2026-04-11|2. Bundesliga|Preußen Münster vs SpVgg Greuther Fürth|O2.5": {
+      "apostada": true,
+      "oddReal": "1.93",
+      "stakeReal": "9.5",
+      "resultadoManual": ""
+    },
+    "2026-04-11|Ligue 2|Boulogne vs Le Mans|BTTS": {
+      "apostada": true,
+      "oddReal": "2.03",
+      "stakeReal": "11",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:25:11.465429+00:00"
+  "updatedAt": "2026-04-10T19:25:20.044057+00:00"
 }
