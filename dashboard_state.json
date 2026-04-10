@@ -258,9 +258,27 @@
       "oddReal": "1.57",
       "stakeReal": "1.5",
       "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|FC Volendam vs Feyenoord|O2.5": {
+      "apostada": true,
+      "oddReal": "1.5",
+      "stakeReal": "1",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Bundesliga|Eintracht Frankfurt vs 1. FC Köln|BTTS": {
+      "apostada": true,
+      "oddReal": "1.63",
+      "stakeReal": "1",
+      "resultadoManual": ""
+    },
+    "2026-04-05|Eredivisie|GO Ahead Eagles vs PEC Zwolle|BTTS": {
+      "apostada": true,
+      "oddReal": "1.5",
+      "stakeReal": "1",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:23:21.015246+00:00"
+  "updatedAt": "2026-04-10T19:23:39.535465+00:00"
 }
