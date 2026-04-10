@@ -384,9 +384,21 @@
       "oddReal": "2.07",
       "stakeReal": "5",
       "resultadoManual": ""
+    },
+    "2026-04-10|Super Lig|Beşiktaş vs Antalyaspor|BTTS": {
+      "apostada": true,
+      "oddReal": "1.94",
+      "stakeReal": "7.5",
+      "resultadoManual": ""
+    },
+    "2026-04-10|Serie B|Frosinone vs Palermo|O2.5": {
+      "apostada": true,
+      "oddReal": "1.65",
+      "stakeReal": "3",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-10T19:25:01.623075+00:00"
+  "updatedAt": "2026-04-10T19:25:11.465429+00:00"
 }
