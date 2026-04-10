@@ -1686,14 +1686,13 @@
         const container = document.querySelector('.top-actions');
         if (!container) return;
 
-        if (document.getElementById('moreActionsBtn')) return;
+        if (document.getElementById('toggleMoreActionsBtn')) return;
 
         const btn = document.createElement('button');
-        btn.id = 'moreActionsBtn';
-        btn.textContent = 'Mais ações';
+        btn.id = 'toggleMoreActionsBtn';
 
         const panel = document.createElement('div');
-        panel.id = 'moreActionsPanel';
+        panel.id = 'mobileActionsPanel';
         panel.style.display = 'none';
         panel.style.flexDirection = 'column';
         panel.style.gap = '8px';
