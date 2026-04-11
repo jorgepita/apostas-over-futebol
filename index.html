@@ -2393,6 +2393,23 @@ table {
         document.getElementById('summaryLossesStat').textContent = String(losses);
         document.getElementById('summaryPushesStat').textContent = String(pushes);
         document.getElementById('summaryPendingOpenStat').textContent = String(risk.openCount);
+      
+      const botOverview = getBotOverviewMetrics();
+
+      document.getElementById('botGeneratedStat').textContent = String(botOverview.generated);
+      document.getElementById('botExecutedStat').textContent = String(botOverview.executed);
+      document.getElementById('botResolvedStat').textContent = String(botOverview.resolved);
+      document.getElementById('botExecutionRateStat').textContent = pct(botOverview.executionRate);
+
+      document.getElementById('o25GeneratedTopStat').textContent = String(botOverview.o25.generated);
+      document.getElementById('o25ExecutedTopStat').textContent = String(botOverview.o25.executed);
+      document.getElementById('o25WinsTopStat').textContent = String(botOverview.o25.wins);
+      document.getElementById('o25LossesTopStat').textContent = String(botOverview.o25.losses);
+
+      document.getElementById('bttsGeneratedTopStat').textContent = String(botOverview.btts.generated);
+      document.getElementById('bttsExecutedTopStat').textContent = String(botOverview.btts.executed);
+      document.getElementById('bttsWinsTopStat').textContent = String(botOverview.btts.wins);
+      document.getElementById('bttsLossesTopStat').textContent = String(botOverview.btts.losses);
       }
 
       function renderAlertsCenter() {
