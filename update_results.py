@@ -1545,7 +1545,7 @@ def try_update_row_via_api_football(
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
         return False, "NO_MATCH"
 
-        can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+    can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
     if not can_try_now:
         kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
         print(
@@ -1632,10 +1632,14 @@ def try_update_manual_row_via_api_football(
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
         return False, "NO_MATCH"
 
-    status = str(get_fixture_status(matched)).upper()
-    if status not in AF_FINISHED_STATUS:
-        print(f"[DBG] {label}: Manual API-Football ainda não terminado: {jogo} | status={status}")
-        return False, "NOT_FINISHED"
+    can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+    if not can_try_now:
+        kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
+        print(
+            f"[DBG] {label}: Manual API-Football ainda cedo para fechar: "
+            f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
+        )
+        return False, "TOO_EARLY"
 
     home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
