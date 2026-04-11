@@ -1,16 +1,16 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-11;Premier League;Arsenal vs Bournemouth;O2.5;1.69;5.63;12.83;;;;;;
-2026-04-11;2. Bundesliga;Preußen Münster vs SpVgg Greuther Fürth;O2.5;1.93;5.63;12.82;;;;;;
+2026-04-11;Premier League;Arsenal vs Bournemouth;O2.5;1.69;5.63;12.83;;;;W;6.17;
+2026-04-11;2. Bundesliga;Preußen Münster vs SpVgg Greuther Fürth;O2.5;1.93;5.63;12.82;;;;L;-9.07;
 2026-04-11;Ligue 2;Boulogne vs Le Mans;BTTS;1.98;20.0;11.35;;;;;;
-2026-04-11;Championship;Norwich vs Ipswich;O2.5;1.91;5.63;10.3;;;;;;
-2026-04-11;Bundesliga;VfL Wolfsburg vs Eintracht Frankfurt;O2.5;1.66;5.63;8.29;;;;;;
-2026-04-11;Serie B;Avellino vs Catanzaro;BTTS;1.81;15.46;6.92;;;;;;
-2026-04-11;2. Bundesliga;1. FC Nürnberg vs Dynamo Dresden;O2.5;1.73;4.56;6.83;;;;;;
+2026-04-11;Championship;Norwich vs Ipswich;O2.5;1.91;5.63;10.3;;;;L;-5.63;
+2026-04-11;Bundesliga;VfL Wolfsburg vs Eintracht Frankfurt;O2.5;1.66;5.63;8.29;;;;W;5.99;
+2026-04-11;Serie B;Avellino vs Catanzaro;BTTS;1.81;15.46;6.92;;;;W;11.9;
+2026-04-11;2. Bundesliga;1. FC Nürnberg vs Dynamo Dresden;O2.5;1.73;4.56;6.83;;;;L;-8.75;
 2026-04-11;2. Bundesliga;SV Darmstadt 98 vs Hannover 96;O2.5;1.71;4.17;6.15;;;;;;
 2026-04-11;Eredivisie;Heracles vs Ajax;O2.5;1.52;4.36;5.29;;;;;;
-2026-04-11;Bundesliga;Borussia Dortmund vs Bayer Leverkusen;O2.5;1.55;3.19;4.02;;;;;;
-2026-04-11;Bundesliga;RB Leipzig vs Borussia Mönchengladbach;O2.5;1.53;2.58;3.17;;;;;;
-2026-04-11;Bundesliga;1. FC Heidenheim vs Union Berlin;BTTS;1.7;4.41;1.82;;;;;;
+2026-04-11;Bundesliga;Borussia Dortmund vs Bayer Leverkusen;O2.5;1.55;3.19;4.02;;;;L;-5.13;
+2026-04-11;Bundesliga;RB Leipzig vs Borussia Mönchengladbach;O2.5;1.53;2.58;3.17;;;;L;-2.54;
+2026-04-11;Bundesliga;1. FC Heidenheim vs Union Berlin;BTTS;1.7;4.41;1.82;;;;W;3.69;
 2026-04-12;Premier League;Nottingham Forest vs Aston Villa;O2.5;2.02;5.63;12.85;;;;;;
 2026-04-12;Bundesliga;1. FC Köln vs Werder Bremen;O2.5;1.79;5.63;12.67;;;;;;
 2026-04-12;2. Bundesliga;SV Elversberg vs FC Schalke 04;O2.5;1.8;5.63;9.08;;;;;;
