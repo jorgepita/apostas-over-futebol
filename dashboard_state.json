@@ -413,7 +413,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "L"
     },
     "2026-04-11|Bundesliga|1. FC Heidenheim vs Union Berlin|BTTS": {
       "apostada": true,
@@ -455,7 +455,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "W"
     },
     "2026-04-11|Ligue 2|Boulogne vs Le Mans|BTTS": {
       "apostada": true,
@@ -478,5 +478,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T21:36:50.692812+00:00"
+  "updatedAt": "2026-04-11T21:37:32.058695+00:00"
 }
