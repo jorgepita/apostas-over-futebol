@@ -619,6 +619,52 @@ def get_fixture_score(fixture: dict) -> tuple[int | None, int | None]:
 
     return None, None
 
+def get_fixture_kickoff_dt(fixture: dict) -> datetime | None:
+    if not isinstance(fixture, dict):
+        return None
+
+    # API-Football
+    fx = fixture.get("fixture") or {}
+    raw = fx.get("date")
+    if raw:
+        try:
+            text = str(raw).strip().replace("Z", "+00:00")
+            dt = datetime.fromisoformat(text)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
+        except Exception:
+            pass
+
+    # football-data.org
+    raw = fixture.get("utcDate")
+    if raw:
+        try:
+            text = str(raw).strip().replace("Z", "+00:00")
+            dt = datetime.fromisoformat(text)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
+        except Exception:
+            pass
+
+    return None
+
+
+def should_try_result_update_from_fixture(
+    fixture: dict,
+    now_dt: datetime | None = None,
+) -> tuple[bool, datetime | None]:
+    kickoff_dt = get_fixture_kickoff_dt(fixture)
+    if kickoff_dt is None:
+        # Se não houver kickoff disponível, não bloqueamos
+        return True, None
+
+    now_dt = now_dt or datetime.now(timezone.utc)
+    if now_dt.tzinfo is None:
+        now_dt = now_dt.replace(tzinfo=timezone.utc)
+
+    return now_dt >= (kickoff_dt + RESULT_READY_DELAY), kickoff_dt
 
 def score_fixture_match(
     row_home: str,
