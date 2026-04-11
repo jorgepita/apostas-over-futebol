@@ -1533,6 +1533,15 @@ def try_update_row_via_api_football(
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
         return False, "NO_MATCH"
 
+        can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+    if not can_try_now:
+        kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
+        print(
+            f"[DBG] {label}: API-Football ainda cedo para fechar: "
+            f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
+        )
+        return False, "TOO_EARLY"
+
     status = str(get_fixture_status(matched)).upper()
     if status not in AF_FINISHED_STATUS:
         print(f"[DBG] {label}: API-Football ainda não terminado: {jogo} | status={status}")
@@ -1840,6 +1849,17 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
+                can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+        if not can_try_now:
+            kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
+            print(
+                f"[DBG] {label}: Ainda cedo para fechar: "
+                f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
+            )
+            future_skipped += 1
+            ignored += 1
+            continue
+
         status = str(get_fixture_status(matched)).upper()
         if status not in FD_FINISHED_STATUS:
             print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
@@ -2052,6 +2072,17 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             print(f"[WARN] {label}: Sem match API para manual: {jogo} | {liga} | {data}")
             log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
             no_match_found += 1
+            ignored += 1
+            continue
+
+                can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+        if not can_try_now:
+            kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
+            print(
+                f"[DBG] {label}: Manual ainda cedo para fechar: "
+                f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
+            )
+            future_skipped += 1
             ignored += 1
             continue
 
