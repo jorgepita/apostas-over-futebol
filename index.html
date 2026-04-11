@@ -1664,6 +1664,53 @@ table {
         return dedupeBotRows(state.footballHistory).map(getRowWithLocalEdits);
       }
 
+      function getAllBotRowsMergedUnique() {
+        const map = new Map();
+
+      [...getHistoryRowsMerged(), ...getDailyRowsMerged()].forEach(row => {
+          if (!map.has(row._pickKey)) {
+            map.set(row._pickKey, row);
+          }
+        });
+
+        return [...map.values()];
+      }
+
+      function marketMatches(row, marketCode) {
+        const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
+        return market.includes(String(marketCode || '').toUpperCase());
+      }
+
+      function buildBotMarketStats(rows, marketCode) {
+        const subset = rows.filter(r => marketMatches(r, marketCode));
+
+        return {
+          generated: subset.length,
+          executed: subset.filter(r => r._apostadaBool).length,
+          wins: subset.filter(r => r._resultKey === 'W').length,
+          losses: subset.filter(r => r._resultKey === 'L').length,
+          pushes: subset.filter(r => r._resultKey === 'P').length
+        };
+      }
+
+      function getBotOverviewMetrics() {
+        const rows = getAllBotRowsMergedUnique();
+
+        const generated = rows.length;
+        const executed = rows.filter(r => r._apostadaBool).length;
+        const resolved = rows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
+        const executionRate = generated > 0 ? (executed / generated) * 100 : 0;
+
+        return {
+          generated,
+          executed,
+          resolved,
+          executionRate,
+          o25: buildBotMarketStats(rows, 'O2.5'),
+          btts: buildBotMarketStats(rows, 'BTTS')
+        };
+      }
+      
       function getManualRowsMerged() {
         const remoteRows = state.manualBetsRemote.map(b => {
           const data = normalizeDateString(b['Data'] || '');
