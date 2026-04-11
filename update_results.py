@@ -1865,7 +1865,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             ignored += 1
             continue
 
-                can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
+        can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
         if not can_try_now:
             kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
             print(
