@@ -79,7 +79,7 @@ AF_CALL_MIN_INTERVAL = 0.50
 AF_BASE_URL = "https://v3.football.api-sports.io"
 
 # Confirmado pelos teus testes
-BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL", "BJL", "SB"}
+BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL", "BJL", "SB", "FL2"}
 
 API_FOOTBALL_FALLBACK_COMPETITIONS = {
     "BL2": {
@@ -97,6 +97,10 @@ API_FOOTBALL_FALLBACK_COMPETITIONS = {
     "SB": {
         "country": "Italy",
         "name": "Serie B",
+    },
+    "FL2": {
+        "country": "France",
+        "name": "Ligue 2",
     },
 }
 
