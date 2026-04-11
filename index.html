@@ -2661,8 +2661,10 @@ table {
               <td><span class="mini info">Bot</span></td>
               <td>${escapeHtml(r['Data'] || '—')}</td>
               <td>${escapeHtml(cleanString(r['Liga'] || '—'))}</td>
-              <td>${escapeHtml(cleanString(r['Jogo'] || '—'))}</td>
-              <td>${escapeHtml(cleanString(r['Mercado'] || '—'))}</td>
+              <td>
+                <div>${escapeHtml(cleanString(r['Jogo'] || '-'))}</div>
+                <div class="note">${escapeHtml(cleanString(r['Mercado'] || '-'))}</div>
+              </td>
               <td>${r._oddModeloNum === null ? '—' : fmt(r._oddModeloNum)}</td>
               <td>${r._stakeModeloNum === null ? '—' : `€${fmt(r._stakeModeloNum)}`}</td>
               <td>${signal.recStake}</td>
