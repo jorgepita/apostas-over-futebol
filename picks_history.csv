@@ -58,8 +58,8 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-10;Bundesliga;FC Augsburg vs 1899 Hoffenheim;O2.5;1.65;11.65;7.93;;;;W;7.57;
 2026-04-10;Championship;West Brom vs Millwall;O2.5;2.14;11.65;12.32;;;;L;-11.65;
 2026-04-10;Eredivisie;Twente vs FC Volendam;BTTS;1.95;18.18;8.86;;;;W;17.27;
-2026-04-10;Ligue 2;Clermont Foot vs Nancy;O2.5;2.07;5.95;5.28;;;;;;
-2026-04-10;Ligue 2;Laval vs Reims;O2.5;2.18;7.05;6.55;;;;;;
+2026-04-10;Ligue 2;Clermont Foot vs Nancy;O2.5;2.07;5.95;5.28;;;;W;6.37;
+2026-04-10;Ligue 2;Laval vs Reims;O2.5;2.18;7.05;6.55;;;;W;8.32;
 2026-04-10;Premier League;West Ham vs Wolves;O2.5;1.91;7.3;5.97;;;;;;
 2026-04-10;Primeira Liga;Famalicao vs Moreirense;O2.5;2.07;10.34;9.18;;;;L;-10.34;
 2026-04-10;Serie A;AS Roma vs Pisa;BTTS;2.37;15.6;9.02;;;;L;-15.6;
@@ -76,7 +76,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-11;Championship;Norwich vs Ipswich;O2.5;1.93;5.63;10.84;;;;L;-5.63;
 2026-04-11;Eredivisie;Groningen vs GO Ahead Eagles;O2.5;1.52;1.62;1.22;;;;L;-1.62;
 2026-04-11;Eredivisie;Heracles vs Ajax;O2.5;1.55;8.39;6.56;;;;W;4.61;
-2026-04-11;Ligue 2;Boulogne vs Le Mans;BTTS;2.03;20.0;12.6;;;;;;
+2026-04-11;Ligue 2;Boulogne vs Le Mans;BTTS;2.03;20.0;12.6;;;;L;-20.0;
 2026-04-11;Premier League;Arsenal vs Bournemouth;O2.5;1.68;9.07;12.48;;;;W;6.17;
 2026-04-11;Serie B;Avellino vs Catanzaro;BTTS;1.8;14.87;6.61;;;;W;11.9;
 2026-04-11;Super Lig;Başakşehir vs Gençlerbirliği S.K.;O2.5;1.8;2.93;4.88;;;;W;2.34;
