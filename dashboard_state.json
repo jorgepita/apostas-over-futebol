@@ -359,7 +359,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "W"
     },
     "2026-04-10|Ligue 2|Laval vs Reims|O2.5": {
       "apostada": true,
@@ -478,5 +478,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T11:20:10.089400+00:00"
+  "updatedAt": "2026-04-11T11:20:16.574016+00:00"
 }
