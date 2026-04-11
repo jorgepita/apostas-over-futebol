@@ -371,7 +371,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "W"
     },
     "2026-04-10|Primeira Liga|Famalicao vs Moreirense|O2.5": {
       "apostada": true,
@@ -478,5 +478,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T11:20:02.128348+00:00"
+  "updatedAt": "2026-04-11T11:20:10.089400+00:00"
 }
