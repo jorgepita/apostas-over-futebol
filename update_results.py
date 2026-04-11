@@ -6,7 +6,7 @@ import time
 import unicodedata
 from pathlib import Path
 from urllib import request, parse, error
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 
 import pandas as pd
@@ -106,6 +106,9 @@ API_FOOTBALL_FALLBACK_COMPETITIONS = {
 
 FD_FINISHED_STATUS = {"FINISHED"}
 AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
+
+RESULT_READY_DELAY = timedelta(hours=2, minutes=15)
+EARLY_STATUS_IGNORE = {"NS", "TBD", "SCHEDULED", "TIMED", "1H", "HT", "2H", "ET", "BT", "LIVE", "IN_PLAY"}
 
 TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
@@ -238,6 +241,47 @@ BASE_TEAM_ALIASES = {
     "eyupspor kulubu": "eyupspor",
     "eyuspor": "eyupspor",
 
+    # Inglaterra
+    "west ham": "west ham united",
+    "west ham united": "west ham united",
+
+    "wolves": "wolverhampton wanderers",
+    "wolverhampton": "wolverhampton wanderers",
+    "wolverhampton wanderers": "wolverhampton wanderers",
+
+    "spurs": "tottenham hotspur",
+    "tottenham": "tottenham hotspur",
+    "tottenham hotspur": "tottenham hotspur",
+
+    "man utd": "manchester united",
+    "man united": "manchester united",
+    "manchester utd": "manchester united",
+    "manchester united": "manchester united",
+
+    "man city": "manchester city",
+    "manchester city": "manchester city",
+
+    "newcastle": "newcastle united",
+    "newcastle united": "newcastle united",
+
+    "forest": "nottingham forest",
+    "nottingham forest": "nottingham forest",
+
+    "brighton": "brighton hove albion",
+    "brighton hove albion": "brighton hove albion",
+
+    "west brom": "west bromwich albion",
+    "west bromwich albion": "west bromwich albion",
+
+    "sheff utd": "sheffield united",
+    "sheffield united": "sheffield united",
+
+    "sheff wed": "sheffield wednesday",
+    "sheffield wednesday": "sheffield wednesday",
+
+    "preston": "preston north end",
+    "preston north end": "preston north end",
+    
     # genéricos frequentes
     "spvgg greuther furth": "greuther furth",
     "greuther furth": "greuther furth",
