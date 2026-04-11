@@ -461,7 +461,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "L"
     },
     "2026-04-11|Premier League|Arsenal vs Bournemouth|O2.5": {
       "apostada": true,
@@ -478,5 +478,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T11:20:16.574016+00:00"
+  "updatedAt": "2026-04-11T21:36:50.692812+00:00"
 }
