@@ -365,7 +365,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "W"
     },
     "2026-04-10|Premier League|West Ham vs Wolves|O2.5": {
       "apostada": true,
@@ -439,6 +439,12 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
+    "2026-04-11|Championship|Norwich vs Ipswich|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
     "2026-04-11|Eredivisie|Groningen vs GO Ahead Eagles|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -468,15 +474,9 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
-    },
-    "2026-04-11|Championship|Norwich vs Ipswich|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T11:14:12.744152+00:00"
+  "updatedAt": "2026-04-11T11:20:02.128348+00:00"
 }
