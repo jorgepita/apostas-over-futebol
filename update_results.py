@@ -281,6 +281,18 @@ BASE_TEAM_ALIASES = {
 
     "preston": "preston north end",
     "preston north end": "preston north end",
+
+    "stoke": "stoke city",
+    "stoke city": "stoke city",
+
+    "birmingham": "birmingham city",
+    "birmingham city": "birmingham city",
+
+    "norwich": "norwich city",
+    "norwich city": "norwich city",
+
+    "leicester": "leicester city",
+    "leicester city": "leicester city",
     
     # genéricos frequentes
     "spvgg greuther furth": "greuther furth",
@@ -1755,7 +1767,9 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 updated += 1
                 af_updated += 1
             else:
-                if reason == "NOT_FINISHED":
+                if reason == "TOO_EARLY":
+                    future_skipped += 1
+                elif reason == "NOT_FINISHED":
                     not_finished += 1
                 elif reason == "NO_MATCH":
                     no_match_found += 1
@@ -1818,7 +1832,9 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 updated += 1
                 af_updated += 1
             else:
-                if reason == "NOT_FINISHED":
+                if reason == "TOO_EARLY":
+                    future_skipped += 1
+                elif reason == "NOT_FINISHED":
                     not_finished += 1
                 elif reason == "NO_MATCH":
                     no_match_found += 1
@@ -1993,7 +2009,9 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 updated += 1
                 af_updated += 1
             else:
-                if reason == "NOT_FINISHED":
+                if reason == "TOO_EARLY":
+                    future_skipped += 1
+                elif reason == "NOT_FINISHED":
                     not_finished += 1
                 elif reason == "NO_MATCH":
                     no_match_found += 1
@@ -2044,7 +2062,9 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 updated += 1
                 af_updated += 1
             else:
-                if reason == "NOT_FINISHED":
+                if reason == "TOO_EARLY":
+                    future_skipped += 1
+                elif reason == "NOT_FINISHED":
                     not_finished += 1
                 elif reason == "NO_MATCH":
                     no_match_found += 1
