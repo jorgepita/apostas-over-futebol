@@ -53,6 +53,7 @@ CSV_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
     "Apostada", "OddReal", "StakeReal€",
     "Resultado", "Lucro€", "LucroReal€"
+    "KickoffUTC"
 ]
 
 SYNC_RESULT_COLUMNS = [
