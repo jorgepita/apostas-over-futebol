@@ -564,9 +564,51 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-12|Jupiler Pro League|Anderlecht vs Gent|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Bundesliga|FSV Mainz 05 vs SC Freiburg|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Bundesliga|VfB Stuttgart vs Hamburger SV|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-13|Primeira Liga|Tondela vs GIL Vicente|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-13|Super Lig|Eyüpspor vs Samsunspor|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-13|Premier League|Manchester United vs Leeds|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-13|Super Lig|Rizespor vs Gaziantep FK|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-12T13:27:13.587761+00:00"
+  "updatedAt": "2026-04-12T13:27:38.307122+00:00"
 }
