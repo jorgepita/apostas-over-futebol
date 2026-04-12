@@ -1747,6 +1747,21 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         if not data or not liga or not jogo or odd <= 1.01 or stake <= 0:
             ignored += 1
             continue
+        kickoff_str = row.get("KickoffUTC", "")
+        if kickoff_str:
+    try:
+        kickoff_dt = datetime.fromisoformat(kickoff_str.replace("Z", "+00:00"))
+        if kickoff_dt.tzinfo is None:
+            kickoff_dt = kickoff_dt.replace(tzinfo=timezone.utc)
+
+        now_utc = datetime.now(timezone.utc)
+
+        if now_utc < kickoff_dt + RESULT_READY_DELAY:
+            future_skipped += 1
+            ignored += 1
+            continue
+    except:
+        pass
 
         if str(mercado).strip().upper() not in SUPPORTED_MARKETS:
             print(f"[WARN] {label}: Mercado não suportado: {mercado}")
