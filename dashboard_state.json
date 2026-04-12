@@ -606,9 +606,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-12|Super Lig|Göztepe vs Kasımpaşa|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-12T14:10:37.273678+00:00"
+  "updatedAt": "2026-04-12T14:10:49.141911+00:00"
 }
