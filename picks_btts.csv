@@ -1,8 +1,4 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-11;franca2;Ligue 2;Boulogne;Le Mans;1.725;1.9;3.625;BTTS;0.619;1.98;0.505;0.1135;0.2294;0.114;0.0459;0.04;20.0;1.0;500.0
-2026-04-11;italia2;Serie B;Avellino;Catanzaro;1.749;1.9;3.649;BTTS;0.622;1.81;0.552;0.0692;0.1546;0.069;0.0309;0.0309;15.46;1.0;500.0
-2026-04-11;alemanha;Bundesliga;1. FC Heidenheim;Union Berlin;1.882;1.652;3.534;BTTS;0.606;1.7;0.588;0.0182;0.0441;0.018;0.0088;0.0088;4.41;1.0;500.0
+2026-04-12;italia;Serie A;Parma;Napoli;1.186;1.9;3.086;BTTS;0.523;2.24;0.446;0.0763;0.1379;0.076;0.0276;0.0276;13.79;1.0;500.0
 2026-04-12;italia2;Serie B;Padova;Empoli;1.67;1.819;3.488;BTTS;0.602;1.87;0.535;0.067;0.1441;0.067;0.0288;0.0288;14.41;1.0;500.0
 2026-04-12;italia;Serie A;Genoa;Sassuolo;1.48;1.9;3.38;BTTS;0.581;1.9;0.526;0.0549;0.1159;0.055;0.0232;0.0232;11.59;1.0;500.0
-2026-04-12;alemanha;Bundesliga;FSV Mainz 05;SC Freiburg;1.882;1.652;3.534;BTTS;0.606;1.67;0.599;0.0076;0.0189;0.008;0.0038;0.0038;1.89;1.0;500.0
-2026-04-12;alemanha;Bundesliga;VfB Stuttgart;Hamburger SV;1.882;1.652;3.534;BTTS;0.606;1.67;0.599;0.0076;0.0189;0.008;0.0038;0.0038;1.89;1.0;500.0
