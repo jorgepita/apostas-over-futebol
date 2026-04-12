@@ -34,19 +34,19 @@
   },
   "rules": {
     "over25": {
-      "edge_min": -0.05,
+      "edge_min": 0.00,
       "edge_max": 0.15,
-      "kelly_fraction": 0.2,
+      "kelly_fraction": 0.18,
       "cap_frac": 0.04,
-      "daily_cap_frac": 0.15,
+      "daily_cap_frac": 0.12,
       "min_picks": 1
     },
     "btts": {
-      "edge_min": -0.05,
+      "edge_min": 0.00,
       "edge_max": 0.15,
-      "kelly_fraction": 0.2,
+      "kelly_fraction": 0.18,
       "cap_frac": 0.04,
-      "daily_cap_frac": 0.15,
+      "daily_cap_frac": 0.12,
       "min_picks": 1
     },
     "nba_over": {
