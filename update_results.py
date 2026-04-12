@@ -976,6 +976,11 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     for col in CSV_COLUMNS:
         if col not in df.columns:
             df[col] = ""
+    df = df.copy()
+    for col in CSV_COLUMNS:
+       if col not in df.columns:
+           df[col] = ""
+
     return df[CSV_COLUMNS].fillna("").copy()
 
 
