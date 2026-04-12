@@ -16,6 +16,12 @@ HISTORY_PATH = BASE / "picks_history.csv"
 DEFAULT_MAX_PICKS_PER_DAY = 12
 DEFAULT_MAX_PICKS_GLOBAL = 36
 
+DEFAULT_KELLY_FRACTION = 0.18
+DEFAULT_CAP_FRAC = 0.04
+DEFAULT_DAILY_CAP_FRAC = 0.12
+DEFAULT_MAX_ODD_O25 = 2.20
+DEFAULT_MAX_ODD_BTTS = 2.20
+
 
 # =============================
 # Anti-duplicados (por dia)
@@ -110,7 +116,6 @@ def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
     p_away0 = math.exp(-lam_away)
     raw = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
 
-    # ligeiramente mais conservador que a versão atual
     adj = raw * 0.885
 
     bigger = max(lam_home, lam_away)
@@ -129,13 +134,11 @@ def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
     elif gap >= 0.90:
         adj *= 0.95
 
-    # travão leve quando uma equipa tem pouco peso ofensivo
     if smaller < 0.55:
         adj *= 0.91
     elif smaller < 0.70:
         adj *= 0.96
 
-    # travão leve para combinações pouco equilibradas
     if product < 0.55:
         adj *= 0.92
     elif product < 0.70:
@@ -434,7 +437,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
                 **base,
                 "lam_t_min": 1.70,
                 "odd_min": 1.42,
-                "odd_max": 2.90,
+                "odd_max": DEFAULT_MAX_ODD_O25,
                 "edge_min_quality": -0.03,
             }
 
@@ -445,7 +448,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
                 "lam_a_min": 0.62,
                 "lam_t_min": 1.88,
                 "odd_min": 1.48,
-                "odd_max": 2.60,
+                "odd_max": DEFAULT_MAX_ODD_BTTS,
                 "edge_min_quality": -0.04,
                 "max_lambda_ratio": 1.90,
                 "max_lambda_gap": 0.83,
@@ -457,7 +460,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
             **base,
             "lam_t_min": 1.80,
             "odd_min": 1.50,
-            "odd_max": 2.65,
+            "odd_max": DEFAULT_MAX_ODD_O25,
             "edge_min_quality": -0.04,
         }
 
@@ -468,7 +471,7 @@ def get_market_thresholds(mode: str, market: str) -> dict:
             "lam_a_min": 0.72,
             "lam_t_min": 1.98,
             "odd_min": 1.50,
-            "odd_max": 2.45,
+            "odd_max": DEFAULT_MAX_ODD_BTTS,
             "edge_min_quality": -0.02,
             "max_lambda_ratio": 1.75,
             "max_lambda_gap": 0.72,
@@ -476,6 +479,27 @@ def get_market_thresholds(mode: str, market: str) -> dict:
         }
 
     return base
+
+
+def get_effective_max_odd(rules: dict, market: str, mode: str) -> float:
+    market = str(market).strip().upper()
+    th = get_market_thresholds(mode, market)
+    th_max = float(th.get("odd_max", 99.0))
+
+    if market == "O2.5":
+        fallback = DEFAULT_MAX_ODD_O25
+    elif market == "BTTS":
+        fallback = DEFAULT_MAX_ODD_BTTS
+    else:
+        fallback = th_max
+
+    rules_max = rules.get("odd_max", fallback)
+    try:
+        rules_max = float(rules_max)
+    except Exception:
+        rules_max = fallback
+
+    return float(min(th_max, rules_max))
 
 
 # =============================
@@ -700,6 +724,14 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
+    market_name = str(df["Market"].iloc[0]).strip().upper() if "Market" in df.columns and len(df) else label.strip().upper()
+    effective_max_odd = get_effective_max_odd(rules, market_name, mode)
+    df = df[df["Odd"] <= effective_max_odd].copy()
+    print(f"[DBG] {label}: após filtro odd_max = {len(df)} | odd_max={effective_max_odd:.2f}")
+
+    if df.empty:
+        return df
+
     edge_min = float(rules.get("edge_min", 0.0))
     edge_max = float(rules.get("edge_max", 0.15))
     df = df[(df["Edge"] >= edge_min) & (df["Edge"] <= edge_max)].copy()
@@ -719,9 +751,9 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
     if df.empty:
         return df
 
-    kfrac = float(rules.get("kelly_fraction", 0.25))
-    cap_frac = float(rules.get("cap_frac", 0.05))
-    daily_cap_frac = float(rules.get("daily_cap_frac", 0.15))
+    kfrac = float(rules.get("kelly_fraction", DEFAULT_KELLY_FRACTION))
+    cap_frac = float(rules.get("cap_frac", DEFAULT_CAP_FRAC))
+    daily_cap_frac = float(rules.get("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC))
     min_picks = int(rules.get("min_picks", 1))
 
     df = df.copy()
@@ -743,7 +775,10 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
         return df.iloc[0:0].copy()
 
     df = df[df["Stake€"] > 0].copy()
-    print(f"[DBG] {label}: final após stake = {len(df)}")
+    print(
+        f"[DBG] {label}: final após stake = {len(df)} | "
+        f"kelly_fraction={kfrac} | cap_frac={cap_frac} | daily_cap_frac={daily_cap_frac} | scale={scale:.4f}"
+    )
 
     round_cols = {
         "LambdaHome": 3,
@@ -1053,10 +1088,18 @@ def main():
     bankroll25 = float(bankroll_cfg.get("over25", 0.0))
     rules25 = dict(rules_cfg.get("over25", {}))
     rules25.setdefault("edge_max", 0.16)
+    rules25.setdefault("odd_max", DEFAULT_MAX_ODD_O25)
+    rules25.setdefault("kelly_fraction", DEFAULT_KELLY_FRACTION)
+    rules25.setdefault("cap_frac", DEFAULT_CAP_FRAC)
+    rules25.setdefault("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC)
 
     bankroll_btts = float(bankroll_cfg.get("btts", 0.0))
     rules_btts = dict(rules_cfg.get("btts", {}))
     rules_btts.setdefault("edge_max", 0.14)
+    rules_btts.setdefault("odd_max", DEFAULT_MAX_ODD_BTTS)
+    rules_btts.setdefault("kelly_fraction", DEFAULT_KELLY_FRACTION)
+    rules_btts.setdefault("cap_frac", DEFAULT_CAP_FRAC)
+    rules_btts.setdefault("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC)
 
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
