@@ -34,7 +34,7 @@
   },
   "rules": {
     "over25": {
-      "edge_min": 0.00,
+      "edge_min": 0.01,
       "edge_max": 0.15,
       "kelly_fraction": 0.18,
       "cap_frac": 0.04,
@@ -42,7 +42,7 @@
       "min_picks": 1
     },
     "btts": {
-      "edge_min": 0.00,
+      "edge_min": 0.01,
       "edge_max": 0.15,
       "kelly_fraction": 0.18,
       "cap_frac": 0.04,
