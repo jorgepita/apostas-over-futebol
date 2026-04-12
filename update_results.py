@@ -1565,6 +1565,10 @@ def try_update_row_via_api_football(
         print(f"[DBG] {label}: API-Football ainda não terminado: {jogo} | status={status}")
         return False, "NOT_FINISHED"
 
+    kickoff_dt = get_fixture_kickoff_dt(matched)
+    if kickoff_dt:
+        df.at[i, "KickoffUTC"] = kickoff_dt.isoformat()
+    
     home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
         print(f"[WARN] {label}: API-Football sem goals finais para: {jogo}")
@@ -1647,6 +1651,10 @@ def try_update_manual_row_via_api_football(
         )
         return False, "TOO_EARLY"
 
+    kickoff_dt = get_fixture_kickoff_dt(matched)
+    if kickoff_dt:
+        df.at[i, "KickoffUTC"] = kickoff_dt.isoformat()
+    
     home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
         print(f"[WARN] {label}: API-Football sem goals finais para manual: {jogo}")
