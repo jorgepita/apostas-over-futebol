@@ -492,9 +492,39 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-12|Premier League|Nottingham Forest vs Aston Villa|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Bundesliga|1. FC Köln vs Werder Bremen|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Super Lig|Konyaspor vs Fatih Karagümrük|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|2. Bundesliga|SV Elversberg vs FC Schalke 04|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Eredivisie|Fortuna Sittard vs NAC Breda|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-12T13:26:14.562029+00:00"
+  "updatedAt": "2026-04-12T13:26:52.155211+00:00"
 }
