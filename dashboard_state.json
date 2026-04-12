@@ -474,9 +474,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-11|Super Lig|Kayserispor vs Fenerbahçe|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-11T22:31:54.909306+00:00"
+  "updatedAt": "2026-04-12T13:25:23.190283+00:00"
 }
