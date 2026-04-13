@@ -1,4 +1,1 @@
-Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-13;nba;Oklahoma City Thunder;Phoenix Suns;lowvig;OVER;212.5;1.92;104.36;101.58;220.35;11.5;0.7527;0.5208;0.2318;0.4838;0;0;0.12096090154962497;0.05;25.0;1.0;500.0
-2026-04-12;nba;New York Knicks;Charlotte Hornets;fanduel;OVER;216.5;1.89;104.36;101.58;220.35;11.5;0.6312;0.5291;0.1021;0.2169;0;0;0.05421902234614727;0.05;25.0;1.0;500.0
-2026-04-12;nba;Toronto Raptors;Brooklyn Nets;lowvig;OVER;219.0;1.95;104.36;101.58;220.35;11.5;0.5469;0.5128;0.034;0.0699;0;0;0.01746407208386667;0.0175;8.73;1.0;500.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed
