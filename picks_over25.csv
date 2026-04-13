@@ -1,7 +1,7 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-13;turquia;Super Lig;Eyüpspor;Samsunspor;1.721;1.404;3.126;O2.5;0.604;2.0;0.5;0.1044;0.2087;0.104;0.0376;0.0358;17.9;0.9528980410572065;500.0
-2026-04-13;premier;Premier League;Manchester United;Leeds;1.709;1.508;3.217;O2.5;0.624;1.74;0.575;0.0489;0.1149;0.049;0.0207;0.0197;9.85;0.9528980410572065;500.0
-2026-04-13;turquia;Super Lig;Rizespor;Gaziantep FK;1.721;1.404;3.126;O2.5;0.604;1.74;0.575;0.0296;0.0697;0.03;0.0125;0.012;5.98;0.9528980410572065;500.0
-2026-04-14;championship;Championship;Portsmouth;Ipswich;1.396;1.464;2.86;O2.5;0.545;2.08;0.481;0.0639;0.1231;0.064;0.0221;0.0211;10.55;0.9528980410572065;500.0
-2026-04-14;championship;Championship;Southampton;Blackburn;2.2;0.882;3.082;O2.5;0.595;1.87;0.535;0.0601;0.1292;0.06;0.0233;0.0222;11.08;0.9528980410572065;500.0
-2026-04-14;italia2;Serie B;Catanzaro;Modena;1.631;1.106;2.737;O2.5;0.515;2.05;0.488;0.0277;0.0541;0.028;0.0097;0.0093;4.64;0.9528980410572065;500.0
+2026-04-13;turquia;Super Lig;Eyüpspor;Samsunspor;1.721;1.404;3.126;O2.5;0.604;1.99;0.503;0.1018;0.2047;0.102;0.0368;0.0368;18.42;1.0;500.0
+2026-04-13;premier;Premier League;Manchester United;Leeds;1.709;1.508;3.217;O2.5;0.624;1.69;0.592;0.0319;0.078;0.032;0.014;0.014;7.02;1.0;500.0
+2026-04-13;turquia;Super Lig;Rizespor;Gaziantep FK;1.721;1.404;3.126;O2.5;0.604;1.74;0.575;0.0296;0.0697;0.03;0.0125;0.0125;6.27;1.0;500.0
+2026-04-14;championship;Championship;Portsmouth;Ipswich;1.396;1.464;2.86;O2.5;0.545;2.08;0.481;0.0639;0.1231;0.064;0.0221;0.0221;11.07;1.0;500.0
+2026-04-14;championship;Championship;Southampton;Blackburn;2.2;0.882;3.082;O2.5;0.595;1.87;0.535;0.0601;0.1292;0.06;0.0233;0.0233;11.63;1.0;500.0
+2026-04-14;italia2;Serie B;Catanzaro;Modena;1.631;1.106;2.737;O2.5;0.515;2.05;0.488;0.0277;0.0541;0.028;0.0097;0.0097;4.87;1.0;500.0
