@@ -618,9 +618,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-12|Serie A|Como vs Inter|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-13T00:32:22.542185+00:00"
+  "updatedAt": "2026-04-13T00:33:05.027810+00:00"
 }
