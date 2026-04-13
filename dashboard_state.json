@@ -439,6 +439,12 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
+    "2026-04-11|Championship|Leicester vs Swansea|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
     "2026-04-11|Championship|Norwich vs Ipswich|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -475,37 +481,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-11|Super Lig|Kayserispor vs Fenerbahçe|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-11|Super Lig|Başakşehir vs Gençlerbirliği S.K.|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-11|Championship|Leicester vs Swansea|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Premier League|Nottingham Forest vs Aston Villa|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Bundesliga|1. FC Köln vs Werder Bremen|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Super Lig|Konyaspor vs Fatih Karagümrük|O2.5": {
+    "2026-04-11|Super Lig|Kayserispor vs Fenerbahçe|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -517,55 +499,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-12|Eredivisie|Fortuna Sittard vs NAC Breda|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Jupiler Pro League|KV Mechelen vs Union St. Gilloise|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Serie A|Parma vs Napoli|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Jupiler Pro League|Dender vs Zulte Waregem|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Serie B|Padova vs Empoli|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Eredivisie|PEC Zwolle vs Excelsior|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-12|Serie A|Genoa vs Sassuolo|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-12|2. Bundesliga|VfL Bochum vs Eintracht Braunschweig|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-12|Jupiler Pro League|Anderlecht vs Gent|O2.5": {
+    "2026-04-12|Bundesliga|1. FC Köln vs Werder Bremen|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -583,6 +523,78 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
+    "2026-04-12|Eredivisie|Fortuna Sittard vs NAC Breda|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Eredivisie|PEC Zwolle vs Excelsior|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Jupiler Pro League|Anderlecht vs Gent|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Jupiler Pro League|Dender vs Zulte Waregem|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Jupiler Pro League|KV Mechelen vs Union St. Gilloise|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Premier League|Nottingham Forest vs Aston Villa|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Serie A|Genoa vs Sassuolo|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Serie A|Parma vs Napoli|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Serie B|Padova vs Empoli|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Super Lig|Göztepe vs Kasımpaşa|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-12|Super Lig|Konyaspor vs Fatih Karagümrük|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-13|Premier League|Manchester United vs Leeds|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
     "2026-04-13|Primeira Liga|Tondela vs GIL Vicente|O2.5": {
       "apostada": true,
       "oddReal": "",
@@ -595,19 +607,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-13|Premier League|Manchester United vs Leeds|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-13|Super Lig|Rizespor vs Gaziantep FK|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-12|Super Lig|Göztepe vs Kasımpaşa|BTTS": {
+    "2026-04-13|Primeira Liga|Tondela vs GIL Vicente|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -616,5 +622,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-12T14:10:49.141911+00:00"
+  "updatedAt": "2026-04-13T00:32:22.542185+00:00"
 }
