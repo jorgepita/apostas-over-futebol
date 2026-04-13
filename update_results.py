@@ -1754,14 +1754,14 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 if kickoff_dt.tzinfo is None:
                 kickoff_dt = kickoff_dt.replace(tzinfo=timezone.utc)
 
-            now_utc = datetime.now(timezone.utc)
+                now_utc = datetime.now(timezone.utc)
 
-            if now_utc < kickoff_dt + RESULT_READY_DELAY:
-                future_skipped += 1
-                ignored += 1
-                continue
-         except Exception:
-             pass
+                if now_utc < kickoff_dt + RESULT_READY_DELAY:
+                    future_skipped += 1
+                    ignored += 1
+                    continue
+            except Exception:
+                pass
 
         if str(mercado).strip().upper() not in SUPPORTED_MARKETS:
             print(f"[WARN] {label}: Mercado não suportado: {mercado}")
