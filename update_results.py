@@ -1749,9 +1749,9 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             continue
         kickoff_str = row.get("KickoffUTC", "")
         if kickoff_str:
-        try:
-            kickoff_dt = datetime.fromisoformat(kickoff_str.replace("Z", "+00:00"))
-            if kickoff_dt.tzinfo is None:
+            try:
+                kickoff_dt = datetime.fromisoformat(kickoff_str.replace("Z", "+00:00"))
+                if kickoff_dt.tzinfo is None:
                 kickoff_dt = kickoff_dt.replace(tzinfo=timezone.utc)
 
             now_utc = datetime.now(timezone.utc)
