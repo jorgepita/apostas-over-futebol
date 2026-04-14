@@ -62,7 +62,7 @@ SYNC_RESULT_COLUMNS = [
 
 MANUAL_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€",
-    "Resultado", "Lucro€", "Notas", "Origem"
+    "Resultado", "Lucro€", "Notas", "Origem", "KickoffUTC"
 ]
 
 HTTP_TIMEOUT = 30
