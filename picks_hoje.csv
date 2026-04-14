@@ -1,3 +1,2 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-14;championship;Championship;Southampton;Blackburn;2.2;0.882;3.082;O2.5;0.595;1.87;0.535;0.0601;0.1292;0.05999999999999994;0.0233;0.0233;11.63;1.0;500.0
-2026-04-14;italia2;Serie B;Catanzaro;Modena;1.631;1.106;2.737;O2.5;0.515;2.05;0.488;0.0277;0.0541;0.027000000000000024;0.0097;0.0097;4.87;1.0;500.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-15;nba;Phoenix Suns;Portland Trail Blazers;fanduel;OVER;216.5;1.88;104.36;101.58;220.35;11.5;0.6312;0.5319;0.0993;0.2122;0;0;0.05304188804086914;0.05;25.0;1.0;500.0
