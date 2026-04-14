@@ -1566,7 +1566,7 @@ def try_update_row_via_api_football(
 
     kickoff_dt = get_fixture_kickoff_dt(matched)
     if kickoff_dt:
-        df.at[i, "KickoffUTC"] = kickoff_dt.isoformat()
+        df.at[idx, "KickoffUTC"] = kickoff_dt.isoformat()
     
     home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
