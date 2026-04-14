@@ -264,6 +264,9 @@ BASE_TEAM_ALIASES = {
     "newcastle": "newcastle united",
     "newcastle united": "newcastle united",
 
+    "leeds": "leeds united",
+    "leeds united": "leeds united",
+
     "forest": "nottingham forest",
     "nottingham forest": "nottingham forest",
 
