@@ -2724,7 +2724,7 @@ table {
 
         document.getElementById('footballRows').innerHTML = rows.length
           ? buildBotRowHtml(rows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma pick do bot encontrada para hoje com os filtros atuais.</div></td></tr>';
+          : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada para hoje com os filtros atuais.</div></td></tr>';
       }
 
       function renderBotHistoryOperational() {
@@ -2734,11 +2734,11 @@ table {
 
         document.getElementById('historyRowsDay').innerHTML = dayRows.length
           ? buildBotRowHtml(dayRows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
+          : '<tr><td colspan="16"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
 
         document.getElementById('historyRows').innerHTML = historyRows.length
           ? buildBotRowHtml(historyRows)
-          : '<tr><td colspan="17"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
+          : '<tr><td colspan="16"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
       }
 
       function renderClosedRealTable() {
