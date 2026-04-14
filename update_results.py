@@ -2186,7 +2186,7 @@ def main():
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
     if not API_FOOTBALL_KEY:
-        print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL/BJL/SB não vai funcionar.")
+        print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL/BJL/SB/FL2 não vai funcionar.")
 
     shared_state = make_shared_runtime_state()
 
