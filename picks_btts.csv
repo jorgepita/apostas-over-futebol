@@ -1,2 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-13;portugal;Primeira Liga;Tondela;GIL Vicente;1.62;1.344;2.964;BTTS;0.525;2.15;0.465;0.0597;0.1116;0.06;0.0201;0.0201;10.04;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap
