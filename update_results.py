@@ -52,8 +52,7 @@ SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
 CSV_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Lucro€", "LucroReal€"
-    "KickoffUTC"
+    "Resultado", "Lucro€", "LucroReal€", "KickoffUTC"
 ]
 
 SYNC_RESULT_COLUMNS = [
