@@ -2686,10 +2686,17 @@ table {
                 <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
               </td>
               <td>
-                <input class="js-odd-real small-input" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.OddReal || '')}" />
-              </td>
-              <td>
-                <input class="js-stake-real small-input" type="text" inputmode="decimal" data-pick-key="${escapeHtml(r._pickKey)}" value="${escapeHtml(r.StakeReal || '')}" />
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <input class="js-odd-real small-input" type="text" inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r.OddReal || '')}"
+                    placeholder="odd" />
+
+                  <input class="js-stake-real small-input" type="text" inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r.StakeReal || '')}"
+                    placeholder="stake" />
+                </div>
               </td>
               <td>
                 <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;width:auto;">
