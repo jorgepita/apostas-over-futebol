@@ -765,13 +765,33 @@ table {
           </div>
         </div>
 
-        <div class="stats-row">
+        <div class="grid grid-4">
           <div class="stat">
             <div class="label">Ganhas</div>
-            <div class="value" id="summaryWinsStat">0</div>
+           <div class="value" id="summaryWinsStat">0</div>
+           <div class="note">Fechadas reais</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Perdidas</div>
+            <div class="value" id="summaryLossesStat">0</div>
             <div class="note">Fechadas reais</div>
           </div>
 
+          <div class="stat">
+            <div class="label">Push</div>
+            <div class="value" id="summaryPushesStat">0</div>
+            <div class="note">Fechadas reais</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">Pendentes abertas</div>
+            <div class="value" id="summaryPendingOpenStat">0</div>
+            <div class="note">Executadas sem resultado</div>
+          </div>
+        </div>
+
+        <div class="grid grid-4">
           <div class="stat">
             <div class="label">Bot geradas</div>
             <div class="value" id="botGeneratedStat">0</div>
@@ -797,97 +817,58 @@ table {
           </div>
         </div>
 
-        <div class="stats-row">
-          <div class="label">O2.5 geradas</div>
-          <div class="value" id="o25GeneratedTopStat">0</div>
-          <div class="note">Todas as picks O2.5</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">O2.5 executadas</div>
-          <div class="value" id="o25ExecutedTopStat">0</div>
-          <div class="note">Marcadas como executadas</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">O2.5 ganhas</div>
-          <div class="value" id="o25WinsTopStat">0</div>
-          <div class="note" id="o25WinsPctNote">—</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">O2.5 perdidas</div>
-          <div class="value" id="o25LossesTopStat">0</div>
-          <div class="note" id="o25LossesPctNote">—</div>
-        </div>
-      </div>
-
-      <div class="stats-row">
-          <div class="label">BTTS geradas</div>
-          <div class="value" id="bttsGeneratedTopStat">0</div>
-          <div class="note">Todas as picks BTTS</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">BTTS executadas</div>
-          <div class="value" id="bttsExecutedTopStat">0</div>
-          <div class="note">Marcadas como executadas</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">BTTS ganhas</div>
-          <div class="value" id="bttsWinsTopStat">0</div>
-          <div class="note" id="bttsWinsPctNote">—</div>
-        </div>
-
-        <div class="stat">
-          <div class="label">BTTS perdidas</div>
-          <div class="value" id="bttsLossesTopStat">0</div>
-          <div class="note" id="bttsLossesPctNote">—</div>
-        </div>
-      </div>
-          
+        <div class="grid grid-4">
           <div class="stat">
-            <div class="label">Perdidas</div>
-            <div class="value" id="summaryLossesStat">0</div>
-            <div class="note">Fechadas reais</div>
+            <div class="label">O2.5 geradas</div>
+            <div class="value" id="o25GeneratedTopStat">0</div>
+            <div class="note">Todas as picks O2.5</div>
           </div>
 
           <div class="stat">
-            <div class="label">Push</div>
-            <div class="value" id="summaryPushesStat">0</div>
-            <div class="note">Fechadas reais</div>
+            <div class="label">O2.5 executadas</div>
+            <div class="value" id="o25ExecutedTopStat">0</div>
+            <div class="note">Marcadas como executadas</div>
           </div>
 
           <div class="stat">
-            <div class="label">Pendentes abertas</div>
-            <div class="value" id="summaryPendingOpenStat">0</div>
-            <div class="note">Executadas sem resultado</div>
+            <div class="label">O2.5 ganhas</div>
+            <div class="value" id="o25WinsTopStat">0</div>
+            <div class="note" id="o25WinsPctNote">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">O2.5 perdidas</div>
+            <div class="value" id="o25LossesTopStat">0</div>
+            <div class="note" id="o25LossesPctNote">—</div>
           </div>
         </div>
 
-        <div class="grid grid-2">
-          <div class="card">
-            <div class="label">Evolução da banca</div>
-            <div class="note" style="margin-bottom:12px;">Baseada nas apostas reais fechadas.</div>
-            <div class="chart-box">
-              <div id="bankrollChartWrap"></div>
-            </div>
+        <div class="grid grid-4">
+          <div class="stat">
+            <div class="label">BTTS geradas</div>
+            <div class="value" id="bttsGeneratedTopStat">0</div>
+            <div class="note">Todas as picks BTTS</div>
           </div>
 
-          <div class="card">
-            <div class="label">Resumo rápido</div>
-            <div class="note" style="margin-bottom:12px;">Sessão, risco e execução.</div>
-            <div id="summaryList" class="grid"></div>
+          <div class="stat">
+            <div class="label">BTTS executadas</div>
+            <div class="value" id="bttsExecutedTopStat">0</div>
+            <div class="note">Marcadas como executadas</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">BTTS ganhas</div>
+            <div class="value" id="bttsWinsTopStat">0</div>
+            <div class="note" id="bttsWinsPctNote">—</div>
+          </div>
+
+          <div class="stat">
+            <div class="label">BTTS perdidas</div>
+            <div class="value" id="bttsLossesTopStat">0</div>
+            <div class="note" id="bttsLossesPctNote">—</div>
           </div>
         </div>
-
-        <div class="card">
-          <div class="label">Centro de alertas</div>
-          <div class="note" style="margin-bottom:12px;">Leitura consolidada do estado atual.</div>
-          <div id="alertsCenter" class="grid"></div>
-        </div>
-
+        
         <div class="card">
           <div class="label">Apostas em aberto</div>
           <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
