@@ -648,9 +648,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-14|Serie B|Catanzaro vs Modena|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-15T06:29:42.745309+00:00"
+  "updatedAt": "2026-04-15T06:30:01.136297+00:00"
 }
