@@ -2433,6 +2433,25 @@ table {
       document.getElementById('bttsExecutedTopStat').textContent = String(botOverview.btts.executed);
       document.getElementById('bttsWinsTopStat').textContent = String(botOverview.btts.wins);
       document.getElementById('bttsLossesTopStat').textContent = String(botOverview.btts.losses);
+
+      // ===== Percentagens O2.5 =====
+      const o25Total = botOverview.o25.wins + botOverview.o25.losses;
+
+      const o25WinPct = o25Total > 0 ? (botOverview.o25.wins / o25Total) * 100 : 0;
+      const o25LossPct = o25Total > 0 ? (botOverview.o25.losses / o25Total) * 100 : 0;
+
+      document.getElementById('o25WinsPctNote').textContent = `${o25WinPct.toFixed(1)}%`;
+      document.getElementById('o25LossesPctNote').textContent = `${o25LossPct.toFixed(1)}%`;
+
+
+      // ===== Percentagens BTTS =====
+      const bttsTotal = botOverview.btts.wins + botOverview.btts.losses;
+
+      const bttsWinPct = bttsTotal > 0 ? (botOverview.btts.wins / bttsTotal) * 100 : 0;
+      const bttsLossPct = bttsTotal > 0 ? (botOverview.btts.losses / bttsTotal) * 100 : 0;
+
+      document.getElementById('bttsWinsPctNote').textContent = `${bttsWinPct.toFixed(1)}%`;
+      document.getElementById('bttsLossesPctNote').textContent = `${bttsLossPct.toFixed(1)}%`;
       }
 
       function renderAlertsCenter() {
