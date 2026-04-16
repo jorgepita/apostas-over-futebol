@@ -603,19 +603,20 @@ table {
 #bttsWinsPctNote,
 #bttsLossesPctNote {
   display: block;
+}
 
 .stats-row {
   display: flex;
   gap: 12px;
   align-items: stretch;
-  flex-wrap: wrap; /* evita overflow */
+  flex-wrap: wrap;
 }
 
 .stats-row .stat {
-  flex: 0 0 calc(25% - 9px);
+  flex: 0 0 calc(25% - 9px) !important;
+  max-width: calc(25% - 9px) !important;
+  width: auto !important;
   min-width: 0;
-  max-width: calc(25% - 9px);
-  width: auto;
   text-align: center;
 }
   </style>
