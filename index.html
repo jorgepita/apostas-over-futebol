@@ -3391,17 +3391,16 @@ table {
             fetch(`${URLS.footballHistory}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.nba}?t=${Date.now()}`, { cache: 'no-store' }),
              fetch(`${URLS.manual}?t=${Date.now()}`, { cache: 'no-store' })
-      ]);
-
-      if (!historyRes.ok) {
-          throw new Error('Falha a ler picks_history.csv');
-      }
-
-      const dailyText = dailyRes.ok ? await dailyRes.text() : '';
-      const historyText = await historyRes.text();
-      const nbaText = nbaRes.ok ? await nbaRes.text() : '';
-      const manualText = manualRes.ok ? await manualRes.text() : '';
           ]);
+
+          if (!historyRes.ok) {
+            throw new Error('Falha a ler picks_history.csv');
+          }
+
+          const dailyText = dailyRes.ok ? await dailyRes.text() : '';
+          const historyText = await historyRes.text();
+          const nbaText = nbaRes.ok ? await nbaRes.text() : '';
+          const manualText = manualRes.ok ? await manualRes.text() : '';
 
           state.footballDaily = parseSemicolonCsv(dailyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
           state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
