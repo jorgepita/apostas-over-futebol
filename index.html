@@ -608,20 +608,13 @@ table {
   display: flex;
   gap: 12px;
   align-items: stretch;
+  flex-wrap: wrap; /* evita overflow */
 }
 
 .stats-row .stat {
-  flex: 1;
-  min-width: 120px;
+  flex: 1 1 calc(25% - 12px);
+  min-width: 0;
   text-align: center;
-}
-
-.stats-row {
-  display: flex;
-  gap: 12px;
-  align-items: stretch;
-  flex-wrap: wrap; /* evita overflow */
-}
 }
   </style>
 </head>
