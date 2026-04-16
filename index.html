@@ -3410,7 +3410,8 @@ table {
           rerenderAll(false);
           return true;
         } catch (e) {
-          alert('Erro a carregar os CSV do GitHub. Confirma se os links continuam públicos e válidos.');
+          console.error('loadData error:', e);
+          alert(`Erro a carregar os CSV do GitHub: ${e.message}`);
           return false;
         }
       }
