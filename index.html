@@ -3390,18 +3390,17 @@ table {
             fetch(`${URLS.footballDaily}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.footballHistory}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.nba}?t=${Date.now()}`, { cache: 'no-store' }),
-            fetch(`${URLS.manual}?t=${Date.now()}`, { cache: 'no-store' })
-          ]);
+             fetch(`${URLS.manual}?t=${Date.now()}`, { cache: 'no-store' })
+      ]);
 
-          if (!dailyRes.ok || !historyRes.ok || !nbaRes.ok || !manualRes.ok) {
-            throw new Error('Falha a ler um ou mais CSV remotos.');
-          }
+      if (!historyRes.ok) {
+          throw new Error('Falha a ler picks_history.csv');
+      }
 
-          const [dailyText, historyText, nbaText, manualText] = await Promise.all([
-            dailyRes.text(),
-            historyRes.text(),
-            nbaRes.text(),
-            manualRes.text()
+      const dailyText = dailyRes.ok ? await dailyRes.text() : '';
+      const historyText = await historyRes.text();
+      const nbaText = nbaRes.ok ? await nbaRes.text() : '';
+      const manualText = manualRes.ok ? await manualRes.text() : '';
           ]);
 
           state.footballDaily = parseSemicolonCsv(dailyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
