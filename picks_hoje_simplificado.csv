@@ -1,16 +1,16 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-17;Bundesliga;FC St. Pauli vs 1. FC Köln;BTTS;1.91;15.65;8.28;;;;;;
-2026-04-17;2. Bundesliga;Holstein Kiel vs 1. FC Kaiserslautern;O2.5;1.67;4.53;4.75;;;;;;
-2026-04-17;Super Lig;Antalyaspor vs Konyaspor;BTTS;1.82;7.73;3.87;;;;;;
-2026-04-18;Ligue 1;Lorient vs Marseille;O2.5;1.74;8.5;14.53;;;;;;
-2026-04-18;Premier League;Leeds vs Wolves;O2.5;1.97;8.5;13.52;;;;;;
-2026-04-18;Bundesliga;Werder Bremen vs Hamburger SV;O2.5;1.79;8.5;12.67;;;;;;
-2026-04-18;Championship;Swansea vs Southampton;O2.5;1.81;8.5;10.79;;;;;;
-2026-04-18;Ligue 1;Lille vs Nice;BTTS;1.91;12.47;6.6;;;;;;
-2026-04-18;2. Bundesliga;Arminia Bielefeld vs 1. FC Nürnberg;O2.5;1.72;5.93;6.49;;;;;;
-2026-04-18;Premier League;Newcastle vs Bournemouth;O2.5;1.52;6.94;6.21;;;;;;
-2026-04-18;Serie B;Juve Stabia vs Catanzaro;BTTS;1.87;7.8;4.03;;;;;;
-2026-04-18;Bundesliga;1899 Hoffenheim vs Borussia Dortmund;O2.5;1.53;3.51;3.17;;;;;;
-2026-04-18;2. Bundesliga;Dynamo Dresden vs VfL Bochum;O2.5;1.62;2.9;2.91;;;;;;
-2026-04-18;Bundesliga;Union Berlin vs VfL Wolfsburg;BTTS;1.73;6.05;2.84;;;;;;
-2026-04-18;2. Bundesliga;Hannover 96 vs SC Paderborn 07;O2.5;1.6;2.18;2.13;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-04-17;Bundesliga;FC St. Pauli vs 1. FC Köln;BTTS;1.91;15.65;8.28;;;;;;;
+2026-04-17;2. Bundesliga;Holstein Kiel vs 1. FC Kaiserslautern;O2.5;1.67;4.53;4.75;;;;W;8.89;;2026-04-17T16:30:00+00:00
+2026-04-17;Super Lig;Antalyaspor vs Konyaspor;BTTS;1.82;7.73;3.87;;;;;;;
+2026-04-18;Ligue 1;Lorient vs Marseille;O2.5;1.74;8.5;14.53;;;;;;;
+2026-04-18;Premier League;Leeds vs Wolves;O2.5;1.97;8.5;13.52;;;;;;;
+2026-04-18;Bundesliga;Werder Bremen vs Hamburger SV;O2.5;1.79;8.5;12.67;;;;;;;
+2026-04-18;Championship;Swansea vs Southampton;O2.5;1.81;8.5;10.79;;;;;;;
+2026-04-18;Ligue 1;Lille vs Nice;BTTS;1.91;12.47;6.6;;;;;;;
+2026-04-18;2. Bundesliga;Arminia Bielefeld vs 1. FC Nürnberg;O2.5;1.72;5.93;6.49;;;;;;;
+2026-04-18;Premier League;Newcastle vs Bournemouth;O2.5;1.52;6.94;6.21;;;;;;;
+2026-04-18;Serie B;Juve Stabia vs Catanzaro;BTTS;1.87;7.8;4.03;;;;;;;
+2026-04-18;Bundesliga;1899 Hoffenheim vs Borussia Dortmund;O2.5;1.53;3.51;3.17;;;;;;;
+2026-04-18;2. Bundesliga;Dynamo Dresden vs VfL Bochum;O2.5;1.62;2.9;2.91;;;;;;;
+2026-04-18;Bundesliga;Union Berlin vs VfL Wolfsburg;BTTS;1.73;6.05;2.84;;;;;;;
+2026-04-18;2. Bundesliga;Hannover 96 vs SC Paderborn 07;O2.5;1.6;2.18;2.13;;;;;;;
