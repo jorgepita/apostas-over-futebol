@@ -744,9 +744,21 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-18|2. Bundesliga|Dynamo Dresden vs VfL Bochum|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Bundesliga|Union Berlin vs VfL Wolfsburg|BTTS": {
+      "apostada": false,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T08:32:44.749315+00:00"
+  "updatedAt": "2026-04-17T08:32:57.513481+00:00"
 }
