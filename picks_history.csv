@@ -109,11 +109,11 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-14;Championship;Southampton vs Blackburn;O2.5;1.87;10.78;6.01;;;;W;9.38;;
 2026-04-14;Serie B;Catanzaro vs Modena;O2.5;2.05;4.51;2.77;;;;W;4.74;;
 2026-04-17;2. Bundesliga;Holstein Kiel vs 1. FC Kaiserslautern;O2.5;1.7;12.7;5.81;;;;W;8.89;;2026-04-17T16:30:00+00:00
-2026-04-17;Bundesliga;FC St. Pauli vs 1. FC Köln;BTTS;1.91;15.65;8.28;;;;;;;
-2026-04-17;Primeira Liga;Rio Ave vs AVS;O2.5;1.98;16.38;9.01;;;;;;;
-2026-04-17;Serie A;Inter vs Cagliari;O2.5;1.62;3.84;1.63;;;;;;;
-2026-04-17;Super Lig;Antalyaspor vs Konyaspor;BTTS;1.82;7.73;3.87;;;;;;;
-2026-04-17;Super Lig;Fenerbahçe vs Rizespor;BTTS;1.9;4.18;2.2;;;;;;;
+2026-04-17;Bundesliga;FC St. Pauli vs 1. FC Köln;BTTS;1.91;15.65;8.28;;;;W;14.24;;
+2026-04-17;Primeira Liga;Rio Ave vs AVS;O2.5;1.98;16.38;9.01;;;;W;16.05;;
+2026-04-17;Serie A;Inter vs Cagliari;O2.5;1.62;3.84;1.63;;;;W;2.38;;
+2026-04-17;Super Lig;Antalyaspor vs Konyaspor;BTTS;1.82;7.73;3.87;;;;L;-7.73;;2026-04-17T17:00:00+00:00
+2026-04-17;Super Lig;Fenerbahçe vs Rizespor;BTTS;1.9;4.18;2.2;;;;W;3.76;;2026-04-17T17:00:00+00:00
 2026-04-18;2. Bundesliga;Arminia Bielefeld vs 1. FC Nürnberg;O2.5;1.72;5.89;6.49;;;;;;;
 2026-04-18;2. Bundesliga;Dynamo Dresden vs VfL Bochum;O2.5;1.62;2.88;2.91;;;;;;;
 2026-04-18;2. Bundesliga;Hannover 96 vs SC Paderborn 07;O2.5;1.6;2.16;2.13;;;;;;;
