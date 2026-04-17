@@ -660,9 +660,27 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-17|Bundesliga|FC St. Pauli vs 1. FC Köln|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-17|Super Lig|Antalyaspor vs Konyaspor|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-17|2. Bundesliga|Holstein Kiel vs 1. FC Kaiserslautern|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T00:19:01.728193+00:00"
+  "updatedAt": "2026-04-17T00:19:12.215425+00:00"
 }
