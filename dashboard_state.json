@@ -752,7 +752,13 @@
       "resultadoManual": ""
     },
     "2026-04-18|Bundesliga|Union Berlin vs VfL Wolfsburg|BTTS": {
-      "apostada": false,
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|2. Bundesliga|Hannover 96 vs SC Paderborn 07|O2.5": {
+      "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
@@ -760,5 +766,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T08:32:57.513481+00:00"
+  "updatedAt": "2026-04-17T08:33:17.677203+00:00"
 }
