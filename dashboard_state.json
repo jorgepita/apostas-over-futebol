@@ -726,9 +726,27 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-18|Premier League|Newcastle vs Bournemouth|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Serie B|Juve Stabia vs Catanzaro|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Bundesliga|1899 Hoffenheim vs Borussia Dortmund|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T08:32:30.109336+00:00"
+  "updatedAt": "2026-04-17T08:32:44.749315+00:00"
 }
