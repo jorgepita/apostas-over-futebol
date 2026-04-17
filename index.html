@@ -3297,30 +3297,30 @@ table {
       }
 
       function rerenderSummaryOnly() {
-        renderTopDecisionBlock();
-        renderSummaryHeadlineStats();
-        renderAlertsCenter();
-        renderOpenBets();
-        renderAnalytics();
-        renderNba();
-        renderSummary();
-        renderBankrollChart();
+        try { renderTopDecisionBlock(); } catch (e) { console.error('renderTopDecisionBlock', e); }
+        try { renderSummaryHeadlineStats(); } catch (e) { console.error('renderSummaryHeadlineStats', e); }
+        try { renderAlertsCenter(); } catch (e) { console.error('renderAlertsCenter', e); }
+        try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
+        try { renderAnalytics(); } catch (e) { console.error('renderAnalytics', e); }
+        try { renderNba(); } catch (e) { console.error('renderNba', e); }
+        try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
+        try { renderBankrollChart(); } catch (e) { console.error('renderBankrollChart', e); }
       }
 
       function rerenderDayOnly() {
-        renderOpenBets();
-        renderFootball();
-        renderBotHistoryOperational();
-        syncQuickMarketButtons();
+        try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
+        try { renderFootball(); } catch (e) { console.error('renderFootball', e); }
+        try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
+        try { syncQuickMarketButtons(); } catch (e) { console.error('syncQuickMarketButtons', e); }
       }
 
       function rerenderHistoryOnly() {
-        renderBotHistoryOperational();
-        renderClosedRealTable();
+        try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
+        try { renderClosedRealTable(); } catch (e) { console.error('renderClosedRealTable', e); }
       }
 
       function rerenderManualOnly() {
-        renderManualBets();
+        try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
       }
 
       function rerenderAll(triggerAutoSave = true) {
