@@ -716,7 +716,13 @@
       "resultadoManual": ""
     },
     "2026-04-18|Ligue 1|Lille vs Nice|BTTS": {
-      "apostada": false,
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|2. Bundesliga|Arminia Bielefeld vs 1. FC Nürnberg|O2.5": {
+      "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
@@ -724,5 +730,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T08:32:04.412337+00:00"
+  "updatedAt": "2026-04-17T08:32:30.109336+00:00"
 }
