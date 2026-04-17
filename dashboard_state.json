@@ -654,9 +654,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-17|Super Lig|Fenerbahçe vs Rizespor|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T00:18:44.689724+00:00"
+  "updatedAt": "2026-04-17T00:19:01.728193+00:00"
 }
