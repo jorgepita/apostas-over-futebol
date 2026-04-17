@@ -702,9 +702,27 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-18|Bundesliga|Werder Bremen vs Hamburger SV|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Championship|Swansea vs Southampton|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Ligue 1|Lille vs Nice|BTTS": {
+      "apostada": false,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T08:31:34.228493+00:00"
+  "updatedAt": "2026-04-17T08:31:49.888953+00:00"
 }
