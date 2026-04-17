@@ -678,9 +678,21 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-17|Serie A|Inter vs Cagliari|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-17|Primeira Liga|Rio Ave vs AVS|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-17T00:19:12.215425+00:00"
+  "updatedAt": "2026-04-17T00:19:30.879024+00:00"
 }
