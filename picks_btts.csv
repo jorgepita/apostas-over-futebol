@@ -1,7 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-18;franca;Ligue 1;Lille;Nice;2.2;1.383;3.583;BTTS;0.59;1.91;0.524;0.066;0.1385;0.066;0.0249;0.0249;12.47;1.0;500.0
-2026-04-18;italia2;Serie B;Juve Stabia;Catanzaro;1.688;1.595;3.284;BTTS;0.575;1.87;0.535;0.0403;0.0867;0.04;0.0156;0.0156;7.8;1.0;500.0
-2026-04-18;alemanha;Bundesliga;Union Berlin;VfL Wolfsburg;1.882;1.652;3.534;BTTS;0.606;1.73;0.578;0.0284;0.0672;0.028;0.0121;0.0121;6.05;1.0;500.0
-2026-04-19;portugal;Primeira Liga;Arouca;Estrela;2.081;1.587;3.668;BTTS;0.616;1.83;0.546;0.0697;0.1536;0.07;0.0276;0.0276;13.82;1.0;500.0
+2026-04-19;italia;Serie A;Juventus;Bologna;2.2;1.4;3.6;BTTS;0.593;1.95;0.513;0.08;0.1642;0.08;0.0296;0.0296;14.78;1.0;500.0
+2026-04-19;portugal;Primeira Liga;Arouca;Estrela;2.081;1.587;3.668;BTTS;0.616;1.77;0.565;0.0511;0.1175;0.051;0.0212;0.0212;10.58;1.0;500.0
 2026-04-19;franca;Ligue 1;Nantes;Stade Brestois 29;1.813;1.453;3.267;BTTS;0.567;1.91;0.524;0.0439;0.0922;0.044;0.0166;0.0166;8.3;1.0;500.0
-2026-04-19;alemanha;Bundesliga;Borussia Mönchengladbach;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.72;0.581;0.025;0.0597;0.025;0.0108;0.0108;5.38;1.0;500.0
+2026-04-19;alemanha;Bundesliga;Borussia Mönchengladbach;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.7;0.588;0.0182;0.0441;0.018;0.0079;0.0079;3.97;1.0;500.0
