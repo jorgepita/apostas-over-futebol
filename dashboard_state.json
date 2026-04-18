@@ -828,9 +828,15 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-18|Ligue 1|Lille vs Nice|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-18T11:23:02.129675+00:00"
+  "updatedAt": "2026-04-18T22:47:05.933683+00:00"
 }
