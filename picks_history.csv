@@ -116,17 +116,17 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-04-17;Super Lig;Fenerbahçe vs Rizespor;BTTS;1.9;4.18;2.2;;;;W;3.76;;
 2026-04-18;2. Bundesliga;Arminia Bielefeld vs 1. FC Nürnberg;O2.5;1.72;5.89;6.49;;;;L;-5.89;;
 2026-04-18;2. Bundesliga;Dynamo Dresden vs VfL Bochum;O2.5;1.62;2.88;2.91;;;;L;-2.88;;
-2026-04-18;2. Bundesliga;Hannover 96 vs SC Paderborn 07;O2.5;1.6;2.16;2.13;;;;;;;
+2026-04-18;2. Bundesliga;Hannover 96 vs SC Paderborn 07;O2.5;1.6;2.16;2.13;;;;L;-2.16;;2026-04-18T18:30:00+00:00
 2026-04-18;Bundesliga;1899 Hoffenheim vs Borussia Dortmund;O2.5;1.53;3.48;3.17;;;;W;1.84;;
 2026-04-18;Bundesliga;Union Berlin vs VfL Wolfsburg;BTTS;1.73;6.05;2.84;;;;W;4.42;;
 2026-04-18;Bundesliga;Werder Bremen vs Hamburger SV;O2.5;1.81;8.44;13.29;;;;W;6.84;;
 2026-04-18;Championship;Swansea vs Southampton;O2.5;1.8;8.44;10.48;;;;W;6.75;;
-2026-04-18;Ligue 1;Lille vs Nice;BTTS;1.91;12.47;6.6;;;;;;;
-2026-04-18;Ligue 1;Lille vs Nice;O2.5;1.8;4.48;13.87;;;;;;;
+2026-04-18;Ligue 1;Lille vs Nice;BTTS;1.91;12.47;6.6;;;;L;-12.47;;
+2026-04-18;Ligue 1;Lille vs Nice;O2.5;1.8;4.48;13.87;;;;L;-4.48;;
 2026-04-18;Ligue 1;Lorient vs Marseille;O2.5;1.75;8.44;14.86;;;;L;-8.44;;
 2026-04-18;Premier League;Leeds vs Wolves;O2.5;1.97;8.44;13.52;;;;W;8.19;;
 2026-04-18;Premier League;Newcastle vs Bournemouth;O2.5;1.51;6.49;5.77;;;;W;3.31;;
-2026-04-18;Serie B;Juve Stabia vs Catanzaro;BTTS;1.87;7.8;4.03;;;;;;;
+2026-04-18;Serie B;Juve Stabia vs Catanzaro;BTTS;1.87;7.8;4.03;;;;W;6.79;;2026-04-18T17:30:00+00:00
 2026-04-19;2. Bundesliga;Eintracht Braunschweig vs Hertha BSC;O2.5;1.65;2.12;4.03;;;;;;;
 2026-04-19;2. Bundesliga;FC Schalke 04 vs Preußen Münster;O2.5;1.92;4.6;12.55;;;;;;;
 2026-04-19;2. Bundesliga;SpVgg Greuther Fürth vs SV Darmstadt 98;O2.5;1.6;1.18;2.13;;;;;;;
