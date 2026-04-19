@@ -649,7 +649,7 @@ table {
 
             <div class="mobile-actions-inline" id="desktopActionsGroup">
               <button id="loadCloudBtn" type="button">Carregar cloud</button>
-              <button id="saveCloudBtn" type="button">Guardar cloud</button>
+              <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
               <button id="resetLocalBtn" type="button">Limpar controlos locais</button>
               <button id="clearManualBtn" type="button">Apagar manuais locais</button>
               <button id="exportManualBtn" type="button">Exportar manuais</button>
@@ -662,7 +662,7 @@ table {
 
         <div id="mobileActionsPanel" class="mobile-actions-panel">
           <button id="loadCloudBtnMobile" type="button">Carregar cloud</button>
-          <button id="saveCloudBtnMobile" type="button">Guardar cloud</button>
+          <button id="saveCloudBtnMobile" type="button" disabled>Guardar cloud</button>
           <button id="resetLocalBtnMobile" type="button">Limpar controlos locais</button>
           <button id="clearManualBtnMobile" type="button">Apagar manuais locais</button>
           <button id="exportManualBtnMobile" type="button">Exportar manuais</button>
@@ -3254,6 +3254,25 @@ table {
         }
       }
 
+      function updateSaveCloudButton() {
+        const buttons = [
+          document.getElementById('saveCloudBtn'),
+          document.getElementById('saveCloudBtnMobile')
+        ].filter(Boolean);
+
+        buttons.forEach(btn => {
+          if (hasPendingCloudChanges) {
+            btn.disabled = false;
+            btn.textContent = 'Guardar cloud*';
+            btn.classList.add('warn');
+          } else {
+            btn.disabled = true;
+            btn.textContent = 'Guardar cloud';
+            btn.classList.remove('warn');
+          }
+        });
+      }
+      
       function markDirty() {
         hasPendingCloudChanges = true;
         rerenderSummaryOnly();
