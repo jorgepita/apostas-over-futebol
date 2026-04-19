@@ -843,7 +843,7 @@
     },
     "2026-04-18|Bundesliga|1899 Hoffenheim vs Borussia Dortmund|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.46",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:21:17.343364+00:00"
+  "updatedAt": "2026-04-19T09:21:50.535267+00:00"
 }
