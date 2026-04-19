@@ -2144,15 +2144,20 @@
     document.body.addEventListener('input', handleInputs);
     document.body.addEventListener('change', handleInputs);
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
       btn.addEventListener('click', () => {
-        state.activeTab = btn.dataset.tab;
+        const target = btn.dataset.tabTarget;
+        if (!target) return;
+
+        state.activeTab = target;
         saveLocalState();
 
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-btn[data-tab-target]').forEach(b => b.classList.remove('active'));
 
-        document.getElementById(state.activeTab).classList.add('active');
+        const panel = document.getElementById(target);
+        if (panel) panel.classList.add('active');
+
         btn.classList.add('active');
       });
     });
@@ -2166,10 +2171,10 @@
 
     // aplicar tab ativo guardado
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn[data-tab-target]').forEach(b => b.classList.remove('active'));
 
     const activePanel = document.getElementById(state.activeTab);
-    const activeBtn = document.querySelector(`.tab-btn[data-tab="${state.activeTab}"]`);
+    const activeBtn = document.querySelector(`.tab-btn[data-tab-target="${state.activeTab}"]`);
 
     if (activePanel) activePanel.classList.add('active');
     if (activeBtn) activeBtn.classList.add('active');
