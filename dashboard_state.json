@@ -1,19 +1,7 @@
 {
   "bankrollInicial": 11.0,
   "localEdits": {},
-  "manualBets": [
-    {
-      "id": "manual_1776590738705_ngn8ma",
-      "data": "2026-04-18",
-      "liga": "Bundesliga",
-      "jogo": "Union Berlin x Vfl Wolfsburg",
-      "mercado": "O2.5",
-      "odd": "1.79",
-      "stake": "1",
-      "resultado": "W",
-      "notas": ""
-    }
-  ],
+  "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-19T09:33:35.781832+00:00"
+  "updatedAt": "2026-04-19T09:34:11.216864+00:00"
 }
