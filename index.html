@@ -1415,7 +1415,6 @@ table {
       const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
       const SYNC_STATE_URL = `${SYNC_API_BASE}/state`;
 
-      let autoSaveTimer = null;
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
       let initialLoadDone = false;
@@ -3568,18 +3567,6 @@ table {
           if (!file) return;
           await importManualJsonFromFile(file);
           e.target.value = '';
-        });
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'hidden' && hasPendingCloudChanges) {
-            saveCloudState(false, false);
-          }
-        });
-
-        window.addEventListener('beforeunload', () => {
-          if (hasPendingCloudChanges) {
-            saveCloudState(false, false);
-          }
         });
       }
 
