@@ -837,7 +837,7 @@
     },
     "2026-04-18|Serie B|Juve Stabia vs Catanzaro|BTTS": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.84",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:18:46.613421+00:00"
+  "updatedAt": "2026-04-19T09:19:13.354014+00:00"
 }
