@@ -527,6 +527,12 @@
       min-height: 34px;
     }
 
+    button.warn {
+  border-color: #b45309;
+  background: #fffbeb;
+  color: #92400e;
+}
+    
     .table-wrap table {
       border-collapse: separate;
       border-spacing: 0;
@@ -573,6 +579,16 @@
       box-shadow: 4px 0 6px rgba(0,0,0,0.05);
     }
 
+    .save-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+    
     td:nth-child(6),
     td:nth-child(7),
     td:nth-child(11),
@@ -642,7 +658,9 @@
 
             <div class="mobile-actions-inline" id="desktopActionsGroup">
               <button id="loadCloudBtn" type="button">Carregar cloud</button>
-              <button id="saveCloudBtn" type="button">Guardar cloud</button>
+              <button id="saveCloudBtn" type="button" onclick="saveToCloud()" disabled>
+                Guardar cloud
+              </button>
               <button id="resetLocalBtn" type="button">Limpar controlos locais</button>
               <button id="clearManualBtn" type="button">Apagar manuais locais</button>
               <button id="exportManualBtn" type="button">Exportar manuais</button>
@@ -655,7 +673,9 @@
 
         <div id="mobileActionsPanel" class="mobile-actions-panel">
           <button id="loadCloudBtnMobile" type="button">Carregar cloud</button>
-          <button id="saveCloudBtnMobile" type="button">Guardar cloud</button>
+          <button id="saveCloudBtnMobile" type="button" onclick="saveToCloud()" disabled>
+            Guardar cloud
+          </button>
           <button id="resetLocalBtnMobile" type="button">Limpar controlos locais</button>
           <button id="clearManualBtnMobile" type="button">Apagar manuais locais</button>
           <button id="exportManualBtnMobile" type="button">Exportar manuais</button>
@@ -1656,6 +1676,10 @@
     } catch (e) {
       console.warn('Erro a guardar localStorage', e);
     }
+   
+    markPendingCloudChanges();
+    updateSaveCloudButton();
+    }
   }
 
   function loadLocalState() {
@@ -1682,14 +1706,16 @@
   }
 
   function markPendingCloudChanges() {
-    if (!initialLoadDone) return;
-    hasPendingCloudChanges = true;
-    updateCloudStatus();
-  }
+  if (!initialLoadDone) return;
+  hasPendingCloudChanges = true;
+  updateCloudStatus();
+  updateSaveCloudButton();
+}
 
   function clearPendingCloudChanges() {
     hasPendingCloudChanges = false;
     updateCloudStatus();
+    updateSaveCloudButton();
   }
 
   async function checkCloudStatus() {
@@ -1713,14 +1739,31 @@
     }
 
     if (hasPendingCloudChanges) {
-      el.textContent = 'Cloud: alterações por guardar';
-      el.style.color = 'var(--warn)';
-    } else {
-      el.textContent = 'Cloud: OK';
-      el.style.color = 'var(--ok)';
-    }
+  el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações locais por guardar';
+  el.style.color = 'var(--warn)';
+} else {
+  el.innerHTML = '<span class="save-status-dot"></span> Cloud: OK';
+  el.style.color = 'var(--ok)';
+}
   }
 
+function updateSaveCloudButton() {
+  const buttons = [
+    document.getElementById('saveCloudBtn'),
+    document.getElementById('saveCloudBtnMobile')
+  ].filter(Boolean);
+
+  buttons.forEach(btn => {
+    if (hasPendingCloudChanges) {
+      btn.disabled = false;
+      btn.classList.add('warn');
+    } else {
+      btn.disabled = true;
+      btn.classList.remove('warn');
+    }
+  });
+}
+      
   async function saveToCloud() {
     try {
       const payload = {
@@ -2190,6 +2233,7 @@
     initialLoadDone = true;
 
     rerenderAll();
+    updateSaveCloudButton();
   }
 
     init();
