@@ -1,7 +1,20 @@
 {
   "bankrollInicial": 11.0,
-  "localEdits": {},
+  "localEdits": {
+    "2026-04-19|Super Lig|Kasımpaşa vs Alanyaspor|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-19|2. Bundesliga|FC Schalke 04 vs Preußen Münster|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    }
+  },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-19T14:01:17.800071+00:00"
+  "updatedAt": "2026-04-19T15:38:03.956754+00:00"
 }
