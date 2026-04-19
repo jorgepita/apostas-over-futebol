@@ -732,9 +732,33 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-19|Jupiler Pro League|RAAL La Louvière vs Zulte Waregem|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-19|Primeira Liga|Arouca vs Estrela|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-19|2. Bundesliga|SpVgg Greuther Fürth vs SV Darmstadt 98|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-19|Jupiler Pro League|Union St. Gilloise vs Club Brugge KV|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:12:47.046292+00:00"
+  "updatedAt": "2026-04-19T09:13:14.887032+00:00"
 }
