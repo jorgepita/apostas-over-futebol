@@ -831,8 +831,8 @@
     },
     "2026-04-18|Premier League|Newcastle vs Bournemouth|O2.5": {
       "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
+      "oddReal": "1.51",
+      "stakeReal": "1",
       "resultadoManual": ""
     },
     "2026-04-18|Serie B|Juve Stabia vs Catanzaro|BTTS": {
@@ -898,5 +898,5 @@
     }
   ],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:28:03.614090+00:00"
+  "updatedAt": "2026-04-19T09:28:34.940930+00:00"
 }
