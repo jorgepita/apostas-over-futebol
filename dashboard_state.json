@@ -861,8 +861,8 @@
     },
     "2026-04-18|2. Bundesliga|Hannover 96 vs SC Paderborn 07|O2.5": {
       "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
+      "oddReal": "1.51",
+      "stakeReal": "1",
       "resultadoManual": ""
     },
     "2026-04-20|Premier League|Crystal Palace vs West Ham|O2.5": {
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:20:20.055919+00:00"
+  "updatedAt": "2026-04-19T09:21:17.343364+00:00"
 }
