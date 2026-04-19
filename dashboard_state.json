@@ -1,14 +1,7 @@
 {
   "bankrollInicial": 1000.0,
-  "localEdits": {
-    "2026-04-19|2. Bundesliga|FC Schalke 04 vs Preußen Münster|O2.5": {
-      "apostada": true,
-      "oddReal": "1",
-      "stakeReal": "5",
-      "resultadoManual": ""
-    }
-  },
+  "localEdits": {},
   "manualBets": [],
   "sessionStartDate": null,
-  "updatedAt": "2026-04-19T11:40:13.794713+00:00"
+  "updatedAt": "2026-04-19T13:50:42.460496+00:00"
 }
