@@ -1,5 +1,5 @@
 {
-  "bankrollInicial": 1000.0,
+  "bankrollInicial": 11.0,
   "localEdits": {},
   "manualBets": [
     {
@@ -15,5 +15,5 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-19T09:32:58.203182+00:00"
+  "updatedAt": "2026-04-19T09:33:35.781832+00:00"
 }
