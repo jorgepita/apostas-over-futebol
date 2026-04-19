@@ -30,9 +30,33 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-04|Primeira Liga|Nacional vs Estrela|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|Bundesliga|Borussia Mönchengladbach vs 1. FC Heidenheim|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|LaLiga|Mallorca vs Real Madrid|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-04|LaLiga|Mallorca vs Real Madrid|O2.5": {
+      "apostada": false,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-19T15:39:10.397503+00:00"
+  "updatedAt": "2026-04-19T15:39:43.273123+00:00"
 }
