@@ -3195,6 +3195,7 @@ table {
 
           saveLocalState();
           hasPendingCloudChanges = false;
+          updateCloudStatus();
           updateSaveCloudButton();
           rerenderAll(false);
 
@@ -3272,9 +3273,29 @@ table {
           }
         });
       }
+
+      function updateCloudStatus() {
+  const el = document.getElementById('cloudStatus');
+  if (!el) return;
+
+  if (state.cloudAvailable === false) {
+    el.textContent = 'Cloud: indisponível';
+    el.style.color = 'var(--bad)';
+    return;
+  }
+
+  if (hasPendingCloudChanges) {
+    el.textContent = 'Cloud: alterações por guardar';
+    el.style.color = 'var(--warn)';
+  } else {
+    el.textContent = 'Cloud: sincronizada';
+    el.style.color = 'var(--ok)';
+  }
+}
       
       function markDirty() {
         hasPendingCloudChanges = true;
+        updateCloudStatus();
         rerenderSummaryOnly();
         updateSaveCloudButton();
 
