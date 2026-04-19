@@ -844,7 +844,7 @@
     "2026-04-18|Bundesliga|1899 Hoffenheim vs Borussia Dortmund|O2.5": {
       "apostada": true,
       "oddReal": "1.46",
-      "stakeReal": "",
+      "stakeReal": "1",
       "resultadoManual": ""
     },
     "2026-04-18|2. Bundesliga|Dynamo Dresden vs VfL Bochum|O2.5": {
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:21:50.535267+00:00"
+  "updatedAt": "2026-04-19T09:22:00.585828+00:00"
 }
