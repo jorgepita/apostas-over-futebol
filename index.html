@@ -3312,11 +3312,6 @@ table {
         updateCloudStatus();
         rerenderSummaryOnly();
         updateSaveCloudButton();
-
-        if (autoSaveTimer) clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(() => {
-          if (hasPendingCloudChanges) saveCloudState(false, false);
-        }, 2000);
       }
 
       function updateApostasTooltip() {
