@@ -790,7 +790,7 @@
     "2026-04-18|Ligue 1|Lorient vs Marseille|O2.5": {
       "apostada": true,
       "oddReal": "1.51",
-      "stakeReal": "",
+      "stakeReal": "1",
       "resultadoManual": ""
     },
     "2026-04-18|Ligue 1|Lille vs Nice|O2.5": {
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:18:32.779038+00:00"
+  "updatedAt": "2026-04-19T09:18:46.613421+00:00"
 }
