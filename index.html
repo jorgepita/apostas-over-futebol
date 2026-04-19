@@ -379,6 +379,16 @@
       align-items: center;
     }
 
+    .save-status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+  background: currentColor;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+    
     .small-input {
       width: 86px;
       padding: 8px;
@@ -3210,7 +3220,10 @@ table {
       }
 
       async function saveCloudState(showSuccess = true, reloadGithubDataAfterSave = false) {
-        if (autoSaveInFlight) return false;
+        if (autoSaveInFlight) {
+          updateSaveCloudButton();
+          return false;
+        }
 
         try {
           autoSaveInFlight = true;
@@ -3280,16 +3293,16 @@ table {
   if (!el) return;
 
   if (state.cloudAvailable === false) {
-    el.textContent = 'Cloud: indisponível';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
     el.style.color = 'var(--bad)';
     return;
   }
 
   if (hasPendingCloudChanges) {
-    el.textContent = 'Cloud: alterações por guardar';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
     el.style.color = 'var(--warn)';
   } else {
-    el.textContent = 'Cloud: sincronizada';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
     el.style.color = 'var(--ok)';
   }
 }
