@@ -3195,6 +3195,7 @@ table {
 
           saveLocalState();
           hasPendingCloudChanges = false;
+          updateSaveCloudButton();
           rerenderAll(false);
 
           if (showAlert) alert('Estado cloud carregado com sucesso.');
@@ -3256,6 +3257,7 @@ table {
       function markDirty() {
         hasPendingCloudChanges = true;
         rerenderSummaryOnly();
+        updateSaveCloudButton();
 
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => {
