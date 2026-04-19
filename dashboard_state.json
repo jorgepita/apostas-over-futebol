@@ -819,7 +819,7 @@
     },
     "2026-04-18|Premier League|Leeds vs Wolves|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.87",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -898,5 +898,5 @@
     }
   ],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:29:15.473076+00:00"
+  "updatedAt": "2026-04-19T09:29:35.758431+00:00"
 }
