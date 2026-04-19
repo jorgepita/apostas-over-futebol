@@ -696,9 +696,21 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-19|2. Bundesliga|FC Schalke 04 vs Preußen Münster|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-19|Premier League|Manchester City vs Arsenal|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:12:00.461711+00:00"
+  "updatedAt": "2026-04-19T09:12:16.955047+00:00"
 }
