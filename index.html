@@ -1354,777 +1354,841 @@
         </div>
       </div>
     </div>
-
     <script>
-      const URLS = {
-        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
-        footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
-        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
-        manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
+  const URLS = {
+    footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+    footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
+    nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
+    manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
+  };
+
+  const STORAGE_KEYS = {
+    bankroll: 'apostas_bot_bankroll_inicial',
+    picks: 'apostas_bot_local_edits_v6_manual_cloud',
+    manual: 'apostas_bot_manual_bets_v3',
+    sessionStartDate: 'apostas_bot_session_start_date_v3',
+    activeTab: 'apostas_bot_active_tab_v2',
+    mobileActionsOpen: 'apostas_bot_mobile_actions_open_v1',
+    compactMode: 'apostas_bot_compact_mode_v1'
+  };
+
+  const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
+  const SYNC_STATE_URL = `${SYNC_API_BASE}/state`;
+
+  let hasPendingCloudChanges = false;
+  let initialLoadDone = false;
+
+  const state = {
+    footballDaily: [],
+    footballHistory: [],
+    nba: [],
+    manualBetsRemote: [],
+    bankrollInicial: 1000,
+    localEdits: {},
+    manualBets: [],
+    sessionStartDate: '',
+    lastUpdated: null,
+    activeTab: 'tab-summary',
+    mobileActionsOpen: false,
+    cloudAvailable: null
+  };
+
+  function parseDelimitedCsv(text, delimiter = ';') {
+    const input = String(text || '').replace(/^\uFEFF/, '');
+    if (!input.trim()) return [];
+
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < input.length; i++) {
+      const ch = input[i];
+      const next = input[i + 1];
+
+      if (ch === '"') {
+        if (inQuotes && next === '"') {
+          cell += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+        continue;
+      }
+
+      if (ch === delimiter && !inQuotes) {
+        row.push(cell);
+        cell = '';
+        continue;
+      }
+
+      if ((ch === '\n' || ch === '\r') && !inQuotes) {
+        if (ch === '\r' && next === '\n') i++;
+        row.push(cell);
+        if (row.some(v => String(v).trim() !== '')) rows.push(row);
+        row = [];
+        cell = '';
+        continue;
+      }
+
+      cell += ch;
+    }
+
+    if (cell.length || row.length) {
+      row.push(cell);
+      if (row.some(v => String(v).trim() !== '')) rows.push(row);
+    }
+
+    if (!rows.length) return [];
+
+    const headers = rows[0].map(h => String(h || '').trim().replace(/^\uFEFF/, ''));
+    return rows.slice(1).map(values => {
+      const obj = {};
+      headers.forEach((header, idx) => {
+        obj[header] = String(values[idx] ?? '').trim();
+      });
+      return obj;
+    });
+  }
+
+  function parseSemicolonCsv(text) {
+    return parseDelimitedCsv(text, ';');
+  }
+
+  function num(v) {
+    if (v === null || v === undefined) return null;
+    const raw = String(v).trim()
+      .replace(/\s/g, '')
+      .replace(/€/g, '')
+      .replace(/"/g, '')
+      .replace(',', '.');
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function sum(arr) {
+    return arr
+      .filter(v => typeof v === 'number' && !Number.isNaN(v))
+      .reduce((a, b) => a + b, 0);
+  }
+
+  function fmt(n, d = 2) {
+    return Number.isFinite(n) ? Number(n).toFixed(d) : '—';
+  }
+
+  function pct(n, d = 2) {
+    return Number.isFinite(n) ? `${Number(n).toFixed(d)}%` : '—';
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function cleanString(value) {
+    return String(value ?? '').trim().replace(/^"+|"+$/g, '');
+  }
+
+  function normalizeDateString(value) {
+    const s = cleanString(value);
+    if (!s) return '';
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+    const pt = s.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+    if (pt) {
+      const [, dd, mm, yyyy] = pt;
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const isoWithTime = s.match(/^(\d{4}-\d{2}-\d{2})[T ]/);
+    if (isoWithTime) return isoWithTime[1];
+
+    return '';
+  }
+
+  function parseDateSafe(value) {
+    const normalized = normalizeDateString(value);
+    if (!normalized) return null;
+    const d = new Date(`${normalized}T00:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function todayIso() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function formatDatePt(dateStr) {
+    const d = parseDateSafe(dateStr);
+    if (!d) return '—';
+    return d.toLocaleDateString('pt-PT');
+  }
+
+  function formatDateTimePt(dateObj) {
+    if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return '—';
+    return dateObj.toLocaleString('pt-PT');
+  }
+
+  function isToday(dateStr) {
+    return normalizeDateString(dateStr) === todayIso();
+  }
+
+  function isWithinLastDays(dateStr, days) {
+    const d = parseDateSafe(dateStr);
+    if (!d) return false;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() - (days - 1));
+
+    return d >= minDate && d <= today;
+  }
+
+  function resultKey(r) {
+    const x = cleanString(r).toUpperCase();
+    if (x === 'W' || x === 'L' || x === 'P') return x;
+    return 'pending';
+  }
+
+  function resultBadge(r) {
+    const k = resultKey(r);
+    if (k === 'W') return '<span class="mini good">W</span>';
+    if (k === 'L') return '<span class="mini bad">L</span>';
+    if (k === 'P') return '<span class="mini info">P</span>';
+    return '<span class="mini warn">Pend.</span>';
+  }
+
+  function profitClass(v) {
+    if (v > 0) return 'style="color:var(--ok);font-weight:800;"';
+    if (v < 0) return 'style="color:var(--bad);font-weight:800;"';
+    return '';
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function roundTo(value, step = 0.5) {
+    if (!Number.isFinite(value)) return null;
+    return Math.round(value / step) * step;
+  }
+    function calcProfitByResult(result, stake, odd) {
+    if (!Number.isFinite(stake) || !Number.isFinite(odd)) return null;
+
+    if (result === 'W') return stake * (odd - 1);
+    if (result === 'L') return -stake;
+    if (result === 'P') return 0;
+
+    return null;
+  }
+
+  function makePickKey(row) {
+    return [
+      normalizeDateString(row['Data']),
+      cleanString(row['Liga']),
+      cleanString(row['Jogo']),
+      cleanString(row['Mercado'])
+    ].join('|');
+  }
+
+  function makeManualId() {
+    return `m_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  function dedupeBotRows(rows) {
+    const map = new Map();
+    rows.forEach(r => {
+      const key = makePickKey(r);
+      if (!map.has(key)) map.set(key, r);
+    });
+    return Array.from(map.values());
+  }
+
+  function normalizeBotCsvRow(r) {
+    return {
+      Data: normalizeDateString(r['Data']),
+      Liga: cleanString(r['Liga']),
+      Jogo: cleanString(r['Jogo']),
+      Mercado: cleanString(r['Mercado']).toUpperCase(),
+      Odd: cleanString(r['Odd']),
+      'Stake€': cleanString(r['Stake€'] ?? r['Stake']),
+      Resultado: cleanString(r['Resultado']).toUpperCase(),
+      'Lucro€': cleanString(r['Lucro€']),
+      OddReal: cleanString(r['OddReal']),
+      StakeReal: cleanString(r['StakeReal'])
+    };
+  }
+
+  function normalizeManualCsvRow(r) {
+    return {
+      _id: makeManualId(),
+      Data: normalizeDateString(r['Data']),
+      Liga: cleanString(r['Liga']),
+      Jogo: cleanString(r['Jogo']),
+      Mercado: cleanString(r['Mercado']).toUpperCase(),
+      Odd: cleanString(r['Odd']),
+      Stake: cleanString(r['Stake']),
+      Resultado: cleanString(r['Resultado']).toUpperCase(),
+      'Lucro€': cleanString(r['Lucro€']),
+      Notas: cleanString(r['Notas']),
+      Origem: 'Remoto'
+    };
+  }
+
+  function saveLocalState() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+      localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
+      localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
+      localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || '');
+      localStorage.setItem(STORAGE_KEYS.activeTab, state.activeTab || 'tab-summary');
+      localStorage.setItem(STORAGE_KEYS.mobileActionsOpen, JSON.stringify(state.mobileActionsOpen));
+    } catch (e) {
+      console.warn('Erro a guardar localStorage', e);
+    }
+  }
+
+  function loadLocalState() {
+    try {
+      const bankroll = Number(localStorage.getItem(STORAGE_KEYS.bankroll));
+      if (Number.isFinite(bankroll)) state.bankrollInicial = bankroll;
+
+      const edits = JSON.parse(localStorage.getItem(STORAGE_KEYS.picks) || '{}');
+      state.localEdits = edits || {};
+
+      const manual = JSON.parse(localStorage.getItem(STORAGE_KEYS.manual) || '[]');
+      state.manualBets = Array.isArray(manual) ? manual : [];
+
+      state.sessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate) || '';
+
+      const tab = localStorage.getItem(STORAGE_KEYS.activeTab);
+      if (tab) state.activeTab = tab;
+
+      const mobile = JSON.parse(localStorage.getItem(STORAGE_KEYS.mobileActionsOpen) || 'false');
+      state.mobileActionsOpen = !!mobile;
+    } catch (e) {
+      console.warn('Erro a carregar localStorage', e);
+    }
+  }
+
+  function markPendingCloudChanges() {
+    if (!initialLoadDone) return;
+    hasPendingCloudChanges = true;
+    updateCloudStatus();
+  }
+
+  function clearPendingCloudChanges() {
+    hasPendingCloudChanges = false;
+    updateCloudStatus();
+  }
+
+  async function checkCloudStatus() {
+    try {
+      const res = await fetch(SYNC_STATE_URL, { method: 'GET' });
+      state.cloudAvailable = res.ok;
+    } catch {
+      state.cloudAvailable = false;
+    }
+    updateCloudStatus();
+  }
+
+  function updateCloudStatus() {
+    const el = document.getElementById('cloudStatus');
+    if (!el) return;
+
+    if (state.cloudAvailable === false) {
+      el.textContent = 'Cloud: offline';
+      el.style.color = 'var(--bad)';
+      return;
+    }
+
+    if (hasPendingCloudChanges) {
+      el.textContent = 'Cloud: alterações por guardar';
+      el.style.color = 'var(--warn)';
+    } else {
+      el.textContent = 'Cloud: OK';
+      el.style.color = 'var(--ok)';
+    }
+  }
+
+  async function saveToCloud() {
+    try {
+      const payload = {
+        localEdits: state.localEdits,
+        manualBets: state.manualBets
       };
 
-      const STORAGE_KEYS = {
-        bankroll: 'apostas_bot_bankroll_inicial',
-        picks: 'apostas_bot_local_edits_v6',
-        manual: 'apostas_bot_manual_bets_v3',
-        sessionStartDate: 'apostas_bot_session_start_date_v3',
-        activeTab: 'apostas_bot_active_tab_v2',
-        mobileActionsOpen: 'apostas_bot_mobile_actions_open_v1'
-      };
+      const res = await fetch(SYNC_STATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
-      const SYNC_STATE_URL = `${SYNC_API_BASE}/state`;
+      if (!res.ok) throw new Error('Falha no save');
 
-      let hasPendingCloudChanges = false;
-      let initialLoadDone = false;
+      clearPendingCloudChanges();
+      alert('Guardado na cloud com sucesso.');
+    } catch (e) {
+      alert('Erro ao guardar na cloud.');
+    }
+  }
 
-      const state = {
-        footballDaily: [],
-        footballHistory: [],
-        nba: [],
-        manualBetsRemote: [],
-        bankrollInicial: 1000,
-        localEdits: {},
-        manualBets: [],
-        sessionStartDate: '',
-        lastUpdated: null,
-        activeTab: 'tab-summary',
-        mobileActionsOpen: false,
-        cloudAvailable: null
-      };
+  async function loadFromCloud() {
+    try {
+      const res = await fetch(SYNC_STATE_URL);
+      if (!res.ok) throw new Error();
 
-      function parseDelimitedCsv(text, delimiter = ';') {
-        const input = String(text || '').replace(/^\uFEFF/, '');
-        if (!input.trim()) return [];
+      const data = await res.json();
 
-        const rows = [];
-        let row = [];
-        let cell = '';
-        let inQuotes = false;
+      state.localEdits = data.localEdits || {};
+      state.manualBets = data.manualBets || [];
 
-        for (let i = 0; i < input.length; i++) {
-          const ch = input[i];
-          const next = input[i + 1];
+      saveLocalState();
+      rerenderAll();
+      clearPendingCloudChanges();
 
-          if (ch === '"') {
-            if (inQuotes && next === '"') {
-              cell += '"';
-              i++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-            continue;
-          }
+      alert('Carregado da cloud.');
+    } catch {
+      alert('Erro ao carregar da cloud.');
+    }
+  }
+    async function fetchCsv(url) {
+    const res = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return parseSemicolonCsv(text);
+  }
 
-          if (ch === delimiter && !inQuotes) {
-            row.push(cell);
-            cell = '';
-            continue;
-          }
+  async function loadRemoteData() {
+    const [daily, history, nba, manual] = await Promise.allSettled([
+      fetchCsv(URLS.footballDaily),
+      fetchCsv(URLS.footballHistory),
+      fetchCsv(URLS.nba),
+      fetchCsv(URLS.manual)
+    ]);
 
-          if ((ch === '\n' || ch === '\r') && !inQuotes) {
-            if (ch === '\r' && next === '\n') i++;
-            row.push(cell);
-            if (row.some(v => String(v).trim() !== '')) rows.push(row);
-            row = [];
-            cell = '';
-            continue;
-          }
+    state.footballDaily = daily.status === 'fulfilled'
+      ? dedupeBotRows(daily.value.map(normalizeBotCsvRow))
+      : [];
 
-          cell += ch;
-        }
+    state.footballHistory = history.status === 'fulfilled'
+      ? history.value.map(normalizeBotCsvRow)
+      : [];
 
-        if (cell.length || row.length) {
-          row.push(cell);
-          if (row.some(v => String(v).trim() !== '')) rows.push(row);
-        }
+    state.nba = nba.status === 'fulfilled'
+      ? nba.value.map(normalizeNbaCsvRow)
+      : [];
 
-        if (!rows.length) return [];
+    state.manualBetsRemote = manual.status === 'fulfilled'
+      ? manual.value.map(normalizeManualCsvRow)
+      : [];
 
-        const headers = rows[0].map(h => String(h || '').trim().replace(/^\uFEFF/, ''));
-        return rows.slice(1).map(values => {
-          const obj = {};
-          headers.forEach((header, idx) => {
-            obj[header] = String(values[idx] ?? '').trim();
-          });
-          return obj;
-        });
+    state.lastUpdated = new Date();
+  }
+
+  function normalizeNbaCsvRow(r) {
+    return {
+      Data: normalizeDateString(r['Data']),
+      Jogo: cleanString(r['Jogo']),
+      Mercado: cleanString(r['Mercado']),
+      Linha: cleanString(r['Linha']),
+      Odd: cleanString(r['Odd']),
+      'Stake€': cleanString(r['Stake€'])
+    };
+  }
+
+  function mergeManualBets() {
+    const local = Array.isArray(state.manualBets) ? state.manualBets : [];
+    const remote = Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : [];
+
+    const normalizedLocal = local.map(b => ({
+      ...b,
+      Data: normalizeDateString(b.Data),
+      Origem: 'Local'
+    }));
+
+    return [...normalizedLocal, ...remote];
+  }
+
+  function getDailyRows() {
+    return state.footballDaily.filter(r => isToday(r.Data));
+  }
+
+  function getPendingRows() {
+    return state.footballDaily.filter(r => resultKey(r.Resultado) === 'pending');
+  }
+
+  function getHistoryRows() {
+    return state.footballHistory.filter(r => {
+      const k = resultKey(r.Resultado);
+      return k === 'W' || k === 'L' || k === 'P';
+    });
+  }
+
+  function getManualRowsForStats() {
+    return mergeManualBets().filter(r => resultKey(r.Resultado) !== 'pending');
+  }
+
+  function computeStats() {
+    const history = getHistoryRows();
+    const manual = getManualRowsForStats();
+    const all = [...history, ...manual];
+
+    let stakeTotal = 0;
+    let lucroTotal = 0;
+    let wins = 0;
+    let losses = 0;
+    let push = 0;
+
+    all.forEach(r => {
+      const stake = num(r['Stake€'] ?? r['Stake']);
+      const odd = num(r['Odd']);
+      const resultado = resultKey(r['Resultado']);
+
+      if (stake !== null) stakeTotal += stake;
+
+      let lucro = num(r['Lucro€']);
+      if (lucro === null) {
+        lucro = calcProfitByResult(resultado, stake, odd);
       }
 
-      function parseSemicolonCsv(text) {
-        return parseDelimitedCsv(text, ';');
-      }
-
-      function num(v) {
-        if (v === null || v === undefined) return null;
-        const raw = String(v).trim()
-          .replace(/\s/g, '')
-          .replace(/€/g, '')
-          .replace(/"/g, '')
-          .replace(',', '.');
-        if (!raw) return null;
-        const n = Number(raw);
-        return Number.isFinite(n) ? n : null;
-      }
-
-      function sum(arr) {
-        return arr
-          .filter(v => typeof v === 'number' && !Number.isNaN(v))
-          .reduce((a, b) => a + b, 0);
-      }
-
-      function fmt(n, d = 2) {
-        return Number.isFinite(n) ? Number(n).toFixed(d) : '—';
-      }
-
-      function pct(n, d = 2) {
-        return Number.isFinite(n) ? `${Number(n).toFixed(d)}%` : '—';
-      }
-
-      function escapeHtml(str) {
-        return String(str ?? '')
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#039;');
-      }
-
-      function cleanString(value) {
-        return String(value ?? '').trim().replace(/^"+|"+$/g, '');
-      }
-
-      function normalizeDateString(value) {
-        const s = cleanString(value);
-        if (!s) return '';
-
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-        const pt = s.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
-        if (pt) {
-          const [, dd, mm, yyyy] = pt;
-          return `${yyyy}-${mm}-${dd}`;
-        }
-
-        const isoWithTime = s.match(/^(\d{4}-\d{2}-\d{2})[T ]/);
-        if (isoWithTime) return isoWithTime[1];
-
-        return '';
-      }
-
-      function parseDateSafe(value) {
-        const normalized = normalizeDateString(value);
-        if (!normalized) return null;
-        const d = new Date(`${normalized}T00:00:00`);
-        return Number.isNaN(d.getTime()) ? null : d;
-      }
-
-      function todayIso() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-      }
-
-      function formatDatePt(dateStr) {
-        const d = parseDateSafe(dateStr);
-        if (!d) return '—';
-        return d.toLocaleDateString('pt-PT');
-      }
-
-      function formatDateTimePt(dateObj) {
-        if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return '—';
-        return dateObj.toLocaleString('pt-PT');
-      }
-
-      function isToday(dateStr) {
-        return normalizeDateString(dateStr) === todayIso();
-      }
-
-      function isWithinLastDays(dateStr, days) {
-        const d = parseDateSafe(dateStr);
-        if (!d) return false;
-
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const minDate = new Date(today);
-        minDate.setDate(today.getDate() - (days - 1));
-
-        return d >= minDate && d <= today;
-      }
-
-      function resultKey(r) {
-        const x = cleanString(r).toUpperCase();
-        if (x === 'W' || x === 'L' || x === 'P') return x;
-        return 'pending';
-      }
-
-      function resultBadge(r) {
-        const k = resultKey(r);
-        if (k === 'W') return '<span class="mini good">W</span>';
-        if (k === 'L') return '<span class="mini bad">L</span>';
-        if (k === 'P') return '<span class="mini info">P</span>';
-        return '<span class="mini warn">Pend.</span>';
-      }
-
-      function profitClass(v) {
-        if (v > 0) return 'style="color:var(--ok);font-weight:800;"';
-        if (v < 0) return 'style="color:var(--bad);font-weight:800;"';
-        return '';
-      }
-
-      function clamp(value, min, max) {
-        return Math.min(max, Math.max(min, value));
-      }
-
-      function roundTo(value, step = 0.5) {
-        if (!Number.isFinite(value)) return null;
-        return Math.round(value / step) * step;
-      }
-
-      function makePickKey(row) {
-        return [
-          normalizeDateString(row['Data'] || ''),
-          cleanString(row['Liga'] || ''),
-          cleanString(row['Jogo'] || ''),
-          cleanString(row['Mercado'] || '')
-        ].join('|');
-      }
-
-      function makeManualId() {
-        return `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      }
-
-      function calcProfitByResult(resultado, stake, odd) {
-        const r = cleanString(resultado).toUpperCase();
-        const stakeNum = num(stake);
-        const oddNum = num(odd);
-
-        if (stakeNum === null || stakeNum <= 0) return null;
-        if (r === 'W') {
-          if (oddNum === null || oddNum <= 1.01) return null;
-          return stakeNum * (oddNum - 1);
-        }
-        if (r === 'L') return -stakeNum;
-        if (r === 'P') return 0;
-        return null;
-      }
-
-      function dedupeBotRows(rows) {
-        const map = new Map();
-        rows.forEach(row => {
-          const key = makePickKey(row);
-          if (!map.has(key)) map.set(key, row);
-        });
-        return [...map.values()];
-      }
-
-      function normalizeBotCsvRow(row) {
-        const normalized = { ...row };
-        normalized['Data'] = normalizeDateString(row['Data'] || row['Date'] || '');
-        normalized['Liga'] = cleanString(row['Liga'] || row['League'] || '');
-        normalized['Jogo'] = cleanString(row['Jogo'] || row['Game'] || '');
-        normalized['Mercado'] = cleanString(row['Mercado'] || row['Market'] || '');
-        normalized['Odd'] = cleanString(row['Odd'] || row['Odds'] || '');
-        normalized['Stake€'] = cleanString(row['Stake€'] || row['Stake'] || '');
-        normalized['Resultado'] = cleanString(row['Resultado'] || row['Result'] || '');
-        normalized['Edge%'] = cleanString(row['Edge%'] || row['Edge'] || '');
-        return normalized;
-      }
-
-      function normalizeNbaCsvRow(row) {
-        return {
-          Date: normalizeDateString(row['Date'] || row['Data'] || ''),
-          HomeTeam: cleanString(row['HomeTeam'] || row['Casa'] || ''),
-          AwayTeam: cleanString(row['AwayTeam'] || row['Fora'] || ''),
-          Market: cleanString(row['Market'] || row['Mercado'] || ''),
-          Line: cleanString(row['Line'] || row['Linha'] || ''),
-          Odd: cleanString(row['Odd'] || ''),
-          'Stake€': cleanString(row['Stake€'] || row['Stake'] || '')
-        };
-      }
-
-      function normalizeManualCsvRow(row) {
-        const stakeValue = cleanString(row['Stake'] || row['Stake€'] || '');
-        const lucroValue = cleanString(row['Lucro€'] || row['Lucro'] || '');
-        return {
-          Data: normalizeDateString(row['Data'] || row['Date'] || ''),
-          Liga: cleanString(row['Liga'] || row['League'] || ''),
-          Jogo: cleanString(row['Jogo'] || row['Game'] || ''),
-          Mercado: cleanString(row['Mercado'] || row['Market'] || '').toUpperCase(),
-          Odd: cleanString(row['Odd'] || ''),
-          Stake: stakeValue,
-          Resultado: cleanString(row['Resultado'] || row['Result'] || '').toUpperCase(),
-          'Lucro€': lucroValue,
-          Notas: cleanString(row['Notas'] || row['Notes'] || ''),
-          Origem: cleanString(row['Origem'] || 'Manual')
-        };
-      }
-
-      function loadLocalState() {
-        const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
-        const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
-        const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
-        const savedSessionStartDate = localStorage.getItem(STORAGE_KEYS.sessionStartDate);
-        const savedActiveTab = localStorage.getItem(STORAGE_KEYS.activeTab);
-        const savedMobileActions = localStorage.getItem(STORAGE_KEYS.mobileActionsOpen);
-
-        const bankrollParsed = num(savedBankroll);
-        if (bankrollParsed !== null && bankrollParsed >= 0) state.bankrollInicial = bankrollParsed;
-
-        try {
-          state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
-        } catch {
-          state.localEdits = {};
-        }
-
-        try {
-          state.manualBets = savedManual ? JSON.parse(savedManual) : [];
-        } catch {
-          state.manualBets = [];
-        }
-
-        state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
-        state.mobileActionsOpen = savedMobileActions === '1';
-      }
-
-      function saveLocalState() {
-        localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
-        localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
-        localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
-        localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || todayIso());
-        localStorage.setItem(STORAGE_KEYS.activeTab, state.activeTab || 'tab-summary');
-        localStorage.setItem(STORAGE_KEYS.mobileActionsOpen, state.mobileActionsOpen ? '1' : '0');
-      }
-            async function fetchCsv(url) {
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        return parseSemicolonCsv(text);
-      }
-
-      async function loadRemoteData() {
-        const [daily, history, nba, manual] = await Promise.allSettled([
-          fetchCsv(URLS.footballDaily),
-          fetchCsv(URLS.footballHistory),
-          fetchCsv(URLS.nba),
-          fetchCsv(URLS.manual)
-        ]);
-
-        state.footballDaily = daily.status === 'fulfilled'
-          ? dedupeBotRows(daily.value.map(normalizeBotCsvRow))
-          : [];
-
-        state.footballHistory = history.status === 'fulfilled'
-          ? history.value.map(normalizeBotCsvRow)
-          : [];
-
-        state.nba = nba.status === 'fulfilled'
-          ? nba.value.map(normalizeNbaCsvRow)
-          : [];
-
-        state.manualBetsRemote = manual.status === 'fulfilled'
-          ? manual.value.map(normalizeManualCsvRow)
-          : [];
-
-        state.lastUpdated = new Date();
-      }
-
-      function mergeManualBets() {
-        const local = Array.isArray(state.manualBets) ? state.manualBets : [];
-        const remote = Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : [];
-
-        const normalizedLocal = local.map(b => ({
-          ...b,
-          Data: normalizeDateString(b.Data || ''),
-          Liga: cleanString(b.Liga || ''),
-          Jogo: cleanString(b.Jogo || ''),
-          Mercado: cleanString(b.Mercado || '').toUpperCase(),
-          Odd: cleanString(b.Odd || ''),
-          Stake: cleanString(b.Stake || ''),
-          Resultado: cleanString(b.Resultado || '').toUpperCase(),
-          'Lucro€': cleanString(b['Lucro€'] || ''),
-          Notas: cleanString(b.Notas || ''),
-          Origem: 'Local',
-          _id: b._id || makeManualId()
-        }));
-
-        const normalizedRemote = remote.map(b => ({
-          ...b,
-          Origem: 'Remoto'
-        }));
-
-        return [...normalizedLocal, ...normalizedRemote];
-      }
-
-      function getDailyBotRows() {
-        return state.footballDaily.filter(r => isToday(r['Data']));
-      }
-
-      function getPendingBotRows() {
-        return state.footballDaily.filter(r => {
-          const rKey = resultKey(r['Resultado']);
-          return rKey !== 'W' && rKey !== 'L' && rKey !== 'P';
-        });
-      }
-
-      function getHistoryRows() {
-        return state.footballHistory.filter(r => {
-          const k = resultKey(r['Resultado']);
-          return k === 'W' || k === 'L' || k === 'P';
-        });
-      }
-
-      function getManualRowsForStats() {
-        const merged = mergeManualBets();
-        return merged.filter(b => resultKey(b.Resultado) !== 'pending');
-      }
-
-      function computeStats() {
-        const history = getHistoryRows();
-        const manual = getManualRowsForStats();
-
-        const all = [...history, ...manual];
-
-        let stakeTotal = 0;
-        let lucroTotal = 0;
-        let wins = 0;
-        let losses = 0;
-        let push = 0;
-
-        all.forEach(r => {
-          const stake = num(r['Stake€'] ?? r['Stake']);
-          const odd = num(r['Odd']);
-          const resultado = resultKey(r['Resultado']);
-
-          if (stake !== null) stakeTotal += stake;
-
-          let lucro = num(r['Lucro€']);
-          if (lucro === null) {
-            lucro = calcProfitByResult(resultado, stake, odd);
-          }
-
-          if (lucro !== null) lucroTotal += lucro;
-
-          if (resultado === 'W') wins++;
-          else if (resultado === 'L') losses++;
-          else if (resultado === 'P') push++;
-        });
-
-        const totalBets = wins + losses + push;
-        const winRate = totalBets > 0 ? (wins / totalBets) * 100 : 0;
-        const roi = stakeTotal > 0 ? (lucroTotal / stakeTotal) * 100 : 0;
-
-        return {
-          stakeTotal,
-          lucroTotal,
-          wins,
-          losses,
-          push,
-          totalBets,
-          winRate,
-          roi
-        };
-      }
-
-      function computeBankroll() {
-        const stats = computeStats();
-        const inicial = state.bankrollInicial || 0;
-        const atual = inicial + stats.lucroTotal;
-        const exposto = stats.stakeTotal;
-        const disponivel = atual - exposto;
-
-        return {
-          inicial,
-          atual,
-          exposto,
-          disponivel
-        };
-      }
-
-      function applyLocalEditsToRow(row) {
-        const key = makePickKey(row);
-        const edit = state.localEdits[key];
-        if (!edit) return row;
-
-        return {
-          ...row,
-          OddReal: edit.oddReal ?? row['OddReal'],
-          StakeReal: edit.stakeReal ?? row['StakeReal'],
-          Resultado: edit.resultado ?? row['Resultado']
-        };
-      }
-
-      function setActiveTab(tabId) {
-        state.activeTab = tabId;
-        saveLocalState();
-
-        document.querySelectorAll('.tab-panel').forEach(el => {
-          el.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-btn').forEach(el => {
-          el.classList.remove('active');
-        });
-
-        const panel = document.getElementById(tabId);
-        if (panel) panel.classList.add('active');
-
-        const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-        if (btn) btn.classList.add('active');
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      function renderSummary() {
-        const stats = computeStats();
-        const bank = computeBankroll();
-
-        const el = document.getElementById('summaryContent');
-        if (!el) return;
-
-        el.innerHTML = `
-          <div class="kpi-grid">
-            <div class="kpi">
-              <div class="label">Banca inicial</div>
-              <div class="value">€ ${fmt(bank.inicial)}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Banca atual</div>
-              <div class="value">€ ${fmt(bank.atual)}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Lucro</div>
-              <div class="value" ${profitClass(stats.lucroTotal)}>€ ${fmt(stats.lucroTotal)}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">ROI</div>
-              <div class="value">${pct(stats.roi)}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Win rate</div>
-              <div class="value">${pct(stats.winRate)}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Apostas</div>
-              <div class="value">${stats.totalBets}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Ganhas</div>
-              <div class="value">${stats.wins}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Perdidas</div>
-              <div class="value">${stats.losses}</div>
-            </div>
-
-            <div class="kpi">
-              <div class="label">Push</div>
-              <div class="value">${stats.push}</div>
-            </div>
+      if (lucro !== null) lucroTotal += lucro;
+
+      if (resultado === 'W') wins++;
+      else if (resultado === 'L') losses++;
+      else if (resultado === 'P') push++;
+    });
+
+    const total = wins + losses + push;
+
+    return {
+      stakeTotal,
+      lucroTotal,
+      wins,
+      losses,
+      push,
+      total,
+      winRate: total ? (wins / total) * 100 : 0,
+      roi: stakeTotal ? (lucroTotal / stakeTotal) * 100 : 0
+    };
+  }
+
+  function computeBankroll() {
+    const stats = computeStats();
+    const inicial = state.bankrollInicial;
+    const atual = inicial + stats.lucroTotal;
+
+    return {
+      inicial,
+      atual,
+      exposto: stats.stakeTotal,
+      disponivel: atual - stats.stakeTotal
+    };
+  }
+
+  function applyLocalEdits(row) {
+    const key = makePickKey(row);
+    const edit = state.localEdits[key];
+    if (!edit) return row;
+
+    return {
+      ...row,
+      OddReal: edit.oddReal ?? row.OddReal,
+      StakeReal: edit.stakeReal ?? row.StakeReal,
+      Resultado: edit.resultado ?? row.Resultado
+    };
+  }
+    function renderTopBar() {
+    const bank = computeBankroll();
+
+    const sessionLabel = document.getElementById('sessionLabel');
+    const lastUpdateLabel = document.getElementById('lastUpdateLabel');
+
+    if (sessionLabel) {
+      sessionLabel.textContent = `Sessão atual: ${state.sessionStartDate ? formatDatePt(state.sessionStartDate) : '—'}`;
+    }
+
+    if (lastUpdateLabel) {
+      lastUpdateLabel.textContent = `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`;
+    }
+
+    const bankrollLabelTop = document.getElementById('bankrollLabelTop');
+    const currentBankrollTop = document.getElementById('currentBankrollTop');
+    const openExposureTop = document.getElementById('openExposureTop');
+    const availableBankrollTop = document.getElementById('availableBankrollTop');
+
+    if (bankrollLabelTop) bankrollLabelTop.textContent = `€${fmt(bank.inicial)}`;
+    if (currentBankrollTop) currentBankrollTop.textContent = `€${fmt(bank.atual)}`;
+    if (openExposureTop) openExposureTop.textContent = `€${fmt(bank.exposto)}`;
+    if (availableBankrollTop) availableBankrollTop.textContent = `€${fmt(bank.disponivel)}`;
+  }
+
+  function renderSummaryHeadlineStats() {
+    const stats = computeStats();
+    const pending = getPendingRows().length;
+
+    document.getElementById('summaryRoiStat').textContent = pct(stats.roi);
+    document.getElementById('summaryProfitStat').textContent = `€${fmt(stats.lucroTotal)}`;
+    document.getElementById('summaryWrStat').textContent = pct(stats.winRate);
+    document.getElementById('summaryResolvedCountStat').textContent = String(stats.total);
+    document.getElementById('summaryWinsStat').textContent = String(stats.wins);
+    document.getElementById('summaryLossesStat').textContent = String(stats.losses);
+    document.getElementById('summaryPushesStat').textContent = String(stats.push);
+    document.getElementById('summaryPendingOpenStat').textContent = String(pending);
+
+    const botRows = [...state.footballDaily, ...state.footballHistory];
+    const o25 = botRows.filter(r => cleanString(r.Mercado).toUpperCase().includes('O2.5'));
+    const btts = botRows.filter(r => cleanString(r.Mercado).toUpperCase().includes('BTTS'));
+
+    const o25Wins = o25.filter(r => resultKey(r.Resultado) === 'W').length;
+    const o25Losses = o25.filter(r => resultKey(r.Resultado) === 'L').length;
+    const bttsWins = btts.filter(r => resultKey(r.Resultado) === 'W').length;
+    const bttsLosses = btts.filter(r => resultKey(r.Resultado) === 'L').length;
+
+    document.getElementById('botGeneratedStat').textContent = String(botRows.length);
+    document.getElementById('botExecutedStat').textContent = String(Object.keys(state.localEdits).length);
+    document.getElementById('botResolvedStat').textContent = String(
+      botRows.filter(r => ['W', 'L', 'P'].includes(resultKey(r.Resultado))).length
+    );
+    document.getElementById('botExecutionRateStat').textContent = pct(
+      botRows.length ? (Object.keys(state.localEdits).length / botRows.length) * 100 : 0
+    );
+
+    document.getElementById('o25GeneratedTopStat').textContent = String(o25.length);
+    document.getElementById('o25ExecutedTopStat').textContent = String(o25.filter(r => state.localEdits[makePickKey(r)]).length);
+    document.getElementById('o25WinsTopStat').textContent = String(o25Wins);
+    document.getElementById('o25LossesTopStat').textContent = String(o25Losses);
+    document.getElementById('o25WinsPctNote').textContent = pct(o25Wins + o25Losses ? (o25Wins / (o25Wins + o25Losses)) * 100 : 0, 1);
+    document.getElementById('o25LossesPctNote').textContent = pct(o25Wins + o25Losses ? (o25Losses / (o25Wins + o25Losses)) * 100 : 0, 1);
+
+    document.getElementById('bttsGeneratedTopStat').textContent = String(btts.length);
+    document.getElementById('bttsExecutedTopStat').textContent = String(btts.filter(r => state.localEdits[makePickKey(r)]).length);
+    document.getElementById('bttsWinsTopStat').textContent = String(bttsWins);
+    document.getElementById('bttsLossesTopStat').textContent = String(bttsLosses);
+    document.getElementById('bttsWinsPctNote').textContent = pct(bttsWins + bttsLosses ? (bttsWins / (bttsWins + bttsLosses)) * 100 : 0, 1);
+    document.getElementById('bttsLossesPctNote').textContent = pct(bttsWins + bttsLosses ? (bttsLosses / (bttsWins + bttsLosses)) * 100 : 0, 1);
+  }
+
+  function renderOpenBets() {
+    const rows = getPendingRows().map(applyLocalEdits);
+    const html = rows.length
+      ? rows.map(r => `
+          <div class="stat">
+            <div class="label">${escapeHtml(r.Liga || '—')} • ${escapeHtml(formatDatePt(r.Data))}</div>
+            <div class="value" style="font-size:18px;">${escapeHtml(r.Jogo || '—')}</div>
+            <div class="note">${escapeHtml(r.Mercado || '—')} • Odd ${escapeHtml(r.Odd || '—')} • Stake ${escapeHtml(r['Stake€'] || '—')}</div>
           </div>
-        `;
-      }
+        `).join('')
+      : '<div class="stat"><div class="note">Sem apostas em aberto.</div></div>';
 
-      function renderDay() {
-        const rows = getDailyBotRows().map(applyLocalEditsToRow);
+    document.getElementById('openBetsWrap').innerHTML = html;
+    document.getElementById('openBetsWrapDay').innerHTML = html;
+  }
 
-        const tbody = document.getElementById('dayRows');
-        if (!tbody) return;
+  function buildBotRowHtml(r, includeMarket = true) {
+    const key = makePickKey(r);
+    const edit = state.localEdits[key] || {};
+    const oddReal = cleanString(edit.oddReal ?? '');
+    const stakeReal = cleanString(edit.stakeReal ?? '');
+    const resultado = cleanString(edit.resultado ?? '');
+    const checked = edit.apostada ? 'checked' : '';
 
-        if (!rows.length) {
-          tbody.innerHTML = `<tr><td colspan="10" class="note">Sem picks para hoje.</td></tr>`;
-          return;
-        }
+    const lucroModelo = calcProfitByResult(resultKey(r.Resultado), num(r['Stake€']), num(r.Odd));
+    const lucroReal = calcProfitByResult(resultKey(resultado), num(stakeReal), num(oddReal));
 
-        tbody.innerHTML = rows.map(r => {
-          const key = makePickKey(r);
-          const edit = state.localEdits[key] || {};
+    return `
+      <tr>
+        <td><span class="mini info">Bot</span></td>
+        <td>${escapeHtml(r.Data || '—')}</td>
+        <td>${escapeHtml(r.Liga || '—')}</td>
+        <td>
+          <div>${escapeHtml(r.Jogo || '—')}</div>
+          ${includeMarket ? `<div class="note">${escapeHtml(r.Mercado || '—')}</div>` : ''}
+        </td>
+        ${includeMarket ? `<td>${escapeHtml(r.Mercado || '—')}</td>` : ''}
+        <td>${escapeHtml(r.Odd || '—')}</td>
+        <td>${escapeHtml(r['Stake€'] || '—')}</td>
+        <td><span class="mini info">Manual</span></td>
+        <td><span class="mini info">—</span></td>
+        <td>${edit.apostada ? '<span class="mini good">Sim</span>' : '<span class="mini warn">Não</span>'}</td>
+        <td><input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(key)}" ${checked} style="width:auto;padding:0;border:none;" /></td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <input class="js-odd-real small-input" type="text" inputmode="decimal" data-pick-key="${escapeHtml(key)}" value="${escapeHtml(oddReal)}" placeholder="odd" />
+            <input class="js-stake-real small-input" type="text" inputmode="decimal" data-pick-key="${escapeHtml(key)}" value="${escapeHtml(stakeReal)}" placeholder="stake" />
+          </div>
+        </td>
+        <td>
+          <select class="js-bot-resultado" data-pick-key="${escapeHtml(key)}" style="padding:8px;border:1px solid var(--line);border-radius:10px;width:auto;">
+            <option value="" ${!resultado ? 'selected' : ''}>Pend.</option>
+            <option value="W" ${resultado === 'W' ? 'selected' : ''}>W</option>
+            <option value="L" ${resultado === 'L' ? 'selected' : ''}>L</option>
+            <option value="P" ${resultado === 'P' ? 'selected' : ''}>P</option>
+          </select>
+        </td>
+        <td ${profitClass(lucroModelo)}>${lucroModelo === null ? '—' : `€${fmt(lucroModelo)}`}</td>
+        <td ${profitClass(lucroReal)}>${lucroReal === null ? '—' : `€${fmt(lucroReal)}`}</td>
+      </tr>
+    `;
+  }
 
-          const oddReal = edit.oddReal ?? '';
-          const stakeReal = edit.stakeReal ?? '';
-          const resultado = edit.resultado ?? '';
+  function renderFootball() {
+    const rows = getDailyRows();
+    document.getElementById('footballRows').innerHTML = rows.length
+      ? rows.map(r => buildBotRowHtml(r, false)).join('')
+      : '<tr><td colspan="15"><div class="note">Nenhuma pick do bot encontrada para hoje.</div></td></tr>';
+  }
+    function renderHistory() {
+    const rows = getHistoryRows();
+
+    document.getElementById('historyRows').innerHTML = rows.length
+      ? rows.map(r => {
+          const lucro = num(r['Lucro€']) ?? calcProfitByResult(
+            resultKey(r.Resultado),
+            num(r['Stake€']),
+            num(r.Odd)
+          );
 
           return `
             <tr>
-              <td>${formatDatePt(r['Data'])}</td>
-              <td>${escapeHtml(r['Liga'])}</td>
-              <td>${escapeHtml(r['Jogo'])}</td>
-              <td>${escapeHtml(r['Mercado'])}</td>
-              <td>${escapeHtml(r['Odd'])}</td>
-              <td>${escapeHtml(r['Stake€'])}</td>
-
-              <td>
-                <input type="number" step="0.01" min="1" value="${escapeHtml(oddReal)}"
-                  data-key="${key}" data-field="oddReal" />
-              </td>
-
-              <td>
-                <input type="number" step="0.01" min="0" value="${escapeHtml(stakeReal)}"
-                  data-key="${key}" data-field="stakeReal" />
-              </td>
-
-              <td>
-                <select data-key="${key}" data-field="resultado">
-                  <option value="">Pend.</option>
-                  <option value="W" ${resultado === 'W' ? 'selected' : ''}>W</option>
-                  <option value="L" ${resultado === 'L' ? 'selected' : ''}>L</option>
-                  <option value="P" ${resultado === 'P' ? 'selected' : ''}>P</option>
-                </select>
-              </td>
-
-              <td>
-                <button data-action="save" data-key="${key}">Guardar</button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-            function renderHistory() {
-        const rows = getHistoryRows();
-
-        const tbody = document.getElementById('historyRows');
-        if (!tbody) return;
-
-        if (!rows.length) {
-          tbody.innerHTML = `<tr><td colspan="8" class="note">Sem histórico.</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = rows.map(r => {
-          const resultado = resultKey(r['Resultado']);
-          const lucro = num(r['Lucro€']) ?? calcProfitByResult(resultado, num(r['Stake€']), num(r['Odd']));
-
-          return `
-            <tr>
-              <td>${formatDatePt(r['Data'])}</td>
-              <td>${escapeHtml(r['Liga'])}</td>
-              <td>${escapeHtml(r['Jogo'])}</td>
-              <td>${escapeHtml(r['Mercado'])}</td>
-              <td>${escapeHtml(r['Odd'])}</td>
-              <td>${escapeHtml(r['Stake€'])}</td>
-              <td>${resultado}</td>
-              <td ${profitClass(lucro)}>€ ${fmt(lucro)}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      function renderManual() {
-        const rows = mergeManualBets();
-
-        const tbody = document.getElementById('manualRows');
-        if (!tbody) return;
-
-        if (!rows.length) {
-          tbody.innerHTML = `<tr><td colspan="10" class="note">Sem apostas manuais.</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = rows.map(r => {
-          return `
-            <tr>
-              <td>${formatDatePt(r.Data)}</td>
+              <td>${escapeHtml(r.Data)}</td>
               <td>${escapeHtml(r.Liga)}</td>
               <td>${escapeHtml(r.Jogo)}</td>
               <td>${escapeHtml(r.Mercado)}</td>
               <td>${escapeHtml(r.Odd)}</td>
-              <td>${escapeHtml(r.Stake)}</td>
-              <td>${escapeHtml(r.Resultado)}</td>
-              <td>${escapeHtml(r['Lucro€'])}</td>
-              <td>${escapeHtml(r.Notas)}</td>
-              <td>${escapeHtml(r.Origem)}</td>
+              <td>${escapeHtml(r['Stake€'])}</td>
+              <td>${resultBadge(r.Resultado)}</td>
+              <td ${profitClass(lucro)}>€${fmt(lucro)}</td>
             </tr>
           `;
-        }).join('');
+        }).join('')
+      : '<tr><td colspan="8"><div class="note">Sem histórico.</div></td></tr>';
+  }
+
+  function renderManual() {
+    const rows = mergeManualBets();
+
+    document.getElementById('manualRows').innerHTML = rows.length
+      ? rows.map(r => `
+          <tr>
+            <td>${formatDatePt(r.Data)}</td>
+            <td>${escapeHtml(r.Liga)}</td>
+            <td>${escapeHtml(r.Jogo)}</td>
+            <td>${escapeHtml(r.Mercado)}</td>
+            <td>${escapeHtml(r.Odd)}</td>
+            <td>${escapeHtml(r.Stake)}</td>
+            <td>${escapeHtml(r.Resultado)}</td>
+            <td>${escapeHtml(r['Lucro€'])}</td>
+            <td>${escapeHtml(r.Notas)}</td>
+            <td>${escapeHtml(r.Origem)}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="10"><div class="note">Sem apostas manuais.</div></td></tr>';
+  }
+
+  function rerenderAll() {
+    renderTopBar();
+    renderSummaryHeadlineStats();
+    renderOpenBets();
+    renderFootball();
+    renderHistory();
+    renderManual();
+  }
+
+  function handleInputs(e) {
+    const t = e.target;
+
+    if (t.classList.contains('js-odd-real') ||
+        t.classList.contains('js-stake-real') ||
+        t.classList.contains('js-bot-resultado') ||
+        t.classList.contains('js-apostada')) {
+
+      const key = t.dataset.pickKey;
+      if (!key) return;
+
+      if (!state.localEdits[key]) state.localEdits[key] = {};
+
+      if (t.classList.contains('js-odd-real')) {
+        state.localEdits[key].oddReal = t.value;
       }
 
-      function handleTableEvents(e) {
-        const target = e.target;
-
-        if (target.matches('input, select')) {
-          const key = target.dataset.key;
-          const field = target.dataset.field;
-
-          if (!key || !field) return;
-
-          if (!state.localEdits[key]) {
-            state.localEdits[key] = {};
-          }
-
-          state.localEdits[key][field] = target.value;
-          saveLocalState();
-        }
-
-        if (target.matches('button[data-action="save"]')) {
-          const key = target.dataset.key;
-          const edit = state.localEdits[key] || {};
-
-          const oddReal = num(edit.oddReal);
-          const stakeReal = num(edit.stakeReal);
-          const resultado = resultKey(edit.resultado);
-
-          if (oddReal !== null && stakeReal !== null && resultado !== 'pending') {
-            const lucro = calcProfitByResult(resultado, stakeReal, oddReal);
-
-            const manualBet = {
-              _id: makeManualId(),
-              Data: todayStr(),
-              Liga: '',
-              Jogo: '',
-              Mercado: 'O2.5',
-              Odd: oddReal,
-              Stake: stakeReal,
-              Resultado: resultado,
-              'Lucro€': lucro,
-              Notas: 'Auto (bot)',
-              Origem: 'Local'
-            };
-
-            state.manualBets.push(manualBet);
-
-            delete state.localEdits[key];
-
-            saveLocalState();
-            rerenderAll();
-          }
-        }
+      if (t.classList.contains('js-stake-real')) {
+        state.localEdits[key].stakeReal = t.value;
       }
 
-      function bindEvents() {
-        document.body.addEventListener('input', handleTableEvents);
-        document.body.addEventListener('change', handleTableEvents);
-        document.body.addEventListener('click', handleTableEvents);
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            setActiveTab(btn.dataset.tab);
-          });
-        });
+      if (t.classList.contains('js-bot-resultado')) {
+        state.localEdits[key].resultado = t.value;
       }
 
-      async function init() {
-        loadLocalState();
-        bindEvents();
-
-        try {
-          await loadRemoteData();
-        } catch (e) {
-          console.warn('Erro a carregar dados remotos', e);
-        }
-
-        rerenderAll();
+      if (t.classList.contains('js-apostada')) {
+        state.localEdits[key].apostada = t.checked;
       }
 
-      init();
-    </script>
-  </body>
+      saveLocalState();
+      markPendingCloudChanges();
+      rerenderAll();
+    }
+  }
+
+  function bindUI() {
+    document.body.addEventListener('input', handleInputs);
+    document.body.addEventListener('change', handleInputs);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeTab = btn.dataset.tab;
+        saveLocalState();
+
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+        document.getElementById(state.activeTab).classList.add('active');
+        btn.classList.add('active');
+      });
+    });
+
+    document.getElementById('saveCloudBtn')?.addEventListener('click', saveToCloud);
+    document.getElementById('loadCloudBtn')?.addEventListener('click', loadFromCloud);
+  }
+    async function init() {
+    loadLocalState();
+    bindUI();
+
+    // aplicar tab ativo guardado
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+    const activePanel = document.getElementById(state.activeTab);
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${state.activeTab}"]`);
+
+    if (activePanel) activePanel.classList.add('active');
+    if (activeBtn) activeBtn.classList.add('active');
+
+    try {
+      await loadRemoteData();
+    } catch (e) {
+      console.warn('Erro ao carregar dados remotos', e);
+    }
+
+    await checkCloudStatus();
+
+    initialLoadDone = true;
+
+    rerenderAll();
+  }
+
+    init();
+</script>
+  </div>
+</body>
 </html>
