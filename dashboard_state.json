@@ -789,7 +789,7 @@
     },
     "2026-04-18|Ligue 1|Lorient vs Marseille|O2.5": {
       "apostada": true,
-      "oddReal": "",
+      "oddReal": "1.51",
       "stakeReal": "",
       "resultadoManual": ""
     },
@@ -886,5 +886,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:17:12.555730+00:00"
+  "updatedAt": "2026-04-19T09:18:32.779038+00:00"
 }
