@@ -816,9 +816,21 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-18|Premier League|Leeds vs Wolves|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-18|Bundesliga|Werder Bremen vs Hamburger SV|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:15:55.122158+00:00"
+  "updatedAt": "2026-04-19T09:16:10.075345+00:00"
 }
