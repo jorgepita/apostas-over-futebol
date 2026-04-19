@@ -825,8 +825,8 @@
     },
     "2026-04-18|Bundesliga|Werder Bremen vs Hamburger SV|O2.5": {
       "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
+      "oddReal": "1.73",
+      "stakeReal": "1",
       "resultadoManual": ""
     },
     "2026-04-18|Premier League|Newcastle vs Bournemouth|O2.5": {
@@ -898,5 +898,5 @@
     }
   ],
   "sessionStartDate": "2026-04-10",
-  "updatedAt": "2026-04-19T09:25:49.203186+00:00"
+  "updatedAt": "2026-04-19T09:27:07.368625+00:00"
 }
