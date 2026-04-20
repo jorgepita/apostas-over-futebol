@@ -2991,13 +2991,13 @@ table {
           el.addEventListener('input', e => {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).oddReal = e.target.value;
-            saveLocalState();
             markDirty();
-          });
+         });
 
           el.addEventListener('blur', e => {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).oddReal = e.target.value;
+            saveLocalState();
             rerenderAll();
           });
         });
@@ -3009,13 +3009,13 @@ table {
           el.addEventListener('input', e => {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).stakeReal = e.target.value;
-            saveLocalState();
             markDirty();
           });
 
           el.addEventListener('blur', e => {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).stakeReal = e.target.value;
+            saveLocalState();
             rerenderAll();
           });
         });
@@ -3554,9 +3554,10 @@ table {
         document.getElementById('historyResultFilter').addEventListener('change', rerenderHistoryOnly);
         document.getElementById('historyExecutionFilter').addEventListener('change', rerenderHistoryOnly);
 
-        document.getElementById('bankrollInput').addEventListener('input', e => {
+        document.getElementById('bankrollInput').addEventListener('blur', e => {
           const v = num(e.target.value);
           state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+          saveLocalState();
           rerenderAll();
         });
 
