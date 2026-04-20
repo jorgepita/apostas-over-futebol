@@ -883,25 +883,19 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-21|Championship|West Brom vs Watford|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-21|Jupiler Pro League|Standard Liege vs Antwerp|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
     "2026-04-21|Championship|Coventry vs Portsmouth|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-21|LaLiga|Girona vs Real Betis|O2.5": {
+    "2026-04-21|Championship|QPR vs Swansea|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-21|Championship|West Brom vs Watford|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -913,7 +907,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-21|Championship|QPR vs Swansea|O2.5": {
+    "2026-04-21|Jupiler Pro League|Standard Liege vs Antwerp|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-21|LaLiga|Girona vs Real Betis|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -922,5 +922,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-20T21:21:56.217433+00:00"
+  "updatedAt": "2026-04-20T21:50:07.217321+00:00"
 }
