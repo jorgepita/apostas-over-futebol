@@ -216,6 +216,11 @@ BASE_TEAM_ALIASES = {
     "sporting cp": "sporting cp",
     "porto": "fc porto",
     "fc porto": "fc porto",
+    "estoril": "estoril praia",
+    "estoril praia": "estoril praia",
+    "gd estoril praia": "estoril praia",
+    "moreirense": "moreirense",
+    "moreirense fc": "moreirense",
 
     # Itália
     "inter": "inter",
