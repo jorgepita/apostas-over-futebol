@@ -1,10 +1,10 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-20;Premier League;Crystal Palace vs West Ham;O2.5;1.96;10.27;11.6;;;;;;
-2026-04-20;Primeira Liga;Moreirense vs Estoril;BTTS;1.66;9.42;4.16;;;;;;
-2026-04-20;Super Lig;Gaziantep FK vs Kayserispor;O2.5;1.77;4.19;3.94;;;;;;
-2026-04-21;Championship;QPR vs Swansea;O2.5;1.96;10.27;12.96;;;;;;
-2026-04-21;Championship;West Brom vs Watford;O2.5;2.06;10.27;12.51;;;;;;
-2026-04-21;Jupiler Pro League;Standard Liege vs Antwerp;O2.5;2.16;9.83;11.42;;;;;;
-2026-04-21;Championship;Coventry vs Portsmouth;O2.5;1.87;8.78;8.84;;;;;;
-2026-04-21;LaLiga;Girona vs Real Betis;O2.5;1.93;4.33;4.52;;;;;;
-2026-04-21;Jupiler Pro League;Genk vs Charleroi;O2.5;1.75;2.05;1.9;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-04-20;Premier League;Crystal Palace vs West Ham;O2.5;1.96;10.27;11.6;;;;;;;
+2026-04-20;Primeira Liga;Moreirense vs Estoril;BTTS;1.66;9.42;4.16;;;;;;;
+2026-04-20;Super Lig;Gaziantep FK vs Kayserispor;O2.5;1.77;4.19;3.94;;;;;;;
+2026-04-21;Championship;QPR vs Swansea;O2.5;1.96;10.27;12.96;;;;;;;
+2026-04-21;Championship;West Brom vs Watford;O2.5;2.06;10.27;12.51;;;;;;;
+2026-04-21;Jupiler Pro League;Standard Liege vs Antwerp;O2.5;2.16;9.83;11.42;;;;;;;
+2026-04-21;Championship;Coventry vs Portsmouth;O2.5;1.87;8.78;8.84;;;;;;;
+2026-04-21;LaLiga;Girona vs Real Betis;O2.5;1.93;4.33;4.52;;;;;;;
+2026-04-21;Jupiler Pro League;Genk vs Charleroi;O2.5;1.75;2.05;1.9;;;;;;;
