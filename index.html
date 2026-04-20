@@ -3422,7 +3422,7 @@ table {
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
-        if (triggerAutoSave && initialLoadDone) markDirty();
+        if (initialLoadDone) markDirty();
       }
 
       function addManualBet() {
