@@ -875,7 +875,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": "L"
+      "resultadoManual": ""
     },
     "2026-04-20|Super Lig|Gaziantep FK vs Kayserispor|O2.5": {
       "apostada": true,
@@ -922,5 +922,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-20T21:58:05.108982+00:00"
+  "updatedAt": "2026-04-20T22:04:39.252158+00:00"
 }
