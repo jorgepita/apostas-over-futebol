@@ -1,16 +1,10 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
-2026-04-19;Super Lig;Kasımpaşa vs Alanyaspor;O2.5;2.18;5.52;14.56;;;;L;-5.52;;2026-04-19T11:30:00+00:00
-2026-04-19;Premier League;Manchester City vs Arsenal;O2.5;2.07;5.52;14.05;;;;W;4.74;;
-2026-04-19;2. Bundesliga;FC Schalke 04 vs Preußen Münster;O2.5;1.96;5.52;13.61;;;;W;4.23;;2026-04-19T11:30:00+00:00
-2026-04-19;Serie A;Juventus vs Bologna;O2.5;1.78;5.52;13.54;;;;L;-4.6;;
-2026-04-19;Premier League;Everton vs Liverpool;O2.5;1.91;5.33;10.22;;;;W;4.85;;
-2026-04-19;Ligue 1;Monaco vs Auxerre;O2.5;1.72;5.44;9.16;;;;W;3.54;;
-2026-04-19;Bundesliga;SC Freiburg vs 1. FC Heidenheim;O2.5;1.68;5.52;9.01;;;;W;3.13;;
-2026-04-19;Premier League;Nottingham Forest vs Burnley;O2.5;1.79;3.66;6.49;;;;W;2.92;;
-2026-04-19;Jupiler Pro League;RAAL La Louvière vs Zulte Waregem;O2.5;1.94;3.17;6.17;;;;L;-3.17;;2026-04-19T17:15:00+00:00
-2026-04-19;2. Bundesliga;SpVgg Greuther Fürth vs SV Darmstadt 98;O2.5;1.68;3.14;5.11;;;;W;0.71;;2026-04-19T11:30:00+00:00
-2026-04-19;Primeira Liga;Arouca vs Estrela;BTTS;1.77;10.58;5.11;;;;;;;
-2026-04-19;Jupiler Pro League;Union St. Gilloise vs Club Brugge KV;O2.5;1.9;2.67;5.09;;;;W;2.4;;2026-04-19T16:30:00+00:00
-2026-04-20;Premier League;Crystal Palace vs West Ham;O2.5;1.97;5.52;11.86;;;;;;;
-2026-04-20;Primeira Liga;Moreirense vs Estoril;BTTS;1.73;14.08;6.6;;;;;;;
-2026-04-20;Super Lig;Gaziantep FK vs Kayserispor;O2.5;1.85;3.45;6.38;;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
+2026-04-20;Premier League;Crystal Palace vs West Ham;O2.5;1.96;10.27;11.6;;;;;;
+2026-04-20;Primeira Liga;Moreirense vs Estoril;BTTS;1.66;9.42;4.16;;;;;;
+2026-04-20;Super Lig;Gaziantep FK vs Kayserispor;O2.5;1.77;4.19;3.94;;;;;;
+2026-04-21;Championship;QPR vs Swansea;O2.5;1.96;10.27;12.96;;;;;;
+2026-04-21;Championship;West Brom vs Watford;O2.5;2.06;10.27;12.51;;;;;;
+2026-04-21;Jupiler Pro League;Standard Liege vs Antwerp;O2.5;2.16;9.83;11.42;;;;;;
+2026-04-21;Championship;Coventry vs Portsmouth;O2.5;1.87;8.78;8.84;;;;;;
+2026-04-21;LaLiga;Girona vs Real Betis;O2.5;1.93;4.33;4.52;;;;;;
+2026-04-21;Jupiler Pro League;Genk vs Charleroi;O2.5;1.75;2.05;1.9;;;;;;
