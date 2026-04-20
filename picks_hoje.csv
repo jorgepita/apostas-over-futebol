@@ -1,9 +1,3 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-20;portugal;Primeira Liga;Moreirense;Estoril;1.936;1.9;3.836;BTTS;0.644;1.7;0.588;0.0558;0.1355;0.05600000000000005;0.0244;0.0244;12.2;1.0;500.0
-2026-04-20;turquia;Super Lig;Gaziantep FK;Kayserispor;1.721;1.404;3.126;O2.5;0.604;1.78;0.562;0.0426;0.0971;0.041999999999999926;0.0175;0.0109;5.45;0.6236793765100119;500.0
-2026-04-21;championship;Championship;QPR;Swansea;2.016;1.28;3.296;O2.5;0.64;1.96;0.51;0.1296;0.2645;0.13;0.0476;0.0249;12.47;0.6236793765100119;500.0
-2026-04-21;championship;Championship;West Brom;Watford;1.435;1.72;3.155;O2.5;0.611;2.06;0.485;0.1251;0.2432;0.126;0.0438;0.0249;12.47;0.6236793765100119;500.0
-2026-04-21;belgica;Jupiler Pro League;Standard Liege;Antwerp;1.678;1.324;3.002;O2.5;0.577;2.15;0.465;0.1121;0.2096;0.11199999999999993;0.0377;0.0235;11.76;0.6236793765100119;500.0
-2026-04-21;championship;Championship;Coventry;Portsmouth;2.05;1.164;3.215;O2.5;0.623;1.85;0.541;0.0826;0.1797;0.08199999999999996;0.0324;0.0202;10.09;0.6236793765100119;500.0
-2026-04-21;espanha;LaLiga;Girona;Real Betis;1.654;1.286;2.94;O2.5;0.563;1.93;0.518;0.0452;0.0937;0.04499999999999993;0.0169;0.0105;5.26;0.6236793765100119;500.0
-2026-04-21;belgica;Jupiler Pro League;Genk;Charleroi;1.473;1.589;3.061;O2.5;0.59;1.75;0.571;0.019;0.0443;0.019000000000000017;0.008;0.005;2.49;0.6236793765100119;500.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-21;nba;Boston Celtics;Philadelphia 76ers;lowvig;OVER;216.0;1.93;104.36;101.58;220.35;11.5;0.6475;0.5181;0.1294;0.2685;0;0;0.06711777782344817;0.05;25.0;1.0;500.0
+2026-04-21;nba;New York Knicks;Atlanta Hawks;lowvig;OVER;217.0;1.93;104.36;101.58;220.35;11.5;0.6147;0.5181;0.0966;0.2004;0;0;0.05010714780704827;0.05;25.0;1.0;500.0
