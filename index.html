@@ -3256,14 +3256,16 @@ table {
           const data = await res.json();
           if (!data.ok) throw new Error(data.error || 'Erro ao guardar estado cloud.');
 
-          hasPendingCloudChanges = false;
-          saveLocalState();
-
           if (reloadGithubDataAfterSave) {
             await loadData(false);
           } else {
             rerenderSummaryOnly();
           }
+
+          hasPendingCloudChanges = false;
+          updateCloudStatus();
+          rerenderSummaryOnly();
+          updateSaveCloudButton();
 
           if (showSuccess) alert('Estado guardado na cloud com sucesso.');
           return true;
@@ -3422,7 +3424,6 @@ table {
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
-        if (initialLoadDone) markDirty();
       }
 
       function addManualBet() {
