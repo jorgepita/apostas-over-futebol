@@ -2972,6 +2972,9 @@ table {
     }
       
       function bindBotTableControls() {
+        if (window._botBound) return;
+        window._botBound = true;
+        
         document.querySelectorAll('.js-apostada').forEach(el => {
           if (el.dataset.bound === '1') return;
           el.dataset.bound = '1';
@@ -3031,6 +3034,9 @@ table {
       }
 
       function bindManualControls() {
+        if (window._manualBound) return;
+        window._manualBound = true;
+        
         document.querySelectorAll('.js-delete-manual').forEach(el => {
           if (el.dataset.bound === '1') return;
           el.dataset.bound = '1';
@@ -3044,6 +3050,9 @@ table {
       }
 
       function bindTabButtons() {
+        if (window._tabsBound) return;
+        window._tabsBound = true;
+        
         document.querySelectorAll('[data-tab-target]').forEach(btn => {
           if (btn.dataset.bound === '1') return;
           btn.dataset.bound = '1';
@@ -3080,6 +3089,9 @@ table {
       }
 
       function bindMobileActionsButton() {
+        if (window._mobileBound) return;
+        window._mobileBound = true;
+        
         const btn = document.getElementById('mobileMoreActionsBtn');
         if (btn.dataset.bound === '1') return;
         btn.dataset.bound = '1';
@@ -3351,6 +3363,9 @@ table {
       }
 
       function bindQuickMarketButtons() {
+        if (window._quickBound) return;
+        window._quickBound = true;
+        
         document.querySelectorAll('[data-day-market-quick]').forEach(btn => {
           if (btn.dataset.bound === '1') return;
           btn.dataset.bound = '1';
@@ -3391,8 +3406,7 @@ table {
         try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
       }
 
-      function rerenderAll(triggerAutoSave = true) {
-        saveLocalState();
+      function rerenderAll() {
         fillFilters();
         rerenderSummaryOnly();
         rerenderDayOnly();
