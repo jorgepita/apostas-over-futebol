@@ -2998,7 +2998,6 @@ table {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).oddReal = e.target.value;
             saveLocalState();
-            rerenderAll();
           });
         });
 
@@ -3016,7 +3015,6 @@ table {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).stakeReal = e.target.value;
             saveLocalState();
-            rerenderAll();
           });
         });
 
@@ -3558,7 +3556,6 @@ table {
           const v = num(e.target.value);
           state.bankrollInicial = v !== null && v >= 0 ? v : 0;
           saveLocalState();
-          rerenderAll();
         });
 
         document.getElementById('addManualBetBtn').addEventListener('click', addManualBet);
