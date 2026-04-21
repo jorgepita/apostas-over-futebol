@@ -1,1 +1,5 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-22;premier;Premier League;Burnley;Manchester City;1.709;1.508;3.217;BTTS;0.564;2.2;0.455;0.1098;0.2012;0.11;0.0362;0.0362;18.11;1.0;500.0
+2026-04-22;espanha;LaLiga;Real Sociedad;Getafe;1.654;1.286;2.94;BTTS;0.518;2.14;0.467;0.0507;0.0951;0.051;0.0171;0.0171;8.56;1.0;500.0
+2026-04-22;franca;Ligue 1;Paris Saint Germain;Nantes;1.813;1.453;3.267;BTTS;0.567;1.82;0.549;0.018;0.04;0.018;0.0072;0.0072;3.6;1.0;500.0
+2026-04-22;championship;Championship;Middlesbrough;Sheffield Wednesday;1.582;1.231;2.813;BTTS;0.498;2.08;0.481;0.017;0.0327;0.017;0.0059;0.0059;2.95;1.0;500.0
