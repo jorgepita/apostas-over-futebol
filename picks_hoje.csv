@@ -1,5 +1,6 @@
-Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-22;nba;Los Angeles Lakers;Houston Rockets;draftkings;OVER;206.5;1.91;104.36;101.58;220.35;11.5;0.8858;0.5236;0.3623;0.7604;0;0;0.19009465374093076;0.05;25.0;1.0;500.0
-2026-04-21;nba;Boston Celtics;Philadelphia 76ers;bovada;OVER;215.0;1.91;104.36;101.58;220.35;11.5;0.6792;0.5236;0.1557;0.3267;0;0;0.08168272586407077;0.05;25.0;1.0;500.0
-2026-04-22;nba;Detroit Pistons;Orlando Magic;fanduel;OVER;218.5;1.94;104.36;101.58;220.35;11.5;0.564;0.5155;0.0486;0.1002;0;0;0.025057624783965306;0.0251;12.53;1.0;500.0
-2026-04-22;nba;San Antonio Spurs;Portland Trail Blazers;draftkings;OVER;219.5;1.87;104.36;101.58;220.35;11.5;0.5296;0.5348;-0.0052;0.0;0;0;0.0;0.0;0.0;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-21;championship;Championship;West Brom;Watford;1.435;1.72;3.155;O2.5;0.611;2.07;0.483;0.1275;0.2466;0.128;0.0444;0.0291;14.53;0.7266238013759895;500.0
+2026-04-21;championship;Championship;QPR;Swansea;2.016;1.28;3.296;O2.5;0.64;1.95;0.513;0.127;0.2606;0.127;0.0469;0.0291;14.53;0.7266238013759895;500.0
+2026-04-21;belgica;Jupiler Pro League;Standard Liege;Antwerp;1.678;1.324;3.002;O2.5;0.577;2.11;0.474;0.1033;0.1963;0.10299999999999998;0.0353;0.0257;12.84;0.7266238013759895;500.0
+2026-04-21;championship;Championship;Coventry;Portsmouth;2.05;1.164;3.215;O2.5;0.623;1.85;0.541;0.0826;0.1797;0.08199999999999996;0.0324;0.0235;11.75;0.7266238013759895;500.0
+2026-04-21;belgica;Jupiler Pro League;Genk;Charleroi;1.473;1.589;3.061;O2.5;0.59;1.83;0.546;0.044;0.097;0.04399999999999993;0.0175;0.0127;6.34;0.7266238013759895;500.0
