@@ -1,14 +1,14 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-04-21;Championship;QPR vs Swansea;O2.5;2.0;11.75;13.98;;;;;;
-2026-04-21;Championship;West Brom vs Watford;O2.5;2.0;11.69;11.06;;;;;;
-2026-04-21;LaLiga;Athletic Club vs Osasuna;O2.5;2.08;8.4;8.25;;;;;;
-2026-04-21;Jupiler Pro League;Genk vs Charleroi;O2.5;1.88;6.61;5.85;;;;;;
-2026-04-21;Championship;Coventry vs Portsmouth;O2.5;1.75;6.38;5.17;;;;;;
-2026-04-21;LaLiga;Girona vs Real Betis;O2.5;1.93;4.95;4.52;;;;;;
-2026-04-22;Premier League;Burnley vs Manchester City;BTTS;2.1;15.14;8.81;;;;;;
-2026-04-22;Championship;Charlton vs Ipswich;O2.5;2.02;5.85;5.59;;;;;;
-2026-04-22;LaLiga;Real Sociedad vs Getafe;BTTS;2.15;8.89;5.29;;;;;;
-2026-04-22;Jupiler Pro League;Union St. Gilloise vs Gent;O2.5;1.82;3.26;2.78;;;;;;
-2026-04-22;Ligue 1;Paris Saint Germain vs Nantes;BTTS;1.85;5.28;2.7;;;;;;
-2026-04-22;Championship;Middlesbrough vs Sheffield Wednesday;BTTS;2.07;2.56;1.47;;;;;;
-2026-04-22;Championship;Sheffield Utd vs Blackburn;O2.5;1.91;1.11;1.0;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-04-21;Championship;QPR vs Swansea;O2.5;2.0;11.75;13.98;;;;;;;
+2026-04-21;Championship;West Brom vs Watford;O2.5;2.0;11.69;11.06;;;;;;;
+2026-04-21;LaLiga;Athletic Club vs Osasuna;O2.5;2.08;8.4;8.25;;;;;;;
+2026-04-21;Jupiler Pro League;Genk vs Charleroi;O2.5;1.88;6.61;5.85;;;;;;;
+2026-04-21;Championship;Coventry vs Portsmouth;O2.5;1.75;6.38;5.17;;;;;;;
+2026-04-21;LaLiga;Girona vs Real Betis;O2.5;1.93;4.95;4.52;;;;;;;
+2026-04-22;Premier League;Burnley vs Manchester City;BTTS;2.1;15.14;8.81;;;;;;;
+2026-04-22;Championship;Charlton vs Ipswich;O2.5;2.02;5.85;5.59;;;;;;;
+2026-04-22;LaLiga;Real Sociedad vs Getafe;BTTS;2.15;8.89;5.29;;;;;;;
+2026-04-22;Jupiler Pro League;Union St. Gilloise vs Gent;O2.5;1.82;3.26;2.78;;;;;;;
+2026-04-22;Ligue 1;Paris Saint Germain vs Nantes;BTTS;1.85;5.28;2.7;;;;;;;
+2026-04-22;Championship;Middlesbrough vs Sheffield Wednesday;BTTS;2.07;2.56;1.47;;;;;;;
+2026-04-22;Championship;Sheffield Utd vs Blackburn;O2.5;1.91;1.11;1.0;;;;;;;
