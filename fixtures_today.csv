@@ -1,15 +1,15 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
 2026-04-22;belgica;Club Brugge KV;KV Mechelen;1.40;1.82
-2026-04-22;belgica;Union St. Gilloise;Gent;1.96;2.15
-2026-04-22;championship;Charlton;Ipswich;2.00;1.91
-2026-04-22;espanha;Barcelona;Celta Vigo;1.31;1.64
-2026-04-22;espanha;Elche;Atletico Madrid;1.74;1.57
+2026-04-22;belgica;Union St. Gilloise;Gent;2.01;2.22
+2026-04-22;championship;Charlton;Ipswich;2.01;1.95
+2026-04-22;espanha;Barcelona;Celta Vigo;1.31;1.63
+2026-04-22;espanha;Elche;Atletico Madrid;1.76;1.60
 2026-04-22;espanha;Real Sociedad;Getafe;2.60;2.10
-2026-04-22;franca;Paris Saint Germain;Nantes;1.35;1.91
+2026-04-22;franca;Paris Saint Germain;Nantes;1.33;1.91
 2026-04-22;paises_baixos;Telstar;Sparta Rotterdam;1.60;1.50
-2026-04-22;premier;Bournemouth;Leeds;1.79;1.62
-2026-04-22;premier;Burnley;Manchester City;1.35;2.05
-2026-04-23;belgica;Lommel United;Liège;1.67;1.67
+2026-04-22;premier;Bournemouth;Leeds;1.75;1.62
+2026-04-22;premier;Burnley;Manchester City;1.35;1.95
+2026-04-23;belgica;Lommel United;Liège;1.68;1.67
 2026-04-23;belgica;Patro Eisden;Beerschot VA;1.95;1.73
 2026-04-23;belgica;St. Truiden;Anderlecht;1.65;1.53
 2026-04-23;espanha;Levante;Sevilla;2.23;1.85
@@ -23,8 +23,9 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
 2026-04-24;championship;Leicester;Millwall;1.83;1.80
 2026-04-24;espanha;Real Betis;Real Madrid;1.57;1.53
 2026-04-24;franca;Stade Brestois 29;Lens;1.74;1.67
-2026-04-24;franca2;Clermont Foot;Bastia;2.22;1.85
+2026-04-24;franca2;Clermont Foot;Bastia;2.20;1.87
 2026-04-24;franca2;Laval;Rodez;1.92;1.67
 2026-04-24;italia2;Avellino;Bari;2.12;1.95
 2026-04-24;portugal;Alverca;Arouca;2.11;1.80
+2026-04-24;premier;Sunderland;Nottingham Forest;2.22;1.91
 2026-04-24;turquia;Başakşehir;Kasımpaşa;1.76;1.70
