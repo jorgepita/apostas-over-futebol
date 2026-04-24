@@ -1,1 +1,12 @@
-
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-04-24;alemanha;Bundesliga;RB Leipzig;Union Berlin;2.2;1.542;3.742;O2.5;0.72;1.58;0.633;0.0871;0.2372;0.087;0.0427;0.0156;7.81;0.39042431898206936;500.0
+2026-04-24;alemanha2;2. Bundesliga;Fortuna Düsseldorf;Dynamo Dresden;1.802;1.527;3.329;O2.5;0.646;1.72;0.581;0.0649;0.1552;0.065;0.0279;0.0109;5.45;0.39042431898206936;500.0
+2026-04-24;alemanha2;2. Bundesliga;1. FC Kaiserslautern;Eintracht Braunschweig;1.802;1.527;3.329;O2.5;0.646;1.62;0.617;0.0291;0.0759;0.029;0.0137;0.0053;2.67;0.39042431898206936;500.0
+2026-04-25;premier;Premier League;Fulham;Aston Villa;1.639;1.717;3.356;O2.5;0.652;1.81;0.552;0.0993;0.2218;0.099;0.0399;0.0156;7.8;0.39042431898206936;500.0
+2026-04-25;alemanha;Bundesliga;VfL Wolfsburg;Borussia Mönchengladbach;1.882;1.652;3.534;O2.5;0.685;1.68;0.595;0.0901;0.2226;0.09;0.0401;0.0156;7.81;0.39042431898206936;500.0
+2026-04-25;paises_baixos;Eredivisie;NAC Breda;Ajax;1.585;1.9;3.485;O2.5;0.676;1.7;0.588;0.0882;0.2142;0.088;0.0386;0.0151;7.53;0.39042431898206936;500.0
+2026-04-25;premier;Premier League;Wolves;Tottenham;1.522;1.838;3.36;O2.5;0.652;1.74;0.575;0.0778;0.1828;0.078;0.0329;0.0128;6.42;0.39042431898206936;500.0
+2026-04-25;alemanha2;2. Bundesliga;Preußen Münster;Arminia Bielefeld;1.802;1.527;3.329;O2.5;0.646;1.75;0.571;0.0749;0.1748;0.075;0.0315;0.0123;6.14;0.39042431898206936;500.0
+2026-04-25;alemanha;Bundesliga;FC Augsburg;Eintracht Frankfurt;1.882;1.652;3.534;O2.5;0.685;1.55;0.645;0.0402;0.1132;0.04;0.0204;0.008;3.98;0.39042431898206936;500.0
+2026-04-25;paises_baixos;Eredivisie;Feyenoord;Groningen;2.007;1.461;3.468;O2.5;0.673;1.54;0.649;0.0239;0.0682;0.024;0.0123;0.0048;2.4;0.39042431898206936;500.0
+2026-04-25;alemanha2;2. Bundesliga;Hertha BSC;Holstein Kiel;1.802;1.527;3.329;O2.5;0.646;1.6;0.625;0.0213;0.0569;0.021;0.0102;0.004;2.0;0.39042431898206936;500.0
