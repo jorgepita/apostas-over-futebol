@@ -919,43 +919,31 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
+    "2026-04-25|2. Bundesliga|Hertha BSC vs Holstein Kiel|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
     "2026-04-25|2. Bundesliga|Preußen Münster vs Arminia Bielefeld|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-25|Eredivisie|NAC Breda vs Ajax|O2.5": {
+    "2026-04-25|Bundesliga|1. FC Heidenheim vs FC St. Pauli|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-25|Serie A|Parma vs Pisa|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-25|Premier League|Fulham vs Aston Villa|O2.5": {
+    "2026-04-25|Bundesliga|FC Augsburg vs Eintracht Frankfurt|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
     "2026-04-25|Bundesliga|VfL Wolfsburg vs Borussia Mönchengladbach|O2.5": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-25|Ligue 1|Angers vs Paris Saint Germain|BTTS": {
-      "apostada": true,
-      "oddReal": "",
-      "stakeReal": "",
-      "resultadoManual": ""
-    },
-    "2026-04-25|Premier League|Wolves vs Tottenham|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -973,19 +961,67 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-25|Bundesliga|FC Augsburg vs Eintracht Frankfurt|O2.5": {
+    "2026-04-25|Eredivisie|NAC Breda vs Ajax|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-25|2. Bundesliga|Hertha BSC vs Holstein Kiel|O2.5": {
+    "2026-04-25|Ligue 1|Angers vs Paris Saint Germain|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-25|Bundesliga|1. FC Heidenheim vs FC St. Pauli|BTTS": {
+    "2026-04-25|Premier League|Fulham vs Aston Villa|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-25|Premier League|Wolves vs Tottenham|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-25|Serie A|Parma vs Pisa|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|Bundesliga|Borussia Dortmund vs SC Freiburg|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|Ligue 1|Lorient vs Strasbourg|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|Eredivisie|Heracles vs FC Volendam|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|LaLiga|Osasuna vs Sevilla|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|2. Bundesliga|SC Paderborn 07 vs FC Schalke 04|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-26|Serie A|Fiorentina vs Sassuolo|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -994,5 +1030,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-25T18:16:47.290467+00:00"
+  "updatedAt": "2026-04-25T22:31:00.133593+00:00"
 }
