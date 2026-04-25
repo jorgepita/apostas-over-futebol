@@ -910,6 +910,11 @@ def main():
     fixtures = pd.read_csv(StringIO(response.text), sep=";")
     fixtures = normalize_columns(fixtures)
 
+    fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce")
+    
+    print("[DEBUG] total fixtures:", len(fixtures))
+    print("[DEBUG] datas únicas:", sorted(fixtures["Date"].astype(str).unique())[:10])
+
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25"}
     if not required.issubset(set(fixtures.columns)):
         raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
