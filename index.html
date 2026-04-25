@@ -2983,6 +2983,9 @@ table {
             const key = e.target.dataset.pickKey;
             const edit = ensureEditObject(key);
             edit.apostada = e.target.checked;
+
+            markDirty();
+            
             rerenderAll();
           });
         });
@@ -3028,6 +3031,9 @@ table {
           el.addEventListener('change', e => {
             const key = e.target.dataset.pickKey;
             ensureEditObject(key).resultadoManual = e.target.value;
+
+            markDirty();
+            
             rerenderAll();
           });
         });
@@ -3044,6 +3050,8 @@ table {
           el.addEventListener('click', e => {
             const id = e.target.dataset.id;
             state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
+            markDirty();
+            
             rerenderAll();
           });
         });
@@ -3410,20 +3418,25 @@ table {
 
       function rerenderAll() {
         fillFilters();
+
         rerenderSummaryOnly();
         rerenderDayOnly();
         rerenderHistoryOnly();
         rerenderManualOnly();
+
         bindBotTableControls();
         bindManualControls();
         bindTabButtons();
         bindQuickMarketButtons();
         bindMobileActionsButton();
+
         updateApostasButton();
         updateApostasTooltip();
+
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
+        saveLocalState();
       }
 
       function addManualBet() {
@@ -3442,6 +3455,7 @@ table {
         }
 
         state.manualBets.push({
+          markDirty();
           id: makeManualId(),
           data: normalizeDateString(data),
           liga: cleanString(liga),
