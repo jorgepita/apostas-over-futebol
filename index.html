@@ -1663,16 +1663,51 @@ table {
 
       function normalizeBotCsvRow(row) {
         const normalized = { ...row };
-        normalized['Data'] = normalizeDateString(row['Data'] || row['Date'] || '');
-        normalized['Liga'] = cleanString(row['Liga'] || row['League'] || '');
-        normalized['Jogo'] = cleanString(row['Jogo'] || row['Game'] || '');
-        normalized['Mercado'] = cleanString(row['Mercado'] || row['Market'] || '');
-        normalized['Odd'] = cleanString(row['Odd'] || row['Odds'] || '');
-        normalized['Stake€'] = cleanString(row['Stake€'] || row['Stake'] || '');
-        normalized['Resultado'] = cleanString(row['Resultado'] || row['Result'] || '');
-        normalized['Edge%'] = cleanString(row['Edge%'] || row['Edge'] || '');
+
+  // DATA
+        normalized['Data'] = normalizeDateString(
+          row['Data'] || row['Date'] || ''
+        );
+
+  // LIGA
+        normalized['Liga'] = cleanString(
+          row['Liga'] || row['League'] || ''
+        );
+
+  // JOGO (CRÍTICO)
+        const home = row['HomeTeam'] || '';
+        const away = row['AwayTeam'] || '';
+        normalized['Jogo'] = cleanString(
+          row['Jogo'] || row['Game'] || `${home} vs ${away}`
+        );
+
+  // MERCADO (CRÍTICO)
+        if (row['Odd_Over25']) {
+          normalized['Mercado'] = 'O2.5';
+          normalized['Odd'] = row['Odd_Over25'];
+        } else if (row['Odd_BTTS_Yes']) {
+          normalized['Mercado'] = 'BTTS';
+          normalized['Odd'] = row['Odd_BTTS_Yes'];
+        } else {
+          normalized['Mercado'] = cleanString(row['Mercado'] || '');
+          normalized['Odd'] = cleanString(row['Odd'] || '');
+        }
+
+  // STAKE DEFAULT (para não ficar vazio)
+        normalized['Stake€'] = cleanString(row['Stake€'] || '1');
+
+  // RESULTADO
+        normalized['Resultado'] = cleanString(
+          row['Resultado'] || row['Result'] || ''
+        );
+
+  // EDGE (opcional)
+        normalized['Edge%'] = cleanString(
+          row['Edge%'] || row['Edge'] || ''
+        );
+
         return normalized;
-      }
+       }
 
       function normalizeNbaCsvRow(row) {
         return {
