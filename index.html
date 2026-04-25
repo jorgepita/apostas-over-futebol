@@ -3538,12 +3538,12 @@ table {
 
           state.footballDaily = parseSemicolonCsv(dailyText)
             .map(r => ({
-              Data: r.Date,
-              Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
+              Data: r.Data,
+              Jogo: r.Jogo,
               Odd: parseFloat(r.Odd),
-              Mercado: (r.Market || '').trim()
+              Mercado: (r.Mercado || '').trim()
             }))
-            .filter(r => r.Data && r.Jogo && r.Odd > 0);
+            .filter(r => r.Data && r.Jogo && r.Odd > 0 && r.Mercado === 'O2.5');
 
           console.log(state.footballDaily);
           
