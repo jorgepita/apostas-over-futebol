@@ -3538,9 +3538,9 @@ table {
     Data: r.Date,
     Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
     Odd: r.Odd,
-    Market: r.Market
+    Mercado: r.Market
   }))
-  .filter(r => r['Data'] && r['Jogo'] && r['Odd'] && r['Market'] === 'O2.5');
+  .filter(r => r['Data'] && r['Jogo'] && r['Odd'] && r['Mercado'] === 'O2.5');
           state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
           state.nba = parseSemicolonCsv(nbaText).map(normalizeNbaCsvRow);
           state.manualBetsRemote = parseSemicolonCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
