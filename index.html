@@ -3455,7 +3455,6 @@ table {
         }
 
         state.manualBets.push({
-          markDirty();
           id: makeManualId(),
           data: normalizeDateString(data),
           liga: cleanString(liga),
@@ -3466,6 +3465,8 @@ table {
           resultado: cleanString(resultado).toUpperCase(),
           notas: cleanString(notas)
         });
+
+        markDirty();
 
         document.getElementById('manualData').value = '';
         document.getElementById('manualLiga').value = '';
