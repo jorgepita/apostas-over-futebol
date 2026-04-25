@@ -1397,7 +1397,7 @@ table {
 
     <script>
       const URLS = {
-        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje.csv',
+        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_github.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
         nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
         manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
@@ -3538,10 +3538,10 @@ table {
 
           state.footballDaily = parseSemicolonCsv(dailyText)
             .map(r => ({
-              Data: r.Data,
-              Jogo: r.Jogo,
+              Data: r.Date,
+              Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
               Odd: parseFloat(r.Odd),
-              Mercado: (r.Mercado || '').trim()
+              Mercado: (r.Market || '').trim()
             }))
             .filter(r => r.Data && r.Jogo && r.Odd > 0 && r.Mercado === 'O2.5');
 
