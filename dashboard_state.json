@@ -918,9 +918,27 @@
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
+    },
+    "2026-04-25|2. Bundesliga|Preußen Münster vs Arminia Bielefeld|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-25|Eredivisie|NAC Breda vs Ajax|O2.5": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
+    },
+    "2026-04-25|Serie A|Parma vs Pisa|BTTS": {
+      "apostada": true,
+      "oddReal": "",
+      "stakeReal": "",
+      "resultadoManual": ""
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-25T13:44:39.108761+00:00"
+  "updatedAt": "2026-04-25T18:12:56.762150+00:00"
 }
