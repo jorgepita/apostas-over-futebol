@@ -3533,29 +3533,14 @@ table {
           const manualText = manualRes.ok ? await manualRes.text() : '';
 
           state.footballDaily = parseSemicolonCsv(dailyText)
-  .flatMap(row => {
-    const base = normalizeBotCsvRow(row);
-    const picks = [];
-
-    if (row['Odd_Over25']) {
-      picks.push({
-        ...base,
-        Mercado: 'O2.5',
-        Odd: row['Odd_Over25']
-      });
-    }
-
-    if (row['Odd_BTTS_Yes']) {
-      picks.push({
-        ...base,
-        Mercado: 'BTTS',
-        Odd: row['Odd_BTTS_Yes']
-      });
-    }
-
-    return picks;
-  })
-  .filter(r => r['Data'] && r['Jogo']);
+  .map(r => ({
+    ...r,
+    Data: r.Date,
+    Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
+    Odd: r.Odd,
+    Market: r.Market
+  }))
+  .filter(r => r['Data'] && r['Jogo'] && r['Odd'] && r['Market'] === 'O2.5');
           state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
           state.nba = parseSemicolonCsv(nbaText).map(normalizeNbaCsvRow);
           state.manualBetsRemote = parseSemicolonCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
