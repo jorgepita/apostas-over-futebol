@@ -2972,73 +2972,76 @@ table {
     }
       
       function bindBotTableControls() {
-        if (window._botBound) return;
-        window._botBound = true;
-        
-        document.querySelectorAll('.js-apostada').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
+  if (window._botBound) return;
+  window._botBound = true;
 
-          el.addEventListener('change', e => {
-            const key = e.target.dataset.pickKey;
-            const edit = ensureEditObject(key);
-            edit.apostada = e.target.checked;
+  function update(key, changes, rerender = false) {
+    if (!state.localEdits[key]) {
+      state.localEdits[key] = {};
+    }
 
-            markDirty();
-            
-            rerenderAll();
-          });
-        });
+    Object.assign(state.localEdits[key], changes);
 
-        document.querySelectorAll('.js-odd-real').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
+    markDirty();
 
-          el.addEventListener('input', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).oddReal = e.target.value;
-            markDirty();
-         });
+    if (rerender) {
+      rerenderAll();
+    }
+  }
 
-          el.addEventListener('blur', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).oddReal = e.target.value;
-            saveLocalState();
-          });
-        });
+  document.querySelectorAll('.js-apostada').forEach(el => {
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
 
-        document.querySelectorAll('.js-stake-real').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
+    el.addEventListener('change', e => {
+      const key = e.target.dataset.pickKey;
 
-          el.addEventListener('input', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).stakeReal = e.target.value;
-            markDirty();
-          });
+      update(key, {
+        apostada: e.target.checked
+      }, true);
+    });
+  });
 
-          el.addEventListener('blur', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).stakeReal = e.target.value;
-            saveLocalState();
-          });
-        });
+  document.querySelectorAll('.js-odd-real').forEach(el => {
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
 
-        document.querySelectorAll('.js-bot-resultado').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
+    el.addEventListener('input', e => {
+      const key = e.target.dataset.pickKey;
 
-          el.addEventListener('change', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).resultadoManual = e.target.value;
+      update(key, {
+        oddReal: e.target.value
+      });
+    });
+  });
 
-            markDirty();
-            
-            rerenderAll();
-          });
-        });
-      }
+  document.querySelectorAll('.js-stake-real').forEach(el => {
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
 
+    el.addEventListener('input', e => {
+      const key = e.target.dataset.pickKey;
+
+      update(key, {
+        stakeReal: e.target.value
+      });
+    });
+  });
+
+  document.querySelectorAll('.js-bot-resultado').forEach(el => {
+    if (el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+
+    el.addEventListener('change', e => {
+      const key = e.target.dataset.pickKey;
+
+      update(key, {
+        resultadoManual: e.target.value
+      }, true);
+    });
+  });
+}
+      
       function bindManualControls() {
         if (window._manualBound) return;
         window._manualBound = true;
@@ -3333,6 +3336,16 @@ table {
         updateSaveCloudButton();
       }
 
+      function updateLocalEdit(key, changes) {
+        if (!state.localEdits[key]) {
+          state.localEdits[key] = {};
+        }
+
+        Object.assign(state.localEdits[key], changes);
+
+        markDirty();
+      }
+      
       function updateApostasTooltip() {
         const todaysPicks = getTodaysDailyRows();
         const count = todaysPicks.length;
