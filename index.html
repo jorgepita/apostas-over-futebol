@@ -3530,7 +3530,11 @@ table {
           const dailyText = dailyRes.ok ? await dailyRes.text() : '';
           const historyText = await historyRes.text();
           const nbaText = nbaRes.ok ? await nbaRes.text() : '';
+          const fixturesRes = await fetch('https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv');
+          const fixturesText = fixturesRes.ok ? await fixturesRes.text() : '';
           const manualText = manualRes.ok ? await manualRes.text() : '';
+
+          state.fixtures = parseSemicolonCsv(fixturesText);
 
           state.footballDaily = parseSemicolonCsv(dailyText)
             .map(r => ({
