@@ -1,5 +1,7 @@
 import base64
 import json
+import requests
+from io import StringIO
 import math
 import os
 from collections import Counter
@@ -900,11 +902,12 @@ def main():
     max_picks_global = int(run_cfg.get("max_picks_global", DEFAULT_MAX_PICKS_GLOBAL))
     print(f"[DBG] max_picks_per_day={max_picks_per_day} | max_picks_global={max_picks_global}")
 
-    fixtures_path = BASE / "fixtures_today.csv"
-    if not fixtures_path.exists():
-        raise SystemExit("Falta fixtures_today.csv na pasta do projeto.")
+    GITHUB_RAW_URL = "https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv"
 
-    fixtures = pd.read_csv(fixtures_path, sep=None, engine="python")
+    response = requests.get(GITHUB_RAW_URL)
+    response.raise_for_status()
+
+    fixtures = pd.read_csv(StringIO(response.text), sep=";")
     fixtures = normalize_columns(fixtures)
 
     required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25"}
