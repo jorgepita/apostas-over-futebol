@@ -2982,6 +2982,8 @@ table {
 
           markDirty();
 
+          localStorage.setItem('dashboardState', JSON.stringify(state));
+          
           if (rerender) rerenderAll();
         }
 
