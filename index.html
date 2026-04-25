@@ -3300,23 +3300,23 @@ table {
       }
 
       function updateCloudStatus() {
-  const el = document.getElementById('cloudStatus');
-  if (!el) return;
+        const el = document.getElementById('cloudStatusLabel');
+        if (!el) return;
 
-  if (state.cloudAvailable === false) {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
-    el.style.color = 'var(--bad)';
-    return;
-  }
+        if (state.cloudAvailable === false) {
+          el.className = 'decision-badge bad';
+          el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
+          return;
+        }
 
-  if (hasPendingCloudChanges) {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
-    el.style.color = 'var(--warn)';
-  } else {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
-    el.style.color = 'var(--ok)';
-  }
-}
+        if (hasPendingCloudChanges) {
+          el.className = 'decision-badge warn';
+          el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
+        } else {
+          el.className = 'decision-badge good';
+          el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
+        }
+      }
       
       function markDirty() {
         hasPendingCloudChanges = true;
