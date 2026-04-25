@@ -2972,75 +2972,59 @@ table {
     }
       
       function bindBotTableControls() {
-  if (window._botBound) return;
-  window._botBound = true;
 
-  function update(key, changes, rerender = false) {
-    if (!state.localEdits[key]) {
-      state.localEdits[key] = {};
-    }
+        function update(key, changes, rerender = false) {
+          if (!state.localEdits[key]) {
+            state.localEdits[key] = {};
+          }
 
-    Object.assign(state.localEdits[key], changes);
+          Object.assign(state.localEdits[key], changes);
 
-    markDirty();
+          markDirty();
 
-    if (rerender) {
-      rerenderAll();
-    }
-  }
+          if (rerender) rerenderAll();
+        }
 
-  document.querySelectorAll('.js-apostada').forEach(el => {
-    if (el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
+        document.querySelectorAll('.js-apostada').forEach(el => {
+          el.onchange = e => {
+            const key = e.target.dataset.pickKey;
 
-    el.addEventListener('change', e => {
-      const key = e.target.dataset.pickKey;
+            update(key, {
+              apostada: e.target.checked
+            }, true);
+          };
+        });
 
-      update(key, {
-        apostada: e.target.checked
-      }, true);
-    });
-  });
+        document.querySelectorAll('.js-odd-real').forEach(el => {
+          el.oninput = e => {
+            const key = e.target.dataset.pickKey;
 
-  document.querySelectorAll('.js-odd-real').forEach(el => {
-    if (el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
+            update(key, {
+              oddReal: e.target.value
+            });
+          };
+        });
 
-    el.addEventListener('input', e => {
-      const key = e.target.dataset.pickKey;
+        document.querySelectorAll('.js-stake-real').forEach(el => {
+          el.oninput = e => {
+            const key = e.target.dataset.pickKey;
 
-      update(key, {
-        oddReal: e.target.value
-      });
-    });
-  });
+            update(key, {
+              stakeReal: e.target.value
+            });
+          };
+        });
 
-  document.querySelectorAll('.js-stake-real').forEach(el => {
-    if (el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
+        document.querySelectorAll('.js-bot-resultado').forEach(el => {
+          el.onchange = e => {
+            const key = e.target.dataset.pickKey;
 
-    el.addEventListener('input', e => {
-      const key = e.target.dataset.pickKey;
-
-      update(key, {
-        stakeReal: e.target.value
-      });
-    });
-  });
-
-  document.querySelectorAll('.js-bot-resultado').forEach(el => {
-    if (el.dataset.bound === '1') return;
-    el.dataset.bound = '1';
-
-    el.addEventListener('change', e => {
-      const key = e.target.dataset.pickKey;
-
-      update(key, {
-        resultadoManual: e.target.value
-      }, true);
-    });
-  });
-}
+            update(key, {
+              resultadoManual: e.target.value
+            }, true);
+          };
+        });
+      }
       
       function bindManualControls() {
         if (window._manualBound) return;
@@ -3449,7 +3433,6 @@ table {
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
-        saveLocalState();
       }
 
       function addManualBet() {
