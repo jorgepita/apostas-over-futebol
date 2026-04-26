@@ -3537,16 +3537,29 @@ table {
           state.fixtures = parseSemicolonCsv(fixturesText);
 
           state.footballDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';'))
-            .map(r => ({
-              Data: r.Date,
-              Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
-              Odd: parseFloat(r.Odd),
-              Mercado: (r.Market || '').trim()
+            .map(r => {
+              const probModel = parseFloat(r.ProbModel);
+              const probMarket = parseFloat(r.ProbMarket);
 
-              ProbModel: parseFloat(r.ProbModel),
-              ProbMarket: parseFloat(r.ProbMarket),
-            }))
-            .filter(r => r.Data && r.Jogo && r.Odd > 0 && r.Mercado === 'O2.5');
+              return {
+                Data: r.Date,
+                Liga: r.LeagueName || r.League || '',
+                Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
+                Odd: parseFloat(r.Odd),
+                Mercado: (r.Market || '').trim(),
+
+                ProbModel: probModel,
+                ProbMarket: probMarket,
+
+                Edge: probModel - probMarket
+              };
+            })
+            .filter(r => 
+              r.Data && 
+              r.Jogo && 
+              r.Odd > 0 && 
+              r.Mercado === 'O2.5'
+            );
 
           console.log(state.footballDaily);
           
