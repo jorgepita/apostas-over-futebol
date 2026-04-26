@@ -3224,10 +3224,82 @@ table {
 
 
       async function saveCloudState() {
-        state.cloudAvailable = false;
-        return false;
-      }
+  try {
+    const payload = {
+      bankrollInicial: state.bankrollInicial,
+      manualBets: state.manualBets,
+      localEdits: state.localEdits,
+      sessionStartDate: getSessionStartDate()
+    };
 
+    // 1. Obter SHA atual do ficheiro
+    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`
+      }
+    });
+
+    const fileData = await getRes.json();
+    const sha = fileData.sha;
+
+    // 2. Atualizar ficheiro
+    const updateRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'update cloud state',
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
+        sha: sha,
+        branch: GITHUB_BRANCH
+      })
+    });
+
+    const result = await updateRes.json();
+
+    if (result.commit) {
+      alert('Guardado no GitHub com sucesso');
+      return true;
+    } else {
+      throw new Error('Erro ao guardar');
+    }
+
+  } catch (e) {
+    console.error(e);
+    alert('Erro ao guardar no GitHub');
+    return false;
+  }
+}
+
+      async function loadCloudState() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`
+      }
+    });
+
+    const data = await res.json();
+
+    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+
+    state.bankrollInicial = content.bankrollInicial || 1000;
+    state.manualBets = content.manualBets || [];
+    state.localEdits = content.localEdits || {};
+    state.sessionStartDate = content.sessionStartDate || '';
+
+    rerenderAll(true);
+
+    alert('Carregado do GitHub com sucesso');
+
+  } catch (e) {
+    console.error(e);
+    alert('Erro ao carregar do GitHub');
+  }
+}
+      
       function updateSaveCloudButton() {
   const buttons = [
     document.getElementById('saveCloudBtn'),
