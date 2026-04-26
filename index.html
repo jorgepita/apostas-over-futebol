@@ -1882,7 +1882,7 @@ table {
       }
       
       function getManualRowsMerged() {
-        const remoteRows = state.manualBetsRemote.map(b => {
+        const remoteRows = (Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : []).map(b => {
           const data = normalizeDateString(b['Data'] || '');
           const liga = cleanString(b['Liga'] || '');
           const jogo = cleanString(b['Jogo'] || '');
@@ -1913,7 +1913,7 @@ table {
           };
         });
 
-        const localRows = state.manualBets.map(b => {
+        const localRows = (Array.isArray(state.manualBets) ? state.manualBets : []).map(...)
           const resultado = cleanString(b.resultado || '').toUpperCase();
           const data = normalizeDateString(b.data || '');
           const liga = cleanString(b.liga || '');
