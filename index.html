@@ -3582,7 +3582,7 @@ table {
 
       function bindStaticButtons() {
         bindElementAction('refreshBtn', () => loadData(true));
-        bindElementAction('loadCloudBtn', () => loadCloudState(true));
+        bindElementAction('loadCloudBtn', () => false);
         bindElementAction('saveCloudBtn', () => saveCloudState(true, true));
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
@@ -3590,7 +3590,7 @@ table {
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
 
-        bindElementAction('loadCloudBtnMobile', () => loadCloudState(true));
+        bindElementAction('loadCloudBtnMobile', () => false);
         bindElementAction('saveCloudBtnMobile', () => saveCloudState(true, true));
         bindElementAction('resetLocalBtnMobile', resetLocalControls);
         bindElementAction('clearManualBtnMobile', clearManualLocal);
