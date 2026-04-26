@@ -1,5 +1,4 @@
 Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-27;nba;Houston Rockets;Los Angeles Lakers;lowvig;OVER;207.5;1.93;104.36;101.58;220.35;11.5;0.8682;0.5181;0.35;0.7264;0;0;0.1815968192422542;0.05;25.0;1.0;500.0
-2026-04-26;nba;Philadelphia 76ers;Boston Celtics;lowvig;OVER;213.5;1.98;104.36;101.58;220.35;11.5;0.7244;0.5051;0.2194;0.4432;0;0;0.11079597944288852;0.05;25.0;1.0;500.0
-2026-04-26;nba;Portland Trail Blazers;San Antonio Spurs;betrivers;OVER;218.0;1.88;104.36;101.58;220.35;11.5;0.5811;0.5319;0.0492;0.105;0;0;0.026261531658179817;0.0263;13.13;1.0;500.0
-2026-04-26;nba;Toronto Raptors;Cleveland Cavaliers;draftkings;OVER;218.5;1.91;104.36;101.58;220.35;11.5;0.564;0.5236;0.0405;0.0849;0;0;0.021235107928589177;0.0212;10.62;1.0;500.0
+2026-04-26;nba;Portland Trail Blazers;San Antonio Spurs;fanduel;OVER;200.5;2.06;104.36;101.58;220.35;11.5;0.9579;0.4854;0.4724;0.9181;0;0;0.22952786341141224;0.05;25.0;1.0;500.0
+2026-04-27;nba;Houston Rockets;Los Angeles Lakers;lowvig;OVER;205.5;1.96;104.36;101.58;220.35;11.5;0.9018;0.5102;0.3916;0.7994;0;0;0.1998550948887693;0.05;25.0;1.0;500.0
+2026-04-26;nba;Philadelphia 76ers;Boston Celtics;lowvig;OVER;213.5;1.93;104.36;101.58;220.35;11.5;0.7244;0.5181;0.2063;0.4281;0;0;0.10701613745969338;0.05;25.0;1.0;500.0
