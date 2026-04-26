@@ -3217,49 +3217,9 @@ table {
       }
 
 
-      async function saveCloudState(showSuccess = true, reloadGithubDataAfterSave = false) {
-        if (autoSaveInFlight) {
-          updateSaveCloudButton();
-          return false;
-        }
-
-        try {
-          autoSaveInFlight = true;
-
-          const payload = {
-            bankrollInicial: state.bankrollInicial,
-            localEdits: state.localEdits,
-            manualBets: state.manualBets,
-            sessionStartDate: getSessionStartDate()
-          };
-
-          state.cloudAvailable = res.ok;
-          if (!res.ok) throw new Error('Resposta inválida do servidor');
-
-          const data = await res.json();
-          if (!data.ok) throw new Error(data.error || 'Erro ao guardar estado cloud.');
-
-          if (reloadGithubDataAfterSave) {
-            await loadData(false);
-          } else {
-            rerenderSummaryOnly();
-          }
-
-          hasPendingCloudChanges = false;
-          updateCloudStatus();
-          rerenderSummaryOnly();
-          updateSaveCloudButton();
-
-          if (showSuccess) alert('Estado guardado na cloud com sucesso.');
-          return true;
-        } catch (e) {
-          state.cloudAvailable = false;
-          rerenderSummaryOnly();
-          return false;
-        } finally {
-          autoSaveInFlight = false;
-          updateSaveCloudButton();
-        }
+      async function saveCloudState() {
+        state.cloudAvailable = false;
+        return false;
       }
 
       function updateSaveCloudButton() {
