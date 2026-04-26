@@ -1917,7 +1917,7 @@ table {
     };
   });
 
-  const localRows = local.map(b => {
+  const localRows = (Array.isArray(state.manualBets) ? state.manualBets : []).map(b => {
     const data = normalizeDateString(b['Data'] || '');
     const liga = cleanString(b['Liga'] || '');
     const jogo = cleanString(b['Jogo'] || '');
