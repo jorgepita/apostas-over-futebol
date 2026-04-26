@@ -3223,23 +3223,17 @@ table {
       }
 
       function updateSaveCloudButton() {
-        const buttons = [
-          document.getElementById('saveCloudBtn'),
-          document.getElementById('saveCloudBtnMobile')
-        ].filter(Boolean);
+  const buttons = [
+    document.getElementById('saveCloudBtn'),
+    document.getElementById('saveCloudBtnMobile')
+  ].filter(Boolean);
 
-        buttons.forEach(btn => {
-          if (hasPendingCloudChanges) {
-            btn.disabled = false;
-            btn.textContent = 'Guardar cloud*';
-            btn.classList.add('warn');
-          } else {
-            btn.disabled = true;
-            btn.textContent = 'Guardar cloud';
-            btn.classList.remove('warn');
-          }
-        });
-      }
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.textContent = 'Cloud desligada';
+    btn.classList.remove('warn');
+  });
+}
 
       function updateCloudStatus() {
         const el = document.getElementById('cloudStatusLabel');
