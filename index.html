@@ -3542,6 +3542,9 @@ table {
               Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
               Odd: parseFloat(r.Odd),
               Mercado: (r.Market || '').trim()
+
+              ProbModel: parseFloat(r.ProbModel),
+              ProbMarket: parseFloat(r.ProbMarket),
             }))
             .filter(r => r.Data && r.Jogo && r.Odd > 0 && r.Mercado === 'O2.5');
 
