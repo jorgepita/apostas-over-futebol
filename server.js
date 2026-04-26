@@ -18,25 +18,29 @@ const ALLOWED_ORIGINS = [
    MIDDLEWARES
 ========================= */
 
-// CORS (resolve o teu erro)
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // permitir requests sem origin (ex: curl/postman)
     if (!origin) return callback(null, true);
 
-    if (ALLOWED_ORIGINS.includes(origin)) {
-      return callback(null, true);
+    const allowed = [
+      'https://jorgepita.github.io',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+
+    if (allowed.includes(origin)) {
+      callback(null, true);
     } else {
       console.warn('CORS bloqueado para:', origin);
-      return callback(new Error('Not allowed by CORS'));
+      callback(null, false);
     }
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
 
-// Preflight fix explícito (importante)
-app.options('*', cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // JSON body parser
 app.use(express.json({ limit: '1mb' }));
