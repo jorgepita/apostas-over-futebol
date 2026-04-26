@@ -1,32 +1,158 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-const FILE = 'data.json';
-
-app.get('/load', (req, res) => {
-  try {
-    if (!fs.existsSync(FILE)) return res.json({});
-    const data = JSON.parse(fs.readFileSync(FILE));
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: 'load error' });
-  }
-});
-
-app.post('/save', (req, res) => {
-  try {
-    fs.writeFileSync(FILE, JSON.stringify(req.body, null, 2));
-    res.json({ ok: true });
-  } catch {
-    res.status(500).json({ error: 'save error' });
-  }
-});
-
+/* =========================
+   CONFIG
+========================= */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('server running'));
+
+const ALLOWED_ORIGINS = [
+  'https://jorgepita.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+];
+
+/* =========================
+   MIDDLEWARES
+========================= */
+
+// CORS (resolve o teu erro)
+app.use(cors({
+  origin: function (origin, callback) {
+    // permitir requests sem origin (ex: curl/postman)
+    if (!origin) return callback(null, true);
+
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    } else {
+      console.warn('CORS bloqueado para:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Preflight fix explícito (importante)
+app.options('*', cors());
+
+// JSON body parser
+app.use(express.json({ limit: '1mb' }));
+
+/* =========================
+   HEALTH CHECK
+========================= */
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'cloud-save-api' });
+});
+
+/* =========================
+   SAVE ENDPOINT
+========================= */
+app.post('/save', async (req, res) => {
+  try {
+    const { content, message = 'update cloud state' } = req.body;
+
+    if (!content) {
+      return res.status(400).json({
+        error: 'Missing content'
+      });
+    }
+
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO = process.env.GITHUB_REPO; // ex: jorgepita/apostas-over-futebol
+    const FILE_PATH = 'cloud_state.json';
+
+    if (!GITHUB_TOKEN || !REPO) {
+      return res.status(500).json({
+        error: 'Missing env vars (GITHUB_TOKEN or GITHUB_REPO)'
+      });
+    }
+
+    const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
+
+    // timeout helper
+    const fetchWithTimeout = (url, options, timeout = 10000) =>
+      Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), timeout)
+        )
+      ]);
+
+    // 1. GET sha atual (se existir)
+    let sha = null;
+
+    const getRes = await fetchWithTimeout(apiUrl, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json'
+      }
+    });
+
+    if (getRes.status === 200) {
+      const data = await getRes.json();
+      sha = data.sha;
+    }
+
+    // 2. Converter conteúdo para base64
+    const encodedContent = Buffer.from(
+      JSON.stringify(content, null, 2)
+    ).toString('base64');
+
+    // 3. PUT (criar ou atualizar)
+    const putRes = await fetchWithTimeout(apiUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message,
+        content: encodedContent,
+        sha
+      })
+    });
+
+    const result = await putRes.json();
+
+    if (!putRes.ok) {
+      console.error('GitHub error:', result);
+      return res.status(500).json({
+        error: 'GitHub API error',
+        details: result
+      });
+    }
+
+    console.log('Saved to GitHub:', FILE_PATH);
+
+    return res.json({
+      success: true,
+      sha: result.content.sha
+    });
+
+  } catch (err) {
+    console.error('SAVE ERROR:', err);
+
+    return res.status(500).json({
+      error: err.message || 'Internal error'
+    });
+  }
+});
+
+/* =========================
+   ERROR HANDLER GLOBAL
+========================= */
+app.use((err, req, res, next) => {
+  console.error('GLOBAL ERROR:', err.message);
+  res.status(500).json({ error: err.message });
+});
+
+/* =========================
+   START
+========================= */
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
