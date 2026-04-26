@@ -1882,72 +1882,74 @@ table {
       }
       
       function getManualRowsMerged() {
-        const remoteRows = (Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : []).map(b => {
-          const data = normalizeDateString(b['Data'] || '');
-          const liga = cleanString(b['Liga'] || '');
-          const jogo = cleanString(b['Jogo'] || '');
-          const mercado = cleanString(b['Mercado'] || '');
-          const odd = cleanString(b['Odd'] || '');
-          const stake = cleanString(b['Stake'] || '');
-          const resultado = cleanString(b['Resultado'] || '').toUpperCase();
-          const lucroCsv = num(b['Lucro€']);
-          const notas = cleanString(b['Notas'] || '');
 
-          return {
-            id: `remote_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
-            data,
-            liga,
-            jogo,
-            mercado,
-            odd,
-            stake,
-            resultado,
-            notas,
-            source: 'manual',
-            sourceLabel: 'Manual CSV',
-            isRemote: true,
-            isLocal: false,
-            _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
-            _resultKey: resultKey(resultado),
-            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
-          };
-        });
-        
-        return remoteRows;
+  const remote = Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : [];
+  const local = Array.isArray(state.manualBets) ? state.manualBets : [];
+
+  const remoteRows = remote.map(b => {
+    const data = normalizeDateString(b['Data'] || '');
+    const liga = cleanString(b['Liga'] || '');
+    const jogo = cleanString(b['Jogo'] || '');
+    const mercado = cleanString(b['Mercado'] || '');
+    const odd = cleanString(b['Odd'] || '');
+    const stake = cleanString(b['Stake'] || '');
+    const resultado = cleanString(b['Resultado'] || '').toUpperCase();
+    const lucroCsv = num(b['Lucro€']);
+    const notas = cleanString(b['Notas'] || '');
+
+    return {
+      id: `remote_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
+      data,
+      liga,
+      jogo,
+      mercado,
+      odd,
+      stake,
+      resultado,
+      notas,
+      source: 'manual',
+      sourceLabel: 'Manual CSV',
+      isRemote: true,
+      isLocal: false,
+      _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+      _resultKey: resultKey(resultado),
+      _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+    };
+  });
+
+  const localRows = local.map(b => {
+    const data = normalizeDateString(b['Data'] || '');
+    const liga = cleanString(b['Liga'] || '');
+    const jogo = cleanString(b['Jogo'] || '');
+    const mercado = cleanString(b['Mercado'] || '');
+    const odd = cleanString(b['Odd'] || '');
+    const stake = cleanString(b['Stake'] || '');
+    const resultado = cleanString(b['Resultado'] || '').toUpperCase();
+    const lucroCsv = num(b['Lucro€']);
+    const notas = cleanString(b['Notas'] || '');
+
+    return {
+      id: `local_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
+      data,
+      liga,
+      jogo,
+      mercado,
+      odd,
+      stake,
+      resultado,
+      notas,
+      source: 'manual',
+      sourceLabel: 'Manual',
+      isRemote: false,
+      isLocal: true,
+      _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+      _resultKey: resultKey(resultado),
+      _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+    };
+  });
+
+  return [...remoteRows, ...localRows];
 }
-
-        const localRows = (Array.isArray(state.manualBets) ? state.manualBets : []).map(...)
-          const resultado = cleanString(b.resultado || '').toUpperCase();
-          const data = normalizeDateString(b.data || '');
-          const liga = cleanString(b.liga || '');
-          const jogo = cleanString(b.jogo || '');
-          const mercado = cleanString(b.mercado || '');
-          const odd = cleanString(b.odd || '');
-          const stake = cleanString(b.stake || '');
-          const notas = cleanString(b.notas || '');
-
-          return {
-            id: String(b.id || makeManualId()),
-            data,
-            liga,
-            jogo,
-            mercado,
-            odd,
-            stake,
-            resultado,
-            notas,
-            source: 'manual',
-            sourceLabel: 'Manual Local',
-            isRemote: false,
-            isLocal: true,
-            _lucro: calcProfitByResult(resultado, stake, odd),
-            _resultKey: resultKey(resultado),
-            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
-          };
-        });
-
-        return [...remoteRows, ...localRows];
-      }
 
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
