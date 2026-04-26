@@ -1396,6 +1396,7 @@ table {
     </div>
 
     <script>
+      const API_URL = 'https://nodejs-production-fa7d.up.railway.app';
       const GITHUB_TOKEN = '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';
       const GITHUB_OWNER = 'jorgepita';
       const GITHUB_REPO = 'apostas-over-futebol';
@@ -3246,19 +3247,13 @@ table {
     const sha = fileData.sha;
 
     // 2. Atualizar ficheiro
-    const updateRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'update cloud state',
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
-        sha: sha,
-        branch: GITHUB_BRANCH
-      })
-    });
+    const updateRes = await fetch(`${API_URL}/save`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+});
 
     const result = await updateRes.json();
 
@@ -3278,15 +3273,8 @@ table {
 
       async function loadCloudState() {
   try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
-      headers: {
-        Authorization: `token ${GITHUB_TOKEN}`
-      }
-    });
-
-    const data = await res.json();
-
-    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    const res = await fetch(`${API_URL}/load`);
+    const content = await res.json();
 
     state.bankrollInicial = content.bankrollInicial || 1000;
     state.manualBets = content.manualBets || [];
