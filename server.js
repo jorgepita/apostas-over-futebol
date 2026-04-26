@@ -15,7 +15,7 @@ const ALLOWED_ORIGINS = [
 ];
 
 /* =========================
-   MIDDLEWARES
+   MIDDLEWARE
 ========================= */
 
 const corsOptions = {
