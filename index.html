@@ -3536,7 +3536,7 @@ table {
 
           state.fixtures = parseSemicolonCsv(fixturesText);
 
-          state.footballDaily = parseSemicolonCsv(dailyText)
+          state.footballDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';'))
             .map(r => ({
               Data: r.Date,
               Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
