@@ -1412,9 +1412,6 @@ table {
         mobileActionsOpen: 'apostas_bot_mobile_actions_open_v1'
       };
 
-      const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
-      const SYNC_STATE_URL = `${SYNC_API_BASE}/state`;
-
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
       let initialLoadDone = false;
@@ -1423,7 +1420,6 @@ table {
         footballDaily: [],
         footballHistory: [],
         nba: [],
-        manualBetsRemote: [],
         bankrollInicial: 1000,
         localEdits: {},
         manualBets: [],
@@ -3215,55 +3211,6 @@ table {
         downloadTextFile(`historico_real_${todayIso()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8');
       }
 
-      async function checkCloudAvailability() {
-        try {
-          const res = await fetch(SYNC_STATE_URL, { method: 'GET', cache: 'no-store' });
-          state.cloudAvailable = res.ok;
-        } catch {
-          state.cloudAvailable = false;
-        }
-      }
-
-      async function loadCloudState(showAlert = true) {
-        try {
-          const res = await fetch(SYNC_STATE_URL, { cache: 'no-store' });
-          state.cloudAvailable = res.ok;
-          if (!res.ok) throw new Error('Resposta inválida do servidor');
-
-          const data = await res.json();
-          if (!data.ok) throw new Error(data.error || 'Erro ao carregar estado cloud.');
-
-          const cloud = data.state || {};
-          state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
-          state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
-          state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets.map(item => ({
-            id: String(item.id || makeManualId()),
-            data: normalizeDateString(item.data || ''),
-            liga: cleanString(item.liga || ''),
-            jogo: cleanString(item.jogo || ''),
-            mercado: cleanString(item.mercado || ''),
-            odd: cleanString(item.odd || ''),
-            stake: cleanString(item.stake || ''),
-            resultado: cleanString(item.resultado || '').toUpperCase(),
-            notas: cleanString(item.notas || '')
-          })) : [];
-          state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
-
-          saveLocalState();
-          hasPendingCloudChanges = false;
-          updateCloudStatus();
-          updateSaveCloudButton();
-          rerenderAll(false);
-
-          if (showAlert) alert('Estado cloud carregado com sucesso.');
-          return true;
-        } catch (e) {
-          state.cloudAvailable = false;
-          rerenderSummaryOnly();
-          if (showAlert) alert('Erro de ligação ao serviço cloud.');
-          return false;
-        }
-      }
 
       async function saveCloudState(showSuccess = true, reloadGithubDataAfterSave = false) {
         if (autoSaveInFlight) {
@@ -3280,12 +3227,6 @@ table {
             manualBets: state.manualBets,
             sessionStartDate: getSessionStartDate()
           };
-
-          const res = await fetch(SYNC_STATE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
 
           state.cloudAvailable = res.ok;
           if (!res.ok) throw new Error('Resposta inválida do servidor');
