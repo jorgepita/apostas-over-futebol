@@ -1497,16 +1497,19 @@ table {
       }
 
       function num(v) {
-        if (v === null || v === undefined) return null;
-        const raw = String(v).trim()
-          .replace(/\s/g, '')
-          .replace(/€/g, '')
-          .replace(/"/g, '')
-          .replace(',', '.');
-        if (!raw) return null;
-        const n = Number(raw);
-        return Number.isFinite(n) ? n : null;
-      }
+  if (v === null || v === undefined) return null;
+
+  const raw = String(v).trim()
+    .replace(/\s/g, '')
+    .replace(/€/g, '')
+    .replace(/"/g, '')
+    .replace(',', '.');
+
+  if (!raw) return null;
+
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
 
       function sum(arr) {
         return arr
@@ -1846,9 +1849,11 @@ table {
       }
 
       function marketMatches(row, marketCode) {
-        const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
-        return market.includes(String(marketCode || '').toUpperCase());
-      }
+  const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
+  const target = String(marketCode || '').toUpperCase();
+
+  return market === target || market.includes(target);
+}
 
       function buildBotMarketStats(rows, marketCode) {
         const subset = rows.filter(r => marketMatches(r, marketCode));
@@ -3371,7 +3376,9 @@ table {
         const todaysPicks = getTodaysDailyRows();
         const count = todaysPicks.length;
         const validOdds = todaysPicks.map(r => num(r['Odd'])).filter(v => v !== null);
-        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const validEdges = todaysPicks
+  .map(r => num(r['Edge%'] ?? r.Edge))
+  .filter(v => v !== null);
         const validStakes = todaysPicks.map(r => num(r['Stake€'])).filter(v => v !== null);
 
         const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
@@ -3385,19 +3392,25 @@ table {
       }
 
       function updateApostasButton() {
-        const btn = document.getElementById('btnApostasTab');
-        const todaysPicks = getTodaysDailyRows();
-        const count = todaysPicks.length;
+  const btn = document.getElementById('btnApostasTab');
+  const todaysPicks = getTodaysDailyRows();
+  const count = todaysPicks.length;
 
-        if (count === 0) {
-          btn.textContent = 'Sem picks hoje';
-          return;
-        }
+  if (count === 0) {
+    btn.textContent = 'Sem picks hoje';
+    return;
+  }
 
-        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
-        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : 0;
-        btn.textContent = `${count} pick${count > 1 ? 's' : ''} hoje • edge méd. ${fmt(avgEdge)}%`;
-      }
+  const validEdges = todaysPicks
+    .map(r => num(r['Edge%'] ?? r.Edge))
+    .filter(v => v !== null);
+
+  const avgEdge = validEdges.length
+    ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length
+    : 0;
+
+  btn.textContent = `${count} picks hoje • edge méd. ${fmt(avgEdge)}%`;
+}
 
       function syncQuickMarketButtons() {
         const current = document.getElementById('dayMarketFilter').value || '';
@@ -3537,29 +3550,33 @@ table {
           state.fixtures = parseSemicolonCsv(fixturesText);
 
           state.footballDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';'))
-            .map(r => {
-              const probModel = parseFloat(r.ProbModel);
-              const probMarket = parseFloat(r.ProbMarket);
+  .map(r => {
+    const probModel = parseFloat(r.ProbModel);
+    const probMarket = parseFloat(r.ProbMarket);
 
-              return {
-                Data: r.Date,
-                Liga: r.LeagueName || r.League || '',
-                Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
-                Odd: parseFloat(r.Odd),
-                Mercado: (r.Market || '').trim(),
+    const edge = probModel - probMarket;
 
-                ProbModel: probModel,
-                ProbMarket: probMarket,
+    return {
+      Data: normalizeDateString(r.Date),
+      Liga: r.LeagueName || r.League || '',
+      Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
+      Odd: parseFloat(r.Odd),
+      Mercado: (r.Market || '').trim(),
 
-                Edge: probModel - probMarket
-              };
-            })
-            .filter(r => 
-              r.Data && 
-              r.Jogo && 
-              r.Odd > 0 && 
-              r.Mercado === 'O2.5'
-            );
+      ProbModel: probModel,
+      ProbMarket: probMarket,
+
+      // 👇 NORMALIZAÇÃO CRÍTICA
+      Edge: edge,
+      'Edge%': edge * 100
+    };
+  })
+  .filter(r => 
+    r.Data && 
+    r.Jogo && 
+    r.Odd > 0 &&
+    (r.Mercado === 'O2.5' || r.Mercado === 'BTTS')
+  );
 
           console.log(state.footballDaily);
           
@@ -3567,6 +3584,17 @@ table {
           state.nba = parseSemicolonCsv(nbaText).map(normalizeNbaCsvRow);
           state.manualBetsRemote = parseSemicolonCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
 
+          state.footballDaily = state.footballDaily.map(r => {
+  const edgeRaw = r.Edge ?? r['Edge%'];
+
+  const edgeDecimal = num(edgeRaw) ?? 0;
+
+  return {
+    ...r,
+    Edge: edgeDecimal,
+    'Edge%': edgeDecimal * 100
+  };
+});
           if (markUpdated) state.lastUpdated = new Date();
           rerenderAll(false);
           return true;
