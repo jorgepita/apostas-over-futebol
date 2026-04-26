@@ -3255,7 +3255,6 @@ table {
         } catch (e) {
           state.cloudAvailable = false;
           rerenderSummaryOnly();
-          if (showSuccess) alert('Erro de ligação ao serviço cloud.');
           return false;
         } finally {
           autoSaveInFlight = false;
