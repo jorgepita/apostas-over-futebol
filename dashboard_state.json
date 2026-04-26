@@ -875,7 +875,7 @@
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
-      "resultadoManual": ""
+      "resultadoManual": "L"
     },
     "2026-04-20|Super Lig|Gaziantep FK vs Kayserispor|O2.5": {
       "apostada": true,
@@ -991,13 +991,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-26|Bundesliga|Borussia Dortmund vs SC Freiburg|BTTS": {
+    "2026-04-26|2. Bundesliga|SC Paderborn 07 vs FC Schalke 04|O2.5": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-26|Ligue 1|Lorient vs Strasbourg|BTTS": {
+    "2026-04-26|Bundesliga|Borussia Dortmund vs SC Freiburg|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -1015,7 +1015,7 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-26|2. Bundesliga|SC Paderborn 07 vs FC Schalke 04|O2.5": {
+    "2026-04-26|Ligue 1|Lorient vs Strasbourg|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -1027,13 +1027,13 @@
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-27|Serie A|Lazio vs Udinese|BTTS": {
+    "2026-04-27|Ligue 2|Boulogne vs Dunkerque|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
       "resultadoManual": ""
     },
-    "2026-04-27|Ligue 2|Boulogne vs Dunkerque|BTTS": {
+    "2026-04-27|Serie A|Lazio vs Udinese|BTTS": {
       "apostada": true,
       "oddReal": "",
       "stakeReal": "",
@@ -1042,5 +1042,5 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "updatedAt": "2026-04-25T23:04:50.483464+00:00"
+  "updatedAt": "2026-04-26T00:50:20.664632+00:00"
 }
