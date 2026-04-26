@@ -3618,7 +3618,10 @@ table {
       function bindStaticButtons() {
         bindElementAction('refreshBtn', () => loadData(true));
         bindElementAction('loadCloudBtn', () => loadCloudState());
-        bindElementAction('saveCloudBtn', () => saveCloudState());
+        bindElementAction('saveCloudBtn', () => {
+  console.log('CLICK SAVE');
+  saveCloudState();
+});
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('exportManualBtn', exportManualJson);
@@ -3626,7 +3629,10 @@ table {
         bindElementAction('exportRealCsvBtn', exportRealCsv);
 
         bindElementAction('loadCloudBtnMobile', () => loadCloudState());
-        bindElementAction('saveCloudBtnMobile', () => saveCloudState());
+        bindElementAction('saveCloudBtnMobile', () => {
+  console.log('CLICK SAVE MOBILE');
+  saveCloudState();
+});
         bindElementAction('resetLocalBtnMobile', resetLocalControls);
         bindElementAction('clearManualBtnMobile', clearManualLocal);
         bindElementAction('exportManualBtnMobile', exportManualJson);
