@@ -1,6 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-27;portugal;Primeira Liga;GIL Vicente;Casa Pia;1.62;1.344;2.964;O2.5;0.569;2.15;0.465;0.1037;0.1938;0.104;0.0349;0.0291;14.56;0.8344739467087788;500.0
-2026-04-27;espanha;LaLiga;Espanyol;Levante;1.654;1.286;2.94;O2.5;0.563;2.17;0.461;0.1025;0.19;0.102;0.0342;0.0285;14.27;0.8344739467087788;500.0
-2026-04-27;turquia;Super Lig;Alanyaspor;Samsunspor;1.813;1.131;2.944;O2.5;0.564;2.05;0.488;0.0763;0.1489;0.076;0.0268;0.0224;11.18;0.8344739467087788;500.0
-2026-04-27;belgica;Jupiler Pro League;Beerschot VA;Patro Eisden;1.678;1.324;3.002;O2.5;0.577;1.98;0.505;0.0722;0.1458;0.072;0.0262;0.0219;10.95;0.8344739467087788;500.0
-2026-04-28;paises_baixos;Eredivisie;Roda;Waalwijk;1.93;1.522;3.452;O2.5;0.67;1.6;0.625;0.0451;0.1203;0.045;0.0217;0.0181;9.04;0.8344739467087788;500.0
+2026-04-28;paises_baixos;Eredivisie;Roda;Waalwijk;1.93;1.522;3.452;O2.5;0.67;1.6;0.625;0.0451;0.1203;0.045;0.0217;0.0217;10.83;1.0;500.0
