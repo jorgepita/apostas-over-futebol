@@ -2415,8 +2415,8 @@
       "HomeTeam": "Los Angeles Lakers",
       "AwayTeam": "Houston Rockets",
       "Market": "OVER",
-      "Line": "208.0",
-      "Odd": "1.91",
+      "Line": "208.5",
+      "Odd": "1.95",
       "Stake€": "25.0"
     },
     {
@@ -2424,8 +2424,8 @@
       "HomeTeam": "Detroit Pistons",
       "AwayTeam": "Orlando Magic",
       "Market": "OVER",
-      "Line": "211.0",
-      "Odd": "1.89",
+      "Line": "211.5",
+      "Odd": "1.93",
       "Stake€": "25.0"
     },
     {
@@ -2433,8 +2433,8 @@
       "HomeTeam": "Atlanta Hawks",
       "AwayTeam": "New York Knicks",
       "Market": "OVER",
-      "Line": "213.5",
-      "Odd": "1.91",
+      "Line": "213.0",
+      "Odd": "1.88",
       "Stake€": "25.0"
     },
     {
@@ -2442,9 +2442,9 @@
       "HomeTeam": "Cleveland Cavaliers",
       "AwayTeam": "Toronto Raptors",
       "Market": "OVER",
-      "Line": "217.5",
+      "Line": "218.5",
       "Odd": "1.91",
-      "Stake€": "19.53"
+      "Stake€": "10.62"
     }
   ],
   "bankrollInicial": 11,
@@ -3527,7 +3527,8 @@
       "apostada": true
     },
     "2026-04-29|Primeira Liga|Sporting CP vs Tondela|BTTS": {
-      "apostada": true
+      "apostada": true,
+      "resultadoManual": "W"
     },
     "2026-04-29|Eredivisie|Den Bosch vs Almere City FC|O2.5": {
       "apostada": true
@@ -3535,7 +3536,7 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-04-29T20:40:57.638Z",
+  "lastUpdated": "2026-04-29T23:54:30.287Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": false,
   "cloudAvailable": false,
