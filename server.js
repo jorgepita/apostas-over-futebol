@@ -8,12 +8,6 @@ const app = express();
 ========================= */
 const PORT = process.env.PORT || 3000;
 
-const ALLOWED_ORIGINS = [
-  'https://jorgepita.github.io',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000'
-];
-
 /* =========================
    MIDDLEWARE
 ========================= */
@@ -68,7 +62,7 @@ app.post('/save', async (req, res) => {
     }
 
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = process.env.GITHUB_REPO; // ex: jorgepita/apostas-over-futebol
+    const REPO = process.env.GITHUB_REPO;
     const FILE_PATH = 'cloud_state.json';
 
     if (!GITHUB_TOKEN || !REPO) {
@@ -79,7 +73,6 @@ app.post('/save', async (req, res) => {
 
     const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 
-    // timeout helper
     const fetchWithTimeout = (url, options, timeout = 10000) =>
       Promise.race([
         fetch(url, options),
@@ -88,12 +81,11 @@ app.post('/save', async (req, res) => {
         )
       ]);
 
-    // 1. GET sha atual (se existir)
     let sha = null;
 
     const getRes = await fetchWithTimeout(apiUrl, {
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
         Accept: 'application/vnd.github+json'
       }
     });
@@ -103,16 +95,14 @@ app.post('/save', async (req, res) => {
       sha = data.sha;
     }
 
-    // 2. Converter conteúdo para base64
     const encodedContent = Buffer.from(
       JSON.stringify(content, null, 2)
     ).toString('base64');
 
-    // 3. PUT (criar ou atualizar)
     const putRes = await fetchWithTimeout(apiUrl, {
       method: 'PUT',
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -145,6 +135,42 @@ app.post('/save', async (req, res) => {
     return res.status(500).json({
       error: err.message || 'Internal error'
     });
+  }
+});
+
+/* =========================
+   LOAD ENDPOINT (NOVO)
+========================= */
+app.get('/load', async (req, res) => {
+  try {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO = process.env.GITHUB_REPO;
+    const FILE_PATH = 'cloud_state.json';
+
+    const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json'
+      }
+    });
+
+    if (response.status === 404) {
+      return res.json({});
+    }
+
+    const data = await response.json();
+
+    const content = JSON.parse(
+      Buffer.from(data.content, 'base64').toString('utf-8')
+    );
+
+    return res.json(content);
+
+  } catch (err) {
+    console.error('LOAD ERROR:', err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
