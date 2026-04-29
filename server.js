@@ -139,7 +139,7 @@ app.post('/save', async (req, res) => {
 });
 
 /* =========================
-   LOAD ENDPOINT (NOVO)
+   LOAD ENDPOINT
 ========================= */
 app.get('/load', async (req, res) => {
   try {
@@ -147,16 +147,23 @@ app.get('/load', async (req, res) => {
     const REPO = process.env.GITHUB_REPO;
     const FILE_PATH = 'cloud_state.json';
 
+    if (!GITHUB_TOKEN || !REPO) {
+      return res.status(500).json({
+        error: 'Missing env vars (GITHUB_TOKEN or GITHUB_REPO)'
+      });
+    }
+
     const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 
     const response = await fetch(apiUrl, {
       headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
         Accept: 'application/vnd.github+json'
       }
     });
 
     if (response.status === 404) {
+      // ficheiro ainda não existe
       return res.json({});
     }
 
@@ -170,7 +177,10 @@ app.get('/load', async (req, res) => {
 
   } catch (err) {
     console.error('LOAD ERROR:', err);
-    return res.status(500).json({ error: err.message });
+
+    return res.status(500).json({
+      error: err.message || 'Internal error'
+    });
   }
 });
 
