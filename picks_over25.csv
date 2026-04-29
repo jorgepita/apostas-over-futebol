@@ -1,2 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-04-29;paises_baixos;Eredivisie;Den Bosch;Almere City FC;1.93;1.522;3.452;O2.5;0.67;1.55;0.645;0.025;0.0704;0.025;0.0127;0.0127;6.33;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap
