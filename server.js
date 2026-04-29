@@ -57,6 +57,8 @@ app.get('/', (req, res) => {
 ========================= */
 app.post('/save', async (req, res) => {
   try {
+    console.log('BODY:', req.body);
+
     const { content, message = 'update cloud state' } = req.body;
 
     if (!content) {
