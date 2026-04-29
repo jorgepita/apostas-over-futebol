@@ -3221,48 +3221,33 @@ table {
 
       async function saveCloudState() {
   try {
-    
-    console.log(GITHUB_TOKEN);
-    
-    const payload = {
-      bankrollInicial: state.bankrollInicial,
-      manualBets: state.manualBets,
-      localEdits: state.localEdits,
-      sessionStartDate: getSessionStartDate()
-    };
+    console.log('CLICK SAVE');
 
-    // 1. Obter SHA atual do ficheiro
-    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+    // usa o estado atual que já tens no dashboard
+    const data = state;
+
+    const res = await fetch(`${API_URL}/save`, {
+      method: 'POST',
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`
-      }
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        content: data
+      })
     });
 
-    const fileData = await getRes.json();
-    const sha = fileData.sha;
-
-    // 2. Atualizar ficheiro
-    const updateRes = await fetch(`${API_URL}/save`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(payload)
-});
-
-    const result = await updateRes.json();
-
-    if (result.commit) {
-      alert('Guardado no GitHub com sucesso');
-      return true;
-    } else {
+    if (!res.ok) {
       throw new Error('Erro ao guardar');
     }
 
+    const result = await res.json();
+
+    console.log('Guardado com sucesso:', result);
+    alert('Guardado na cloud com sucesso');
+
   } catch (e) {
     console.error(e);
-    alert('Erro ao guardar no GitHub');
-    return false;
+    alert('Erro ao guardar');
   }
 }
 
