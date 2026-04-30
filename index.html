@@ -3271,6 +3271,9 @@ table {
     const res = await fetch(`${API_URL}/load`);
     const content = await res.json();
 
+    state.cloudAvailable = true;
+    updateCloudStatus();
+    
     state.bankrollInicial = content.bankrollInicial || 1000;
     state.manualBets = content.manualBets || [];
     state.localEdits = content.localEdits || {};
