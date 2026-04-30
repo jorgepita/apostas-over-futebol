@@ -157,7 +157,7 @@ app.get('/load', async (req, res) => {
 
     const response = await fetch(apiUrl, {
       headers: {
-        Authorization: `token ${GITHUB_TOKEN}`,
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
         Accept: 'application/vnd.github+json'
       }
     });
