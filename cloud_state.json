@@ -2516,7 +2516,7 @@
       "stakeReal": ""
     },
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
-      "apostada": false,
+      "apostada": true,
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
@@ -3602,7 +3602,7 @@
   "lastUpdated": "2026-04-30T20:56:05.896Z",
   "activeTab": "tab-history",
   "mobileActionsOpen": false,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-01",
