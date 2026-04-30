@@ -435,24 +435,24 @@ def get_market_thresholds(mode: str, market: str) -> dict:
     if market == "O2.5":
         return {
             **base,
-            "lam_t_min": 1.85,
-            "odd_min": 1.50,
+            "lam_t_min": 1.90,
+            "odd_min": 1.55,
             "odd_max": DEFAULT_MAX_ODD_O25,
-            "edge_min_quality": 0.02,
+            "edge_min_quality": 0.00,
         }
 
     if market == "BTTS":
         return {
             **base,
-            "lam_h_min": 0.72,
-            "lam_a_min": 0.72,
+            "lam_h_min": 0.75,
+            "lam_a_min": 0.75,
             "lam_t_min": 2.05,
-            "odd_min": 1.50,
+            "odd_min": 1.55,
             "odd_max": DEFAULT_MAX_ODD_BTTS,
-            "edge_min_quality": 0.03,
-            "max_lambda_ratio": 1.75,
-            "max_lambda_gap": 0.72,
-            "min_lambda_product": 0.74,
+            "edge_min_quality": 0.00,
+            "max_lambda_ratio": 1.65,
+            "max_lambda_gap": 0.65,
+            "min_lambda_product": 0.80,
         }
 
     return base
@@ -890,7 +890,7 @@ def main():
         raise SystemExit("Falta config.json na pasta do projeto.")
     cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
 
-    run_mode = get_run_mode(cfg)
+    run_mode = "normal"
     print(f"[DBG] gerar_picks mode={run_mode}")
 
     run_cfg = cfg.get("run", {})
