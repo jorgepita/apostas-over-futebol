@@ -3559,14 +3559,23 @@
     },
     "2026-04-29|Eredivisie|Den Bosch vs Almere City FC|O2.5": {
       "apostada": true
+    },
+    "2026-05-01|Premier League|Leeds vs Burnley|O2.5": {
+      "apostada": true
+    },
+    "2026-05-01|Serie B|Palermo vs Catanzaro|O2.5": {
+      "apostada": true
+    },
+    "2026-05-01|Serie B|Padova vs Pescara|O2.5": {
+      "apostada": true
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-04-30T01:30:15.591Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-04-30T01:40:38.039Z",
+  "activeTab": "tab-history",
   "mobileActionsOpen": false,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-01",
