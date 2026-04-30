@@ -755,7 +755,15 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
     min_picks = int(rules.get("min_picks", 1))
 
     df = df.copy()
-    df["StakeFracRaw"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0) * kfrac
+    # base Kelly
+kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+
+# confiança baseada no edge (0% → 0 | 10%+ → 1)
+edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
+confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
+
+# stake ajustado
+df["StakeFracRaw"] = kelly * kfrac * confidence_factor
     df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
     total_frac = float(df["StakeFrac"].sum())
