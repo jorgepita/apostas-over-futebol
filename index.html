@@ -3238,6 +3238,9 @@ table {
   try {
     console.log('CLICK SAVE');
 
+    hasPendingCloudChanges = true;
+    updateCloudStatus();
+    
     // usa o estado atual que já tens no dashboard
     const data = state;
 
@@ -3257,11 +3260,17 @@ table {
 
     const result = await res.json();
 
+    state.cloudAvailable = true;
+    hasPendingCloudChanges = false;   // importante
+    updateCloudStatus();
+
     console.log('Guardado com sucesso:', result);
-    alert('Guardado na cloud com sucesso');
+    console.log('Cloud save OK');
 
   } catch (e) {
     console.error(e);
+    state.cloudAvailable = false;
+    updateCloudStatus();
     alert('Erro ao guardar');
   }
 }
