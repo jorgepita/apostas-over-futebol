@@ -1,7 +1,7 @@
 {
   "run": {
     "days_ahead": 2,
-    "mode": "test",
+    "mode": "normal",
     "max_picks_per_day": 12,
     "max_picks_global": 36
   },
