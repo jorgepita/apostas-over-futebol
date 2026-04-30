@@ -3235,7 +3235,10 @@ table {
   ].filter(Boolean);
 
   try {
-    console.log('CLICK SAVE');
+  autoSaveInFlight = true;
+  updateCloudStatus();
+
+  console.log('CLICK SAVE');
 
     // 🔹 UI: loading
     buttons.forEach(btn => {
@@ -3273,7 +3276,10 @@ table {
     alert('Erro ao guardar');
 
   } finally {
-    // 🔹 UI: reset botão
+  autoSaveInFlight = false;
+  updateCloudStatus();
+
+  // 🔹 UI: reset botão
     buttons.forEach(btn => {
       btn.disabled = false;
       btn.textContent = 'Guardar cloud';
@@ -3318,23 +3324,34 @@ table {
 }
 
       function updateCloudStatus() {
-        const el = document.getElementById('cloudStatusLabel');
-        if (!el) return;
+  const el = document.getElementById('cloudStatusLabel');
+  if (!el) return;
 
-        if (state.cloudAvailable === false) {
-          el.className = 'decision-badge bad';
-          el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
-          return;
-        }
+  // 🔹 Estado: indisponível
+  if (state.cloudAvailable === false) {
+    el.className = 'decision-badge bad';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
+    return;
+  }
 
-        if (hasPendingCloudChanges) {
-          el.className = 'decision-badge warn';
-          el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
-        } else {
-          el.className = 'decision-badge good';
-          el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
-        }
-      }
+  // 🔹 Estado: a guardar
+  if (autoSaveInFlight) {
+    el.className = 'decision-badge info';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: a guardar...';
+    return;
+  }
+
+  // 🔹 Estado: alterações por guardar
+  if (hasPendingCloudChanges) {
+    el.className = 'decision-badge warn';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
+    return;
+  }
+
+  // 🔹 Estado: sincronizado
+  el.className = 'decision-badge good';
+  el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
+}
       
       function markDirty() {
         hasPendingCloudChanges = true;
