@@ -1,26 +1,37 @@
 {
   "footballDaily": [
     {
-      "Data": "2026-04-29",
-      "Liga": "Primeira Liga",
-      "Jogo": "Sporting CP vs Tondela",
-      "Odd": 2.2,
-      "Mercado": "BTTS",
-      "ProbModel": 0.525,
-      "ProbMarket": 0.455,
-      "Edge": 0.07,
-      "Edge%": 7.000000000000001
+      "Data": "2026-05-01",
+      "Liga": "Premier League",
+      "Jogo": "Leeds vs Burnley",
+      "Odd": 1.75,
+      "Mercado": "O2.5",
+      "ProbModel": 0.72,
+      "ProbMarket": 0.571,
+      "Edge": 0.14900000000000002,
+      "Edge%": 14.900000000000002
     },
     {
-      "Data": "2026-04-29",
-      "Liga": "Eredivisie",
-      "Jogo": "Den Bosch vs Almere City FC",
-      "Odd": 1.52,
+      "Data": "2026-05-01",
+      "Liga": "Serie B",
+      "Jogo": "Palermo vs Catanzaro",
+      "Odd": 1.72,
       "Mercado": "O2.5",
-      "ProbModel": 0.67,
-      "ProbMarket": 0.658,
-      "Edge": 0.01200000000000001,
-      "Edge%": 1.200000000000001
+      "ProbModel": 0.675,
+      "ProbMarket": 0.581,
+      "Edge": 0.09400000000000008,
+      "Edge%": 9.40000000000001
+    },
+    {
+      "Data": "2026-05-01",
+      "Liga": "Serie B",
+      "Jogo": "Padova vs Pescara",
+      "Odd": 1.73,
+      "Mercado": "O2.5",
+      "ProbModel": 0.625,
+      "ProbMarket": 0.578,
+      "Edge": 0.04700000000000004,
+      "Edge%": 4.700000000000005
     }
   ],
   "footballHistory": [
@@ -2377,13 +2388,13 @@
       "KickoffUTC": "2026-04-20T17:00:00+00:00"
     },
     {
-      "Data": "2026-04-29",
-      "Liga": "Eredivisie",
-      "Jogo": "Den Bosch vs Almere City FC",
+      "Data": "2026-05-01",
+      "Liga": "Premier League",
+      "Jogo": "Leeds vs Burnley",
       "Mercado": "O2.5",
-      "Odd": "1.52",
-      "Stake€": "3.22",
-      "Edge%": "1.22",
+      "Odd": "1.75",
+      "Stake€": "20.0",
+      "Edge%": "14.86",
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
@@ -2393,13 +2404,29 @@
       "KickoffUTC": ""
     },
     {
-      "Data": "2026-04-29",
-      "Liga": "Primeira Liga",
-      "Jogo": "Sporting CP vs Tondela",
-      "Mercado": "BTTS",
-      "Odd": "2.2",
-      "Stake€": "11.59",
-      "Edge%": "7.03",
+      "Data": "2026-05-01",
+      "Liga": "Serie B",
+      "Jogo": "Padova vs Pescara",
+      "Mercado": "O2.5",
+      "Odd": "1.73",
+      "Stake€": "9.97",
+      "Edge%": "4.68",
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": ""
+    },
+    {
+      "Data": "2026-05-01",
+      "Liga": "Serie B",
+      "Jogo": "Palermo vs Catanzaro",
+      "Mercado": "O2.5",
+      "Odd": "1.72",
+      "Stake€": "20.0",
+      "Edge%": "9.34",
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
@@ -2462,7 +2489,7 @@
       "stakeReal": ""
     },
     "2026-04-03|Ligue 1|Paris Saint Germain vs Toulouse|BTTS": {
-      "apostada": true,
+      "apostada": false,
       "oddReal": "",
       "resultadoManual": "",
       "stakeReal": ""
@@ -3536,67 +3563,11 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-04-29T23:54:30.287Z",
+  "lastUpdated": "2026-04-30T00:41:15.104Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": false,
   "cloudAvailable": false,
   "fixtures": [
-    {
-      "Date": "2026-04-29",
-      "League": "paises_baixos",
-      "HomeTeam": "Den Bosch",
-      "AwayTeam": "Almere City FC",
-      "Odd_Over25": "1.52",
-      "Odd_BTTS_Yes": "1.42"
-    },
-    {
-      "Date": "2026-04-29",
-      "League": "portugal",
-      "HomeTeam": "Sporting CP",
-      "AwayTeam": "Tondela",
-      "Odd_Over25": "1.35",
-      "Odd_BTTS_Yes": "2.20"
-    },
-    {
-      "Date": "2026-05-01",
-      "League": "belgica",
-      "HomeTeam": "Cercle Brugge",
-      "AwayTeam": "Zulte Waregem",
-      "Odd_Over25": "1.57",
-      "Odd_BTTS_Yes": "1.53"
-    },
-    {
-      "Date": "2026-05-01",
-      "League": "espanha",
-      "HomeTeam": "Girona",
-      "AwayTeam": "Mallorca",
-      "Odd_Over25": "1.89",
-      "Odd_BTTS_Yes": "1.70"
-    },
-    {
-      "Date": "2026-05-01",
-      "League": "italia",
-      "HomeTeam": "Pisa",
-      "AwayTeam": "Lecce",
-      "Odd_Over25": "2.60",
-      "Odd_BTTS_Yes": "2.05"
-    },
-    {
-      "Date": "2026-05-01",
-      "League": "italia2",
-      "HomeTeam": "Bari",
-      "AwayTeam": "Virtus Entella",
-      "Odd_Over25": "2.20",
-      "Odd_BTTS_Yes": "1.87"
-    },
-    {
-      "Date": "2026-05-01",
-      "League": "italia2",
-      "HomeTeam": "Mantova",
-      "AwayTeam": "Monza",
-      "Odd_Over25": "1.98",
-      "Odd_BTTS_Yes": "1.87"
-    },
     {
       "Date": "2026-05-01",
       "League": "italia2",
@@ -3610,7 +3581,7 @@
       "League": "italia2",
       "HomeTeam": "Palermo",
       "AwayTeam": "Catanzaro",
-      "Odd_Over25": "1.73",
+      "Odd_Over25": "1.72",
       "Odd_BTTS_Yes": "1.75"
     },
     {
@@ -3638,12 +3609,196 @@
       "Odd_BTTS_Yes": "1.53"
     },
     {
-      "Date": "2026-05-01",
-      "League": "turquia",
-      "HomeTeam": "Rizespor",
-      "AwayTeam": "Konyaspor",
+      "Date": "2026-05-02",
+      "League": "alemanha",
+      "HomeTeam": "1899 Hoffenheim",
+      "AwayTeam": "VfB Stuttgart",
+      "Odd_Over25": "1.39",
+      "Odd_BTTS_Yes": "1.36"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha",
+      "HomeTeam": "Bayern München",
+      "AwayTeam": "1. FC Heidenheim",
+      "Odd_Over25": "1.27",
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha",
+      "HomeTeam": "Eintracht Frankfurt",
+      "AwayTeam": "Hamburger SV",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha",
+      "HomeTeam": "Werder Bremen",
+      "AwayTeam": "FC Augsburg",
+      "Odd_Over25": "1.66",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha2",
+      "HomeTeam": "Arminia Bielefeld",
+      "AwayTeam": "VfL Bochum",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha2",
+      "HomeTeam": "Dynamo Dresden",
+      "AwayTeam": "1. FC Kaiserslautern",
+      "Odd_Over25": "1.56",
+      "Odd_BTTS_Yes": "1.50"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha2",
+      "HomeTeam": "FC Schalke 04",
+      "AwayTeam": "Fortuna Düsseldorf",
+      "Odd_Over25": "1.60",
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "alemanha2",
+      "HomeTeam": "Holstein Kiel",
+      "AwayTeam": "Eintracht Braunschweig",
       "Odd_Over25": "1.80",
-      "Odd_BTTS_Yes": "1.67"
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "belgica",
+      "HomeTeam": "Charleroi",
+      "AwayTeam": "Genk",
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "championship",
+      "HomeTeam": "Preston",
+      "AwayTeam": "Southampton",
+      "Odd_Over25": "1.70",
+      "Odd_BTTS_Yes": "1.65"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "championship",
+      "HomeTeam": "Wrexham",
+      "AwayTeam": "Middlesbrough",
+      "Odd_Over25": "1.73",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "espanha",
+      "HomeTeam": "Osasuna",
+      "AwayTeam": "Barcelona",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.53"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "espanha",
+      "HomeTeam": "Villarreal",
+      "AwayTeam": "Levante",
+      "Odd_Over25": "1.65",
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "franca",
+      "HomeTeam": "Nantes",
+      "AwayTeam": "Marseille",
+      "Odd_Over25": "1.70",
+      "Odd_BTTS_Yes": "1.70"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "franca",
+      "HomeTeam": "Paris Saint Germain",
+      "AwayTeam": "Lorient",
+      "Odd_Over25": "1.44",
+      "Odd_BTTS_Yes": "1.73"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "franca2",
+      "HomeTeam": "Boulogne",
+      "AwayTeam": "Annecy",
+      "Odd_Over25": "2.27",
+      "Odd_BTTS_Yes": "1.91"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "paises_baixos",
+      "HomeTeam": "Ajax",
+      "AwayTeam": "PSV Eindhoven",
+      "Odd_Over25": "1.35",
+      "Odd_BTTS_Yes": "1.33"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "paises_baixos",
+      "HomeTeam": "NEC Nijmegen",
+      "AwayTeam": "Telstar",
+      "Odd_Over25": "1.42",
+      "Odd_BTTS_Yes": "1.53"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "portugal",
+      "HomeTeam": "Moreirense",
+      "AwayTeam": "Estrela",
+      "Odd_Over25": "2.26",
+      "Odd_BTTS_Yes": "1.91"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "portugal",
+      "HomeTeam": "Nacional",
+      "AwayTeam": "AVS",
+      "Odd_Over25": "1.72",
+      "Odd_BTTS_Yes": "1.82"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "premier",
+      "HomeTeam": "Newcastle",
+      "AwayTeam": "Brighton",
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.60"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "premier",
+      "HomeTeam": "Wolves",
+      "AwayTeam": "Sunderland",
+      "Odd_Over25": "2.17",
+      "Odd_BTTS_Yes": "1.83"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "turquia",
+      "HomeTeam": "Fenerbahçe",
+      "AwayTeam": "Başakşehir",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.65"
+    },
+    {
+      "Date": "2026-05-02",
+      "League": "turquia",
+      "HomeTeam": "Trabzonspor",
+      "AwayTeam": "Göztepe",
+      "Odd_Over25": "1.86",
+      "Odd_BTTS_Yes": "1.73"
     }
   ],
   "manualBetsRemote": []
