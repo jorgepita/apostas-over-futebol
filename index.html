@@ -629,6 +629,16 @@ table {
   min-width: 0;
   text-align: center;
 }
+
+button.saving {
+  background: #e0f2fe;
+  border-color: #38bdf8;
+}
+
+button.dirty {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  }
   </style>
 </head>
 <body>
@@ -3312,15 +3322,30 @@ table {
       
       function updateSaveCloudButton() {
   const buttons = [
-    document.getElementById('saveCloudBtn'),
-    document.getElementById('saveCloudBtnMobile')
-  ].filter(Boolean);
+  document.getElementById('saveCloudBtn'),
+  document.getElementById('saveCloudBtnMobile')
+].filter(Boolean);
 
-  buttons.forEach(btn => {
+buttons.forEach(btn => {
+  btn.classList.remove('saving', 'dirty');
+
+  if (autoSaveInFlight) {
+    btn.classList.add('saving');
+    btn.textContent = 'A guardar...';
+    btn.disabled = true;
+    return;
+  }
+
+  if (hasPendingCloudChanges) {
+    btn.classList.add('dirty');
+    btn.textContent = 'Guardar cloud *';
     btn.disabled = false;
-    btn.textContent = 'Guardar cloud';
-    btn.classList.remove('warn');
-  });
+    return;
+  }
+
+  btn.textContent = 'Guardar cloud';
+  btn.disabled = false;
+});
 }
 
       function updateCloudStatus() {
@@ -3351,6 +3376,8 @@ table {
   // 🔹 Estado: sincronizado
   el.className = 'decision-badge good';
   el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
+
+  updateSaveCloudButton();
 }
       
       function markDirty() {
