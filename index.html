@@ -640,9 +640,22 @@ table {
             <div class="value" style="font-size:22px;line-height:1.2;">Dashboard GitHub Pages</div>
           </div>
 
-          <div class="top-actions">
+          <div class="top-actions" style="display:flex;gap:10px;align-items:center;">
             <button id="refreshBtn" type="button">Atualizar agora</button>
             <button id="toggleCompactBtn" type="button">Compacto</button>
+
+            <div id="cloudStatus" style="
+              margin-left:auto;
+              padding:6px 10px;
+              border-radius:8px;
+              font-size:12px;
+              font-weight:600;
+              background:#eee;
+              color:#333;
+            ">
+              Cloud: a verificar...
+            </div>
+          </div>
 
             <div class="tooltip-wrap">
               <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">Apostas do dia</button>
