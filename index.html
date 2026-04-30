@@ -640,25 +640,29 @@ table {
             <div class="value" style="font-size:22px;line-height:1.2;">Dashboard GitHub Pages</div>
           </div>
 
-          <div class="top-actions" style="display:flex;gap:10px;align-items:center;">
-            <button id="refreshBtn" type="button">Atualizar agora</button>
-            <button id="toggleCompactBtn" type="button">Compacto</button>
+          <div class="top-actions">
 
-            </div>
-          </div>
+  <button id="refreshBtn" type="button">Atualizar agora</button>
+  <button id="toggleCompactBtn" type="button">Compacto</button>
 
-            <div class="tooltip-wrap">
-              <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">Apostas do dia</button>
-              <div class="tooltip-box" id="btnApostasTooltip">
-                <div class="tooltip-title">Resumo das picks do dia</div>
-                <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
-                <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
-                <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
-                <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
-              </div>
-            </div>
+  <div class="tooltip-wrap">
+    <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">
+      Apostas do dia
+    </button>
+    <div class="tooltip-box" id="btnApostasTooltip">
+      <div class="tooltip-title">Resumo das picks do dia</div>
+      <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
+      <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
+      <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
+      <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
+    </div>
+  </div>
 
-            <button id="mobileMoreActionsBtn" class="more-actions-btn" type="button" aria-expanded="false">Mais ações</button>
+  <button id="mobileMoreActionsBtn" class="more-actions-btn" type="button" aria-expanded="false">
+    Mais ações
+  </button>
+
+  <div class="mobile-actions-inline" id="desktopActionsGroup">
 
             <div class="mobile-actions-inline" id="desktopActionsGroup">
               <button id="loadCloudBtn" type="button">Carregar cloud</button>
@@ -3225,23 +3229,29 @@ table {
 
 
       async function saveCloudState() {
+  const buttons = [
+    document.getElementById('saveCloudBtn'),
+    document.getElementById('saveCloudBtnMobile')
+  ].filter(Boolean);
+
   try {
     console.log('CLICK SAVE');
 
+    // 🔹 UI: loading
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = 'A guardar...';
+    });
+
     hasPendingCloudChanges = true;
     updateCloudStatus();
-    
-    // usa o estado atual que já tens no dashboard
+
     const data = state;
 
     const res = await fetch(`${API_URL}/save`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        content: data
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: data })
     });
 
     if (!res.ok) {
@@ -3251,17 +3261,23 @@ table {
     const result = await res.json();
 
     state.cloudAvailable = true;
-    hasPendingCloudChanges = false;   // importante
+    hasPendingCloudChanges = false;
     updateCloudStatus();
 
     console.log('Guardado com sucesso:', result);
-    console.log('Cloud save OK');
 
   } catch (e) {
     console.error(e);
     state.cloudAvailable = false;
     updateCloudStatus();
     alert('Erro ao guardar');
+
+  } finally {
+    // 🔹 UI: reset botão
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cloud';
+    });
   }
 }
 
