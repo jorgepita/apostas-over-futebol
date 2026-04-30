@@ -414,8 +414,7 @@ def build_message(rows: list[dict], titulo: str) -> str:
 # Modo normal / teste
 # =============================
 def get_run_mode(cfg: dict) -> str:
-    mode = str(cfg.get("run", {}).get("mode", "normal")).strip().lower()
-    return mode if mode in {"normal", "test"} else "normal"
+    return "normal"
 
 
 def get_market_thresholds(mode: str, market: str) -> dict:
@@ -433,37 +432,13 @@ def get_market_thresholds(mode: str, market: str) -> dict:
         "min_lambda_product": 0.0,
     }
 
-    if mode == "test":
-        if market == "O2.5":
-            return {
-                **base,
-                "lam_t_min": 1.70,
-                "odd_min": 1.42,
-                "odd_max": DEFAULT_MAX_ODD_O25,
-                "edge_min_quality": -0.03,
-            }
-
-        if market == "BTTS":
-            return {
-                **base,
-                "lam_h_min": 0.62,
-                "lam_a_min": 0.62,
-                "lam_t_min": 1.88,
-                "odd_min": 1.48,
-                "odd_max": DEFAULT_MAX_ODD_BTTS,
-                "edge_min_quality": -0.04,
-                "max_lambda_ratio": 1.90,
-                "max_lambda_gap": 0.83,
-                "min_lambda_product": 0.65,
-            }
-
     if market == "O2.5":
         return {
             **base,
-            "lam_t_min": 1.80,
+            "lam_t_min": 1.85,
             "odd_min": 1.50,
             "odd_max": DEFAULT_MAX_ODD_O25,
-            "edge_min_quality": -0.04,
+            "edge_min_quality": 0.02,
         }
 
     if market == "BTTS":
@@ -471,10 +446,10 @@ def get_market_thresholds(mode: str, market: str) -> dict:
             **base,
             "lam_h_min": 0.72,
             "lam_a_min": 0.72,
-            "lam_t_min": 1.98,
+            "lam_t_min": 2.05,
             "odd_min": 1.50,
             "odd_max": DEFAULT_MAX_ODD_BTTS,
-            "edge_min_quality": -0.02,
+            "edge_min_quality": 0.03,
             "max_lambda_ratio": 1.75,
             "max_lambda_gap": 0.72,
             "min_lambda_product": 0.74,
@@ -734,10 +709,31 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
-    edge_min = float(rules.get("edge_min", 0.0))
-    edge_max = float(rules.get("edge_max", 0.15))
-    df = df[(df["Edge"] >= edge_min) & (df["Edge"] <= edge_max)].copy()
-    print(f"[DBG] {label}: após edge_min/edge_max = {len(df)} | edge_min={edge_min} edge_max={edge_max}")
+    edge_min_base = float(rules.get("edge_min", 0.05))
+edge_max = float(rules.get("edge_max", 0.15))
+
+def dynamic_edge_min(row):
+    odd = float(row.get("Odd", 0.0) or 0.0)
+
+    edge_req = edge_min_base
+
+    if odd >= 2.05:
+        edge_req += 0.04
+    elif odd >= 1.90:
+        edge_req += 0.025
+    elif odd >= 1.75:
+        edge_req += 0.015
+
+    return edge_req
+
+df["EdgeMinDynamic"] = df.apply(dynamic_edge_min, axis=1)
+
+df = df[
+    (df["Edge"] >= df["EdgeMinDynamic"]) &
+    (df["Edge"] <= edge_max)
+].copy()
+
+print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
 
     if df.empty:
         return df
