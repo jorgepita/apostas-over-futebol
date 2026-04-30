@@ -3239,6 +3239,8 @@ button.dirty {
 
 
       async function saveCloudState() {
+        if (autoSaveInFlight) return;
+        
   const buttons = [
     document.getElementById('saveCloudBtn'),
     document.getElementById('saveCloudBtnMobile')
