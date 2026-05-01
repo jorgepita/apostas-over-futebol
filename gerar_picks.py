@@ -715,10 +715,10 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
         edge_min_base = float(rules.get("edge_min", 0.05))
     edge_max = float(rules.get("edge_max", 0.15))
 
-    def dynamic_edge_min(row):
-        odd = float(row.get("Odd", 0.0) or 0.0)
+    def dynamic_edge_min(row, edge_min_base):
+    odd = float(row.get("Odd", 0.0) or 0.0)
 
-        edge_req = edge_min_base
+    edge_req = edge_min_base
 
         if odd >= 2.05:
             edge_req += 0.04
@@ -729,7 +729,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
         return edge_req
 
-    df["EdgeMinDynamic"] = df.apply(dynamic_edge_min, axis=1)
+    df["EdgeMinDynamic"] = df.apply(lambda r: dynamic_edge_min(r, edge_min_base), axis=1)
 
     df = df[
         (df["Edge"] >= df["EdgeMinDynamic"]) &
