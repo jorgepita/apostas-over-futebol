@@ -893,8 +893,10 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
 # Main
 # =============================
 def main():
+    print("### TESTE NOVO CODIGO ###")
     # RESET TOTAL DO HISTÓRICO (modo arranque limpo)
-if os.getenv("RESET_HISTORY", "1") == "1":
+
+    if os.getenv("RESET_HISTORY", "1") == "1":
     print("[DBG] RESET_HISTORY ativo -> limpar histórico")
     pd.DataFrame(columns=[
         "Data","Liga","Jogo","Mercado","Odd","Stake€","Edge%",
