@@ -739,7 +739,7 @@ df = df[
 print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
 
 if df.empty:
-   return df
+    return df
 
     df = add_rank_fields(df)
     df = dedupe_correlated_picks(df)
