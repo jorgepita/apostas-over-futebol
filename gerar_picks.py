@@ -766,8 +766,8 @@ edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
 confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
 
 # stake ajustado
-df["StakeFracRaw"] = kelly * kfrac * confidence_factor
-df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
+    df["StakeFracRaw"] = kelly * kfrac * confidence_factor
+    df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
     total_frac = float(df["StakeFrac"].sum())
     scale = 1.0
