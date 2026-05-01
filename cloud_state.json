@@ -382,18 +382,18 @@
   "bankrollInicial": 100,
   "localEdits": {
     "2026-05-01|Premier League|Leeds vs Burnley|O2.5": {
-      "apostada": true
+      "apostada": false
     },
     "2026-05-01|Eredivisie|Waalwijk vs Roda|O2.5": {
-      "apostada": true
+      "apostada": false
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-05-01",
   "lastUpdated": "2026-05-01T13:00:21.363Z",
-  "activeTab": "tab-manual",
+  "activeTab": "tab-day",
   "mobileActionsOpen": false,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-01",
