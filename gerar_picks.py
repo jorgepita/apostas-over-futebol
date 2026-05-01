@@ -1198,7 +1198,8 @@ def main():
         ])
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
-    history = merge_into_history(simple)
+    # RESET TOTAL DO HISTÓRICO (modo produção inicial)
+    history = simple.copy()
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
