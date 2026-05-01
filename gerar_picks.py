@@ -747,7 +747,6 @@ print(f"[DBG] {label}: após dedupe = {len(df)}")
 
 return df
 
-
 def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> pd.DataFrame:
     if df.empty:
         return df
@@ -758,12 +757,13 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
     min_picks = int(rules.get("min_picks", 1))
 
     df = df.copy()
-    # base Kelly
-kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 
-# confiança baseada no edge (0% → 0 | 10%+ → 1)
-edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
-confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
+    # base Kelly
+    kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+
+    # confiança baseada no edge (0% → 0 | 10%+ → 1)
+    edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
+    confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
 
     # stake ajustado
     df["StakeFracRaw"] = kelly * kfrac * confidence_factor
@@ -771,6 +771,7 @@ confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
 
     total_frac = float(df["StakeFrac"].sum())
     scale = 1.0
+
     if total_frac > daily_cap_frac and total_frac > 0:
         scale = daily_cap_frac / total_frac
         df["StakeFrac"] = df["StakeFrac"] * scale
@@ -784,10 +785,14 @@ confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
         return df.iloc[0:0].copy()
 
     df = df[df["Stake€"] > 0].copy()
+
     print(
         f"[DBG] {label}: final após stake = {len(df)} | "
-        f"kelly_fraction={kfrac} | cap_frac={cap_frac} | daily_cap_frac={daily_cap_frac} | scale={scale:.4f}"
+        f"kelly_fraction={kfrac} | cap_frac={cap_frac} | "
+        f"daily_cap_frac={daily_cap_frac} | scale={scale:.4f}"
     )
+
+    return df
 
     round_cols = {
         "LambdaHome": 3,
