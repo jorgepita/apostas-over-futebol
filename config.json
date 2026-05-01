@@ -6,8 +6,8 @@
     "max_picks_global": 36
   },
   "bankroll": {
-    "over25": 500,
-    "btts": 500,
+    "over25": 50,
+    "btts": 50,
     "nba_over": 500
   },
   "leagues": {
