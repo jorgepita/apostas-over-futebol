@@ -779,7 +779,7 @@ confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
 
-        if len(df) < min_picks:
+    if len(df) < min_picks:
         print(f"[DBG] {label}: abaixo de min_picks={min_picks}")
         return df.iloc[0:0].copy()
 
