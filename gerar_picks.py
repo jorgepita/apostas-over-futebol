@@ -1,3 +1,6 @@
+# força deploy
+print("### TESTE NOVO CODIGO ###")
+
 import base64
 import json
 import requests
