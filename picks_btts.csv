@@ -1,2 +1,2 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-02;franca2;Ligue 2;Boulogne;Annecy;1.642;1.803;3.445;BTTS;0.596;1.93;0.518;0.0779;0.1616;0.078;0.0291;0.0291;14.55;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-02;franca2;Ligue 2;Boulogne;Annecy;1.642;1.803;3.445;BTTS;0.596;1.93;0.518;0.0779;0.1616;0.035;0.078;0.0227;0.0227;1.13;1.0;50.0
