@@ -893,6 +893,15 @@ def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str)
 # Main
 # =============================
 def main():
+    # RESET TOTAL DO HISTÓRICO (modo arranque limpo)
+if os.getenv("RESET_HISTORY", "1") == "1":
+    print("[DBG] RESET_HISTORY ativo -> limpar histórico")
+    pd.DataFrame(columns=[
+        "Data","Liga","Jogo","Mercado","Odd","Stake€","Edge%",
+        "Apostada","OddReal","StakeReal€",
+        "Resultado","Lucro€","LucroReal€"
+    ]).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
+    
     cfg_path = BASE / "config.json"
     if not cfg_path.exists():
         raise SystemExit("Falta config.json na pasta do projeto.")
@@ -1203,7 +1212,12 @@ def main():
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
     # RESET TOTAL DO HISTÓRICO (modo produção inicial)
+    
+    today_str = datetime.now().date().isoformat()
+    simple = simple[simple["Data"] >= today_str].copy()
+
     history = simple.copy()
+
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
 
     print("OK. Gerados:")
