@@ -939,6 +939,10 @@ def main():
     today_iso = start.isoformat()
 
     fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
+   
+    print("==== DEBUG DATES ====")
+    print(fixtures["Date"].value_counts().sort_index())
+    
     fixtures["Date"] = fixtures["Date"].astype(str)
 
     print(f"[DBG] fixtures no range {start} -> {end}: {len(fixtures)}")
