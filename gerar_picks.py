@@ -712,40 +712,41 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
-    edge_min_base = float(rules.get("edge_min", 0.05))
-edge_max = float(rules.get("edge_max", 0.15))
+        edge_min_base = float(rules.get("edge_min", 0.05))
+    edge_max = float(rules.get("edge_max", 0.15))
 
-def dynamic_edge_min(row):
-    odd = float(row.get("Odd", 0.0) or 0.0)
+    def dynamic_edge_min(row):
+        odd = float(row.get("Odd", 0.0) or 0.0)
 
-    edge_req = edge_min_base
+        edge_req = edge_min_base
 
-    if odd >= 2.05:
-        edge_req += 0.04
-    elif odd >= 1.90:
-        edge_req += 0.025
-    elif odd >= 1.75:
-        edge_req += 0.015
+        if odd >= 2.05:
+            edge_req += 0.04
+        elif odd >= 1.90:
+            edge_req += 0.025
+        elif odd >= 1.75:
+            edge_req += 0.015
 
-    return edge_req
+        return edge_req
 
-df["EdgeMinDynamic"] = df.apply(dynamic_edge_min, axis=1)
+    df["EdgeMinDynamic"] = df.apply(dynamic_edge_min, axis=1)
 
-df = df[
-    (df["Edge"] >= df["EdgeMinDynamic"]) &
-    (df["Edge"] <= edge_max)
-].copy()
+    df = df[
+        (df["Edge"] >= df["EdgeMinDynamic"]) &
+        (df["Edge"] <= edge_max)
+    ].copy()
 
-print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
+    print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
 
-if df.empty:
+    if df.empty:
+        return df
+
+    df = add_rank_fields(df)
+    df = dedupe_correlated_picks(df)
+
+    print(f"[DBG] {label}: após dedupe = {len(df)}")
+
     return df
-
-df = add_rank_fields(df)
-df = dedupe_correlated_picks(df)
-print(f"[DBG] {label}: após dedupe = {len(df)}")
-
-return df
 
 def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> pd.DataFrame:
     if df.empty:
@@ -791,8 +792,6 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
         f"kelly_fraction={kfrac} | cap_frac={cap_frac} | "
         f"daily_cap_frac={daily_cap_frac} | scale={scale:.4f}"
     )
-
-    return df
 
     round_cols = {
         "LambdaHome": 3,
