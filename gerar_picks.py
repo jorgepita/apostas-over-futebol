@@ -771,7 +771,7 @@ confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
 
     total_frac = float(df["StakeFrac"].sum())
     scale = 1.0
-        if total_frac > daily_cap_frac and total_frac > 0:
+    if total_frac > daily_cap_frac and total_frac > 0:
         scale = daily_cap_frac / total_frac
         df["StakeFrac"] = df["StakeFrac"] * scale
 
