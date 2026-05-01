@@ -765,15 +765,15 @@ kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
 confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
 
-# stake ajustado
-df["StakeFracRaw"] = kelly * kfrac * confidence_factor
-df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
+    # stake ajustado
+    df["StakeFracRaw"] = kelly * kfrac * confidence_factor
+    df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
-total_frac = float(df["StakeFrac"].sum())
-scale = 1.0
-if total_frac > daily_cap_frac and total_frac > 0:
-    scale = daily_cap_frac / total_frac
-    df["StakeFrac"] = df["StakeFrac"] * scale
+    total_frac = float(df["StakeFrac"].sum())
+    scale = 1.0
+    if total_frac > daily_cap_frac and total_frac > 0:
+        scale = daily_cap_frac / total_frac
+        df["StakeFrac"] = df["StakeFrac"] * scale
 
     df["Stake€"] = (df["StakeFrac"] * float(bankroll)).round(2)
     df["DailyScale"] = float(scale)
