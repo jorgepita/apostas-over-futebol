@@ -904,11 +904,12 @@ def main():
     # RESET TOTAL DO HISTÓRICO (modo arranque limpo)
 
     if os.getenv("RESET_HISTORY", "1") == "1":
-    print("[DBG] RESET_HISTORY ativo -> limpar histórico")
-    pd.DataFrame(columns=[
-        "Data","Liga","Jogo","Mercado","Odd","Stake€","Edge%",
-        "Apostada","OddReal","StakeReal€",
-        "Resultado","Lucro€","LucroReal€"
+        print("[DBG] RESET_HISTORY ativo -> limpar histórico")
+       
+        pd.DataFrame(columns=[
+            "Data","Liga","Jogo","Mercado","Odd","Stake€","Edge%",
+            "Apostada","OddReal","StakeReal€",
+            "Resultado","Lucro€","LucroReal€"
     ]).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
     
     cfg_path = BASE / "config.json"
