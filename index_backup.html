@@ -629,6 +629,16 @@ table {
   min-width: 0;
   text-align: center;
 }
+
+button.saving {
+  background: #e0f2fe;
+  border-color: #38bdf8;
+}
+
+button.dirty {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  }
   </style>
 </head>
 <body>
@@ -641,21 +651,28 @@ table {
           </div>
 
           <div class="top-actions">
-            <button id="refreshBtn" type="button">Atualizar agora</button>
-            <button id="toggleCompactBtn" type="button">Compacto</button>
 
-            <div class="tooltip-wrap">
-              <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">Apostas do dia</button>
-              <div class="tooltip-box" id="btnApostasTooltip">
-                <div class="tooltip-title">Resumo das picks do dia</div>
-                <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
-                <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
-                <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
-                <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
-              </div>
-            </div>
+  <button id="refreshBtn" type="button">Atualizar agora</button>
+  <button id="toggleCompactBtn" type="button">Compacto</button>
 
-            <button id="mobileMoreActionsBtn" class="more-actions-btn" type="button" aria-expanded="false">Mais ações</button>
+  <div class="tooltip-wrap">
+    <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">
+      Apostas do dia
+    </button>
+    <div class="tooltip-box" id="btnApostasTooltip">
+      <div class="tooltip-title">Resumo das picks do dia</div>
+      <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
+      <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
+      <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
+      <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
+    </div>
+  </div>
+
+  <button id="mobileMoreActionsBtn" class="more-actions-btn" type="button" aria-expanded="false">
+    Mais ações
+  </button>
+
+  <div class="mobile-actions-inline" id="desktopActionsGroup">
 
             <div class="mobile-actions-inline" id="desktopActionsGroup">
               <button id="loadCloudBtn" type="button">Carregar cloud</button>
@@ -1396,8 +1413,12 @@ table {
     </div>
 
     <script>
+      const API_URL = 'https://apostas-over-futebol-production.up.railway.app';
+
+      const CLOUD_API = 'https://apostas-over-futebol-production.up.railway.app';
+      
       const URLS = {
-        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_simplificado.csv',
+        footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_github.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
         nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
         manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv'
@@ -1412,9 +1433,6 @@ table {
         mobileActionsOpen: 'apostas_bot_mobile_actions_open_v1'
       };
 
-      const SYNC_API_BASE = 'https://apostas-dashboard-sync.onrender.com';
-      const SYNC_STATE_URL = `${SYNC_API_BASE}/state`;
-
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
       let initialLoadDone = false;
@@ -1423,7 +1441,6 @@ table {
         footballDaily: [],
         footballHistory: [],
         nba: [],
-        manualBetsRemote: [],
         bankrollInicial: 1000,
         localEdits: {},
         manualBets: [],
@@ -1431,7 +1448,7 @@ table {
         lastUpdated: null,
         activeTab: 'tab-summary',
         mobileActionsOpen: false,
-        cloudAvailable: null
+        cloudAvailable: false
       };
 
       function parseDelimitedCsv(text, delimiter = ';') {
@@ -1497,16 +1514,19 @@ table {
       }
 
       function num(v) {
-        if (v === null || v === undefined) return null;
-        const raw = String(v).trim()
-          .replace(/\s/g, '')
-          .replace(/€/g, '')
-          .replace(/"/g, '')
-          .replace(',', '.');
-        if (!raw) return null;
-        const n = Number(raw);
-        return Number.isFinite(n) ? n : null;
-      }
+  if (v === null || v === undefined) return null;
+
+  const raw = String(v).trim()
+    .replace(/\s/g, '')
+    .replace(/€/g, '')
+    .replace(/"/g, '')
+    .replace(',', '.');
+
+  if (!raw) return null;
+
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
 
       function sum(arr) {
         return arr
@@ -1663,16 +1683,51 @@ table {
 
       function normalizeBotCsvRow(row) {
         const normalized = { ...row };
-        normalized['Data'] = normalizeDateString(row['Data'] || row['Date'] || '');
-        normalized['Liga'] = cleanString(row['Liga'] || row['League'] || '');
-        normalized['Jogo'] = cleanString(row['Jogo'] || row['Game'] || '');
-        normalized['Mercado'] = cleanString(row['Mercado'] || row['Market'] || '');
-        normalized['Odd'] = cleanString(row['Odd'] || row['Odds'] || '');
-        normalized['Stake€'] = cleanString(row['Stake€'] || row['Stake'] || '');
-        normalized['Resultado'] = cleanString(row['Resultado'] || row['Result'] || '');
-        normalized['Edge%'] = cleanString(row['Edge%'] || row['Edge'] || '');
+
+  // DATA
+        normalized['Data'] = normalizeDateString(
+          row['Data'] || row['Date'] || ''
+        );
+
+  // LIGA
+        normalized['Liga'] = cleanString(
+          row['Liga'] || row['League'] || ''
+        );
+
+  // JOGO (CRÍTICO)
+        const home = row['HomeTeam'] || '';
+        const away = row['AwayTeam'] || '';
+        normalized['Jogo'] = cleanString(
+          row['Jogo'] || row['Game'] || `${home} vs ${away}`
+        );
+
+  // MERCADO (CRÍTICO)
+        if (row['Odd_Over25']) {
+          normalized['Mercado'] = 'O2.5';
+          normalized['Odd'] = row['Odd_Over25'];
+        } else if (row['Odd_BTTS_Yes']) {
+          normalized['Mercado'] = 'BTTS';
+          normalized['Odd'] = row['Odd_BTTS_Yes'];
+        } else {
+          normalized['Mercado'] = cleanString(row['Mercado'] || '');
+          normalized['Odd'] = cleanString(row['Odd'] || '');
+        }
+
+  // STAKE DEFAULT (para não ficar vazio)
+        normalized['Stake€'] = cleanString(row['Stake€'] || '1');
+
+  // RESULTADO
+        normalized['Resultado'] = cleanString(
+          row['Resultado'] || row['Result'] || ''
+        );
+
+  // EDGE (opcional)
+        normalized['Edge%'] = cleanString(
+          row['Edge%'] || row['Edge'] || ''
+        );
+
         return normalized;
-      }
+       }
 
       function normalizeNbaCsvRow(row) {
         return {
@@ -1811,9 +1866,11 @@ table {
       }
 
       function marketMatches(row, marketCode) {
-        const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
-        return market.includes(String(marketCode || '').toUpperCase());
-      }
+  const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
+  const target = String(marketCode || '').toUpperCase();
+
+  return market === target || market.includes(target);
+}
 
       function buildBotMarketStats(rows, marketCode) {
         const subset = rows.filter(r => marketMatches(r, marketCode));
@@ -1846,69 +1903,74 @@ table {
       }
       
       function getManualRowsMerged() {
-        const remoteRows = state.manualBetsRemote.map(b => {
-          const data = normalizeDateString(b['Data'] || '');
-          const liga = cleanString(b['Liga'] || '');
-          const jogo = cleanString(b['Jogo'] || '');
-          const mercado = cleanString(b['Mercado'] || '');
-          const odd = cleanString(b['Odd'] || '');
-          const stake = cleanString(b['Stake'] || '');
-          const resultado = cleanString(b['Resultado'] || '').toUpperCase();
-          const lucroCsv = num(b['Lucro€']);
-          const notas = cleanString(b['Notas'] || '');
 
-          return {
-            id: `remote_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
-            data,
-            liga,
-            jogo,
-            mercado,
-            odd,
-            stake,
-            resultado,
-            notas,
-            source: 'manual',
-            sourceLabel: 'Manual CSV',
-            isRemote: true,
-            isLocal: false,
-            _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
-            _resultKey: resultKey(resultado),
-            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
-          };
-        });
+  const remote = Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : [];
+  const local = Array.isArray(state.manualBets) ? state.manualBets : [];
 
-        const localRows = state.manualBets.map(b => {
-          const resultado = cleanString(b.resultado || '').toUpperCase();
-          const data = normalizeDateString(b.data || '');
-          const liga = cleanString(b.liga || '');
-          const jogo = cleanString(b.jogo || '');
-          const mercado = cleanString(b.mercado || '');
-          const odd = cleanString(b.odd || '');
-          const stake = cleanString(b.stake || '');
-          const notas = cleanString(b.notas || '');
+  const remoteRows = remote.map(b => {
+    const data = normalizeDateString(b['Data'] || '');
+    const liga = cleanString(b['Liga'] || '');
+    const jogo = cleanString(b['Jogo'] || '');
+    const mercado = cleanString(b['Mercado'] || '');
+    const odd = cleanString(b['Odd'] || '');
+    const stake = cleanString(b['Stake'] || '');
+    const resultado = cleanString(b['Resultado'] || '').toUpperCase();
+    const lucroCsv = num(b['Lucro€']);
+    const notas = cleanString(b['Notas'] || '');
 
-          return {
-            id: String(b.id || makeManualId()),
-            data,
-            liga,
-            jogo,
-            mercado,
-            odd,
-            stake,
-            resultado,
-            notas,
-            source: 'manual',
-            sourceLabel: 'Manual Local',
-            isRemote: false,
-            isLocal: true,
-            _lucro: calcProfitByResult(resultado, stake, odd),
-            _resultKey: resultKey(resultado),
-            _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
-          };
-        });
+    return {
+      id: `remote_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
+      data,
+      liga,
+      jogo,
+      mercado,
+      odd,
+      stake,
+      resultado,
+      notas,
+      source: 'manual',
+      sourceLabel: 'Manual CSV',
+      isRemote: true,
+      isLocal: false,
+      _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+      _resultKey: resultKey(resultado),
+      _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+    };
+  });
 
-        return [...remoteRows, ...localRows];
-      }
+  const localRows = (Array.isArray(state.manualBets) ? state.manualBets : []).map(b => {
+    const data = normalizeDateString(b['Data'] || '');
+    const liga = cleanString(b['Liga'] || '');
+    const jogo = cleanString(b['Jogo'] || '');
+    const mercado = cleanString(b['Mercado'] || '');
+    const odd = cleanString(b['Odd'] || '');
+    const stake = cleanString(b['Stake'] || '');
+    const resultado = cleanString(b['Resultado'] || '').toUpperCase();
+    const lucroCsv = num(b['Lucro€']);
+    const notas = cleanString(b['Notas'] || '');
+
+    return {
+      id: `local_${data}_${liga}_${jogo}_${mercado}_${odd}_${stake}`,
+      data,
+      liga,
+      jogo,
+      mercado,
+      odd,
+      stake,
+      resultado,
+      notas,
+      source: 'manual',
+      sourceLabel: 'Manual',
+      isRemote: false,
+      isLocal: true,
+      _lucro: lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
+      _resultKey: resultKey(resultado),
+      _searchText: `${liga} ${jogo} ${mercado}`.toLowerCase()
+    };
+  });
+
+  return [...remoteRows, ...localRows];
+}
 
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
@@ -2972,67 +3034,66 @@ table {
     }
       
       function bindBotTableControls() {
-        document.querySelectorAll('.js-apostada').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
 
-          el.addEventListener('change', e => {
+        function update(key, changes, rerender = false) {
+          if (!state.localEdits[key]) {
+            state.localEdits[key] = {};
+          }
+
+          Object.assign(state.localEdits[key], changes);
+
+          markDirty();
+
+          localStorage.setItem('dashboardState', JSON.stringify(state));
+          
+          if (rerender) rerenderAll();
+        }
+
+        document.querySelectorAll('.js-apostada').forEach(el => {
+          el.onchange = e => {
             const key = e.target.dataset.pickKey;
-            const edit = ensureEditObject(key);
-            edit.apostada = e.target.checked;
-            rerenderAll();
-          });
+
+            update(key, {
+              apostada: e.target.checked
+            }, true);
+          };
         });
 
         document.querySelectorAll('.js-odd-real').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
-
-          el.addEventListener('input', e => {
+          el.oninput = e => {
             const key = e.target.dataset.pickKey;
-            ensureEditObject(key).oddReal = e.target.value;
-            saveLocalState();
-            markDirty();
-          });
 
-          el.addEventListener('blur', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).oddReal = e.target.value;
-            rerenderAll();
-          });
+            update(key, {
+              oddReal: e.target.value
+            });
+          };
         });
 
         document.querySelectorAll('.js-stake-real').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
-
-          el.addEventListener('input', e => {
+          el.oninput = e => {
             const key = e.target.dataset.pickKey;
-            ensureEditObject(key).stakeReal = e.target.value;
-            saveLocalState();
-            markDirty();
-          });
 
-          el.addEventListener('blur', e => {
-            const key = e.target.dataset.pickKey;
-            ensureEditObject(key).stakeReal = e.target.value;
-            rerenderAll();
-          });
+            update(key, {
+              stakeReal: e.target.value
+            });
+          };
         });
 
         document.querySelectorAll('.js-bot-resultado').forEach(el => {
-          if (el.dataset.bound === '1') return;
-          el.dataset.bound = '1';
-
-          el.addEventListener('change', e => {
+          el.onchange = e => {
             const key = e.target.dataset.pickKey;
-            ensureEditObject(key).resultadoManual = e.target.value;
-            rerenderAll();
-          });
+
+            update(key, {
+              resultadoManual: e.target.value
+            }, true);
+          };
         });
       }
-
+      
       function bindManualControls() {
+        if (window._manualBound) return;
+        window._manualBound = true;
+        
         document.querySelectorAll('.js-delete-manual').forEach(el => {
           if (el.dataset.bound === '1') return;
           el.dataset.bound = '1';
@@ -3040,12 +3101,17 @@ table {
           el.addEventListener('click', e => {
             const id = e.target.dataset.id;
             state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
+            markDirty();
+            
             rerenderAll();
           });
         });
       }
 
       function bindTabButtons() {
+        if (window._tabsBound) return;
+        window._tabsBound = true;
+        
         document.querySelectorAll('[data-tab-target]').forEach(btn => {
           if (btn.dataset.bound === '1') return;
           btn.dataset.bound = '1';
@@ -3082,6 +3148,9 @@ table {
       }
 
       function bindMobileActionsButton() {
+        if (window._mobileBound) return;
+        window._mobileBound = true;
+        
         const btn = document.getElementById('mobileMoreActionsBtn');
         if (btn.dataset.bound === '1') return;
         btn.dataset.bound = '1';
@@ -3168,142 +3237,149 @@ table {
         downloadTextFile(`historico_real_${todayIso()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8');
       }
 
-      async function checkCloudAvailability() {
-        try {
-          const res = await fetch(SYNC_STATE_URL, { method: 'GET', cache: 'no-store' });
-          state.cloudAvailable = res.ok;
-        } catch {
-          state.cloudAvailable = false;
-        }
-      }
 
-      async function loadCloudState(showAlert = true) {
-        try {
-          const res = await fetch(SYNC_STATE_URL, { cache: 'no-store' });
-          state.cloudAvailable = res.ok;
-          if (!res.ok) throw new Error('Resposta inválida do servidor');
+      async function saveCloudState() {
+        if (autoSaveInFlight) return;
+        
+  const buttons = [
+    document.getElementById('saveCloudBtn'),
+    document.getElementById('saveCloudBtnMobile')
+  ].filter(Boolean);
 
-          const data = await res.json();
-          if (!data.ok) throw new Error(data.error || 'Erro ao carregar estado cloud.');
+  try {
+  autoSaveInFlight = true;
+  updateCloudStatus();
 
-          const cloud = data.state || {};
-          state.bankrollInicial = num(cloud.bankrollInicial) ?? 1000;
-          state.localEdits = typeof cloud.localEdits === 'object' && cloud.localEdits ? cloud.localEdits : {};
-          state.manualBets = Array.isArray(cloud.manualBets) ? cloud.manualBets.map(item => ({
-            id: String(item.id || makeManualId()),
-            data: normalizeDateString(item.data || ''),
-            liga: cleanString(item.liga || ''),
-            jogo: cleanString(item.jogo || ''),
-            mercado: cleanString(item.mercado || ''),
-            odd: cleanString(item.odd || ''),
-            stake: cleanString(item.stake || ''),
-            resultado: cleanString(item.resultado || '').toUpperCase(),
-            notas: cleanString(item.notas || '')
-          })) : [];
-          state.sessionStartDate = normalizeDateString(cloud.sessionStartDate) || todayIso();
+  console.log('CLICK SAVE');
 
-          saveLocalState();
-          hasPendingCloudChanges = false;
-          updateCloudStatus();
-          updateSaveCloudButton();
-          rerenderAll(false);
+    // 🔹 UI: loading
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = 'A guardar...';
+    });
 
-          if (showAlert) alert('Estado cloud carregado com sucesso.');
-          return true;
-        } catch (e) {
-          state.cloudAvailable = false;
-          rerenderSummaryOnly();
-          if (showAlert) alert('Erro de ligação ao serviço cloud.');
-          return false;
-        }
-      }
+    hasPendingCloudChanges = true;
+    updateCloudStatus();
 
-      async function saveCloudState(showSuccess = true, reloadGithubDataAfterSave = false) {
-        if (autoSaveInFlight) {
-          updateSaveCloudButton();
-          return false;
-        }
+    const data = state;
 
-        try {
-          autoSaveInFlight = true;
+    const res = await fetch(`${API_URL}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: data })
+    });
 
-          const payload = {
-            bankrollInicial: state.bankrollInicial,
-            localEdits: state.localEdits,
-            manualBets: state.manualBets,
-            sessionStartDate: getSessionStartDate()
-          };
+    if (!res.ok) {
+      throw new Error('Erro ao guardar');
+    }
 
-          const res = await fetch(SYNC_STATE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+    const result = await res.json();
 
-          state.cloudAvailable = res.ok;
-          if (!res.ok) throw new Error('Resposta inválida do servidor');
+    state.cloudAvailable = true;
+    hasPendingCloudChanges = false;
+    updateCloudStatus();
 
-          const data = await res.json();
-          if (!data.ok) throw new Error(data.error || 'Erro ao guardar estado cloud.');
+    console.log('Guardado com sucesso:', result);
 
-          hasPendingCloudChanges = false;
-          saveLocalState();
+  } catch (e) {
+    console.error(e);
+    state.cloudAvailable = false;
+    updateCloudStatus();
+    alert('Erro ao guardar');
 
-          if (reloadGithubDataAfterSave) {
-            await loadData(false);
-          } else {
-            rerenderSummaryOnly();
-          }
+  } finally {
+  autoSaveInFlight = false;
+  updateCloudStatus();
 
-          if (showSuccess) alert('Estado guardado na cloud com sucesso.');
-          return true;
-        } catch (e) {
-          state.cloudAvailable = false;
-          rerenderSummaryOnly();
-          if (showSuccess) alert('Erro de ligação ao serviço cloud.');
-          return false;
-        } finally {
-          autoSaveInFlight = false;
-          updateSaveCloudButton();
-        }
-      }
+  // 🔹 UI: reset botão
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cloud';
+    });
+  }
+}
 
+      async function loadCloudState() {
+  try {
+    const res = await fetch(`${API_URL}/load`);
+    const content = await res.json();
+
+    state.cloudAvailable = true;
+    updateCloudStatus();
+    
+    state.bankrollInicial = content.bankrollInicial || 1000;
+    state.manualBets = content.manualBets || [];
+    state.localEdits = content.localEdits || {};
+    state.sessionStartDate = content.sessionStartDate || '';
+
+    rerenderAll(true);
+
+    alert('Carregado do GitHub com sucesso');
+
+  } catch (e) {
+    console.error(e);
+    alert('Erro ao carregar do GitHub');
+  }
+}
+      
       function updateSaveCloudButton() {
-        const buttons = [
-          document.getElementById('saveCloudBtn'),
-          document.getElementById('saveCloudBtnMobile')
-        ].filter(Boolean);
+  const buttons = [
+  document.getElementById('saveCloudBtn'),
+  document.getElementById('saveCloudBtnMobile')
+].filter(Boolean);
 
-        buttons.forEach(btn => {
-          if (hasPendingCloudChanges) {
-            btn.disabled = false;
-            btn.textContent = 'Guardar cloud*';
-            btn.classList.add('warn');
-          } else {
-            btn.disabled = true;
-            btn.textContent = 'Guardar cloud';
-            btn.classList.remove('warn');
-          }
-        });
-      }
+buttons.forEach(btn => {
+  btn.classList.remove('saving', 'dirty');
 
-      function updateCloudStatus() {
-  const el = document.getElementById('cloudStatus');
-  if (!el) return;
-
-  if (state.cloudAvailable === false) {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
-    el.style.color = 'var(--bad)';
+  if (autoSaveInFlight) {
+    btn.classList.add('saving');
+    btn.textContent = 'A guardar...';
+    btn.disabled = true;
     return;
   }
 
   if (hasPendingCloudChanges) {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
-    el.style.color = 'var(--warn)';
-  } else {
-    el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
-    el.style.color = 'var(--ok)';
+    btn.classList.add('dirty');
+    btn.textContent = 'Guardar cloud *';
+    btn.disabled = false;
+    return;
   }
+
+  btn.textContent = 'Guardar cloud';
+  btn.disabled = false;
+});
+}
+
+      function updateCloudStatus() {
+  const el = document.getElementById('cloudStatusLabel');
+  if (!el) return;
+
+  // 🔹 Estado: indisponível
+  if (state.cloudAvailable === false) {
+    el.className = 'decision-badge bad';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: indisponível';
+    return;
+  }
+
+  // 🔹 Estado: a guardar
+  if (autoSaveInFlight) {
+    el.className = 'decision-badge info';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: a guardar...';
+    return;
+  }
+
+  // 🔹 Estado: alterações por guardar
+  if (hasPendingCloudChanges) {
+    el.className = 'decision-badge warn';
+    el.innerHTML = '<span class="save-status-dot"></span> Cloud: alterações por guardar';
+    return;
+  }
+
+  // 🔹 Estado: sincronizado
+  el.className = 'decision-badge good';
+  el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
+
+  updateSaveCloudButton();
 }
       
       function markDirty() {
@@ -3313,11 +3389,23 @@ table {
         updateSaveCloudButton();
       }
 
+      function updateLocalEdit(key, changes) {
+        if (!state.localEdits[key]) {
+          state.localEdits[key] = {};
+        }
+
+        Object.assign(state.localEdits[key], changes);
+
+        markDirty();
+      }
+      
       function updateApostasTooltip() {
         const todaysPicks = getTodaysDailyRows();
         const count = todaysPicks.length;
         const validOdds = todaysPicks.map(r => num(r['Odd'])).filter(v => v !== null);
-        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
+        const validEdges = todaysPicks
+  .map(r => num(r['Edge%'] ?? r.Edge))
+  .filter(v => v !== null);
         const validStakes = todaysPicks.map(r => num(r['Stake€'])).filter(v => v !== null);
 
         const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
@@ -3331,19 +3419,25 @@ table {
       }
 
       function updateApostasButton() {
-        const btn = document.getElementById('btnApostasTab');
-        const todaysPicks = getTodaysDailyRows();
-        const count = todaysPicks.length;
+  const btn = document.getElementById('btnApostasTab');
+  const todaysPicks = getTodaysDailyRows();
+  const count = todaysPicks.length;
 
-        if (count === 0) {
-          btn.textContent = 'Sem picks hoje';
-          return;
-        }
+  if (count === 0) {
+    btn.textContent = 'Sem picks hoje';
+    return;
+  }
 
-        const validEdges = todaysPicks.map(r => num(r['Edge%'])).filter(v => v !== null);
-        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : 0;
-        btn.textContent = `${count} pick${count > 1 ? 's' : ''} hoje • edge méd. ${fmt(avgEdge)}%`;
-      }
+  const validEdges = todaysPicks
+    .map(r => num(r['Edge%'] ?? r.Edge))
+    .filter(v => v !== null);
+
+  const avgEdge = validEdges.length
+    ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length
+    : 0;
+
+  btn.textContent = `${count} picks hoje • edge méd. ${fmt(avgEdge)}%`;
+}
 
       function syncQuickMarketButtons() {
         const current = document.getElementById('dayMarketFilter').value || '';
@@ -3353,6 +3447,9 @@ table {
       }
 
       function bindQuickMarketButtons() {
+        if (window._quickBound) return;
+        window._quickBound = true;
+        
         document.querySelectorAll('[data-day-market-quick]').forEach(btn => {
           if (btn.dataset.bound === '1') return;
           btn.dataset.bound = '1';
@@ -3393,24 +3490,26 @@ table {
         try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
       }
 
-      function rerenderAll(triggerAutoSave = true) {
-        saveLocalState();
+      function rerenderAll() {
         fillFilters();
+
         rerenderSummaryOnly();
         rerenderDayOnly();
         rerenderHistoryOnly();
         rerenderManualOnly();
+
         bindBotTableControls();
         bindManualControls();
         bindTabButtons();
         bindQuickMarketButtons();
         bindMobileActionsButton();
+
         updateApostasButton();
         updateApostasTooltip();
+
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
-        if (triggerAutoSave && initialLoadDone) markDirty();
       }
 
       function addManualBet() {
@@ -3439,6 +3538,8 @@ table {
           resultado: cleanString(resultado).toUpperCase(),
           notas: cleanString(notas)
         });
+
+        markDirty();
 
         document.getElementById('manualData').value = '';
         document.getElementById('manualLiga').value = '';
@@ -3469,13 +3570,58 @@ table {
           const dailyText = dailyRes.ok ? await dailyRes.text() : '';
           const historyText = await historyRes.text();
           const nbaText = nbaRes.ok ? await nbaRes.text() : '';
+          const fixturesRes = await fetch('https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv');
+          const fixturesText = fixturesRes.ok ? await fixturesRes.text() : '';
           const manualText = manualRes.ok ? await manualRes.text() : '';
 
-          state.footballDaily = parseSemicolonCsv(dailyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
+          state.fixtures = parseSemicolonCsv(fixturesText);
+
+          state.footballDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';'))
+  .map(r => {
+    const probModel = parseFloat(r.ProbModel);
+    const probMarket = parseFloat(r.ProbMarket);
+
+    const edge = probModel - probMarket;
+
+    return {
+      Data: normalizeDateString(r.Date),
+      Liga: r.LeagueName || r.League || '',
+      Jogo: `${r.HomeTeam} vs ${r.AwayTeam}`,
+      Odd: parseFloat(r.Odd),
+      Mercado: (r.Market || '').trim(),
+
+      ProbModel: probModel,
+      ProbMarket: probMarket,
+
+      // 👇 NORMALIZAÇÃO CRÍTICA
+      Edge: edge,
+      'Edge%': edge * 100
+    };
+  })
+  .filter(r => 
+    r.Data && 
+    r.Jogo && 
+    r.Odd > 0 &&
+    (r.Mercado === 'O2.5' || r.Mercado === 'BTTS')
+  );
+
+          console.log(state.footballDaily);
+          
           state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
           state.nba = parseSemicolonCsv(nbaText).map(normalizeNbaCsvRow);
           state.manualBetsRemote = parseSemicolonCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
 
+          state.footballDaily = state.footballDaily.map(r => {
+  const edgeRaw = r.Edge ?? r['Edge%'];
+
+  const edgeDecimal = num(edgeRaw) ?? 0;
+
+  return {
+    ...r,
+    Edge: edgeDecimal,
+    'Edge%': edgeDecimal * 100
+  };
+});
           if (markUpdated) state.lastUpdated = new Date();
           rerenderAll(false);
           return true;
@@ -3518,16 +3664,22 @@ table {
 
       function bindStaticButtons() {
         bindElementAction('refreshBtn', () => loadData(true));
-        bindElementAction('loadCloudBtn', () => loadCloudState(true));
-        bindElementAction('saveCloudBtn', () => saveCloudState(true, true));
+        bindElementAction('loadCloudBtn', () => loadCloudState());
+        bindElementAction('saveCloudBtn', () => {
+  console.log('CLICK SAVE');
+  saveCloudState();
+});
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
 
-        bindElementAction('loadCloudBtnMobile', () => loadCloudState(true));
-        bindElementAction('saveCloudBtnMobile', () => saveCloudState(true, true));
+        bindElementAction('loadCloudBtnMobile', () => loadCloudState());
+        bindElementAction('saveCloudBtnMobile', () => {
+  console.log('CLICK SAVE MOBILE');
+  saveCloudState();
+});
         bindElementAction('resetLocalBtnMobile', resetLocalControls);
         bindElementAction('clearManualBtnMobile', clearManualLocal);
         bindElementAction('exportManualBtnMobile', exportManualJson);
@@ -3554,10 +3706,10 @@ table {
         document.getElementById('historyResultFilter').addEventListener('change', rerenderHistoryOnly);
         document.getElementById('historyExecutionFilter').addEventListener('change', rerenderHistoryOnly);
 
-        document.getElementById('bankrollInput').addEventListener('input', e => {
+        document.getElementById('bankrollInput').addEventListener('blur', e => {
           const v = num(e.target.value);
           state.bankrollInicial = v !== null && v >= 0 ? v : 0;
-          rerenderAll();
+          saveLocalState();
         });
 
         document.getElementById('addManualBetBtn').addEventListener('click', addManualBet);
@@ -3584,7 +3736,6 @@ table {
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
 
-        await checkCloudAvailability();
         rerenderAll(false);
 
         await loadData(true);
