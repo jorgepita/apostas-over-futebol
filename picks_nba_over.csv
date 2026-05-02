@@ -1,4 +1,4 @@
 Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-03;nba;Detroit Pistons;Orlando Magic;betmgm;OVER;202.5;1.91;104.36;101.58;220.35;11.5;0.9397;0.5236;0.4162;0.8735;0;0;0.2183739359511205;0.05;25.0;1.0;500.0
-2026-05-02;nba;Boston Celtics;Philadelphia 76ers;betrivers;OVER;205.0;1.92;104.36;101.58;220.35;11.5;0.9091;0.5208;0.3882;0.8103;0;0;0.20256303003498688;0.05;25.0;1.0;500.0
-2026-05-03;nba;Cleveland Cavaliers;Toronto Raptors;draftkings;OVER;210.5;1.91;104.36;101.58;220.35;11.5;0.8042;0.5236;0.2807;0.5891;0;0;0.14727700304022157;0.05;25.0;1.0;500.0
+2026-05-03;nba;Detroit Pistons;Orlando Magic;lowvig;OVER;202.0;1.93;104.36;101.58;220.35;11.5;0.9448;0.5181;0.4266;0.8853;0;0;0.2213368303490307;0.05;25.0;1.0;500.0
+2026-05-02;nba;Boston Celtics;Philadelphia 76ers;lowvig;OVER;204.5;1.91;104.36;101.58;220.35;11.5;0.916;0.5236;0.3924;0.8237;0;0;0.2059170345434588;0.05;25.0;1.0;500.0
+2026-05-03;nba;Cleveland Cavaliers;Toronto Raptors;fanduel;OVER;210.5;1.89;104.36;101.58;220.35;11.5;0.8042;0.5291;0.2751;0.5843;0;0;0.14606842610087484;0.05;25.0;1.0;500.0
