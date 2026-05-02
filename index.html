@@ -3043,8 +3043,6 @@ button.dirty {
           Object.assign(state.localEdits[key], changes);
 
           markDirty();
-
-          localStorage.setItem('dashboardState', JSON.stringify(state));
           
           if (rerender) rerenderAll();
         }
@@ -3638,6 +3636,7 @@ buttons.forEach(btn => {
         localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
         localStorage.removeItem(STORAGE_KEYS.activeTab);
         localStorage.removeItem(STORAGE_KEYS.mobileActionsOpen);
+        localStorage.removeItem('dashboardState');
 
         state.bankrollInicial = 1000;
         state.localEdits = {};
