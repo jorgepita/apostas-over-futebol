@@ -1,5 +1,6 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-02;franca2;Ligue 2;Boulogne;Annecy;1.642;1.803;3.445;BTTS;0.596;1.91;0.524;0.0725;0.1521;0.035;0.072;0.0198;0.0198;0.99;1.0;50.0
-2026-05-02;championship;Championship;Wrexham;Middlesbrough;1.787;1.9;3.687;BTTS;0.627;1.67;0.599;0.0278;0.0692;0.01;0.028;0.0035;0.0035;0.17;1.0;50.0
-2026-05-03;alemanha;Bundesliga;FC St. Pauli;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.85;0.541;0.0659;0.1434;0.025;0.066;0.017;0.017;0.85;1.0;50.0
-2026-05-03;turquia;Super Lig;Antalyaspor;Alanyaspor;1.708;1.823;3.532;BTTS;0.608;1.8;0.556;0.0521;0.1172;0.025;0.052;0.011;0.011;0.55;1.0;50.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-02;franca2;Ligue 2;Boulogne;Annecy;1.642;1.803;3.445;BTTS;0.596;1.85;0.541;0.0555;0.1208;0.055;0.0217;0.0217;10.87;1.0;500.0
+2026-05-02;championship;Championship;Wrexham;Middlesbrough;1.787;1.9;3.687;BTTS;0.627;1.67;0.599;0.0278;0.0692;0.028;0.0125;0.0125;6.23;1.0;500.0
+2026-05-03;portugal;Primeira Liga;Casa Pia;Tondela;2.2;1.398;3.598;BTTS;0.593;1.91;0.524;0.069;0.1448;0.069;0.0261;0.0261;13.03;1.0;500.0
+2026-05-03;alemanha;Bundesliga;FC St. Pauli;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.85;0.541;0.0659;0.1434;0.066;0.0258;0.0258;12.9;1.0;500.0
+2026-05-03;turquia;Super Lig;Antalyaspor;Alanyaspor;1.708;1.823;3.532;BTTS;0.608;1.8;0.556;0.0521;0.1172;0.052;0.0211;0.0211;10.55;1.0;500.0
