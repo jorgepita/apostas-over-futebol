@@ -484,6 +484,16 @@
       "apostada": true,
       "oddReal": "1.73",
       "stakeReal": "1.5"
+    },
+    "2026-05-03|Super Lig|Fatih Karagümrük vs Gençlerbirliği S.K.|O2.5": {
+      "apostada": true,
+      "oddReal": "1.904",
+      "stakeReal": "1.5"
+    },
+    "2026-05-03|Super Lig|Kayserispor vs Eyüpspor|O2.5": {
+      "apostada": true,
+      "oddReal": "1.896",
+      "stakeReal": "1.5"
     }
   },
   "manualBets": [
@@ -500,10 +510,10 @@
     }
   ],
   "sessionStartDate": "2026-05-01",
-  "lastUpdated": "2026-05-03T11:13:48.523Z",
+  "lastUpdated": "2026-05-03T11:16:48.547Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-03",
