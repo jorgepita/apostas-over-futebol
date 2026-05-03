@@ -1,15 +1,15 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-05-03;Super Lig;Fatih Karagümrük vs Gençlerbirliği S.K.;O2.5;2.06;8.7;11.89;;;;;;
-2026-05-03;Bundesliga;SC Freiburg vs VfL Wolfsburg;O2.5;1.71;8.7;10.05;;;;;;
-2026-05-03;Super Lig;Kayserispor vs Eyüpspor;O2.5;1.94;7.19;8.89;;;;;;
-2026-05-03;Ligue 1;Paris FC vs Stade Brestois 29;O2.5;1.81;7.12;8.13;;;;;;
-2026-05-03;Primeira Liga;Casa Pia vs Tondela;BTTS;1.95;14.73;7.97;;;;;;
-2026-05-03;Primeira Liga;Rio Ave vs GIL Vicente;O2.5;1.98;5.04;6.37;;;;;;
-2026-05-03;Super Lig;Antalyaspor vs Alanyaspor;BTTS;1.83;12.14;6.12;;;;;;
-2026-05-03;2. Bundesliga;SpVgg Greuther Fürth vs 1. FC Nürnberg;O2.5;1.7;5.53;5.81;;;;;;
-2026-05-03;Bundesliga;Borussia Mönchengladbach vs Borussia Dortmund;O2.5;1.58;5.59;5.24;;;;;;
-2026-05-03;Bundesliga;FC St. Pauli vs FSV Mainz 05;BTTS;1.8;10.3;5.08;;;;;;
-2026-05-03;Jupiler Pro League;Antwerp vs Standard Liege;O2.5;1.88;3.79;4.53;;;;;;
-2026-05-03;Super Lig;Kasımpaşa vs Kocaelispor;BTTS;1.95;6.55;3.55;;;;;;
-2026-05-04;Premier League;Chelsea vs Nottingham Forest;O2.5;1.77;5.28;5.86;;;;;;
-2026-05-04;Premier League;Everton vs Manchester City;O2.5;1.69;3.06;3.19;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-05-03;Super Lig;Fatih Karagümrük vs Gençlerbirliği S.K.;O2.5;2.06;8.7;11.89;;;;L;-8.7;;2026-05-03T17:00:00+00:00
+2026-05-03;Bundesliga;SC Freiburg vs VfL Wolfsburg;O2.5;1.71;8.7;10.05;;;;L;-8.7;;
+2026-05-03;Super Lig;Kayserispor vs Eyüpspor;O2.5;1.94;7.19;8.89;;;;L;-7.19;;2026-05-03T17:00:00+00:00
+2026-05-03;Ligue 1;Paris FC vs Stade Brestois 29;O2.5;1.81;7.12;8.13;;;;W;5.77;;
+2026-05-03;Primeira Liga;Casa Pia vs Tondela;BTTS;1.95;14.73;7.97;;;;L;-14.73;;
+2026-05-03;Primeira Liga;Rio Ave vs GIL Vicente;O2.5;1.98;5.04;6.37;;;;;;;
+2026-05-03;Super Lig;Antalyaspor vs Alanyaspor;BTTS;1.83;12.14;6.12;;;;L;-12.14;;2026-05-03T17:00:00+00:00
+2026-05-03;2. Bundesliga;SpVgg Greuther Fürth vs 1. FC Nürnberg;O2.5;1.7;5.53;5.81;;;;L;-5.53;;2026-05-03T11:30:00+00:00
+2026-05-03;Bundesliga;Borussia Mönchengladbach vs Borussia Dortmund;O2.5;1.58;5.59;5.24;;;;L;-5.59;;
+2026-05-03;Bundesliga;FC St. Pauli vs FSV Mainz 05;BTTS;1.8;10.3;5.08;;;;W;8.24;;
+2026-05-03;Jupiler Pro League;Antwerp vs Standard Liege;O2.5;1.88;3.79;4.53;;;;W;3.34;;2026-05-03T14:00:00+00:00
+2026-05-03;Super Lig;Kasımpaşa vs Kocaelispor;BTTS;1.95;6.55;3.55;;;;W;6.22;;2026-05-03T17:00:00+00:00
+2026-05-04;Premier League;Chelsea vs Nottingham Forest;O2.5;1.77;5.28;5.86;;;;;;;
+2026-05-04;Premier League;Everton vs Manchester City;O2.5;1.69;3.06;3.19;;;;;;;
