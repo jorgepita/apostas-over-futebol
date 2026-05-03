@@ -454,10 +454,10 @@
     }
   ],
   "sessionStartDate": "2026-05-01",
-  "lastUpdated": "2026-05-03T15:57:11.407Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-05-03T16:01:10.983Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": false,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-03",
