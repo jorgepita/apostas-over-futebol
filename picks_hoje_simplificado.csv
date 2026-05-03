@@ -1,14 +1,14 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-05-03;Ligue 1;Paris FC vs Stade Brestois 29;O2.5;1.95;8.84;12.1;;;;;;
-2026-05-03;Super Lig;Fatih Karagümrük vs Gençlerbirliği S.K.;O2.5;2.02;8.61;10.93;;;;;;
-2026-05-03;Bundesliga;SC Freiburg vs VfL Wolfsburg;O2.5;1.72;8.84;10.39;;;;;;
-2026-05-03;Super Lig;Kayserispor vs Eyüpspor;O2.5;1.95;7.47;9.15;;;;;;
-2026-05-03;Bundesliga;Borussia Mönchengladbach vs Borussia Dortmund;O2.5;1.65;8.0;7.93;;;;;;
-2026-05-03;Jupiler Pro League;Antwerp vs Standard Liege;O2.5;1.97;5.62;6.96;;;;;;
-2026-05-03;Primeira Liga;Casa Pia vs Tondela;BTTS;1.91;13.03;6.9;;;;;;
-2026-05-03;Primeira Liga;Rio Ave vs GIL Vicente;O2.5;2.0;5.47;6.88;;;;;;
-2026-05-03;Jupiler Pro League;Dender vs RAAL La Louvière;O2.5;1.92;4.68;5.64;;;;;;
-2026-05-03;Super Lig;Antalyaspor vs Alanyaspor;BTTS;1.8;10.55;5.21;;;;;;
-2026-05-03;Bundesliga;FC St. Pauli vs FSV Mainz 05;BTTS;1.8;10.3;5.08;;;;;;
-2026-05-03;Super Lig;Kasımpaşa vs Kocaelispor;BTTS;2.0;8.69;4.83;;;;;;
-2026-05-04;Premier League;Everton vs Manchester City;O2.5;1.67;2.46;2.48;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-05-03;Ligue 1;Paris FC vs Stade Brestois 29;O2.5;1.95;8.84;12.1;;;;;;;
+2026-05-03;Super Lig;Fatih Karagümrük vs Gençlerbirliği S.K.;O2.5;2.02;8.61;10.93;;;;;;;
+2026-05-03;Bundesliga;SC Freiburg vs VfL Wolfsburg;O2.5;1.72;8.84;10.39;;;;;;;
+2026-05-03;Super Lig;Kayserispor vs Eyüpspor;O2.5;1.95;7.47;9.15;;;;;;;
+2026-05-03;Bundesliga;Borussia Mönchengladbach vs Borussia Dortmund;O2.5;1.65;8.0;7.93;;;;;;;
+2026-05-03;Jupiler Pro League;Antwerp vs Standard Liege;O2.5;1.97;5.62;6.96;;;;;;;
+2026-05-03;Primeira Liga;Casa Pia vs Tondela;BTTS;1.91;13.03;6.9;;;;;;;
+2026-05-03;Primeira Liga;Rio Ave vs GIL Vicente;O2.5;2.0;5.47;6.88;;;;;;;
+2026-05-03;Jupiler Pro League;Dender vs RAAL La Louvière;O2.5;1.92;4.68;5.64;;;;;;;
+2026-05-03;Super Lig;Antalyaspor vs Alanyaspor;BTTS;1.8;10.55;5.21;;;;;;;
+2026-05-03;Bundesliga;FC St. Pauli vs FSV Mainz 05;BTTS;1.8;10.3;5.08;;;;;;;
+2026-05-03;Super Lig;Kasımpaşa vs Kocaelispor;BTTS;2.0;8.69;4.83;;;;;;;
+2026-05-04;Premier League;Everton vs Manchester City;O2.5;1.67;2.46;2.48;;;;;;;
