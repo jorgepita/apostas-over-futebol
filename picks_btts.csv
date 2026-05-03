@@ -1,4 +1,5 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-03;turquia;Super Lig;Antalyaspor;Alanyaspor;1.708;1.823;3.532;BTTS;0.608;1.8;0.556;0.0521;0.1172;0.025;0.052;0.011;0.011;0.55;1.0;50.0
-2026-05-03;alemanha;Bundesliga;FC St. Pauli;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.8;0.556;0.0508;0.1144;0.025;0.051;0.0105;0.0105;0.52;1.0;50.0
-2026-05-03;turquia;Super Lig;Kasımpaşa;Kocaelispor;1.721;1.404;3.126;BTTS;0.548;2.0;0.5;0.0483;0.0966;0.035;0.048;0.0084;0.0084;0.42;1.0;50.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-03;portugal;Primeira Liga;Casa Pia;Tondela;2.2;1.398;3.598;BTTS;0.593;1.95;0.513;0.0797;0.1636;0.08;0.0295;0.0295;14.73;1.0;500.0
+2026-05-03;turquia;Super Lig;Antalyaspor;Alanyaspor;1.708;1.823;3.532;BTTS;0.608;1.83;0.546;0.0612;0.1349;0.061;0.0243;0.0243;12.14;1.0;500.0
+2026-05-03;alemanha;Bundesliga;FC St. Pauli;FSV Mainz 05;1.882;1.652;3.534;BTTS;0.606;1.8;0.556;0.0508;0.1144;0.051;0.0206;0.0206;10.3;1.0;500.0
+2026-05-03;turquia;Super Lig;Kasımpaşa;Kocaelispor;1.721;1.404;3.126;BTTS;0.548;1.95;0.513;0.0355;0.0728;0.035;0.0131;0.0131;6.55;1.0;500.0
