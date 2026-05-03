@@ -448,15 +448,15 @@ def get_market_thresholds(mode: str, market: str) -> dict:
     if market == "BTTS":
         return {
             **base,
-            "lam_h_min": 0.75,
-            "lam_a_min": 0.75,
-            "lam_t_min": 2.05,
+            "lam_h_min": 0.65,
+            "lam_a_min": 0.65,
+            "lam_t_min": 1.95,
             "odd_min": 1.55,
             "odd_max": DEFAULT_MAX_ODD_BTTS,
             "edge_min_quality": 0.00,
-            "max_lambda_ratio": 1.65,
-            "max_lambda_gap": 0.65,
-            "min_lambda_product": 0.80,
+            "max_lambda_ratio": 1.85,
+            "max_lambda_gap": 0.80,
+            "min_lambda_product": 0.65,
         }
 
     return base
