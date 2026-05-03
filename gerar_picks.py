@@ -907,7 +907,7 @@ def main():
     print("### TESTE NOVO CODIGO ###")
     # RESET TOTAL DO HISTÓRICO (modo arranque limpo)
 
-    if os.getenv("RESET_HISTORY", "1") == "1":
+    if os.getenv("RESET_HISTORY", "0") == "0":
         print("[DBG] RESET_HISTORY ativo -> limpar histórico")
        
         pd.DataFrame(columns=[
