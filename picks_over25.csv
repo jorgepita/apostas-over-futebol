@@ -1,4 +1,6 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-04;premier;Premier League;Chelsea;Nottingham Forest;1.709;1.508;3.217;O2.5;0.624;1.77;0.565;0.0586;0.1347;0.025;0.059;0.0142;0.0142;0.71;1.0;50.0
-2026-05-04;premier;Premier League;Everton;Manchester City;1.709;1.508;3.217;O2.5;0.624;1.69;0.592;0.0319;0.078;0.01;0.032;0.0045;0.0045;0.22;1.0;50.0
-2026-05-05;paises_baixos;Eredivisie;Waalwijk;Willem II;2.2;1.583;3.783;O2.5;0.72;1.57;0.637;0.0831;0.2288;0.01;0.083;0.0342;0.0342;1.71;1.0;50.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-04;espanha;LaLiga;Sevilla;Real Sociedad;1.654;1.286;2.94;O2.5;0.563;2.02;0.495;0.0682;0.1351;0.068;0.0243;0.0243;12.16;1.0;500.0
+2026-05-04;premier;Premier League;Chelsea;Nottingham Forest;1.709;1.508;3.217;O2.5;0.624;1.78;0.562;0.0618;0.141;0.062;0.0254;0.0254;12.69;1.0;500.0
+2026-05-04;premier;Premier League;Everton;Manchester City;1.709;1.508;3.217;O2.5;0.624;1.68;0.595;0.0283;0.07;0.028;0.0126;0.0126;6.3;1.0;500.0
+2026-05-04;italia;Serie A;AS Roma;Fiorentina;1.467;1.346;2.812;O2.5;0.534;1.94;0.515;0.018;0.0372;0.018;0.0067;0.0067;3.35;1.0;500.0
+2026-05-05;paises_baixos;Eredivisie;Waalwijk;Willem II;2.2;1.583;3.783;O2.5;0.72;1.6;0.625;0.095;0.2533;0.095;0.0456;0.04;20.0;1.0;500.0
