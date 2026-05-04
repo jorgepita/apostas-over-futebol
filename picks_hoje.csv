@@ -1,5 +1,4 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-04;espanha;LaLiga;Sevilla;Real Sociedad;1.654;1.286;2.94;O2.5;0.563;2.02;0.495;0.0682;0.1351;0.035;0.06799999999999995;0.0166;0.0166;0.83;1.0;50.0
-2026-05-04;premier;Premier League;Chelsea;Nottingham Forest;1.709;1.508;3.217;O2.5;0.624;1.78;0.562;0.0618;0.141;0.025;0.061999999999999944;0.0157;0.0157;0.78;1.0;50.0
-2026-05-04;premier;Premier League;Everton;Manchester City;1.709;1.508;3.217;O2.5;0.624;1.68;0.595;0.0283;0.07;0.01;0.029000000000000026;0.0036;0.0036;0.18;1.0;50.0
-2026-05-05;paises_baixos;Eredivisie;Waalwijk;Willem II;2.2;1.583;3.783;O2.5;0.72;1.6;0.625;0.095;0.2533;0.01;0.09499999999999997;0.0433;0.04;2.0;1.0;50.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-05;nba;New York Knicks;Philadelphia 76ers;draftkings;OVER;212.5;1.91;104.36;101.58;220.35;11.5;0.7527;0.5236;0.2291;0.4809;0;0;0.12022235359603993;0.05;25.0;1.0;500.0
+2026-05-05;nba;Detroit Pistons;Cleveland Cavaliers;betrivers;OVER;213.5;1.92;104.36;101.58;220.35;11.5;0.7244;0.5208;0.2036;0.4248;0;0;0.10621086677631704;0.05;25.0;1.0;500.0
+2026-05-05;nba;San Antonio Spurs;Minnesota Timberwolves;fanduel;OVER;217.5;1.94;104.36;101.58;220.35;11.5;0.598;0.5155;0.0825;0.1703;0;0;0.042580230206437523;0.0426;21.29;1.0;500.0
