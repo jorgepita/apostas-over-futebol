@@ -1,2 +1,4 @@
-Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-03;nba;Cleveland Cavaliers;Toronto Raptors;draftkings;OVER;209.5;1.91;104.36;101.58;220.35;11.5;0.8274;0.5236;0.3038;0.6377;0;0;0.1594137601037542;0.05;25.0;1.0;500.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-04;premier;Premier League;Chelsea;Nottingham Forest;1.709;1.508;3.217;O2.5;0.624;1.77;0.565;0.0586;0.1347;0.025;0.05900000000000005;0.0142;0.0142;0.71;1.0;50.0
+2026-05-04;premier;Premier League;Everton;Manchester City;1.709;1.508;3.217;O2.5;0.624;1.69;0.592;0.0319;0.078;0.01;0.03200000000000003;0.0045;0.0045;0.22;1.0;50.0
+2026-05-05;paises_baixos;Eredivisie;Waalwijk;Willem II;2.2;1.583;3.783;O2.5;0.72;1.57;0.637;0.0831;0.2288;0.01;0.08299999999999996;0.0342;0.0342;1.71;1.0;50.0
