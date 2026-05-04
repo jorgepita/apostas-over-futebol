@@ -1,5 +1,5 @@
-Date,League,LeagueName,HomeTeam,AwayTeam,LambdaHome,LambdaAway,LambdaTotal,Market,ProbModel,Odd,ProbMarket,Edge,KellyTrue,EdgeMinDynamic,ProbGap,StakeFracRaw,StakeFrac,Stake€,DailyScale,Bankroll€
-2026-05-04,espanha,LaLiga,Sevilla,Real Sociedad,1.654,1.286,2.94,O2.5,0.563,2.02,0.495,0.0682,0.1351,0.035,0.06799999999999995,0.0166,0.0166,0.83,1.0,50.0
-2026-05-04,premier,Premier League,Chelsea,Nottingham Forest,1.709,1.508,3.217,O2.5,0.624,1.78,0.562,0.0618,0.141,0.025,0.061999999999999944,0.0157,0.0157,0.78,1.0,50.0
-2026-05-04,premier,Premier League,Everton,Manchester City,1.709,1.508,3.217,O2.5,0.624,1.68,0.595,0.0283,0.07,0.01,0.029000000000000026,0.0036,0.0036,0.18,1.0,50.0
-2026-05-05,paises_baixos,Eredivisie,Waalwijk,Willem II,2.2,1.583,3.783,O2.5,0.72,1.6,0.625,0.095,0.2533,0.01,0.09499999999999997,0.0433,0.04,2.0,1.0,50.0
+Date,League,LeagueName,HomeTeam,AwayTeam,LambdaHome,LambdaAway,LambdaTotal,Market,ProbModel,Odd,ProbMarket,Edge,KellyTrue,ProbGap,StakeFracRaw,StakeFrac,Stake€,DailyScale,Bankroll€
+2026-05-04,espanha,LaLiga,Sevilla,Real Sociedad,1.654,1.286,2.94,O2.5,0.563,2.16,0.463,0.1003,0.1868,0.09999999999999992,0.0336,0.0336,16.81,1.0,500.0
+2026-05-04,premier,Premier League,Chelsea,Nottingham Forest,1.709,1.508,3.217,O2.5,0.624,1.76,0.568,0.0554,0.1283,0.05600000000000005,0.0231,0.0231,11.55,1.0,500.0
+2026-05-04,premier,Premier League,Everton,Manchester City,1.709,1.508,3.217,O2.5,0.624,1.65,0.606,0.0175,0.0445,0.018000000000000016,0.008,0.008,4.0,1.0,500.0
+2026-05-05,paises_baixos,Eredivisie,Waalwijk,Willem II,2.2,1.583,3.783,O2.5,0.72,1.62,0.617,0.1027,0.2684,0.10299999999999998,0.0483,0.04,20.0,1.0,500.0
