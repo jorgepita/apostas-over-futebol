@@ -1,6 +1,4 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-08;italia2;Serie B;Monza;Empoli;2.2;1.119;3.319;O2.5;0.644;1.75;0.571;0.073;0.1703;0.07300000000000006;0.0307;0.0307;15.33;1.0;500.0
-2026-05-08;belgica;Jupiler Pro League;Standard Liege;OH Leuven;1.678;1.324;3.002;O2.5;0.577;1.93;0.518;0.0591;0.1226;0.05899999999999994;0.0221;0.0221;11.03;1.0;500.0
-2026-05-08;italia2;Serie B;Pescara;Spezia;2.2;1.176;3.376;O2.5;0.656;1.62;0.617;0.0384;0.1003;0.039000000000000035;0.0181;0.0181;9.03;1.0;500.0
-2026-05-08;alemanha2;2. Bundesliga;1. FC Kaiserslautern;Arminia Bielefeld;1.802;1.527;3.329;O2.5;0.646;1.6;0.625;0.0213;0.0569;0.02100000000000002;0.0102;0.0102;5.12;1.0;500.0
-2026-05-08;italia2;Serie B;Virtus Entella;Carrarese;1.974;1.164;3.137;O2.5;0.607;1.7;0.588;0.0187;0.0453;0.019000000000000017;0.0082;0.0082;4.08;1.0;500.0
+Date;League;HomeTeam;AwayTeam;Book;Market;Line;Odd;MuHome;MuAway;MuTotal;StdTotal;ProbModel;ProbMarket;Edge;KellyTrue;HomeGamesUsed;AwayGamesUsed;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-05-08;nba;Oklahoma City Thunder;Los Angeles Lakers;betmgm;OVER;210.5;1.87;104.36;101.58;220.35;11.5;0.8042;0.5348;0.2695;0.5792;0;0;0.14480428240569604;0.05;25.0;1.0;500.0
+2026-05-08;nba;Philadelphia 76ers;New York Knicks;draftkings;OVER;213.5;1.91;104.36;101.58;220.35;11.5;0.7244;0.5236;0.2008;0.4216;0;0;0.10538789783616313;0.05;25.0;1.0;500.0
+2026-05-07;nba;Detroit Pistons;Cleveland Cavaliers;betus;OVER;214.5;1.91;104.36;101.58;220.35;11.5;0.6946;0.5236;0.1711;0.3591;0;0;0.08976490284349832;0.05;25.0;1.0;500.0
