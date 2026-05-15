@@ -12,23 +12,6 @@ from urllib import request, parse, error
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
-from src.calculations import (
-    poisson_cdf,
-    prob_over25,
-    prob_btts_yes_adjusted,
-    kelly_fraction,
-    safe_mean,
-    weighted_mean,
-    clamp_strength,
-    league_avgs,
-    last_n_home,
-    last_n_away,
-    compute_lambdas,
-    clamp_prob_o25,
-    clamp_prob_btts,
-    clamp_edge_o25,
-    clamp_edge_btts,
-)
 from src.state import (
     load_sent_state,
     save_sent_state,
@@ -45,8 +28,9 @@ from src.output_utils import (
 from src.data_loader import (
     load_fixtures,
     normalize_columns,
-    _to_float,
-    get_btts_odd,
+)
+from src.pick_generation import (
+    process_league_fixtures,
 )
 from src.integrations import (
     send_telegram_message,
@@ -179,118 +163,20 @@ def main():
     total_fixture_errors = 0
 
     for league_key, league_meta in leagues_cfg.items():
-        try:
-            league_fixt = fixtures[fixtures["League"] == league_key].copy()
-            print(f"[DBG] liga={league_key} | fixtures={len(league_fixt)}")
-            if league_fixt.empty:
-                continue
-
-            hist_path = BASE / "data_raw" / f"{league_key}.csv"
-            if not hist_path.exists():
-                print(f"[WARN] histórico em falta para {league_key}")
-                continue
-
-            df_hist = pd.read_csv(hist_path, sep=None, engine="python")
-            df_hist = normalize_columns(df_hist)
-
-            need_hist = {"Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"}
-            if not need_hist.issubset(set(df_hist.columns)):
-                print(f"{league_key}: histórico sem colunas necessárias -> {sorted(df_hist.columns)}")
-                continue
-
-            df_hist["Date"] = pd.to_datetime(df_hist["Date"], dayfirst=True, errors="coerce")
-            df_hist = df_hist.dropna(subset=["Date"]).copy()
-
-            league_name = league_meta.get("name", league_key)
-
-            league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
-            lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
-
-            for _, fx in league_fixt.iterrows():
-                try:
-                    home = str(fx["HomeTeam"])
-                    away = str(fx["AwayTeam"])
-
-                    lam_h, lam_a, lam_t = compute_lambdas(
-                        df_hist,
-                        home,
-                        away,
-                        window=window,
-                        decay=decay,
-                        min_games_home=min_games_home,
-                        min_games_away=min_games_away,
-                    )
-
-                    if lambda_boost and lambda_boost != 1.0:
-                        lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
-                        lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
-                        lam_t = lam_h + lam_a
-
-                    base_row = {
-                        "Date": fx["Date"],
-                        "League": league_key,
-                        "LeagueName": league_name,
-                        "HomeTeam": home,
-                        "AwayTeam": away,
-                        "LambdaHome": lam_h,
-                        "LambdaAway": lam_a,
-                        "LambdaTotal": lam_t,
-                    }
-
-                    odd25 = _to_float(fx.get("Odd_Over25", 0.0), 0.0)
-                    if odd25 > 1.01:
-                        p25_raw = prob_over25(lam_t)
-                        p25 = clamp_prob_o25(p25_raw)
-                        pm25 = 1.0 / odd25
-                        edge25 = clamp_edge_o25(p25 - pm25)
-                        k25 = kelly_fraction(p25, odd25)
-
-                        rows25.append(
-                            {
-                                **base_row,
-                                "Market": "O2.5",
-                                "ProbModel": p25,
-                                "Odd": odd25,
-                                "ProbMarket": pm25,
-                                "Edge": edge25,
-                                "KellyTrue": k25,
-                            }
-                        )
-
-                    odd_btts = get_btts_odd(fx)
-                    if odd_btts > 1.01:
-                        pbtts_raw = prob_btts_yes_adjusted(lam_h, lam_a)
-                        pbtts = clamp_prob_btts(pbtts_raw)
-                        pmbtts = 1.0 / odd_btts
-                        edgebtts = clamp_edge_btts(pbtts - pmbtts)
-                        kbtts = kelly_fraction(pbtts, odd_btts)
-
-                        rows_btts.append(
-                            {
-                                **base_row,
-                                "Market": "BTTS",
-                                "ProbModel": pbtts,
-                                "Odd": odd_btts,
-                                "ProbMarket": pmbtts,
-                                "Edge": edgebtts,
-                                "KellyTrue": kbtts,
-                            }
-                        )
-
-                except Exception as e:
-                    total_fixture_errors += 1
-                    try:
-                        print(
-                            f"[ERR] fixture {league_key} | "
-                            f"{fx.get('HomeTeam', '?')} vs {fx.get('AwayTeam', '?')} -> {e}"
-                        )
-                    except Exception:
-                        print(f"[ERR] fixture {league_key}: erro ao processar jogo -> {e}")
-                    continue
-
-        except Exception as e:
-            print(f"[ERR] liga {league_key}: erro geral -> {e}")
-            continue
+        rows_for_league25, rows_for_league_btts, league_errors = process_league_fixtures(
+            fixtures=fixtures,
+            league_key=league_key,
+            league_meta=league_meta,
+            history_cfg=history_cfg,
+            window=window,
+            decay=decay,
+            min_games_home=min_games_home,
+            min_games_away=min_games_away,
+            data_raw_dir=BASE / "data_raw",
+        )
+        rows25.extend(rows_for_league25)
+        rows_btts.extend(rows_for_league_btts)
+        total_fixture_errors += league_errors
 
     print(f"[DBG] candidatos O2.5 gerados = {len(rows25)}")
     print(f"[DBG] candidatos BTTS gerados = {len(rows_btts)}")
