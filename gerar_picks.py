@@ -42,6 +42,12 @@ from src.output_utils import (
     load_history,
     merge_into_history,
 )
+from src.data_loader import (
+    load_fixtures,
+    normalize_columns,
+    _to_float,
+    get_btts_odd,
+)
 from src.integrations import (
     send_telegram_message,
     _send_in_chunks,
@@ -78,11 +84,6 @@ DEFAULT_MAX_ODD_BTTS = 2.20
 # =============================
 # Anti-duplicados (por dia)
 # =============================
-
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df.columns = [str(c).replace("\ufeff", "").strip() for c in df.columns]
-    return df
 
 
 # =============================
@@ -129,11 +130,7 @@ def main():
 
     GITHUB_RAW_URL = "https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv"
 
-    response = requests.get(GITHUB_RAW_URL)
-    response.raise_for_status()
-
-    fixtures = pd.read_csv(StringIO(response.text), sep=";")
-    fixtures = normalize_columns(fixtures)
+    fixtures = load_fixtures(GITHUB_RAW_URL)
 
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce")
     
@@ -178,26 +175,6 @@ def main():
     min_games_away = int(history_cfg.get("min_games_away", 8))
 
     leagues_cfg = cfg.get("leagues", {})
-
-    def _to_float(x, default=0.0):
-        try:
-            if x is None:
-                return float(default)
-            s = str(x).strip().replace(",", ".")
-            if s == "":
-                return float(default)
-            return float(s)
-        except Exception:
-            return float(default)
-
-    def get_btts_odd(fx_row) -> float:
-        candidates = ["Odd_BTTS_Yes", "Odd_BTTS", "Odd_BTTSYes", "Odd_Btts_Yes", "Odd_Btts"]
-        for col in candidates:
-            if col in fixtures.columns:
-                odd = _to_float(fx_row.get(col, 0.0), 0.0)
-                if odd > 1.01:
-                    return odd
-        return 0.0
 
     total_fixture_errors = 0
 
