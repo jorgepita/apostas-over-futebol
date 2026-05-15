@@ -1,19 +1,10 @@
-from pathlib import Path
-
 import pandas as pd
-from src.history import history_pick_id_from_simple
-
-BASE = Path(__file__).resolve().parent.parent
-HISTORY_PATH = BASE / "picks_history.csv"
+from src.history import HISTORY_COLUMNS, HISTORY_PATH, history_pick_id_from_simple
 
 
 def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    cols = [
-        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-        "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€",
-    ]
+    cols = HISTORY_COLUMNS
     for col in cols:
         if col not in df.columns:
             df[col] = ""
@@ -21,18 +12,13 @@ def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_history() -> pd.DataFrame:
-    cols = [
-        "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-        "Apostada", "OddReal", "StakeReal€",
-        "Resultado", "Lucro€", "LucroReal€",
-    ]
     if not HISTORY_PATH.exists():
-        return pd.DataFrame(columns=cols)
+        return pd.DataFrame(columns=HISTORY_COLUMNS)
     try:
         df = pd.read_csv(HISTORY_PATH, sep=";", dtype=str).fillna("")
         return ensure_simple_columns(df)
     except Exception:
-        return pd.DataFrame(columns=cols)
+        return pd.DataFrame(columns=HISTORY_COLUMNS)
 
 
 def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:

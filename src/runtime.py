@@ -15,7 +15,6 @@ def build_runtime_settings(cfg: dict) -> dict:
     run_cfg = cfg.get("run", {})
     return {
         "run_mode": "normal",
-        "run_cfg": run_cfg,
         "max_picks_per_day": int(run_cfg.get("max_picks_per_day", DEFAULT_MAX_PICKS_PER_DAY)),
         "max_picks_global": int(run_cfg.get("max_picks_global", DEFAULT_MAX_PICKS_GLOBAL)),
         "days_ahead": max(1, int(run_cfg.get("days_ahead", 1))),

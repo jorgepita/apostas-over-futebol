@@ -1,28 +1,16 @@
 # força deploy
 print("### TESTE NOVO CODIGO ###")
 
-import base64
-import requests
-from io import StringIO
-import math
 import os
 from pathlib import Path
-from urllib import request, parse, error
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
+from src.history import HISTORY_COLUMNS, HISTORY_PATH
 from src.state import (
     load_sent_state,
     save_sent_state,
     pick_id,
-)
-from src.history import (
-    history_pick_id_from_simple,
-)
-from src.output_utils import (
-    ensure_simple_columns,
-    load_history,
-    merge_into_history,
 )
 from src.config import (
     DEFAULT_CAP_FRAC,
@@ -67,7 +55,6 @@ from src.market_rules import (
 print("### TESTE NOVO CODIGO ###")
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
-HISTORY_PATH = BASE / "picks_history.csv"
 
 
 # =============================
@@ -82,13 +69,6 @@ HISTORY_PATH = BASE / "picks_history.csv"
 
 
 # =============================
-# Modo normal / teste
-# =============================
-def get_run_mode(cfg: dict) -> str:
-    return "normal"
-
-
-# =============================
 # Main
 # =============================
 def main():
@@ -98,11 +78,7 @@ def main():
     if os.getenv("RESET_HISTORY", "1") == "1":
         print("[DBG] RESET_HISTORY ativo -> limpar histórico")
        
-        pd.DataFrame(columns=[
-            "Data","Liga","Jogo","Mercado","Odd","Stake€","Edge%",
-            "Apostada","OddReal","StakeReal€",
-            "Resultado","Lucro€","LucroReal€"
-    ]).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
+        pd.DataFrame(columns=HISTORY_COLUMNS).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
     
     cfg = load_config(BASE)
 
@@ -258,20 +234,11 @@ def main():
         simple["Lucro€"] = ""
         simple["LucroReal€"] = ""
 
-        cols = [
-            "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-            "Apostada", "OddReal", "StakeReal€",
-            "Resultado", "Lucro€", "LucroReal€",
-        ]
-        simple = simple[cols].copy()
+        simple = simple[HISTORY_COLUMNS].copy()
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
     else:
-        simple = pd.DataFrame(columns=[
-            "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
-            "Apostada", "OddReal", "StakeReal€",
-            "Resultado", "Lucro€", "LucroReal€",
-        ])
+        simple = pd.DataFrame(columns=HISTORY_COLUMNS)
         simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
 
     # RESET TOTAL DO HISTÓRICO (modo produção inicial)
