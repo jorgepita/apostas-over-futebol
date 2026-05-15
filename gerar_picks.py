@@ -34,6 +34,12 @@ from src.runtime import (
     build_history_settings,
     build_runtime_settings,
 )
+from src.pipeline import (
+    persist_history,
+    process_notifications,
+    save_all_outputs,
+    upload_outputs,
+)
 from src.integrations import (
     send_telegram_message,
     _send_in_chunks,
@@ -204,51 +210,19 @@ def main():
                 max_global=max_picks_global,
             ).reset_index(drop=True)
 
-    out25_path = BASE / "picks_over25.csv"
-    out_btts_path = BASE / "picks_btts.csv"
-    combo_path = BASE / "picks_hoje.csv"
-
-    out25_final.to_csv(out25_path, index=False, encoding="utf-8", sep=";")
-    out_btts_final.to_csv(out_btts_path, index=False, encoding="utf-8", sep=";")
-    combo.to_csv(combo_path, index=False, encoding="utf-8", sep=";")
-
-    combo_github_path = BASE / "picks_hoje_github.csv"
-    combo.to_csv(combo_github_path, index=False, encoding="utf-8", sep=",")
-
-    simple_path = BASE / "picks_hoje_simplificado.csv"
-    if len(combo) > 0:
-        simple = combo.copy()
-        simple["Jogo"] = simple["HomeTeam"].astype(str) + " vs " + simple["AwayTeam"].astype(str)
-        simple["Data"] = simple["Date"].astype(str)
-        simple["Liga"] = simple["LeagueName"].astype(str)
-        simple["Mercado"] = simple["Market"].astype(str)
-
-        simple["Odd"] = pd.to_numeric(simple["Odd"], errors="coerce")
-        simple["Stake€"] = pd.to_numeric(simple.get("Stake€", 0.0), errors="coerce")
-        simple["Edge%"] = (pd.to_numeric(simple["Edge"], errors="coerce") * 100.0).round(2)
-
-        simple["Apostada"] = ""
-        simple["OddReal"] = ""
-        simple["StakeReal€"] = ""
-        simple["Resultado"] = ""
-        simple["Lucro€"] = ""
-        simple["LucroReal€"] = ""
-
-        simple = simple[HISTORY_COLUMNS].copy()
-        simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
-        simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
-    else:
-        simple = pd.DataFrame(columns=HISTORY_COLUMNS)
-        simple.to_csv(simple_path, index=False, encoding="utf-8", sep=";")
+    simple, out25_path, out_btts_path, combo_path, combo_github_path, simple_path = save_all_outputs(
+        out25_final=out25_final,
+        out_btts_final=out_btts_final,
+        combo=combo,
+        base_dir=BASE,
+    )
 
     # RESET TOTAL DO HISTÓRICO (modo produção inicial)
     
     today_str = datetime.now().date().isoformat()
     simple = simple[simple["Data"] >= today_str].copy()
 
-    history = simple.copy()
-
-    history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
+    history = persist_history(simple)
 
     print("OK. Gerados:")
     print(f"- {out25_path.name} ({len(out25_final)} picks)")
@@ -261,56 +235,16 @@ def main():
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()
 
-    if TELEGRAM_TOKEN and CHAT_ID:
-        try:
-            sent = load_sent_state(today_iso)
-
-            new25 = []
-            for r in df_to_rows(out25_final):
-                pid = pick_id(r)
-                if pid not in sent:
-                    new25.append(r)
-
-            new_btts = []
-            for r in df_to_rows(out_btts_final):
-                pid = pick_id(r)
-                if pid not in sent:
-                    new_btts.append(r)
-
-            msg_25 = build_message(new25, "PICKS OVER 2.5 (NOVAS)")
-            if msg_25:
-                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_25, "PICKS OVER 2.5")
-
-            msg_btts = build_message(new_btts, "PICKS BTTS (NOVAS)")
-            if msg_btts:
-                _send_in_chunks(TELEGRAM_TOKEN, CHAT_ID, msg_btts, "PICKS BTTS")
-
-            for r in new25:
-                sent.add(pick_id(r))
-            for r in new_btts:
-                sent.add(pick_id(r))
-
-            save_sent_state(today_iso, sent)
-
-            if msg_25:
-                print(f"Telegram: enviei {len(new25)} novas O2.5.")
-            else:
-                print("Telegram: sem novas picks O2.5.")
-
-            if msg_btts:
-                print(f"Telegram: enviei {len(new_btts)} novas BTTS.")
-            else:
-                print("Telegram: sem novas picks BTTS.")
-
-        except Exception as e:
-            print(f"Telegram: erro ao enviar -> {e}")
-    else:
-        print("Telegram: TOKEN ou CHAT_ID em falta (não enviei mensagem).")
+    process_notifications(
+        out25_final=out25_final,
+        out_btts_final=out_btts_final,
+        today_iso=today_iso,
+    )
 
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
-    upload_csvs_to_github(
+    upload_outputs(
         [out25_path, out_btts_path, combo_path, combo_github_path, simple_path, HISTORY_PATH],
         owner,
         repo,
