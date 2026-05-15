@@ -54,6 +54,9 @@ from src.market_rules import (
     get_effective_max_odd,
     get_market_thresholds,
     market_quality_filter,
+    add_rank_fields,
+    dedupe_correlated_picks,
+    limit_picks_per_day,
 )
 # força deploy
 print("### TESTE NOVO CODIGO ###")
@@ -97,111 +100,6 @@ def get_run_mode(cfg: dict) -> str:
 # =============================
 # Ranking limpo
 # =============================
-def add_rank_fields(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = df.copy()
-    for col in ["ProbModel", "ProbMarket", "Edge", "KellyTrue", "LambdaHome", "LambdaAway", "LambdaTotal", "Odd"]:
-        if col not in df.columns:
-            df[col] = 0.0
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
-
-    df["ProbGap"] = df["ProbModel"] - df["ProbMarket"]
-    return df
-
-
-def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = add_rank_fields(df.copy())
-    game_cols = ["Date", "League", "HomeTeam", "AwayTeam"]
-    keep_rows = []
-
-    for _, g in df.groupby(game_cols, dropna=False):
-        g = g.sort_values(
-            ["Edge", "KellyTrue", "ProbModel", "Odd"],
-            ascending=[False, False, False, False],
-        ).reset_index(drop=True)
-
-        winner = g.iloc[0].to_dict()
-        keep_rows.append(winner)
-
-        try:
-            date_txt = str(winner.get("Date", ""))
-            league_txt = str(winner.get("LeagueName", winner.get("League", "")))
-            game_txt = f"{winner.get('HomeTeam', '?')} vs {winner.get('AwayTeam', '?')}"
-            winner_market = str(winner.get("Market", ""))
-            winner_edge = float(winner.get("Edge", 0.0) or 0.0)
-            winner_kelly = float(winner.get("KellyTrue", 0.0) or 0.0)
-            winner_prob = float(winner.get("ProbModel", 0.0) or 0.0)
-            winner_odd = float(winner.get("Odd", 0.0) or 0.0)
-
-            if len(g) == 1:
-                print(
-                    f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
-                    f"única pick={winner_market} | "
-                    f"edge={winner_edge:.4f} | kelly={winner_kelly:.4f} | "
-                    f"prob={winner_prob:.4f} | odd={winner_odd:.2f}"
-                )
-            else:
-                losers = []
-                for i in range(1, len(g)):
-                    row = g.iloc[i]
-                    loser_market = str(row.get("Market", ""))
-                    loser_edge = float(row.get("Edge", 0.0) or 0.0)
-                    loser_kelly = float(row.get("KellyTrue", 0.0) or 0.0)
-                    loser_prob = float(row.get("ProbModel", 0.0) or 0.0)
-                    loser_odd = float(row.get("Odd", 0.0) or 0.0)
-                    losers.append(
-                        f"{loser_market}(edge={loser_edge:.4f}, kelly={loser_kelly:.4f}, "
-                        f"prob={loser_prob:.4f}, odd={loser_odd:.2f})"
-                    )
-
-                print(
-                    f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
-                    f"winner={winner_market}(edge={winner_edge:.4f}, kelly={winner_kelly:.4f}, "
-                    f"prob={winner_prob:.4f}, odd={winner_odd:.2f}) | "
-                    f"discarded=" + " ; ".join(losers)
-                )
-        except Exception as e:
-            print(f"[DBG] dedupe jogo | erro a construir log: {e}")
-
-    out = pd.DataFrame(keep_rows)
-    out = out.sort_values(
-        ["Date", "Edge", "KellyTrue", "ProbModel", "Odd"],
-        ascending=[True, False, False, False, False],
-    ).reset_index(drop=True)
-    return out
-
-
-def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | None = None) -> pd.DataFrame:
-    if df.empty:
-        return df
-
-    df = add_rank_fields(df.copy())
-    kept = []
-
-    for _, group in df.groupby("Date", sort=True, dropna=False):
-        group_sorted = group.sort_values(
-            ["Edge", "KellyTrue", "ProbModel", "Odd"],
-            ascending=[False, False, False, False],
-        ).head(max_per_day)
-        kept.append(group_sorted)
-
-    out = pd.concat(kept, ignore_index=True) if kept else df.iloc[0:0].copy()
-    out = out.sort_values(
-        ["Date", "Edge", "KellyTrue", "ProbModel", "Odd"],
-        ascending=[True, False, False, False, False],
-    ).reset_index(drop=True)
-
-    if max_global is not None and max_global > 0:
-        out = out.head(max_global).copy()
-
-    return out
-
-
 # =============================
 # Qualidade / correlação
 # =============================
