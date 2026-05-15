@@ -42,9 +42,9 @@ def get_market_thresholds(mode: str, market: str) -> dict:
             "odd_min": 1.55,
             "odd_max": DEFAULT_MAX_ODD_BTTS,
             "edge_min_quality": 0.00,
-            "max_lambda_ratio": 1.65,
-            "max_lambda_gap": 0.65,
-            "min_lambda_product": 0.80,
+            "max_lambda_ratio": 1.85,
+            "max_lambda_gap": 0.80,
+            "min_lambda_product": 0.70,
         }
 
     return base
@@ -229,11 +229,11 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
         edge_req = edge_min_base
 
         if odd >= 2.05:
-            edge_req += 0.04
-        elif odd >= 1.90:
             edge_req += 0.025
-        elif odd >= 1.75:
+        elif odd >= 1.90:
             edge_req += 0.015
+        elif odd >= 1.75:
+            edge_req += 0.010
 
         return edge_req
 

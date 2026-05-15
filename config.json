@@ -23,7 +23,14 @@
     "italia2": { "name": "Serie B", "country": "ITA" },
     "franca2": { "name": "Ligue 2", "country": "FRA" },
     "belgica": { "name": "Jupiler Pro League", "country": "BEL" },
-    "turquia": { "name": "Super Lig", "country": "TUR" }
+    "turquia": { "name": "Super Lig", "country": "TUR" },
+    "noruega": { "name": "Eliteserien", "country": "NOR" },
+    "suecia": { "name": "Allsvenskan", "country": "SWE" },
+    "finlandia": { "name": "Veikkausliiga", "country": "FIN" },
+    "islandia": { "name": "Besta deild", "country": "ISL" },
+    "mls": { "name": "MLS", "country": "USA" },
+    "japao": { "name": "J1 League", "country": "JPN" },
+    "coreia": { "name": "K League 1", "country": "KOR" }
   },
   "history": {
     "window": 12,
