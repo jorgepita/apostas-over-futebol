@@ -1,7 +1,12 @@
 ﻿import pandas as pd
+from collections import Counter
 
 DEFAULT_MAX_ODD_O25 = 2.20
 DEFAULT_MAX_ODD_BTTS = 2.20
+
+DEFAULT_KELLY_FRACTION = 0.18
+DEFAULT_CAP_FRAC = 0.04
+DEFAULT_DAILY_CAP_FRAC = 0.12
 
 
 def get_market_thresholds(mode: str, market: str) -> dict:
@@ -171,7 +176,153 @@ def limit_picks_per_day(df: pd.DataFrame, max_per_day: int, max_global: int | No
     return out
 
 
-def btts_balance_filter(row: dict, th: dict) -> tuple[bool, str]:
+def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: str, mode: str = "normal") -> pd.DataFrame:
+    if not rows:
+        print(f"[DBG] {label}: sem rows à entrada")
+        return pd.DataFrame()
+
+    print(f"[DBG] {label}: rows iniciais = {len(rows)}")
+
+    quality_counter = Counter()
+    filtered_rows = []
+
+    for r in rows:
+        ok, reason = evaluate_market_quality(r, mode=mode)
+        quality_counter[reason] += 1
+        if ok:
+            filtered_rows.append(r)
+
+    quality_parts = [f"{k}={v}" for k, v in sorted(quality_counter.items(), key=lambda x: (-x[1], x[0]))]
+    print(f"[DBG] {label}: quality reasons -> " + (" | ".join(quality_parts) if quality_parts else "sem dados"))
+    print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)} | mode={mode}")
+
+    if not filtered_rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(filtered_rows).copy()
+    df["Odd"] = pd.to_numeric(df["Odd"], errors="coerce")
+    df["Edge"] = pd.to_numeric(df["Edge"], errors="coerce")
+    df["KellyTrue"] = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+    df["ProbModel"] = pd.to_numeric(df["ProbModel"], errors="coerce").fillna(0.0)
+
+    df = df[df["Odd"] > 1.01].copy()
+    df = df[df["Edge"].notna()].copy()
+    print(f"[DBG] {label}: após odd/edge válidos = {len(df)}")
+
+    if df.empty:
+        return df
+
+    market_name = str(df["Market"].iloc[0]).strip().upper() if "Market" in df.columns and len(df) else label.strip().upper()
+    effective_max_odd = get_effective_max_odd(rules, market_name, mode)
+    df = df[df["Odd"] <= effective_max_odd].copy()
+    print(f"[DBG] {label}: após filtro odd_max = {len(df)} | odd_max={effective_max_odd:.2f}")
+
+    if df.empty:
+        return df
+
+    edge_min_base = float(rules.get("edge_min", 0.05))
+    edge_max = float(rules.get("edge_max", 0.15))
+
+    def dynamic_edge_min(row, edge_min_base):
+        odd = float(row.get("Odd", 0.0) or 0.0)
+
+        edge_req = edge_min_base
+
+        if odd >= 2.05:
+            edge_req += 0.04
+        elif odd >= 1.90:
+            edge_req += 0.025
+        elif odd >= 1.75:
+            edge_req += 0.015
+
+        return edge_req
+
+    df["EdgeMinDynamic"] = df.apply(lambda r: dynamic_edge_min(r, edge_min_base), axis=1)
+
+    df = df[
+        (df["Edge"] >= df["EdgeMinDynamic"]) &
+        (df["Edge"] <= edge_max)
+    ].copy()
+
+    print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
+
+    if df.empty:
+        return df
+
+    df = add_rank_fields(df)
+    df = dedupe_correlated_picks(df)
+
+    print(f"[DBG] {label}: após dedupe = {len(df)}")
+
+    return df
+
+
+def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    kfrac = float(rules.get("kelly_fraction", DEFAULT_KELLY_FRACTION))
+    cap_frac = float(rules.get("cap_frac", DEFAULT_CAP_FRAC))
+    daily_cap_frac = float(rules.get("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC))
+    min_picks = int(rules.get("min_picks", 1))
+
+    df = df.copy()
+
+    # base Kelly
+    kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
+
+    # confiança baseada no edge (0% → 0 | 10%+ → 1)
+    edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
+    confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
+
+    # stake ajustado
+    df["StakeFracRaw"] = kelly * kfrac * confidence_factor
+    df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
+
+    total_frac = float(df["StakeFrac"].sum())
+    scale = 1.0
+
+    if total_frac > daily_cap_frac and total_frac > 0:
+        scale = daily_cap_frac / total_frac
+        df["StakeFrac"] = df["StakeFrac"] * scale
+
+    df["Stake€"] = (df["StakeFrac"] * float(bankroll)).round(2)
+    df["DailyScale"] = float(scale)
+    df["Bankroll€"] = float(bankroll)
+
+    if len(df) < min_picks:
+        print(f"[DBG] {label}: abaixo de min_picks={min_picks}")
+        return df.iloc[0:0].copy()
+
+    df = df[df["Stake€"] > 0].copy()
+
+    print(
+        f"[DBG] {label}: final após stake = {len(df)} | "
+        f"kelly_fraction={kfrac} | cap_frac={cap_frac} | "
+        f"daily_cap_frac={daily_cap_frac} | scale={scale:.4f}"
+    )
+
+    round_cols = {
+        "LambdaHome": 3,
+        "LambdaAway": 3,
+        "LambdaTotal": 3,
+        "ProbModel": 3,
+        "ProbMarket": 3,
+        "ProbGap": 3,
+        "Edge": 4,
+        "KellyTrue": 4,
+        "StakeFracRaw": 4,
+        "StakeFrac": 4,
+        "Stake€": 2,
+    }
+    for col, dec in round_cols.items():
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").round(dec)
+
+    return df
+
+
+def btts_balance_filter(row: dict, th: dict) -> tuple[bool, str]: 
     lam_h = float(row.get("LambdaHome", 0.0) or 0.0)
     lam_a = float(row.get("LambdaAway", 0.0) or 0.0)
 
