@@ -30,6 +30,11 @@ from src.calculations import (
     clamp_edge_o25,
     clamp_edge_btts,
 )
+from src.state import (
+    load_sent_state,
+    save_sent_state,
+    pick_id,
+)
 # força deploy
 print("### TESTE NOVO CODIGO ###")
 BASE = Path(__file__).resolve().parent
@@ -49,30 +54,6 @@ DEFAULT_MAX_ODD_BTTS = 2.20
 # =============================
 # Anti-duplicados (por dia)
 # =============================
-def load_sent_state(today_iso: str) -> set[str]:
-    try:
-        if not SENT_STATE_PATH.exists():
-            return set()
-        data = json.loads(SENT_STATE_PATH.read_text(encoding="utf-8"))
-        if data.get("date") != today_iso:
-            return set()
-        sent_list = data.get("sent", [])
-        return set(sent_list) if isinstance(sent_list, list) else set()
-    except Exception:
-        return set()
-
-
-def save_sent_state(today_iso: str, sent: set[str]) -> None:
-    payload = {"date": today_iso, "sent": sorted(sent)}
-    SENT_STATE_PATH.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-
-def pick_id(row: dict) -> str:
-    return f"{row['Date']}|{row['League']}|{row['HomeTeam']}|{row['AwayTeam']}|{row['Market']}"
-
 
 def history_pick_id_from_simple(row: pd.Series) -> str:
     return (
