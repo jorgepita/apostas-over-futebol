@@ -14,7 +14,7 @@ def main():
 
     # ===== FUTEBOL =====
     run([py, "fetch_oddsapi_fixtures.py"])
-    run([py, "gerar_picks.py"])
+    run([py, "main.py"])
     run([py, "update_results.py"])
 
 
