@@ -1,12 +1,12 @@
 ﻿import pandas as pd
 from collections import Counter
-
-DEFAULT_MAX_ODD_O25 = 2.20
-DEFAULT_MAX_ODD_BTTS = 2.20
-
-DEFAULT_KELLY_FRACTION = 0.18
-DEFAULT_CAP_FRAC = 0.04
-DEFAULT_DAILY_CAP_FRAC = 0.12
+from src.config import (
+    DEFAULT_CAP_FRAC,
+    DEFAULT_DAILY_CAP_FRAC,
+    DEFAULT_KELLY_FRACTION,
+    DEFAULT_MAX_ODD_BTTS,
+    DEFAULT_MAX_ODD_O25,
+)
 
 
 def get_market_thresholds(mode: str, market: str) -> dict:

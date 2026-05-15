@@ -25,6 +25,16 @@ from src.output_utils import (
     load_history,
     merge_into_history,
 )
+from src.config import (
+    DEFAULT_CAP_FRAC,
+    DEFAULT_DAILY_CAP_FRAC,
+    DEFAULT_KELLY_FRACTION,
+    DEFAULT_MAX_ODD_BTTS,
+    DEFAULT_MAX_ODD_O25,
+    DEFAULT_MAX_PICKS_GLOBAL,
+    DEFAULT_MAX_PICKS_PER_DAY,
+    load_config,
+)
 from src.data_loader import (
     load_fixtures,
     normalize_columns,
@@ -54,15 +64,6 @@ print("### TESTE NOVO CODIGO ###")
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 HISTORY_PATH = BASE / "picks_history.csv"
-
-DEFAULT_MAX_PICKS_PER_DAY = 12
-DEFAULT_MAX_PICKS_GLOBAL = 36
-
-DEFAULT_KELLY_FRACTION = 0.18
-DEFAULT_CAP_FRAC = 0.04
-DEFAULT_DAILY_CAP_FRAC = 0.12
-DEFAULT_MAX_ODD_O25 = 2.20
-DEFAULT_MAX_ODD_BTTS = 2.20
 
 
 # =============================
@@ -99,10 +100,7 @@ def main():
             "Resultado","Lucro€","LucroReal€"
     ]).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
     
-    cfg_path = BASE / "config.json"
-    if not cfg_path.exists():
-        raise SystemExit("Falta config.json na pasta do projeto.")
-    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    cfg = load_config(BASE)
 
     run_mode = "normal"
     print(f"[DBG] gerar_picks mode={run_mode}")
