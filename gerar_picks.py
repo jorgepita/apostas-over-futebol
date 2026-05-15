@@ -36,6 +36,8 @@ from src.state import (
 )
 from src.history import (
     history_pick_id_from_simple,
+)
+from src.output_utils import (
     ensure_simple_columns,
     load_history,
     merge_into_history,
