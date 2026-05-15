@@ -48,6 +48,13 @@ from src.integrations import (
     build_message,
     upload_csvs_to_github,
 )
+from src.market_rules import (
+    btts_balance_filter,
+    evaluate_market_quality,
+    get_effective_max_odd,
+    get_market_thresholds,
+    market_quality_filter,
+)
 # força deploy
 print("### TESTE NOVO CODIGO ###")
 BASE = Path(__file__).resolve().parent
@@ -85,68 +92,6 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
 # =============================
 def get_run_mode(cfg: dict) -> str:
     return "normal"
-
-
-def get_market_thresholds(mode: str, market: str) -> dict:
-    market = str(market).strip().upper()
-
-    base = {
-        "lam_h_min": 0.0,
-        "lam_a_min": 0.0,
-        "lam_t_min": 0.0,
-        "odd_min": 1.01,
-        "odd_max": 99.0,
-        "edge_min_quality": -1.0,
-        "max_lambda_ratio": 99.0,
-        "max_lambda_gap": 99.0,
-        "min_lambda_product": 0.0,
-    }
-
-    if market == "O2.5":
-        return {
-            **base,
-            "lam_t_min": 1.90,
-            "odd_min": 1.55,
-            "odd_max": DEFAULT_MAX_ODD_O25,
-            "edge_min_quality": 0.00,
-        }
-
-    if market == "BTTS":
-        return {
-            **base,
-            "lam_h_min": 0.75,
-            "lam_a_min": 0.75,
-            "lam_t_min": 2.05,
-            "odd_min": 1.55,
-            "odd_max": DEFAULT_MAX_ODD_BTTS,
-            "edge_min_quality": 0.00,
-            "max_lambda_ratio": 1.65,
-            "max_lambda_gap": 0.65,
-            "min_lambda_product": 0.80,
-        }
-
-    return base
-
-
-def get_effective_max_odd(rules: dict, market: str, mode: str) -> float:
-    market = str(market).strip().upper()
-    th = get_market_thresholds(mode, market)
-    th_max = float(th.get("odd_max", 99.0))
-
-    if market == "O2.5":
-        fallback = DEFAULT_MAX_ODD_O25
-    elif market == "BTTS":
-        fallback = DEFAULT_MAX_ODD_BTTS
-    else:
-        fallback = th_max
-
-    rules_max = rules.get("odd_max", fallback)
-    try:
-        rules_max = float(rules_max)
-    except Exception:
-        rules_max = fallback
-
-    return float(min(th_max, rules_max))
 
 
 # =============================
