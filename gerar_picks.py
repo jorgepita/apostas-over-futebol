@@ -2,7 +2,6 @@
 print("### TESTE NOVO CODIGO ###")
 
 import base64
-import json
 import requests
 from io import StringIO
 import math
@@ -41,6 +40,11 @@ from src.data_loader import (
 )
 from src.pick_generation import (
     process_league_fixtures,
+)
+from src.runtime import (
+    build_bankroll_settings,
+    build_history_settings,
+    build_runtime_settings,
 )
 from src.integrations import (
     send_telegram_message,
@@ -102,12 +106,12 @@ def main():
     
     cfg = load_config(BASE)
 
-    run_mode = "normal"
+    runtime_settings = build_runtime_settings(cfg)
+    run_mode = runtime_settings["run_mode"]
+    max_picks_per_day = runtime_settings["max_picks_per_day"]
+    max_picks_global = runtime_settings["max_picks_global"]
+    days_ahead = runtime_settings["days_ahead"]
     print(f"[DBG] gerar_picks mode={run_mode}")
-
-    run_cfg = cfg.get("run", {})
-    max_picks_per_day = int(run_cfg.get("max_picks_per_day", DEFAULT_MAX_PICKS_PER_DAY))
-    max_picks_global = int(run_cfg.get("max_picks_global", DEFAULT_MAX_PICKS_GLOBAL))
     print(f"[DBG] max_picks_per_day={max_picks_per_day} | max_picks_global={max_picks_global}")
 
     GITHUB_RAW_URL = "https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv"
@@ -132,8 +136,6 @@ def main():
     except Exception:
         now_pt = datetime.utcnow()
 
-    days_ahead = int(cfg.get("run", {}).get("days_ahead", 1))
-    days_ahead = max(1, days_ahead)
     start = now_pt.date()
     end = start + timedelta(days=days_ahead - 1)
     today_iso = start.isoformat()
@@ -150,11 +152,12 @@ def main():
     rows25 = []
     rows_btts = []
 
-    history_cfg = cfg.get("history", {})
-    window = int(history_cfg.get("window", 12))
-    decay = float(history_cfg.get("decay", 0.90))
-    min_games_home = int(history_cfg.get("min_games_home", 8))
-    min_games_away = int(history_cfg.get("min_games_away", 8))
+    history_settings = build_history_settings(cfg)
+    history_cfg = history_settings["history_cfg"]
+    window = history_settings["window"]
+    decay = history_settings["decay"]
+    min_games_home = history_settings["min_games_home"]
+    min_games_away = history_settings["min_games_away"]
 
     leagues_cfg = cfg.get("leagues", {})
 
@@ -180,24 +183,11 @@ def main():
     print(f"[DBG] candidatos BTTS gerados = {len(rows_btts)}")
     print(f"[DBG] erros por fixture = {total_fixture_errors}")
 
-    bankroll_cfg = cfg.get("bankroll", {})
-    rules_cfg = cfg.get("rules", {})
-
-    bankroll25 = float(bankroll_cfg.get("over25", 0.0))
-    rules25 = dict(rules_cfg.get("over25", {}))
-    rules25.setdefault("edge_max", 0.16)
-    rules25.setdefault("odd_max", DEFAULT_MAX_ODD_O25)
-    rules25.setdefault("kelly_fraction", DEFAULT_KELLY_FRACTION)
-    rules25.setdefault("cap_frac", DEFAULT_CAP_FRAC)
-    rules25.setdefault("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC)
-
-    bankroll_btts = float(bankroll_cfg.get("btts", 0.0))
-    rules_btts = dict(rules_cfg.get("btts", {}))
-    rules_btts.setdefault("edge_max", 0.14)
-    rules_btts.setdefault("odd_max", DEFAULT_MAX_ODD_BTTS)
-    rules_btts.setdefault("kelly_fraction", DEFAULT_KELLY_FRACTION)
-    rules_btts.setdefault("cap_frac", DEFAULT_CAP_FRAC)
-    rules_btts.setdefault("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC)
+    bankroll_settings = build_bankroll_settings(cfg)
+    bankroll25 = bankroll_settings["bankroll25"]
+    rules25 = bankroll_settings["rules25"]
+    bankroll_btts = bankroll_settings["bankroll_btts"]
+    rules_btts = bankroll_settings["rules_btts"]
 
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
