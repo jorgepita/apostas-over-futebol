@@ -46,6 +46,7 @@ from src.integrations import (
     _send_in_chunks,
     df_to_rows,
     build_message,
+    upload_csvs_to_github,
 )
 # força deploy
 print("### TESTE NOVO CODIGO ###")
@@ -477,89 +478,6 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
             df[col] = pd.to_numeric(df[col], errors="coerce").round(dec)
 
     return df
-
-
-# =============================
-# GitHub upload
-# =============================
-def github_request(url: str, token: str, method: str = "GET", data: dict | None = None):
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Authorization": f"token {token}",
-        "User-Agent": "render-apostas-bot",
-    }
-    body = None
-    if data is not None:
-        body = json.dumps(data).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-
-    req = request.Request(url, data=body, headers=headers, method=method)
-    with request.urlopen(req, timeout=30) as resp:
-        raw = resp.read().decode("utf-8")
-        return json.loads(raw) if raw else {}
-
-
-def github_get_sha(owner: str, repo: str, path: str, branch: str, token: str) -> str | None:
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}?ref={parse.quote(branch)}"
-    try:
-        j = github_request(url, token, method="GET")
-        sha = j.get("sha")
-        return sha if isinstance(sha, str) else None
-    except error.HTTPError as e:
-        if e.code == 404:
-            return None
-        raise
-
-
-def github_put_file(
-    owner: str,
-    repo: str,
-    path: str,
-    content_bytes: bytes,
-    branch: str,
-    token: str,
-    message: str,
-) -> None:
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/{parse.quote(path)}"
-    sha = github_get_sha(owner, repo, path, branch, token)
-
-    payload = {
-        "message": message,
-        "content": base64.b64encode(content_bytes).decode("utf-8"),
-        "branch": branch,
-    }
-    if sha:
-        payload["sha"] = sha
-
-    _ = github_request(url, token, method="PUT", data=payload)
-
-
-def upload_csvs_to_github(files: list[Path], owner: str, repo: str, branch: str) -> None:
-    token = os.getenv("GITHUB_TOKEN", "").strip()
-    if not token:
-        print("GitHub: GITHUB_TOKEN em falta (não fiz upload).")
-        return
-
-    prefix = os.getenv("GITHUB_PATH_PREFIX", "").strip().strip("/")
-
-    ok = 0
-    for fp in files:
-        if not fp.exists():
-            continue
-
-        rel_path = fp.name if not prefix else f"{prefix}/{fp.name}"
-
-        try:
-            content = fp.read_bytes()
-            ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            msg = f"Update {fp.name} ({ts})"
-            github_put_file(owner, repo, rel_path, content, branch, token, msg)
-            ok += 1
-        except Exception as e:
-            print(f"GitHub: falhou upload de {fp.name} -> {e}")
-
-    print(f"GitHub: upload concluído ({ok}/{len(files)} ficheiros).")
 
 
 # =============================
