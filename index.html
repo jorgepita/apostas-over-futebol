@@ -209,6 +209,105 @@
       font-size: 14px;
     }
 
+    .league-analytics-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .league-analytics-compact-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .league-analytics-scroll {
+      overflow: auto;
+      max-width: 100%;
+      max-height: min(70vh, 560px);
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .league-analytics-table {
+      min-width: 980px;
+      margin: 0;
+    }
+
+    .league-analytics-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: #fafafa;
+      box-shadow: 0 1px 0 var(--line);
+    }
+
+    .league-analytics-table .league-analytics-emphasis {
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .league-analytics-table tbody tr.league-tier-row td {
+      transition: background-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .league-analytics-table tbody tr.league-tier-elite td {
+      background: #f0fdf4;
+    }
+
+    .league-analytics-table tbody tr.league-tier-strong td {
+      background: #eff6ff;
+    }
+
+    .league-analytics-table tbody tr.league-tier-neutral td {
+      background: #fffbeb;
+    }
+
+    .league-analytics-table tbody tr.league-tier-weak td {
+      background: #fef2f2;
+    }
+
+    .league-analytics-table tbody tr.league-tier-unproven td {
+      background: #f8fafc;
+    }
+
+    .league-analytics-table tbody tr.league-tier-row:hover td {
+      box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.045);
+    }
+
+    .league-analytics-scroll.is-compact .league-analytics-table th,
+    .league-analytics-scroll.is-compact .league-analytics-table td {
+      padding: 5px 8px;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .league-analytics-scroll.is-compact .league-analytics-table .mini {
+      font-size: 9px;
+      padding: 1px 4px;
+    }
+
+  body.compact .league-analytics-scroll.is-compact .league-analytics-table th,
+  body.compact .league-analytics-scroll.is-compact .league-analytics-table td {
+      padding: 4px 6px;
+      font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+      .league-analytics-scroll {
+        max-height: min(65vh, 480px);
+      }
+
+      .league-analytics-table {
+        min-width: 920px;
+      }
+    }
+
     .mini {
       font-size: 10px;
       font-weight: 700;
@@ -1129,13 +1228,18 @@ button.dirty {
         </select>
       </div>
     </div>
-    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="league-analytics-toolbar">
+      <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
+    </div>
+    <div class="table-wrap league-analytics-scroll">
       <table class="league-analytics-table">
         <thead>
           <tr>
             <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col">Market</th>
-            <th class="league-analytics-sort is-sorted is-desc" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
+            <th scope="col" class="league-analytics-emphasis">Confidence Score</th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1183,13 +1287,18 @@ button.dirty {
         </select>
       </div>
     </div>
-    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="league-analytics-toolbar">
+      <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
+    </div>
+    <div class="table-wrap league-analytics-scroll">
       <table class="league-analytics-table">
         <thead>
           <tr>
             <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col">Market</th>
-            <th class="league-analytics-sort is-sorted is-desc" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
+            <th scope="col" class="league-analytics-emphasis">Confidence Score</th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1688,6 +1797,63 @@ button.dirty {
         return LEAGUE_TIER_BADGE[key] || 'tier-unproven';
       }
 
+      function leagueTierRowClass(tier) {
+        const key = String(tier || 'Unproven').trim().toLowerCase();
+        const allowed = ['elite', 'strong', 'neutral', 'weak', 'unproven'];
+        return `league-tier-row league-tier-${allowed.includes(key) ? key : 'unproven'}`;
+      }
+
+      function leagueActionBadgeClass(action) {
+        switch (action) {
+          case 'Priorizar':
+            return 'good';
+          case 'Monitorizar':
+            return 'info';
+          case 'Reduzir':
+            return 'bad';
+          case 'Neutro':
+            return 'warn';
+          default:
+            return 'neutral';
+        }
+      }
+
+      function deriveLeagueRecommendedAction(row) {
+        const tier = cleanString(row.Tier || 'Unproven');
+        const roi = num(row['ROI%']) ?? 0;
+        const picks = num(row.TotalPicks) ?? 0;
+
+        if (picks < 3) return 'Aguardar';
+        if (tier === 'Elite' || (tier === 'Strong' && roi >= 5)) return 'Priorizar';
+        if (tier === 'Strong' || (tier === 'Neutral' && roi >= 0)) return 'Monitorizar';
+        if (tier === 'Weak' || roi < -5) return 'Reduzir';
+        if (tier === 'Neutral') return 'Neutro';
+        return 'Aguardar';
+      }
+
+      function deriveLeagueConfidenceScore(row) {
+        const tier = cleanString(row.Tier || 'Unproven');
+        const picks = num(row.TotalPicks) ?? 0;
+        const roi = num(row['ROI%']) ?? 0;
+        const wr = num(row['WinRate%']) ?? 0;
+
+        const tierBase = {
+          Elite: 85,
+          Strong: 72,
+          Neutral: 55,
+          Weak: 35,
+          Unproven: 25
+        }[tier] ?? 25;
+
+        const sampleFactor = Math.min(picks / 10, 1) * 15;
+        const roiAdj = Math.max(-15, Math.min(15, roi * 0.8));
+        const wrAdj = Math.max(-10, Math.min(10, (wr - 50) * 0.2));
+        const samplePenalty = picks < 3 ? 0.55 : 1;
+
+        const score = tierBase * samplePenalty + sampleFactor + roiAdj + wrAdj;
+        return Math.round(Math.max(0, Math.min(100, score)));
+      }
+
       function fmtLeaguePct(v, digits = 1) {
         const n = num(v);
         if (n === null) return '—';
@@ -1915,6 +2081,33 @@ button.dirty {
         });
       }
 
+      const LEAGUE_ANALYTICS_COMPACT_KEY = 'league_analytics_compact';
+
+      function applyLeagueAnalyticsCompactMode(enabled) {
+        document.querySelectorAll('.league-analytics-scroll').forEach(el => {
+          el.classList.toggle('is-compact', enabled);
+        });
+        document.querySelectorAll('.league-analytics-compact-btn').forEach(btn => {
+          btn.classList.toggle('active', enabled);
+          btn.textContent = enabled ? 'Densidade normal' : 'Densidade compacta';
+        });
+        localStorage.setItem(LEAGUE_ANALYTICS_COMPACT_KEY, enabled ? '1' : '0');
+      }
+
+      function loadLeagueAnalyticsCompactMode() {
+        applyLeagueAnalyticsCompactMode(localStorage.getItem(LEAGUE_ANALYTICS_COMPACT_KEY) === '1');
+      }
+
+      function bindLeagueAnalyticsCompact() {
+        if (document.body.dataset.leagueCompactBound === '1') return;
+        document.body.dataset.leagueCompactBound = '1';
+        document.body.addEventListener('click', e => {
+          if (!e.target.classList.contains('league-analytics-compact-btn')) return;
+          const enabled = !document.querySelector('.league-analytics-scroll')?.classList.contains('is-compact');
+          applyLeagueAnalyticsCompactMode(enabled);
+        });
+      }
+
       function bindLeagueAnalyticsFilters() {
         if (document.body.dataset.leagueFiltersBound === '1') return;
         document.body.dataset.leagueFiltersBound = '1';
@@ -1966,23 +2159,32 @@ button.dirty {
 
         renderLeagueAnalyticsInsights(filteredRows);
 
+        const colSpan = 9;
         let html;
         if (!baseRows.length) {
-          html = '<tr><td colspan="7" class="note">Sem dados em league_stats.csv.</td></tr>';
+          html = `<tr><td colspan="${colSpan}" class="note">Sem dados em league_stats.csv.</td></tr>`;
         } else if (!filteredRows.length) {
-          html = '<tr><td colspan="7" class="note">Nenhum resultado para os filtros atuais.</td></tr>';
+          html = `<tr><td colspan="${colSpan}" class="note">Nenhum resultado para os filtros atuais.</td></tr>`;
         } else {
           html = rows.map(row => {
             const tier = row.Tier || 'Unproven';
             const tierCls = leagueTierBadgeClass(tier);
+            const rowCls = leagueTierRowClass(tier);
+            const action = deriveLeagueRecommendedAction(row);
+            const actionCls = leagueActionBadgeClass(action);
+            const confidence = deriveLeagueConfidenceScore(row);
             const kelly = num(row.AvgKelly);
             const picks = num(row.TotalPicks);
+            const roi = num(row['ROI%']);
+            const roiCls = roi !== null && roi < 0 ? 'bad' : roi !== null && roi > 0 ? 'good' : '';
 
             return `
-              <tr>
+              <tr class="${rowCls}">
                 <td>${escapeHtml(row.League || '—')}</td>
                 <td>${escapeHtml(row.Market || '—')}</td>
-                <td>${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
+                <td class="league-analytics-emphasis ${roiCls}">${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
+                <td><span class="mini ${actionCls} league-analytics-emphasis">${escapeHtml(action)}</span></td>
+                <td class="league-analytics-emphasis">${escapeHtml(String(confidence))}</td>
                 <td>${escapeHtml(fmtLeaguePct(row['WinRate%']))}</td>
                 <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
                 <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
@@ -4271,6 +4473,8 @@ buttons.forEach(btn => {
         bindMobileActionsButton();
         bindLeagueAnalyticsSort();
         bindLeagueAnalyticsFilters();
+        bindLeagueAnalyticsCompact();
+        loadLeagueAnalyticsCompactMode();
 
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
