@@ -280,6 +280,11 @@
       box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.045);
     }
 
+    .league-analytics-table tbody tr td.league-confidence-cell {
+      background-color: rgba(22, 163, 74, var(--league-conf-alpha, 0.08));
+      transition: background-color 0.12s ease;
+    }
+
     .league-analytics-scroll.is-compact .league-analytics-table th,
     .league-analytics-scroll.is-compact .league-analytics-table td {
       padding: 5px 8px;
@@ -1265,7 +1270,7 @@ button.dirty {
             <th scope="col">Market</th>
             <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
-            <th scope="col" class="league-analytics-emphasis">Confidence Score</th>
+            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1324,7 +1329,7 @@ button.dirty {
             <th scope="col">Market</th>
             <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
-            <th scope="col" class="league-analytics-emphasis">Confidence Score</th>
+            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1857,27 +1862,65 @@ button.dirty {
         return 'Aguardar';
       }
 
-      function deriveLeagueConfidenceScore(row) {
-        const tier = cleanString(row.Tier || 'Unproven');
+      function leagueClampScore(v) {
+        return Math.max(0, Math.min(100, v));
+      }
+
+      function leagueNormalizeRoiScore(roi) {
+        if (roi === null) return 50;
+        return leagueClampScore(((roi + 15) / 35) * 100);
+      }
+
+      function leagueNormalizeWinRateScore(wr) {
+        if (wr === null) return 50;
+        return leagueClampScore(((wr - 35) / 30) * 100);
+      }
+
+      function leagueNormalizeKellyScore(kelly) {
+        if (kelly === null) return 35;
+        const k = Math.max(0, kelly);
+        return leagueClampScore(25 + (Math.min(k, 0.75) / 0.75) * 75);
+      }
+
+      function leagueNormalizeSampleScore(picks) {
+        const p = Math.max(0, Math.floor(picks ?? 0));
+        if (p === 0) return 0;
+        return leagueClampScore((Math.log1p(p) / Math.log1p(25)) * 100);
+      }
+
+      function leagueSamplePenaltyMultiplier(picks) {
+        const p = Math.max(0, Math.floor(picks ?? 0));
+        if (p <= 1) return 0.48;
+        if (p === 2) return 0.62;
+        if (p === 3) return 0.74;
+        if (p <= 5) return 0.86;
+        if (p <= 7) return 0.94;
+        return 1;
+      }
+
+      function calculateConfidenceScore(row) {
+        const roi = num(row['ROI%']);
+        const wr = num(row['WinRate%']);
+        const kelly = num(row.AvgKelly);
         const picks = num(row.TotalPicks) ?? 0;
-        const roi = num(row['ROI%']) ?? 0;
-        const wr = num(row['WinRate%']) ?? 0;
 
-        const tierBase = {
-          Elite: 85,
-          Strong: 72,
-          Neutral: 55,
-          Weak: 35,
-          Unproven: 25
-        }[tier] ?? 25;
+        const roiScore = leagueNormalizeRoiScore(roi);
+        const wrScore = leagueNormalizeWinRateScore(wr);
+        const kellyScore = leagueNormalizeKellyScore(kelly);
+        const sampleScore = leagueNormalizeSampleScore(picks);
 
-        const sampleFactor = Math.min(picks / 10, 1) * 15;
-        const roiAdj = Math.max(-15, Math.min(15, roi * 0.8));
-        const wrAdj = Math.max(-10, Math.min(10, (wr - 50) * 0.2));
-        const samplePenalty = picks < 3 ? 0.55 : 1;
+        const weighted =
+          roiScore * 0.35 +
+          wrScore * 0.25 +
+          kellyScore * 0.20 +
+          sampleScore * 0.20;
 
-        const score = tierBase * samplePenalty + sampleFactor + roiAdj + wrAdj;
-        return Math.round(Math.max(0, Math.min(100, score)));
+        return Math.round(leagueClampScore(weighted * leagueSamplePenaltyMultiplier(picks)));
+      }
+
+      function leagueConfidenceCellAlpha(score) {
+        const s = Math.max(0, Math.min(100, score ?? 0));
+        return (0.05 + (s / 100) * 0.2).toFixed(3);
       }
 
       function fmtLeaguePct(v, digits = 1) {
@@ -1892,6 +1935,8 @@ button.dirty {
             return cleanString(row.League || '').toLowerCase();
           case 'ROI%':
             return num(row['ROI%']) ?? -Infinity;
+          case 'ConfidenceScore':
+            return calculateConfidenceScore(row);
           case 'WinRate%':
             return num(row['WinRate%']) ?? -Infinity;
           case 'AvgKelly':
@@ -2198,7 +2243,8 @@ button.dirty {
             const rowCls = leagueTierRowClass(tier);
             const action = deriveLeagueRecommendedAction(row);
             const actionCls = leagueActionBadgeClass(action);
-            const confidence = deriveLeagueConfidenceScore(row);
+            const confidence = calculateConfidenceScore(row);
+            const confAlpha = leagueConfidenceCellAlpha(confidence);
             const kelly = num(row.AvgKelly);
             const picks = num(row.TotalPicks);
             const roi = num(row['ROI%']);
@@ -2210,7 +2256,7 @@ button.dirty {
                 <td>${escapeHtml(row.Market || '—')}</td>
                 <td class="league-analytics-emphasis ${roiCls}">${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
                 <td><span class="mini ${actionCls} league-analytics-emphasis">${escapeHtml(action)}</span></td>
-                <td class="league-analytics-emphasis">${escapeHtml(String(confidence))}</td>
+                <td class="league-analytics-emphasis league-confidence-cell" style="--league-conf-alpha:${confAlpha}">${escapeHtml(String(confidence))}</td>
                 <td>${escapeHtml(fmtLeaguePct(row['WinRate%']))}</td>
                 <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
                 <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
