@@ -265,7 +265,7 @@
     }
 
     .league-analytics-table tbody tr.league-tier-neutral td {
-      background: #fffbeb;
+      background: #fff7ed;
     }
 
     .league-analytics-table tbody tr.league-tier-weak td {
@@ -273,7 +273,7 @@
     }
 
     .league-analytics-table tbody tr.league-tier-unproven td {
-      background: #f8fafc;
+      background: #f1f5f9;
     }
 
     .league-analytics-table tbody tr.league-tier-row:hover td {
@@ -735,6 +735,32 @@ button,
 .table-wrap td:nth-child(4),
 .table-wrap th:nth-child(4) {
   box-shadow: 4px 0 6px rgba(0,0,0,0.05);
+}
+
+/* League Analytics: tier row backgrounds (override sticky column whites) */
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-elite td,
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-elite) td {
+  background: #f0fdf4;
+}
+
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-strong td,
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-strong) td {
+  background: #eff6ff;
+}
+
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-neutral td,
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-neutral) td {
+  background: #fff7ed;
+}
+
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-weak td,
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-weak) td {
+  background: #fef2f2;
+}
+
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-unproven td,
+.league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-unproven) td {
+  background: #f1f5f9;
 }
 
 /* =========================
