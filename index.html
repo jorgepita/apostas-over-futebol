@@ -285,6 +285,26 @@
       transition: background-color 0.12s ease;
     }
 
+    .league-stake-badge.good {
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+
+    .league-stake-badge.neutral {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .league-stake-badge.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .league-stake-badge.bad {
+      background: var(--bad-bg);
+      color: var(--bad);
+    }
+
     .league-analytics-scroll.is-compact .league-analytics-table th,
     .league-analytics-scroll.is-compact .league-analytics-table td {
       padding: 5px 8px;
@@ -309,7 +329,7 @@
       }
 
       .league-analytics-table {
-        min-width: 920px;
+        min-width: 1000px;
       }
     }
 
@@ -1271,6 +1291,7 @@ button.dirty {
             <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
             <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1330,6 +1351,7 @@ button.dirty {
             <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
             <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
             <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -1838,6 +1860,8 @@ button.dirty {
         switch (action) {
           case 'Priorizar':
             return 'good';
+          case 'Favorável':
+            return 'info';
           case 'Monitorizar':
             return 'info';
           case 'Reduzir':
@@ -1849,17 +1873,91 @@ button.dirty {
         }
       }
 
-      function deriveLeagueRecommendedAction(row) {
+      const LEAGUE_ACTION_CODE_LABEL = {
+        PRIORITIZE: 'Priorizar',
+        FAVORABLE: 'Favorável',
+        MONITOR: 'Monitorizar',
+        CAUTION: 'Reduzir',
+        AVOID: 'Aguardar'
+      };
+
+      function deriveLeagueActionCode(row) {
         const tier = cleanString(row.Tier || 'Unproven');
         const roi = num(row['ROI%']) ?? 0;
         const picks = num(row.TotalPicks) ?? 0;
 
-        if (picks < 3) return 'Aguardar';
-        if (tier === 'Elite' || (tier === 'Strong' && roi >= 5)) return 'Priorizar';
-        if (tier === 'Strong' || (tier === 'Neutral' && roi >= 0)) return 'Monitorizar';
-        if (tier === 'Weak' || roi < -5) return 'Reduzir';
-        if (tier === 'Neutral') return 'Neutro';
-        return 'Aguardar';
+        if (picks < 3) return 'AVOID';
+        if (tier === 'Elite' || (tier === 'Strong' && roi >= 8)) return 'PRIORITIZE';
+        if (tier === 'Strong' || (tier === 'Neutral' && roi >= 5)) return 'FAVORABLE';
+        if (tier === 'Neutral' && roi >= 0) return 'MONITOR';
+        if (tier === 'Weak' || roi < -5) return 'CAUTION';
+        return 'AVOID';
+      }
+
+      function deriveLeagueRecommendedAction(row) {
+        return LEAGUE_ACTION_CODE_LABEL[deriveLeagueActionCode(row)] || 'Aguardar';
+      }
+
+      const LEAGUE_STAKE_ACTION_BASE = {
+        PRIORITIZE: 1.28,
+        FAVORABLE: 1.12,
+        MONITOR: 1.00,
+        CAUTION: 0.82,
+        AVOID: 0.50
+      };
+
+      const LEAGUE_STAKE_TIER_NUDGE = {
+        Elite: 0.04,
+        Strong: 0.02,
+        Neutral: 0,
+        Weak: -0.04,
+        Unproven: -0.06
+      };
+
+      function leagueClampStakeMultiplier(v) {
+        return Math.round(Math.max(0.5, Math.min(1.5, v)) * 100) / 100;
+      }
+
+      function calculateStakeMultiplier(row) {
+        const action = deriveLeagueActionCode(row);
+        const confidence = calculateConfidenceScore(row);
+        const roi = num(row['ROI%']) ?? 0;
+        const picks = num(row.TotalPicks) ?? 0;
+        const tier = cleanString(row.Tier || 'Unproven');
+
+        let mult = LEAGUE_STAKE_ACTION_BASE[action] ?? 1;
+
+        const confCentered = (confidence - 50) / 50;
+        if (action === 'PRIORITIZE' || action === 'FAVORABLE') {
+          mult += Math.max(0, confCentered) * 0.12;
+        } else if (action === 'CAUTION' || action === 'AVOID') {
+          mult += Math.min(0, confCentered) * 0.08;
+        } else {
+          mult += confCentered * 0.04;
+        }
+
+        if (action === 'PRIORITIZE' && confidence >= 70) {
+          mult += 0.06 + ((confidence - 70) / 30) * 0.08;
+        }
+
+        mult += LEAGUE_STAKE_TIER_NUDGE[tier] ?? 0;
+        mult += Math.max(-0.05, Math.min(0.05, roi / 100));
+
+        if (picks < 5 && mult > 1.05) {
+          mult -= (5 - picks) * 0.03;
+        }
+
+        return leagueClampStakeMultiplier(mult);
+      }
+
+      function fmtLeagueStakeMultiplier(mult) {
+        return `×${fmt(mult, 2)}`;
+      }
+
+      function leagueStakeBadgeClass(mult) {
+        if (mult >= 1.12) return 'good';
+        if (mult <= 0.92) return mult <= 0.65 ? 'bad' : 'warn';
+        return 'neutral';
       }
 
       function leagueClampScore(v) {
@@ -1937,6 +2035,8 @@ button.dirty {
             return num(row['ROI%']) ?? -Infinity;
           case 'ConfidenceScore':
             return calculateConfidenceScore(row);
+          case 'DynamicStake':
+            return calculateStakeMultiplier(row);
           case 'WinRate%':
             return num(row['WinRate%']) ?? -Infinity;
           case 'AvgKelly':
@@ -2230,7 +2330,7 @@ button.dirty {
 
         renderLeagueAnalyticsInsights(filteredRows);
 
-        const colSpan = 9;
+        const colSpan = 10;
         let html;
         if (!baseRows.length) {
           html = `<tr><td colspan="${colSpan}" class="note">Sem dados em league_stats.csv.</td></tr>`;
@@ -2245,6 +2345,8 @@ button.dirty {
             const actionCls = leagueActionBadgeClass(action);
             const confidence = calculateConfidenceScore(row);
             const confAlpha = leagueConfidenceCellAlpha(confidence);
+            const stakeMult = calculateStakeMultiplier(row);
+            const stakeCls = leagueStakeBadgeClass(stakeMult);
             const kelly = num(row.AvgKelly);
             const picks = num(row.TotalPicks);
             const roi = num(row['ROI%']);
@@ -2257,6 +2359,7 @@ button.dirty {
                 <td class="league-analytics-emphasis ${roiCls}">${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
                 <td><span class="mini ${actionCls} league-analytics-emphasis">${escapeHtml(action)}</span></td>
                 <td class="league-analytics-emphasis league-confidence-cell" style="--league-conf-alpha:${confAlpha}">${escapeHtml(String(confidence))}</td>
+                <td class="league-analytics-emphasis"><span class="mini league-stake-badge ${stakeCls}">${escapeHtml(fmtLeagueStakeMultiplier(stakeMult))}</span></td>
                 <td>${escapeHtml(fmtLeaguePct(row['WinRate%']))}</td>
                 <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
                 <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
