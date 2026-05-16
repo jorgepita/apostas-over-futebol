@@ -201,6 +201,14 @@
       content: '↕';
     }
 
+    .league-analytics-insights .stat {
+      min-width: 0;
+    }
+
+    .league-analytics-insights .value {
+      font-size: 14px;
+    }
+
     .mini {
       font-size: 10px;
       font-weight: 700;
@@ -1097,6 +1105,30 @@ button.dirty {
   <div class="card" style="margin-top:18px;">
     <div class="label">League Analytics</div>
     <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
+    <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
+    <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
+      <div>
+        <label class="label">Pesquisar liga</label>
+        <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
+      </div>
+      <div>
+        <label class="label">Tier</label>
+        <select class="league-analytics-tier-filter">
+          <option value="">Todos os tiers</option>
+          <option value="Elite">Elite</option>
+          <option value="Strong">Strong</option>
+          <option value="Neutral">Neutral</option>
+          <option value="Weak">Weak</option>
+          <option value="Unproven">Unproven</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">Mercado</label>
+        <select class="league-analytics-market-filter">
+          <option value="">Todos os mercados</option>
+        </select>
+      </div>
+    </div>
     <div class="table-wrap" style="overflow-x:auto;">
       <table class="league-analytics-table">
         <thead>
@@ -1127,6 +1159,30 @@ button.dirty {
   <div class="card" style="margin-top:18px;">
     <div class="label">League Analytics</div>
     <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
+    <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
+    <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
+      <div>
+        <label class="label">Pesquisar liga</label>
+        <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
+      </div>
+      <div>
+        <label class="label">Tier</label>
+        <select class="league-analytics-tier-filter">
+          <option value="">Todos os tiers</option>
+          <option value="Elite">Elite</option>
+          <option value="Strong">Strong</option>
+          <option value="Neutral">Neutral</option>
+          <option value="Weak">Weak</option>
+          <option value="Unproven">Unproven</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">Mercado</label>
+        <select class="league-analytics-market-filter">
+          <option value="">Todos os mercados</option>
+        </select>
+      </div>
+    </div>
     <div class="table-wrap" style="overflow-x:auto;">
       <table class="league-analytics-table">
         <thead>
@@ -1624,6 +1680,8 @@ button.dirty {
       };
 
       let leagueAnalyticsSort = { key: 'ROI%', dir: 'desc' };
+      let leagueAnalyticsFilters = { tier: '', market: '', search: '' };
+      let leagueAnalyticsMarketsSig = '';
 
       function leagueTierBadgeClass(tier) {
         const key = String(tier || '').trim();
@@ -1715,6 +1773,177 @@ button.dirty {
         });
       }
 
+      function getLeagueAnalyticsRows() {
+        return (state.leagueStats || [])
+          .map(normalizeLeagueStatsRow)
+          .filter(r => r.League || r.Market);
+      }
+
+      function applyLeagueAnalyticsFilters(rows) {
+        const tier = cleanString(leagueAnalyticsFilters.tier);
+        const market = cleanString(leagueAnalyticsFilters.market);
+        const q = cleanString(leagueAnalyticsFilters.search).toLowerCase();
+
+        return rows.filter(r => {
+          if (tier && cleanString(r.Tier) !== tier) return false;
+          if (market && cleanString(r.Market) !== market) return false;
+          if (q && !cleanString(r.League).toLowerCase().includes(q)) return false;
+          return true;
+        });
+      }
+
+      function syncLeagueAnalyticsFilterControls(field, value) {
+        if (field === 'search') {
+          document.querySelectorAll('.league-analytics-search').forEach(el => {
+            if (el.value !== value) el.value = value;
+          });
+          return;
+        }
+        if (field === 'tier') {
+          document.querySelectorAll('.league-analytics-tier-filter').forEach(el => {
+            if (el.value !== value) el.value = value;
+          });
+          return;
+        }
+        if (field === 'market') {
+          document.querySelectorAll('.league-analytics-market-filter').forEach(el => {
+            if (el.value !== value) el.value = value;
+          });
+        }
+      }
+
+      function fillLeagueAnalyticsFilterOptions(force = false) {
+        const rows = getLeagueAnalyticsRows();
+        const sig = rows.map(r => cleanString(r.Market)).sort().join('|');
+        if (!force && sig === leagueAnalyticsMarketsSig) return;
+        leagueAnalyticsMarketsSig = sig;
+
+        const markets = [...new Set(rows.map(r => cleanString(r.Market)).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, 'pt', { sensitivity: 'base' }));
+        let currentMarket = leagueAnalyticsFilters.market;
+        if (currentMarket && !markets.includes(currentMarket)) {
+          currentMarket = '';
+          leagueAnalyticsFilters.market = '';
+        }
+
+        document.querySelectorAll('.league-analytics-market-filter').forEach(sel => {
+          const options = ['<option value="">Todos os mercados</option>']
+            .concat(markets.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`));
+          sel.innerHTML = options.join('');
+          sel.value = currentMarket;
+        });
+      }
+
+      function setLeagueAnalyticsFilters(partial) {
+        leagueAnalyticsFilters = { ...leagueAnalyticsFilters, ...partial };
+      }
+
+      function getLeagueMetricValue(row, metric) {
+        switch (metric) {
+          case 'roi':
+            return num(row['ROI%']) ?? -Infinity;
+          case 'winrate':
+            return num(row['WinRate%']) ?? -Infinity;
+          case 'kelly':
+            return num(row.AvgKelly) ?? -Infinity;
+          case 'picks':
+            return num(row.TotalPicks) ?? -Infinity;
+          default:
+            return -Infinity;
+        }
+      }
+
+      function pickLeagueBestRow(rows, metric) {
+        if (!rows.length) return null;
+
+        return rows.reduce((best, row) => {
+          const v = getLeagueMetricValue(row, metric);
+          const bv = getLeagueMetricValue(best, metric);
+          if (v > bv) return row;
+          if (v === bv) {
+            const la = cleanString(row.League || '').toLowerCase();
+            const lb = cleanString(best.League || '').toLowerCase();
+            if (la !== lb) return la < lb ? row : best;
+            const ma = cleanString(row.Market || '').toLowerCase();
+            const mb = cleanString(best.Market || '').toLowerCase();
+            return ma < mb ? row : best;
+          }
+          return best;
+        });
+      }
+
+      function formatLeagueInsightSub(row, metric) {
+        const market = cleanString(row.Market || '—');
+        switch (metric) {
+          case 'roi':
+            return `${market} · ${fmtLeaguePct(row['ROI%'])} ROI`;
+          case 'winrate':
+            return `${market} · ${fmtLeaguePct(row['WinRate%'])} WR`;
+          case 'kelly': {
+            const k = num(row.AvgKelly);
+            return `${market} · Kelly ${k === null ? '—' : fmt(k, k >= 1 ? 2 : 4)}`;
+          }
+          case 'picks': {
+            const p = num(row.TotalPicks);
+            return `${market} · ${p === null ? '—' : Math.round(p)} picks`;
+          }
+          default:
+            return market;
+        }
+      }
+
+      function renderLeagueInsightCard(title, row, metric) {
+        return `
+          <div class="stat">
+            <div class="label">${escapeHtml(title)}</div>
+            <div class="value">${row ? escapeHtml(row.League || '—') : '—'}</div>
+            <div class="note">${row ? escapeHtml(formatLeagueInsightSub(row, metric)) : 'Sem dados'}</div>
+          </div>
+        `;
+      }
+
+      function renderLeagueAnalyticsInsights(rows) {
+        const html = [
+          renderLeagueInsightCard('Best ROI league', pickLeagueBestRow(rows, 'roi'), 'roi'),
+          renderLeagueInsightCard('Highest WinRate league', pickLeagueBestRow(rows, 'winrate'), 'winrate'),
+          renderLeagueInsightCard('Highest AvgKelly league', pickLeagueBestRow(rows, 'kelly'), 'kelly'),
+          renderLeagueInsightCard('Most active league', pickLeagueBestRow(rows, 'picks'), 'picks')
+        ].join('');
+
+        document.querySelectorAll('.league-analytics-insights').forEach(el => {
+          el.innerHTML = html;
+        });
+      }
+
+      function bindLeagueAnalyticsFilters() {
+        if (document.body.dataset.leagueFiltersBound === '1') return;
+        document.body.dataset.leagueFiltersBound = '1';
+
+        document.body.addEventListener('input', e => {
+          if (!e.target.classList.contains('league-analytics-search')) return;
+          const value = e.target.value;
+          setLeagueAnalyticsFilters({ search: value });
+          syncLeagueAnalyticsFilterControls('search', value);
+          renderLeagueAnalytics();
+        });
+
+        document.body.addEventListener('change', e => {
+          if (e.target.classList.contains('league-analytics-tier-filter')) {
+            const value = e.target.value;
+            setLeagueAnalyticsFilters({ tier: value });
+            syncLeagueAnalyticsFilterControls('tier', value);
+            renderLeagueAnalytics();
+            return;
+          }
+          if (e.target.classList.contains('league-analytics-market-filter')) {
+            const value = e.target.value;
+            setLeagueAnalyticsFilters({ market: value });
+            syncLeagueAnalyticsFilterControls('market', value);
+            renderLeagueAnalytics();
+          }
+        });
+      }
+
       function normalizeLeagueStatsRow(row) {
         return {
           League: cleanString(row.League || row.Liga || ''),
@@ -1731,32 +1960,37 @@ button.dirty {
         const bodies = document.querySelectorAll('.league-analytics-body');
         if (!bodies.length) return;
 
-        const rows = sortLeagueStatsRows(
-          (state.leagueStats || [])
-            .map(normalizeLeagueStatsRow)
-            .filter(r => r.League || r.Market)
-        );
+        const baseRows = getLeagueAnalyticsRows();
+        const filteredRows = applyLeagueAnalyticsFilters(baseRows);
+        const rows = sortLeagueStatsRows(filteredRows);
 
-        const html = rows.length
-          ? rows.map(row => {
-              const tier = row.Tier || 'Unproven';
-              const tierCls = leagueTierBadgeClass(tier);
-              const kelly = num(row.AvgKelly);
-              const picks = num(row.TotalPicks);
+        renderLeagueAnalyticsInsights(filteredRows);
 
-              return `
-                <tr>
-                  <td>${escapeHtml(row.League || '—')}</td>
-                  <td>${escapeHtml(row.Market || '—')}</td>
-                  <td>${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
-                  <td>${escapeHtml(fmtLeaguePct(row['WinRate%']))}</td>
-                  <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
-                  <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
-                  <td>${picks === null ? '—' : escapeHtml(String(Math.round(picks)))}</td>
-                </tr>
-              `;
-            }).join('')
-          : '<tr><td colspan="7" class="note">Sem dados em league_stats.csv.</td></tr>';
+        let html;
+        if (!baseRows.length) {
+          html = '<tr><td colspan="7" class="note">Sem dados em league_stats.csv.</td></tr>';
+        } else if (!filteredRows.length) {
+          html = '<tr><td colspan="7" class="note">Nenhum resultado para os filtros atuais.</td></tr>';
+        } else {
+          html = rows.map(row => {
+            const tier = row.Tier || 'Unproven';
+            const tierCls = leagueTierBadgeClass(tier);
+            const kelly = num(row.AvgKelly);
+            const picks = num(row.TotalPicks);
+
+            return `
+              <tr>
+                <td>${escapeHtml(row.League || '—')}</td>
+                <td>${escapeHtml(row.Market || '—')}</td>
+                <td>${escapeHtml(fmtLeaguePct(row['ROI%']))}</td>
+                <td>${escapeHtml(fmtLeaguePct(row['WinRate%']))}</td>
+                <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
+                <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
+                <td>${picks === null ? '—' : escapeHtml(String(Math.round(picks)))}</td>
+              </tr>
+            `;
+          }).join('');
+        }
 
         bodies.forEach(tbody => {
           tbody.innerHTML = html;
@@ -1797,6 +2031,12 @@ button.dirty {
           console.warn('loadLeagueStats error:', e);
           state.leagueStats = [];
         }
+
+        leagueAnalyticsMarketsSig = '';
+        fillLeagueAnalyticsFilterOptions(true);
+        syncLeagueAnalyticsFilterControls('search', leagueAnalyticsFilters.search);
+        syncLeagueAnalyticsFilterControls('tier', leagueAnalyticsFilters.tier);
+        syncLeagueAnalyticsFilterControls('market', leagueAnalyticsFilters.market);
 
         try {
           renderLeagueAnalytics();
@@ -4030,6 +4270,7 @@ buttons.forEach(btn => {
         bindStaticInputs();
         bindMobileActionsButton();
         bindLeagueAnalyticsSort();
+        bindLeagueAnalyticsFilters();
 
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
