@@ -161,6 +161,46 @@
       z-index: 1;
     }
 
+    .league-analytics-table th.league-analytics-sort {
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .league-analytics-table th.league-analytics-sort:hover {
+      background: #f1f5f9;
+    }
+
+    .league-analytics-table th.league-analytics-sort .sort-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .league-analytics-table .sort-indicator {
+      font-size: 9px;
+      line-height: 1;
+      color: var(--muted);
+      opacity: 0.4;
+    }
+
+    .league-analytics-table th.league-analytics-sort.is-sorted .sort-indicator {
+      opacity: 1;
+      color: var(--text);
+    }
+
+    .league-analytics-table th.league-analytics-sort.is-asc .sort-indicator::after {
+      content: '▲';
+    }
+
+    .league-analytics-table th.league-analytics-sort.is-desc .sort-indicator::after {
+      content: '▼';
+    }
+
+    .league-analytics-table th.league-analytics-sort:not(.is-sorted) .sort-indicator::after {
+      content: '↕';
+    }
+
     .mini {
       font-size: 10px;
       font-weight: 700;
@@ -1058,16 +1098,16 @@ button.dirty {
     <div class="label">League Analytics</div>
     <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
     <div class="table-wrap" style="overflow-x:auto;">
-      <table>
+      <table class="league-analytics-table">
         <thead>
           <tr>
-            <th>League</th>
-            <th>Market</th>
-            <th>ROI%</th>
-            <th>WinRate%</th>
-            <th>AvgKelly</th>
-            <th>Tier</th>
-            <th>Picks</th>
+            <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th scope="col">Market</th>
+            <th class="league-analytics-sort is-sorted is-desc" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
           </tr>
         </thead>
         <tbody class="league-analytics-body"></tbody>
@@ -1088,16 +1128,16 @@ button.dirty {
     <div class="label">League Analytics</div>
     <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
     <div class="table-wrap" style="overflow-x:auto;">
-      <table>
+      <table class="league-analytics-table">
         <thead>
           <tr>
-            <th>League</th>
-            <th>Market</th>
-            <th>ROI%</th>
-            <th>WinRate%</th>
-            <th>AvgKelly</th>
-            <th>Tier</th>
-            <th>Picks</th>
+            <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th scope="col">Market</th>
+            <th class="league-analytics-sort is-sorted is-desc" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
+            <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
           </tr>
         </thead>
         <tbody class="league-analytics-body"></tbody>
@@ -1575,6 +1615,16 @@ button.dirty {
         Unproven: 'tier-unproven'
       };
 
+      const LEAGUE_TIER_SORT = {
+        Elite: 5,
+        Strong: 4,
+        Neutral: 3,
+        Weak: 2,
+        Unproven: 1
+      };
+
+      let leagueAnalyticsSort = { key: 'ROI%', dir: 'desc' };
+
       function leagueTierBadgeClass(tier) {
         const key = String(tier || '').trim();
         return LEAGUE_TIER_BADGE[key] || 'tier-unproven';
@@ -1586,19 +1636,82 @@ button.dirty {
         return `${fmt(n, digits)}%`;
       }
 
-      function sortLeagueStatsRows(rows) {
+      function getLeagueRowSortValue(row, key) {
+        switch (key) {
+          case 'League':
+            return cleanString(row.League || '').toLowerCase();
+          case 'ROI%':
+            return num(row['ROI%']) ?? -Infinity;
+          case 'WinRate%':
+            return num(row['WinRate%']) ?? -Infinity;
+          case 'AvgKelly':
+            return num(row.AvgKelly) ?? -Infinity;
+          case 'Tier':
+            return LEAGUE_TIER_SORT[row.Tier] ?? 0;
+          case 'Picks':
+            return num(row.TotalPicks) ?? -Infinity;
+          default:
+            return 0;
+        }
+      }
+
+      function defaultLeagueSortDir(key) {
+        return key === 'League' || key === 'Tier' ? 'asc' : 'desc';
+      }
+
+      function sortLeagueStatsRows(rows, key = leagueAnalyticsSort.key, dir = leagueAnalyticsSort.dir) {
+        const mult = dir === 'asc' ? 1 : -1;
+
         return [...rows].sort((a, b) => {
-          const roiA = num(a['ROI%']) ?? 0;
-          const roiB = num(b['ROI%']) ?? 0;
-          if (roiB !== roiA) return roiB - roiA;
+          const va = getLeagueRowSortValue(a, key);
+          const vb = getLeagueRowSortValue(b, key);
 
-          const wrA = num(a['WinRate%']) ?? 0;
-          const wrB = num(b['WinRate%']) ?? 0;
-          if (wrB !== wrA) return wrB - wrA;
+          if (typeof va === 'string' && typeof vb === 'string') {
+            const cmp = va.localeCompare(vb, 'pt', { sensitivity: 'base' });
+            if (cmp !== 0) return cmp * mult;
+          } else if (va !== vb) {
+            return (va < vb ? -1 : 1) * mult;
+          }
 
-          const picksA = num(a.TotalPicks) ?? 0;
-          const picksB = num(b.TotalPicks) ?? 0;
-          return picksB - picksA;
+          const la = cleanString(a.League || '').toLowerCase();
+          const lb = cleanString(b.League || '').toLowerCase();
+          const tie = la.localeCompare(lb, 'pt', { sensitivity: 'base' });
+          if (tie !== 0) return tie;
+
+          const ma = cleanString(a.Market || '').toLowerCase();
+          const mb = cleanString(b.Market || '').toLowerCase();
+          return ma.localeCompare(mb, 'pt', { sensitivity: 'base' });
+        });
+      }
+
+      function updateLeagueAnalyticsSortHeaders() {
+        document.querySelectorAll('.league-analytics-sort').forEach(th => {
+          const active = th.dataset.sortKey === leagueAnalyticsSort.key;
+          th.classList.toggle('is-sorted', active);
+          th.classList.toggle('is-asc', active && leagueAnalyticsSort.dir === 'asc');
+          th.classList.toggle('is-desc', active && leagueAnalyticsSort.dir === 'desc');
+          th.setAttribute('aria-sort', active ? (leagueAnalyticsSort.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+        });
+      }
+
+      function handleLeagueAnalyticsSort(key) {
+        if (leagueAnalyticsSort.key === key) {
+          leagueAnalyticsSort.dir = leagueAnalyticsSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          leagueAnalyticsSort = { key, dir: defaultLeagueSortDir(key) };
+        }
+        renderLeagueAnalytics();
+      }
+
+      function bindLeagueAnalyticsSort() {
+        if (document.body.dataset.leagueSortBound === '1') return;
+        document.body.dataset.leagueSortBound = '1';
+        document.body.addEventListener('click', e => {
+          const th = e.target.closest('.league-analytics-sort');
+          if (!th) return;
+          const key = th.dataset.sortKey;
+          if (!key) return;
+          handleLeagueAnalyticsSort(key);
         });
       }
 
@@ -1648,6 +1761,8 @@ button.dirty {
         bodies.forEach(tbody => {
           tbody.innerHTML = html;
         });
+
+        updateLeagueAnalyticsSortHeaders();
       }
 
       async function fetchLeagueStatsText() {
@@ -3914,6 +4029,7 @@ buttons.forEach(btn => {
         bindStaticButtons();
         bindStaticInputs();
         bindMobileActionsButton();
+        bindLeagueAnalyticsSort();
 
         setActiveTab(state.activeTab);
         setMobileActionsOpen(state.mobileActionsOpen);
