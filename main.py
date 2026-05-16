@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 from src.history import HISTORY_COLUMNS, HISTORY_PATH
+from src.league_stats import update_league_stats
 from src.state import (
     load_sent_state,
     save_sent_state,
@@ -85,6 +86,10 @@ def main():
         print("[DBG] RESET_HISTORY ativo -> limpar histórico")
        
         pd.DataFrame(columns=HISTORY_COLUMNS).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
+        try:
+            update_league_stats(HISTORY_PATH, Path(HISTORY_PATH).parent / 'league_stats.csv')
+        except Exception as e:
+            print(f"[WARN] falha a atualizar league_stats.csv -> {e}")
     
     cfg = load_config(BASE)
 

@@ -1,5 +1,7 @@
 ﻿import pandas as pd
 from collections import Counter
+from pathlib import Path
+import math
 from src.config import (
     DEFAULT_CAP_FRAC,
     DEFAULT_DAILY_CAP_FRAC,
@@ -115,9 +117,9 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
             if len(g) == 1:
                 print(
                     f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
-                    f"única pick={winner_market} | "
-                    f"edge={winner_edge:.4f} | kelly={winner_kelly:.4f} | "
-                    f"prob={winner_prob:.4f} | odd={winner_odd:.2f}"
+                        f"única pick={winner_market} | "
+                            f"edge={winner_edge:.2%} | kelly={winner_kelly:.4f} | "
+                            f"prob={winner_prob:.4f} | odd={winner_odd:.2f}"
                 )
             else:
                 losers = []
@@ -129,13 +131,13 @@ def dedupe_correlated_picks(df: pd.DataFrame) -> pd.DataFrame:
                     loser_prob = float(row.get("ProbModel", 0.0) or 0.0)
                     loser_odd = float(row.get("Odd", 0.0) or 0.0)
                     losers.append(
-                        f"{loser_market}(edge={loser_edge:.4f}, kelly={loser_kelly:.4f}, "
+                        f"{loser_market}(edge={loser_edge:.2%}, kelly={loser_kelly:.4f}, "
                         f"prob={loser_prob:.4f}, odd={loser_odd:.2f})"
                     )
 
                 print(
                     f"[DBG] dedupe jogo | {date_txt} | {league_txt} | {game_txt} | "
-                    f"winner={winner_market}(edge={winner_edge:.4f}, kelly={winner_kelly:.4f}, "
+                    f"winner={winner_market}(edge={winner_edge:.2%}, kelly={winner_kelly:.4f}, "
                     f"prob={winner_prob:.4f}, odd={winner_odd:.2f}) | "
                     f"discarded=" + " ; ".join(losers)
                 )
@@ -183,12 +185,40 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
     print(f"[DBG] {label}: rows iniciais = {len(rows)}")
 
+    # Build per-candidate debug info (candidates BEFORE final filtering)
+    cands = list(rows)
+
     quality_counter = Counter()
     filtered_rows = []
 
-    for r in rows:
+    # Evaluate quality filter (original business logic)
+    for r in cands:
         ok, reason = evaluate_market_quality(r, mode=mode)
         quality_counter[reason] += 1
+        r.setdefault("ProbModel", r.get("ProbModel", 0.0))
+        r.setdefault("ProbMarket", r.get("ProbMarket", 0.0))
+        r.setdefault("Edge", r.get("Edge", 0.0))
+        r.setdefault("Odd", r.get("Odd", 0.0))
+
+        r["PassedQualityFilter"] = bool(ok)
+        r["QualityRejectReason"] = (reason if not ok else "")
+
+        # Log detailed skip for quality rejections
+        if not ok:
+            try:
+                league = str(r.get("League", "?"))
+                game = f"{r.get('HomeTeam','?')} vs {r.get('AwayTeam','?')}"
+                market = str(r.get("Market", ""))
+                prob = float(r.get("ProbModel", 0.0) or 0.0)
+                impl = float(r.get("ProbMarket", 0.0) or 0.0)
+                edge = float(r.get("Edge", 0.0) or 0.0)
+                odd = float(r.get("Odd", 0.0) or 0.0)
+                print(
+                    f"[SKIP] {league} | {game} | {reason} | market={market} | prob={prob:.3f} | impl={impl:.3f} | edge={edge:.2%} | odd={odd:.2f}"
+                )
+            except Exception:
+                print(f"[SKIP] {r.get('League','?')} | {r.get('HomeTeam','?')} vs {r.get('AwayTeam','?')} | {reason}")
+
         if ok:
             filtered_rows.append(r)
 
@@ -197,6 +227,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     print(f"[DBG] {label}: após quality_filter = {len(filtered_rows)} | mode={mode}")
 
     if not filtered_rows:
+        # Still compute passed flags and write debug CSV with all candidates and reasons
+        _mark_passed_flags(cands, rules, mode)
+        _write_debug_candidates(cands, label, rules, mode)
         return pd.DataFrame()
 
     df = pd.DataFrame(filtered_rows).copy()
@@ -208,6 +241,9 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     df = df[df["Odd"] > 1.01].copy()
     df = df[df["Edge"].notna()].copy()
     print(f"[DBG] {label}: após odd/edge válidos = {len(df)}")
+
+    # Mark PassedOddsFilter for debug rows
+    _mark_passed_flags(cands, rules, mode)
 
     if df.empty:
         return df
@@ -254,7 +290,170 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
     print(f"[DBG] {label}: após dedupe = {len(df)}")
 
+    # After dedupe, mark FinalSelected for debug rows and write debug CSV
+    try:
+        selected_keys = set()
+        for _, sel in df.iterrows():
+            key = (
+                str(sel.get("Date", "")),
+                str(sel.get("League", "")),
+                str(sel.get("HomeTeam", "")),
+                str(sel.get("AwayTeam", "")),
+                str(sel.get("Market", "")),
+            )
+            selected_keys.add(key)
+
+        for r in cands:
+            key = (str(r.get("Date", "")), str(r.get("League", "")), str(r.get("HomeTeam", "")), str(r.get("AwayTeam", "")), str(r.get("Market", "")))
+            r["FinalSelected"] = key in selected_keys
+
+        _write_debug_candidates(cands, label, rules, mode)
+    except Exception as e:
+        print(f"[DBG] erro ao escrever debug candidates: {e}")
+
     return df
+
+
+def _mark_passed_flags(cands: list[dict], rules: dict, mode: str):
+    """Compute PassedOddsFilter and PassedEdgeFilter for each candidate (in-place)."""
+    edge_min_base = float(rules.get("edge_min", 0.05))
+    edge_max = float(rules.get("edge_max", 0.15))
+
+    for r in cands:
+        try:
+            odd = float(r.get("Odd", 0.0) or 0.0)
+            edge = float(r.get("Edge", 0.0) or 0.0)
+        except Exception:
+            odd = 0.0
+            edge = 0.0
+
+        market = str(r.get("Market", "")).strip().upper()
+        eff_max = get_effective_max_odd(rules, market, mode)
+
+        passed_odds = (odd > 1.01) and (odd <= eff_max) and (not math.isnan(edge))
+
+        # dynamic edge min
+        edge_req = edge_min_base
+        if odd >= 2.05:
+            edge_req += 0.025
+        elif odd >= 1.90:
+            edge_req += 0.015
+        elif odd >= 1.75:
+            edge_req += 0.010
+
+        passed_edge = passed_odds and (edge >= edge_req) and (edge <= edge_max)
+
+        r["PassedOddsFilter"] = bool(passed_odds)
+        r["PassedEdgeFilter"] = bool(passed_edge)
+
+
+def _write_debug_candidates(cands: list[dict], label: str, rules: dict, mode: str):
+    """Write debug_candidates.csv with all candidates and flags."""
+    try:
+        cols = [
+            "Date",
+            "League",
+            "HomeTeam",
+            "AwayTeam",
+            "Market",
+            "Odd",
+            "ProbModel",
+            "ProbMarket",
+            "ImpliedProbability",
+            "Edge",
+            "KellyTrue",
+            "PassedQualityFilter",
+            "PassedEdgeFilter",
+            "PassedOddsFilter",
+            "FinalSelected",
+            "QualityRejectReason",
+            "RejectReason",
+        ]
+
+        rows_out = []
+        reject_counter = Counter()
+        for r in cands:
+            prob_model = float(r.get("ProbModel", 0.0) or 0.0)
+            prob_market = float(r.get("ProbMarket", 0.0) or 0.0)
+            implied = prob_market
+            edge = float(r.get("Edge", 0.0) or 0.0)
+            odd = float(r.get("Odd", 0.0) or 0.0)
+
+            passed_quality = bool(r.get("PassedQualityFilter", False))
+            passed_odds = bool(r.get("PassedOddsFilter", False))
+            passed_edge = bool(r.get("PassedEdgeFilter", False))
+            final = bool(r.get("FinalSelected", False))
+
+            # Determine primary reject reason for easier aggregation
+            rej = ""
+            if not passed_quality:
+                rej = r.get("QualityRejectReason", "quality_reject")
+            elif not passed_odds:
+                # inspect odd bounds
+                if odd <= 1.01:
+                    rej = "odd_invalid"
+                else:
+                    market = str(r.get("Market", "")).strip().upper()
+                    eff_max = get_effective_max_odd(rules, market, mode)
+                    if odd > eff_max:
+                        rej = "odd_high"
+                    else:
+                        rej = "odd_low"
+            elif not passed_edge:
+                rej = "edge_low"
+
+            reject_counter[rej] += 1 if rej else 0
+
+            rows_out.append(
+                {
+                    "Date": r.get("Date", ""),
+                    "League": r.get("League", ""),
+                    "HomeTeam": r.get("HomeTeam", ""),
+                    "AwayTeam": r.get("AwayTeam", ""),
+                    "Market": r.get("Market", ""),
+                    "Odd": odd,
+                    "ProbModel": prob_model,
+                    "ProbMarket": prob_market,
+                    "ImpliedProbability": implied,
+                    "Edge": edge,
+                    "KellyTrue": float(r.get("KellyTrue", 0.0) or 0.0),
+                    "PassedQualityFilter": passed_quality,
+                    "PassedEdgeFilter": passed_edge,
+                    "PassedOddsFilter": passed_odds,
+                    "FinalSelected": final,
+                    "QualityRejectReason": r.get("QualityRejectReason", ""),
+                    "RejectReason": rej,
+                }
+            )
+
+        df_dbg = pd.DataFrame(rows_out)
+        out_path = Path.cwd() / "debug_candidates.csv"
+        df_dbg.to_csv(out_path, index=False, sep=";", encoding="utf-8")
+
+        # Print summary
+        total = len(rows_out)
+        print(f"[DBG] total candidates={total}")
+        # print reject counters sorted
+        for k, v in sorted(reject_counter.items(), key=lambda x: (-x[1], x[0])):
+            if k:
+                print(f"[DBG] rejected {k}={v}")
+
+        # Debug: top rejected candidates by edge (not FinalSelected)
+        try:
+            not_selected = [r for r in rows_out if not r.get("FinalSelected", False)]
+            top_rejected = sorted(not_selected, key=lambda x: float(x.get("Edge", 0.0) or 0.0), reverse=True)[:10]
+            if top_rejected:
+                print("[DBG] top rejected by edge:")
+                for r in top_rejected:
+                    e = float(r.get("Edge", 0.0) or 0.0)
+                    print(
+                        f"[DBG]  edge={e:.2%} | {r.get('League','')} | {r.get('HomeTeam','')} vs {r.get('AwayTeam','')} | {r.get('Market','')} | reason={r.get('RejectReason','') or r.get('QualityRejectReason','') }"
+                    )
+        except Exception:
+            pass
+
+    except Exception as e:
+        print(f"[DBG] falha ao gerar debug_candidates.csv -> {e}")
 
 
 def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> pd.DataFrame:

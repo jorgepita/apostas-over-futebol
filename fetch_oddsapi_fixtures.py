@@ -38,6 +38,11 @@ DEFAULT_LEAGUE_IDS = {
     "franca2": 62,
     "belgica": 144,
     "turquia": 203,
+    "noruega": 103,
+    "suecia": 113,
+    "mls": 253,
+    "japao": 98,
+    "coreia": 292,
 }
 
 API_CALL_MIN_INTERVAL = 0.28
@@ -279,9 +284,11 @@ def build_league_map(cfg: dict) -> dict:
     leagues_cfg = cfg.get("leagues", {})
     api_cfg = cfg.get("api_football", {})
     league_ids = api_cfg.get("league_ids", {}) or {}
+    # Include keys declared in config plus any present in DEFAULT_LEAGUE_IDS
+    keys = set(leagues_cfg.keys()) | set(DEFAULT_LEAGUE_IDS.keys())
 
     result = {}
-    for key in leagues_cfg.keys():
+    for key in sorted(keys):
         league_id = league_ids.get(key, DEFAULT_LEAGUE_IDS.get(key))
         if league_id:
             result[key] = int(league_id)
@@ -639,8 +646,14 @@ def main():
     days_ahead = int(run_cfg.get("days_ahead", 3))
 
     api_cfg = cfg.get("api_football", {})
-    shortlist_total = int(api_cfg.get("shortlist_total", 18))
-    shortlist_per_league_per_day = int(api_cfg.get("shortlist_per_league_per_day", 3))
+    shortlist_total_cfg = int(api_cfg.get("shortlist_total", 18))
+    shortlist_per_league_per_day_cfg = int(api_cfg.get("shortlist_per_league_per_day", 3))
+    print(f"[DBG] config_shortlist_total={shortlist_total_cfg} shortlist_per_league_per_day={shortlist_per_league_per_day_cfg}")
+
+    # TEMPORARY OVERRIDE to allow newly added leagues to surface for debugging
+    shortlist_total = 80
+    shortlist_per_league_per_day = 10
+    print(f"[DBG] OVERRIDE shortlist_total={shortlist_total} shortlist_per_league_per_day={shortlist_per_league_per_day}")
     sleep_between_requests = float(api_cfg.get("sleep_seconds_between_fixture_requests", 0.35))
     use_api_football_for_btts_odds = bool(api_cfg.get("use_api_football_for_btts_odds", True))
 
@@ -670,9 +683,15 @@ def main():
     odds_cache = {}
     history_cache = {}
 
+    # Counters for debug: per-league raw fixtures and per-league kept (after per-league truncation)
+    counts_per_league_raw: dict = {}
+    counts_per_league_kept: dict = {}
+
     # 1) Fixtures via API-Football
     for league_key, league_id in league_map.items():
         league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
+
+        print(f"[DBG] league_fetch_start league={league_key} id={league_id} name={league_name}")
 
         if league_key in history_cache:
             df_hist = history_cache[league_key]
@@ -706,6 +725,13 @@ def main():
                 print(f"[WARN] fixtures falhou league={league_key} season={season} date={date_iso} -> {e}")
                 continue
 
+            # resp contains raw fixtures returned by API
+            try:
+                resp_count = len(resp or [])
+            except Exception:
+                resp_count = -1
+            print(f"[DBG] league_resp_count league={league_key} date={date_iso} resp_count={resp_count} from_cache={from_cache}")
+
             day_rows = []
             for item in resp:
                 row = build_candidate_from_history(
@@ -726,6 +752,9 @@ def main():
 
             day_rows.sort(key=lambda x: x["score"], reverse=True)
             kept_day = day_rows[:shortlist_per_league_per_day]
+            # Track counts for debugging
+            counts_per_league_raw[league_key] = counts_per_league_raw.get(league_key, 0) + len(day_rows)
+            counts_per_league_kept[league_key] = counts_per_league_kept.get(league_key, 0) + len(kept_day)
             fixture_candidates.extend(kept_day)
 
             print(
@@ -737,6 +766,9 @@ def main():
                 time.sleep(sleep_between_requests)
 
     # 2) Global shortlist
+    # Debug: show per-league counts before global dedupe/truncate
+    print(f"[DBG] per_league_raw_counts={counts_per_league_raw}")
+    print(f"[DBG] per_league_kept_counts={counts_per_league_kept}")
     unique_candidates = {}
     for row in fixture_candidates:
         unique_candidates[row["fixture_id"]] = row
@@ -744,6 +776,16 @@ def main():
     fixture_candidates = list(unique_candidates.values())
     fixture_candidates.sort(key=lambda x: x["score"], reverse=True)
     fixture_candidates = fixture_candidates[:shortlist_total]
+    # Debug: counts before/after global shortlist and per-league distribution
+    try:
+        counts_before = len(list(unique_candidates.values()))
+    except Exception:
+        counts_before = len(fixture_candidates)
+    print(f"[DBG] global_shortlist_before_truncate={counts_before} after_truncate={len(fixture_candidates)}")
+    per_league_counts = {}
+    for c in fixture_candidates:
+        per_league_counts[c.get("league_key")] = per_league_counts.get(c.get("league_key"), 0) + 1
+    print(f"[DBG] global_shortlist_per_league={per_league_counts}")
 
     print(f"[DBG] fixture_requests={fixture_requests}")
     print(f"[DBG] fixture_cache_hits={fixture_cache_hits}")
@@ -817,6 +859,17 @@ def main():
         )
 
     rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
+
+    # Debug: show how many candidates had odds and how many rows will be written
+    try:
+        candidates_before_odds = len(fixture_candidates)
+    except Exception:
+        candidates_before_odds = 0
+    rows_by_league = {}
+    for r in rows:
+        rows_by_league[r.get("League")] = rows_by_league.get(r.get("League"), 0) + 1
+    print(f"[DBG] candidates_before_odds={candidates_before_odds} rows_after_odds_filter={len(rows)}")
+    print(f"[DBG] rows_written_per_league={rows_by_league}")
 
     fixtures_path = BASE_DIR / "fixtures_today.csv"
     with open(fixtures_path, "w", newline="", encoding="utf-8") as f:

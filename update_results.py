@@ -10,6 +10,7 @@ from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 
 import pandas as pd
+from src.league_stats import update_league_stats
 
 BASE = Path(__file__).resolve().parent
 DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
@@ -2210,6 +2211,10 @@ def main():
 
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
+    try:
+        update_league_stats(HISTORY_FILE, BASE / 'league_stats.csv')
+    except Exception as e:
+        print(f"[WARN] falha a atualizar league_stats.csv -> {e}")
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
 
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily", shared_state)

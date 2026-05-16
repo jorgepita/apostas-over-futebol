@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+
+fixtures_today.csv
+picks_*.csv
+league_stats.csv
+sent_state.json
+debug_candidates.csv
+
+data_raw/*.csv

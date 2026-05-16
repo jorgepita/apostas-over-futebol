@@ -8,6 +8,7 @@ import pandas as pd
 from src.history import HISTORY_COLUMNS, HISTORY_PATH
 from src.integrations import _send_in_chunks, build_message, df_to_rows, upload_csvs_to_github
 from src.state import load_sent_state, save_sent_state, pick_id
+from src.league_stats import update_league_stats
 
 
 def save_all_outputs(
@@ -58,6 +59,7 @@ def save_all_outputs(
 def persist_history(simple: pd.DataFrame) -> pd.DataFrame:
     history = simple.copy()
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
+    update_league_stats(HISTORY_PATH)
     return history
 
 
