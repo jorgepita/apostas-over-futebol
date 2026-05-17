@@ -3240,38 +3240,72 @@ button.dirty {
       }
 
       function filterBotRows(rows, filters) {
-        return rows.filter(r => {
-          const okSearch = !filters.q || r._searchText.includes(filters.q);
+        const filteredRows = rows.filter(r => {
+          const q = cleanString(filters.q).toLowerCase();
+          const okSearch = !q || String(r._searchText || '').includes(q);
           const okSource = !filters.source || filters.source === 'bot';
-          const okLeague = !filters.league || cleanString(r['Liga']) === filters.league;
           
-          const rowMarket = cleanString(r['Mercado'] || r['_market'] || '').toUpperCase();
-          const filterMarket = cleanString(filters.market).toUpperCase();
-          const okMarket = !filterMarket || rowMarket === filterMarket || rowMarket.includes(filterMarket);
+          const fLeague = cleanString(filters.league).toUpperCase();
+          const rLeague = cleanString(r['Liga'] || r['_league'] || r['League'] || r.liga || '').toUpperCase();
+          const okLeague = !fLeague || rLeague === fLeague;
+          
+          const fMarket = cleanString(filters.market).toUpperCase();
+          const rMarket = cleanString(r['Mercado'] || r['_market'] || r['Market'] || r.mercado || '').toUpperCase();
+          const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
 
           const okResult = !filters.result || r._resultKey === filters.result;
           const okExecution =
             !filters.execution ||
             (filters.execution === 'executed' && r._apostadaBool) ||
             (filters.execution === 'not_executed' && !r._apostadaBool);
-          const okDate = matchDateFilter(r['Data'], filters.date);
+          
+          const okDate = matchDateFilter(r['Data'] || r['Date'] || r.data || '', filters.date);
 
-          return okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+          const ok = okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+
+          if (!ok && rMarket.includes('BTTS') && !fMarket) {
+             console.log('[DEBUG REJECTED BTTS]', {
+               game: r['Jogo'] || r.jogo,
+               okSearch, okSource, okLeague, okMarket, okResult, okExecution, okDate,
+               filters,
+               rMarket
+             });
+          }
+
+          return ok;
         });
+
+        console.log('[FILTER INPUT]', rows);
+        console.log('[FILTER OUTPUT]', filteredRows);
+        console.log(
+          '[BTTS FILTER CHECK]',
+          rows.filter(r =>
+            String(r['Mercado'] || r['Market'] || r['_market'] || r.mercado || '')
+              .toUpperCase()
+              .includes('BTTS')
+          )
+        );
+
+        return filteredRows;
       }
 
       function filterManualRows(rows, filters) {
         return rows.filter(r => {
-          const okSearch = !filters.q || r._searchText.includes(filters.q);
+          const q = cleanString(filters.q).toLowerCase();
+          const okSearch = !q || String(r._searchText || '').includes(q);
           const okSource = !filters.source || filters.source === 'manual';
-          const okLeague = !filters.league || r.liga === filters.league;
           
-          const rowMarket = cleanString(r.mercado || r.Mercado || '').toUpperCase();
-          const filterMarket = cleanString(filters.market).toUpperCase();
-          const okMarket = !filterMarket || rowMarket === filterMarket || rowMarket.includes(filterMarket);
+          const fLeague = cleanString(filters.league).toUpperCase();
+          const rLeague = cleanString(r.liga || r.Liga || r['Liga'] || '').toUpperCase();
+          const okLeague = !fLeague || rLeague === fLeague;
+          
+          const fMarket = cleanString(filters.market).toUpperCase();
+          const rMarket = cleanString(r.mercado || r.Mercado || r.Market || r['Market'] || '').toUpperCase();
+          const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
 
           const okResult = !filters.result || r._resultKey === filters.result;
-          const okDate = matchDateFilter(r.data, filters.date);
+          const okDate = matchDateFilter(r.data || r.Data || r['Data'] || '', filters.date);
+          
           return okSearch && okSource && okLeague && okMarket && okResult && okDate;
         });
       }
@@ -3743,9 +3777,6 @@ button.dirty {
         const filters = getDayFilters();
         const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
 
-        console.log("[TABLE INPUT]", rows);
-        console.log("[BTTS TABLE ROWS]", rows.filter(r => (r.Mercado || r._market || '').toUpperCase().includes('BTTS')));
-
         document.getElementById('footballRows').innerHTML = rows.length
           ? buildBotRowHtml(rows)
           : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
@@ -3755,9 +3786,6 @@ button.dirty {
         const historyMerged = getHistoryRowsMerged();
         const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()));
         const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()));
-
-        console.log("[HISTORY DAY ROWS]", dayRows);
-        console.log("[BTTS HISTORY DAY ROWS]", dayRows.filter(r => (r.Mercado || r._market || '').toUpperCase().includes('BTTS')));
 
         document.getElementById('historyRowsDay').innerHTML = dayRows.length
           ? buildBotRowHtml(dayRows)
