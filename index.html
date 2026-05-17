@@ -3215,7 +3215,7 @@ button.dirty {
           market: document.getElementById('dayMarketFilter').value,
           result: document.getElementById('dayResultFilter').value,
           execution: document.getElementById('dayExecutionFilter').value,
-          date: ''
+          date: '' // No date filter by default to show all future picks
         };
       }
 
@@ -3537,8 +3537,6 @@ button.dirty {
       }
 
       function renderOpenBets() {
-        return;
-        
         const summaryRows = sortBotRowsForDisplay(
           filterBotRows(getHistoryRowsMerged(), getSummaryFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
         );
@@ -3743,17 +3741,25 @@ button.dirty {
 
       function renderFootball() {
         const filters = getDayFilters();
-        const rows = sortBotRowsForDisplay(filterBotRows(getTodaysDailyRows(), filters));
+        // Use all daily rows instead of just today's to allow BTTS picks (often for future dates) to appear
+        const rawRows = getDailyRowsMerged();
+        const rows = sortBotRowsForDisplay(filterBotRows(rawRows, filters));
+
+        console.log("[TABLE INPUT]", rows);
+        console.log("[BTTS TABLE ROWS]", rows.filter(r => (r.Mercado || r._market || '').toUpperCase().includes('BTTS')));
 
         document.getElementById('footballRows').innerHTML = rows.length
           ? buildBotRowHtml(rows)
-          : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada para hoje com os filtros atuais.</div></td></tr>';
+          : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
       }
 
       function renderBotHistoryOperational() {
         const historyMerged = getHistoryRowsMerged();
         const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()));
         const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()));
+
+        console.log("[HISTORY DAY ROWS]", dayRows);
+        console.log("[BTTS HISTORY DAY ROWS]", dayRows.filter(r => (r.Mercado || r._market || '').toUpperCase().includes('BTTS')));
 
         document.getElementById('historyRowsDay').innerHTML = dayRows.length
           ? buildBotRowHtml(dayRows)
