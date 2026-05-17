@@ -3741,9 +3741,7 @@ button.dirty {
 
       function renderFootball() {
         const filters = getDayFilters();
-        // Use all daily rows instead of just today's to allow BTTS picks (often for future dates) to appear
-        const rawRows = getDailyRowsMerged();
-        const rows = sortBotRowsForDisplay(filterBotRows(rawRows, filters));
+        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
 
         console.log("[TABLE INPUT]", rows);
         console.log("[BTTS TABLE ROWS]", rows.filter(r => (r.Mercado || r._market || '').toUpperCase().includes('BTTS')));
