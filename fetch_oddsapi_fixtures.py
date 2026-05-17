@@ -11,8 +11,11 @@ from datetime import datetime, timedelta, timezone, date
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
 import pandas as pd
 
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
@@ -43,6 +46,18 @@ DEFAULT_LEAGUE_IDS = {
     "mls": 253,
     "japao": 98,
     "coreia": 292,
+    "finlandia": 244,
+    "islandia": 188,
+}
+
+LEAGUE_INFO_EXT = {
+    "noruega": {"name": "Eliteserien", "country": "Norway"},
+    "suecia": {"name": "Allsvenskan", "country": "Sweden"},
+    "mls": {"name": "MLS", "country": "USA"},
+    "japao": {"name": "J1 League", "country": "Japan"},
+    "coreia": {"name": "K League 1", "country": "Korea Republic"},
+    "finlandia": {"name": "Veikkausliiga", "country": "Finland"},
+    "islandia": {"name": "Besta deild", "country": "Iceland"},
 }
 
 API_CALL_MIN_INTERVAL = 0.28
@@ -295,7 +310,12 @@ def build_league_map(cfg: dict) -> dict:
     return result
 
 
-def season_for_date(d: date) -> int:
+def season_for_date(d: date, league_key: str = None) -> int:
+    # Summer leagues (Calendar year)
+    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia"}
+    if league_key in summer_leagues:
+        return d.year
+    # Winter leagues (Starting year)
     return d.year if d.month >= 7 else (d.year - 1)
 
 
@@ -324,10 +344,51 @@ def try_load_history_csv(league_key: str) -> Optional[pd.DataFrame]:
 # =============================
 # API-Football fixtures
 # =============================
+def search_league_id_by_api(league_key: str, season: int) -> Optional[int]:
+    info = LEAGUE_INFO_EXT.get(league_key)
+    if not info:
+        return None
+    
+    country = info.get("country")
+    expected_name = info.get("name", "")
+
+    if not country:
+        return None
+
+    params = {
+        "country": country,
+        "season": season,
+    }
+    try:
+        data = http_get_json_api_football("/leagues", params)
+    except Exception:
+        return None
+
+    response = data.get("response", []) if isinstance(data, dict) else []
+
+    best_id = None
+    for item in response:
+        league = item.get("league", {}) or {}
+        league_id = league.get("id")
+        league_name = str(league.get("name", "")).strip()
+
+        if not league_id or not league_name:
+            continue
+
+        if league_name.lower() == expected_name.lower():
+            return int(league_id)
+
+        if expected_name.lower() in league_name.lower():
+            best_id = int(league_id)
+
+    return best_id
+
+
 def fetch_fixtures_for_league_date(
     league_id: int,
     season: int,
     date_iso: str,
+    league_key: str = None,
     fixtures_cache: dict | None = None,
 ) -> tuple[list[dict], bool]:
     cache_key = (int(league_id), int(season), str(date_iso))
@@ -343,19 +404,26 @@ def fetch_fixtures_for_league_date(
     }
 
     data = http_get_json_api_football("/fixtures", params)
+    response = data.get("response", []) if isinstance(data, dict) else []
+
+    if not response and league_key:
+        resolved_id = search_league_id_by_api(league_key, season)
+        if resolved_id and resolved_id != league_id:
+            print(f"[DBG] Re-resolvendo league_id para {league_key}: {league_id} -> {resolved_id}")
+            params["league"] = resolved_id
+            data = http_get_json_api_football("/fixtures", params)
+            response = data.get("response", []) if isinstance(data, dict) else []
 
     try:
         results = data.get("results", None)
         errors = data.get("errors", None)
-        response_len = len(data.get("response", []) or []) if isinstance(data, dict) else -1
+        response_len = len(response)
         print(
-            f"[API-DBG] /fixtures league={league_id} season={season} date={date_iso} "
+            f"[API-DBG] /fixtures league={params.get('league')} season={season} date={date_iso} "
             f"results={results} response_len={response_len} errors={errors}"
         )
     except Exception:
         pass
-
-    response = data.get("response", []) if isinstance(data, dict) else []
 
     if fixtures_cache is not None:
         fixtures_cache[cache_key] = response
@@ -591,8 +659,10 @@ def build_candidate_from_history(
     away = ((teams.get("away") or {}).get("name") or "").strip()
 
     if not fixture_id or not home or not away:
+        print(f"[FIXTURE FILTERED] league={league_key.upper()} reason=missing_data fixture_id={fixture_id} home={home} away={away}")
         return None
 
+    print(f"[DBG] build_candidate league={league_key} home={home} away={away}")
     try:
         lam_h, lam_a, lam_t = compute_lambdas(
             df_hist,
@@ -603,7 +673,8 @@ def build_candidate_from_history(
             min_games_home=min_games_home,
             min_games_away=min_games_away,
         )
-    except Exception:
+    except Exception as e:
+        print(f"[FIXTURE FILTERED] league={league_key.upper()} reason=lambda_error error={e}")
         return None
 
     if lambda_boost and lambda_boost != 1.0:
@@ -651,8 +722,8 @@ def main():
     print(f"[DBG] config_shortlist_total={shortlist_total_cfg} shortlist_per_league_per_day={shortlist_per_league_per_day_cfg}")
 
     # TEMPORARY OVERRIDE to allow newly added leagues to surface for debugging
-    shortlist_total = 80
-    shortlist_per_league_per_day = 10
+    shortlist_total = shortlist_total_cfg
+    shortlist_per_league_per_day = shortlist_per_league_per_day_cfg
     print(f"[DBG] OVERRIDE shortlist_total={shortlist_total} shortlist_per_league_per_day={shortlist_per_league_per_day}")
     sleep_between_requests = float(api_cfg.get("sleep_seconds_between_fixture_requests", 0.35))
     use_api_football_for_btts_odds = bool(api_cfg.get("use_api_football_for_btts_odds", True))
@@ -666,7 +737,12 @@ def main():
         from zoneinfo import ZoneInfo
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
-        now_pt = datetime.utcnow()
+        # datetime.utcnow() is deprecated, use now(timezone.utc)
+        now_pt = datetime.now(timezone.utc)
+
+    start_dt = now_pt
+    end_dt = now_pt + timedelta(days=days_ahead)
+    print(f"[DATE WINDOW] start={start_dt} end={end_dt}")
 
     dates_to_fetch = [(now_pt.date() + timedelta(days=i)) for i in range(days_ahead + 1)]
 
@@ -691,7 +767,11 @@ def main():
     for league_key, league_id in league_map.items():
         league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
 
-        print(f"[DBG] league_fetch_start league={league_key} id={league_id} name={league_name}")
+        print(f"[FIXTURE FETCH] league={league_key.upper()}")
+        
+        if league_key not in leagues_cfg:
+            print(f"[FIXTURE SKIP] league={league_key.upper()} reason=not_in_config")
+            continue
 
         if league_key in history_cache:
             df_hist = history_cache[league_key]
@@ -700,28 +780,40 @@ def main():
             history_cache[league_key] = df_hist
 
         if df_hist is None:
+            print(f"[FIXTURE SKIP] league={league_key.upper()} reason=missing_mapping")
             print(f"[WARN] histórico em falta para {league_key}")
             continue
 
         league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
         lambda_boost = float(league_boosts.get(league_key, lambda_boost_default))
 
+        league_fixtures_total = 0
+        league_raw_total = 0
         for target_date in dates_to_fetch:
             date_iso = target_date.isoformat()
-            season = int(manual_season) if manual_season is not None else season_for_date(target_date)
+            season = int(manual_season) if manual_season is not None else season_for_date(target_date, league_key)
+
+            if league_key == "noruega":
+                print(f"[NORWAY DEBUG] season={season}")
+                print(f"[NORWAY DEBUG] league_id={league_id}")
 
             try:
                 resp, from_cache = fetch_fixtures_for_league_date(
                     league_id=league_id,
                     season=season,
                     date_iso=date_iso,
+                    league_key=league_key,
                     fixtures_cache=fixtures_cache,
                 )
                 if from_cache:
                     fixture_cache_hits += 1
                 else:
                     fixture_requests += 1
+                
+                if league_key == "noruega":
+                    print(f"[NORWAY DEBUG] api_matches={len(resp or [])}")
             except Exception as e:
+                print(f"[FIXTURE FILTERED] league={league_key.upper()} reason=api_error error={e}")
                 print(f"[WARN] fixtures falhou league={league_key} season={season} date={date_iso} -> {e}")
                 continue
 
@@ -730,10 +822,24 @@ def main():
                 resp_count = len(resp or [])
             except Exception:
                 resp_count = -1
+            
             print(f"[DBG] league_resp_count league={league_key} date={date_iso} resp_count={resp_count} from_cache={from_cache}")
 
             day_rows = []
             for item in resp:
+                # Filter out past fixtures
+                f_date_str = item.get("fixture", {}).get("date")
+                if f_date_str:
+                    try:
+                        # API-Football dates are like 2026-05-17T18:00:00+00:00
+                        f_dt = datetime.fromisoformat(f_date_str.replace("Z", "+00:00"))
+                        if f_dt < now_pt:
+                            continue
+                    except Exception:
+                        pass
+                
+                league_raw_total += 1
+
                 row = build_candidate_from_history(
                     item=item,
                     league_key=league_key,
@@ -756,6 +862,19 @@ def main():
             counts_per_league_raw[league_key] = counts_per_league_raw.get(league_key, 0) + len(day_rows)
             counts_per_league_kept[league_key] = counts_per_league_kept.get(league_key, 0) + len(kept_day)
             fixture_candidates.extend(kept_day)
+            league_fixtures_total += len(day_rows)
+
+            if not day_rows:
+                reason = "no_matches"
+                if resp_count > 0:
+                    reason = "filtered_by_history"
+                
+                print(f"[FIXTURE SKIP] league={league_key.upper()} reason={reason} date={date_iso}")
+                if league_key == "noruega":
+                    print(f"[NORWAY DEBUG] skip_reason={reason}")
+
+                if resp_count > 0:
+                    print(f"[DBG] all {resp_count} matches for {league_key.upper()} on {date_iso} were filtered by build_candidate_from_history")
 
             print(
                 f"[DBG] fixtures league={league_key} season={season} date={date_iso} "
@@ -764,6 +883,9 @@ def main():
 
             if (not from_cache) and sleep_between_requests > 0:
                 time.sleep(sleep_between_requests)
+        
+        print(f"[FIXTURE FETCH] league={league_key.upper()} matches={league_raw_total}")
+        print(f"[FIXTURE WINDOW] league={league_key.upper()} fixtures_in_window={league_raw_total}")
 
     # 2) Global shortlist
     # Debug: show per-league counts before global dedupe/truncate
@@ -845,6 +967,7 @@ def main():
         odd_btts = btts_map.get(fx["fixture_id"])
 
         if odd_o25 is None and odd_btts is None:
+            print(f"[FIXTURE FILTERED] league={fx['league_key'].upper()} reason=no_odds fixture={fx['home']} vs {fx['away']}")
             continue
 
         rows.append(
@@ -868,6 +991,14 @@ def main():
     rows_by_league = {}
     for r in rows:
         rows_by_league[r.get("League")] = rows_by_league.get(r.get("League"), 0) + 1
+    
+    for l_key, count in rows_by_league.items():
+        print(f"[FIXTURE WRITE] league={l_key.upper()} rows={count}")
+
+    if "noruega" in league_map:
+        nor_count = rows_by_league.get("noruega", 0)
+        print(f"[NORWAY DEBUG] fixtures_written={nor_count}")
+
     print(f"[DBG] candidates_before_odds={candidates_before_odds} rows_after_odds_filter={len(rows)}")
     print(f"[DBG] rows_written_per_league={rows_by_league}")
 

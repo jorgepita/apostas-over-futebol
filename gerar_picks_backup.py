@@ -8,6 +8,7 @@ from urllib import request, parse, error
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
+from src.league_stats import update_league_stats
 
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
@@ -1145,6 +1146,10 @@ def main():
 
     history = merge_into_history(simple)
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
+    try:
+        update_league_stats(HISTORY_PATH, BASE / 'league_stats.csv')
+    except Exception as e:
+        print(f"[WARN] falha a atualizar league_stats.csv -> {e}")
 
     print("OK. Gerados:")
     print(f"- {out25_path.name} ({len(out25_final)} picks)")

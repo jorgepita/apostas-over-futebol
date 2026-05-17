@@ -10,7 +10,10 @@ from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 
 import pandas as pd
+from dotenv import load_dotenv
 from src.league_stats import update_league_stats
+
+load_dotenv()
 
 BASE = Path(__file__).resolve().parent
 DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
@@ -229,6 +232,28 @@ BASE_TEAM_ALIASES = {
     "estrela da amadora": "estrela",
     "cf estrela da amadora": "estrela",
 
+    "guimaraes": "vitoria sc",
+    "guimarães": "vitoria sc",
+    "vitoria guimaraes": "vitoria sc",
+    "vitória guimarães": "vitoria sc",
+    "vitoria sc": "vitoria sc",
+
+    "nacional": "cd nacional",
+    "cd nacional": "cd nacional",
+
+    "braga": "sc braga",
+    "sc braga": "sc braga",
+
+    "famalicao": "famalicao",
+    "famalicão": "famalicao",
+    "fc famalicao": "famalicao",
+
+    "rio ave": "rio ave",
+    "rio ave fc": "rio ave",
+
+    "gil vicente": "gil vicente",
+    "gil vicente fc": "gil vicente",
+
     # Itália
     "inter": "inter",
     "inter milan": "inter",
@@ -337,6 +362,11 @@ SHARED_STATE_DEFAULTS = {
     "date_parse_cache": {},
 }
 
+# Temporary diagnostics — enable with UPDATE_RESULTS_DEBUG=1
+UPDATE_RESULTS_DEBUG = os.getenv("UPDATE_RESULTS_DEBUG", "").strip().lower() in {
+    "1", "true", "yes", "on",
+}
+
 
 # =============================
 # Helpers
@@ -354,6 +384,56 @@ def ensure_shared_state_defaults(shared_state: dict | None) -> dict:
 
 def debug_log(msg: str):
     print(f"[DBG] {msg}")
+
+
+def diag_log(msg: str):
+    if UPDATE_RESULTS_DEBUG:
+        print(f"[DIAG] {msg}")
+
+
+def get_fixture_id(fixture: dict | None) -> str:
+    if not isinstance(fixture, dict):
+        return ""
+    nested = fixture.get("fixture") or {}
+    fid = nested.get("id") or fixture.get("id")
+    return str(fid) if fid is not None else ""
+
+
+def format_fixture_diag(fixture: dict | None) -> str:
+    if not isinstance(fixture, dict):
+        return "fixture=None"
+    home, away = extract_fixture_team_names(fixture)
+    status = get_fixture_status(fixture)
+    home_goals, away_goals = get_fixture_score(fixture)
+    kickoff_dt = get_fixture_kickoff_dt(fixture)
+    kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "n/a"
+    return (
+        f"fixture_id={get_fixture_id(fixture)} | api='{home} vs {away}' | "
+        f"status={status} | score={home_goals}-{away_goals} | kickoff_utc={kickoff_txt}"
+    )
+
+
+def log_pick_diag(
+    label: str,
+    idx,
+    row,
+    stage: str,
+    reason: str,
+    **extra,
+):
+    if not UPDATE_RESULTS_DEBUG:
+        return
+    data = str(row.get("Data", "")).strip()
+    liga = str(row.get("Liga", "")).strip()
+    jogo = str(row.get("Jogo", "")).strip()
+    mercado = str(row.get("Mercado", "")).strip()
+    parts = [
+        f"{label}[{idx}] stage={stage} reason={reason}",
+        f"pick={data} | {liga} | {jogo} | {mercado}",
+    ]
+    for key, value in extra.items():
+        parts.append(f"{key}={value}")
+    diag_log(" | ".join(parts))
 
 
 def warn_log(msg: str):
@@ -456,6 +536,7 @@ def get_team_aliases(shared_state: dict | None = None) -> dict:
 
 
 def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
+    original_text = text
     shared_state = ensure_shared_state_defaults(shared_state)
     cache = shared_state["normalized_team_cache"]
 
@@ -472,6 +553,10 @@ def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
 
     if s in aliases:
         cache[cache_key] = aliases[s]
+
+        if os.getenv("UPDATE_RESULTS_DEBUG") == "1":
+            print(f"[DBG] normalize_team_name | original='{original_text}' -> normalized='{cache[cache_key]}'")
+        
         return cache[cache_key]
 
     tokens = [t for t in s.split() if t not in TEAM_STOPWORDS]
@@ -479,6 +564,10 @@ def normalize_team_name(text: str, shared_state: dict | None = None) -> str:
 
     if s2 in aliases:
         cache[cache_key] = aliases[s2]
+
+        if os.getenv("UPDATE_RESULTS_DEBUG") == "1":
+            print(f"[DBG] normalize_team_name | original='{original_text}' -> normalized='{cache[cache_key]}'")
+        
         return cache[cache_key]
 
     s2 = s2.replace("saint ", "st ")
@@ -788,9 +877,22 @@ def find_best_fixture_match(
         return None, 0, None
 
     if best_meta["home_score"] < min_side_score or best_meta["away_score"] < min_side_score:
+        if UPDATE_RESULTS_DEBUG:
+            diag_log(
+                f"match_reject side_score | row='{row_home} vs {row_away}' | "
+                f"api='{best_meta['api_home']} vs {best_meta['api_away']}' | "
+                f"total={best_score} | hs={best_meta['home_score']} | as={best_meta['away_score']} | "
+                f"min_side={min_side_score}"
+            )
         return None, best_score, best_meta
 
     if best_score < min_total_score:
+        if UPDATE_RESULTS_DEBUG:
+            diag_log(
+                f"match_reject total_score | row='{row_home} vs {row_away}' | "
+                f"api='{best_meta['api_home']} vs {best_meta['api_away']}' | "
+                f"total={best_score} | min_total={min_total_score}"
+            )
         return None, best_score, best_meta
 
     maybe_learn_team_alias(row_home, best_meta["api_home"], best_meta["home_score"], shared_state)
@@ -1545,7 +1647,16 @@ def try_update_row_via_api_football(
     )
     if fixtures is None:
         print(f"[WARN] {label}: API-Football sem fixtures para {jogo} | {league_code} | {data} | reason={reason}")
+        log_pick_diag(
+            label, idx, row, "api_football_fetch", reason or "NO_FIXTURES",
+            league_code=league_code,
+        )
         return False, reason or "NO_FIXTURES"
+
+    log_pick_diag(
+        label, idx, row, "api_football_fetch", "OK",
+        league_code=league_code, fixtures=len(fixtures or []),
+    )
 
     matched, best_score, meta = find_best_fixture_match(
         home_csv,
@@ -1558,7 +1669,19 @@ def try_update_row_via_api_football(
     if not matched:
         print(f"[WARN] {label}: API-Football sem match para: {jogo} | {league_code} | {data}")
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
+        log_pick_diag(
+            label, idx, row, "api_football_match", "NO_MATCH",
+            league_code=league_code, fixtures=len(fixtures or []),
+            best_score=best_score, meta=meta,
+        )
         return False, "NO_MATCH"
+
+    log_pick_diag(
+        label, idx, row, "api_football_match", "MATCHED",
+        league_code=league_code, best_score=best_score,
+        match_mode=(meta or {}).get("mode", ""),
+        match=format_fixture_diag(matched),
+    )
 
     can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
     if not can_try_now:
@@ -1567,11 +1690,21 @@ def try_update_row_via_api_football(
             f"[DBG] {label}: API-Football ainda cedo para fechar: "
             f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
         )
+        log_pick_diag(
+            label, idx, row, "api_football_status", "TOO_EARLY",
+            kickoff_utc=kickoff_txt, delay=str(RESULT_READY_DELAY),
+            match=format_fixture_diag(matched),
+        )
         return False, "TOO_EARLY"
 
     status = str(get_fixture_status(matched)).upper()
     if status not in AF_FINISHED_STATUS:
         print(f"[DBG] {label}: API-Football ainda não terminado: {jogo} | status={status}")
+        log_pick_diag(
+            label, idx, row, "api_football_status", "NOT_FINISHED",
+            status=status, allowed=sorted(AF_FINISHED_STATUS),
+            match=format_fixture_diag(matched),
+        )
         return False, "NOT_FINISHED"
 
     kickoff_dt = get_fixture_kickoff_dt(matched)
@@ -1581,11 +1714,16 @@ def try_update_row_via_api_football(
     home_goals, away_goals = get_fixture_score(matched)
     if home_goals is None or away_goals is None:
         print(f"[WARN] {label}: API-Football sem goals finais para: {jogo}")
+        log_pick_diag(
+            label, idx, row, "api_football_score", "NO_SCORE",
+            match=format_fixture_diag(matched),
+        )
         return False, "NO_SCORE"
 
     resultado = market_result(mercado, int(home_goals), int(away_goals))
     if resultado is None:
         print(f"[WARN] {label}: Mercado não suportado no fallback API-Football: {mercado}")
+        log_pick_diag(label, idx, row, "api_football_market", "UNSUPPORTED_MARKET")
         return False, "UNSUPPORTED_MARKET"
 
     lucro = calc_profit(resultado, stake, odd)
@@ -1600,6 +1738,12 @@ def try_update_row_via_api_football(
     )
     if lucro_real != "":
         df.at[idx, "LucroReal€"] = lucro_real
+
+    log_pick_diag(
+        label, idx, row, "api_football_write", "UPDATED",
+        resultado=resultado, score=f"{home_goals}-{away_goals}",
+        lucro=lucro, match=format_fixture_diag(matched),
+    )
 
     print(
         f"[OK] {label}: API-Football fallback | {jogo} | {mercado} | "
@@ -1729,11 +1873,19 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     af_updated = 0
     af_failed = 0
 
+    diag_counts = {} if UPDATE_RESULTS_DEBUG else None
+
+    def _diag_count(reason: str):
+        if diag_counts is not None:
+            diag_counts[reason] = diag_counts.get(reason, 0) + 1
+
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
 
         if resultado_atual in {"W", "L", "P"}:
             already_done += 1
+            _diag_count("ALREADY_DONE")
+            log_pick_diag(label, i, row, "precheck", "ALREADY_DONE", resultado=resultado_atual)
 
             lucro_real = calc_real_profit(
                 row.get("Apostada", ""),
@@ -1755,6 +1907,11 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         if not data or not liga or not jogo or odd <= 1.01 or stake <= 0:
             ignored += 1
+            _diag_count("INVALID_ROW")
+            log_pick_diag(
+                label, i, row, "precheck", "INVALID_ROW",
+                odd=odd, stake=stake,
+            )
             continue
         kickoff_str = row.get("KickoffUTC", "")
         if kickoff_str:
@@ -1768,19 +1925,36 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                 if now_utc < kickoff_dt + RESULT_READY_DELAY:
                     future_skipped += 1
                     ignored += 1
+                    _diag_count("KICKOFF_TOO_EARLY")
+                    log_pick_diag(
+                        label, i, row, "precheck", "KICKOFF_TOO_EARLY",
+                        kickoff_utc=kickoff_dt.isoformat(),
+                        now_utc=now_utc.isoformat(),
+                        delay=str(RESULT_READY_DELAY),
+                    )
                     continue
-            except Exception:
-                pass
+            except Exception as kickoff_err:
+                log_pick_diag(
+                    label, i, row, "precheck", "KICKOFF_PARSE_ERROR",
+                    kickoff_raw=kickoff_str, error=str(kickoff_err),
+                )
 
         if str(mercado).strip().upper() not in SUPPORTED_MARKETS:
             print(f"[WARN] {label}: Mercado não suportado: {mercado}")
             unsupported_market += 1
             ignored += 1
+            _diag_count("UNSUPPORTED_MARKET")
+            log_pick_diag(label, i, row, "precheck", "UNSUPPORTED_MARKET")
             continue
 
         if is_future_date(data, today_iso, shared_state):
             future_skipped += 1
             ignored += 1
+            _diag_count("FUTURE_DATE")
+            log_pick_diag(
+                label, i, row, "precheck", "FUTURE_DATE",
+                today_lisbon=today_iso, pick_date=data,
+            )
             continue
 
         league_code = LEAGUE_CODE_MAP.get(liga)
@@ -1788,19 +1962,32 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             print(f"[WARN] {label}: Liga sem mapping: {liga}")
             missing_mapping += 1
             ignored += 1
+            _diag_count("MISSING_LEAGUE_MAP")
+            log_pick_diag(label, i, row, "precheck", "MISSING_LEAGUE_MAP")
             continue
 
         home_csv, away_csv = split_game(jogo)
         if not home_csv or not away_csv:
             print(f"[WARN] {label}: Jogo mal formatado: {jogo}")
             ignored += 1
+            _diag_count("BAD_GAME_FORMAT")
+            log_pick_diag(label, i, row, "precheck", "BAD_GAME_FORMAT")
             continue
+
+        log_pick_diag(
+            label, i, row, "precheck", "ELIGIBLE",
+            league_code=league_code, home=home_csv, away=away_csv,
+        )
 
         use_api_football_direct = should_use_api_football_fallback(league_code)
 
         if use_api_football_direct:
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
+            log_pick_diag(
+                label, i, row, "provider", "API_FOOTBALL_DIRECT",
+                league_code=league_code,
+            )
 
             ok, reason = try_update_row_via_api_football(
                 df, i, row, league_code, label, shared_state
@@ -1808,6 +1995,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             if ok:
                 updated += 1
                 af_updated += 1
+                _diag_count("UPDATED_API_FOOTBALL")
             else:
                 if reason == "TOO_EARLY":
                     future_skipped += 1
@@ -1819,6 +2007,8 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                     unsupported_market += 1
                 af_failed += 1
                 ignored += 1
+                _diag_count(f"AF_{reason}")
+                log_pick_diag(label, i, row, "provider_result", reason, provider="api_football")
             continue
 
         cache_key = (league_code, data)
@@ -1866,6 +2056,10 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
             blocked_fd_leagues_seen.add(league_code)
             af_used += 1
+            log_pick_diag(
+                label, i, row, "provider", "API_FOOTBALL_FALLBACK",
+                league_code=league_code, fd_reason=cache_entry["reason"],
+            )
 
             ok, reason = try_update_row_via_api_football(
                 df, i, row, league_code, label, shared_state
@@ -1873,6 +2067,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             if ok:
                 updated += 1
                 af_updated += 1
+                _diag_count("UPDATED_API_FOOTBALL")
             else:
                 if reason == "TOO_EARLY":
                     future_skipped += 1
@@ -1884,13 +2079,25 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                     unsupported_market += 1
                 af_failed += 1
                 ignored += 1
+                _diag_count(f"AF_{reason}")
+                log_pick_diag(label, i, row, "provider_result", reason, provider="api_football")
             continue
 
         if not cache_entry["ok"]:
             ignored += 1
+            _diag_count(f"FD_CACHE_FAIL_{cache_entry.get('reason', 'UNKNOWN')}")
+            log_pick_diag(
+                label, i, row, "football_data", "CACHE_FAILED",
+                reason=cache_entry.get("reason", ""),
+            )
             continue
 
         matches = cache_entry["matches"]
+        log_pick_diag(
+            label, i, row, "football_data", "FETCH_OK",
+            matches=len(matches or []), league_code=league_code,
+        )
+
         matched, best_score, meta = find_best_fixture_match(
             home_csv,
             away_csv,
@@ -1905,7 +2112,18 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
             no_match_found += 1
             ignored += 1
+            _diag_count("NO_MATCH")
+            log_pick_diag(
+                label, i, row, "football_data_match", "NO_MATCH",
+                best_score=best_score, meta=meta, fixtures=len(matches or []),
+            )
             continue
+
+        log_pick_diag(
+            label, i, row, "football_data_match", "MATCHED",
+            best_score=best_score, match_mode=(meta or {}).get("mode", ""),
+            match=format_fixture_diag(matched),
+        )
 
         can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
         if not can_try_now:
@@ -1916,6 +2134,11 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             )
             future_skipped += 1
             ignored += 1
+            _diag_count("TOO_EARLY")
+            log_pick_diag(
+                label, i, row, "football_data_status", "TOO_EARLY",
+                kickoff_utc=kickoff_txt, match=format_fixture_diag(matched),
+            )
             continue
 
         status = str(get_fixture_status(matched)).upper()
@@ -1923,12 +2146,23 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
             not_finished += 1
             ignored += 1
+            _diag_count("NOT_FINISHED")
+            log_pick_diag(
+                label, i, row, "football_data_status", "NOT_FINISHED",
+                status=status, allowed=sorted(FD_FINISHED_STATUS),
+                match=format_fixture_diag(matched),
+            )
             continue
 
         home_goals, away_goals = get_fixture_score(matched)
         if home_goals is None or away_goals is None:
             print(f"[WARN] {label}: Sem fullTime score para: {jogo}")
             ignored += 1
+            _diag_count("NO_SCORE")
+            log_pick_diag(
+                label, i, row, "football_data_score", "NO_SCORE",
+                match=format_fixture_diag(matched),
+            )
             continue
 
         resultado = market_result(mercado, int(home_goals), int(away_goals))
@@ -1936,6 +2170,8 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             print(f"[WARN] {label}: Mercado não suportado: {mercado}")
             unsupported_market += 1
             ignored += 1
+            _diag_count("UNSUPPORTED_MARKET")
+            log_pick_diag(label, i, row, "football_data_market", "UNSUPPORTED_MARKET")
             continue
 
         lucro = calc_profit(resultado, stake, odd)
@@ -1953,6 +2189,13 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             df.at[i, "LucroReal€"] = lucro_real
 
         updated += 1
+        _diag_count("UPDATED_FOOTBALL_DATA")
+
+        log_pick_diag(
+            label, i, row, "football_data_write", "UPDATED",
+            resultado=resultado, score=f"{home_goals}-{away_goals}",
+            lucro=lucro, match=format_fixture_diag(matched),
+        )
 
         print(
             f"[OK] {label}: football-data | {jogo} | {mercado} | {home_goals}-{away_goals} "
@@ -1970,6 +2213,8 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         f"af_used={af_used} | af_updated={af_updated} | af_failed={af_failed} | "
         f"blocked_fd_leagues={sorted(blocked_fd_leagues_seen) if blocked_fd_leagues_seen else []}"
     )
+    if diag_counts is not None:
+        diag_log(f"{label} decision_counts={dict(sorted(diag_counts.items()))}")
 
     return ensure_columns(df), updated, already_done, ignored
 
@@ -2202,6 +2447,15 @@ def main():
 
     if not API_FOOTBALL_KEY:
         print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL/BJL/SB/FL2 não vai funcionar.")
+
+    if UPDATE_RESULTS_DEBUG:
+        diag_log(
+            "debug mode ON | "
+            f"today_lisbon={get_today_lisbon_iso()} | "
+            f"result_delay={RESULT_READY_DELAY} | "
+            f"match_thresholds total={MATCH_MIN_TOTAL_SCORE} side={MATCH_MIN_SIDE_SCORE} | "
+            f"fd_finished={sorted(FD_FINISHED_STATUS)} | af_finished={sorted(AF_FINISHED_STATUS)}"
+        )
 
     shared_state = make_shared_runtime_state()
 

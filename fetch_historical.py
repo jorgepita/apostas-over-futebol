@@ -8,8 +8,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
 import pandas as pd
 
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
@@ -23,11 +26,13 @@ print(f"[DBG] API_FOOTBALL_KEY len = {len(API_FOOTBALL_KEY)}")
 print(f"[DBG] API_FOOTBALL_BASE = {API_FOOTBALL_BASE}")
 
 LEAGUE_INFO = {
-    "noruega": {"name": "Eliteserien", "country": "Norway", "id": 848},
-    "suecia": {"name": "Allsvenskan", "country": "Sweden", "id": 846},
+    "noruega": {"name": "Eliteserien", "country": "Norway", "id": 103},
+    "suecia": {"name": "Allsvenskan", "country": "Sweden", "id": 113},
     "mls": {"name": "MLS", "country": "USA", "id": 253},
-    "japao": {"name": "J1 League", "country": "Japan"},
-    "coreia": {"name": "K League 1", "country": "Korea Republic"},
+    "japao": {"name": "J1 League", "country": "Japan", "id": 98},
+    "coreia": {"name": "K League 1", "country": "Korea Republic", "id": 292},
+    "finlandia": {"name": "Veikkausliiga", "country": "Finland", "id": 244},
+    "islandia": {"name": "Besta deild", "country": "Iceland", "id": 188},
 }
 
 API_CALL_MIN_INTERVAL = 0.28
@@ -244,6 +249,14 @@ def get_historical_seasons(cfg: dict, league_key: str, current_year: int, curren
     if seasons:
         return sorted(set(seasons))
 
+    # Fallback default logic
+    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia"}
+    if league_key in summer_leagues:
+        # For summer leagues, we want current year if it has already started (Mar-May)
+        if current_month >= 4:
+            return [current_year - 1, current_year]
+        return [current_year - 1]
+
     if current_month >= 7:
         return [current_year]
     return [current_year - 1]
@@ -265,7 +278,7 @@ def generate_historical_csv(
     if league_id is None:
         print(f"[AVISO] league_id em falta para {league_key}")
 
-    print(f"\n[INI] Gerando histórico {league_key} seasons={seasons}...")
+    print(f"[HIST] fetching league={league_key.upper()}")
 
     records = []
     seen = set()
@@ -306,7 +319,7 @@ def generate_historical_csv(
     output_path = DATA_RAW_DIR / f"{league_key}.csv"
     df.to_csv(output_path, index=False, encoding="utf-8")
 
-    print(f"[OK] {league_key}: {len(df)} matches escritos em {output_path}")
+    print(f"[HIST] saved data_raw/{league_key}.csv rows={len(df)}")
 
 
 def main():

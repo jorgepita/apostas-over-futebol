@@ -90,8 +90,8 @@ def process_league_fixtures(
     total_fixture_errors = 0
 
     league_fixt = fixtures[fixtures["League"] == league_key].copy()
-    print(f"[DBG] liga={league_key} | fixtures={len(league_fixt)}")
     if league_fixt.empty:
+        print(f"[FIXTURE SKIP] league={league_key.upper()} reason=no_matches")
         return rows25, rows_btts, total_fixture_errors
 
     hist_path = data_raw_dir / f"{league_key}.csv"

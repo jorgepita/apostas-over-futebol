@@ -1,6 +1,6 @@
 {
   "run": {
-    "days_ahead": 2,
+    "days_ahead": 5,
     "mode": "normal",
     "max_picks_per_day": 12,
     "max_picks_global": 36
@@ -82,7 +82,14 @@
       "italia2": 136,
       "franca2": 62,
       "belgica": 144,
-      "turquia": 203
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188
     },
     "shortlist_total": 30,
     "shortlist_per_league_per_day": 4,
@@ -107,7 +114,14 @@
       "italia2": "soccer_italy_serie_b",
       "paises_baixos": "soccer_netherlands_eredivisie",
       "belgica": "soccer_belgium_first_div",
-      "turquia": "soccer_turkey_super_league"
+      "turquia": "soccer_turkey_super_league",
+      "noruega": "soccer_norway_eliteserien",
+      "suecia": "soccer_sweden_allsvenskan",
+      "mls": "soccer_usa_mls",
+      "japao": "soccer_japan_j_league",
+      "coreia": "soccer_south_korea_k_league_1",
+      "finlandia": "soccer_finland_veikkausliiga",
+      "islandia": "soccer_iceland_urvalsdeild"
     }
   }
 }

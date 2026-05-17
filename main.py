@@ -107,13 +107,9 @@ def main():
 
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce")
     
-    print("[DEBUG] total fixtures:", len(fixtures))
-    print("[DEBUG] datas únicas:", sorted(fixtures["Date"].astype(str).unique())[:10])
-
-    required = {"Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25"}
-    if not required.issubset(set(fixtures.columns)):
-        raise SystemExit(f"fixtures_today.csv precisa das colunas: {sorted(required)}")
-
+    print(f"[DBG] total fixtures: {len(fixtures)}")
+    all_leagues = fixtures["League"].unique() if not fixtures.empty else []
+    
     fixtures["Date"] = pd.to_datetime(fixtures["Date"], errors="coerce").dt.date
     fixtures = fixtures.dropna(subset=["Date"]).copy()
 
@@ -121,13 +117,21 @@ def main():
         from zoneinfo import ZoneInfo
         now_pt = datetime.now(ZoneInfo("Europe/Lisbon"))
     except Exception:
-        now_pt = datetime.utcnow()
+        # datetime.utcnow() is deprecated, use now(timezone.utc)
+        now_pt = datetime.now(timezone.utc)
 
     start = now_pt.date()
     end = start + timedelta(days=days_ahead - 1)
     today_iso = start.isoformat()
 
-    fixtures = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
+    fixtures_filtered = fixtures[(fixtures["Date"] >= start) & (fixtures["Date"] <= end)].copy()
+    
+    leagues_after_date = fixtures_filtered["League"].unique() if not fixtures_filtered.empty else []
+    for l_key in all_leagues:
+        if l_key not in leagues_after_date:
+            print(f"[FIXTURE FILTERED] league={l_key.upper()} reason=date_filter")
+
+    fixtures = fixtures_filtered
    
     print("==== DEBUG DATES ====")
     print(fixtures["Date"].value_counts().sort_index())

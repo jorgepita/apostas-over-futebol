@@ -1,0 +1,232 @@
+diff --git a/fetch_historical.py b/fetch_historical.py
+new file mode 100644
+index 0000000..9ef7568
+--- /dev/null
++++ b/fetch_historical.py
+@@ -0,0 +1,226 @@
++import os
++import json
++import time
++import urllib.parse
++import urllib.request
++from urllib import error
++from datetime import datetime, date
++from pathlib import Path
++from typing import Optional
++
++import pandas as pd
++
++
++BASE_DIR = Path(__file__).resolve().parent
++CONFIG_PATH = BASE_DIR / "config.json"
++DATA_RAW_DIR = BASE_DIR / "data_raw"
++
++API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
++API_FOOTBALL_BASE = os.getenv("API_FOOTBALL_BASE", "https://v3.football.api-sports.io").strip()
++
++print(f"[DBG] API_FOOTBALL_KEY len = {len(API_FOOTBALL_KEY)}")
++print(f"[DBG] API_FOOTBALL_BASE = {API_FOOTBALL_BASE}")
++
++# League IDs for new leagues
++LEAGUE_IDS = {
++    "noruega": 848,     # Eliteserien
++    "suecia": 846,      # Allsvenskan
++    "mls": 253,         # MLS
++}
++
++API_CALL_MIN_INTERVAL = 0.28
++_api_last_call_ts = 0.0
++
++
++def _respect_api_spacing():
++    global _api_last_call_ts
++
++    now = time.monotonic()
++    elapsed = now - _api_last_call_ts
++    if elapsed < API_CALL_MIN_INTERVAL:
++        time.sleep(API_CALL_MIN_INTERVAL - elapsed)
++
++    _api_last_call_ts = time.monotonic()
++
++
++def http_get_json_api_football(path: str, params: dict) -> dict:
++    if not API_FOOTBALL_KEY:
++        raise SystemExit("Falta API_FOOTBALL_KEY (define no Render -> Environment).")
++
++    query = urllib.parse.urlencode(params)
++    url = f"{API_FOOTBALL_BASE}{path}?{query}"
++
++    _respect_api_spacing()
++
++    req = urllib.request.Request(
++        url,
++        headers={
++            "x-apisports-key": API_FOOTBALL_KEY,
++            "Accept": "application/json",
++            "User-Agent": "apostas-over-futebol/1.0",
++        },
++    )
++
++    try:
++        with urllib.request.urlopen(req, timeout=40) as r:
++            raw = r.read().decode("utf-8")
++            return json.loads(raw)
++    except error.HTTPError as e:
++        print(f"[ERRO] HTTP {e.code} -> {e.reason}")
++        return {"response": []}
++    except Exception as e:
++        print(f"[ERRO] HTTP request falhou -> {e}")
++        return {"response": []}
++
++
++def load_config() -> dict:
++    if not CONFIG_PATH.exists():
++        raise SystemExit("Falta config.json na pasta do projeto.")
++    return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
++
++
++def fetch_finished_matches(
++    league_id: int,
++    season: int,
++) -> list[dict]:
++    """
++    Fetch all finished matches for a league and season from API-Football.
++    Returns list of fixture dicts.
++    """
++    params = {
++        "league": league_id,
++        "season": season,
++        "status": "FT",
++    }
++
++    data = http_get_json_api_football("/fixtures", params)
++    response = data.get("response", []) if isinstance(data, dict) else []
++
++    try:
++        results = data.get("results", None)
++        errors = data.get("errors", None)
++        response_len = len(response) if isinstance(response, list) else -1
++        print(
++            f"[API-DBG] /fixtures league={league_id} season={season} status=FT "
++            f"results={results} response_len={response_len} errors={errors}"
++        )
++    except Exception:
++        pass
++
++    return response
++
++
++def normalize_date(date_str: str) -> str:
++    """
++    Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY format.
++    """
++    try:
++        dt = datetime.fromisoformat(date_str.split("T")[0])
++        return dt.strftime("%d/%m/%Y")
++    except Exception:
++        return ""
++
++
++def extract_match_record(fixture: dict) -> Optional[dict]:
++    """
++    Extract a single match record from API-Football fixture response.
++    Returns dict with {Date, HomeTeam, AwayTeam, FTHG, FTAG} or None.
++    """
++    try:
++        fixture_meta = fixture.get("fixture", {}) or {}
++        teams = fixture.get("teams", {}) or {}
++        goals = fixture.get("goals", {}) or {}
++
++        fixture_date = fixture_meta.get("date", "")
++        home_name = ((teams.get("home") or {}).get("name") or "").strip()
++        away_name = ((teams.get("away") or {}).get("name") or "").strip()
++        home_goals = goals.get("home")
++        away_goals = goals.get("away")
++
++        if not fixture_date or not home_name or not away_name:
++            return None
++
++        if home_goals is None or away_goals is None:
++            return None
++
++        return {
++            "Date": normalize_date(fixture_date),
++            "HomeTeam": home_name,
++            "AwayTeam": away_name,
++            "FTHG": int(home_goals),
++            "FTAG": int(away_goals),
++        }
++    except Exception as e:
++        print(f"[WARN] falhou extraÃ§Ã£o do match -> {e}")
++        return None
++
++
++def generate_historical_csv(
++    league_key: str,
++    league_id: int,
++    season: int,
++) -> None:
++    """
++    Fetch finished matches for a league and season, then write to CSV.
++    """
++    print(f"\n[INI] Gerando histÃ³rico {league_key} season={season}...")
++
++    fixtures = fetch_finished_matches(league_id, season)
++
++    if not fixtures:
++        print(f"[AVISO] Nenhum match encontrado para {league_key} season={season}")
++        return
++
++    records = []
++    for fixture in fixtures:
++        record = extract_match_record(fixture)
++        if record:
++            records.append(record)
++
++    if not records:
++        print(f"[AVISO] Nenhum record extraÃ­do para {league_key}")
++        return
++
++    df = pd.DataFrame(records)
++    df = df[["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG"]].copy()
++
++    output_path = DATA_RAW_DIR / f"{league_key}.csv"
++    df.to_csv(output_path, index=False, encoding="utf-8")
++
++    print(f"[OK] {league_key}: {len(df)} matches escritos em {output_path}")
++
++
++def main():
++    cfg = load_config()
++
++    # Default seasons to fetch (current year and previous year)
++    try:
++        from zoneinfo import ZoneInfo
++        now = datetime.now(ZoneInfo("Europe/Lisbon"))
++    except Exception:
++        now = datetime.utcnow()
++
++    current_year = now.year
++    current_month = now.month
++
++    # Determine seasons: if before July, fetch previous season; otherwise current season
++    seasons_to_fetch = []
++    if current_month >= 7:
++        seasons_to_fetch = [current_year]
++    else:
++        seasons_to_fetch = [current_year - 1]
++
++    print(f"[DBG] Seasons to fetch: {seasons_to_fetch}")
++    print(f"[DBG] Leagues to fetch: {sorted(LEAGUE_IDS.keys())}")
++
++    for league_key in sorted(LEAGUE_IDS.keys()):
++        league_id = LEAGUE_IDS[league_key]
++
++        for season in seasons_to_fetch:
++            generate_historical_csv(league_key, league_id, season)
++
++    print("\n[FIM] HistÃ³rico atualizado com sucesso!")
++
++
++if __name__ == "__main__":
++    main()
