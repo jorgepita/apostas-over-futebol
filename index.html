@@ -1115,12 +1115,6 @@ button.dirty {
           </div>
         </div>
         
-        <div class="card">
-          <div class="label">Apostas em aberto</div>
-          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
-          <div id="openBetsWrap" class="grid"></div>
-        </div>
-
         <div class="grid grid-3">
           <div class="card">
             <div class="label">Analytics por liga</div>
@@ -1416,12 +1410,6 @@ button.dirty {
             <button type="button" class="market-chip" data-day-market-quick="O3.5">O3.5</button>
             <button type="button" class="market-chip" data-day-market-quick="O1.5">O1.5</button>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Apostas em aberto</div>
-          <div class="note" style="margin-bottom:12px;">Executadas e ainda sem resultado final.</div>
-          <div id="openBetsWrapDay" class="grid"></div>
         </div>
 
         <div class="card">
@@ -3541,6 +3529,8 @@ button.dirty {
       }
 
       function renderOpenBets() {
+        return;
+        
         const summaryRows = sortBotRowsForDisplay(
           filterBotRows(getHistoryRowsMerged(), getSummaryFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
         );
