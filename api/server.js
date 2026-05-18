@@ -3,9 +3,6 @@ const cors = require('cors');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
 /* =========================
    CONFIG
 ========================= */
@@ -20,24 +17,21 @@ const ALLOWED_ORIGINS = [
 /* =========================
    MIDDLEWARE
 ========================= */
-
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    const allowed = [
-      'https://jorgepita.github.io',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000'
-    ];
-
-    if (allowed.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn('CORS bloqueado para:', origin);
-      callback(null, false);
+    // permitir requests sem origin (health checks / server-to-server)
+    if (!origin) {
+      return callback(null, true);
     }
+
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn('CORS bloqueado para:', origin);
+    return callback(new Error('Not allowed by CORS'));
   },
+
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
@@ -45,14 +39,74 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-// JSON body parser
 app.use(express.json({ limit: '1mb' }));
 
 /* =========================
    HEALTH CHECK
 ========================= */
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', service: 'cloud-save-api' });
+  res.json({
+    status: 'ok',
+    service: 'cloud-save-api'
+  });
+});
+
+/* =========================
+   LOAD ENDPOINT
+========================= */
+app.get('/load', async (req, res) => {
+  try {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO = process.env.GITHUB_REPO;
+    const FILE_PATH = 'cloud_state.json';
+
+    if (!GITHUB_TOKEN || !REPO) {
+      return res.status(500).json({
+        error: 'Missing env vars (GITHUB_TOKEN or GITHUB_REPO)'
+      });
+    }
+
+    const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
+
+    const githubRes = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github+json'
+      }
+    });
+
+    // ficheiro ainda não existe
+    if (githubRes.status === 404) {
+      return res.json({});
+    }
+
+    const data = await githubRes.json();
+
+    if (!githubRes.ok) {
+      console.error('GitHub LOAD error:', data);
+
+      return res.status(500).json({
+        error: 'GitHub API error',
+        details: data
+      });
+    }
+
+    const decodedContent = Buffer.from(
+      data.content,
+      'base64'
+    ).toString('utf8');
+
+    const parsed = JSON.parse(decodedContent);
+
+    return res.json(parsed);
+
+  } catch (err) {
+    console.error('LOAD ERROR:', err);
+
+    return res.status(500).json({
+      error: err.message || 'Internal error'
+    });
+  }
 });
 
 /* =========================
@@ -69,7 +123,7 @@ app.post('/save', async (req, res) => {
     }
 
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = process.env.GITHUB_REPO; // ex: jorgepita/apostas-over-futebol
+    const REPO = process.env.GITHUB_REPO;
     const FILE_PATH = 'cloud_state.json';
 
     if (!GITHUB_TOKEN || !REPO) {
@@ -80,7 +134,7 @@ app.post('/save', async (req, res) => {
 
     const apiUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
 
-    // timeout helper
+    // helper timeout
     const fetchWithTimeout = (url, options, timeout = 10000) =>
       Promise.race([
         fetch(url, options),
@@ -89,7 +143,7 @@ app.post('/save', async (req, res) => {
         )
       ]);
 
-    // 1. GET sha atual (se existir)
+    // obter SHA atual
     let sha = null;
 
     const getRes = await fetchWithTimeout(apiUrl, {
@@ -100,16 +154,16 @@ app.post('/save', async (req, res) => {
     });
 
     if (getRes.status === 200) {
-      const data = await getRes.json();
-      sha = data.sha;
+      const existingData = await getRes.json();
+      sha = existingData.sha;
     }
 
-    // 2. Converter conteúdo para base64
+    // converter conteúdo para base64
     const encodedContent = Buffer.from(
       JSON.stringify(content, null, 2)
     ).toString('base64');
 
-    // 3. PUT (criar ou atualizar)
+    // criar / atualizar ficheiro
     const putRes = await fetchWithTimeout(apiUrl, {
       method: 'PUT',
       headers: {
@@ -126,7 +180,8 @@ app.post('/save', async (req, res) => {
     const result = await putRes.json();
 
     if (!putRes.ok) {
-      console.error('GitHub error:', result);
+      console.error('GitHub SAVE error:', result);
+
       return res.status(500).json({
         error: 'GitHub API error',
         details: result
@@ -150,15 +205,18 @@ app.post('/save', async (req, res) => {
 });
 
 /* =========================
-   ERROR HANDLER GLOBAL
+   GLOBAL ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error('GLOBAL ERROR:', err.message);
-  res.status(500).json({ error: err.message });
+  console.error('GLOBAL ERROR:', err);
+
+  res.status(500).json({
+    error: err.message || 'Internal server error'
+  });
 });
 
 /* =========================
-   START
+   START SERVER
 ========================= */
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
