@@ -3410,11 +3410,17 @@ button.dirty {
       }
 
       function fillFilters() {
+        console.log('DAILY ROWS', getDailyRowsMerged().length);
+        console.log('HISTORY ROWS', getHistoryRowsMerged().length);
+        console.log('MANUAL ROWS', getManualRowsMerged().length);
+
         const rows = [
           ...getHistoryRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
           ...getDailyRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
           ...getManualRowsMerged().map(r => ({ league: cleanString(r.liga || ''), market: normalizeMarket(r) }))
         ];
+
+        console.log('FINAL ROWS', rows.length);
 
         const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
         const markets = [...new Set(rows.map(r => r.market).filter(Boolean))]
@@ -3634,6 +3640,7 @@ button.dirty {
       }
 
       function renderOpenBets() {
+        console.log('TRACE: renderOpenBets');
         const wrap = document.getElementById('openBetsWrap');
         const wrapDay = document.getElementById('openBetsWrapDay');
 
@@ -4480,6 +4487,7 @@ buttons.forEach(btn => {
       }
 
       function rerenderDayOnly() {
+        console.log('TRACE: rerenderDayOnly');
         try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
         try { renderFootball(); } catch (e) { console.error('renderFootball', e); }
         try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
@@ -4585,17 +4593,22 @@ buttons.forEach(btn => {
 
           state.fixtures = parseSemicolonCsv(fixturesText);
 
-          const rowsDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';')).map(normalizeBotCsvRow);
-          const rowsBtts = parseSemicolonCsv(bttsText.replaceAll(',', ';')).map(normalizeBotCsvRow);
+          const dailyContent = (dailyText || '').includes(';') ? dailyText : (dailyText || '').replaceAll(',', ';');
+          const bttsContent = (bttsText || '').includes(';') ? bttsText : (bttsText || '').replaceAll(',', ';');
+
+          const rowsDaily = parseSemicolonCsv(dailyContent).map(normalizeBotCsvRow);
+          const rowsBtts = parseSemicolonCsv(bttsContent).map(normalizeBotCsvRow);
           
+          console.log('DAILY ROWS RAW', rowsDaily.length);
+          console.log('BTTS ROWS RAW', rowsBtts.length);
+
           state.footballDaily = [...rowsDaily, ...rowsBtts]
             .filter(r => {
               const ok = r.Data && r.Jogo && num(r.Odd) > 0;
-              if (ok) {
-                console.log('FINAL ROW MARKET', r.Mercado);
-              }
               return ok;
             });
+
+          console.log('DAILY ROWS MERGED', state.footballDaily.length);
 
           console.log('BTTS ROWS', state.footballDaily.filter(r => r.Mercado === 'BTTS'));
           console.log(state.footballDaily);
