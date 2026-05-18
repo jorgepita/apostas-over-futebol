@@ -1752,9 +1752,17 @@ button.dirty {
         cloudAvailable: false
       };
 
-      function parseDelimitedCsv(text, delimiter = ';') {
+      function parseDelimitedCsv(text, delimiter) {
         const input = String(text || '').replace(/^\uFEFF/, '');
         if (!input.trim()) return [];
+
+        let d = delimiter;
+        if (!d) {
+          const firstLine = input.split('\n')[0];
+          const semicolons = (firstLine.match(/;/g) || []).length;
+          const commas = (firstLine.match(/,/g) || []).length;
+          d = semicolons >= commas ? ';' : ',';
+        }
 
         const rows = [];
         let row = [];
@@ -1775,7 +1783,7 @@ button.dirty {
             continue;
           }
 
-          if (ch === delimiter && !inQuotes) {
+          if (ch === d && !inQuotes) {
             row.push(cell);
             cell = '';
             continue;
@@ -1812,6 +1820,10 @@ button.dirty {
 
       function parseSemicolonCsv(text) {
         return parseDelimitedCsv(text, ';');
+      }
+
+      function parseAutoCsv(text) {
+        return parseDelimitedCsv(text, null);
       }
 
       const LEAGUE_TIER_BADGE = {
@@ -3410,17 +3422,22 @@ button.dirty {
       }
 
       function fillFilters() {
-        console.log('DAILY ROWS', getDailyRowsMerged().length);
-        console.log('HISTORY ROWS', getHistoryRowsMerged().length);
-        console.log('MANUAL ROWS', getManualRowsMerged().length);
+        const dailyRowsMerged = getDailyRowsMerged();
+        const historyRowsMerged = getHistoryRowsMerged();
+        const manualRowsMerged = getManualRowsMerged();
+
+        console.log('DAILY ROWS', dailyRowsMerged.length);
+        console.log('HISTORY ROWS', historyRowsMerged.length);
+        console.log('MANUAL ROWS', manualRowsMerged.length);
 
         const rows = [
-          ...getHistoryRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
-          ...getDailyRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
-          ...getManualRowsMerged().map(r => ({ league: cleanString(r.liga || ''), market: normalizeMarket(r) }))
+          ...historyRowsMerged.map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r), date: r.Data || r.Date || r.data || r.date })),
+          ...dailyRowsMerged.map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r), date: r.Data || r.Date || r.data || r.date })),
+          ...manualRowsMerged.map(r => ({ league: cleanString(r.liga || ''), market: normalizeMarket(r), date: r.Data || r.Date || r.data || r.date }))
         ];
 
         console.log('FINAL ROWS', rows.length);
+        console.log('ALL DAILY DATES', [...new Set(rows.map(r => r.date))]);
 
         const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
         const markets = [...new Set(rows.map(r => r.market).filter(Boolean))]
@@ -4591,13 +4608,10 @@ buttons.forEach(btn => {
           const fixturesText = fixturesRes.ok ? await fixturesRes.text() : '';
           const manualText = manualRes.ok ? await manualRes.text() : '';
 
-          state.fixtures = parseSemicolonCsv(fixturesText);
+          state.fixtures = parseAutoCsv(fixturesText);
 
-          const dailyContent = (dailyText || '').includes(';') ? dailyText : (dailyText || '').replaceAll(',', ';');
-          const bttsContent = (bttsText || '').includes(';') ? bttsText : (bttsText || '').replaceAll(',', ';');
-
-          const rowsDaily = parseSemicolonCsv(dailyContent).map(normalizeBotCsvRow);
-          const rowsBtts = parseSemicolonCsv(bttsContent).map(normalizeBotCsvRow);
+          const rowsDaily = parseAutoCsv(dailyText).map(normalizeBotCsvRow);
+          const rowsBtts = parseAutoCsv(bttsText).map(normalizeBotCsvRow);
           
           console.log('DAILY ROWS RAW', rowsDaily.length);
           console.log('BTTS ROWS RAW', rowsBtts.length);
@@ -4609,13 +4623,17 @@ buttons.forEach(btn => {
             });
 
           console.log('DAILY ROWS MERGED', state.footballDaily.length);
+          console.log('ALL DAILY DATES LOADED', [...new Set(state.footballDaily.map(r => r.Data))]);
 
           console.log('BTTS ROWS', state.footballDaily.filter(r => r.Mercado === 'BTTS'));
           console.log(state.footballDaily);
           
-          state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
-          state.nba = parseSemicolonCsv(nbaText).map(normalizeNbaCsvRow);
-          state.manualBetsRemote = parseSemicolonCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
+          state.footballHistory = parseAutoCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
+          console.log('HISTORY ROWS LOADED', state.footballHistory.length);
+          console.log('ALL HISTORY DATES LOADED', [...new Set(state.footballHistory.map(r => r.Data))]);
+
+          state.nba = parseAutoCsv(nbaText).map(normalizeNbaCsvRow);
+          state.manualBetsRemote = parseAutoCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
           if (markUpdated) state.lastUpdated = new Date();
           rerenderAll(false);
           return true;
