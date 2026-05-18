@@ -8,36 +8,16 @@ const app = express();
 ========================= */
 const PORT = process.env.PORT || 3000;
 
-const ALLOWED_ORIGINS = [
-  'https://jorgepita.github.io',
-  'http://localhost:3000',
-  'http://127.0.0.1:3000'
-];
-
 /* =========================
    MIDDLEWARE
 ========================= */
-const corsOptions = {
-  origin: function (origin, callback) {
-    // permitir requests sem origin (health checks / server-to-server)
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    if (ALLOWED_ORIGINS.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.warn('CORS bloqueado para:', origin);
-    return callback(new Error('Not allowed by CORS'));
-  },
-
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-};
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*', cors());
 
 app.use(express.json({ limit: '1mb' }));
 
