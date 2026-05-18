@@ -1716,6 +1716,7 @@ button.dirty {
       
       const URLS = {
         footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_github.csv',
+        footballBtts: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_btts.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
         nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
         manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv',
@@ -2486,9 +2487,8 @@ button.dirty {
         }
 
         // Requirement 1: original raw market value and normalized market value
-        if (m === 'BTTS' || rawValue.toUpperCase().includes('BTTS') || rawValue.toUpperCase().includes('SCORE')) {
-           console.log(`[DEBUG normalizeMarket]: rawValue="${rawValue}", normalized="${m}"`);
-        }
+        console.log('RAW MARKET', rawValue);
+        console.log('NORMALIZED MARKET', m);
 
         if (m) {
           if (!window._detectedMarkets) window._detectedMarkets = new Set();
@@ -3634,6 +3634,9 @@ button.dirty {
       }
 
       function renderOpenBets() {
+        const wrap = document.getElementById('openBetsWrap');
+        const wrapDay = document.getElementById('openBetsWrapDay');
+
         const summaryRows = sortBotRowsForDisplay(
           filterBotRows(getHistoryRowsMerged(), getSummaryFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
         );
@@ -3642,8 +3645,8 @@ button.dirty {
           filterBotRows(getHistoryRowsMerged(), getDayFilters()).filter(r => r._apostadaBool && r._resultKey === 'pending')
         );
 
-        document.getElementById('openBetsWrap').innerHTML = buildOpenBetsHtml(summaryRows);
-        document.getElementById('openBetsWrapDay').innerHTML = buildOpenBetsHtml(dayRows);
+        if (wrap) wrap.innerHTML = buildOpenBetsHtml(summaryRows);
+        if (wrapDay) wrapDay.innerHTML = buildOpenBetsHtml(dayRows);
       }
 
       function buildAnalytics(rows, field) {
@@ -4560,8 +4563,9 @@ buttons.forEach(btn => {
 
       async function loadData(markUpdated = true) {
         try {
-          const [dailyRes, historyRes, nbaRes, manualRes] = await Promise.all([
+          const [dailyRes, bttsRes, historyRes, nbaRes, manualRes] = await Promise.all([
             fetch(`${URLS.footballDaily}?t=${Date.now()}`, { cache: 'no-store' }),
+            fetch(`${URLS.footballBtts}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.footballHistory}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.nba}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.manual}?t=${Date.now()}`, { cache: 'no-store' })
@@ -4572,6 +4576,7 @@ buttons.forEach(btn => {
           }
 
           const dailyText = dailyRes.ok ? await dailyRes.text() : '';
+          const bttsText = bttsRes.ok ? await bttsRes.text() : '';
           const historyText = await historyRes.text();
           const nbaText = nbaRes.ok ? await nbaRes.text() : '';
           const fixturesRes = await fetch('https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv');
@@ -4580,14 +4585,17 @@ buttons.forEach(btn => {
 
           state.fixtures = parseSemicolonCsv(fixturesText);
 
-          state.footballDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';'))
-            .map(normalizeBotCsvRow)
-            .filter(r => 
-              r.Data && 
-              r.Jogo && 
-              num(r.Odd) > 0 &&
-              (r.Mercado === 'Over 2.5' || r.Mercado === 'BTTS')
-            );
+          const rowsDaily = parseSemicolonCsv(dailyText.replaceAll(',', ';')).map(normalizeBotCsvRow);
+          const rowsBtts = parseSemicolonCsv(bttsText.replaceAll(',', ';')).map(normalizeBotCsvRow);
+          
+          state.footballDaily = [...rowsDaily, ...rowsBtts]
+            .filter(r => {
+              const ok = r.Data && r.Jogo && num(r.Odd) > 0;
+              if (ok) {
+                console.log('FINAL ROW MARKET', r.Mercado);
+              }
+              return ok;
+            });
 
           console.log('BTTS ROWS', state.footballDaily.filter(r => r.Mercado === 'BTTS'));
           console.log(state.footballDaily);
