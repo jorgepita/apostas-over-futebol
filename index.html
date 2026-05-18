@@ -2455,26 +2455,41 @@ button.dirty {
       function normalizeMarket(row) {
         if (!row) return '';
         let m = '';
+        const rawValue = row['Mercado'] || row['Market'] || row['market'] || row['mercado'] || row['_market'] || '';
+        
         if (row['Odd_Over25']) {
           m = 'Over 2.5';
         } else if (row['Odd_BTTS_Yes']) {
           m = 'BTTS';
         } else {
-          const rawValue = row['Mercado'] || row['Market'] || row['market'] || row['mercado'] || row['_market'] || '';
-          m = cleanString(rawValue).toUpperCase();
-          if (m.includes('BOTH TEAMS TO SCORE') || m === 'BTTS_YES' || m === 'AMBAS MARCAM' || m === 'AMBAS_MARCAM' || m === 'BTTS') {
+          const mClean = cleanString(rawValue).toUpperCase();
+          if (mClean.includes('BOTH TEAMS TO SCORE') || 
+              mClean.includes('BTTS') || 
+              mClean.includes('AMBAS MARCAM') || 
+              mClean.includes('AMBAS_MARCAM') ||
+              mClean.includes('BOTH_TEAMS_TO_SCORE')) {
              m = 'BTTS';
-          } else if (m === 'O2.5' || m === 'OVER 2.5' || m === 'OVER_2.5') {
+          } else if (mClean.includes('OVER 2.5') || 
+                     mClean.includes('O2.5') || 
+                     mClean.includes('OVER_2.5') ||
+                     mClean === 'O25') {
              m = 'Over 2.5';
           }
+          
           if (!m) {
             for (const k in row) {
               const val = String(row[k] || '').toUpperCase();
-              if (val === 'BTTS' || val.includes('BOTH TEAMS TO SCORE')) { m = 'BTTS'; break; }
-              if (val === 'O2.5' || val === 'OVER 2.5') { m = 'Over 2.5'; break; }
+              if (val.includes('BTTS') || val.includes('BOTH TEAMS TO SCORE')) { m = 'BTTS'; break; }
+              if (val.includes('O2.5') || val.includes('OVER 2.5')) { m = 'Over 2.5'; break; }
             }
           }
         }
+
+        // Requirement 1: original raw market value and normalized market value
+        if (m === 'BTTS' || rawValue.toUpperCase().includes('BTTS') || rawValue.toUpperCase().includes('SCORE')) {
+           console.log(`[DEBUG normalizeMarket]: rawValue="${rawValue}", normalized="${m}"`);
+        }
+
         if (m) {
           if (!window._detectedMarkets) window._detectedMarkets = new Set();
           if (!window._detectedMarkets.has(m)) {
@@ -3295,6 +3310,11 @@ button.dirty {
           const rMarket = normalizeMarket(r).toUpperCase();
           const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
 
+          // Requirement 1: final filter comparison value
+          if (fMarket && (rMarket.includes('BTTS') || fMarket.includes('BTTS'))) {
+             console.log(`[DEBUG filterBotRows]: fMarket="${fMarket}", rMarket="${rMarket}", okMarket=${okMarket}`);
+          }
+
           const okResult = !filters.result || r._resultKey === filters.result;
           const okExecution =
             !filters.execution ||
@@ -3305,7 +3325,7 @@ button.dirty {
 
           const ok = okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
 
-          if (!ok && rMarket.includes('BTTS') && !fMarket) {
+          if (!ok && rMarket.includes('BTTS') && fMarket.includes('BTTS')) {
              console.log('[DEBUG REJECTED BTTS]', {
                game: r['Jogo'] || r.jogo,
                okSearch, okSource, okLeague, okMarket, okResult, okExecution, okDate,
@@ -3317,16 +3337,8 @@ button.dirty {
           return ok;
         });
 
-        console.log('[FILTER INPUT]', rows);
-        console.log('[FILTER OUTPUT]', filteredRows);
-        console.log(
-          '[BTTS FILTER CHECK]',
-          rows.filter(r =>
-            String(r['Mercado'] || r['Market'] || r['_market'] || r.mercado || '')
-              .toUpperCase()
-              .includes('BTTS')
-          )
-        );
+        // Requirement 6: temporary debug log
+        console.log('BTTS ROWS', rows.filter(r => normalizeMarket(r) === 'BTTS'));
 
         return filteredRows;
       }
@@ -3344,6 +3356,11 @@ button.dirty {
           const fMarket = cleanString(filters.market).toUpperCase();
           const rMarket = normalizeMarket(r).toUpperCase();
           const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
+
+          // Requirement 1: final filter comparison value
+          if (fMarket && (rMarket.includes('BTTS') || fMarket.includes('BTTS'))) {
+             console.log(`[DEBUG filterManualRows]: fMarket="${fMarket}", rMarket="${rMarket}", okMarket=${okMarket}`);
+          }
 
           const okResult = !filters.result || r._resultKey === filters.result;
           const okDate = matchDateFilter(r.data || r.Data || r['Data'] || '', filters.date);
@@ -4572,6 +4589,7 @@ buttons.forEach(btn => {
               (r.Mercado === 'Over 2.5' || r.Mercado === 'BTTS')
             );
 
+          console.log('BTTS ROWS', state.footballDaily.filter(r => r.Mercado === 'BTTS'));
           console.log(state.footballDaily);
           
           state.footballHistory = parseSemicolonCsv(historyText).map(normalizeBotCsvRow).filter(r => r['Data'] && r['Jogo']);
