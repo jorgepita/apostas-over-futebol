@@ -1405,10 +1405,10 @@ button.dirty {
           <div class="market-quick-wrap" style="margin-top:14px;">
             <span class="label">Filtro rápido:</span>
             <button type="button" class="market-chip active" data-day-market-quick="">Todos</button>
-            <button type="button" class="market-chip" data-day-market-quick="O2.5">O2.5</button>
+            <button type="button" class="market-chip" data-day-market-quick="Over 2.5">Over 2.5</button>
             <button type="button" class="market-chip" data-day-market-quick="BTTS">BTTS</button>
-            <button type="button" class="market-chip" data-day-market-quick="O3.5">O3.5</button>
-            <button type="button" class="market-chip" data-day-market-quick="O1.5">O1.5</button>
+            <button type="button" class="market-chip" data-day-market-quick="O3.5" style="display:none;">O3.5</button>
+            <button type="button" class="market-chip" data-day-market-quick="O1.5" style="display:none;">O1.5</button>
           </div>
         </div>
 
@@ -2299,7 +2299,7 @@ button.dirty {
       function normalizeLeagueStatsRow(row) {
         return {
           League: cleanString(row.League || row.Liga || ''),
-          Market: cleanString(row.Market || row.Mercado || ''),
+          Market: normalizeMarket(row),
           'ROI%': row['ROI%'] ?? '',
           'WinRate%': row['WinRate%'] ?? '',
           AvgKelly: row.AvgKelly ?? '',
@@ -2452,6 +2452,39 @@ button.dirty {
         return String(value ?? '').trim().replace(/^"+|"+$/g, '');
       }
 
+      function normalizeMarket(row) {
+        if (!row) return '';
+        let m = '';
+        if (row['Odd_Over25']) {
+          m = 'Over 2.5';
+        } else if (row['Odd_BTTS_Yes']) {
+          m = 'BTTS';
+        } else {
+          const rawValue = row['Mercado'] || row['Market'] || row['market'] || row['mercado'] || row['_market'] || '';
+          m = cleanString(rawValue).toUpperCase();
+          if (m.includes('BOTH TEAMS TO SCORE') || m === 'BTTS_YES' || m === 'AMBAS MARCAM' || m === 'AMBAS_MARCAM' || m === 'BTTS') {
+             m = 'BTTS';
+          } else if (m === 'O2.5' || m === 'OVER 2.5' || m === 'OVER_2.5') {
+             m = 'Over 2.5';
+          }
+          if (!m) {
+            for (const k in row) {
+              const val = String(row[k] || '').toUpperCase();
+              if (val === 'BTTS' || val.includes('BOTH TEAMS TO SCORE')) { m = 'BTTS'; break; }
+              if (val === 'O2.5' || val === 'OVER 2.5') { m = 'Over 2.5'; break; }
+            }
+          }
+        }
+        if (m) {
+          if (!window._detectedMarkets) window._detectedMarkets = new Set();
+          if (!window._detectedMarkets.has(m)) {
+            window._detectedMarkets.add(m);
+            console.log('[DEBUG UNIQUE MARKET DETECTED]:', m);
+          }
+        }
+        return m;
+      }
+
       function normalizeDateString(value) {
         const s = cleanString(value);
         if (!s) return '';
@@ -2546,7 +2579,7 @@ button.dirty {
           normalizeDateString(row['Data'] || ''),
           cleanString(row['Liga'] || ''),
           cleanString(row['Jogo'] || ''),
-          cleanString(row['Mercado'] || '')
+          normalizeMarket(row)
         ].join('|');
       }
 
@@ -2599,24 +2632,13 @@ button.dirty {
         );
 
         // MERCADO (Aggressive)
-        let m = cleanString(row['Mercado'] || row['Market'] || row['mercado'] || row['market'] || '');
+        const m = normalizeMarket(row);
         let o = cleanString(row['Odd'] || row['odd'] || '');
 
         if (row['Odd_Over25']) {
-          m = 'O2.5';
           o = row['Odd_Over25'];
         } else if (row['Odd_BTTS_Yes']) {
-          m = 'BTTS';
           o = row['Odd_BTTS_Yes'];
-        }
-
-        // Search in all values if still empty
-        if (!m) {
-          for (const k in row) {
-            const val = String(row[k] || '').toUpperCase();
-            if (val === 'BTTS') { m = 'BTTS'; break; }
-            if (val === 'O2.5' || val === 'OVER 2.5') { m = 'O2.5'; break; }
-          }
         }
 
         normalized['Mercado'] = m;
@@ -2651,7 +2673,7 @@ button.dirty {
           Date: normalizeDateString(row['Date'] || row['Data'] || ''),
           HomeTeam: cleanString(row['HomeTeam'] || row['Casa'] || ''),
           AwayTeam: cleanString(row['AwayTeam'] || row['Fora'] || ''),
-          Market: cleanString(row['Market'] || row['Mercado'] || ''),
+          Market: normalizeMarket(row),
           Line: cleanString(row['Line'] || row['Linha'] || ''),
           Odd: cleanString(row['Odd'] || ''),
           'Stake€': cleanString(row['Stake€'] || row['Stake'] || '')
@@ -2665,7 +2687,7 @@ button.dirty {
           Data: normalizeDateString(row['Data'] || row['Date'] || ''),
           Liga: cleanString(row['Liga'] || row['League'] || ''),
           Jogo: cleanString(row['Jogo'] || row['Game'] || ''),
-          Mercado: cleanString(row['Mercado'] || row['Market'] || '').toUpperCase(),
+          Mercado: normalizeMarket(row),
           Odd: cleanString(row['Odd'] || ''),
           Stake: stakeValue,
           Resultado: cleanString(row['Resultado'] || row['Result'] || '').toUpperCase(),
@@ -2783,11 +2805,11 @@ button.dirty {
       }
 
       function marketMatches(row, marketCode) {
-  const market = cleanString(row['Mercado'] || row._market || '').toUpperCase();
-  const target = String(marketCode || '').toUpperCase();
+        const market = normalizeMarket(row).toUpperCase();
+        const target = String(marketCode || '').toUpperCase();
 
-  return market === target || market.includes(target);
-}
+        return market === target || market.includes(target);
+      }
 
       function buildBotMarketStats(rows, marketCode) {
         const subset = rows.filter(r => marketMatches(r, marketCode));
@@ -2814,7 +2836,7 @@ button.dirty {
           executed,
           resolved,
           executionRate,
-          o25: buildBotMarketStats(rows, 'O2.5'),
+          o25: buildBotMarketStats(rows, 'Over 2.5'),
           btts: buildBotMarketStats(rows, 'BTTS')
         };
       }
@@ -2840,7 +2862,7 @@ button.dirty {
       data,
       liga,
       jogo,
-      mercado,
+      mercado: normalizeMarket(b),
       odd,
       stake,
       resultado,
@@ -2871,7 +2893,7 @@ button.dirty {
       data,
       liga,
       jogo,
-      mercado,
+      mercado: normalizeMarket(b),
       odd,
       stake,
       resultado,
@@ -2969,8 +2991,8 @@ button.dirty {
         const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
         const realBankroll = state.bankrollInicial + realProfit;
 
-        const modelO25 = botHistoryRows.filter(r => (r._market || r.Mercado || '').toUpperCase().includes('O2.5'));
-        const modelBTTS = botHistoryRows.filter(r => (r._market || r.Mercado || '').toUpperCase().includes('BTTS'));
+        const modelO25 = botHistoryRows.filter(r => marketMatches(r, 'Over 2.5'));
+        const modelBTTS = botHistoryRows.filter(r => marketMatches(r, 'BTTS'));
 
         function splitWL(rows) {
           return {
@@ -3270,7 +3292,7 @@ button.dirty {
           const okLeague = !fLeague || rLeague === fLeague;
           
           const fMarket = cleanString(filters.market).toUpperCase();
-          const rMarket = cleanString(r['Mercado'] || r['_market'] || r['Market'] || r.mercado || '').toUpperCase();
+          const rMarket = normalizeMarket(r).toUpperCase();
           const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
 
           const okResult = !filters.result || r._resultKey === filters.result;
@@ -3320,7 +3342,7 @@ button.dirty {
           const okLeague = !fLeague || rLeague === fLeague;
           
           const fMarket = cleanString(filters.market).toUpperCase();
-          const rMarket = cleanString(r.mercado || r.Mercado || r.Market || r['Market'] || '').toUpperCase();
+          const rMarket = normalizeMarket(r).toUpperCase();
           const okMarket = !fMarket || rMarket === fMarket || rMarket.includes(fMarket);
 
           const okResult = !filters.result || r._resultKey === filters.result;
@@ -3372,13 +3394,15 @@ button.dirty {
 
       function fillFilters() {
         const rows = [
-          ...getHistoryRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: cleanString(r['Mercado'] || '') })),
-          ...getDailyRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: cleanString(r['Mercado'] || '') })),
-          ...getManualRowsMerged().map(r => ({ league: cleanString(r.liga || ''), market: cleanString(r.mercado || '') }))
+          ...getHistoryRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
+          ...getDailyRowsMerged().map(r => ({ league: cleanString(r['Liga'] || ''), market: normalizeMarket(r) })),
+          ...getManualRowsMerged().map(r => ({ league: cleanString(r.liga || ''), market: normalizeMarket(r) }))
         ];
 
         const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
-        const markets = [...new Set(rows.map(r => r.market).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+        const markets = [...new Set(rows.map(r => r.market).filter(Boolean))]
+          .filter(m => m !== 'O1.5' && m !== 'O3.5' && m !== 'Over 1.5' && m !== 'Over 3.5')
+          .sort((a, b) => a.localeCompare(b, 'pt'));
        
         console.log('MARKETS DEBUG', markets);
 
@@ -4545,7 +4569,7 @@ buttons.forEach(btn => {
               r.Data && 
               r.Jogo && 
               num(r.Odd) > 0 &&
-              (String(r.Mercado).toUpperCase().includes('O2.5') || String(r.Mercado).toUpperCase().includes('BTTS'))
+              (r.Mercado === 'Over 2.5' || r.Mercado === 'BTTS')
             );
 
           console.log(state.footballDaily);
