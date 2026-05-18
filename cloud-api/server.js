@@ -11,39 +11,24 @@ const PORT = process.env.PORT || 3000;
 /* =========================
    MIDDLEWARE
 ========================= */
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    const allowed = [
-      'https://jorgepita.github.io',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000'
-    ];
-
-    if (allowed.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn('CORS bloqueado para:', origin);
-      callback(null, false);
-    }
-  },
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-};
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*', cors());
 
-// JSON body parser
 app.use(express.json({ limit: '1mb' }));
 
 /* =========================
    HEALTH CHECK
 ========================= */
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', service: 'cloud-save-api' });
+  res.json({
+    status: 'ok',
+    service: 'cloud-save-api'
+  });
 });
 
 /* =========================
@@ -81,6 +66,7 @@ app.post('/save', async (req, res) => {
         )
       ]);
 
+    // obter SHA atual
     let sha = null;
 
     const getRes = await fetchWithTimeout(apiUrl, {
@@ -95,10 +81,12 @@ app.post('/save', async (req, res) => {
       sha = data.sha;
     }
 
+    // converter conteúdo para base64
     const encodedContent = Buffer.from(
       JSON.stringify(content, null, 2)
     ).toString('base64');
 
+    // criar / atualizar ficheiro
     const putRes = await fetchWithTimeout(apiUrl, {
       method: 'PUT',
       headers: {
@@ -115,7 +103,8 @@ app.post('/save', async (req, res) => {
     const result = await putRes.json();
 
     if (!putRes.ok) {
-      console.error('GitHub error:', result);
+      console.error('GitHub SAVE error:', result);
+
       return res.status(500).json({
         error: 'GitHub API error',
         details: result
@@ -162,12 +151,21 @@ app.get('/load', async (req, res) => {
       }
     });
 
+    // ficheiro ainda não existe
     if (response.status === 404) {
-      // ficheiro ainda não existe
       return res.json({});
     }
 
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error('GitHub LOAD error:', data);
+
+      return res.status(500).json({
+        error: 'GitHub API error',
+        details: data
+      });
+    }
 
     const content = JSON.parse(
       Buffer.from(data.content, 'base64').toString('utf-8')
@@ -185,15 +183,18 @@ app.get('/load', async (req, res) => {
 });
 
 /* =========================
-   ERROR HANDLER GLOBAL
+   GLOBAL ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error('GLOBAL ERROR:', err.message);
-  res.status(500).json({ error: err.message });
+  console.error('GLOBAL ERROR:', err);
+
+  res.status(500).json({
+    error: err.message || 'Internal server error'
+  });
 });
 
 /* =========================
-   START
+   START SERVER
 ========================= */
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
