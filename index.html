@@ -3379,6 +3379,8 @@ button.dirty {
 
         const leagues = [...new Set(rows.map(r => r.league).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
         const markets = [...new Set(rows.map(r => r.market).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+       
+        console.log('MARKETS DEBUG', markets);
 
         const selects = [
           document.getElementById('dayLeagueFilter'),
