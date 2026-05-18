@@ -1278,14 +1278,17 @@
     },
     "2026-05-19|premier|Chelsea vs Tottenham|O2.5": {
       "apostada": false
+    },
+    "2026-05-19|Premier League|Chelsea vs Tottenham|O2.5": {
+      "apostada": true
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-18T01:50:53.149Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-05-18T09:01:20.660Z",
+  "activeTab": "tab-history",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-18",
