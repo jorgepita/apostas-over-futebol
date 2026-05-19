@@ -1,51 +1,390 @@
 {
   "footballDaily": [
     {
-      "Date": "2026-05-19",
-      "League": "premier",
-      "LeagueName": "Premier League",
-      "HomeTeam": "Chelsea",
-      "AwayTeam": "Tottenham",
-      "LambdaHome": "2.2",
-      "LambdaAway": "1.391",
-      "LambdaTotal": "3.591",
+      "Date": "2026-05-20",
+      "League": "portugal",
+      "LeagueName": "Primeira Liga",
+      "HomeTeam": "Torreense",
+      "AwayTeam": "Casa Pia",
+      "LambdaHome": "1.62",
+      "LambdaAway": "1.344",
+      "LambdaTotal": "2.964",
       "Market": "O2.5",
-      "ProbModel": 0.696,
-      "Odd": "1.67",
-      "ProbMarket": 0.599,
-      "Edge": 0.09699999999999998,
-      "KellyTrue": "0.2414",
-      "EdgeMinDynamic": "0.01",
-      "ProbGap": "0.09699999999999998",
-      "StakeFracRaw": "0.0421",
-      "StakeFrac": "0.04",
-      "Stake€": "2.0",
-      "DailyScale": "1.0",
+      "ProbModel": 0.569,
+      "Odd": "2.2",
+      "ProbMarket": 0.455,
+      "Edge": 0.11399999999999993,
+      "KellyTrue": "0.2095",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.035",
+      "ProbGap": "0.11399999999999993",
+      "StakeFracRaw": "0.0377",
+      "StakeFrac": "0.0236",
+      "Stake€": "1.18",
+      "DailyScale": "0.624912635595501",
       "Bankroll€": "50.0",
-      "Data": "2026-05-19",
-      "Liga": "premier",
-      "Jogo": "Chelsea vs Tottenham",
-      "Mercado": "O2.5",
+      "Data": "2026-05-20",
+      "Liga": "portugal",
+      "Jogo": "Torreense vs Casa Pia",
+      "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 9.699999999999998
+      "Edge%": 11.399999999999993
+    },
+    {
+      "Date": "2026-05-20",
+      "League": "italia2",
+      "LeagueName": "Serie B",
+      "HomeTeam": "Palermo",
+      "AwayTeam": "Catanzaro",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.276",
+      "LambdaTotal": "3.476",
+      "Market": "O2.5",
+      "ProbModel": 0.675,
+      "Odd": "1.75",
+      "ProbMarket": 0.571,
+      "Edge": 0.10400000000000009,
+      "KellyTrue": "0.2411",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.02",
+      "ProbGap": "0.10400000000000009",
+      "StakeFracRaw": "0.0434",
+      "StakeFrac": "0.025",
+      "Stake€": "1.25",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-20",
+      "Liga": "italia2",
+      "Jogo": "Palermo vs Catanzaro",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 10.40000000000001
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "alemanha",
+      "LeagueName": "Bundesliga",
+      "HomeTeam": "VfL Wolfsburg",
+      "AwayTeam": "SC Paderborn 07",
+      "LambdaHome": "1.882",
+      "LambdaAway": "1.652",
+      "LambdaTotal": "3.534",
+      "Market": "O2.5",
+      "ProbModel": 0.685,
+      "Odd": "1.84",
+      "ProbMarket": 0.543,
+      "Edge": 0.14200000000000002,
+      "KellyTrue": "0.3107",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.02",
+      "ProbGap": "0.14200000000000002",
+      "StakeFracRaw": "0.0559",
+      "StakeFrac": "0.025",
+      "Stake€": "1.25",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-21",
+      "Liga": "alemanha",
+      "Jogo": "VfL Wolfsburg vs SC Paderborn 07",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 14.200000000000001
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "belgica",
+      "LeagueName": "Jupiler Pro League",
+      "HomeTeam": "Gent",
+      "AwayTeam": "Union St. Gilloise",
+      "LambdaHome": "1.678",
+      "LambdaAway": "1.324",
+      "LambdaTotal": "3.002",
+      "Market": "O2.5",
+      "ProbModel": 0.577,
+      "Odd": "1.93",
+      "ProbMarket": 0.518,
+      "Edge": 0.05899999999999994,
+      "KellyTrue": "0.1226",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.025",
+      "ProbGap": "0.05899999999999994",
+      "StakeFracRaw": "0.013",
+      "StakeFrac": "0.0081",
+      "Stake€": "0.41",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-21",
+      "Liga": "belgica",
+      "Jogo": "Gent vs Union St. Gilloise",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 5.899999999999994
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "italia",
+      "LeagueName": "Serie A",
+      "HomeTeam": "Lazio",
+      "AwayTeam": "Pisa",
+      "LambdaHome": "1.594",
+      "LambdaAway": "1.88",
+      "LambdaTotal": "3.474",
+      "Market": "O2.5",
+      "ProbModel": 0.674,
+      "Odd": "1.85",
+      "ProbMarket": 0.541,
+      "Edge": 0.133,
+      "KellyTrue": "0.2914",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.02",
+      "ProbGap": "0.133",
+      "StakeFracRaw": "0.0524",
+      "StakeFrac": "0.025",
+      "Stake€": "1.25",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-23",
+      "Liga": "italia",
+      "Jogo": "Lazio vs Pisa",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 13.3
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "LeagueName": "LaLiga",
+      "HomeTeam": "Celta Vigo",
+      "AwayTeam": "Sevilla",
+      "LambdaHome": "1.654",
+      "LambdaAway": "1.286",
+      "LambdaTotal": "2.94",
+      "Market": "O2.5",
+      "ProbModel": 0.563,
+      "Odd": "1.99",
+      "ProbMarket": 0.503,
+      "Edge": 0.05999999999999994,
+      "KellyTrue": "0.1222",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.025",
+      "ProbGap": "0.05999999999999994",
+      "StakeFracRaw": "0.0134",
+      "StakeFrac": "0.0084",
+      "Stake€": "0.42",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-23",
+      "Liga": "espanha",
+      "Jogo": "Celta Vigo vs Sevilla",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 5.999999999999995
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "belgica",
+      "LeagueName": "Jupiler Pro League",
+      "HomeTeam": "Standard Liege",
+      "AwayTeam": "Charleroi",
+      "LambdaHome": "1.678",
+      "LambdaAway": "1.324",
+      "LambdaTotal": "3.002",
+      "Market": "O2.5",
+      "ProbModel": 0.577,
+      "Odd": "1.87",
+      "ProbMarket": 0.535,
+      "Edge": 0.041999999999999926,
+      "KellyTrue": "0.0912",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.02",
+      "ProbGap": "0.041999999999999926",
+      "StakeFracRaw": "0.007",
+      "StakeFrac": "0.0044",
+      "Stake€": "0.22",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-23",
+      "Liga": "belgica",
+      "Jogo": "Standard Liege vs Charleroi",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 4.199999999999992
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "LeagueName": "LaLiga",
+      "HomeTeam": "Girona",
+      "AwayTeam": "Elche",
+      "LambdaHome": "1.72",
+      "LambdaAway": "1.353",
+      "LambdaTotal": "3.073",
+      "Market": "O2.5",
+      "ProbModel": 0.593,
+      "Odd": "1.73",
+      "ProbMarket": 0.578,
+      "Edge": 0.015000000000000013,
+      "KellyTrue": "0.0355",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.01",
+      "ProbGap": "0.015000000000000013",
+      "StakeFracRaw": "0.001",
+      "StakeFrac": "0.0006",
+      "Stake€": "0.03",
+      "DailyScale": "0.624912635595501",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-23",
+      "Liga": "espanha",
+      "Jogo": "Girona vs Elche",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 1.5000000000000013
     }
   ],
   "footballHistory": [
     {
-      "Data": "2026-05-19",
-      "Liga": "Premier League",
-      "Jogo": "Chelsea vs Tottenham",
-      "Mercado": "O2.5",
-      "Odd": "1.67",
-      "Stake€": "2.0",
-      "Edge%": 9.68,
+      "Data": "2026-05-20",
+      "Liga": "Primeira Liga",
+      "Jogo": "Torreense vs Casa Pia",
+      "Mercado": "Over 2.5",
+      "Odd": "2.2",
+      "Stake€": "1.18",
+      "Edge%": 11.43,
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
-      "Edge": 9.68
+      "KickoffUTC": "",
+      "Edge": 11.43
+    },
+    {
+      "Data": "2026-05-20",
+      "Liga": "Serie B",
+      "Jogo": "Palermo vs Catanzaro",
+      "Mercado": "Over 2.5",
+      "Odd": "1.75",
+      "Stake€": "1.25",
+      "Edge%": 10.33,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 10.33
+    },
+    {
+      "Data": "2026-05-21",
+      "Liga": "Bundesliga",
+      "Jogo": "VfL Wolfsburg vs SC Paderborn 07",
+      "Mercado": "Over 2.5",
+      "Odd": "1.84",
+      "Stake€": "1.25",
+      "Edge%": 14.19,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 14.19
+    },
+    {
+      "Data": "2026-05-21",
+      "Liga": "Jupiler Pro League",
+      "Jogo": "Gent vs Union St. Gilloise",
+      "Mercado": "Over 2.5",
+      "Odd": "1.93",
+      "Stake€": "0.41",
+      "Edge%": 5.91,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 5.91
+    },
+    {
+      "Data": "2026-05-23",
+      "Liga": "Serie A",
+      "Jogo": "Lazio vs Pisa",
+      "Mercado": "Over 2.5",
+      "Odd": "1.85",
+      "Stake€": "1.25",
+      "Edge%": 13.39,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 13.39
+    },
+    {
+      "Data": "2026-05-23",
+      "Liga": "LaLiga",
+      "Jogo": "Celta Vigo vs Sevilla",
+      "Mercado": "Over 2.5",
+      "Odd": "1.99",
+      "Stake€": "0.42",
+      "Edge%": 6.08,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 6.08
+    },
+    {
+      "Data": "2026-05-23",
+      "Liga": "Jupiler Pro League",
+      "Jogo": "Standard Liege vs Charleroi",
+      "Mercado": "Over 2.5",
+      "Odd": "1.87",
+      "Stake€": "0.22",
+      "Edge%": 4.24,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 4.24
+    },
+    {
+      "Data": "2026-05-23",
+      "Liga": "LaLiga",
+      "Jogo": "Girona vs Elche",
+      "Mercado": "Over 2.5",
+      "Odd": "1.73",
+      "Stake€": "0.03",
+      "Edge%": 1.5,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "KickoffUTC": "",
+      "Edge": 1.5
     }
   ],
   "nba": [
@@ -53,7 +392,7 @@
       "Date": "2026-05-01",
       "HomeTeam": "Orlando Magic",
       "AwayTeam": "Detroit Pistons",
-      "Market": "OVER",
+      "Market": "",
       "Line": "210.0",
       "Odd": "1.93",
       "Stake€": "25.0"
@@ -62,7 +401,7 @@
       "Date": "2026-05-01",
       "HomeTeam": "Philadelphia 76ers",
       "AwayTeam": "Boston Celtics",
-      "Market": "OVER",
+      "Market": "",
       "Line": "212.5",
       "Odd": "1.88",
       "Stake€": "25.0"
@@ -71,7 +410,7 @@
       "Date": "2026-04-30",
       "HomeTeam": "Atlanta Hawks",
       "AwayTeam": "New York Knicks",
-      "Market": "OVER",
+      "Market": "",
       "Line": "214.0",
       "Odd": "1.91",
       "Stake€": "25.0"
@@ -80,7 +419,7 @@
       "Date": "2026-05-01",
       "HomeTeam": "Toronto Raptors",
       "AwayTeam": "Cleveland Cavaliers",
-      "Market": "OVER",
+      "Market": "",
       "Line": "219.5",
       "Odd": "1.91",
       "Stake€": "1.58"
@@ -89,7 +428,7 @@
   "leagueStats": [
     {
       "League": "Allsvenskan",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.5933",
@@ -98,7 +437,7 @@
     },
     {
       "League": "Premier League",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.62",
@@ -107,7 +446,7 @@
     },
     {
       "League": "2. Bundesliga",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.04",
@@ -143,7 +482,7 @@
     },
     {
       "League": "Ligue 1",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.75",
@@ -161,7 +500,7 @@
     },
     {
       "League": "Serie A",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.77",
@@ -170,7 +509,7 @@
     },
     {
       "League": "Super Lig",
-      "Market": "O2.5",
+      "Market": "Over 2.5",
       "ROI%": "0.0",
       "WinRate%": "0.0",
       "AvgKelly": "0.77",
@@ -1281,61 +1620,85 @@
     },
     "2026-05-19|Premier League|Chelsea vs Tottenham|O2.5": {
       "apostada": true
+    },
+    "2026-05-20|portugal|Torreense vs Casa Pia|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-20|italia2|Palermo vs Catanzaro|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-21|alemanha|VfL Wolfsburg vs SC Paderborn 07|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-21|belgica|Gent vs Union St. Gilloise|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|italia|Lazio vs Pisa|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|espanha|Celta Vigo vs Sevilla|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|belgica|Standard Liege vs Charleroi|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|espanha|Girona vs Elche|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-20|Primeira Liga|Torreense vs Casa Pia|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-20|Serie B|Palermo vs Catanzaro|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-21|Bundesliga|VfL Wolfsburg vs SC Paderborn 07|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-21|Jupiler Pro League|Gent vs Union St. Gilloise|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|Serie A|Lazio vs Pisa|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|LaLiga|Celta Vigo vs Sevilla|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|Jupiler Pro League|Standard Liege vs Charleroi|Over 2.5": {
+      "apostada": true
+    },
+    "2026-05-23|LaLiga|Girona vs Elche|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-18T09:01:20.660Z",
-  "activeTab": "tab-history",
+  "lastUpdated": "2026-05-19T16:50:02.079Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
-    {
-      "Date": "2026-05-18",
-      "League": "premier",
-      "HomeTeam": "Arsenal",
-      "AwayTeam": "Burnley",
-      "Odd_Over25": "1.36",
-      "Odd_BTTS_Yes": "2.50"
-    },
     {
       "Date": "2026-05-19",
       "League": "belgica",
       "HomeTeam": "Charleroi",
       "AwayTeam": "OH Leuven",
-      "Odd_Over25": "1.80",
-      "Odd_BTTS_Yes": "1.72"
-    },
-    {
-      "Date": "2026-05-19",
-      "League": "belgica",
-      "HomeTeam": "Genk",
-      "AwayTeam": "Antwerp",
-      "Odd_Over25": "1.78",
-      "Odd_BTTS_Yes": "1.80"
+      "Odd_Over25": "1.68",
+      "Odd_BTTS_Yes": "1.60"
     },
     {
       "Date": "2026-05-19",
       "League": "belgica",
       "HomeTeam": "KVC Westerlo",
       "AwayTeam": "Standard Liege",
-      "Odd_Over25": "1.72",
-      "Odd_BTTS_Yes": "1.62"
-    },
-    {
-      "Date": "2026-05-19",
-      "League": "italia2",
-      "HomeTeam": "Monza",
-      "AwayTeam": "Juve Stabia",
-      "Odd_Over25": "1.89",
-      "Odd_BTTS_Yes": "1.85"
+      "Odd_Over25": "1.65",
+      "Odd_BTTS_Yes": "1.53"
     },
     {
       "Date": "2026-05-19",
       "League": "premier",
       "HomeTeam": "Bournemouth",
       "AwayTeam": "Manchester City",
-      "Odd_Over25": "1.50",
+      "Odd_Over25": "1.47",
       "Odd_BTTS_Yes": "1.50"
     },
     {
@@ -1343,8 +1706,208 @@
       "League": "premier",
       "HomeTeam": "Chelsea",
       "AwayTeam": "Tottenham",
-      "Odd_Over25": "1.67",
+      "Odd_Over25": "1.87",
+      "Odd_BTTS_Yes": "1.67"
+    },
+    {
+      "Date": "2026-05-20",
+      "League": "italia2",
+      "HomeTeam": "Palermo",
+      "AwayTeam": "Catanzaro",
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.67"
+    },
+    {
+      "Date": "2026-05-20",
+      "League": "portugal",
+      "HomeTeam": "Torreense",
+      "AwayTeam": "Casa Pia",
+      "Odd_Over25": "2.20",
+      "Odd_BTTS_Yes": "1.87"
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "alemanha",
+      "HomeTeam": "VfL Wolfsburg",
+      "AwayTeam": "SC Paderborn 07",
+      "Odd_Over25": "1.84",
+      "Odd_BTTS_Yes": "1.80"
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "belgica",
+      "HomeTeam": "Anderlecht",
+      "AwayTeam": "St. Truiden",
+      "Odd_Over25": "1.65",
       "Odd_BTTS_Yes": "1.53"
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "belgica",
+      "HomeTeam": "Gent",
+      "AwayTeam": "Union St. Gilloise",
+      "Odd_Over25": "1.93",
+      "Odd_BTTS_Yes": "1.80"
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "belgica",
+      "HomeTeam": "KV Mechelen",
+      "AwayTeam": "Club Brugge KV",
+      "Odd_Over25": "1.42",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-21",
+      "League": "paises_baixos",
+      "HomeTeam": "Utrecht",
+      "AwayTeam": "Heerenveen",
+      "Odd_Over25": "1.60",
+      "Odd_BTTS_Yes": "1.52"
+    },
+    {
+      "Date": "2026-05-22",
+      "League": "alemanha2",
+      "HomeTeam": "Rot-Weiß Essen",
+      "AwayTeam": "SpVgg Greuther Fürth",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": ""
+    },
+    {
+      "Date": "2026-05-22",
+      "League": "italia",
+      "HomeTeam": "Fiorentina",
+      "AwayTeam": "Atalanta",
+      "Odd_Over25": "1.76",
+      "Odd_BTTS_Yes": "1.57"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "belgica",
+      "HomeTeam": "Antwerp",
+      "AwayTeam": "KVC Westerlo",
+      "Odd_Over25": "1.60",
+      "Odd_BTTS_Yes": "1.47"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "belgica",
+      "HomeTeam": "OH Leuven",
+      "AwayTeam": "Genk",
+      "Odd_Over25": "1.56",
+      "Odd_BTTS_Yes": "1.48"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "belgica",
+      "HomeTeam": "Standard Liege",
+      "AwayTeam": "Charleroi",
+      "Odd_Over25": "1.87",
+      "Odd_BTTS_Yes": "1.64"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "HomeTeam": "Celta Vigo",
+      "AwayTeam": "Sevilla",
+      "Odd_Over25": "1.99",
+      "Odd_BTTS_Yes": "1.83"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "HomeTeam": "Girona",
+      "AwayTeam": "Elche",
+      "Odd_Over25": "1.73",
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "HomeTeam": "Mallorca",
+      "AwayTeam": "Oviedo",
+      "Odd_Over25": "1.93",
+      "Odd_BTTS_Yes": "2.00"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "espanha",
+      "HomeTeam": "Valencia",
+      "AwayTeam": "Barcelona",
+      "Odd_Over25": "1.47",
+      "Odd_BTTS_Yes": "1.45"
+    },
+    {
+      "Date": "2026-05-23",
+      "League": "italia",
+      "HomeTeam": "Lazio",
+      "AwayTeam": "Pisa",
+      "Odd_Over25": "1.85",
+      "Odd_BTTS_Yes": "1.91"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "belgica",
+      "HomeTeam": "Club Brugge KV",
+      "AwayTeam": "Gent",
+      "Odd_Over25": "1.34",
+      "Odd_BTTS_Yes": "1.58"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "belgica",
+      "HomeTeam": "St. Truiden",
+      "AwayTeam": "KV Mechelen",
+      "Odd_Over25": "1.56",
+      "Odd_BTTS_Yes": "1.52"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "belgica",
+      "HomeTeam": "Union St. Gilloise",
+      "AwayTeam": "Anderlecht",
+      "Odd_Over25": "1.74",
+      "Odd_BTTS_Yes": "1.86"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "italia",
+      "HomeTeam": "Napoli",
+      "AwayTeam": "Udinese",
+      "Odd_Over25": "2.00",
+      "Odd_BTTS_Yes": "2.02"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "premier",
+      "HomeTeam": "Brighton",
+      "AwayTeam": "Manchester United",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.50"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "premier",
+      "HomeTeam": "Manchester City",
+      "AwayTeam": "Aston Villa",
+      "Odd_Over25": "1.40",
+      "Odd_BTTS_Yes": "1.67"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "premier",
+      "HomeTeam": "Nottingham Forest",
+      "AwayTeam": "Bournemouth",
+      "Odd_Over25": "1.69",
+      "Odd_BTTS_Yes": "1.55"
+    },
+    {
+      "Date": "2026-05-24",
+      "League": "premier",
+      "HomeTeam": "West Ham",
+      "AwayTeam": "Leeds",
+      "Odd_Over25": "1.74",
+      "Odd_BTTS_Yes": "1.57"
     }
   ],
   "manualBetsRemote": []
