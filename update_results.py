@@ -1130,15 +1130,20 @@ def safe_read_csv(path: Path) -> pd.DataFrame:
         if path.stat().st_size == 0:
             return pd.DataFrame(columns=CSV_COLUMNS)
 
-        df = pd.read_csv(path, sep=";", dtype=str).fillna("")
+        df = pd.read_csv(path, sep=";", dtype=str, encoding="utf-8").fillna("")
         return ensure_columns(df)
 
-    except pd.errors.EmptyDataError:
-        return pd.DataFrame(columns=CSV_COLUMNS)
-
     except Exception as e:
-        print(f"[WARN] Erro a ler {path.name}: {e}")
-        return pd.DataFrame(columns=CSV_COLUMNS)
+        print(f"[WARN] Erro a ler {path.name} com ponto-e-vírgula: {e}")
+        try:
+            df = pd.read_csv(path, sep=",", dtype=str, encoding="utf-8").fillna("")
+            return ensure_columns(df)
+        except Exception as e2:
+            print(f"[CRITICAL] Falha total a ler {path.name}: {e2}")
+            # Se for o ficheiro de histórico e existir, lançamos erro para não sobrescrever com vazio
+            if "history" in str(path).lower():
+                raise RuntimeError(f"Impossível ler histórico em {path}. Abortando para evitar perda de dados.")
+            return pd.DataFrame(columns=CSV_COLUMNS)
 
 
 def get_today_lisbon_iso() -> str:

@@ -9,6 +9,7 @@ from src.history import HISTORY_COLUMNS, HISTORY_PATH
 from src.integrations import _send_in_chunks, build_message, df_to_rows, upload_csvs_to_github
 from src.state import load_sent_state, save_sent_state, pick_id
 from src.league_stats import update_league_stats
+from src.output_utils import merge_into_history
 
 
 def save_all_outputs(
@@ -57,7 +58,8 @@ def save_all_outputs(
 
 
 def persist_history(simple: pd.DataFrame) -> pd.DataFrame:
-    history = simple.copy()
+    # History agora é persistido em modo append, evitando duplicados
+    history = merge_into_history(simple)
     history.to_csv(HISTORY_PATH, index=False, encoding="utf-8", sep=";")
     update_league_stats(HISTORY_PATH)
     return history

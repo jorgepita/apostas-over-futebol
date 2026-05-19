@@ -80,17 +80,6 @@ SENT_STATE_PATH = BASE / "sent_state.json"
 # =============================
 def main():
     print("### TESTE NOVO CODIGO ###")
-    # RESET TOTAL DO HISTÓRICO (modo arranque limpo)
-
-    if os.getenv("RESET_HISTORY", "1") == "1":
-        print("[DBG] RESET_HISTORY ativo -> limpar histórico")
-       
-        pd.DataFrame(columns=HISTORY_COLUMNS).to_csv(HISTORY_PATH, index=False, sep=";", encoding="utf-8")
-        try:
-            update_league_stats(HISTORY_PATH, Path(HISTORY_PATH).parent / 'league_stats.csv')
-        except Exception as e:
-            print(f"[WARN] falha a atualizar league_stats.csv -> {e}")
-    
     cfg = load_config(BASE)
 
     runtime_settings = build_runtime_settings(cfg)
@@ -226,11 +215,7 @@ def main():
         base_dir=BASE,
     )
 
-    # RESET TOTAL DO HISTÓRICO (modo produção inicial)
-    
-    today_str = datetime.now().date().isoformat()
-    simple = simple[simple["Data"] >= today_str].copy()
-
+    # Persistir histórico (append mode)
     history = persist_history(simple)
 
     print("OK. Gerados:")

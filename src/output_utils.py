@@ -14,11 +14,23 @@ def ensure_simple_columns(df: pd.DataFrame) -> pd.DataFrame:
 def load_history() -> pd.DataFrame:
     if not HISTORY_PATH.exists():
         return pd.DataFrame(columns=HISTORY_COLUMNS)
-    try:
-        df = pd.read_csv(HISTORY_PATH, sep=";", dtype=str).fillna("")
-        return ensure_simple_columns(df)
-    except Exception:
+    
+    # Se o ficheiro estiver vazio, retornamos apenas as colunas
+    if HISTORY_PATH.stat().st_size == 0:
         return pd.DataFrame(columns=HISTORY_COLUMNS)
+
+    try:
+        df = pd.read_csv(HISTORY_PATH, sep=";", dtype=str, encoding="utf-8").fillna("")
+        return ensure_simple_columns(df)
+    except Exception as e:
+        print(f"[ERROR] Falha crítica a ler {HISTORY_PATH}: {e}")
+        # Em caso de erro, tentamos ler com vírgula (fallback comum)
+        try:
+            df = pd.read_csv(HISTORY_PATH, sep=",", dtype=str, encoding="utf-8").fillna("")
+            return ensure_simple_columns(df)
+        except Exception:
+            # Se falhar tudo, lançamos erro para evitar que persist_history sobrescreva o ficheiro
+            raise RuntimeError(f"Não foi possível ler o histórico em {HISTORY_PATH}. Operação abortada para evitar perda de dados.")
 
 
 def merge_into_history(simple_df: pd.DataFrame) -> pd.DataFrame:
