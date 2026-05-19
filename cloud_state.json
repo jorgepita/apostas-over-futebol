@@ -1622,28 +1622,44 @@
       "apostada": true
     },
     "2026-05-20|portugal|Torreense vs Casa Pia|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2.2",
+      "stakeReal": "1.5"
     },
     "2026-05-20|italia2|Palermo vs Catanzaro|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.75",
+      "stakeReal": "1.25"
     },
     "2026-05-21|alemanha|VfL Wolfsburg vs SC Paderborn 07|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1.50"
     },
     "2026-05-21|belgica|Gent vs Union St. Gilloise|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.9",
+      "stakeReal": "1"
     },
     "2026-05-23|italia|Lazio vs Pisa|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.85",
+      "stakeReal": "1.5"
     },
     "2026-05-23|espanha|Celta Vigo vs Sevilla|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2",
+      "stakeReal": "1"
     },
     "2026-05-23|belgica|Standard Liege vs Charleroi|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.9",
+      "stakeReal": "1"
     },
     "2026-05-23|espanha|Girona vs Elche|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     },
     "2026-05-20|Primeira Liga|Torreense vs Casa Pia|Over 2.5": {
       "apostada": true
@@ -1672,7 +1688,7 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-19T16:50:02.079Z",
+  "lastUpdated": "2026-05-19T16:53:02.031Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
