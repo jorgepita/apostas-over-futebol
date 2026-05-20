@@ -1933,28 +1933,44 @@
       "stakeReal": "1"
     },
     "2026-05-20|Primeira Liga|Torreense vs Casa Pia|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2.2",
+      "stakeReal": "1.5"
     },
     "2026-05-20|Serie B|Palermo vs Catanzaro|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.75",
+      "stakeReal": "1.25"
     },
     "2026-05-21|Bundesliga|VfL Wolfsburg vs SC Paderborn 07|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1.5"
     },
     "2026-05-21|Jupiler Pro League|Gent vs Union St. Gilloise|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.9",
+      "stakeReal": "1"
     },
     "2026-05-23|Serie A|Lazio vs Pisa|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.85",
+      "stakeReal": "1.5"
     },
     "2026-05-23|LaLiga|Celta Vigo vs Sevilla|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2",
+      "stakeReal": "1"
     },
     "2026-05-23|Jupiler Pro League|Standard Liege vs Charleroi|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.9",
+      "stakeReal": "1"
     },
     "2026-05-23|LaLiga|Girona vs Elche|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     },
     "2026-05-24|italia|Napoli vs Udinese|Over 2.5": {
       "apostada": true,
@@ -1982,27 +1998,37 @@
       "oddReal": "1.7"
     },
     "2026-05-24|Serie A|Napoli vs Udinese|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.9",
+      "stakeReal": "1"
     },
     "2026-05-24|Premier League|West Ham vs Leeds|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     },
     "2026-05-24|Premier League|Nottingham Forest vs Bournemouth|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     },
     "2026-05-24|Serie A|Hellas Verona vs AS Roma|BTTS": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2.3",
+      "stakeReal": "1"
     },
     "2026-05-24|Serie A|AC Milan vs Cagliari|BTTS": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2.2",
+      "stakeReal": "1"
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-20T21:11:17.262Z",
+  "lastUpdated": "2026-05-20T21:15:17.728Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-20",
