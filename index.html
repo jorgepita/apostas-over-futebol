@@ -3617,39 +3617,49 @@ button.dirty {
         const stake = computeDynamicStake();
         const risk = getRiskMetrics();
 
-        document.getElementById('decisionModeValue').textContent = decision.label;
-        document.getElementById('decisionBadge').className = `decision-badge ${decision.badge}`;
-        document.getElementById('decisionBadge').textContent = decision.label;
-        document.getElementById('decisionModeNote').textContent = decision.note;
+        safeSetText('decisionModeValue', decision.label);
+        const decisionBadge = document.getElementById('decisionBadge');
+        if (decisionBadge) {
+          decisionBadge.className = `decision-badge ${decision.badge}`;
+          decisionBadge.textContent = decision.label;
+        }
+        safeSetText('decisionModeNote', decision.note);
 
-        document.getElementById('autoAlertsValue').textContent = `${alerts.length} ativos`;
+        safeSetText('autoAlertsValue', `${alerts.length} ativos`);
         const alertsBadge = document.getElementById('alertsBadge');
-        alertsBadge.className = `decision-badge ${alerts.length === 0 ? 'info' : alerts.length >= 2 ? 'bad' : 'warn'}`;
-        alertsBadge.textContent = alerts.length === 0 ? 'OK' : alerts.length >= 2 ? 'Alerta' : 'Atenção';
-        document.getElementById('autoAlertsNote').textContent = alerts.length ? alerts.map(a => a.text).join(' • ') : 'Sem alertas relevantes neste momento.';
+        if (alertsBadge) {
+          alertsBadge.className = `decision-badge ${alerts.length === 0 ? 'info' : alerts.length >= 2 ? 'bad' : 'warn'}`;
+          alertsBadge.textContent = alerts.length === 0 ? 'OK' : alerts.length >= 2 ? 'Alerta' : 'Atenção';
+        }
+        safeSetText('autoAlertsNote', alerts.length ? alerts.map(a => a.text).join(' • ') : 'Sem alertas relevantes neste momento.');
 
-        document.getElementById('dynamicStakeValue').textContent = stake.label;
-        document.getElementById('dynamicStakeBadge').className = `decision-badge ${stake.badge}`;
-        document.getElementById('dynamicStakeBadge').textContent = `x${fmt(stake.multiplier)}`;
-        document.getElementById('dynamicStakeNote').textContent = stake.note;
+        safeSetText('dynamicStakeValue', stake.label);
+        const dynamicStakeBadge = document.getElementById('dynamicStakeBadge');
+        if (dynamicStakeBadge) {
+          dynamicStakeBadge.className = `decision-badge ${stake.badge}`;
+          dynamicStakeBadge.textContent = `x${fmt(stake.multiplier)}`;
+        }
+        safeSetText('dynamicStakeNote', stake.note);
 
-        document.getElementById('sessionLabel').textContent = `Sessão atual: desde ${formatDatePt(getSessionStartDate())}`;
-        document.getElementById('lastUpdateLabel').textContent = `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`;
-        document.getElementById('bankrollLabelTop').textContent = `€${fmt(state.bankrollInicial)}`;
-        document.getElementById('currentBankrollTop').textContent = `€${fmt(risk.bancaAtual)}`;
-        document.getElementById('openExposureTop').textContent = `€${fmt(risk.stakeOpen)}`;
-        document.getElementById('availableBankrollTop').textContent = `€${fmt(risk.bancaDisponivel)}`;
+        safeSetText('sessionLabel', `Sessão atual: desde ${formatDatePt(getSessionStartDate())}`);
+        safeSetText('lastUpdateLabel', `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`);
+        safeSetText('bankrollLabelTop', `€${fmt(state.bankrollInicial)}`);
+        safeSetText('currentBankrollTop', `€${fmt(risk.bancaAtual)}`);
+        safeSetText('openExposureTop', `€${fmt(risk.stakeOpen)}`);
+        safeSetText('availableBankrollTop', `€${fmt(risk.bancaDisponivel)}`);
 
         const cloudStatus = document.getElementById('cloudStatusLabel');
-        if (state.cloudAvailable === true) {
-          cloudStatus.className = `decision-badge ${hasPendingCloudChanges ? 'warn' : 'good'}`;
-          cloudStatus.textContent = hasPendingCloudChanges ? 'Cloud: alterações por guardar' : 'Cloud: sincronizada';
-        } else if (state.cloudAvailable === false) {
-          cloudStatus.className = 'decision-badge bad';
-          cloudStatus.textContent = 'Cloud: indisponível';
-        } else {
-          cloudStatus.className = 'decision-badge info';
-          cloudStatus.textContent = 'Cloud: a verificar';
+        if (cloudStatus) {
+          if (state.cloudAvailable === true) {
+            cloudStatus.className = `decision-badge ${hasPendingCloudChanges ? 'warn' : 'good'}`;
+            cloudStatus.textContent = hasPendingCloudChanges ? 'Cloud: alterações por guardar' : 'Cloud: sincronizada';
+          } else if (state.cloudAvailable === false) {
+            cloudStatus.className = 'decision-badge bad';
+            cloudStatus.textContent = 'Cloud: indisponível';
+          } else {
+            cloudStatus.className = 'decision-badge info';
+            cloudStatus.textContent = 'Cloud: a verificar';
+          }
         }
       }
 
@@ -3843,7 +3853,7 @@ button.dirty {
       }
 
       function renderAnalyticsTable(targetId, rows, labelField) {
-        document.getElementById(targetId).innerHTML = rows.length
+        safeSetHTML(targetId, rows.length
           ? rows.map(r => `
               <tr>
                 <td>${escapeHtml(r[labelField])}</td>
@@ -3857,7 +3867,7 @@ button.dirty {
                 <td ${profitClass(r.roi)}>${pct(r.roi)}</td>
               </tr>
             `).join('')
-          : '<tr><td colspan="9"><div class="note">Sem dados suficientes.</div></td></tr>';
+          : '<tr><td colspan="9"><div class="note">Sem dados suficientes.</div></td></tr>');
       }
 
       function computeStreaks(rows) {
@@ -3908,7 +3918,7 @@ button.dirty {
         const rows = getFilteredRealClosedRows(getSummaryFilters());
         const s = computeStreaks(rows);
 
-        document.getElementById('streakCards').innerHTML = [
+        safeSetHTML('streakCards', [
           { label: 'Win streak atual', value: s.currentWin, note: 'Sequência ativa de ganhos' },
           { label: 'Loss streak atual', value: s.currentLoss, note: 'Sequência ativa de perdas' },
           { label: 'Maior win streak', value: s.longestWin, note: 'Melhor sequência histórica' },
@@ -3919,7 +3929,7 @@ button.dirty {
             <div class="value">${card.value}</div>
             <div class="note">${card.note}</div>
           </div>
-        `).join('');
+        `).join(''));
       }
 
       function renderAnalytics() {
@@ -4422,8 +4432,7 @@ button.dirty {
         if (autoSaveInFlight) return;
         
   const buttons = [
-    document.getElementById('saveCloudBtn'),
-    document.getElementById('saveCloudBtnMobile')
+    document.getElementById('saveCloudBtn')
   ].filter(Boolean);
 
   try {
@@ -4504,8 +4513,7 @@ button.dirty {
       
       function updateSaveCloudButton() {
   const buttons = [
-  document.getElementById('saveCloudBtn'),
-  document.getElementById('saveCloudBtnMobile')
+  document.getElementById('saveCloudBtn')
 ].filter(Boolean);
 
 buttons.forEach(btn => {
@@ -4580,6 +4588,9 @@ buttons.forEach(btn => {
       }
       
       function updateApostasTooltip() {
+        const elCount = document.getElementById('tooltipPicksCount');
+        if (!elCount) return; 
+
         const todaysPicks = getTodaysDailyRows();
         const count = todaysPicks.length;
         const validOdds = todaysPicks.map(r => num(r['Odd'])).filter(v => v !== null);
@@ -4592,14 +4603,19 @@ buttons.forEach(btn => {
         const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : null;
         const totalStake = validStakes.length ? validStakes.reduce((a, b) => a + b, 0) : 0;
 
-        document.getElementById('tooltipPicksCount').textContent = String(count);
-        document.getElementById('tooltipAvgOdd').textContent = avgOdd !== null ? fmt(avgOdd) : '—';
-        document.getElementById('tooltipAvgEdge').textContent = avgEdge !== null ? `${fmt(avgEdge)}%` : '—';
-        document.getElementById('tooltipStakeTotal').textContent = `€${fmt(totalStake)}`;
+        elCount.textContent = String(count);
+        const elAvgOdd = document.getElementById('tooltipAvgOdd');
+        if (elAvgOdd) elAvgOdd.textContent = avgOdd !== null ? fmt(avgOdd) : '—';
+        const elAvgEdge = document.getElementById('tooltipAvgEdge');
+        if (elAvgEdge) elAvgEdge.textContent = avgEdge !== null ? `${fmt(avgEdge)}%` : '—';
+        const elStakeTotal = document.getElementById('tooltipStakeTotal');
+        if (elStakeTotal) elStakeTotal.textContent = `€${fmt(totalStake)}`;
       }
 
       function updateApostasButton() {
   const btn = document.getElementById('btnApostasTab');
+  if (!btn) return;
+
   const todaysPicks = getTodaysDailyRows();
   const count = todaysPicks.length;
 
@@ -4685,7 +4701,6 @@ buttons.forEach(btn => {
         bindManualControls();
         bindTabButtons();
         bindQuickMarketButtons();
-        bindMobileActionsButton();
 
         updateApostasButton();
         updateApostasTooltip();
@@ -4847,35 +4862,56 @@ buttons.forEach(btn => {
         }
       }
       
+      function safeSetText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
+      function safeSetHTML(id, html) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      }
+
+      function safeBind(id, event, handler) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(event, handler);
+      }
+
       function bindStaticInputs() {
-        document.getElementById('daySearch').addEventListener('input', rerenderDayOnly);
-        document.getElementById('dayLeagueFilter').addEventListener('change', rerenderDayOnly);
-        document.getElementById('dayMarketFilter').addEventListener('change', rerenderDayOnly);
-        document.getElementById('dayResultFilter').addEventListener('change', rerenderDayOnly);
-        document.getElementById('dayExecutionFilter').addEventListener('change', rerenderDayOnly);
+        safeBind('daySearch', 'input', rerenderDayOnly);
+        safeBind('dayLeagueFilter', 'change', rerenderDayOnly);
+        safeBind('dayMarketFilter', 'change', rerenderDayOnly);
+        safeBind('dayResultFilter', 'change', rerenderDayOnly);
+        safeBind('dayExecutionFilter', 'change', rerenderDayOnly);
 
-        document.getElementById('historySearch').addEventListener('input', rerenderHistoryOnly);
-        document.getElementById('historySourceFilter').addEventListener('change', rerenderHistoryOnly);
-        document.getElementById('historyDateFilter').addEventListener('change', rerenderHistoryOnly);
-        document.getElementById('historyLeagueFilter').addEventListener('change', rerenderHistoryOnly);
-        document.getElementById('historyMarketFilter').addEventListener('change', rerenderHistoryOnly);
-        document.getElementById('historyResultFilter').addEventListener('change', rerenderHistoryOnly);
-        document.getElementById('historyExecutionFilter').addEventListener('change', rerenderHistoryOnly);
+        safeBind('historySearch', 'input', rerenderHistoryOnly);
+        safeBind('historySourceFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyDateFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyLeagueFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyMarketFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyResultFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyExecutionFilter', 'change', rerenderHistoryOnly);
 
-        document.getElementById('bankrollInput').addEventListener('blur', e => {
-          const v = num(e.target.value);
-          state.bankrollInicial = v !== null && v >= 0 ? v : 0;
-          saveLocalState();
-        });
+        const bankrollInput = document.getElementById('bankrollInput');
+        if (bankrollInput) {
+          bankrollInput.addEventListener('blur', e => {
+            const v = num(e.target.value);
+            state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+            saveLocalState();
+          });
+        }
 
-        document.getElementById('addManualBetBtn').addEventListener('click', addManualBet);
+        safeBind('addManualBetBtn', 'click', addManualBet);
 
-        document.getElementById('importManualFile').addEventListener('change', async e => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          await importManualJsonFromFile(file);
-          e.target.value = '';
-        });
+        const importFile = document.getElementById('importManualFile');
+        if (importFile) {
+          importFile.addEventListener('change', async e => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            await importManualJsonFromFile(file);
+            e.target.value = '';
+          });
+        }
       }
 
       async function boot() {
