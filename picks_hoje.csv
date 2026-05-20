@@ -1,6 +1,6 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-20;italia2;Serie B;Palermo;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.78;0.562;0.113;0.2578;True;;0.02;0.11299999999999999;0.0464;0.019;0.95;0.4754684345443296;50.0
-2026-05-21;alemanha;Bundesliga;VfL Wolfsburg;SC Paderborn 07;1.882;1.652;3.534;O2.5;0.685;1.84;0.543;0.1419;0.3107;True;;0.02;0.14200000000000002;0.0559;0.019;0.95;0.4754684345443296;50.0
+2026-05-20;italia2;Serie B;Palermo;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.75;0.571;0.1033;0.2411;True;;0.02;0.10400000000000009;0.0434;0.019;0.95;0.4754684345443296;50.0
+2026-05-21;alemanha;Bundesliga;VfL Wolfsburg;SC Paderborn 07;1.882;1.652;3.534;O2.5;0.685;1.82;0.549;0.1359;0.3016;True;;0.02;0.136;0.0543;0.019;0.95;0.4754684345443296;50.0
 2026-05-21;belgica;Jupiler Pro League;Gent;Union St. Gilloise;1.678;1.324;3.002;O2.5;0.577;1.93;0.518;0.0591;0.1226;True;;0.025;0.05899999999999994;0.013;0.0062;0.31;0.4754684345443296;50.0
 2026-05-23;italia;Serie A;Lazio;Pisa;1.594;1.88;3.474;O2.5;0.674;1.86;0.538;0.1368;0.2958;True;;0.02;0.136;0.0532;0.019;0.95;0.4754684345443296;50.0
 2026-05-23;belgica;Jupiler Pro League;Standard Liege;Charleroi;1.678;1.324;3.002;O2.5;0.577;2.0;0.5;0.0772;0.1544;True;;0.025;0.07699999999999996;0.0215;0.0102;0.51;0.4754684345443296;50.0
