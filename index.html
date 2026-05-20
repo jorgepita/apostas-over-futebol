@@ -13,6 +13,12 @@
       --muted: #475569;
       --line: #e2e8f0;
       --accent: #0f172a;
+      --sidebar-width: 260px;
+      --nav-bg: #1e293b;
+      --nav-text: #f8fafc;
+      --nav-hover: #334155;
+      --nav-active: #2563eb;
+      --transition: all 0.3s ease;
 
       --ok: #16a34a;
       --ok-bg: #ecfdf5;
@@ -40,12 +46,153 @@
       font-family: Inter, system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
+      overflow-x: hidden;
     }
 
+    /* App Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--nav-bg);
+      color: var(--nav-text);
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      font-size: 20px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 24px;
+      color: var(--nav-text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--nav-hover);
+    }
+
+    .nav-item.active {
+      background: var(--nav-hover);
+      border-left-color: var(--nav-active);
+      color: #fff;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 24px;
+      max-width: 100%;
+      transition: var(--transition);
+    }
+
+    .mobile-header {
+      display: none;
+      background: var(--nav-bg);
+      color: var(--nav-text);
+      padding: 12px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hamburger {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 950;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      #closeSidebar {
+        display: block !important;
+      }
+    }
+
+    /* Page Titles */
+    .page-title {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-title .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Existing styles adaptation */
     .wrap {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 18px;
     }
 
     .card {
@@ -847,80 +994,47 @@ button.dirty {
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="sticky-tabs">
-      <div class="card" style="margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-          <div>
-            <div class="value" style="font-size:22px;line-height:1.2;">Dashboard GitHub Pages</div>
-          </div>
-
-          <div class="top-actions">
-
-  <button id="refreshBtn" type="button">Atualizar agora</button>
-  <button id="toggleCompactBtn" type="button">Compacto</button>
-
-  <div class="tooltip-wrap">
-    <button type="button" class="tab-btn" data-tab-target="tab-day" id="btnApostasTab">
-      Apostas do dia
-    </button>
-    <div class="tooltip-box" id="btnApostasTooltip">
-      <div class="tooltip-title">Resumo das picks do dia</div>
-      <div class="tooltip-row"><span>Picks do dia</span><strong id="tooltipPicksCount">—</strong></div>
-      <div class="tooltip-row"><span>Odd média</span><strong id="tooltipAvgOdd">—</strong></div>
-      <div class="tooltip-row"><span>Edge médio</span><strong id="tooltipAvgEdge">—</strong></div>
-      <div class="tooltip-row"><span>Stake total</span><strong id="tooltipStakeTotal">—</strong></div>
-    </div>
-  </div>
-
-  <button id="mobileMoreActionsBtn" class="more-actions-btn" type="button" aria-expanded="false">
-    Mais ações
-  </button>
-
-  <div class="mobile-actions-inline" id="desktopActionsGroup">
-
-            <div class="mobile-actions-inline" id="desktopActionsGroup">
-              <button id="loadCloudBtn" type="button">Carregar cloud</button>
-              <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
-              <button id="resetLocalBtn" type="button">Limpar controlos locais</button>
-              <button id="clearManualBtn" type="button">Apagar manuais locais</button>
-              <button id="exportManualBtn" type="button">Exportar manuais</button>
-              <button id="importManualBtn" type="button">Importar manuais</button>
-              <button id="exportRealCsvBtn" type="button">Exportar CSV real</button>
-              <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
-            </div>
-          </div>
-        </div>
-
-        <div id="mobileActionsPanel" class="mobile-actions-panel">
-          <button id="loadCloudBtnMobile" type="button">Carregar cloud</button>
-          <button id="saveCloudBtnMobile" type="button" disabled>Guardar cloud</button>
-          <button id="resetLocalBtnMobile" type="button">Limpar controlos locais</button>
-          <button id="clearManualBtnMobile" type="button">Apagar manuais locais</button>
-          <button id="exportManualBtnMobile" type="button">Exportar manuais</button>
-          <button id="importManualBtnMobile" type="button">Importar manuais</button>
-          <button id="exportRealCsvBtnMobile" type="button">Exportar CSV real</button>
-          <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer">Abrir GitHub</a>
-        </div>
-
-        <div class="status-inline" style="margin-top:14px;">
-          <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
-          <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
-          <span class="decision-badge info" id="cloudStatusLabel">Cloud: —</span>
-        </div>
-
-        <div class="divider-note">
-          <div class="section-tabs">
-            <button type="button" class="tab-btn active" data-tab-target="tab-summary">Resumo financeiro</button>
-            <button type="button" class="tab-btn" data-tab-target="tab-day">Apostas do dia / pendentes</button>
-            <button type="button" class="tab-btn" data-tab-target="tab-history">Histórico (fechadas)</button>
-            <button type="button" class="tab-btn" data-tab-target="tab-manual">Apostas manuais</button>
-          </div>
-        </div>
-
-        <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
+  <div class="app-container">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span>Apostas Bot</span>
+        <button class="hamburger" id="closeSidebar" style="display:none;">&times;</button>
       </div>
-    </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-tab-target="tab-summary">
+          <span class="nav-icon">🏠</span> Home
+        </div>
+        <div class="nav-item" data-tab-target="tab-day">
+          <span class="nav-icon">🎯</span> Picks
+        </div>
+        <div class="nav-item" data-tab-target="tab-history">
+          <span class="nav-icon">📜</span> History
+        </div>
+        <div class="nav-item" data-tab-target="tab-analytics">
+          <span class="nav-icon">📊</span> Analytics
+        </div>
+        <div class="nav-item" data-tab-target="tab-manual">
+          <span class="nav-icon">✍️</span> Manual Bets
+        </div>
+        <div class="nav-item" data-tab-target="tab-settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </div>
+      </nav>
+      <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <button id="refreshBtn" type="button" style="width:100%; padding:10px; background:var(--nav-active); color:white; border:none; border-radius:8px; cursor:pointer;">Atualizar agora</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="mobile-header">
+        <button class="hamburger" id="openSidebar">&#9776;</button>
+        <span style="font-weight:700;">Apostas Bot</span>
+        <div style="width:24px;"></div> <!-- Spacer -->
+      </header>
+
+      <div class="wrap">
+        <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
 
     <div id="tab-summary" class="tab-panel active">
       <div class="section-stack">
@@ -1115,76 +1229,6 @@ button.dirty {
           </div>
         </div>
         
-        <div class="grid grid-3">
-          <div class="card">
-            <div class="label">Analytics por liga</div>
-            <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
-            <div class="table-wrap" style="max-height:360px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Liga</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsLeagueRows"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="label">Analytics por mercado</div>
-            <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
-            <div class="table-wrap" style="max-height:360px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mercado</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsMarketRows"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="label">Analytics por origem</div>
-            <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
-            <div class="table-wrap" style="max-height:360px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Origem</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsSourceRows"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
 
         <div class="grid grid-3">
           <div class="card">
@@ -1193,25 +1237,6 @@ button.dirty {
             <div id="streakCards" class="grid"></div>
           </div>
 
-          <div class="card">
-            <div class="label">NBA</div>
-            <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
-            <div class="table-wrap" style="max-height:360px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Jogo</th>
-                    <th>Mercado</th>
-                    <th>Linha</th>
-                    <th>Odd</th>
-                    <th>Stake€</th>
-                  </tr>
-                </thead>
-                <tbody id="nbaRows"></tbody>
-              </table>
-            </div>
-          </div>
 
           <div class="card">
             <div class="label">Notas operacionais</div>
@@ -1222,11 +1247,9 @@ button.dirty {
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-   <div class="grid grid-3">
-    <div class="card">
+        <div class="grid grid-3">
+          <div class="card">
       <div class="label">Centro de alertas</div>
       <div class="note" style="margin-bottom:12px;">Alertas automáticos e avisos operacionais.</div>
       <div id="alertsCenter" class="grid"></div>
@@ -1242,62 +1265,12 @@ button.dirty {
       <div class="label">Evolução da banca</div>
       <div class="note" style="margin-bottom:12px;">Gráfico com base nas fechadas reais.</div>
       <div id="bankrollChartWrap" class="chart-box"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- League Analytics Section -->
-  <div class="card" style="margin-top:18px;">
-    <div class="label">League Analytics</div>
-    <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
-    <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
-    <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
-      <div>
-        <label class="label">Pesquisar liga</label>
-        <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
-      </div>
-      <div>
-        <label class="label">Tier</label>
-        <select class="league-analytics-tier-filter">
-          <option value="">Todos os tiers</option>
-          <option value="Elite">Elite</option>
-          <option value="Strong">Strong</option>
-          <option value="Neutral">Neutral</option>
-          <option value="Weak">Weak</option>
-          <option value="Unproven">Unproven</option>
-        </select>
-      </div>
-      <div>
-        <label class="label">Mercado</label>
-        <select class="league-analytics-market-filter">
-          <option value="">Todos os mercados</option>
-        </select>
-      </div>
-    </div>
-    <div class="league-analytics-toolbar">
-      <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
-    </div>
-    <div class="table-wrap league-analytics-scroll">
-      <table class="league-analytics-table">
-        <thead>
-          <tr>
-            <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th scope="col">Market</th>
-            <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
-            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
-          </tr>
-        </thead>
-        <tbody class="league-analytics-body"></tbody>
-      </table>
-    </div>
-  </div>
-    
-    <div id="tab-day" class="tab-panel">
+  <div id="tab-day" class="tab-panel">
       <div class="section-stack">
         <div class="page-title">
           <div>
@@ -1305,57 +1278,6 @@ button.dirty {
           </div>
         </div>
 
-    <!-- League Analytics Section -->
-  <div class="card" style="margin-top:18px;">
-    <div class="label">League Analytics</div>
-    <div class="note" style="margin-bottom:12px;">Resumo analítico por liga e mercado.</div>
-    <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
-    <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
-      <div>
-        <label class="label">Pesquisar liga</label>
-        <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
-      </div>
-      <div>
-        <label class="label">Tier</label>
-        <select class="league-analytics-tier-filter">
-          <option value="">Todos os tiers</option>
-          <option value="Elite">Elite</option>
-          <option value="Strong">Strong</option>
-          <option value="Neutral">Neutral</option>
-          <option value="Weak">Weak</option>
-          <option value="Unproven">Unproven</option>
-        </select>
-      </div>
-      <div>
-        <label class="label">Mercado</label>
-        <select class="league-analytics-market-filter">
-          <option value="">Todos os mercados</option>
-        </select>
-      </div>
-    </div>
-    <div class="league-analytics-toolbar">
-      <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
-    </div>
-    <div class="table-wrap league-analytics-scroll">
-      <table class="league-analytics-table">
-        <thead>
-          <tr>
-            <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th scope="col">Market</th>
-            <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
-            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
-            <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
-          </tr>
-        </thead>
-        <tbody class="league-analytics-body"></tbody>
-      </table>
-    </div>
-  </div>
         
         <div class="card">
           <div class="label">Filtros desta página</div>
@@ -1469,6 +1391,26 @@ button.dirty {
                 </tr>
               </thead>
               <tbody id="historyRowsDay"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">NBA</div>
+          <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
+          <div class="table-wrap" style="max-height:360px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Linha</th>
+                  <th>Odd</th>
+                  <th>Stake€</th>
+                </tr>
+              </thead>
+              <tbody id="nbaRows"></tbody>
             </table>
           </div>
         </div>
@@ -1618,14 +1560,6 @@ button.dirty {
         </div>
 
         <div class="card">
-          <div class="label">Banca inicial</div>
-          <div class="note" style="margin-bottom:12px;">Guardada neste browser e usada nos cálculos globais.</div>
-          <div style="max-width:260px;">
-            <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" />
-          </div>
-        </div>
-
-        <div class="card">
           <div class="label">Adicionar aposta manual</div>
           <div class="note" style="margin-bottom:12px;">Para jogos ou mercados fora das picks geradas.</div>
 
@@ -1708,6 +1642,210 @@ button.dirty {
         </div>
       </div>
     </div>
+
+    <div id="tab-analytics" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div class="value" style="font-size:28px;">League Analytics</div>
+          <div class="note">Resumo analítico por liga e mercado.</div>
+        </div>
+
+        <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
+
+        <div class="card">
+          <div class="label">Filtros de Analytics</div>
+          <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
+            <div>
+              <label class="label">Pesquisar liga</label>
+              <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
+            </div>
+            <div>
+              <label class="label">Tier</label>
+              <select class="league-analytics-tier-filter">
+                <option value="">Todos os tiers</option>
+                <option value="Elite">Elite</option>
+                <option value="Strong">Strong</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Weak">Weak</option>
+                <option value="Unproven">Unproven</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Mercado</label>
+              <select class="league-analytics-market-filter">
+                <option value="">Todos os mercados</option>
+              </select>
+            </div>
+          </div>
+          <div class="league-analytics-toolbar">
+            <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap league-analytics-scroll">
+            <table class="league-analytics-table">
+              <thead>
+                <tr>
+                  <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th scope="col">Market</th>
+                  <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
+                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                </tr>
+              </thead>
+              <tbody class="league-analytics-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="label">Analytics por liga</div>
+            <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Liga</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsLeagueRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Analytics por mercado</div>
+            <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mercado</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsMarketRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Analytics por origem</div>
+            <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
+            <div class="table-wrap" style="max-height:360px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Origem</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsSourceRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-settings" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div class="value" style="font-size:28px;">Definições e Sistema</div>
+          <div class="note">Gestão de cloud, exportação, banca e estado local.</div>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="label">Banca inicial</div>
+            <div class="note" style="margin-bottom:12px;">Usada nos cálculos globais de ROI e banca atual.</div>
+            <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" />
+          </div>
+
+          <div class="card">
+            <div class="label">Interface</div>
+            <div class="note" style="margin-bottom:12px;">Opções visuais.</div>
+            <button id="toggleCompactBtn" type="button" style="width:100%;">Modo Compacto</button>
+          </div>
+
+          <div class="card">
+            <div class="label">Estado da Sessão</div>
+            <div class="status-inline" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
+              <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
+              <span class="decision-badge info" id="cloudStatusLabel">Cloud: —</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Sincronização Cloud (Railway)</div>
+          <div class="note" style="margin-bottom:12px;">Guardar ou carregar o estado das edições locais e apostas manuais.</div>
+          <div class="toolbar-grid">
+            <button id="loadCloudBtn" type="button">Carregar cloud</button>
+            <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Exportação / Importação</div>
+          <div class="note" style="margin-bottom:12px;">Transferir dados via ficheiros.</div>
+          <div class="toolbar-grid">
+            <button id="exportManualBtn" type="button">Exportar manuais (JSON)</button>
+            <button id="importManualBtn" type="button">Importar manuais (JSON)</button>
+            <button id="exportRealCsvBtn" type="button">Exportar CSV real</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Limpeza de Dados</div>
+          <div class="note" style="margin-bottom:12px;">Ações destrutivas sobre o estado local.</div>
+          <div class="toolbar-grid">
+            <button id="resetLocalBtn" type="button">Limpar controlos locais</button>
+            <button id="clearManualBtn" type="button">Apagar manuais locais</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Links Úteis</div>
+          <div class="toolbar-grid">
+            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:10px; background:var(--nav-bg); color:white; text-decoration:none; border-radius:8px;">Abrir GitHub Project</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- wrap -->
+</main> <!-- main-content -->
+</div> <!-- app-container -->
 
     <script>
       const API_URL = 'https://believable-purpose-production-2520.up.railway.app';
@@ -2748,7 +2886,7 @@ button.dirty {
         }
 
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
+        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-analytics', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
         state.mobileActionsOpen = savedMobileActions === '1';
       }
 
@@ -4142,21 +4280,51 @@ button.dirty {
         window._tabsBound = true;
         
         document.querySelectorAll('[data-tab-target]').forEach(btn => {
-          if (btn.dataset.bound === '1') return;
-          btn.dataset.bound = '1';
-
           btn.addEventListener('click', () => {
             const target = btn.dataset.tabTarget;
             if (!target) return;
             setActiveTab(target);
+            
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth <= 1024) {
+              setSidebarOpen(false);
+            }
           });
         });
+
+        // Mobile sidebar events
+        const openBtn = document.getElementById('openSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (openBtn) openBtn.onclick = () => setSidebarOpen(true);
+        if (closeBtn) closeBtn.onclick = () => setSidebarOpen(false);
+        if (overlay) overlay.onclick = () => setSidebarOpen(false);
+      }
+
+      function setSidebarOpen(open) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        if (open) {
+          sidebar.classList.add('open');
+          overlay.classList.add('open');
+        } else {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('open');
+        }
       }
 
       function setActiveTab(tabId) {
         state.activeTab = tabId;
         saveLocalState();
 
+        // Update nav items
+        document.querySelectorAll('.nav-item').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
+        });
+        
+        // Support legacy tab-btn if any remains
         document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
         });
@@ -4164,29 +4332,12 @@ button.dirty {
         document.querySelectorAll('.tab-panel').forEach(panel => {
           panel.classList.toggle('active', panel.id === tabId);
         });
-      }
 
-      function setMobileActionsOpen(open) {
-        state.mobileActionsOpen = !!open;
-        const panel = document.getElementById('mobileActionsPanel');
-        const btn = document.getElementById('mobileMoreActionsBtn');
-        panel.classList.toggle('open', state.mobileActionsOpen);
-        btn.setAttribute('aria-expanded', state.mobileActionsOpen ? 'true' : 'false');
-        btn.textContent = state.mobileActionsOpen ? 'Fechar ações' : 'Mais ações';
-        saveLocalState();
+        window.scrollTo(0, 0);
       }
 
       function bindMobileActionsButton() {
-        if (window._mobileBound) return;
-        window._mobileBound = true;
-        
-        const btn = document.getElementById('mobileMoreActionsBtn');
-        if (btn.dataset.bound === '1') return;
-        btn.dataset.bound = '1';
-
-        btn.addEventListener('click', () => {
-          setMobileActionsOpen(!state.mobileActionsOpen);
-        });
+        // Obsoleto, substituído pelo sidebar mobile
       }
 
       function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
@@ -4540,8 +4691,6 @@ buttons.forEach(btn => {
         updateApostasTooltip();
 
         setActiveTab(state.activeTab);
-        setMobileActionsOpen(state.mobileActionsOpen);
-
       }
 
       function addManualBet() {
@@ -4657,7 +4806,9 @@ buttons.forEach(btn => {
         state.activeTab = 'tab-summary';
         state.mobileActionsOpen = false;
 
-        document.getElementById('bankrollInput').value = 1000;
+        if (document.getElementById('bankrollInput')) {
+          document.getElementById('bankrollInput').value = 1000;
+        }
         rerenderAll();
       }
 
@@ -4689,22 +4840,12 @@ buttons.forEach(btn => {
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
-
-        bindElementAction('loadCloudBtnMobile', () => loadCloudState());
-        bindElementAction('saveCloudBtnMobile', () => {
-  console.log('CLICK SAVE MOBILE');
-  saveCloudState();
-});
-        bindElementAction('resetLocalBtnMobile', resetLocalControls);
-        bindElementAction('clearManualBtnMobile', clearManualLocal);
-        bindElementAction('exportManualBtnMobile', exportManualJson);
-        bindElementAction('importManualBtnMobile', () => document.getElementById('importManualFile').click());
-        bindElementAction('exportRealCsvBtnMobile', exportRealCsv);
+        
         const btnCompact = document.getElementById('toggleCompactBtn');
         if (btnCompact) {
           btnCompact.addEventListener('click', toggleCompactMode);
         }
-        }
+      }
       
       function bindStaticInputs() {
         document.getElementById('daySearch').addEventListener('input', rerenderDayOnly);
@@ -4740,7 +4881,9 @@ buttons.forEach(btn => {
       async function boot() {
         loadCompactMode();
         loadLocalState();
-        document.getElementById('bankrollInput').value = state.bankrollInicial;
+        if (document.getElementById('bankrollInput')) {
+          document.getElementById('bankrollInput').value = state.bankrollInicial;
+        }
 
         bindTabButtons();
         bindQuickMarketButtons();
@@ -4753,7 +4896,6 @@ buttons.forEach(btn => {
         loadLeagueAnalyticsCompactMode();
 
         setActiveTab(state.activeTab);
-        setMobileActionsOpen(state.mobileActionsOpen);
 
         rerenderAll(false);
 
@@ -4768,6 +4910,5 @@ buttons.forEach(btn => {
 
       boot();
     </script>
-  </div>
 </body>
 </html>
