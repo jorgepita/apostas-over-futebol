@@ -11,15 +11,15 @@
       "LambdaTotal": "3.476",
       "Market": "O2.5",
       "ProbModel": 0.675,
-      "Odd": "1.78",
-      "ProbMarket": 0.562,
-      "Edge": 0.11299999999999999,
-      "KellyTrue": "0.2578",
+      "Odd": "1.75",
+      "ProbMarket": 0.571,
+      "Edge": 0.10400000000000009,
+      "KellyTrue": "0.2411",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.02",
-      "ProbGap": "0.11299999999999999",
-      "StakeFracRaw": "0.0464",
+      "ProbGap": "0.10400000000000009",
+      "StakeFracRaw": "0.0434",
       "StakeFrac": "0.019",
       "Stake€": "0.95",
       "DailyScale": "0.4754684345443296",
@@ -29,7 +29,7 @@
       "Jogo": "Palermo vs Catanzaro",
       "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 11.299999999999999
+      "Edge%": 10.40000000000001
     },
     {
       "Date": "2026-05-21",
@@ -42,15 +42,15 @@
       "LambdaTotal": "3.534",
       "Market": "O2.5",
       "ProbModel": 0.685,
-      "Odd": "1.84",
-      "ProbMarket": 0.543,
-      "Edge": 0.14200000000000002,
-      "KellyTrue": "0.3107",
+      "Odd": "1.82",
+      "ProbMarket": 0.549,
+      "Edge": 0.136,
+      "KellyTrue": "0.3016",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.02",
-      "ProbGap": "0.14200000000000002",
-      "StakeFracRaw": "0.0559",
+      "ProbGap": "0.136",
+      "StakeFracRaw": "0.0543",
       "StakeFrac": "0.019",
       "Stake€": "0.95",
       "DailyScale": "0.4754684345443296",
@@ -60,7 +60,7 @@
       "Jogo": "VfL Wolfsburg vs SC Paderborn 07",
       "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 14.200000000000001
+      "Edge%": 13.600000000000001
     },
     {
       "Date": "2026-05-21",
@@ -1893,7 +1893,7 @@
       "apostada": true
     },
     "2026-05-20|portugal|Torreense vs Casa Pia|Over 2.5": {
-      "apostada": true,
+      "apostada": false,
       "oddReal": "2.2",
       "stakeReal": "1.5"
     },
@@ -1958,72 +1958,66 @@
     },
     "2026-05-24|italia|Napoli vs Udinese|Over 2.5": {
       "apostada": true,
-      "oddReal": "2",
+      "oddReal": "1.9",
       "stakeReal": "1"
     },
     "2026-05-24|premier|West Ham vs Leeds|Over 2.5": {
       "apostada": true,
-      "oddReal": "1.7",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "oddReal": "1.7"
     },
     "2026-05-24|italia|Hellas Verona vs AS Roma|BTTS": {
       "apostada": true,
-      "oddReal": "2.3",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "oddReal": "2.3"
     },
     "2026-05-24|italia|AC Milan vs Cagliari|BTTS": {
       "apostada": true,
-      "oddReal": "2.2",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "oddReal": "2.2"
     },
     "2026-05-24|premier|Nottingham Forest vs Bournemouth|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1",
+      "oddReal": "1.7"
     },
-    "2026-05-24|Serie A|AC Milan vs Cagliari|BTTS": {
-      "apostada": true
-    },
-    "2026-05-24|Serie A|Hellas Verona vs AS Roma|BTTS": {
+    "2026-05-24|Serie A|Napoli vs Udinese|Over 2.5": {
       "apostada": true
     },
     "2026-05-24|Premier League|West Ham vs Leeds|Over 2.5": {
       "apostada": true
     },
-    "2026-05-24|Serie A|Napoli vs Udinese|Over 2.5": {
+    "2026-05-24|Premier League|Nottingham Forest vs Bournemouth|Over 2.5": {
       "apostada": true
     },
-    "2026-05-24|Premier League|Nottingham Forest vs Bournemouth|Over 2.5": {
+    "2026-05-24|Serie A|Hellas Verona vs AS Roma|BTTS": {
+      "apostada": true
+    },
+    "2026-05-24|Serie A|AC Milan vs Cagliari|BTTS": {
       "apostada": true
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-20T14:18:25.889Z",
+  "lastUpdated": "2026-05-20T21:11:17.262Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-05-20",
       "League": "italia2",
       "HomeTeam": "Palermo",
       "AwayTeam": "Catanzaro",
-      "Odd_Over25": "1.78",
-      "Odd_BTTS_Yes": "1.73"
-    },
-    {
-      "Date": "2026-05-20",
-      "League": "portugal",
-      "HomeTeam": "Torreense",
-      "AwayTeam": "Casa Pia",
-      "Odd_Over25": "2.29",
-      "Odd_BTTS_Yes": "1.90"
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.75"
     },
     {
       "Date": "2026-05-21",
       "League": "alemanha",
       "HomeTeam": "VfL Wolfsburg",
       "AwayTeam": "SC Paderborn 07",
-      "Odd_Over25": "1.84",
+      "Odd_Over25": "1.82",
       "Odd_BTTS_Yes": "1.80"
     },
     {
@@ -2048,15 +2042,15 @@
       "HomeTeam": "KV Mechelen",
       "AwayTeam": "Club Brugge KV",
       "Odd_Over25": "1.42",
-      "Odd_BTTS_Yes": "1.58"
+      "Odd_BTTS_Yes": "1.59"
     },
     {
       "Date": "2026-05-21",
       "League": "paises_baixos",
       "HomeTeam": "Utrecht",
       "AwayTeam": "Heerenveen",
-      "Odd_Over25": "1.60",
-      "Odd_BTTS_Yes": "1.52"
+      "Odd_Over25": "1.62",
+      "Odd_BTTS_Yes": "1.55"
     },
     {
       "Date": "2026-05-22",
