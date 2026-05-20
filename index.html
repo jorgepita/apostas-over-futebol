@@ -13,7 +13,7 @@
       --muted: #475569;
       --line: #e2e8f0;
       --accent: #0f172a;
-      --sidebar-width: 260px;
+      --sidebar-width: 210px;
       --nav-bg: #1e293b;
       --nav-text: #f8fafc;
       --nav-hover: #334155;
@@ -70,8 +70,8 @@
     }
 
     .sidebar-header {
-      padding: 24px;
-      font-size: 20px;
+      padding: 16px;
+      font-size: 18px;
       font-weight: 700;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       display: flex;
@@ -88,14 +88,15 @@
     .nav-item {
       display: flex;
       align-items: center;
-      padding: 12px 24px;
+      padding: 8px 16px;
       color: var(--nav-text);
       text-decoration: none;
       font-weight: 500;
       transition: var(--transition);
       cursor: pointer;
       border-left: 4px solid transparent;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+      font-size: 13.5px;
     }
 
     .nav-item:hover {
@@ -117,7 +118,7 @@
     .main-content {
       flex: 1;
       margin-left: var(--sidebar-width);
-      padding: 24px;
+      padding: 16px;
       max-width: 100%;
       transition: var(--transition);
     }
@@ -178,13 +179,13 @@
 
     /* Page Titles */
     .page-title {
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--line);
     }
 
     .page-title .value {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--accent);
     }
@@ -198,14 +199,14 @@
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 10px;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
     }
 
     .grid {
       display: grid;
-      gap: 12px;
+      gap: 8px;
     }
 
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -214,14 +215,14 @@
 
     .toolbar-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
     }
 
     .stat {
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 10px;
       background: #fff;
       min-width: 0;
     }
@@ -293,11 +294,11 @@
     }
 
     th, td {
-      padding: 10px;
+      padding: 6px 8px;
       border-top: 1px solid var(--line);
-      font-size: 13px;
+      font-size: 12px;
       vertical-align: top;
-      line-height: 1.35;
+      line-height: 1.3;
     }
 
     th {
@@ -727,11 +728,12 @@
     select {
       font: inherit;
       width: 100%;
-      padding: 6px;
+      padding: 4px 8px;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #fff;
       color: var(--text);
+      font-size: 12px;
     }
 
     .section-tabs {
@@ -741,8 +743,7 @@
     }
 
     @media (max-width: 1100px) {
-      .grid-4,
-      .toolbar-grid {
+      .grid-4 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
@@ -752,16 +753,19 @@
 
       .grid-2,
       .grid-3,
-      .grid-4,
-      .toolbar-grid {
+      .grid-4 {
         grid-template-columns: 1fr;
       }
+      
+      .toolbar-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
 
-      .wrap { padding: 12px; }
+      .wrap { padding: 8px; }
 
-      .card { padding: 14px; }
+      .card { padding: 10px; }
 
-      .value { font-size: 20px; }
+      .page-title .value { font-size: 18px; }
 
       .top-actions {
         width: 100%;
@@ -1151,83 +1155,6 @@ button.dirty {
           </div>
         </div>
 
-        <div class="stats-row">
-          <div class="stat">
-            <div class="label">Bot geradas</div>
-            <div class="value" id="botGeneratedStat">0</div>
-            <div class="note">Todas as picks do bot</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Bot executadas</div>
-            <div class="value" id="botExecutedStat">0</div>
-            <div class="note">Marcadas como executadas</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Bot resolvidas</div>
-            <div class="value" id="botResolvedStat">0</div>
-            <div class="note">Com resultado W/L/P</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Taxa execução bot</div>
-            <div class="value" id="botExecutionRateStat">0%</div>
-            <div class="note">Executadas / geradas</div>
-          </div>
-        </div>
-
-        <div class="stats-row">
-          <div class="stat">
-            <div class="label">O2.5 geradas</div>
-            <div class="value" id="o25GeneratedTopStat">0</div>
-            <div class="note">Todas as picks O2.5</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">O2.5 executadas</div>
-            <div class="value" id="o25ExecutedTopStat">0</div>
-            <div class="note">Marcadas como executadas</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">O2.5 ganhas</div>
-            <div class="value" id="o25WinsTopStat">0</div>
-            <div class="note" id="o25WinsPctNote">—</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">O2.5 perdidas</div>
-            <div class="value" id="o25LossesTopStat">0</div>
-            <div class="note" id="o25LossesPctNote">—</div>
-          </div>
-        </div>
-
-        <div class="stats-row">
-          <div class="stat">
-            <div class="label">BTTS geradas</div>
-            <div class="value" id="bttsGeneratedTopStat">0</div>
-            <div class="note">Todas as picks BTTS</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">BTTS executadas</div>
-            <div class="value" id="bttsExecutedTopStat">0</div>
-            <div class="note">Marcadas como executadas</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">BTTS ganhas</div>
-            <div class="value" id="bttsWinsTopStat">0</div>
-            <div class="note" id="bttsWinsPctNote">—</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">BTTS perdidas</div>
-            <div class="value" id="bttsLossesTopStat">0</div>
-            <div class="note" id="bttsLossesPctNote">—</div>
-          </div>
-        </div>
         
 
         <div class="grid grid-3">
@@ -1395,25 +1322,6 @@ button.dirty {
           </div>
         </div>
 
-        <div class="card">
-          <div class="label">NBA</div>
-          <div class="note" style="margin-bottom:12px;">Fonte: picks_nba_over.csv</div>
-          <div class="table-wrap" style="max-height:360px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Jogo</th>
-                  <th>Mercado</th>
-                  <th>Linha</th>
-                  <th>Odd</th>
-                  <th>Stake€</th>
-                </tr>
-              </thead>
-              <tbody id="nbaRows"></tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1780,65 +1688,65 @@ button.dirty {
     <div id="tab-settings" class="tab-panel">
       <div class="section-stack">
         <div class="page-title">
-          <div class="value" style="font-size:28px;">Definições e Sistema</div>
+          <div class="value" style="font-size:22px;">Definições e Sistema</div>
           <div class="note">Gestão de cloud, exportação, banca e estado local.</div>
         </div>
 
-        <div class="grid grid-3">
+        <div class="grid grid-2">
           <div class="card">
             <div class="label">Banca inicial</div>
-            <div class="note" style="margin-bottom:12px;">Usada nos cálculos globais de ROI e banca atual.</div>
+            <div class="note" style="margin-bottom:8px;">Usada nos cálculos globais de ROI e banca atual.</div>
             <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" />
           </div>
 
           <div class="card">
             <div class="label">Interface</div>
-            <div class="note" style="margin-bottom:12px;">Opções visuais.</div>
+            <div class="note" style="margin-bottom:8px;">Opções visuais.</div>
             <button id="toggleCompactBtn" type="button" style="width:100%;">Modo Compacto</button>
           </div>
 
           <div class="card">
+            <div class="label">Sincronização Cloud (Railway)</div>
+            <div class="note" style="margin-bottom:8px;">Sincronizar estado das edições e manuais.</div>
+            <div class="toolbar-grid" style="grid-template-columns: 1fr 1fr;">
+              <button id="loadCloudBtn" type="button">Carregar cloud</button>
+              <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
+            </div>
+          </div>
+
+          <div class="card">
             <div class="label">Estado da Sessão</div>
-            <div class="status-inline" style="display:flex; flex-direction:column; gap:8px;">
-              <span class="decision-badge info" id="sessionLabel">Sessão atual: —</span>
-              <span class="decision-badge info" id="lastUpdateLabel">Última atualização: —</span>
-              <span class="decision-badge info" id="cloudStatusLabel">Cloud: —</span>
+            <div class="status-inline" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+              <span class="decision-badge info" id="sessionLabel" style="font-size:10px; padding:2px 8px;">Sessão atual: —</span>
+              <span class="decision-badge info" id="lastUpdateLabel" style="font-size:10px; padding:2px 8px;">Última atualização: —</span>
+              <span class="decision-badge info" id="cloudStatusLabel" style="font-size:10px; padding:2px 8px;">Cloud: —</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Exportação / Importação</div>
+            <div class="note" style="margin-bottom:8px;">Transferir dados via ficheiros.</div>
+            <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
+              <button id="exportManualBtn" type="button">Exportar JSON</button>
+              <button id="importManualBtn" type="button">Importar JSON</button>
+              <button id="exportRealCsvBtn" type="button">Exportar CSV</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Limpeza de Dados</div>
+            <div class="note" style="margin-bottom:8px;">Ações destrutivas locais.</div>
+            <div class="toolbar-grid" style="grid-template-columns: 1fr 1fr;">
+              <button id="resetLocalBtn" type="button">Limpar controlos</button>
+              <button id="clearManualBtn" type="button">Apagar manuais</button>
             </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="label">Sincronização Cloud (Railway)</div>
-          <div class="note" style="margin-bottom:12px;">Guardar ou carregar o estado das edições locais e apostas manuais.</div>
-          <div class="toolbar-grid">
-            <button id="loadCloudBtn" type="button">Carregar cloud</button>
-            <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Exportação / Importação</div>
-          <div class="note" style="margin-bottom:12px;">Transferir dados via ficheiros.</div>
-          <div class="toolbar-grid">
-            <button id="exportManualBtn" type="button">Exportar manuais (JSON)</button>
-            <button id="importManualBtn" type="button">Importar manuais (JSON)</button>
-            <button id="exportRealCsvBtn" type="button">Exportar CSV real</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="label">Limpeza de Dados</div>
-          <div class="note" style="margin-bottom:12px;">Ações destrutivas sobre o estado local.</div>
-          <div class="toolbar-grid">
-            <button id="resetLocalBtn" type="button">Limpar controlos locais</button>
-            <button id="clearManualBtn" type="button">Apagar manuais locais</button>
-          </div>
-        </div>
-
-        <div class="card">
           <div class="label">Links Úteis</div>
-          <div class="toolbar-grid">
-            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:10px; background:var(--nav-bg); color:white; text-decoration:none; border-radius:8px;">Abrir GitHub Project</a>
+          <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); margin-top:4px;">
+            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:6px; background:var(--nav-bg); color:white; text-decoration:none; border-radius:8px; font-size:12px;">Abrir GitHub Project</a>
           </div>
         </div>
       </div>
@@ -1856,7 +1764,6 @@ button.dirty {
         footballDaily: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_hoje_github.csv',
         footballBtts: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_btts.csv',
         footballHistory: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_history.csv',
-        nba: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/picks_nba_over.csv',
         manual: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/manual_bets.csv',
         leagueStats: 'league_stats.csv',
         leagueStatsRemote: 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/league_stats.csv'
@@ -1878,7 +1785,6 @@ button.dirty {
       const state = {
         footballDaily: [],
         footballHistory: [],
-        nba: [],
         leagueStats: [],
         bankrollInicial: 1000,
         localEdits: {},
@@ -2833,17 +2739,6 @@ button.dirty {
         return normalized;
       }
 
-      function normalizeNbaCsvRow(row) {
-        return {
-          Date: normalizeDateString(row['Date'] || row['Data'] || ''),
-          HomeTeam: cleanString(row['HomeTeam'] || row['Casa'] || ''),
-          AwayTeam: cleanString(row['AwayTeam'] || row['Fora'] || ''),
-          Market: normalizeMarket(row),
-          Line: cleanString(row['Line'] || row['Linha'] || ''),
-          Odd: cleanString(row['Odd'] || ''),
-          'Stake€': cleanString(row['Stake€'] || row['Stake'] || '')
-        };
-      }
 
       function normalizeManualCsvRow(row) {
         const stakeValue = cleanString(row['Stake'] || row['Stake€'] || '');
@@ -3676,50 +3571,14 @@ button.dirty {
         const roi = stake > 0 ? (lucro / stake) * 100 : 0;
         const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
 
-        document.getElementById('summaryRoiStat').textContent = pct(roi);
-        document.getElementById('summaryProfitStat').textContent = `€${fmt(lucro)}`;
-        document.getElementById('summaryWrStat').textContent = pct(wr);
-        document.getElementById('summaryResolvedCountStat').textContent = String(rows.length);
-        document.getElementById('summaryWinsStat').textContent = String(wins);
-        document.getElementById('summaryLossesStat').textContent = String(losses);
-        document.getElementById('summaryPushesStat').textContent = String(pushes);
-        document.getElementById('summaryPendingOpenStat').textContent = String(risk.openCount);
-      
-      const botOverview = getBotOverviewMetrics();
-
-      document.getElementById('botGeneratedStat').textContent = String(botOverview.generated);
-      document.getElementById('botExecutedStat').textContent = String(botOverview.executed);
-      document.getElementById('botResolvedStat').textContent = String(botOverview.resolved);
-      document.getElementById('botExecutionRateStat').textContent = pct(botOverview.executionRate);
-
-      document.getElementById('o25GeneratedTopStat').textContent = String(botOverview.o25.generated);
-      document.getElementById('o25ExecutedTopStat').textContent = String(botOverview.o25.executed);
-      document.getElementById('o25WinsTopStat').textContent = String(botOverview.o25.wins);
-      document.getElementById('o25LossesTopStat').textContent = String(botOverview.o25.losses);
-
-      document.getElementById('bttsGeneratedTopStat').textContent = String(botOverview.btts.generated);
-      document.getElementById('bttsExecutedTopStat').textContent = String(botOverview.btts.executed);
-      document.getElementById('bttsWinsTopStat').textContent = String(botOverview.btts.wins);
-      document.getElementById('bttsLossesTopStat').textContent = String(botOverview.btts.losses);
-
-      // ===== Percentagens O2.5 =====
-      const o25Total = botOverview.o25.wins + botOverview.o25.losses;
-
-      const o25WinPct = o25Total > 0 ? (botOverview.o25.wins / o25Total) * 100 : 0;
-      const o25LossPct = o25Total > 0 ? (botOverview.o25.losses / o25Total) * 100 : 0;
-
-      document.getElementById('o25WinsPctNote').textContent = `${o25WinPct.toFixed(1)}%`;
-      document.getElementById('o25LossesPctNote').textContent = `${o25LossPct.toFixed(1)}%`;
-
-
-      // ===== Percentagens BTTS =====
-      const bttsTotal = botOverview.btts.wins + botOverview.btts.losses;
-
-      const bttsWinPct = bttsTotal > 0 ? (botOverview.btts.wins / bttsTotal) * 100 : 0;
-      const bttsLossPct = bttsTotal > 0 ? (botOverview.btts.losses / bttsTotal) * 100 : 0;
-
-      document.getElementById('bttsWinsPctNote').textContent = `${bttsWinPct.toFixed(1)}%`;
-      document.getElementById('bttsLossesPctNote').textContent = `${bttsLossPct.toFixed(1)}%`;
+        safeSetText('summaryRoiStat', pct(roi));
+        safeSetText('summaryProfitStat', `€${fmt(lucro)}`);
+        safeSetText('summaryWrStat', pct(wr));
+        safeSetText('summaryResolvedCountStat', String(rows.length));
+        safeSetText('summaryWinsStat', String(wins));
+        safeSetText('summaryLossesStat', String(losses));
+        safeSetText('summaryPushesStat', String(pushes));
+        safeSetText('summaryPendingOpenStat', String(risk.openCount));
       }
 
       function renderAlertsCenter() {
@@ -4080,20 +3939,6 @@ button.dirty {
           : '<tr><td colspan="11"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
       }
 
-      function renderNba() {
-        document.getElementById('nbaRows').innerHTML = state.nba.length
-          ? state.nba.map(r => `
-              <tr>
-                <td>${escapeHtml(r['Date'] || '—')}</td>
-                <td>${(r['HomeTeam'] && r['AwayTeam']) ? `${escapeHtml(r['HomeTeam'])} vs ${escapeHtml(r['AwayTeam'])}` : '—'}</td>
-                <td>${escapeHtml(r['Market'] || '—')}</td>
-                <td>${escapeHtml(r['Line'] || '—')}</td>
-                <td>${escapeHtml(r['Odd'] || '—')}</td>
-                <td>${escapeHtml(r['Stake€'] || '—')}</td>
-              </tr>
-            `).join('')
-          : '<tr><td colspan="6"><div class="note">Sem picks NBA neste momento.</div></td></tr>';
-      }
 
       function renderSummary() {
         const m = getMetrics();
@@ -4665,7 +4510,6 @@ buttons.forEach(btn => {
         try { renderAlertsCenter(); } catch (e) { console.error('renderAlertsCenter', e); }
         try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
         try { renderAnalytics(); } catch (e) { console.error('renderAnalytics', e); }
-        try { renderNba(); } catch (e) { console.error('renderNba', e); }
         try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
         try { renderBankrollChart(); } catch (e) { console.error('renderBankrollChart', e); }
       }
@@ -4752,11 +4596,10 @@ buttons.forEach(btn => {
 
       async function loadData(markUpdated = true) {
         try {
-          const [dailyRes, bttsRes, historyRes, nbaRes, manualRes] = await Promise.all([
+          const [dailyRes, bttsRes, historyRes, manualRes] = await Promise.all([
             fetch(`${URLS.footballDaily}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.footballBtts}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.footballHistory}?t=${Date.now()}`, { cache: 'no-store' }),
-            fetch(`${URLS.nba}?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`${URLS.manual}?t=${Date.now()}`, { cache: 'no-store' })
           ]);
 
@@ -4767,7 +4610,6 @@ buttons.forEach(btn => {
           const dailyText = dailyRes.ok ? await dailyRes.text() : '';
           const bttsText = bttsRes.ok ? await bttsRes.text() : '';
           const historyText = await historyRes.text();
-          const nbaText = nbaRes.ok ? await nbaRes.text() : '';
           const fixturesRes = await fetch('https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/fixtures_today.csv');
           const fixturesText = fixturesRes.ok ? await fixturesRes.text() : '';
           const manualText = manualRes.ok ? await manualRes.text() : '';
@@ -4796,7 +4638,6 @@ buttons.forEach(btn => {
           console.log('HISTORY ROWS LOADED', state.footballHistory.length);
           console.log('ALL HISTORY DATES LOADED', [...new Set(state.footballHistory.map(r => r.Data))]);
 
-          state.nba = parseAutoCsv(nbaText).map(normalizeNbaCsvRow);
           state.manualBetsRemote = parseAutoCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
           if (markUpdated) state.lastUpdated = new Date();
           rerenderAll(false);
