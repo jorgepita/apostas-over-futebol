@@ -1,13 +1,14 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
-2026-05-21;alemanha;VfL Wolfsburg;SC Paderborn 07;1.82;1.77
-2026-05-21;belgica;Anderlecht;St. Truiden;1.63;1.53
-2026-05-21;belgica;Gent;Union St. Gilloise;1.93;1.83
-2026-05-21;belgica;KV Mechelen;Club Brugge KV;1.42;1.64
-2026-05-21;paises_baixos;Utrecht;Heerenveen;1.71;1.62
+2026-05-21;alemanha;VfL Wolfsburg;SC Paderborn 07;1.82;1.75
+2026-05-21;belgica;Anderlecht;St. Truiden;1.73;1.60
+2026-05-21;belgica;Gent;Union St. Gilloise;1.95;1.82
+2026-05-21;belgica;KV Mechelen;Club Brugge KV;1.42;1.66
+2026-05-21;paises_baixos;Utrecht;Heerenveen;1.66;1.57
 2026-05-22;alemanha2;Rot-Weiß Essen;SpVgg Greuther Fürth;1.57;1.47
 2026-05-22;italia;Fiorentina;Atalanta;1.72;1.57
-2026-05-23;belgica;Antwerp;KVC Westerlo;1.55;1.51
-2026-05-23;belgica;OH Leuven;Genk;1.68;1.62
+2026-05-23;belgica;Antwerp;KVC Westerlo;1.55;1.50
+2026-05-23;belgica;Dender;Lommel United;1.71;1.61
+2026-05-23;belgica;OH Leuven;Genk;1.62;1.57
 2026-05-23;belgica;Standard Liege;Charleroi;1.95;1.80
 2026-05-23;espanha;Celta Vigo;Sevilla;2.00;1.85
 2026-05-23;espanha;Girona;Elche;1.74;1.68
@@ -15,7 +16,7 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes
 2026-05-23;espanha;Valencia;Barcelona;1.48;1.45
 2026-05-23;italia;Lazio;Pisa;1.86;1.90
 2026-05-24;belgica;Club Brugge KV;Gent;1.34;1.58
-2026-05-24;belgica;St. Truiden;KV Mechelen;1.56;1.52
+2026-05-24;belgica;St. Truiden;KV Mechelen;1.57;1.52
 2026-05-24;belgica;Union St. Gilloise;Anderlecht;1.74;1.86
 2026-05-24;espanha;Villarreal;Atletico Madrid;1.49;1.40
 2026-05-24;italia;AC Milan;Cagliari;1.79;2.20
