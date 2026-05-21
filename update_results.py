@@ -83,7 +83,7 @@ AF_CALL_MIN_INTERVAL = 0.50
 AF_BASE_URL = "https://v3.football.api-sports.io"
 
 # Confirmado pelos teus testes
-BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL", "BJL", "SB", "FL2"}
+BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL", "BJL", "SB", "FL2", "PPL", "BL1"}
 
 API_FOOTBALL_FALLBACK_COMPETITIONS = {
     "BL2": {
@@ -105,6 +105,14 @@ API_FOOTBALL_FALLBACK_COMPETITIONS = {
     "FL2": {
         "country": "France",
         "name": "Ligue 2",
+    },
+    "PPL": {
+        "country": "Portugal",
+        "name": "Primeira Liga",
+    },
+    "BL1": {
+        "country": "Germany",
+        "name": "Bundesliga",
     },
 }
 
@@ -1207,6 +1215,10 @@ def should_use_api_football_fallback(league_code: str, reason: str = "") -> bool
         return False
 
     if league_code in BLOCKED_FOOTBALL_DATA_CODES:
+        if league_code == "PPL":
+            debug_log("API-Football direct provider enabled for PPL")
+        if league_code == "BL1":
+            debug_log("API-Football direct provider enabled for BL1")
         return True
 
     reason = str(reason or "").upper().strip()
