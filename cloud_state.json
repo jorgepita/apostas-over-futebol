@@ -2210,7 +2210,9 @@
       "stakeReal": "1"
     },
     "2026-05-24|Premier League|West Ham vs Leeds|BTTS": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     },
     "2026-05-24|premier|West Ham vs Leeds|BTTS": {
       "apostada": true,
@@ -2248,15 +2250,39 @@
       "stakeReal": "1"
     },
     "2026-05-24|Serie B|Catanzaro vs Monza|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "2",
+      "stakeReal": "1"
     },
     "2026-05-22|2. Bundesliga|Rot-Weiß Essen vs SpVgg Greuther Fürth|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.6",
+      "stakeReal": "1"
+    },
+    "2026-05-23|Championship|Hull City vs Middlesbrough|Over 2.5": {
+      "apostada": true,
+      "oddReal": "2.15",
+      "stakeReal": "1"
+    },
+    "2026-05-24|Jupiler Pro League|Union St. Gilloise vs Anderlecht|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1"
+    },
+    "2026-05-25|Bundesliga|SC Paderborn 07 vs VfL Wolfsburg|BTTS": {
+      "oddReal": "1.7",
+      "stakeReal": "1",
+      "apostada": true
+    },
+    "2026-05-26|Ligue 1|Saint Etienne vs Nice|Over 2.5": {
+      "oddReal": "1.7",
+      "stakeReal": "1",
       "apostada": true
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-22T18:15:45.996Z",
+  "lastUpdated": "2026-05-22T18:17:48.778Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
