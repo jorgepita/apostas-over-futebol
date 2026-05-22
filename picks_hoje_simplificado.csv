@@ -1,16 +1,16 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-05-22;2. Bundesliga;Rot-Weiß Essen vs SpVgg Greuther Fürth;O2.5;1.62;0.12;2.91;;;;;;
-2026-05-23;Serie A;Lazio vs Pisa;O2.5;1.83;1.23;12.8;;;;;;
-2026-05-23;Championship;Hull City vs Middlesbrough;O2.5;2.15;0.49;6.85;;;;;;
-2026-05-23;LaLiga;Celta Vigo vs Sevilla;O2.5;2.0;0.44;6.33;;;;;;
-2026-05-23;Jupiler Pro League;Standard Liege vs Charleroi;O2.5;1.93;0.4;5.91;;;;;;
-2026-05-23;LaLiga;Girona vs Elche;O2.5;1.75;0.06;2.16;;;;;;
-2026-05-24;Serie A;Napoli vs Udinese;O2.5;1.94;1.23;14.41;;;;;;
-2026-05-24;Premier League;West Ham vs Leeds;O2.5;1.72;1.23;13.86;;;;;;
-2026-05-24;Serie A;Hellas Verona vs AS Roma;BTTS;2.27;0.64;6.31;;;;;;
-2026-05-24;Serie B;Catanzaro vs Monza;O2.5;2.0;0.34;5.52;;;;;;
-2026-05-24;Serie A;AC Milan vs Cagliari;BTTS;2.2;0.4;4.9;;;;;;
-2026-05-24;Jupiler Pro League;Union St. Gilloise vs Anderlecht;O2.5;1.8;0.06;2.16;;;;;;
-2026-05-24;Premier League;Nottingham Forest vs Bournemouth;O2.5;1.64;0.03;1.38;;;;;;
-2026-05-25;Bundesliga;SC Paderborn 07 vs VfL Wolfsburg;BTTS;1.7;0.07;1.82;;;;;;
-2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.36;5.24;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-05-22;2. Bundesliga;Rot-Weiß Essen vs SpVgg Greuther Fürth;O2.5;1.62;0.12;2.91;;;;;;;
+2026-05-23;Serie A;Lazio vs Pisa;O2.5;1.83;1.23;12.8;;;;;;;
+2026-05-23;Championship;Hull City vs Middlesbrough;O2.5;2.15;0.49;6.85;;;;;;;
+2026-05-23;LaLiga;Celta Vigo vs Sevilla;O2.5;2.0;0.44;6.33;;;;;;;
+2026-05-23;Jupiler Pro League;Standard Liege vs Charleroi;O2.5;1.93;0.4;5.91;;;;;;;
+2026-05-23;LaLiga;Girona vs Elche;O2.5;1.75;0.06;2.16;;;;;;;
+2026-05-24;Serie A;Napoli vs Udinese;O2.5;1.94;1.23;14.41;;;;;;;
+2026-05-24;Premier League;West Ham vs Leeds;O2.5;1.72;1.23;13.86;;;;;;;
+2026-05-24;Serie A;Hellas Verona vs AS Roma;BTTS;2.27;0.64;6.31;;;;;;;
+2026-05-24;Serie B;Catanzaro vs Monza;O2.5;2.0;0.34;5.52;;;;;;;
+2026-05-24;Serie A;AC Milan vs Cagliari;BTTS;2.2;0.4;4.9;;;;;;;
+2026-05-24;Jupiler Pro League;Union St. Gilloise vs Anderlecht;O2.5;1.8;0.06;2.16;;;;;;;
+2026-05-24;Premier League;Nottingham Forest vs Bournemouth;O2.5;1.64;0.03;1.38;;;;;;;
+2026-05-25;Bundesliga;SC Paderborn 07 vs VfL Wolfsburg;BTTS;1.7;0.07;1.82;;;;;;;
+2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.36;5.24;;;;;;;
