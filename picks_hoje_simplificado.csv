@@ -1,14 +1,14 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-05-22;2. Bundesliga;Rot-Weiß Essen vs SpVgg Greuther Fürth;O2.5;1.62;0.12;2.91;;;;;;
-2026-05-23;Serie A;Lazio vs Pisa;O2.5;1.86;1.25;13.68;;;;;;
-2026-05-23;Championship;Hull City vs Middlesbrough;O2.5;2.15;0.49;6.85;;;;;;
-2026-05-23;LaLiga;Celta Vigo vs Sevilla;O2.5;2.0;0.45;6.33;;;;;;
-2026-05-23;Jupiler Pro League;Standard Liege vs Charleroi;O2.5;1.93;0.41;5.91;;;;;;
-2026-05-23;LaLiga;Girona vs Elche;O2.5;1.75;0.06;2.16;;;;;;
-2026-05-24;Serie A;Napoli vs Udinese;O2.5;1.96;1.25;14.94;;;;;;
-2026-05-24;Premier League;West Ham vs Leeds;O2.5;1.73;1.25;14.2;;;;;;
-2026-05-24;Serie A;AC Milan vs Cagliari;BTTS;2.25;0.57;5.91;;;;;;
-2026-05-24;Serie B;Catanzaro vs Monza;O2.5;1.98;0.29;5.02;;;;;;
-2026-05-24;Premier League;Nottingham Forest vs Bournemouth;O2.5;1.65;0.04;1.75;;;;;;
-2026-05-25;Bundesliga;SC Paderborn 07 vs VfL Wolfsburg;BTTS;1.7;0.07;1.82;;;;;;
-2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.37;5.24;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-05-22;2. Bundesliga;Rot-Weiß Essen vs SpVgg Greuther Fürth;O2.5;1.62;0.12;2.91;;;;;;;
+2026-05-23;Serie A;Lazio vs Pisa;O2.5;1.86;1.25;13.68;;;;;;;
+2026-05-23;Championship;Hull City vs Middlesbrough;O2.5;2.15;0.49;6.85;;;;;;;
+2026-05-23;LaLiga;Celta Vigo vs Sevilla;O2.5;2.0;0.45;6.33;;;;;;;
+2026-05-23;Jupiler Pro League;Standard Liege vs Charleroi;O2.5;1.93;0.41;5.91;;;;;;;
+2026-05-23;LaLiga;Girona vs Elche;O2.5;1.75;0.06;2.16;;;;;;;
+2026-05-24;Serie A;Napoli vs Udinese;O2.5;1.96;1.25;14.94;;;;;;;
+2026-05-24;Premier League;West Ham vs Leeds;O2.5;1.73;1.25;14.2;;;;;;;
+2026-05-24;Serie A;AC Milan vs Cagliari;BTTS;2.25;0.57;5.91;;;;;;;
+2026-05-24;Serie B;Catanzaro vs Monza;O2.5;1.98;0.29;5.02;;;;;;;
+2026-05-24;Premier League;Nottingham Forest vs Bournemouth;O2.5;1.65;0.04;1.75;;;;;;;
+2026-05-25;Bundesliga;SC Paderborn 07 vs VfL Wolfsburg;BTTS;1.7;0.07;1.82;;;;;;;
+2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.37;5.24;;;;;;;
