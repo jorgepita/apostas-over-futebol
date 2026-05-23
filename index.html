@@ -2881,7 +2881,30 @@ button.dirty {
       }
 
       function getDailyRowsMerged() {
-        return dedupeBotRows(state.footballDaily).map(getRowWithLocalEdits);
+        // Build a settled-result lookup from history (W/L/P only).
+        // Used to propagate results that update_results.py wrote to picks_history.csv
+        // but that picks_hoje_github.csv never receives (it has no Resultado column).
+        const historyResultMap = new Map();
+        dedupeBotRows(state.footballHistory).forEach(row => {
+          const r = cleanString(row['Resultado'] || '').toUpperCase();
+          if (r === 'W' || r === 'L' || r === 'P') {
+            historyResultMap.set(makePickKey(row), r);
+          }
+        });
+
+        return dedupeBotRows(state.footballDaily).map(row => {
+          const enriched = getRowWithLocalEdits(row);
+          // Only overwrite when still pending AND no localStorage manual override.
+          // getRowWithLocalEdits already applied the manual override, so _resultKey
+          // is non-pending if the user set one — the guard here handles that.
+          if (enriched._resultKey === 'pending' && historyResultMap.has(enriched._pickKey)) {
+            const settled = historyResultMap.get(enriched._pickKey);
+            enriched._resultadoFinal = settled;
+            enriched._resultKey = settled;
+            enriched._lucroModeloLocal = calcProfitByResult(settled, enriched._stakeModeloNum, enriched._oddModeloNum);
+          }
+          return enriched;
+        });
       }
 
       function getHistoryRowsMerged() {
