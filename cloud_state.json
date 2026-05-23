@@ -2200,7 +2200,7 @@
       "stakeReal": "1"
     },
     "2026-05-23|Serie A|Lazio vs Pisa|BTTS": {
-      "apostada": false,
+      "apostada": true,
       "oddReal": "1.8",
       "stakeReal": "1"
     },
@@ -2212,9 +2212,9 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-23T22:19:15.962Z",
+  "lastUpdated": "2026-05-23T22:53:57.334Z",
   "activeTab": "tab-settings",
-  "mobileActionsOpen": true,
+  "mobileActionsOpen": false,
   "cloudAvailable": true,
   "fixtures": [
     {
