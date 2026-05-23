@@ -53,6 +53,7 @@
     .app-container {
       display: flex;
       min-height: 100vh;
+      min-height: 100dvh;
     }
 
     .sidebar {
@@ -61,6 +62,7 @@
       color: var(--nav-text);
       position: fixed;
       height: 100vh;
+      height: 100dvh;
       left: 0;
       top: 0;
       z-index: 1000;
@@ -4831,7 +4833,17 @@ buttons.forEach(btn => {
     <div class="landscape-hint-icon">📱</div>
     <div style="font-size:20px; font-weight:700; margin-bottom:8px;">Modo Paisagem Recomendado</div>
     <div style="font-size:14px; opacity:0.8; margin-bottom:24px;">Para uma melhor experiência com as tabelas e gráficos, rode o seu telemóvel.</div>
-    <button type="button" onclick="document.getElementById('landscapeHint').style.setProperty('display', 'none', 'important')" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:white;">Continuar em Vertical</button>
+    <button type="button" onclick="(function(el){el.style.setProperty('display','none','important');try{localStorage.setItem('landscape_hint_dismissed','1')}catch(e){}})(document.getElementById('landscapeHint'))" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:white;">Continuar em Vertical</button>
   </div>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('landscape_hint_dismissed') === '1') {
+          var el = document.getElementById('landscapeHint');
+          if (el) el.style.setProperty('display', 'none', 'important');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
