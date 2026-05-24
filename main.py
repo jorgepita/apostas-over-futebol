@@ -63,6 +63,11 @@ print("### TESTE NOVO CODIGO ###")
 BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 
+NON_EU_TOPUP_LEAGUES = frozenset({
+    "mls", "brasil", "japao", "coreia",
+    "noruega", "suecia", "finlandia", "australia", "islandia",
+})
+
 
 # =============================
 # Anti-duplicados (por dia)
@@ -78,7 +83,12 @@ SENT_STATE_PATH = BASE / "sent_state.json"
 # =============================
 # Main
 # =============================
-def main():
+def main(topup_mode: bool = False):
+    if topup_mode:
+        print("[TOPUP] Modo top-up activado — apenas ligas não-EU")
+    else:
+        print("[MAIN_RUN] Execução principal — pipeline completo")
+
     print("### TESTE NOVO CODIGO ###")
     cfg = load_config(BASE)
 
@@ -141,9 +151,18 @@ def main():
 
     leagues_cfg = cfg.get("leagues", {})
 
+    if topup_mode:
+        leagues_to_process = {k: v for k, v in leagues_cfg.items() if k in NON_EU_TOPUP_LEAGUES}
+        found_keys = list(leagues_to_process.keys())
+        skipped_keys = [k for k in leagues_cfg if k not in NON_EU_TOPUP_LEAGUES]
+        print(f"[TOPUP] Ligas a processar: {found_keys}")
+        print(f"[TOPUP] Ligas EU ignoradas: {skipped_keys}")
+    else:
+        leagues_to_process = leagues_cfg
+
     total_fixture_errors = 0
 
-    for league_key, league_meta in leagues_cfg.items():
+    for league_key, league_meta in leagues_to_process.items():
         rows_for_league25, rows_for_league_btts, league_errors = process_league_fixtures(
             fixtures=fixtures,
             league_key=league_key,
@@ -279,11 +298,62 @@ def main():
             _trace_dropped("limit_picks_per_day_2", combo_before_limit2, combo)
             _trace("after_limit_picks_per_day_2", combo)
 
+    # ── Top-up: filter out picks already present in today's daily CSV ────────
+    if topup_mode and not combo.empty:
+        existing_simple_path = BASE / "picks_hoje_simplificado.csv"
+        existing_keys: set = set()
+        if existing_simple_path.exists() and existing_simple_path.stat().st_size > 0:
+            try:
+                ex_df = pd.read_csv(existing_simple_path, sep=";", dtype=str).fillna("")
+                for _, r in ex_df.iterrows():
+                    existing_keys.add((
+                        str(r.get("Data", "")),
+                        str(r.get("Liga", "")),
+                        str(r.get("Jogo", "")),
+                        str(r.get("Mercado", "")),
+                    ))
+                print(f"[TOPUP] {len(existing_keys)} picks já existentes nos ficheiros diários")
+            except Exception as _e:
+                print(f"[TOPUP] Aviso: falha ao ler picks existentes: {_e}")
+
+        before_topup = len(combo)
+        combo = combo[~combo.apply(
+            lambda row: (
+                str(row.get("Date", "")),
+                str(row.get("LeagueName", "")),
+                f"{row.get('HomeTeam', '')} vs {row.get('AwayTeam', '')}",
+                str(row.get("Market", "")),
+            ) in existing_keys,
+            axis=1,
+        )].copy()
+
+        skipped_topup = before_topup - len(combo)
+        print(
+            f"[TOPUP] Fixtures candidatas: {before_topup} | "
+            f"Já existentes (skipped): {skipped_topup} | "
+            f"A adicionar: {len(combo)}"
+        )
+        if not combo.empty:
+            # Count per non-EU league for logging
+            if "League" in combo.columns:
+                for lg, cnt in combo.groupby("League").size().items():
+                    print(f"[TOPUP]   Liga {lg}: {cnt} picks novas")
+            out25_final = combo[combo["Market"] == "O2.5"].copy()
+            out_btts_final = combo[combo["Market"] == "BTTS"].copy()
+        else:
+            print("[TOPUP] Nenhuma pick nova para adicionar.")
+            out25_final = pd.DataFrame()
+            out_btts_final = pd.DataFrame()
+    elif topup_mode and combo.empty:
+        print("[TOPUP] Nenhuma candidata gerada — sem picks para top-up.")
+    # ─────────────────────────────────────────────────────────────────────────
+
     simple, out25_path, out_btts_path, combo_path, combo_github_path, simple_path = save_all_outputs(
         out25_final=out25_final,
         out_btts_final=out_btts_final,
         combo=combo,
         base_dir=BASE,
+        topup_mode=topup_mode,
     )
     _trace_dropped("save_all_outputs", combo, simple)
     _trace("after_save_all_outputs (simple)", simple)
@@ -292,13 +362,14 @@ def main():
     history = persist_history(simple)
     _trace("after_persist_history", history[history["Liga"].notna()].rename(columns={"Liga": "League"}) if "Liga" in history.columns else history)
 
-    print("OK. Gerados:")
-    print(f"- {out25_path.name} ({len(out25_final)} picks)")
-    print(f"- {out_btts_path.name} ({len(out_btts_final)} picks)")
-    print(f"- {combo_path.name} ({len(combo)} picks)")
-    print(f"- {combo_github_path.name} ({len(combo)} picks)")
-    print(f"- {simple_path.name} ({len(simple)} picks)")
-    print(f"- {HISTORY_PATH.name} ({len(history)} linhas de histórico)")
+    mode_tag = "[TOPUP]" if topup_mode else "[MAIN_RUN]"
+    print(f"{mode_tag} OK. Picks adicionadas/geradas:")
+    print(f"{mode_tag} - {out25_path.name} ({len(out25_final)} picks novas)")
+    print(f"{mode_tag} - {out_btts_path.name} ({len(out_btts_final)} picks novas)")
+    print(f"{mode_tag} - {combo_path.name} ({len(combo)} picks novas)")
+    print(f"{mode_tag} - {combo_github_path.name} ({len(combo)} picks novas)")
+    print(f"{mode_tag} - {simple_path.name} ({len(simple)} picks novas)")
+    print(f"{mode_tag} - {HISTORY_PATH.name} ({len(history)} linhas de histórico total)")
 
     TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "").strip()
     CHAT_ID = os.getenv("CHAT_ID", "").strip()

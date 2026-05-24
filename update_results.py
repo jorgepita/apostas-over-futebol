@@ -2512,6 +2512,7 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 # Main
 # =============================
 def main():
+    print("[SETTLEMENT] Início — a actualizar resultados pendentes...")
     if not API_TOKEN:
         raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
 
