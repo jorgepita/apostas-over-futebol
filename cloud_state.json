@@ -1,102 +1,6 @@
 {
   "footballDaily": [
     {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "LeagueName": "Serie A",
-      "HomeTeam": "Hellas Verona",
-      "AwayTeam": "AS Roma",
-      "LambdaHome": "1.467",
-      "LambdaAway": "1.346",
-      "LambdaTotal": "2.812",
-      "Market": "BTTS",
-      "ProbModel": 0.504,
-      "Odd": "2.3",
-      "ProbMarket": 0.435,
-      "Edge": 0.069,
-      "KellyTrue": "0.1217",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0325",
-      "EdgeMinFinal": "0.0325",
-      "ProbGap": "0.069",
-      "StakeFracRaw": "0.0151",
-      "StakeFrac": "0.0151",
-      "Stake€": "0.75",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-05-24",
-      "Liga": "italia",
-      "Jogo": "Hellas Verona vs AS Roma",
-      "Mercado": "BTTS",
-      "Resultado": "",
-      "Edge%": 6.9
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "LeagueName": "Serie A",
-      "HomeTeam": "AC Milan",
-      "AwayTeam": "Cagliari",
-      "LambdaHome": "1.467",
-      "LambdaAway": "1.346",
-      "LambdaTotal": "2.812",
-      "Market": "BTTS",
-      "ProbModel": 0.504,
-      "Odd": "2.17",
-      "ProbMarket": 0.461,
-      "Edge": 0.04299999999999998,
-      "KellyTrue": "0.0793",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0325",
-      "EdgeMinFinal": "0.0325",
-      "ProbGap": "0.04299999999999998",
-      "StakeFracRaw": "0.0061",
-      "StakeFrac": "0.0061",
-      "Stake€": "0.31",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-05-24",
-      "Liga": "italia",
-      "Jogo": "AC Milan vs Cagliari",
-      "Mercado": "BTTS",
-      "Resultado": "",
-      "Edge%": 4.299999999999998
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "LeagueName": "Serie A",
-      "HomeTeam": "Torino",
-      "AwayTeam": "Juventus",
-      "LambdaHome": "1.024",
-      "LambdaAway": "1.9",
-      "LambdaTotal": "2.924",
-      "Market": "O2.5",
-      "ProbModel": 0.56,
-      "Odd": "1.87",
-      "ProbMarket": 0.535,
-      "Edge": 0.025000000000000022,
-      "KellyTrue": "0.0533",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0175",
-      "EdgeMinFinal": "0.0175",
-      "ProbGap": "0.025000000000000022",
-      "StakeFracRaw": "0.0024",
-      "StakeFrac": "0.0024",
-      "Stake€": "0.12",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-05-24",
-      "Liga": "italia",
-      "Jogo": "Torino vs Juventus",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 2.500000000000002
-    },
-    {
       "Date": "2026-05-25",
       "League": "alemanha",
       "LeagueName": "Bundesliga",
@@ -193,70 +97,6 @@
       "Edge%": 4.600000000000004
     },
     {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "LeagueName": "Serie A",
-      "HomeTeam": "Hellas Verona",
-      "AwayTeam": "AS Roma",
-      "LambdaHome": "1.467",
-      "LambdaAway": "1.346",
-      "LambdaTotal": "2.812",
-      "Market": "BTTS",
-      "ProbModel": 0.504,
-      "Odd": "2.3",
-      "ProbMarket": 0.435,
-      "Edge": 0.069,
-      "KellyTrue": "0.1217",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0325",
-      "EdgeMinFinal": "0.0325",
-      "ProbGap": "0.069",
-      "StakeFracRaw": "0.0151",
-      "StakeFrac": "0.0151",
-      "Stake€": "0.75",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-05-24",
-      "Liga": "italia",
-      "Jogo": "Hellas Verona vs AS Roma",
-      "Mercado": "BTTS",
-      "Resultado": "",
-      "Edge%": 6.9
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "LeagueName": "Serie A",
-      "HomeTeam": "AC Milan",
-      "AwayTeam": "Cagliari",
-      "LambdaHome": "1.467",
-      "LambdaAway": "1.346",
-      "LambdaTotal": "2.812",
-      "Market": "BTTS",
-      "ProbModel": 0.504,
-      "Odd": "2.17",
-      "ProbMarket": 0.461,
-      "Edge": 0.04299999999999998,
-      "KellyTrue": "0.0793",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0325",
-      "EdgeMinFinal": "0.0325",
-      "ProbGap": "0.043",
-      "StakeFracRaw": "0.0061",
-      "StakeFrac": "0.0061",
-      "Stake€": "0.31",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-05-24",
-      "Liga": "italia",
-      "Jogo": "AC Milan vs Cagliari",
-      "Mercado": "BTTS",
-      "Resultado": "",
-      "Edge%": 4.299999999999998
-    },
-    {
       "Date": "2026-05-25",
       "League": "alemanha",
       "LeagueName": "Bundesliga",
@@ -304,6 +144,7 @@
       "Resultado": "L",
       "Lucro€": "-1.18",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 11.43
     },
     {
@@ -320,6 +161,7 @@
       "Resultado": "L",
       "Lucro€": "-1.25",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 10.33
     },
     {
@@ -336,6 +178,7 @@
       "Resultado": "L",
       "Lucro€": "-1.25",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 14.19
     },
     {
@@ -352,6 +195,7 @@
       "Resultado": "L",
       "Lucro€": "-0.41",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 5.91
     },
     {
@@ -368,6 +212,7 @@
       "Resultado": "L",
       "Lucro€": "-0.12",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 2.91
     },
     {
@@ -384,6 +229,7 @@
       "Resultado": "L",
       "Lucro€": "-0.49",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 6.85
     },
     {
@@ -400,6 +246,7 @@
       "Resultado": "L",
       "Lucro€": "-0.22",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 4.24
     },
     {
@@ -416,6 +263,7 @@
       "Resultado": "L",
       "Lucro€": "-0.42",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 6.08
     },
     {
@@ -432,6 +280,7 @@
       "Resultado": "L",
       "Lucro€": "-0.03",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 1.5
     },
     {
@@ -448,6 +297,7 @@
       "Resultado": "W",
       "Lucro€": "1.06",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 13.39
     },
     {
@@ -464,6 +314,7 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 1.24
     },
     {
@@ -477,9 +328,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "W",
+      "Lucro€": "0.05",
       "LucroReal€": "",
+      "KickoffUTC": "2026-05-24T16:30:00+00:00",
       "Edge": 2.16
     },
     {
@@ -493,9 +345,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "L",
+      "Lucro€": "-0.08",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 2.83
     },
     {
@@ -509,9 +362,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "L",
+      "Lucro€": "-0.29",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 3.6
     },
     {
@@ -525,9 +379,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "W",
+      "Lucro€": "0.7",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 14.53
     },
     {
@@ -541,9 +396,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "W",
+      "Lucro€": "0.48",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 4.9
     },
     {
@@ -557,9 +413,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "L",
+      "Lucro€": "-0.75",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 6.88
     },
     {
@@ -573,9 +430,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "L",
+      "Lucro€": "-0.95",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 14.94
     },
     {
@@ -589,9 +447,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "W",
+      "Lucro€": "0.1",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 2.48
     },
     {
@@ -605,9 +464,10 @@
       "Apostada": "",
       "OddReal": "",
       "StakeReal€": "",
-      "Resultado": "",
-      "Lucro€": "",
+      "Resultado": "L",
+      "Lucro€": "-0.29",
       "LucroReal€": "",
+      "KickoffUTC": "2026-05-24T18:00:00+00:00",
       "Edge": 5.02
     },
     {
@@ -624,6 +484,7 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 1.82
     },
     {
@@ -640,6 +501,7 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 5.81
     },
     {
@@ -656,6 +518,7 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
+      "KickoffUTC": "",
       "Edge": 5.24
     }
   ],
@@ -2109,7 +1972,8 @@
     "2026-05-24|Eredivisie|Ajax vs Utrecht|Over 2.5": {
       "oddReal": "1.55",
       "stakeReal": "1",
-      "apostada": true
+      "apostada": true,
+      "resultadoManual": "L"
     },
     "2026-05-26|alemanha2|SpVgg Greuther Fürth vs Rot-Weiß Essen|Over 2.5": {
       "apostada": true,
@@ -2134,59 +1998,11 @@
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-24T18:15:24.685Z",
+  "lastUpdated": "2026-05-24T23:03:23.089Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
-    {
-      "Date": "2026-05-24",
-      "League": "espanha",
-      "HomeTeam": "Villarreal",
-      "AwayTeam": "Atletico Madrid",
-      "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.43"
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "HomeTeam": "AC Milan",
-      "AwayTeam": "Cagliari",
-      "Odd_Over25": "1.78",
-      "Odd_BTTS_Yes": "2.17"
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "HomeTeam": "Hellas Verona",
-      "AwayTeam": "AS Roma",
-      "Odd_Over25": "1.90",
-      "Odd_BTTS_Yes": "2.30"
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "HomeTeam": "Lecce",
-      "AwayTeam": "Genoa",
-      "Odd_Over25": "2.47",
-      "Odd_BTTS_Yes": "2.15"
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia",
-      "HomeTeam": "Torino",
-      "AwayTeam": "Juventus",
-      "Odd_Over25": "1.87",
-      "Odd_BTTS_Yes": "1.95"
-    },
-    {
-      "Date": "2026-05-24",
-      "League": "italia2",
-      "HomeTeam": "Catanzaro",
-      "AwayTeam": "Monza",
-      "Odd_Over25": "2.29",
-      "Odd_BTTS_Yes": "1.85"
-    },
     {
       "Date": "2026-05-25",
       "League": "alemanha",
