@@ -91,7 +91,7 @@
       "finlandia": 244,
       "islandia": 188
     },
-    "shortlist_total": 30,
+    "shortlist_total": 80,
     "shortlist_per_league_per_day": 4,
     "sleep_seconds_between_fixture_requests": 0.35,
     "use_api_football_for_btts_odds": true

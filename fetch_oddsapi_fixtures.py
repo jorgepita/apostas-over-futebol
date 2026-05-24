@@ -887,7 +887,7 @@ def main():
         print(f"[FIXTURE FETCH] league={league_key.upper()} matches={league_raw_total}")
         print(f"[FIXTURE WINDOW] league={league_key.upper()} fixtures_in_window={league_raw_total}")
 
-    # 2) Global shortlist
+    # 2) Global shortlist with per-league minimum guarantee
     # Debug: show per-league counts before global dedupe/truncate
     print(f"[DBG] per_league_raw_counts={counts_per_league_raw}")
     print(f"[DBG] per_league_kept_counts={counts_per_league_kept}")
@@ -895,14 +895,28 @@ def main():
     for row in fixture_candidates:
         unique_candidates[row["fixture_id"]] = row
 
-    fixture_candidates = list(unique_candidates.values())
+    all_cands = sorted(unique_candidates.values(), key=lambda x: x["score"], reverse=True)
+    counts_before = len(all_cands)
+
+    # Pass 1: guarantee each league that produced candidates gets at least this many slots,
+    # taken in descending score order so the best fixtures per league are kept first.
+    MIN_PER_LEAGUE_GLOBAL = 2
+    guaranteed: list = []
+    guaranteed_counts: dict = {}
+    remaining: list = []
+    for row in all_cands:
+        lk = row["league_key"]
+        if guaranteed_counts.get(lk, 0) < MIN_PER_LEAGUE_GLOBAL:
+            guaranteed.append(row)
+            guaranteed_counts[lk] = guaranteed_counts.get(lk, 0) + 1
+        else:
+            remaining.append(row)
+
+    # Pass 2: fill remaining capacity from the top-scored non-guaranteed candidates
+    extra = remaining[: max(0, shortlist_total - len(guaranteed))]
+    fixture_candidates = guaranteed + extra
     fixture_candidates.sort(key=lambda x: x["score"], reverse=True)
-    fixture_candidates = fixture_candidates[:shortlist_total]
-    # Debug: counts before/after global shortlist and per-league distribution
-    try:
-        counts_before = len(list(unique_candidates.values()))
-    except Exception:
-        counts_before = len(fixture_candidates)
+
     print(f"[DBG] global_shortlist_before_truncate={counts_before} after_truncate={len(fixture_candidates)}")
     per_league_counts = {}
     for c in fixture_candidates:
