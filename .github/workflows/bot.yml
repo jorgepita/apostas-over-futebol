@@ -2,7 +2,7 @@ name: Bot Apostas
 
 on:
   schedule:
-    - cron: '0 7,15 * * *'  # corre às 9h e 17h UTC (10h e 18h Lisboa)
+    - cron: '0 7,15,23 * * *'  # corre às 7h, 15h e 23h UTC
   workflow_dispatch:          # permite correr manualmente
 
 permissions:
