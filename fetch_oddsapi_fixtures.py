@@ -763,14 +763,21 @@ def main():
     counts_per_league_raw: dict = {}
     counts_per_league_kept: dict = {}
 
+    # Per-league rejection audit (accumulated across all dates for the league)
+    league_audit: dict = {}
+
+    def _audit(lk: str, key: str, n: int = 1):
+        if lk not in league_audit:
+            league_audit[lk] = {}
+        league_audit[lk][key] = league_audit[lk].get(key, 0) + n
+
     # 1) Fixtures via API-Football
     for league_key, league_id in league_map.items():
         league_name = leagues_cfg.get(league_key, {}).get("name", league_key)
 
-        print(f"[FIXTURE FETCH] league={league_key.upper()}")
-        
         if league_key not in leagues_cfg:
             print(f"[FIXTURE SKIP] league={league_key.upper()} reason=not_in_config")
+            _audit(league_key, "skip_not_in_config")
             continue
 
         if league_key in history_cache:
@@ -780,9 +787,17 @@ def main():
             history_cache[league_key] = df_hist
 
         if df_hist is None:
-            print(f"[FIXTURE SKIP] league={league_key.upper()} reason=missing_mapping")
-            print(f"[WARN] histórico em falta para {league_key}")
+            print(f"[FIXTURE SKIP] league={league_key.upper()} reason=no_history_file")
+            _audit(league_key, "skip_no_history_file")
             continue
+
+        hist_rows = len(df_hist)
+        hist_date_min = str(df_hist["Date"].min().date()) if len(df_hist) else "n/a"
+        hist_date_max = str(df_hist["Date"].max().date()) if len(df_hist) else "n/a"
+        print(
+            f"[HISTORY] league={league_key.upper()} rows={hist_rows} "
+            f"date_range={hist_date_min}..{hist_date_max}"
+        )
 
         league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
         lambda_boost = float(league_boosts.get(league_key, lambda_boost_default))
@@ -792,10 +807,6 @@ def main():
         for target_date in dates_to_fetch:
             date_iso = target_date.isoformat()
             season = int(manual_season) if manual_season is not None else season_for_date(target_date, league_key)
-
-            if league_key == "noruega":
-                print(f"[NORWAY DEBUG] season={season}")
-                print(f"[NORWAY DEBUG] league_id={league_id}")
 
             try:
                 resp, from_cache = fetch_fixtures_for_league_date(
@@ -809,88 +820,175 @@ def main():
                     fixture_cache_hits += 1
                 else:
                     fixture_requests += 1
-                
-                if league_key == "noruega":
-                    print(f"[NORWAY DEBUG] api_matches={len(resp or [])}")
             except Exception as e:
-                print(f"[FIXTURE FILTERED] league={league_key.upper()} reason=api_error error={e}")
-                print(f"[WARN] fixtures falhou league={league_key} season={season} date={date_iso} -> {e}")
+                print(
+                    f"[FIXTURE SKIP] league={league_key.upper()} reason=api_error "
+                    f"date={date_iso} season={season} error={e}"
+                )
+                _audit(league_key, "skip_api_error")
                 continue
 
-            # resp contains raw fixtures returned by API
-            try:
-                resp_count = len(resp or [])
-            except Exception:
-                resp_count = -1
-            
-            print(f"[DBG] league_resp_count league={league_key} date={date_iso} resp_count={resp_count} from_cache={from_cache}")
+            resp_count = len(resp or [])
+            _audit(league_key, "api_returned", resp_count)
+
+            print(
+                f"[AUDIT] league={league_key.upper()} date={date_iso} season={season} "
+                f"api_fixtures={resp_count} from_cache={from_cache}"
+            )
+
+            if resp_count == 0:
+                _audit(league_key, "skip_api_empty_date")
+                print(
+                    f"[AUDIT] league={league_key.upper()} date={date_iso} "
+                    f"→ 0 fixtures from API (wrong season? off-season?)"
+                )
+                if (not from_cache) and sleep_between_requests > 0:
+                    time.sleep(sleep_between_requests)
+                continue
 
             day_rows = []
+            n_past = 0
+            n_missing_data = 0
+            n_lambda_error = 0
+            n_built = 0
+
             for item in resp:
-                # Filter out past fixtures
-                f_date_str = item.get("fixture", {}).get("date")
+                # --- Gate 1: past-fixture filter ---
+                f_date_str = (item.get("fixture") or {}).get("date", "")
                 if f_date_str:
                     try:
-                        # API-Football dates are like 2026-05-17T18:00:00+00:00
                         f_dt = datetime.fromisoformat(f_date_str.replace("Z", "+00:00"))
                         if f_dt < now_pt:
+                            n_past += 1
                             continue
                     except Exception:
                         pass
-                
+
+                fixture = item.get("fixture") or {}
+                teams  = item.get("teams") or {}
+                fixture_id = fixture.get("id")
+                home = ((teams.get("home") or {}).get("name") or "").strip()
+                away = ((teams.get("away") or {}).get("name") or "").strip()
+
+                # --- Gate 2: missing team/fixture data ---
+                if not fixture_id or not home or not away:
+                    n_missing_data += 1
+                    _audit(league_key, "reject_missing_data")
+                    continue
+
                 league_raw_total += 1
 
-                row = build_candidate_from_history(
-                    item=item,
-                    league_key=league_key,
-                    league_name=league_name,
-                    date_iso=date_iso,
-                    season=season,
-                    df_hist=df_hist,
-                    window=window,
-                    decay=decay,
-                    min_games_home=min_games_home,
-                    min_games_away=min_games_away,
-                    lambda_boost=lambda_boost,
+                # --- Gate 3: lambda calculation ---
+                try:
+                    lam_h, lam_a, lam_t = compute_lambdas(
+                        df_hist, home, away,
+                        window=window, decay=decay,
+                        min_games_home=min_games_home,
+                        min_games_away=min_games_away,
+                    )
+                    # Determine whether we used team-specific history or league fallback
+                    h_rows = last_n_home(df_hist, home, window)
+                    a_rows = last_n_away(df_hist, away, window)
+                    used_fallback = (len(h_rows) < min_games_home or len(a_rows) < min_games_away)
+                    if used_fallback:
+                        _audit(league_key, "lambda_fallback_league_avg")
+                    else:
+                        _audit(league_key, "lambda_team_specific")
+                except Exception as e:
+                    n_lambda_error += 1
+                    _audit(league_key, "reject_lambda_error")
+                    print(
+                        f"[AUDIT] league={league_key.upper()} date={date_iso} "
+                        f"lambda_error home={home} away={away} err={e}"
+                    )
+                    continue
+
+                if lambda_boost and lambda_boost != 1.0:
+                    lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
+                    lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
+                    lam_t = lam_h + lam_a
+
+                score = fixture_shortlist_score(lam_h, lam_a, lam_t)
+                row = {
+                    "fixture_id": int(fixture_id),
+                    "date": date_iso,
+                    "season": season,
+                    "league_key": league_key,
+                    "league_name": league_name,
+                    "home": home,
+                    "away": away,
+                    "lam_h": lam_h,
+                    "lam_a": lam_a,
+                    "lam_t": lam_t,
+                    "score": score,
+                    "api_fixture_date": f_date_str,
+                }
+                n_built += 1
+                day_rows.append(row)
+
+            _audit(league_key, "past_filtered", n_past)
+            _audit(league_key, "built_candidates", n_built)
+
+            print(
+                f"[AUDIT] league={league_key.upper()} date={date_iso} season={season} "
+                f"api={resp_count} past_filtered={n_past} missing_data={n_missing_data} "
+                f"lambda_errors={n_lambda_error} built={n_built}"
+            )
+
+            if n_past == resp_count and resp_count > 0:
+                print(
+                    f"[AUDIT] league={league_key.upper()} date={date_iso} "
+                    f"→ ALL {resp_count} fixtures are in the past — "
+                    f"script ran too late or fixtures already played"
                 )
-                if row:
-                    day_rows.append(row)
 
             day_rows.sort(key=lambda x: x["score"], reverse=True)
             kept_day = day_rows[:shortlist_per_league_per_day]
-            # Track counts for debugging
             counts_per_league_raw[league_key] = counts_per_league_raw.get(league_key, 0) + len(day_rows)
             counts_per_league_kept[league_key] = counts_per_league_kept.get(league_key, 0) + len(kept_day)
             fixture_candidates.extend(kept_day)
             league_fixtures_total += len(day_rows)
 
-            if not day_rows:
-                reason = "no_matches"
-                if resp_count > 0:
-                    reason = "filtered_by_history"
-                
-                print(f"[FIXTURE SKIP] league={league_key.upper()} reason={reason} date={date_iso}")
-                if league_key == "noruega":
-                    print(f"[NORWAY DEBUG] skip_reason={reason}")
-
-                if resp_count > 0:
-                    print(f"[DBG] all {resp_count} matches for {league_key.upper()} on {date_iso} were filtered by build_candidate_from_history")
-
-            print(
-                f"[DBG] fixtures league={league_key} season={season} date={date_iso} "
-                f"raw={len(day_rows)} shortlist_day={len(kept_day)}"
-            )
+            if day_rows:
+                scores = [r["score"] for r in day_rows]
+                print(
+                    f"[AUDIT] league={league_key.upper()} date={date_iso} "
+                    f"candidates={len(day_rows)} kept_day={len(kept_day)} "
+                    f"score_range={min(scores):.2f}..{max(scores):.2f}"
+                )
 
             if (not from_cache) and sleep_between_requests > 0:
                 time.sleep(sleep_between_requests)
-        
-        print(f"[FIXTURE FETCH] league={league_key.upper()} matches={league_raw_total}")
-        print(f"[FIXTURE WINDOW] league={league_key.upper()} fixtures_in_window={league_raw_total}")
+
+        # --- Per-league summary ---
+        audit_entry = league_audit.get(league_key, {})
+        total_api    = audit_entry.get("api_returned", 0)
+        total_past   = audit_entry.get("past_filtered", 0)
+        total_built  = audit_entry.get("built_candidates", 0)
+        total_kept   = counts_per_league_kept.get(league_key, 0)
+        total_fallbk = audit_entry.get("lambda_fallback_league_avg", 0)
+        total_team   = audit_entry.get("lambda_team_specific", 0)
+        print(
+            f"[LEAGUE SUMMARY] league={league_key.upper()} "
+            f"api_total={total_api} past_filtered={total_past} "
+            f"built={total_built} kept_after_per_league_cap={total_kept} "
+            f"lambda_team={total_team} lambda_fallback={total_fallbk}"
+        )
+        if total_built == 0 and total_api > 0:
+            print(
+                f"[LEAGUE SUMMARY] league={league_key.upper()} "
+                f"→ ZERO valid candidates despite {total_api} API fixtures. "
+                f"Likely cause: all past ({total_past}) or missing data."
+            )
 
     # 2) Global shortlist with per-league minimum guarantee
-    # Debug: show per-league counts before global dedupe/truncate
-    print(f"[DBG] per_league_raw_counts={counts_per_league_raw}")
-    print(f"[DBG] per_league_kept_counts={counts_per_league_kept}")
+    print("\n========== GLOBAL SHORTLIST AUDIT ==========")
+    print(f"[AUDIT] candidates_entering_global_pool={sum(counts_per_league_raw.values())}")
+    for lk in sorted(counts_per_league_raw):
+        raw  = counts_per_league_raw.get(lk, 0)
+        kept = counts_per_league_kept.get(lk, 0)
+        print(f"[AUDIT]   {lk.upper():20s} raw={raw:3d}  after_per_league_cap={kept:3d}")
+
     unique_candidates = {}
     for row in fixture_candidates:
         unique_candidates[row["fixture_id"]] = row
@@ -917,11 +1015,23 @@ def main():
     fixture_candidates = guaranteed + extra
     fixture_candidates.sort(key=lambda x: x["score"], reverse=True)
 
-    print(f"[DBG] global_shortlist_before_truncate={counts_before} after_truncate={len(fixture_candidates)}")
-    per_league_counts = {}
+    per_league_final: dict = {}
     for c in fixture_candidates:
-        per_league_counts[c.get("league_key")] = per_league_counts.get(c.get("league_key"), 0) + 1
-    print(f"[DBG] global_shortlist_per_league={per_league_counts}")
+        per_league_final[c["league_key"]] = per_league_final.get(c["league_key"], 0) + 1
+
+    print(f"[AUDIT] global_pool_before={counts_before}  after_shortlist={len(fixture_candidates)}  shortlist_total={shortlist_total}")
+    print("[AUDIT] per-league slots in final shortlist:")
+    for lk in sorted(set(list(counts_per_league_raw.keys()) + list(per_league_final.keys()))):
+        raw_cands = counts_per_league_kept.get(lk, 0)
+        final     = per_league_final.get(lk, 0)
+        flag      = "" if final > 0 else "  ← ZERO SLOTS (no candidates reached global pool)"
+        print(f"[AUDIT]   {lk.upper():20s} entered_pool={raw_cands:3d}  final_slots={final:3d}{flag}")
+
+    if all_cands:
+        score_cutoff = all_cands[min(shortlist_total, len(all_cands)) - 1]["score"] if len(all_cands) >= shortlist_total else 0.0
+        print(f"[AUDIT] score_cutoff_without_guarantee={score_cutoff:.3f}")
+        print(f"[AUDIT] score of lowest-kept fixture (with guarantee): {fixture_candidates[-1]['score']:.3f}")
+    print("=============================================\n")
 
     print(f"[DBG] fixture_requests={fixture_requests}")
     print(f"[DBG] fixture_cache_hits={fixture_cache_hits}")
@@ -974,20 +1084,27 @@ def main():
         if (not from_cache) and sleep_between_requests > 0:
             time.sleep(min(sleep_between_requests, 0.25))
 
-    # 4) Final rows
+    # 4) Final rows — with per-league odds audit
+    print("\n========== ODDS AUDIT ==========")
+    no_odds_by_league: dict = {}
     rows = []
     for fx in fixture_candidates:
         odd_o25 = over25_map.get(fx["fixture_id"])
         odd_btts = btts_map.get(fx["fixture_id"])
+        lk = fx["league_key"]
 
         if odd_o25 is None and odd_btts is None:
-            print(f"[FIXTURE FILTERED] league={fx['league_key'].upper()} reason=no_odds fixture={fx['home']} vs {fx['away']}")
+            no_odds_by_league[lk] = no_odds_by_league.get(lk, 0) + 1
+            print(
+                f"[AUDIT] no_odds league={lk.upper()} fixture_id={fx['fixture_id']} "
+                f"{fx['home']} vs {fx['away']} date={fx['date']}"
+            )
             continue
 
         rows.append(
             {
                 "Date": fx["date"],
-                "League": fx["league_key"],
+                "League": lk,
                 "HomeTeam": fx["home"],
                 "AwayTeam": fx["away"],
                 "Odd_Over25": (f"{odd_o25:.2f}" if odd_o25 is not None else ""),
@@ -995,26 +1112,23 @@ def main():
             }
         )
 
-    rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
-
-    # Debug: show how many candidates had odds and how many rows will be written
-    try:
-        candidates_before_odds = len(fixture_candidates)
-    except Exception:
-        candidates_before_odds = 0
-    rows_by_league = {}
+    rows_by_league: dict = {}
     for r in rows:
-        rows_by_league[r.get("League")] = rows_by_league.get(r.get("League"), 0) + 1
-    
-    for l_key, count in rows_by_league.items():
-        print(f"[FIXTURE WRITE] league={l_key.upper()} rows={count}")
+        rows_by_league[r["League"]] = rows_by_league.get(r["League"], 0) + 1
 
-    if "noruega" in league_map:
-        nor_count = rows_by_league.get("noruega", 0)
-        print(f"[NORWAY DEBUG] fixtures_written={nor_count}")
+    print(f"[AUDIT] shortlisted={len(fixture_candidates)}  with_odds={len(rows)}  no_odds={len(fixture_candidates)-len(rows)}")
+    all_lks = sorted(set(list(per_league_final.keys()) + list(no_odds_by_league.keys())))
+    for lk in all_lks:
+        shortlisted = per_league_final.get(lk, 0)
+        no_odds     = no_odds_by_league.get(lk, 0)
+        with_odds   = rows_by_league.get(lk, 0)
+        flag        = "  ← ZERO rows written" if with_odds == 0 else ""
+        print(
+            f"[AUDIT]   {lk.upper():20s} shortlisted={shortlisted}  no_odds={no_odds}  written={with_odds}{flag}"
+        )
+    print("=================================\n")
 
-    print(f"[DBG] candidates_before_odds={candidates_before_odds} rows_after_odds_filter={len(rows)}")
-    print(f"[DBG] rows_written_per_league={rows_by_league}")
+    rows.sort(key=lambda x: (x["Date"], x["League"], x["HomeTeam"], x["AwayTeam"]))
 
     fixtures_path = BASE_DIR / "fixtures_today.csv"
     with open(fixtures_path, "w", newline="", encoding="utf-8") as f:
