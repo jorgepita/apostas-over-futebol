@@ -37,11 +37,17 @@
     "decay": 0.88,
     "min_games_home": 8,
     "min_games_away": 8,
-    "lambda_boost": 1.12
+    "lambda_boost": 1.12,
+    "league_lambda_boost": {
+      "japao": 1.00,
+      "coreia": 1.00,
+      "finlandia": 1.00,
+      "islandia": 1.00
+    }
   },
   "rules": {
     "over25": {
-      "edge_min": 0.01,
+      "edge_min": 0.0075,
       "edge_max": 0.15,
       "kelly_fraction": 0.18,
       "cap_frac": 0.04,
@@ -49,7 +55,7 @@
       "min_picks": 1
     },
     "btts": {
-      "edge_min": 0.01,
+      "edge_min": 0.0075,
       "edge_max": 0.15,
       "kelly_fraction": 0.18,
       "cap_frac": 0.04,

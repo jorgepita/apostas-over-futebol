@@ -115,10 +115,39 @@ def process_league_fixtures(
     league_boosts = history_cfg.get("league_lambda_boost", {}) or {}
     lambda_boost = float(league_boosts.get(league_key, history_cfg.get("lambda_boost", 1.0)))
 
+    # Audit flag: print full detail for non-EU leagues
+    _eu_keys = {
+        "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
+        "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
+        "turquia",
+    }
+    verbose = league_key not in _eu_keys
+
+    if verbose:
+        from src.data_loader import FIXTURES_COLUMNS as _FC
+        print(
+            f"[PICK_GEN] league={league_key.upper()} fixtures={len(league_fixt)} "
+            f"hist_rows={len(df_hist)} FIXTURES_COLUMNS={sorted(_FC)}"
+        )
+
     for _, fx in league_fixt.iterrows():
         try:
             home = str(fx["HomeTeam"])
             away = str(fx["AwayTeam"])
+
+            # Team-name matching audit
+            if verbose:
+                h_matches = len(df_hist[df_hist["HomeTeam"] == home])
+                a_matches = len(df_hist[df_hist["AwayTeam"] == away])
+                h_last_n = len(df_hist[df_hist["HomeTeam"] == home].sort_values("Date").tail(window))
+                a_last_n = len(df_hist[df_hist["AwayTeam"] == away].sort_values("Date").tail(window))
+                used_fallback = h_last_n < min_games_home or a_last_n < min_games_away
+                print(
+                    f"[PICK_GEN]   {home} vs {away} | "
+                    f"hist_home={h_matches}(last{window}={h_last_n}) "
+                    f"hist_away={a_matches}(last{window}={a_last_n}) "
+                    f"fallback={used_fallback}"
+                )
 
             lam_h, lam_a, lam_t = compute_lambdas(
                 df_hist,
@@ -145,6 +174,25 @@ def process_league_fixtures(
             if pbtts_row is not None:
                 rows_btts.append(pbtts_row)
 
+            if verbose:
+                from src.calculations import prob_over25, prob_btts_yes_adjusted, clamp_prob_o25, clamp_prob_btts
+                from src.data_loader import get_btts_odd, _to_float
+                odd_o25  = _to_float(fx.get("Odd_Over25",  0.0), 0.0)
+                odd_btts = get_btts_odd(fx)
+                p25_raw  = prob_over25(lam_t)
+                p25      = clamp_prob_o25(p25_raw)
+                pm25     = (1.0 / odd_o25) if odd_o25 > 1.01 else 0.0
+                pbtts    = clamp_prob_btts(prob_btts_yes_adjusted(lam_h, lam_a))
+                pmbtts   = (1.0 / odd_btts) if odd_btts > 1.01 else 0.0
+                edge_o25  = p25   - pm25
+                edge_btts = pbtts - pmbtts
+                print(
+                    f"[PICK_GEN]     lambdas=({lam_h:.3f},{lam_a:.3f},{lam_t:.3f}) "
+                    f"odd_o25={odd_o25:.2f} odd_btts={odd_btts:.2f} | "
+                    f"p25={p25:.3f} pm25={pm25:.3f} edge_o25={edge_o25:+.4f} gen_o25={'YES' if p25_row else 'NO'} | "
+                    f"pbtts={pbtts:.3f} pmbtts={pmbtts:.3f} edge_btts={edge_btts:+.4f} gen_btts={'YES' if pbtts_row else 'NO'}"
+                )
+
         except Exception as e:
             total_fixture_errors += 1
             try:
@@ -155,5 +203,11 @@ def process_league_fixtures(
             except Exception:
                 print(f"[ERR] fixture {league_key}: erro ao processar jogo -> {e}")
             continue
+
+    if verbose:
+        print(
+            f"[PICK_GEN] league={league_key.upper()} done: "
+            f"o25_candidates={len(rows25)} btts_candidates={len(rows_btts)}"
+        )
 
     return rows25, rows_btts, total_fixture_errors

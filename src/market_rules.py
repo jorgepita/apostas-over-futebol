@@ -213,8 +213,13 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
                 impl = float(r.get("ProbMarket", 0.0) or 0.0)
                 edge = float(r.get("Edge", 0.0) or 0.0)
                 odd = float(r.get("Odd", 0.0) or 0.0)
+                lam_h_v = float(r.get("LambdaHome", 0.0) or 0.0)
+                lam_a_v = float(r.get("LambdaAway", 0.0) or 0.0)
+                lam_t_v = float(r.get("LambdaTotal", 0.0) or 0.0)
                 print(
-                    f"[SKIP] {league} | {game} | {reason} | market={market} | prob={prob:.3f} | impl={impl:.3f} | edge={edge:.2%} | odd={odd:.2f}"
+                    f"[SKIP] {league} | {game} | {reason} | market={market} | "
+                    f"lam=({lam_h_v:.3f},{lam_a_v:.3f},{lam_t_v:.3f}) | "
+                    f"prob={prob:.3f} | impl={impl:.3f} | edge={edge:.2%} | odd={odd:.2f}"
                 )
             except Exception:
                 print(f"[SKIP] {r.get('League','?')} | {r.get('HomeTeam','?')} vs {r.get('AwayTeam','?')} | {reason}")
@@ -275,12 +280,32 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
     df["EdgeMinDynamic"] = df.apply(lambda r: dynamic_edge_min(r, edge_min_base), axis=1)
 
+    _eu_keys_mr = {
+        "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
+        "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal", "turquia",
+    }
+    df_before_dyn = df.copy()
     df = df[
         (df["Edge"] >= df["EdgeMinDynamic"]) &
         (df["Edge"] <= edge_max)
     ].copy()
 
     print(f"[DBG] {label}: após edge dinâmico = {len(df)}")
+    dropped_dyn = df_before_dyn[~df_before_dyn.index.isin(df.index)]
+    for _, _r in dropped_dyn.iterrows():
+        _lg = str(_r.get("League", "?"))
+        if _lg not in _eu_keys_mr:
+            _gm = f"{_r.get('HomeTeam','?')} vs {_r.get('AwayTeam','?')}"
+            _mk = str(_r.get("Market", ""))
+            _ed = float(_r.get("Edge", 0.0) or 0.0)
+            _em = float(_r.get("EdgeMinDynamic", 0.0) or 0.0)
+            _od = float(_r.get("Odd", 0.0) or 0.0)
+            _em_max = edge_max
+            _skip_reason = "edge_low" if _ed < _em else "edge_high"
+            print(
+                f"[SKIP] {_lg} | {_gm} | {_skip_reason} | market={_mk} | "
+                f"edge={_ed:.2%} edge_min={_em:.2%} edge_max={_em_max:.2%} odd={_od:.2f}"
+            )
 
     if df.empty:
         return df
