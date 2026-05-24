@@ -114,6 +114,20 @@ API_FOOTBALL_FALLBACK_COMPETITIONS = {
         "country": "Germany",
         "name": "Bundesliga",
     },
+    # Fallback-only: football-data.org is still tried first for these leagues.
+    # AF is only reached when FD returns an HTTP error or finds no fixture.
+    "ELC": {
+        "country": "England",
+        "name": "Championship",
+    },
+    "PD": {
+        "country": "Spain",
+        "name": "La Liga",
+    },
+    "SA": {
+        "country": "Italy",
+        "name": "Serie A",
+    },
 }
 
 FD_FINISHED_STATUS = {"FINISHED"}
@@ -2125,6 +2139,45 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         )
 
         if not matched:
+            # FD returned data but no fixture matched. For leagues with an
+            # API-Football fallback, retry via AF before giving up.
+            if should_use_api_football_fallback(league_code, "NO_FIXTURES"):
+                blocked_fd_leagues_seen.add(league_code)
+                af_used += 1
+                print(
+                    f"[DBG] {label}: football-data sem match para '{jogo}' | "
+                    f"liga={liga} | data={data} | n_fd_fixtures={len(matches or [])} | "
+                    f"tentando API-Football fallback"
+                )
+                log_pick_diag(
+                    label, i, row, "provider", "API_FOOTBALL_FALLBACK_AFTER_NO_MATCH",
+                    league_code=league_code, fd_fixtures=len(matches or []),
+                    best_fd_score=best_score,
+                )
+                ok, reason = try_update_row_via_api_football(
+                    df, i, row, league_code, label, shared_state
+                )
+                if ok:
+                    updated += 1
+                    af_updated += 1
+                    _diag_count("UPDATED_API_FOOTBALL")
+                else:
+                    if reason == "TOO_EARLY":
+                        future_skipped += 1
+                    elif reason == "NOT_FINISHED":
+                        not_finished += 1
+                    elif reason == "NO_MATCH":
+                        no_match_found += 1
+                    elif reason == "UNSUPPORTED_MARKET":
+                        unsupported_market += 1
+                    af_failed += 1
+                    ignored += 1
+                    _diag_count(f"AF_{reason}")
+                    log_pick_diag(
+                        label, i, row, "provider_result", reason,
+                        provider="api_football_after_fd_no_match",
+                    )
+                continue
             print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
             log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
             no_match_found += 1
