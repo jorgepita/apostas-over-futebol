@@ -48,6 +48,8 @@ DEFAULT_LEAGUE_IDS = {
     "coreia": 292,
     "finlandia": 244,
     "islandia": 188,
+    # Brazilian Serie A: calendar-year season, BTTS-favored profile, O2.5 medium confidence only
+    "brasil": 71,
 }
 
 LEAGUE_INFO_EXT = {
@@ -58,6 +60,12 @@ LEAGUE_INFO_EXT = {
     "coreia": {"name": "K League 1", "country": "Korea Republic"},
     "finlandia": {"name": "Veikkausliiga", "country": "Finland"},
     "islandia": {"name": "Besta deild", "country": "Iceland"},
+    # Campeonato Brasileiro runs April-December (calendar year).
+    # Brazilian football has relatively balanced home/away attack rates, supporting BTTS.
+    # O2.5 is medium-confidence only: ~2.3 avg goals/game vs ~2.8 in EU top leagues,
+    # and lambda calibration is unverified until sufficient history accumulates.
+    # lambda_boost=1.00 (no inflation) — avoids the over-estimation seen in Asian leagues.
+    "brasil": {"name": "Campeonato Brasileiro Serie A", "country": "Brazil"},
 }
 
 API_CALL_MIN_INTERVAL = 0.28
@@ -312,7 +320,7 @@ def build_league_map(cfg: dict) -> dict:
 
 def season_for_date(d: date, league_key: str = None) -> int:
     # Summer leagues (Calendar year)
-    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia"}
+    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia", "brasil"}
     if league_key in summer_leagues:
         return d.year
     # Winter leagues (Starting year)

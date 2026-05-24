@@ -310,6 +310,45 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     if df.empty:
         return df
 
+    # ── Per-league BTTS edge floor override ──────────────────────────────
+    # Stricter edge_min for specific league+market combos, read from
+    # config["league_overrides"]. Currently: brasil+BTTS floor = 1.25%
+    # (vs global 0.75%) — calibration delta was +9.1% on initial backtest,
+    # so we gate on stronger signals only until live data confirms the model.
+    _league_overrides = rules.get("league_overrides", {}) or {}
+    if _league_overrides and not df.empty:
+        def _override_floor(row):
+            lo = _league_overrides.get(str(row.get("League", "")), {})
+            mk_cfg = lo.get(str(row.get("Market", "")).lower()) or {}
+            override = mk_cfg.get("edge_min")
+            if override is not None:
+                return float(override)
+            return float(row.get("EdgeMinDynamic", 0.0) or 0.0)
+
+        df["EdgeMinFinal"] = df.apply(_override_floor, axis=1)
+        df_before_lo = df.copy()
+        df = df[df["Edge"] >= df["EdgeMinFinal"]].copy()
+
+        dropped_lo = df_before_lo[~df_before_lo.index.isin(df.index)]
+        for _, _r in dropped_lo.iterrows():
+            _lg = str(_r.get("League", "?"))
+            _mk = str(_r.get("Market", "")).upper()
+            if _lg == "brasil" and _mk == "BTTS":
+                _gm = f"{_r.get('HomeTeam','?')} vs {_r.get('AwayTeam','?')}"
+                _ed = float(_r.get("Edge", 0.0) or 0.0)
+                _em = float(_r.get("EdgeMinFinal", 0.0) or 0.0)
+                _od = float(_r.get("Odd", 0.0) or 0.0)
+                print(
+                    f"[BRASIL_BTTS_SKIP] {_gm} | "
+                    f"edge={_ed:.2%} required={_em:.2%} odd={_od:.2f}"
+                )
+        if len(df) < len(df_before_lo):
+            print(f"[DBG] {label}: após league_override_edge = {len(df)}")
+    # ─────────────────────────────────────────────────────────────────────
+
+    if df.empty:
+        return df
+
     df = add_rank_fields(df)
     df = dedupe_correlated_picks(df)
 
@@ -513,6 +552,34 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
     df["Stake€"] = (df["StakeFrac"] * float(bankroll)).round(2)
     df["DailyScale"] = float(scale)
     df["Bankroll€"] = float(bankroll)
+
+    # ── Per-league stake multiplier ───────────────────────────────────────
+    # Dampens final stake for specific league+market combos.
+    # Currently: brasil+BTTS * 0.75 — protects bankroll while live
+    # calibration data accumulates (higher BTTS variance, early-phase model).
+    _league_overrides = rules.get("league_overrides", {}) or {}
+    if _league_overrides:
+        for _idx in df.index:
+            _lg = str(df.at[_idx, "League"]) if "League" in df.columns else ""
+            _mk = str(df.at[_idx, "Market"]).upper() if "Market" in df.columns else ""
+            _lo = _league_overrides.get(_lg, {})
+            _mk_cfg = _lo.get(_mk.lower()) or {}
+            _mult = _mk_cfg.get("stake_multiplier")
+            if _mult is not None:
+                _mult_f = float(_mult)
+                _old = float(df.at[_idx, "Stake€"])
+                _new = round(_old * _mult_f, 2)
+                df.at[_idx, "Stake€"] = _new
+                if _lg == "brasil" and _mk == "BTTS":
+                    _ht = df.at[_idx, "HomeTeam"] if "HomeTeam" in df.columns else "?"
+                    _at = df.at[_idx, "AwayTeam"] if "AwayTeam" in df.columns else "?"
+                    _ed = float(df.at[_idx, "Edge"]) if "Edge" in df.columns else 0.0
+                    print(
+                        f"[BRASIL_BTTS_KEEP] {_ht} vs {_at} | "
+                        f"edge={_ed:.2%} stake_before={_old:.2f} "
+                        f"stake_after={_new:.2f} multiplier={_mult_f}"
+                    )
+    # ─────────────────────────────────────────────────────────────────────
 
     if len(df) < min_picks:
         print(f"[DBG] {label}: abaixo de min_picks={min_picks}")

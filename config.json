@@ -29,6 +29,7 @@
     "finlandia": { "name": "Veikkausliiga", "country": "FIN" },
     "islandia": { "name": "Besta deild", "country": "ISL" },
     "mls": { "name": "MLS", "country": "USA" },
+    "brasil": { "name": "Campeonato Brasileiro Serie A", "country": "BRA" },
     "japao": { "name": "J1 League", "country": "JPN" },
     "coreia": { "name": "K League 1", "country": "KOR" }
   },
@@ -42,7 +43,8 @@
       "japao": 1.00,
       "coreia": 1.00,
       "finlandia": 1.00,
-      "islandia": 1.00
+      "islandia": 1.00,
+      "brasil": 1.00
     }
   },
   "rules": {
@@ -95,12 +97,21 @@
       "japao": 98,
       "coreia": 292,
       "finlandia": 244,
-      "islandia": 188
+      "islandia": 188,
+      "brasil": 71
     },
     "shortlist_total": 80,
     "shortlist_per_league_per_day": 4,
     "sleep_seconds_between_fixture_requests": 0.35,
     "use_api_football_for_btts_odds": true
+  },
+  "league_overrides": {
+    "brasil": {
+      "btts": {
+        "edge_min": 0.0125,
+        "stake_multiplier": 0.75
+      }
+    }
   },
   "the_odds_api": {
     "regions": "eu",
@@ -127,7 +138,8 @@
       "japao": "soccer_japan_j_league",
       "coreia": "soccer_south_korea_k_league_1",
       "finlandia": "soccer_finland_veikkausliiga",
-      "islandia": "soccer_iceland_urvalsdeild"
+      "islandia": "soccer_iceland_urvalsdeild",
+      "brasil": "soccer_brazil_campeonato"
     }
   }
 }

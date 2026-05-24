@@ -41,6 +41,10 @@ def build_bankroll_settings(cfg: dict) -> dict:
     rules_btts.setdefault("cap_frac", DEFAULT_CAP_FRAC)
     rules_btts.setdefault("daily_cap_frac", DEFAULT_DAILY_CAP_FRAC)
 
+    league_overrides = cfg.get("league_overrides", {}) or {}
+    rules25["league_overrides"] = league_overrides
+    rules_btts["league_overrides"] = league_overrides
+
     return {
         "bankroll_cfg": bankroll_cfg,
         "rules_cfg": rules_cfg,
