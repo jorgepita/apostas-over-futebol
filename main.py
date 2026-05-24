@@ -172,15 +172,78 @@ def main():
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
 
+    # ── Stage-trace helper ───────────────────────────────────────────────────
+    def _trace(label: str, df: pd.DataFrame) -> None:
+        """Print every row whose League is not a known European league."""
+        eu = {
+            "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
+            "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
+            "turquia",
+        }
+        if df is None or df.empty:
+            print(f"[TRACE] {label}: dataframe vazio")
+            return
+        non_eu = df[~df.get("League", pd.Series(dtype=str)).isin(eu)] if "League" in df.columns else df.iloc[0:0]
+        eu_count = len(df) - len(non_eu)
+        print(f"[TRACE] {label}: total={len(df)} eu={eu_count} non_eu={len(non_eu)}")
+        for _, r in non_eu.iterrows():
+            edge_pct = float(r.get("Edge", 0) or 0) * 100
+            stake    = float(r.get("Stake€", 0) or 0)
+            kelly    = float(r.get("KellyTrue", 0) or 0)
+            odd      = float(r.get("Odd", 0) or 0)
+            print(
+                f"[TRACE]   {label} | {r.get('League','')} | "
+                f"{r.get('HomeTeam','')} vs {r.get('AwayTeam','')} | "
+                f"date={r.get('Date','')} market={r.get('Market','')} | "
+                f"odd={odd:.2f} edge={edge_pct:.2f}% kelly={kelly:.4f} stake={stake:.2f}"
+            )
+
+    def _trace_dropped(label: str, before: pd.DataFrame, after: pd.DataFrame) -> None:
+        """Print rows present in before but absent in after, keyed by (League,HomeTeam,AwayTeam,Market)."""
+        eu = {
+            "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
+            "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
+            "turquia",
+        }
+        if before is None or before.empty:
+            return
+        cols_key = ["League", "HomeTeam", "AwayTeam", "Market"]
+        before_keys = set(
+            tuple(str(r.get(c, "")) for c in cols_key)
+            for _, r in before.iterrows()
+        )
+        after_keys  = set(
+            tuple(str(r.get(c, "")) for c in cols_key)
+            for _, r in (after.iterrows() if (after is not None and not after.empty) else iter([]))
+        )
+        dropped = before_keys - after_keys
+        non_eu_dropped = [k for k in dropped if k[0] not in eu]
+        if non_eu_dropped:
+            for k in sorted(non_eu_dropped):
+                print(f"[TRACE] DROPPED at {label}: {k}")
+        elif dropped:
+            print(f"[TRACE] {label}: {len(dropped)} EU picks dropped (no non-EU drops)")
+    # ────────────────────────────────────────────────────────────────────────
+
+    _trace("after_apply_market_rules_O25",  out25)
+    _trace("after_apply_market_rules_BTTS", out_btts)
+
     combo_pre = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
 
     if not combo_pre.empty:
+        combo_pre_before_dedupe = combo_pre.copy()
         combo_pre = dedupe_correlated_picks(combo_pre)
+        _trace_dropped("combined_dedupe", combo_pre_before_dedupe, combo_pre)
+        _trace("after_combined_dedupe", combo_pre)
+
+        combo_pre_before_limit = combo_pre.copy()
         combo_pre = limit_picks_per_day(
             combo_pre,
             max_per_day=max_picks_per_day,
             max_global=max_picks_global,
         )
+        _trace_dropped("limit_picks_per_day_1", combo_pre_before_limit, combo_pre)
+        _trace("after_limit_picks_per_day_1", combo_pre)
         print(
             f"[DBG] combo final limitado por dia | "
             f"max_per_day={max_picks_per_day} | max_global={max_picks_global} | total={len(combo_pre)}"
@@ -199,14 +262,22 @@ def main():
         out25_final = apply_stakes(out25_candidates, bankroll25, rules25, "O2.5")
         out_btts_final = apply_stakes(out_btts_candidates, bankroll_btts, rules_btts, "BTTS")
 
+        _trace_dropped("apply_stakes_O25",  out25_candidates,  out25_final)
+        _trace_dropped("apply_stakes_BTTS", out_btts_candidates, out_btts_final)
+        _trace("after_apply_stakes_O25",  out25_final)
+        _trace("after_apply_stakes_BTTS", out_btts_final)
+
         combo = pd.concat([out25_final, out_btts_final], ignore_index=True) if (len(out25_final) or len(out_btts_final)) else pd.DataFrame()
         if not combo.empty:
             combo = add_rank_fields(combo)
+            combo_before_limit2 = combo.copy()
             combo = limit_picks_per_day(
                 combo,
                 max_per_day=max_picks_per_day,
                 max_global=max_picks_global,
             ).reset_index(drop=True)
+            _trace_dropped("limit_picks_per_day_2", combo_before_limit2, combo)
+            _trace("after_limit_picks_per_day_2", combo)
 
     simple, out25_path, out_btts_path, combo_path, combo_github_path, simple_path = save_all_outputs(
         out25_final=out25_final,
@@ -214,9 +285,12 @@ def main():
         combo=combo,
         base_dir=BASE,
     )
+    _trace_dropped("save_all_outputs", combo, simple)
+    _trace("after_save_all_outputs (simple)", simple)
 
     # Persistir histórico (append mode)
     history = persist_history(simple)
+    _trace("after_persist_history", history[history["Liga"].notna()].rename(columns={"Liga": "League"}) if "Liga" in history.columns else history)
 
     print("OK. Gerados:")
     print(f"- {out25_path.name} ({len(out25_final)} picks)")
