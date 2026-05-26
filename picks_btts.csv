@@ -1,2 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-25;alemanha;Bundesliga;SC Paderborn 07;VfL Wolfsburg;1.882;1.652;3.534;BTTS;0.606;1.8;0.556;0.0508;0.1144;True;;0.0175;0.0175;0.051;0.0105;0.0105;0.52;1.0;50.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap
