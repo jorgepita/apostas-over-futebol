@@ -1,4 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-26;franca;Ligue 1;Saint Etienne;Nice;1.813;1.453;3.267;O2.5;0.634;1.72;0.581;0.0524;0.1253;True;;0.0075;0.0075;0.052;0.0118;0.0118;0.59;1.0;50.0
-2026-05-26;alemanha2;2. Bundesliga;SpVgg Greuther Fürth;Rot-Weiß Essen;1.802;1.527;3.329;O2.5;0.646;1.67;0.599;0.0475;0.1185;True;;0.0075;0.0075;0.048;0.0101;0.0101;0.51;1.0;50.0
-2026-05-29;italia2;Serie B;Monza;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.72;0.581;0.0934;0.223;True;;0.0075;0.0075;0.093;0.0375;0.0375;1.87;1.0;50.0
+2026-05-29;italia2;Serie B;Monza;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.75;0.571;0.1033;0.2411;True;;0.0175;0.0175;0.103;0.0434;0.04;2.0;1.0;50.0
