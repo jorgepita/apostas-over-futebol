@@ -1,6 +1,38 @@
 {
   "footballDaily": [
     {
+      "Date": "2026-05-28",
+      "League": "portugal",
+      "LeagueName": "Primeira Liga",
+      "HomeTeam": "Casa Pia",
+      "AwayTeam": "Torreense",
+      "LambdaHome": "1.62",
+      "LambdaAway": "1.344",
+      "LambdaTotal": "2.964",
+      "Market": "BTTS",
+      "ProbModel": 0.525,
+      "Odd": "2.1",
+      "ProbMarket": 0.476,
+      "Edge": 0.049000000000000044,
+      "KellyTrue": "0.0928",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0325",
+      "EdgeMinFinal": "0.0325",
+      "ProbGap": "0.049000000000000044",
+      "StakeFracRaw": "0.0081",
+      "StakeFrac": "0.0081",
+      "Stake€": "0.41",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-28",
+      "Liga": "portugal",
+      "Jogo": "Casa Pia vs Torreense",
+      "Mercado": "BTTS",
+      "Resultado": "",
+      "Edge%": 4.900000000000004
+    },
+    {
       "Date": "2026-05-29",
       "League": "italia2",
       "LeagueName": "Serie B",
@@ -11,16 +43,16 @@
       "LambdaTotal": "3.476",
       "Market": "O2.5",
       "ProbModel": 0.675,
-      "Odd": "1.75",
-      "ProbMarket": 0.571,
-      "Edge": 0.10400000000000009,
-      "KellyTrue": "0.2411",
+      "Odd": "1.8",
+      "ProbMarket": 0.556,
+      "Edge": 0.119,
+      "KellyTrue": "0.2682",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.0175",
       "EdgeMinFinal": "0.0175",
-      "ProbGap": "0.10400000000000009",
-      "StakeFracRaw": "0.0434",
+      "ProbGap": "0.119",
+      "StakeFracRaw": "0.0483",
       "StakeFrac": "0.04",
       "Stake€": "2.0",
       "DailyScale": "1.0",
@@ -30,7 +62,135 @@
       "Jogo": "Monza vs Catanzaro",
       "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 10.40000000000001
+      "Edge%": 11.899999999999999
+    },
+    {
+      "Date": "2026-05-29",
+      "League": "franca",
+      "LeagueName": "Ligue 1",
+      "HomeTeam": "Nice",
+      "AwayTeam": "Saint Etienne",
+      "LambdaHome": "1.813",
+      "LambdaAway": "1.453",
+      "LambdaTotal": "3.267",
+      "Market": "BTTS",
+      "ProbModel": 0.567,
+      "Odd": "2.0",
+      "ProbMarket": 0.5,
+      "Edge": 0.06699999999999995,
+      "KellyTrue": "0.135",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0225",
+      "EdgeMinFinal": "0.0225",
+      "ProbGap": "0.06699999999999995",
+      "StakeFracRaw": "0.0164",
+      "StakeFrac": "0.0164",
+      "Stake€": "0.82",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-29",
+      "Liga": "franca",
+      "Jogo": "Nice vs Saint Etienne",
+      "Mercado": "BTTS",
+      "Resultado": "",
+      "Edge%": 6.699999999999995
+    },
+    {
+      "Date": "2026-05-31",
+      "League": "belgica",
+      "LeagueName": "Jupiler Pro League",
+      "HomeTeam": "Gent",
+      "AwayTeam": "Genk",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.622",
+      "LambdaTotal": "3.822",
+      "Market": "O2.5",
+      "ProbModel": 0.72,
+      "Odd": "1.72",
+      "ProbMarket": 0.581,
+      "Edge": 0.139,
+      "KellyTrue": "0.3311",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.139",
+      "StakeFracRaw": "0.0596",
+      "StakeFrac": "0.04",
+      "Stake€": "2.0",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-31",
+      "Liga": "belgica",
+      "Jogo": "Gent vs Genk",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 13.900000000000002
+    },
+    {
+      "Date": "2026-05-28",
+      "League": "portugal",
+      "LeagueName": "Primeira Liga",
+      "HomeTeam": "Casa Pia",
+      "AwayTeam": "Torreense",
+      "LambdaHome": "1.62",
+      "LambdaAway": "1.344",
+      "LambdaTotal": "2.964",
+      "Market": "BTTS",
+      "ProbModel": 0.525,
+      "Odd": "2.1",
+      "ProbMarket": 0.476,
+      "Edge": 0.049000000000000044,
+      "KellyTrue": "0.0928",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0325",
+      "EdgeMinFinal": "0.0325",
+      "ProbGap": "0.049",
+      "StakeFracRaw": "0.0081",
+      "StakeFrac": "0.0081",
+      "Stake€": "0.41",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-28",
+      "Liga": "portugal",
+      "Jogo": "Casa Pia vs Torreense",
+      "Mercado": "BTTS",
+      "Resultado": "",
+      "Edge%": 4.900000000000004
+    },
+    {
+      "Date": "2026-05-29",
+      "League": "franca",
+      "LeagueName": "Ligue 1",
+      "HomeTeam": "Nice",
+      "AwayTeam": "Saint Etienne",
+      "LambdaHome": "1.813",
+      "LambdaAway": "1.453",
+      "LambdaTotal": "3.267",
+      "Market": "BTTS",
+      "ProbModel": 0.567,
+      "Odd": "2.0",
+      "ProbMarket": 0.5,
+      "Edge": 0.06699999999999995,
+      "KellyTrue": "0.135",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0225",
+      "EdgeMinFinal": "0.0225",
+      "ProbGap": "0.067",
+      "StakeFracRaw": "0.0164",
+      "StakeFrac": "0.0164",
+      "Stake€": "0.82",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-05-29",
+      "Liga": "franca",
+      "Jogo": "Nice vs Saint Etienne",
+      "Mercado": "BTTS",
+      "Resultado": "",
+      "Edge%": 6.699999999999995
     }
   ],
   "footballHistory": [
@@ -48,7 +208,6 @@
       "Resultado": "L",
       "Lucro€": "-1.18",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 11.43
     },
     {
@@ -65,7 +224,6 @@
       "Resultado": "L",
       "Lucro€": "-1.25",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 10.33
     },
     {
@@ -82,7 +240,6 @@
       "Resultado": "L",
       "Lucro€": "-1.25",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 14.19
     },
     {
@@ -99,7 +256,6 @@
       "Resultado": "L",
       "Lucro€": "-0.41",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 5.91
     },
     {
@@ -116,7 +272,6 @@
       "Resultado": "L",
       "Lucro€": "-0.12",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 2.91
     },
     {
@@ -133,7 +288,6 @@
       "Resultado": "L",
       "Lucro€": "-0.49",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 6.85
     },
     {
@@ -150,7 +304,6 @@
       "Resultado": "L",
       "Lucro€": "-0.22",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 4.24
     },
     {
@@ -167,7 +320,6 @@
       "Resultado": "L",
       "Lucro€": "-0.42",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 6.08
     },
     {
@@ -184,7 +336,6 @@
       "Resultado": "L",
       "Lucro€": "-0.03",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 1.5
     },
     {
@@ -201,7 +352,6 @@
       "Resultado": "W",
       "Lucro€": "1.06",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 13.39
     },
     {
@@ -218,7 +368,6 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 1.24
     },
     {
@@ -235,7 +384,6 @@
       "Resultado": "W",
       "Lucro€": "0.05",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 2.16
     },
     {
@@ -252,7 +400,6 @@
       "Resultado": "L",
       "Lucro€": "-0.08",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 2.83
     },
     {
@@ -269,7 +416,6 @@
       "Resultado": "L",
       "Lucro€": "-0.29",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 3.6
     },
     {
@@ -286,7 +432,6 @@
       "Resultado": "W",
       "Lucro€": "0.7",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 14.53
     },
     {
@@ -303,7 +448,6 @@
       "Resultado": "W",
       "Lucro€": "0.48",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 4.9
     },
     {
@@ -320,7 +464,6 @@
       "Resultado": "L",
       "Lucro€": "-0.75",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 6.88
     },
     {
@@ -337,7 +480,6 @@
       "Resultado": "L",
       "Lucro€": "-0.95",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 14.94
     },
     {
@@ -354,7 +496,6 @@
       "Resultado": "W",
       "Lucro€": "0.1",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 2.48
     },
     {
@@ -371,7 +512,6 @@
       "Resultado": "L",
       "Lucro€": "-0.29",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 5.02
     },
     {
@@ -388,7 +528,6 @@
       "Resultado": "W",
       "Lucro€": "0.05",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 1.82
     },
     {
@@ -405,7 +544,6 @@
       "Resultado": "L",
       "Lucro€": "-0.63",
       "LucroReal€": "",
-      "KickoffUTC": "2026-05-26T18:30:00+00:00",
       "Edge": 5.81
     },
     {
@@ -422,8 +560,39 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 5.24
+    },
+    {
+      "Data": "2026-05-28",
+      "Liga": "Primeira Liga",
+      "Jogo": "Casa Pia vs Torreense",
+      "Mercado": "BTTS",
+      "Odd": "2.1",
+      "Stake€": "0.41",
+      "Edge%": 4.86,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "Edge": 4.86
+    },
+    {
+      "Data": "2026-05-29",
+      "Liga": "Ligue 1",
+      "Jogo": "Nice vs Saint Etienne",
+      "Mercado": "BTTS",
+      "Odd": "2.0",
+      "Stake€": "0.82",
+      "Edge%": 6.75,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "Edge": 6.75
     },
     {
       "Data": "2026-05-29",
@@ -439,8 +608,23 @@
       "Resultado": "",
       "Lucro€": "",
       "LucroReal€": "",
-      "KickoffUTC": "",
       "Edge": 9.34
+    },
+    {
+      "Data": "2026-05-31",
+      "Liga": "Jupiler Pro League",
+      "Jogo": "Gent vs Genk",
+      "Mercado": "Over 2.5",
+      "Odd": "1.72",
+      "Stake€": "2.0",
+      "Edge%": 13.86,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "Edge": 13.86
     }
   ],
   "leagueStats": [
@@ -1925,30 +2109,61 @@
       "apostada": true,
       "oddReal": "1.75",
       "stakeReal": "1.5"
+    },
+    "2026-05-28|portugal|Casa Pia vs Torreense|BTTS": {
+      "apostada": true,
+      "oddReal": "2.1",
+      "stakeReal": "1"
+    },
+    "2026-05-29|franca|Nice vs Saint Etienne|BTTS": {
+      "apostada": true,
+      "oddReal": "2",
+      "stakeReal": "1"
+    },
+    "2026-05-31|belgica|Gent vs Genk|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1"
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-26T23:58:14.129Z",
+  "lastUpdated": "2026-05-27T21:55:02.959Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-05-28",
       "League": "portugal",
       "HomeTeam": "Casa Pia",
       "AwayTeam": "Torreense",
-      "Odd_Over25": "2.33",
-      "Odd_BTTS_Yes": "1.95"
+      "Odd_Over25": "2.53",
+      "Odd_BTTS_Yes": "2.10"
+    },
+    {
+      "Date": "2026-05-29",
+      "League": "franca",
+      "HomeTeam": "Nice",
+      "AwayTeam": "Saint Etienne",
+      "Odd_Over25": "2.28",
+      "Odd_BTTS_Yes": "2.00"
     },
     {
       "Date": "2026-05-29",
       "League": "italia2",
       "HomeTeam": "Monza",
       "AwayTeam": "Catanzaro",
-      "Odd_Over25": "1.75",
-      "Odd_BTTS_Yes": "1.74"
+      "Odd_Over25": "1.80",
+      "Odd_BTTS_Yes": "1.75"
+    },
+    {
+      "Date": "2026-05-31",
+      "League": "belgica",
+      "HomeTeam": "Gent",
+      "AwayTeam": "Genk",
+      "Odd_Over25": "1.72",
+      "Odd_BTTS_Yes": "1.57"
     }
   ],
   "manualBetsRemote": []
