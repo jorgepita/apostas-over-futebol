@@ -2124,11 +2124,26 @@
       "apostada": true,
       "oddReal": "1.7",
       "stakeReal": "1"
+    },
+    "2026-05-28|Primeira Liga|Casa Pia vs Torreense|BTTS": {
+      "apostada": true,
+      "oddReal": "2.1",
+      "stakeReal": "1"
+    },
+    "2026-05-29|Ligue 1|Nice vs Saint Etienne|BTTS": {
+      "apostada": true,
+      "oddReal": "2",
+      "stakeReal": "1"
+    },
+    "2026-05-31|Jupiler Pro League|Gent vs Genk|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.7",
+      "stakeReal": "1.5"
     }
   },
   "manualBets": [],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-05-27T21:55:02.959Z",
+  "lastUpdated": "2026-05-27T21:57:03.083Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
