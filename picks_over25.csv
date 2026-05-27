@@ -1,2 +1,3 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-29;italia2;Serie B;Monza;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.75;0.571;0.1033;0.2411;True;;0.0175;0.0175;0.103;0.0434;0.04;2.0;1.0;50.0
+2026-05-29;italia2;Serie B;Monza;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.8;0.556;0.1192;0.2682;True;;0.0175;0.0175;0.119;0.0483;0.04;2.0;1.0;50.0
+2026-05-31;belgica;Jupiler Pro League;Gent;Genk;2.2;1.622;3.822;O2.5;0.72;1.72;0.581;0.1386;0.3311;True;;0.0075;0.0075;0.139;0.0596;0.04;2.0;1.0;50.0
