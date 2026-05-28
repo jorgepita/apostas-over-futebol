@@ -1,4 +1,4 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€
-2026-05-29;Serie B;Monza vs Catanzaro;O2.5;1.83;2.0;12.83;;;;;;
-2026-05-29;Ligue 1;Nice vs Saint Etienne;BTTS;2.0;0.82;6.75;;;;;;
-2026-05-31;Jupiler Pro League;Gent vs Genk;O2.5;1.75;2.0;14.86;;;;;;
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-05-29;Serie B;Monza vs Catanzaro;O2.5;1.83;2.0;12.83;;;;;;;
+2026-05-29;Ligue 1;Nice vs Saint Etienne;BTTS;2.0;0.82;6.75;;;;;;;
+2026-05-31;Jupiler Pro League;Gent vs Genk;O2.5;1.75;2.0;14.86;;;;;;;
