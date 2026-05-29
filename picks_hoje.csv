@@ -1,4 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-05-29;italia2;Serie B;Monza;Catanzaro;2.2;1.276;3.476;O2.5;0.675;1.83;0.546;0.1283;0.2829;True;;0.0175;0.0175;0.129;0.0509;0.04;2.0;1.0;50.0
-2026-05-29;franca;Ligue 1;Nice;Saint Etienne;1.813;1.453;3.267;BTTS;0.567;2.0;0.5;0.0675;0.135;True;;0.0225;0.0225;0.06699999999999995;0.0164;0.0164;0.82;1.0;50.0
 2026-05-31;belgica;Jupiler Pro League;Gent;Genk;2.2;1.622;3.822;O2.5;0.72;1.75;0.571;0.1486;0.3467;True;;0.0175;0.0175;0.14900000000000002;0.0624;0.04;2.0;1.0;50.0
