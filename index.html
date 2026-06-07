@@ -2332,9 +2332,24 @@ button.dirty {
           </div>
         </div>
 
-        <!-- SECTION E: Market Performance -->
+        <!-- SECTION E: Edge Validation -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">E — Market &amp; Source Performance</span>
+          <span class="section-header-title">E — Edge Validation</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Edge Validation</div>
+            <div class="note">Confirma se o edge previsto se traduz em ROI real.</div>
+          </div>
+          <div id="edgeValidationWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
+        <!-- SECTION F: Market & Source Performance -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">F — Market &amp; Source Performance</span>
           <div class="section-header-line"></div>
         </div>
 
@@ -2390,12 +2405,12 @@ button.dirty {
           </div>
         </div>
 
-        <!-- SECTION F: Top + Worst Performers -->
+        <!-- SECTION G: Top + Worst Performers -->
         <div class="grid grid-2">
           <!-- Top Performers -->
           <div>
             <div class="section-header">
-              <span class="section-header-title">F — Top Performers</span>
+              <span class="section-header-title">G — Top Performers</span>
               <div class="section-header-line"></div>
             </div>
             <div class="card">
@@ -2433,7 +2448,7 @@ button.dirty {
           <!-- Worst Performers -->
           <div>
             <div class="section-header">
-              <span class="section-header-title">F — Worst Performers</span>
+              <span class="section-header-title">G — Worst Performers</span>
               <div class="section-header-line"></div>
             </div>
             <div class="card">
@@ -4858,6 +4873,7 @@ button.dirty {
         try { renderLeagueClassification(); } catch (e) { console.error('renderLeagueClassification', e); }
         try { renderMarketIntelligence(); } catch (e) { console.error('renderMarketIntelligence', e); }
         try { renderPerformanceOverTime(); } catch (e) { console.error('renderPerformanceOverTime', e); }
+        try { renderEdgeValidation(); } catch (e) { console.error('renderEdgeValidation', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -6112,6 +6128,144 @@ buttons.forEach(btn => {
       }
 
       // ============================================================
+
+      function renderEdgeValidation() {
+        const wrap = document.getElementById('edgeValidationWrap');
+        if (!wrap) return;
+
+        // Source: raw bot history rows — same underlying data, with Edge% field available
+        const botRows = getRealResolvedBotHistory();
+        const bets = botRows
+          .map(r => ({
+            edge: num(r['Edge%'] ?? r['Edge']),
+            result: r._resultKey,
+            stake: r._stakeRealNum ?? 0,
+            lucro: r._lucroRealLocal ?? 0
+          }))
+          .filter(b => b.edge !== null && b.edge >= 0);
+
+        const BUCKETS = [
+          { label: '0–2%',  min: 0, max: 2 },
+          { label: '2–4%',  min: 2, max: 4 },
+          { label: '4–6%',  min: 4, max: 6 },
+          { label: '6–8%',  min: 6, max: 8 },
+          { label: '8%+',   min: 8, max: Infinity }
+        ];
+
+        const buckets = BUCKETS.map(b => {
+          const rows = bets.filter(r => r.edge >= b.min && r.edge < b.max);
+          const picks = rows.length;
+          const stake = sum(rows.map(r => r.stake));
+          const lucro = sum(rows.map(r => r.lucro));
+          const wins = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          const avgEdge = picks > 0 ? rows.reduce((s, r) => s + r.edge, 0) / picks : null;
+          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr, avgEdge };
+        });
+
+        // KPI summaries (over buckets with at least 1 pick)
+        const active = buckets.filter(b => b.picks > 0);
+
+        if (!active.length) {
+          wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem apostas com edge registado para análise.</div>`;
+          return;
+        }
+
+        const bestRoi     = active.reduce((best, b) => (b.roi !== null && (best === null || b.roi > best.roi)) ? b : best, null);
+        const mostProfit  = active.reduce((best, b) => b.lucro > (best?.lucro ?? -Infinity) ? b : best, null);
+        const bestWr      = active.reduce((best, b) => (b.wr !== null && (best === null || b.wr > best.wr)) ? b : best, null);
+        const mostUsed    = active.reduce((best, b) => b.picks > (best?.picks ?? 0) ? b : best, null);
+
+        // Monotonicity: check if ROI trends upward across buckets (ascending edge order = bucket order)
+        const rois = active.filter(b => b.roi !== null).map(b => b.roi);
+        let upPairs = 0, downPairs = 0;
+        for (let i = 1; i < rois.length; i++) {
+          if (rois[i] > rois[i - 1]) upPairs++;
+          else if (rois[i] < rois[i - 1]) downPairs++;
+        }
+        const total = upPairs + downPairs;
+        const quality = total === 0 ? 'INCONCLUSIVE'
+          : upPairs > downPairs ? 'VALIDATED'
+          : downPairs > upPairs ? 'WARNING'
+          : 'INCONCLUSIVE';
+        const qualityColor = quality === 'VALIDATED' ? 'var(--ok)' : quality === 'WARNING' ? 'var(--bad)' : 'var(--warn)';
+        const qualityBadge = quality === 'VALIDATED' ? 'good' : quality === 'WARNING' ? 'bad' : 'warn';
+        const qualityNote = quality === 'VALIDATED'
+          ? 'ROI aumenta à medida que o edge aumenta — modelo calibrado.'
+          : quality === 'WARNING'
+          ? 'Buckets de maior edge têm pior ROI — edge previsto não está calibrado.'
+          : 'Tendência mista — dados insuficientes ou edge inconsistente.';
+
+        const kpiHtml = `
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+            <div class="kpi-hero kpi-ok">
+              <div class="kpi-label">Melhor ROI</div>
+              <div class="kpi-value" style="font-size:18px;">${bestRoi ? bestRoi.label : '—'}</div>
+              <div class="kpi-sub">${bestRoi && bestRoi.roi !== null ? `ROI ${bestRoi.roi >= 0 ? '+' : ''}${pct(bestRoi.roi)}` : '—'}</div>
+            </div>
+            <div class="kpi-hero kpi-ok">
+              <div class="kpi-label">Mais Lucrativo</div>
+              <div class="kpi-value" style="font-size:18px;">${mostProfit ? mostProfit.label : '—'}</div>
+              <div class="kpi-sub">${mostProfit ? `P/L ${mostProfit.lucro >= 0 ? '+' : ''}€${fmt(mostProfit.lucro)}` : '—'}</div>
+            </div>
+            <div class="kpi-hero">
+              <div class="kpi-label">Maior Win Rate</div>
+              <div class="kpi-value" style="font-size:18px;">${bestWr ? bestWr.label : '—'}</div>
+              <div class="kpi-sub">${bestWr && bestWr.wr !== null ? `WR ${pct(bestWr.wr)}` : '—'}</div>
+            </div>
+            <div class="kpi-hero">
+              <div class="kpi-label">Mais Usado</div>
+              <div class="kpi-value" style="font-size:18px;">${mostUsed ? mostUsed.label : '—'}</div>
+              <div class="kpi-sub">${mostUsed ? `${mostUsed.picks} picks` : '—'}</div>
+            </div>
+          </div>
+        `;
+
+        const tableHtml = `
+          <div class="table-wrap" style="margin-bottom:12px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Edge Range</th>
+                  <th>Picks</th>
+                  <th>Win Rate</th>
+                  <th>ROI</th>
+                  <th>Profit / Loss</th>
+                  <th>Stake</th>
+                  <th>Avg Edge</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${buckets.map(b => `
+                  <tr ${b.picks === 0 ? 'style="opacity:0.4;"' : ''}>
+                    <td style="font-weight:700;">${b.label}</td>
+                    <td>${b.picks}</td>
+                    <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                    <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                    <td ${profitClass(b.lucro)}>${b.lucro >= 0 ? '+' : ''}€${fmt(b.lucro)}</td>
+                    <td style="color:var(--muted);">€${fmt(b.stake)}</td>
+                    <td style="color:var(--muted);">${b.avgEdge !== null ? `${fmt(b.avgEdge)}%` : '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        const qualityHtml = `
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;border-left:4px solid ${qualityColor};">
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Edge Quality</div>
+              <div style="font-size:20px;font-weight:900;color:${qualityColor};">${quality}</div>
+              <div class="note" style="margin-top:4px;">${qualityNote}</div>
+            </div>
+            <span class="mini ${qualityBadge}" style="margin-top:4px;">${quality}</span>
+          </div>
+        `;
+
+        wrap.innerHTML = kpiHtml + tableHtml + qualityHtml;
+      }
 
       function renderLeagueClassification() {
         const wrap = document.getElementById('leagueClassificationWrap');
