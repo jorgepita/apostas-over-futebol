@@ -2497,6 +2497,21 @@ button.dirty {
           </div>
         </div>
 
+        <!-- SECTION J: Action Engine -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">J — Action Engine</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Action Engine</div>
+            <div class="note">Recomendações baseadas em histórico real. Não altera apostas.</div>
+          </div>
+          <div id="actionEngineWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -4906,6 +4921,7 @@ button.dirty {
         try { renderEdgeValidation(); } catch (e) { console.error('renderEdgeValidation', e); }
         try { renderStrategyValidation(); } catch (e) { console.error('renderStrategyValidation', e); }
         try { renderModelCalibration(); } catch (e) { console.error('renderModelCalibration', e); }
+        try { renderActionEngine(); } catch (e) { console.error('renderActionEngine', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -6937,6 +6953,293 @@ buttons.forEach(btn => {
           </div>`;
 
         wrap.innerHTML = modeBanner + kpiRow1 + kpiRow2 + tableHtml + chartHtml + diagHtml;
+      }
+
+      function renderActionEngine() {
+        const wrap = document.getElementById('actionEngineWrap');
+        if (!wrap) return;
+
+        const closedRows = getFilteredRealClosedRows(getSummaryFilters());
+        const botRows    = getRealResolvedBotHistory();
+
+        if (!closedRows.length) {
+          wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem histórico real para gerar recomendações.</div>`;
+          return;
+        }
+
+        // ── Action helpers ────────────────────────────────────
+        function getAction(roi, wr) {
+          if (roi > 10 && wr > 50) return 'PROMOTE';
+          if (roi >= 0)            return 'MONITOR';
+          if (roi > -20)           return 'REDUCE';
+          return 'AVOID';
+        }
+
+        const ACTION_STYLE = {
+          PROMOTE: { cls: 'good', color: 'var(--ok)'  },
+          MONITOR: { cls: 'info', color: 'var(--info)' },
+          REDUCE:  { cls: 'warn', color: 'var(--warn)' },
+          AVOID:   { cls: 'bad',  color: 'var(--bad)'  }
+        };
+
+        function actionBadge(action) {
+          const s = ACTION_STYLE[action] || ACTION_STYLE.MONITOR;
+          return `<span class="mini ${s.cls}">${action}</span>`;
+        }
+
+        function getReason(action, roi, wr) {
+          const roiStr = `${roi >= 0 ? '+' : ''}${pct(roi)}`;
+          if (action === 'PROMOTE') return `ROI forte (${roiStr}) e WR ${pct(wr)} — amostra positiva.`;
+          if (action === 'MONITOR') return `ROI ${roiStr} — manter e acompanhar.`;
+          if (action === 'REDUCE')  return `ROI negativo (${roiStr}) — reduzir exposição.`;
+          return `ROI muito negativo (${roiStr}) — evitar até recuperação.`;
+        }
+
+        function subLabel(text) {
+          return `<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:18px 0 8px;">${text}</div>`;
+        }
+
+        // ── League Recommendations (min 5 picks) ──────────────
+        const leagueRecs = buildAnalytics(closedRows, 'league')
+          .map(r => ({ ...r, league: r.key }))
+          .filter(r => r.apostas >= 5)
+          .map(r => ({ ...r, action: getAction(r.roi, r.winRate) }))
+          .sort((a, b) => b.roi - a.roi);
+
+        // ── Market Recommendations (min 3 picks) ──────────────
+        const marketRecs = buildAnalytics(closedRows, 'market')
+          .map(r => ({ ...r, market: r.key }))
+          .filter(r => r.apostas >= 3)
+          .map(r => ({ ...r, action: getAction(r.roi, r.winRate) }))
+          .sort((a, b) => b.roi - a.roi);
+
+        // ── Edge Buckets ──────────────────────────────────────
+        const EDGE_DEFS = [
+          { label: '0–2%',  min: 0, max: 2 },
+          { label: '2–4%',  min: 2, max: 4 },
+          { label: '4–6%',  min: 4, max: 6 },
+          { label: '6–8%',  min: 6, max: 8 },
+          { label: '8%+',   min: 8, max: Infinity }
+        ];
+
+        const edgeBets = botRows.map(r => {
+          const edge = num(r['Edge%'] ?? r['Edge']);
+          const odds  = r._oddRealNum;
+          if (edge === null || edge < 0 || odds === null || odds <= 1.0) return null;
+          if (!['W', 'L', 'P'].includes(r._resultKey)) return null;
+          return { edge, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
+        }).filter(b => b !== null);
+
+        const edgeBuckets = EDGE_DEFS.map(b => {
+          const rows   = edgeBets.filter(r => r.edge >= b.min && r.edge < b.max);
+          const picks  = rows.length;
+          const stake  = sum(rows.map(r => r.stake));
+          const lucro  = sum(rows.map(r => r.lucro));
+          const wins   = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          const action = (roi !== null && wr !== null) ? getAction(roi, wr) : null;
+          return { label: b.label, picks, roi, wr, action };
+        });
+
+        const activeEdge = edgeBuckets.filter(b => b.picks >= 3 && b.roi !== null);
+        let edgeInverted = false;
+        if (activeEdge.length >= 2) {
+          let up = 0, down = 0;
+          for (let i = 1; i < activeEdge.length; i++) {
+            if (activeEdge[i].roi > activeEdge[i - 1].roi) up++;
+            else if (activeEdge[i].roi < activeEdge[i - 1].roi) down++;
+          }
+          edgeInverted = down > up;
+        }
+
+        // ── Weekday Recommendations (min 3 picks) ────────────
+        const DAY_LABELS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        const weekdayRecs = DAY_LABELS.map((label, idx) => {
+          const jsDay = idx === 6 ? 0 : idx + 1;
+          const rows   = closedRows.filter(r => { const d = parseDateSafe(r.date); return d && d.getDay() === jsDay; });
+          const picks  = rows.length;
+          if (picks < 3) return null;
+          const stake  = sum(rows.map(r => r.stake));
+          const lucro  = sum(rows.map(r => r.lucro));
+          const wins   = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          return (roi !== null && wr !== null) ? { label, picks, roi, wr, action: getAction(roi, wr) } : null;
+        }).filter(r => r !== null);
+
+        // ── Confidence Score (0–100) ──────────────────────────
+        const settledWithEdge = edgeBets.length;
+        const totalSettled    = botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
+
+        const samplePts  = Math.min(settledWithEdge / 200 * 25, 25);
+        const leaguePts  = leagueRecs.length > 0 ? (leagueRecs.filter(r => r.roi >= 0).length / leagueRecs.length) * 25 : 0;
+        const marketPts  = marketRecs.length > 0 ? (marketRecs.filter(r => r.roi >= 0).length / marketRecs.length) * 25 : 0;
+        const strictCal  = edgeBuckets.filter(b => b.picks >= 10).length;
+        const obsCal     = edgeBuckets.filter(b => b.picks >= 3).length;
+        const calPts     = strictCal >= 2 ? 25 : obsCal >= 2 ? 12 : 3;
+
+        const confRaw   = Math.round(samplePts + leaguePts + marketPts + calPts);
+        const confLabel = confRaw >= 67 ? 'HIGH' : confRaw >= 34 ? 'MEDIUM' : 'LOW';
+        const confCls   = confRaw >= 67 ? 'kpi-ok' : confRaw >= 34 ? 'kpi-warn' : 'kpi-bad';
+
+        // ── Alerts ────────────────────────────────────────────
+        const alerts = [];
+        const sortedLeagues = [...leagueRecs].sort((a, b) => b.roi - a.roi);
+        if (sortedLeagues.length) {
+          const best = sortedLeagues[0];
+          alerts.push(`Highest ROI currently comes from ${escapeHtml(best.league)} (${best.roi >= 0 ? '+' : ''}${pct(best.roi)}).`);
+        }
+        if (marketRecs.length >= 2) {
+          const mBest  = marketRecs[0];
+          const mWorst = [...marketRecs].sort((a, b) => a.roi - b.roi)[0];
+          if (mBest !== mWorst && Math.abs(mBest.roi - mWorst.roi) > 10) {
+            alerts.push(`${escapeHtml(mBest.market)} outperforms ${escapeHtml(mWorst.market)} by ${fmt(Math.abs(mBest.roi - mWorst.roi))} ROI points.`);
+          }
+        }
+        if (edgeInverted) {
+          alerts.push(`Model edge ordering currently inverted — higher edge buckets underperforming.`);
+        }
+        if (strictCal < 2) {
+          alerts.push(`Model calibration remains unverified (strict mode requires ≥ 10 picks per bucket).`);
+        }
+        if (totalSettled < 200) {
+          alerts.push(`Sample size still below maturity threshold (${totalSettled} / 200 settled bets).`);
+        }
+        const worstLeague = [...leagueRecs].sort((a, b) => a.roi - b.roi)[0];
+        if (worstLeague && worstLeague.action === 'AVOID') {
+          alerts.push(`${escapeHtml(worstLeague.league)} flagged for avoidance (ROI ${pct(worstLeague.roi)}).`);
+        }
+
+        // ── Priority Actions (top 3) ──────────────────────────
+        const ORDER = { PROMOTE: 0, AVOID: 1, REDUCE: 2, MONITOR: 3 };
+        const allRecs = [
+          ...leagueRecs.map(r => ({ type: 'Liga',    name: r.league, action: r.action, roi: r.roi, picks: r.apostas })),
+          ...marketRecs.map(r => ({ type: 'Mercado', name: r.market, action: r.action, roi: r.roi, picks: r.apostas })),
+          ...weekdayRecs.map(r => ({ type: 'Dia',   name: r.label,  action: r.action, roi: r.roi, picks: r.picks   }))
+        ].sort((a, b) => {
+          const od = ORDER[a.action] - ORDER[b.action];
+          return od !== 0 ? od : Math.abs(b.roi) - Math.abs(a.roi);
+        });
+
+        const top3 = allRecs.slice(0, 3);
+
+        function priorityText(rec) {
+          if (rec.action === 'PROMOTE') return `Increase focus on ${escapeHtml(rec.name)} (${rec.type}, ROI ${rec.roi >= 0 ? '+' : ''}${pct(rec.roi)}).`;
+          if (rec.action === 'AVOID')   return `Avoid ${escapeHtml(rec.name)} (${rec.type}) until ROI recovers (currently ${pct(rec.roi)}).`;
+          if (rec.action === 'REDUCE')  return `Reduce exposure to ${escapeHtml(rec.name)} (${rec.type}, ROI ${pct(rec.roi)}).`;
+          return `Monitor ${escapeHtml(rec.name)} (${rec.type}) as sample grows (${rec.picks} picks so far).`;
+        }
+
+        // ── Render helpers ────────────────────────────────────
+        function recTable(recs, nameKey, nameLabel) {
+          if (!recs.length) return `<div class="note" style="padding:10px;text-align:center;opacity:0.5;">Dados insuficientes.</div>`;
+          return `
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>${nameLabel}</th><th>Picks</th><th>ROI</th><th>Action</th><th>Reason</th></tr></thead>
+                <tbody>
+                  ${recs.map(r => `
+                    <tr>
+                      <td style="font-weight:600;">${escapeHtml(r[nameKey])}</td>
+                      <td>${r.apostas ?? r.picks}</td>
+                      <td ${profitClass(r.roi)}>${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</td>
+                      <td>${actionBadge(r.action)}</td>
+                      <td class="note">${getReason(r.action, r.roi, r.winRate ?? r.wr ?? 0)}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>`;
+        }
+
+        // ── Confidence + Alerts ───────────────────────────────
+        const confHtml = `
+          <div style="display:grid;grid-template-columns:minmax(160px,1fr) minmax(0,2fr);gap:10px;margin-bottom:6px;">
+            <div class="kpi-hero ${confCls}">
+              <div class="kpi-label">Confidence Score</div>
+              <div class="kpi-value" style="font-size:32px;">${confRaw}</div>
+              <div class="kpi-sub">${confLabel} — ${leagueRecs.length} ligas • ${marketRecs.length} mercados</div>
+            </div>
+            <div style="padding:10px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Alerts</div>
+              ${alerts.length
+                ? alerts.map(a => `
+                  <div style="display:flex;gap:6px;align-items:flex-start;">
+                    <span style="color:var(--info);font-weight:700;flex-shrink:0;font-size:12px;">→</span>
+                    <span class="note" style="line-height:1.4;">${a}</span>
+                  </div>`).join('')
+                : `<div class="note" style="opacity:0.5;">Sem alertas relevantes.</div>`}
+            </div>
+          </div>`;
+
+        // ── Priority Actions ──────────────────────────────────
+        const priorityHtml = top3.length ? `
+          ${subLabel('Priority Actions')}
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px;">
+            ${top3.map((rec, i) => {
+              const s = ACTION_STYLE[rec.action] || ACTION_STYLE.MONITOR;
+              return `
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;border-left:3px solid ${s.color};">
+                  <span style="font-size:16px;font-weight:900;color:${s.color};flex-shrink:0;">${i + 1}</span>
+                  <span style="font-size:13px;line-height:1.5;flex:1;">${priorityText(rec)}</span>
+                  ${actionBadge(rec.action)}
+                </div>`;
+            }).join('')}
+          </div>` : '';
+
+        // ── League & Market Tables ────────────────────────────
+        const leagueHtml  = subLabel('League Recommendations (mín. 5 picks)') + recTable(leagueRecs,  'league',  'Liga');
+        const marketHtml  = subLabel('Market Recommendations (mín. 3 picks)')  + recTable(marketRecs, 'market',  'Mercado');
+
+        // ── Edge Recommendations ──────────────────────────────
+        const edgeRecRows = edgeBuckets.filter(b => b.picks > 0 && b.action).map(b => {
+          const reason = b.action === 'PROMOTE' ? 'Bucket de alta performance — edge confirmado.'
+            : b.action === 'MONITOR' ? 'Performance aceitável — manter e observar.'
+            : b.action === 'REDUCE'  ? 'Underperformance — rever seleção neste range.'
+            : 'Bucket muito negativo — rever modelo.';
+          return `
+            <tr>
+              <td style="font-weight:600;">${b.label}</td>
+              <td>${b.picks}</td>
+              <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+              <td>${actionBadge(b.action)}</td>
+              <td class="note">${reason}</td>
+            </tr>`;
+        }).join('');
+
+        const edgeInvHtml = edgeInverted
+          ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;margin-top:8px;">
+               <span style="color:var(--warn);font-weight:700;">⚠</span>
+               <span class="note" style="color:var(--warn);">Model edge ordering currently inverted.</span>
+             </div>` : '';
+
+        const edgeHtml = subLabel('Edge Bucket Recommendations') + (edgeRecRows
+          ? `<div class="table-wrap"><table>
+               <thead><tr><th>Edge Range</th><th>Picks</th><th>ROI</th><th>Action</th><th>Reason</th></tr></thead>
+               <tbody>${edgeRecRows}</tbody>
+             </table></div>${edgeInvHtml}`
+          : `<div class="note" style="padding:10px;text-align:center;opacity:0.5;">Sem dados de edge suficientes.</div>`);
+
+        // ── Weekday Recommendations ───────────────────────────
+        const weekdayHtml = subLabel('Weekday Recommendations (mín. 3 picks)') + (weekdayRecs.length
+          ? `<div class="table-wrap"><table>
+               <thead><tr><th>Dia</th><th>Picks</th><th>ROI</th><th>Action</th><th>Reason</th></tr></thead>
+               <tbody>
+                 ${weekdayRecs.map(r => `
+                   <tr>
+                     <td style="font-weight:600;">${r.label}</td>
+                     <td>${r.picks}</td>
+                     <td ${profitClass(r.roi)}>${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</td>
+                     <td>${actionBadge(r.action)}</td>
+                     <td class="note">${getReason(r.action, r.roi, r.wr)}</td>
+                   </tr>`).join('')}
+               </tbody>
+             </table></div>`
+          : `<div class="note" style="padding:10px;text-align:center;opacity:0.5;">Sem dias com 3+ picks.</div>`);
+
+        wrap.innerHTML = confHtml + priorityHtml + leagueHtml + marketHtml + edgeHtml + weekdayHtml;
       }
 
       function renderLeagueClassification() {
