@@ -2337,6 +2337,7 @@ button.dirty {
                   <th>Notas</th>
                   <th>Análise</th>
                   <th>Opinião</th>
+                  <th>Estado</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -4155,6 +4156,7 @@ button.dirty {
       sourceLabel:      'Manual',
       isRemote:         false,
       isLocal:          true,
+      status:           b.status            || 'pending',
       hadAnalysis:      b.hadAnalysis      ?? false,
       botOpinion:       b.botOpinion       ?? null,
       edgeAtAnalysis:   b.edgeAtAnalysis   ?? null,
@@ -6774,11 +6776,12 @@ button.dirty {
           stake: cleanString(stake),
           resultado: '',
           notas: '',
-          hadAnalysis:     !!snapshot,
-          botOpinion:      snapshot?.opinion      ?? null,
-          edgeAtAnalysis:  snapshot?.EdgePercent  ?? snapshot?.edge ?? null,
-          scoreAtAnalysis: snapshot?.score        ?? null,
-          analysisSnapshot: snapshot              ?? null
+          status:           'pending',
+          hadAnalysis:      !!snapshot,
+          botOpinion:       snapshot?.opinion      ?? null,
+          edgeAtAnalysis:   snapshot?.EdgePercent  ?? snapshot?.edge ?? null,
+          scoreAtAnalysis:  snapshot?.score        ?? null,
+          analysisSnapshot: snapshot               ?? null
         });
         markDirty();
         rerenderManualOnly();
@@ -6790,14 +6793,41 @@ button.dirty {
         const rows = sortManualRowsForDisplay(getManualRowsMerged());
 
         const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };
+        const statusCls     = { pending: 'warn', approved: 'good', rejected: 'bad' };
+        const statusLabel   = { pending: 'Pendente', approved: 'Aprovada', rejected: 'Rejeitada' };
+        const btnBase       = 'padding:5px 8px;width:auto;font-size:11px;';
+
         document.getElementById('manualRows').innerHTML = rows.length
           ? rows.map(b => {
+              const status = b.status || 'pending';
+
               const analysisBadge = b.hadAnalysis
-                ? `<span class="mini good">Sim</span>`
+                ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis ?? '—'}</span>
+                   <span class="note" style="display:block;margin-top:2px;font-size:10px;">${
+                     b.edgeAtAnalysis !== null && b.edgeAtAnalysis !== undefined
+                       ? (b.edgeAtAnalysis >= 0 ? '+' : '') + fmt(b.edgeAtAnalysis) + '%'
+                       : ''
+                   }</span>`
                 : `<span class="mini" style="opacity:0.4;">—</span>`;
+
               const opinionBadge = b.botOpinion
                 ? `<span class="mini ${opinionClsMap[b.botOpinion] || 'info'}">${escapeHtml(b.botOpinion)}</span>`
                 : `<span class="mini" style="opacity:0.4;">—</span>`;
+
+              const estadoBadge = `<span class="mini ${statusCls[status] || 'warn'}">${statusLabel[status] || 'Pendente'}</span>`;
+
+              const localActions = b.isLocal ? `
+                <div style="display:flex;flex-wrap:wrap;gap:4px;min-width:200px;">
+                  <button class="js-analyze-manual" type="button" data-id="${escapeHtml(b.id)}"
+                    style="${btnBase}">${b.hadAnalysis ? 'Reanalisar' : 'Analisar'}</button>
+                  ${status !== 'approved' ? `<button class="js-approve-manual" type="button" data-id="${escapeHtml(b.id)}"
+                    style="${btnBase}background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);">Aprovar</button>` : ''}
+                  ${status !== 'rejected' ? `<button class="js-reject-manual" type="button" data-id="${escapeHtml(b.id)}"
+                    style="${btnBase}background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);">Rejeitar</button>` : ''}
+                  <button class="js-delete-manual" type="button" data-id="${escapeHtml(b.id)}"
+                    style="${btnBase}">Remover</button>
+                </div>` : `<span class="manual-remote-note">CSV</span>`;
+
               return `
               <tr>
                 <td><span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span></td>
@@ -6812,14 +6842,11 @@ button.dirty {
                 <td>${escapeHtml(b.notas || '—')}</td>
                 <td>${analysisBadge}</td>
                 <td>${opinionBadge}</td>
-                <td>
-                  ${b.isLocal
-                    ? `<button class="js-delete-manual" type="button" data-id="${escapeHtml(b.id)}" style="padding:8px 10px;width:auto;">Remover</button>`
-                    : `<span class="manual-remote-note">CSV</span>`}
-                </td>
+                <td>${estadoBadge}</td>
+                <td>${localActions}</td>
               </tr>`;
             }).join('')
-          : '<tr><td colspan="13"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
+          : '<tr><td colspan="14"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
       }
 
 
@@ -7008,6 +7035,65 @@ button.dirty {
         });
       }
       
+      async function mbHandleRowAnalyze(btn) {
+        if (!btn) return;
+        const id     = btn.dataset.id;
+        const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
+        if (betIdx === -1) return;
+        const b = state.manualBets[betIdx];
+
+        const parts    = String(b.jogo || '').split(' vs ');
+        const homeTeam = parts[0]?.trim() || '';
+        const awayTeam = parts[1]?.trim() || '';
+        const leagueKey = String(b.liga || '').toLowerCase().trim();
+        const market    = mbScoutNormMarket(b.mercado);
+        const odd       = parseFloat(b.odd);
+        const stake     = parseFloat(b.stake);
+
+        if (!leagueKey || !homeTeam || !awayTeam || isNaN(odd) || isNaN(stake) || odd < 1.01 || stake <= 0) {
+          alert('Dados insuficientes para análise. Verifica Liga, Jogo (formato "Casa vs Fora"), Odd e Stake.');
+          return;
+        }
+
+        btn.disabled    = true;
+        btn.textContent = 'A calcular…';
+
+        try {
+          const result = await analyzeFixture(leagueKey, homeTeam, awayTeam, market, odd, stake);
+          state.manualBets[betIdx] = {
+            ...state.manualBets[betIdx],
+            hadAnalysis:      true,
+            botOpinion:       result.opinion,
+            edgeAtAnalysis:   result.EdgePercent,
+            scoreAtAnalysis:  result.score,
+            analysisSnapshot: result
+          };
+          markDirty();
+          rerenderManualOnly();
+        } catch (err) {
+          console.error('mbHandleRowAnalyze', err);
+          btn.disabled    = false;
+          btn.textContent = b.hadAnalysis ? 'Reanalisar' : 'Analisar';
+          alert('Erro na análise. Verifica a consola.');
+        }
+      }
+
+      function mbHandleRowApprove(id) {
+        const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
+        if (betIdx === -1) return;
+        state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'approved' };
+        markDirty();
+        rerenderManualOnly();
+      }
+
+      function mbHandleRowReject(id) {
+        const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
+        if (betIdx === -1) return;
+        state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'rejected' };
+        markDirty();
+        rerenderManualOnly();
+      }
+
       function bindManualControls() {
         bindManualScoutEvents();
 
@@ -7015,13 +7101,24 @@ button.dirty {
         window._mbDeleteBound = true;
 
         document.addEventListener('click', e => {
-          const btn = e.target.closest('.js-delete-manual');
-          if (!btn) return;
-          const id = btn.dataset.id;
-          if (!id) return;
-          state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
-          markDirty();
-          rerenderAll();
+          const deleteBtn  = e.target.closest('.js-delete-manual');
+          const analyzeBtn = e.target.closest('.js-analyze-manual');
+          const approveBtn = e.target.closest('.js-approve-manual');
+          const rejectBtn  = e.target.closest('.js-reject-manual');
+
+          if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
+            if (!id) return;
+            state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
+            markDirty();
+            rerenderAll();
+          } else if (analyzeBtn) {
+            mbHandleRowAnalyze(analyzeBtn);
+          } else if (approveBtn) {
+            mbHandleRowApprove(approveBtn.dataset.id);
+          } else if (rejectBtn) {
+            mbHandleRowReject(rejectBtn.dataset.id);
+          }
         });
       }
 
@@ -7121,7 +7218,13 @@ button.dirty {
           resultado: ['W', 'L', 'P', ''].includes(cleanString(item.resultado || '').toUpperCase())
             ? cleanString(item.resultado || '').toUpperCase()
             : '',
-          notas: cleanString(item.notas || '')
+          notas: cleanString(item.notas || ''),
+          status:           ['pending','approved','rejected'].includes(item.status) ? item.status : 'pending',
+          hadAnalysis:      !!item.hadAnalysis,
+          botOpinion:       item.botOpinion       ?? null,
+          edgeAtAnalysis:   item.edgeAtAnalysis   ?? null,
+          scoreAtAnalysis:  item.scoreAtAnalysis  ?? null,
+          analysisSnapshot: item.analysisSnapshot ?? null
         }));
       }
 
@@ -9547,7 +9650,8 @@ buttons.forEach(btn => {
           odd: cleanString(odd),
           stake: cleanString(stake),
           resultado: cleanString(resultado).toUpperCase(),
-          notas: cleanString(notas)
+          notas: cleanString(notas),
+          status: 'pending'
         });
 
         markDirty();
