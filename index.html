@@ -2417,6 +2417,7 @@ button.dirty {
             <div class="label">Banca inicial</div>
             <div class="note" style="margin-bottom:8px;">Usada nos cálculos globais de ROI e banca atual.</div>
             <input id="bankrollInput" type="number" step="0.01" min="0" value="1000" />
+            <div id="bankrollSettingsLockWarning" style="display:none;margin-top:8px;"></div>
           </div>
 
           <div class="card">
@@ -2595,6 +2596,7 @@ button.dirty {
             <div class="label">Banca inicial</div>
             <div class="note" style="margin-bottom:8px;">Valor base para cálculo de ROI e banca atual. Sincronizado com Definições.</div>
             <input id="bankrollConfigInput" type="number" step="0.01" min="0" value="1000" />
+            <div id="bankrollLockWarning" style="display:none;margin-top:8px;"></div>
           </div>
           <div class="card" id="bkConfigSummary">
             <!-- Rendered by renderBankrollConfig() -->
@@ -5783,29 +5785,51 @@ buttons.forEach(btn => {
           return;
         }
 
-        const sorted = [...state.movements].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        // Running balance: compute in strict chronological order, display newest-first.
+        const chronological = [...state.movements].sort((a, b) => {
+          const d = (a.date || '').localeCompare(b.date || '');
+          return d !== 0 ? d : (a.id || '').localeCompare(b.id || '');
+        });
+
+        let running = state.bankrollInicial;
+        const balanceAfter = new Map();
+        chronological.forEach(m => {
+          const amt = num(m.amount) || 0;
+          running += m.type === 'deposit' ? amt : -amt;
+          balanceAfter.set(m.id, running);
+        });
+
+        // Display newest-first.
+        const sorted = [...state.movements].sort((a, b) => {
+          const d = (b.date || '').localeCompare(a.date || '');
+          return d !== 0 ? d : (b.id || '').localeCompare(a.id || '');
+        });
 
         wrap.innerHTML = `
-          <table style="min-width:360px;">
+          <table style="min-width:440px;">
             <thead>
               <tr>
                 <th>Data</th>
                 <th>Tipo</th>
                 <th>Valor</th>
+                <th>Saldo</th>
                 <th>Nota</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              ${sorted.map(m => `
+              ${sorted.map(m => {
+                const bal = balanceAfter.get(m.id) ?? 0;
+                return `
                 <tr>
                   <td>${escapeHtml(m.date || '—')}</td>
                   <td><span class="movement-badge ${m.type === 'deposit' ? 'deposit' : 'withdrawal'}">${m.type === 'deposit' ? 'Depósito' : 'Levantamento'}</span></td>
                   <td style="font-weight:700;color:${m.type === 'deposit' ? 'var(--ok)' : 'var(--bad)'};">${m.type === 'deposit' ? '+' : '−'}€${fmt(num(m.amount) || 0)}</td>
-                  <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(m.note || '—')}</td>
+                  <td style="font-weight:700;color:var(--text);">€${fmt(bal)}</td>
+                  <td style="color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(m.note || '—')}</td>
                   <td><button type="button" data-delete-movement="${escapeHtml(m.id)}" style="padding:2px 7px;font-size:10px;min-height:24px;color:var(--bad);border-color:var(--bad-border);">×</button></td>
                 </tr>
-              `).join('')}
+              `;}).join('')}
             </tbody>
           </table>
         `;
@@ -5820,11 +5844,46 @@ buttons.forEach(btn => {
         });
       }
 
+      function applyBankrollLock() {
+        const locked = state.movements.length > 0;
+        const warningHTML = locked
+          ? `<div class="note" style="padding:6px 10px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:6px;color:var(--warn);line-height:1.5;">
+               A banca inicial está bloqueada porque existem movimentos registados.
+               Remove todos os movimentos para alterar o valor inicial.
+             </div>`
+          : '';
+
+        const cfgInput = document.getElementById('bankrollConfigInput');
+        if (cfgInput) {
+          cfgInput.disabled = locked;
+          cfgInput.style.opacity = locked ? '0.5' : '';
+          cfgInput.style.cursor = locked ? 'not-allowed' : '';
+        }
+        const cfgWarn = document.getElementById('bankrollLockWarning');
+        if (cfgWarn) {
+          cfgWarn.style.display = locked ? 'block' : 'none';
+          cfgWarn.innerHTML = warningHTML;
+        }
+
+        const settingsInput = document.getElementById('bankrollInput');
+        if (settingsInput) {
+          settingsInput.disabled = locked;
+          settingsInput.style.opacity = locked ? '0.5' : '';
+          settingsInput.style.cursor = locked ? 'not-allowed' : '';
+        }
+        const settingsWarn = document.getElementById('bankrollSettingsLockWarning');
+        if (settingsWarn) {
+          settingsWarn.style.display = locked ? 'block' : 'none';
+          settingsWarn.innerHTML = warningHTML;
+        }
+      }
+
       function renderBankrollConfig() {
         const configInput = document.getElementById('bankrollConfigInput');
         if (configInput && configInput !== document.activeElement) {
           configInput.value = state.bankrollInicial;
         }
+        applyBankrollLock();
 
         const summary = document.getElementById('bkConfigSummary');
         if (!summary) return;
@@ -6013,6 +6072,7 @@ buttons.forEach(btn => {
 
         updateApostasButton();
         updateApostasTooltip();
+        applyBankrollLock();
 
         setActiveTab(state.activeTab);
       }
@@ -6206,6 +6266,7 @@ buttons.forEach(btn => {
         const bankrollInput = document.getElementById('bankrollInput');
         if (bankrollInput) {
           bankrollInput.addEventListener('blur', e => {
+            if (state.movements.length > 0) { e.target.value = state.bankrollInicial; return; }
             const v = num(e.target.value);
             state.bankrollInicial = v !== null && v >= 0 ? v : 0;
             const cfgInput = document.getElementById('bankrollConfigInput');
@@ -6218,6 +6279,7 @@ buttons.forEach(btn => {
         const bankrollConfigInput = document.getElementById('bankrollConfigInput');
         if (bankrollConfigInput) {
           bankrollConfigInput.addEventListener('blur', e => {
+            if (state.movements.length > 0) { e.target.value = state.bankrollInicial; return; }
             const v = num(e.target.value);
             state.bankrollInicial = v !== null && v >= 0 ? v : 0;
             const settingsInput = document.getElementById('bankrollInput');
