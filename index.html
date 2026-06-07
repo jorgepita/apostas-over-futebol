@@ -2085,6 +2085,9 @@ button.dirty {
         <!-- HISTORY INTELLIGENCE -->
         <div id="histIntelligenceWrap"></div>
 
+        <!-- HISTORY TIMELINE -->
+        <div id="histTimelineWrap"></div>
+
         <!-- OPERATIONAL BOT HISTORY TABLE -->
         <div class="card">
           <div style="margin-bottom:12px;">
@@ -5344,6 +5347,285 @@ button.dirty {
         }
       }
 
+      function renderHistoryTimeline() {
+        const wrap = document.getElementById('histTimelineWrap');
+        if (!wrap) return;
+        const rows = getHistoryFilteredRows();
+        const settled = rows.filter(r => ['W','L','P'].includes(r.result));
+        if (!settled.length) { wrap.innerHTML = ''; return; }
+
+        const PT_MO = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+        // ── Centralized period aggregation ──────────────────────────────────
+        function aggregatePeriods(src, keyFn, labelFn) {
+          const map = {};
+          src.forEach(r => {
+            const key = keyFn(r);
+            if (!key) return;
+            if (!map[key]) map[key] = { key, label: labelFn(key), picks: 0, wins: 0, losses: 0, pushes: 0, stake: 0, lucro: 0 };
+            const p = map[key];
+            p.picks++;
+            if (r.result === 'W') p.wins++;
+            else if (r.result === 'L') p.losses++;
+            else if (r.result === 'P') p.pushes++;
+            p.stake += (r.stake || 0);
+            p.lucro += (r.lucro || 0);
+          });
+          return Object.values(map).map(p => {
+            const decided = p.wins + p.losses;
+            p.wr  = decided > 0 ? p.wins / decided * 100 : null;
+            p.roi = p.stake  > 0 ? p.lucro / p.stake * 100 : null;
+            return p;
+          }).sort((a, b) => b.key.localeCompare(a.key)); // newest first
+        }
+
+        // ── Key / label helpers ─────────────────────────────────────────────
+        function mkMonthKey(r) {
+          const d = parseDateSafe(r.date);
+          if (!d) return null;
+          return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        }
+        function mkMonthLabel(key) {
+          const parts = key.split('-');
+          return (PT_MO[parseInt(parts[1], 10) - 1] || parts[1]) + ' ' + parts[0];
+        }
+        function mkWeekKey(r) {
+          const d = parseDateSafe(r.date);
+          if (!d) return null;
+          const tmp = new Date(d);
+          tmp.setHours(0, 0, 0, 0);
+          tmp.setDate(tmp.getDate() + 3 - (tmp.getDay() + 6) % 7);
+          const w1 = new Date(tmp.getFullYear(), 0, 4);
+          const wn = 1 + Math.round(((tmp - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+          return tmp.getFullYear() + '-W' + String(wn).padStart(2, '0');
+        }
+        function mkDayKey(r) {
+          const d = parseDateSafe(r.date);
+          if (!d) return null;
+          return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        function mkDayLabel(key) {
+          const pts = key.split('-');
+          return pts[2] + ' ' + (PT_MO[parseInt(pts[1], 10) - 1] || pts[1]) + ' ' + pts[0];
+        }
+
+        // ── Aggregated periods ──────────────────────────────────────────────
+        const months = aggregatePeriods(settled, mkMonthKey, mkMonthLabel);
+        const weeks  = aggregatePeriods(settled, mkWeekKey, k => k);
+
+        const thirtyAgo = new Date();
+        thirtyAgo.setDate(thirtyAgo.getDate() - 29);
+        const recent30 = settled.filter(r => { const d = parseDateSafe(r.date); return d && d >= thirtyAgo; });
+        const days = aggregatePeriods(recent30, mkDayKey, mkDayLabel);
+
+        // ── Period table builder ────────────────────────────────────────────
+        function periodRows(periods, inclStake) {
+          const cols = inclStake ? 6 : 5;
+          if (!periods.length) return `<tr><td colspan="${cols}"><div class="note" style="padding:8px;">Sem dados para o período.</div></td></tr>`;
+          return periods.map(p => `
+            <tr>
+              <td style="font-weight:600;">${escapeHtml(p.label)}</td>
+              <td>${p.picks}</td>
+              <td>${p.wr  !== null ? pct(p.wr)  : '—'}</td>
+              <td ${p.roi !== null ? profitClass(p.roi) : ''}>${p.roi !== null ? pct(p.roi) : '—'}</td>
+              <td ${profitClass(p.lucro)}>€${fmt(p.lucro)}</td>
+              ${inclStake ? `<td>€${fmt(p.stake)}</td>` : ''}
+            </tr>`).join('');
+        }
+
+        // ── Section D: Period Comparison KPI cards ──────────────────────────
+        const validMonths = months.filter(m => m.roi !== null);
+        const validWeeks  = weeks.filter(w => w.roi !== null);
+        const bestMonth   = validMonths.length ? validMonths.reduce((a, b) => b.roi > a.roi ? b : a) : null;
+        const worstMonth  = validMonths.length ? validMonths.reduce((a, b) => b.roi < a.roi ? b : a) : null;
+        const bestWeek    = validWeeks.length  ? validWeeks.reduce((a, b) => b.roi > a.roi ? b : a)  : null;
+        const curMonth    = months.length ? months[0] : null;
+
+        function periodKpiCard(title, p) {
+          if (!p) return `<div class="kpi-hero" style="flex:1;min-width:155px;"><div class="kpi-label">${escapeHtml(title)}</div><div class="kpi-value" style="font-size:18px;">—</div><div class="kpi-sub">Sem dados</div></div>`;
+          const cls   = p.roi !== null ? (p.roi > 0 ? 'kpi-ok' : p.roi < -5 ? 'kpi-bad' : '') : '';
+          const color = p.roi !== null ? (p.roi > 0 ? 'var(--ok)' : p.roi < 0 ? 'var(--bad)' : 'var(--text)') : 'var(--muted)';
+          return `<div class="kpi-hero ${cls}" style="flex:1;min-width:155px;">
+            <div class="kpi-label">${escapeHtml(title)}</div>
+            <div class="kpi-value" style="font-size:20px;color:${color};">${p.roi !== null ? pct(p.roi) : '—'}</div>
+            <div class="kpi-sub">${escapeHtml(p.label)} • ${p.picks} pick${p.picks !== 1 ? 's' : ''} • €${fmt(p.lucro)}</div>
+          </div>`;
+        }
+
+        // ── Section E: Momentum insights ────────────────────────────────────
+        const insights = [];
+
+        const totalStake  = sum(settled.map(r => r.stake));
+        const totalLucro  = sum(settled.map(r => r.lucro));
+        const overallROI  = totalStake > 0 ? totalLucro / totalStake * 100 : null;
+        const overallWins = settled.filter(r => r.result === 'W').length;
+        const overallLoss = settled.filter(r => r.result === 'L').length;
+        const overallWR   = (overallWins + overallLoss) > 0 ? overallWins / (overallWins + overallLoss) * 100 : null;
+
+        const l30Stake = sum(recent30.map(r => r.stake));
+        const l30Lucro = sum(recent30.map(r => r.lucro));
+        const l30ROI   = l30Stake > 0 ? l30Lucro / l30Stake * 100 : null;
+        const l30Wins  = recent30.filter(r => r.result === 'W').length;
+        const l30Loss  = recent30.filter(r => r.result === 'L').length;
+        const l30WR    = (l30Wins + l30Loss) > 0 ? l30Wins / (l30Wins + l30Loss) * 100 : null;
+
+        function insightColor(cls) {
+          if (cls === 'good') return 'var(--ok)';
+          if (cls === 'bad')  return 'var(--bad)';
+          if (cls === 'warn') return 'var(--warn)';
+          return 'var(--info)';
+        }
+
+        if (overallROI !== null && l30ROI !== null && recent30.length >= 5) {
+          const diff = l30ROI - overallROI;
+          if (diff > 1)       insights.push({ cls: 'good', icon: '▲', text: `Últimos 30 dias superam histórico em +${fmt(Math.abs(diff), 1)} pts ROI (${pct(l30ROI, 1)} vs ${pct(overallROI, 1)})` });
+          else if (diff < -1) insights.push({ cls: 'bad',  icon: '▼', text: `Últimos 30 dias abaixo do histórico em ${fmt(Math.abs(diff), 1)} pts ROI (${pct(l30ROI, 1)} vs ${pct(overallROI, 1)})` });
+          else                insights.push({ cls: 'info', icon: '◆', text: `Performance recente alinhada com histórico (${pct(l30ROI, 1)} vs ${pct(overallROI, 1)})` });
+        }
+
+        if (curMonth && overallWR !== null && curMonth.wr !== null && curMonth.picks >= 3) {
+          const wrDiff = curMonth.wr - overallWR;
+          if (wrDiff > 3)       insights.push({ cls: 'good', icon: '▲', text: `Mês atual com WR superior ao histórico (${pct(curMonth.wr, 1)} vs ${pct(overallWR, 1)})` });
+          else if (wrDiff < -3) insights.push({ cls: 'bad',  icon: '▼', text: `Mês atual com WR inferior ao histórico (${pct(curMonth.wr, 1)} vs ${pct(overallWR, 1)})` });
+        }
+
+        if (weeks.length >= 4) {
+          const last4 = weeks.slice(0, 4).filter(w => w.roi !== null);
+          if (last4.length >= 3) {
+            let improving = 0;
+            for (let i = 0; i < last4.length - 1; i++) {
+              if (last4[i + 1].roi < last4[i].roi) improving++;
+            }
+            const totalPairs = last4.length - 1;
+            if (improving >= Math.ceil(totalPairs * 0.66))       insights.push({ cls: 'good', icon: '▲', text: `Últimas ${last4.length} semanas apresentam tendência de melhoria de ROI` });
+            else if (improving <= Math.floor(totalPairs * 0.33)) insights.push({ cls: 'bad',  icon: '▼', text: `Últimas ${last4.length} semanas apresentam tendência de deterioração` });
+          }
+        }
+
+        if (bestMonth && curMonth && bestMonth.key === curMonth.key && curMonth.picks >= 3) {
+          insights.push({ cls: 'good', icon: '★', text: `Mês atual é o melhor mês registado com ROI de ${pct(bestMonth.roi, 1)}` });
+        }
+
+        if (months.length >= 2) {
+          const prevMonth = months[1];
+          if (curMonth && curMonth.picks > 0 && prevMonth.picks > 0) {
+            const vd = curMonth.picks - prevMonth.picks;
+            if (vd > 0)       insights.push({ cls: 'info', icon: '◆', text: `Volume do mês atual superior ao mês anterior (+${vd} picks: ${curMonth.picks} vs ${prevMonth.picks})` });
+            else if (vd < 0)  insights.push({ cls: 'warn', icon: '◆', text: `Volume do mês atual inferior ao mês anterior (${curMonth.picks} vs ${prevMonth.picks} picks)` });
+          }
+        }
+
+        const shownInsights = insights.slice(0, 5);
+
+        // ── Section F: Consistency Score ────────────────────────────────────
+        const activeMonths = months.length;
+        const activeWeeks  = weeks.length;
+        const monthROIs    = validMonths.filter(m => m.picks >= 3).map(m => m.roi);
+        let roiStdDev = 0;
+        if (monthROIs.length >= 2) {
+          const mean     = monthROIs.reduce((a, b) => a + b, 0) / monthROIs.length;
+          const variance = monthROIs.map(r => (r - mean) * (r - mean)).reduce((a, b) => a + b, 0) / monthROIs.length;
+          roiStdDev = Math.sqrt(variance);
+        }
+        const pts_months    = Math.min(activeMonths / 6 * 30, 30);
+        const pts_weeks     = Math.min(activeWeeks  / 12 * 20, 20);
+        const pts_stability = monthROIs.length >= 2 ? Math.max(0, 25 - roiStdDev / 2) : 0;
+        const pts_sample    = Math.min(settled.length / 100 * 25, 25);
+        const consScore     = Math.round(pts_months + pts_weeks + pts_stability + pts_sample);
+        const consLabel     = consScore >= 67 ? 'HIGH' : consScore >= 34 ? 'MEDIUM' : 'LOW';
+        const consCls       = consScore >= 67 ? 'kpi-ok' : consScore >= 34 ? 'kpi-warn' : 'kpi-bad';
+        const consColor     = consScore >= 67 ? 'var(--ok)' : consScore >= 34 ? 'var(--warn)' : 'var(--bad)';
+        const consText      = consScore >= 67
+          ? `${activeMonths} meses ativos, ${activeWeeks} semanas ativas, ROI estável (σ = ${fmt(roiStdDev, 1)}%), ${settled.length} apostas resolvidas`
+          : consScore >= 34
+          ? `${activeMonths} meses ativos, ${activeWeeks} semanas ativas, amostra em crescimento (${settled.length} apostas)`
+          : `Amostra insuficiente para avaliar consistência (${settled.length} apostas, ${activeMonths} meses ativos)`;
+
+        // ── Render ──────────────────────────────────────────────────────────
+        wrap.innerHTML = `
+          <div style="margin-top:0;display:flex;flex-direction:column;gap:12px;">
+
+            <div style="font-size:15px;font-weight:800;color:var(--text);padding:2px 0;">Timeline de Performance</div>
+
+            <!-- D: Period Comparison -->
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Comparação de Períodos</div>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                ${periodKpiCard('Melhor Mês', bestMonth)}
+                ${periodKpiCard('Pior Mês', worstMonth)}
+                ${periodKpiCard('Melhor Semana', bestWeek)}
+                ${periodKpiCard('Mês Atual', curMonth)}
+              </div>
+            </div>
+
+            <!-- A: Monthly Performance -->
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Performance por Mês</div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Mês</th><th>Picks</th><th>Win Rate</th><th>ROI</th><th>Lucro</th><th>Stake</th></tr></thead>
+                  <tbody>${periodRows(months, true)}</tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- B: Weekly Performance -->
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Performance por Semana</div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Semana</th><th>Picks</th><th>Win Rate</th><th>ROI</th><th>Lucro</th></tr></thead>
+                  <tbody>${periodRows(weeks, false)}</tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- C: Daily Timeline (last 30 days) -->
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Últimos 30 Dias <span class="note" style="font-weight:400;"> — apenas dias com actividade</span></div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Data</th><th>Picks</th><th>Win Rate</th><th>ROI</th><th>Lucro</th></tr></thead>
+                  <tbody>${periodRows(days, false)}</tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- E: Momentum Analysis -->
+            ${shownInsights.length ? `
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Análise de Momentum</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                ${shownInsights.map(ins => `
+                  <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card-alt);border-radius:8px;border-left:3px solid ${insightColor(ins.cls)};">
+                    <span style="font-size:13px;font-weight:900;color:${insightColor(ins.cls)};flex-shrink:0;">${ins.icon}</span>
+                    <span class="note" style="flex:1;line-height:1.5;">${escapeHtml(ins.text)}</span>
+                  </div>`).join('')}
+              </div>
+            </div>` : ''}
+
+            <!-- F: Consistency Score -->
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Consistência Histórica</div>
+              <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                <div class="kpi-hero ${consCls}" style="min-width:110px;text-align:center;flex-shrink:0;">
+                  <div class="kpi-label">Score</div>
+                  <div class="kpi-value" style="color:${consColor};">${consScore}</div>
+                  <div class="kpi-sub">${consLabel}</div>
+                </div>
+                <div style="flex:1;min-width:200px;">
+                  <div style="height:8px;background:var(--line);border-radius:4px;margin-bottom:8px;overflow:hidden;">
+                    <div style="height:100%;width:${consScore}%;background:${consColor};border-radius:4px;"></div>
+                  </div>
+                  <div class="note">${escapeHtml(consText)}</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }
+
       function exportFilteredHistory() {
         const rows = getHistoryFilteredRows();
         if (!rows.length) { alert('Sem dados para exportar com os filtros atuais.'); return; }
@@ -8064,6 +8346,7 @@ buttons.forEach(btn => {
         try { renderClosedRealTable(); } catch (e) { console.error('renderClosedRealTable', e); }
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
         try { renderHistoryIntelligence(); } catch (e) { console.error('renderHistoryIntelligence', e); }
+        try { renderHistoryTimeline(); } catch (e) { console.error('renderHistoryTimeline', e); }
       }
 
       function rerenderManualOnly() {
