@@ -2467,6 +2467,21 @@ button.dirty {
           </div>
         </div>
 
+        <!-- SECTION H: Strategy Validation -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">H — Strategy Validation</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Strategy Validation</div>
+            <div class="note">Identifica padrões reais de performance para otimizar o modelo.</div>
+          </div>
+          <div id="strategyValidationWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -4874,6 +4889,7 @@ button.dirty {
         try { renderMarketIntelligence(); } catch (e) { console.error('renderMarketIntelligence', e); }
         try { renderPerformanceOverTime(); } catch (e) { console.error('renderPerformanceOverTime', e); }
         try { renderEdgeValidation(); } catch (e) { console.error('renderEdgeValidation', e); }
+        try { renderStrategyValidation(); } catch (e) { console.error('renderStrategyValidation', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -6265,6 +6281,379 @@ buttons.forEach(btn => {
         `;
 
         wrap.innerHTML = kpiHtml + tableHtml + qualityHtml;
+      }
+
+      function renderStrategyValidation() {
+        const wrap = document.getElementById('strategyValidationWrap');
+        if (!wrap) return;
+
+        const botRows = getRealResolvedBotHistory();
+        const closedRows = getFilteredRealClosedRows(getSummaryFilters());
+
+        if (!closedRows.length && !botRows.length) {
+          wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem histórico real para análise.</div>`;
+          return;
+        }
+
+        function sampleBadge(picks) {
+          if (picks >= 30) return `<span class="mini good">Strong</span>`;
+          if (picks >= 15) return `<span class="mini warn">Moderate</span>`;
+          return `<span class="mini bad">Weak</span>`;
+        }
+
+        function subSection(title, subtitle, content) {
+          return `
+            <div style="margin-bottom:22px;">
+              <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:${subtitle ? '2px' : '8px'};">${title}</div>
+              ${subtitle ? `<div class="note" style="margin-bottom:8px;">${subtitle}</div>` : ''}
+              ${content}
+            </div>`;
+        }
+
+        function simpleTable(headers, rowsHtml) {
+          return `
+            <div class="table-wrap">
+              <table>
+                <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+            </div>`;
+        }
+
+        // ── A: Edge vs ROI with Sample Quality ──────────────────
+        const edgeBets = botRows
+          .map(r => ({
+            edge: num(r['Edge%'] ?? r['Edge']),
+            result: r._resultKey,
+            stake: r._stakeRealNum ?? 0,
+            lucro: r._lucroRealLocal ?? 0
+          }))
+          .filter(b => b.edge !== null && b.edge >= 0);
+
+        const EDGE_BUCKETS = [
+          { label: '0–2%',  min: 0, max: 2 },
+          { label: '2–4%',  min: 2, max: 4 },
+          { label: '4–6%',  min: 4, max: 6 },
+          { label: '6–8%',  min: 6, max: 8 },
+          { label: '8%+',   min: 8, max: Infinity }
+        ];
+
+        const edgeBuckets = EDGE_BUCKETS.map(b => {
+          const rows = edgeBets.filter(r => r.edge >= b.min && r.edge < b.max);
+          const picks = rows.length;
+          const stake = sum(rows.map(r => r.stake));
+          const lucro = sum(rows.map(r => r.lucro));
+          const wins = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr };
+        });
+
+        const edgeSection = subSection('A — Edge vs ROI', 'Sample quality por bucket de edge previsto',
+          simpleTable(['Edge Range', 'Picks', 'Win Rate', 'ROI', 'P/L', 'Sample Quality'],
+            edgeBuckets.map(b => `
+              <tr ${b.picks === 0 ? 'style="opacity:0.4;"' : ''}>
+                <td style="font-weight:700;">${b.label}</td>
+                <td>${b.picks}</td>
+                <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                <td ${profitClass(b.lucro)}>${b.lucro >= 0 ? '+' : ''}€${fmt(b.lucro)}</td>
+                <td>${sampleBadge(b.picks)}</td>
+              </tr>`).join('')));
+
+        // ── B: Odds Analysis ─────────────────────────────────────
+        const ODDS_BUCKETS = [
+          { label: '1.00–1.49', min: 1.00, max: 1.50 },
+          { label: '1.50–1.79', min: 1.50, max: 1.80 },
+          { label: '1.80–1.99', min: 1.80, max: 2.00 },
+          { label: '2.00–2.19', min: 2.00, max: 2.20 },
+          { label: '2.20+',     min: 2.20, max: Infinity }
+        ];
+
+        const oddsBuckets = ODDS_BUCKETS.map(b => {
+          const rows = closedRows.filter(r => r.odd !== null && r.odd >= b.min && r.odd < b.max);
+          const picks = rows.length;
+          const stake = sum(rows.map(r => r.stake));
+          const lucro = sum(rows.map(r => r.lucro));
+          const wins = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          const botInRange = botRows.filter(r => {
+            const o = r._oddRealNum;
+            const edge = num(r['Edge%'] ?? r['Edge']);
+            return o !== null && o >= b.min && o < b.max && edge !== null;
+          });
+          const avgEdge = botInRange.length > 0
+            ? botInRange.reduce((s, r) => s + (num(r['Edge%'] ?? r['Edge']) || 0), 0) / botInRange.length
+            : null;
+          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr, avgEdge };
+        });
+
+        const oddsSection = subSection('B — Odds Analysis', 'Performance real por intervalo de odds',
+          simpleTable(['Odds Range', 'Picks', 'Win Rate', 'ROI', 'P/L', 'Avg Edge'],
+            oddsBuckets.map(b => `
+              <tr ${b.picks === 0 ? 'style="opacity:0.4;"' : ''}>
+                <td style="font-weight:700;">${b.label}</td>
+                <td>${b.picks}</td>
+                <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                <td ${profitClass(b.lucro)}>${b.lucro >= 0 ? '+' : ''}€${fmt(b.lucro)}</td>
+                <td style="color:var(--muted);">${b.avgEdge !== null ? `${fmt(b.avgEdge)}%` : '—'}</td>
+              </tr>`).join('')));
+
+        // ── C: League Validation ─────────────────────────────────
+        const leagueEdgeMap = new Map();
+        botRows.forEach(r => {
+          const lg = cleanString(r['Liga'] || '').toLowerCase();
+          const edge = num(r['Edge%'] ?? r['Edge']);
+          if (edge === null) return;
+          if (!leagueEdgeMap.has(lg)) leagueEdgeMap.set(lg, []);
+          leagueEdgeMap.get(lg).push(edge);
+        });
+
+        const leagueData = buildAnalytics(closedRows, 'league')
+          .map(r => {
+            const key = cleanString(r.key || '').toLowerCase();
+            const edges = leagueEdgeMap.get(key) || [];
+            const avgEdge = edges.length > 0 ? edges.reduce((s, e) => s + e, 0) / edges.length : null;
+            return { ...r, league: r.key, avgEdge };
+          })
+          .filter(r => r.apostas >= 3)
+          .sort((a, b) => b.roi - a.roi);
+
+        const leagueSection = leagueData.length
+          ? subSection('C — League Validation', 'Mín. 3 picks • Top 3 a verde • Bottom 3 a vermelho • Ordenado por ROI',
+              simpleTable(['Liga', 'Picks', 'Win Rate', 'ROI', 'P/L', 'Avg Edge'],
+                leagueData.map((r, i) => {
+                  const isTop3 = i < 3;
+                  const isBot3 = leagueData.length > 3 && i >= leagueData.length - 3;
+                  const rowBg = isTop3 ? 'background:rgba(34,197,94,0.07);' : isBot3 ? 'background:rgba(239,68,68,0.07);' : '';
+                  return `
+                    <tr style="${rowBg}">
+                      <td style="font-weight:600;">${escapeHtml(r.league)}</td>
+                      <td>${r.apostas}</td>
+                      <td>${pct(r.winRate)}</td>
+                      <td ${profitClass(r.roi)}>${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</td>
+                      <td ${profitClass(r.lucro)}>${r.lucro >= 0 ? '+' : ''}€${fmt(r.lucro)}</td>
+                      <td style="color:var(--muted);">${r.avgEdge !== null ? `${fmt(r.avgEdge)}%` : '—'}</td>
+                    </tr>`;
+                }).join('')))
+          : subSection('C — League Validation', '', `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem ligas com 3+ picks.</div>`);
+
+        // ── D: Market Validation ──────────────────────────────────
+        const marketData = buildAnalytics(closedRows, 'market')
+          .map(r => ({ ...r, market: r.key }))
+          .sort((a, b) => b.apostas - a.apostas);
+
+        const marketSection = marketData.length
+          ? subSection('D — Market Validation', 'Rentabilidade real por tipo de mercado',
+              simpleTable(['Mercado', 'Picks', 'Win Rate', 'ROI', 'P/L'],
+                marketData.map(r => `
+                  <tr>
+                    <td style="font-weight:600;">${escapeHtml(r.market)}</td>
+                    <td>${r.apostas}</td>
+                    <td>${pct(r.winRate)}</td>
+                    <td ${profitClass(r.roi)}>${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</td>
+                    <td ${profitClass(r.lucro)}>${r.lucro >= 0 ? '+' : ''}€${fmt(r.lucro)}</td>
+                  </tr>`).join('')))
+          : subSection('D — Market Validation', '', `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem dados de mercado.</div>`);
+
+        // ── E: Day of Week Analysis ───────────────────────────────
+        const DAY_LABELS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        // JS getDay(): 0=Sun 1=Mon ... 6=Sat — map idx (0=Mon) to jsDay
+        const dayBuckets = DAY_LABELS.map((label, idx) => {
+          const jsDay = idx === 6 ? 0 : idx + 1;
+          const rows = closedRows.filter(r => {
+            const d = parseDateSafe(r.date);
+            return d && d.getDay() === jsDay;
+          });
+          const picks = rows.length;
+          const stake = sum(rows.map(r => r.stake));
+          const lucro = sum(rows.map(r => r.lucro));
+          const wins = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          return { label, picks, stake, lucro, wins, losses, roi, wr };
+        });
+
+        const daySection = subSection('E — Day of Week Analysis', 'Efeito do dia da semana na performance real',
+          simpleTable(['Dia', 'Picks', 'Win Rate', 'ROI', 'P/L'],
+            dayBuckets.map(b => `
+              <tr ${b.picks === 0 ? 'style="opacity:0.4;"' : ''}>
+                <td style="font-weight:600;">${b.label}</td>
+                <td>${b.picks}</td>
+                <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                <td ${profitClass(b.lucro)}>${b.lucro >= 0 ? '+' : ''}€${fmt(b.lucro)}</td>
+              </tr>`).join('')));
+
+        // ── F: Kickoff Time Analysis ──────────────────────────────
+        const TIME_BUCKETS = [
+          { label: '00–05', min: 0,  max: 6  },
+          { label: '06–11', min: 6,  max: 12 },
+          { label: '12–17', min: 12, max: 18 },
+          { label: '18–23', min: 18, max: 24 }
+        ];
+
+        const betsWithTime = botRows.map(r => {
+          const timeStr = cleanString(r['Hora'] || r['Hour'] || r['KickoffTime'] || r['Time'] || r['Kickoff'] || '');
+          const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+          const hour = match ? parseInt(match[1], 10) : null;
+          return { hour, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
+        }).filter(b => b.hour !== null);
+
+        let kickoffSection;
+        if (!betsWithTime.length) {
+          kickoffSection = subSection('F — Kickoff Time Analysis', '',
+            `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem dados de horário disponíveis nos registos de apostas.</div>`);
+        } else {
+          const timeBuckets = TIME_BUCKETS.map(b => {
+            const rows = betsWithTime.filter(r => r.hour >= b.min && r.hour < b.max);
+            const picks = rows.length;
+            const stake = sum(rows.map(r => r.stake));
+            const lucro = sum(rows.map(r => r.lucro));
+            const wins = rows.filter(r => r.result === 'W').length;
+            const losses = rows.filter(r => r.result === 'L').length;
+            const roi = stake > 0 ? (lucro / stake) * 100 : null;
+            const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+            return { label: b.label, picks, stake, lucro, roi, wr };
+          });
+
+          kickoffSection = subSection('F — Kickoff Time Analysis', 'Performance por janela horária',
+            simpleTable(['Hora', 'Picks', 'Win Rate', 'ROI', 'P/L'],
+              timeBuckets.map(b => `
+                <tr ${b.picks === 0 ? 'style="opacity:0.4;"' : ''}>
+                  <td style="font-weight:700;">${b.label}</td>
+                  <td>${b.picks}</td>
+                  <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                  <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                  <td ${profitClass(b.lucro)}>${b.lucro >= 0 ? '+' : ''}€${fmt(b.lucro)}</td>
+                </tr>`).join('')));
+        }
+
+        // ── G: Strategy Scorecard ─────────────────────────────────
+        const globalStake = sum(closedRows.map(r => r.stake));
+        const globalRoi = globalStake > 0 ? (sum(closedRows.map(r => r.lucro)) / globalStake) * 100 : null;
+
+        function bestOf(arr, roiField) { return arr.filter(r => (r[roiField] ?? r.roi) !== null).sort((a, b) => (b[roiField] ?? b.roi) - (a[roiField] ?? a.roi))[0] ?? null; }
+        function worstOf(arr, roiField) { return arr.filter(r => (r[roiField] ?? r.roi) !== null).sort((a, b) => (a[roiField] ?? a.roi) - (b[roiField] ?? b.roi))[0] ?? null; }
+
+        const qualLeagues  = leagueData.filter(r => r.apostas >= 3);
+        const qualMarkets  = marketData.filter(r => r.apostas >= 3);
+        const qualOdds     = oddsBuckets.filter(b => b.picks >= 3 && b.roi !== null);
+        const qualDays     = dayBuckets.filter(b => b.picks >= 3 && b.roi !== null);
+        const qualEdge     = edgeBuckets.filter(b => b.picks > 0 && b.roi !== null);
+
+        function scorecardCard(title, item, nameKey) {
+          if (!item) return `<div class="kpi-hero"><div class="kpi-label">${title}</div><div class="kpi-value" style="font-size:13px;">—</div><div class="kpi-sub">Dados insuf.</div></div>`;
+          const roiVal = item.roi ?? null;
+          const cls = roiVal !== null && roiVal >= 0 ? 'kpi-ok' : 'kpi-bad';
+          const roiStr = roiVal !== null ? `ROI ${roiVal >= 0 ? '+' : ''}${pct(roiVal)}` : '';
+          const picks = item.apostas ?? item.picks ?? 0;
+          return `
+            <div class="kpi-hero ${cls}">
+              <div class="kpi-label">${title}</div>
+              <div class="kpi-value" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(String(item[nameKey] ?? item.label ?? '—'))}">${escapeHtml(String(item[nameKey] ?? item.label ?? '—'))}</div>
+              <div class="kpi-sub">${roiStr}${roiStr && picks ? ' • ' : ''}${picks ? picks + ' picks' : ''}</div>
+            </div>`;
+        }
+
+        const scorecardSection = subSection('G — Strategy Scorecard', 'Melhores e piores segmentos (mín. 3 picks)', `
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:8px;">
+            ${scorecardCard('Melhor Liga',         bestOf(qualLeagues, 'roi'),  'league')}
+            ${scorecardCard('Pior Liga',           worstOf(qualLeagues, 'roi'), 'league')}
+            ${scorecardCard('Melhor Mercado',      bestOf(qualMarkets, 'roi'),  'market')}
+            ${scorecardCard('Pior Mercado',        worstOf(qualMarkets, 'roi'), 'market')}
+            ${scorecardCard('Melhor Edge Bucket',  bestOf(qualEdge, 'roi'),     'label')}
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
+            ${scorecardCard('Melhor Odds Range',   bestOf(qualOdds, 'roi'),     'label')}
+            ${scorecardCard('Pior Odds Range',     worstOf(qualOdds, 'roi'),    'label')}
+            ${scorecardCard('Melhor Dia',          bestOf(qualDays, 'roi'),     'label')}
+            ${scorecardCard('Pior Dia',            worstOf(qualDays, 'roi'),    'label')}
+          </div>`);
+
+        // ── H: Actionable Insights ────────────────────────────────
+        const MIN_PICKS = 5;
+        const insights = [];
+
+        // League vs global ROI
+        if (globalRoi !== null) {
+          leagueData.filter(r => r.apostas >= MIN_PICKS).forEach(r => {
+            const diff = r.roi - globalRoi;
+            if (Math.abs(diff) >= 5) {
+              insights.push({
+                text: `${escapeHtml(r.league)} ROI (${r.roi >= 0 ? '+' : ''}${pct(r.roi)}) ${diff > 0 ? 'supera' : 'fica abaixo de'} o ROI global em ${fmt(Math.abs(diff))} pontos.`,
+                delta: Math.abs(diff)
+              });
+            }
+          });
+        }
+
+        // Worst odds range
+        oddsBuckets.filter(b => b.picks >= MIN_PICKS && b.roi !== null && b.roi < -5)
+          .sort((a, b) => a.roi - b.roi)
+          .slice(0, 1)
+          .forEach(b => insights.push({
+            text: `Odds ${escapeHtml(b.label)} produzem ROI (${pct(b.roi)}) em ${b.picks} picks.`,
+            delta: Math.abs(b.roi)
+          }));
+
+        // Market comparison
+        const mktQ = marketData.filter(r => r.apostas >= MIN_PICKS);
+        if (mktQ.length >= 2) {
+          const mBest = [...mktQ].sort((a, b) => b.roi - a.roi)[0];
+          const mWorst = [...mktQ].sort((a, b) => a.roi - b.roi)[0];
+          if (mBest !== mWorst) {
+            insights.push({
+              text: `${escapeHtml(mBest.market)} supera ${escapeHtml(mWorst.market)} em ${fmt(mBest.roi - mWorst.roi)} pontos de ROI.`,
+              delta: mBest.roi - mWorst.roi
+            });
+          }
+        }
+
+        // Best day
+        const topDay = dayBuckets.filter(b => b.picks >= MIN_PICKS && b.roi !== null).sort((a, b) => b.roi - a.roi)[0];
+        if (topDay && topDay.roi > 3) {
+          insights.push({
+            text: `${escapeHtml(topDay.label)} é o dia mais forte com ROI ${topDay.roi >= 0 ? '+' : ''}${pct(topDay.roi)} em ${topDay.picks} picks.`,
+            delta: topDay.roi
+          });
+        }
+
+        // Edge monotonicity
+        const roiByEdge = edgeBuckets.filter(b => b.picks > 0 && b.roi !== null);
+        if (roiByEdge.length >= 3) {
+          let up = 0, down = 0;
+          for (let i = 1; i < roiByEdge.length; i++) {
+            if (roiByEdge[i].roi > roiByEdge[i - 1].roi) up++;
+            else if (roiByEdge[i].roi < roiByEdge[i - 1].roi) down++;
+          }
+          if (down > up) {
+            insights.push({ text: `Edge previsto mais alto não produz ROI superior — modelo pode estar mal calibrado.`, delta: 10 });
+          } else if (up > down) {
+            insights.push({ text: `Edge previsto correlaciona positivamente com ROI real — modelo está bem calibrado.`, delta: 10 });
+          }
+        }
+
+        insights.sort((a, b) => b.delta - a.delta);
+        const top5 = insights.slice(0, 5);
+
+        const insightsSection = subSection('H — Actionable Insights', `Padrões com ≥ ${MIN_PICKS} picks por segmento (máx. 5)`,
+          top5.length
+            ? `<div style="display:flex;flex-direction:column;gap:8px;">
+                ${top5.map(ins => `
+                  <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;border-left:3px solid var(--info);">
+                    <span style="color:var(--info);font-weight:700;font-size:14px;flex-shrink:0;">→</span>
+                    <span style="font-size:13px;line-height:1.5;">${ins.text}</span>
+                  </div>`).join('')}
+              </div>`
+            : `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Dados insuficientes para gerar insights (mín. ${MIN_PICKS} picks por segmento).</div>`);
+
+        wrap.innerHTML = edgeSection + oddsSection + leagueSection + marketSection + daySection + kickoffSection + scorecardSection + insightsSection;
       }
 
       function renderLeagueClassification() {
