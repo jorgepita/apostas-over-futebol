@@ -5641,7 +5641,7 @@ button.dirty {
         }
       }
 
-      function setActiveTab(tabId) {
+      function setActiveTab(tabId, { scrollToTop = true } = {}) {
         state.activeTab = tabId;
         saveLocalState();
 
@@ -5649,7 +5649,7 @@ button.dirty {
         document.querySelectorAll('.nav-item').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
         });
-        
+
         // Support legacy tab-btn if any remains
         document.querySelectorAll('.tab-btn[data-tab-target]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.tabTarget === tabId);
@@ -5659,7 +5659,7 @@ button.dirty {
           panel.classList.toggle('active', panel.id === tabId);
         });
 
-        window.scrollTo(0, 0);
+        if (scrollToTop) window.scrollTo(0, 0);
       }
 
       function bindMobileActionsButton() {
@@ -8093,7 +8093,7 @@ buttons.forEach(btn => {
         updateApostasTooltip();
         applyBankrollImmutability();
 
-        setActiveTab(state.activeTab);
+        setActiveTab(state.activeTab, { scrollToTop: false });
       }
 
       function addManualBet() {
