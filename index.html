@@ -1590,6 +1590,98 @@ button.dirty {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* =========================
+   MANUAL SCOUT WORKSPACE
+========================= */
+.scout-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.manual-scout-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scout-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.scout-card-header strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 3px;
+}
+
+.scout-card-controls {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.scout-analysis-panel {
+  background: var(--card-alt);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.scout-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px 10px;
+  margin-bottom: 6px;
+}
+
+.scout-analysis-kpi {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.scout-analysis-kpi strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.scout-stale-warn {
+  font-size: 11px;
+  color: var(--warn-text, #f59e0b);
+  margin-bottom: 5px;
+}
+
+.scout-msg {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+}
+
+@media (max-width: 768px) {
+  .scout-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .scout-card-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
   </style>
 </head>
 <body>
@@ -2167,6 +2259,8 @@ button.dirty {
           </div>
         </div>
 
+        <div id="manualScoutWrap"></div>
+
         <div class="card">
           <div class="label">Adicionar aposta manual</div>
           <div class="note" style="margin-bottom:12px;">Para jogos ou mercados fora das picks geradas.</div>
@@ -2241,6 +2335,8 @@ button.dirty {
                   <th>Resultado</th>
                   <th>Lucro</th>
                   <th>Notas</th>
+                  <th>Análise</th>
+                  <th>Opinião</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -6066,11 +6162,467 @@ button.dirty {
         URL.revokeObjectURL(url);
       }
 
+      // ── PHASE 17: MANUAL SCOUT — HELPER FUNCTIONS ──────────────────
+
+      function mbScoutMarketLabel(val) {
+        if (val === 'O2.5') return 'Over 2.5';
+        if (val === 'BTTS') return 'BTTS';
+        return val;
+      }
+
+      function mbScoutNormMarket(m) {
+        const u = String(m || '').toUpperCase().replace(/\s+/g, '');
+        if (u === 'O2.5' || u === 'OVER2.5') return 'O2.5';
+        if (u === 'BTTS') return 'BTTS';
+        return u;
+      }
+
+      function findLeagueStatsForAnalysis(league, market) {
+        const rows = Array.isArray(state.leagueStats) ? state.leagueStats : [];
+        const normLeague = cleanString(league || '').toLowerCase();
+        const normMarket = mbScoutNormMarket(market);
+        return rows.find(r => {
+          const rLeague = cleanString(r.League || r.Liga || '').toLowerCase();
+          const rMarket = mbScoutNormMarket(normalizeMarket(r) || r.Market || '');
+          return rLeague === normLeague && rMarket === normMarket;
+        }) || null;
+      }
+
+      function computeManualAnalysis(league, market, userOdd, userStake) {
+        const statsRow = findLeagueStatsForAnalysis(league, market);
+        const totalPicks = statsRow ? (num(statsRow.TotalPicks) ?? 0) : 0;
+        const rawWR = statsRow ? num(statsRow['WinRate%']) : null;
+
+        // Use historical win rate if sample is meaningful (≥5 picks), else defaults
+        let modelProb;
+        if (rawWR !== null && totalPicks >= 5) {
+          modelProb = clamp(rawWR / 100, 0.01, 0.99);
+        } else {
+          const defaults = { 'O2.5': 0.54, 'BTTS': 0.50 };
+          modelProb = defaults[mbScoutNormMarket(market)] ?? 0.52;
+        }
+
+        const marketProb = clamp(1 / userOdd, 0.01, 0.99);
+        const edge = (modelProb - marketProb) * 100;
+        const fairOdd = modelProb > 0 ? 1 / modelProb : null;
+        const ev = userStake * ((modelProb * userOdd) - 1);
+
+        // Score (same formula as computePickScore adapted for manual analysis)
+        let score = 50;
+        score += clamp(edge * 3, -20, 30);
+        if (userOdd >= 1.7 && userOdd <= 2.2) score += 8;
+        else if (userOdd > 2.2 && userOdd <= 2.6) score += 4;
+        else if (userOdd > 2.6) score -= 4;
+        if (userStake >= 3) score += 6;
+        if (userStake >= 5) score += 6;
+        score = clamp(Math.round(score), 0, 100);
+        const scoreCls = score >= 75 ? 'good' : score >= 60 ? 'info' : score >= 45 ? 'warn' : 'bad';
+
+        // Opinion
+        let opinion, opinionCls;
+        if (edge >= 8 || score >= 75)      { opinion = 'STRONG BUY'; opinionCls = 'good'; }
+        else if (edge >= 4 || score >= 60) { opinion = 'BUY';        opinionCls = 'info'; }
+        else if (edge >= 0 || score >= 45) { opinion = 'NEUTRAL';    opinionCls = 'warn'; }
+        else                               { opinion = 'AVOID';      opinionCls = 'bad';  }
+
+        return { modelProb, marketProb, edge, fairOdd, ev, score, scoreCls, opinion, opinionCls };
+      }
+
+      function mbScoutBuildCacheKey(matchKey, market, odd, stake) {
+        return `${matchKey}|${mbScoutNormMarket(market)}|${parseFloat(odd).toFixed(2)}|${parseFloat(stake).toFixed(2)}`;
+      }
+
+      function mbScoutGetCardValues(card) {
+        return {
+          market: card.querySelector('.js-scout-market')?.value || '',
+          odd:    card.querySelector('.js-scout-odd')?.value || '',
+          stake:  card.querySelector('.js-scout-stake')?.value || ''
+        };
+      }
+
+      function renderScoutAnalysisPanel(card, result, isStale) {
+        const panel = card.querySelector('.js-scout-analysis-panel');
+        const analyzeBtn = card.querySelector('.js-scout-analyze');
+        if (!panel || !analyzeBtn) return;
+
+        analyzeBtn.textContent = isStale ? 'Reanalisar' : 'Analisar';
+
+        const staleHtml = isStale
+          ? `<div class="scout-stale-warn">⚠ Análise desatualizada — clique Reanalisar</div>`
+          : '';
+
+        const evSign = result.ev >= 0 ? '+' : '';
+        const edgeSign = result.edge >= 0 ? '+' : '';
+        const edgeColor = result.edge >= 0 ? 'var(--ok)' : 'var(--bad)';
+        const evColor = result.ev >= 0 ? 'var(--ok)' : 'var(--bad)';
+
+        panel.style.display = '';
+        panel.innerHTML = `
+          ${staleHtml}
+          <div class="scout-analysis-grid">
+            <div class="scout-analysis-kpi">
+              Prob. Modelo
+              <strong>${(result.modelProb * 100).toFixed(1)}%</strong>
+            </div>
+            <div class="scout-analysis-kpi">
+              Odd Justa
+              <strong>${result.fairOdd ? fmt(result.fairOdd) : '—'}</strong>
+            </div>
+            <div class="scout-analysis-kpi">
+              Edge
+              <strong style="color:${edgeColor};">${edgeSign}${fmt(result.edge)}%</strong>
+            </div>
+            <div class="scout-analysis-kpi">
+              EV
+              <strong style="color:${evColor};">${evSign}€${fmt(Math.abs(result.ev))}</strong>
+            </div>
+          </div>
+          <div>
+            <span class="mini ${result.scoreCls}">Score ${result.score}</span>
+            <span class="mini ${result.opinionCls}" style="margin-left:6px;">${escapeHtml(result.opinion)}</span>
+          </div>
+        `;
+      }
+
+      function renderManualScout() {
+        const wrap = document.getElementById('manualScoutWrap');
+        if (!wrap) return;
+
+        const today = todayIso();
+        const maxDate = (() => {
+          const d = new Date(`${today}T00:00:00`);
+          d.setDate(d.getDate() + 3);
+          const y = d.getFullYear();
+          const mo = String(d.getMonth() + 1).padStart(2, '0');
+          const da = String(d.getDate()).padStart(2, '0');
+          return `${y}-${mo}-${da}`;
+        })();
+
+        const fixtures = (Array.isArray(state.fixtures) ? state.fixtures : [])
+          .filter(f => {
+            const d = normalizeDateString(f.Date || f.date || '');
+            return d && d >= today && d <= maxDate;
+          });
+
+        if (!fixtures.length) {
+          wrap.innerHTML = `
+            <div class="section-header">
+              <span class="section-header-title">Scout — Próximas Partidas</span>
+              <div class="section-header-line"></div>
+            </div>
+            <div class="card">
+              <div class="note" style="text-align:center;padding:14px;opacity:0.5;">
+                Sem jogos disponíveis para os próximos 3 dias.<br>Os dados são actualizados pelo bot automaticamente.
+              </div>
+            </div>`;
+          return;
+        }
+
+        // Save current card values (survive re-render from 60s refresh)
+        const prevValues = {};
+        wrap.querySelectorAll('.manual-scout-card').forEach(card => {
+          const mk = card.dataset.matchKey;
+          if (!mk) return;
+          prevValues[mk] = mbScoutGetCardValues(card);
+        });
+
+        // Group by date
+        const byDate = new Map();
+        fixtures.forEach(f => {
+          const d = normalizeDateString(f.Date || f.date || '');
+          if (!byDate.has(d)) byDate.set(d, []);
+          byDate.get(d).push(f);
+        });
+
+        const dayLabels = { 0: 'Hoje', 1: 'Amanhã', 2: 'Depois de amanhã', 3: '+3 dias' };
+
+        let html = `
+          <div class="section-header">
+            <span class="section-header-title">Scout — Próximas Partidas</span>
+            <div class="section-header-line"></div>
+          </div>`;
+
+        const sortedDates = [...byDate.keys()].sort();
+        sortedDates.forEach(date => {
+          const dayOffset = Math.round((new Date(`${date}T00:00:00`) - new Date(`${today}T00:00:00`)) / 86400000);
+          const dayLabel = dayLabels[dayOffset] ?? date;
+
+          html += `<div class="section-header" style="margin-top:10px;">
+            <span class="section-header-title">${escapeHtml(dayLabel)} — ${escapeHtml(date)}</span>
+            <div class="section-header-line"></div>
+          </div>
+          <div class="scout-card-grid">`;
+
+          byDate.get(date).forEach(f => {
+            const league = cleanString(f.League || f.Liga || '');
+            const home   = cleanString(f.HomeTeam || f.Home || '');
+            const away   = cleanString(f.AwayTeam || f.Away || '');
+            const game   = `${home} vs ${away}`;
+            const matchKey = `${date}_${league}_${home}_${away}`.replace(/\s+/g, '_').toLowerCase();
+
+            const oddO25  = num(f.Odd_Over25)  ?? '';
+            const oddBTTS = num(f.Odd_BTTS_Yes) ?? '';
+
+            html += `
+              <div class="manual-scout-card"
+                data-match-key="${escapeHtml(matchKey)}"
+                data-league="${escapeHtml(league)}"
+                data-game="${escapeHtml(game)}"
+                data-date="${escapeHtml(date)}"
+                data-odd-o25="${escapeHtml(String(oddO25))}"
+                data-odd-btts="${escapeHtml(String(oddBTTS))}">
+
+                <div class="scout-card-header">
+                  <div>
+                    <span class="mini info">${escapeHtml(league)}</span>
+                    <strong>${escapeHtml(game)}</strong>
+                  </div>
+                  <div class="note">${escapeHtml(date)}</div>
+                </div>
+
+                <div class="scout-card-controls">
+                  <div>
+                    <label class="label" style="font-size:10px;margin-bottom:3px;">Mercado</label>
+                    <select class="js-scout-market" style="font-size:12px;">
+                      <option value="O2.5"${oddO25 ? '' : ''}>Over 2.5${oddO25 ? ` (${fmt(oddO25)})` : ''}</option>
+                      <option value="BTTS">BTTS${oddBTTS ? ` (${fmt(oddBTTS)})` : ''}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="label" style="font-size:10px;margin-bottom:3px;">Odd</label>
+                    <input type="number" class="js-scout-odd" step="0.01" min="1.01" placeholder="1.90"
+                      value="${escapeHtml(String(oddO25))}" style="font-size:12px;" />
+                  </div>
+                  <div>
+                    <label class="label" style="font-size:10px;margin-bottom:3px;">Stake €</label>
+                    <input type="number" class="js-scout-stake" step="0.5" min="0.5" placeholder="10"
+                      style="font-size:12px;" />
+                  </div>
+                  <div style="display:flex;gap:5px;padding-bottom:1px;">
+                    <button type="button" class="js-scout-analyze"
+                      style="padding:7px 10px;width:auto;font-size:11px;white-space:nowrap;">Analisar</button>
+                    <button type="button" class="js-scout-create"
+                      style="padding:7px 10px;width:auto;font-size:11px;white-space:nowrap;background:var(--ok);color:#fff;">Criar</button>
+                  </div>
+                </div>
+
+                <div class="js-scout-analysis-panel scout-analysis-panel" style="display:none;"></div>
+                <div class="js-scout-msg scout-msg" style="display:none;"></div>
+              </div>`;
+          });
+
+          html += `</div>`;
+        });
+
+        wrap.innerHTML = html;
+
+        // Restore card values + reapply cached analysis
+        wrap.querySelectorAll('.manual-scout-card').forEach(card => {
+          const mk = card.dataset.matchKey;
+          const prev = prevValues[mk];
+          if (prev) {
+            const mktEl  = card.querySelector('.js-scout-market');
+            const oddEl  = card.querySelector('.js-scout-odd');
+            const stakeEl = card.querySelector('.js-scout-stake');
+            if (mktEl  && prev.market) mktEl.value  = prev.market;
+            if (oddEl  && prev.odd)    oddEl.value   = prev.odd;
+            if (stakeEl && prev.stake) stakeEl.value = prev.stake;
+
+            // Sync default odd when market changes back to defaults
+          }
+
+          // Re-apply analysis from cache
+          const cached = (window._mbAnalysisCache || {})[mk];
+          if (cached) {
+            const curr = mbScoutGetCardValues(card);
+            const currentKey = mbScoutBuildCacheKey(mk, curr.market, curr.odd, curr.stake);
+            renderScoutAnalysisPanel(card, cached, currentKey !== cached.cacheKey);
+          }
+        });
+      }
+
+      function bindManualScoutEvents() {
+        if (window._mbScoutEventsBound) return;
+        const wrap = document.getElementById('manualScoutWrap');
+        if (!wrap) return;
+        window._mbScoutEventsBound = true;
+
+        // Delegated click handler
+        wrap.addEventListener('click', e => {
+          const analyzeBtn = e.target.closest('.js-scout-analyze');
+          const createBtn  = e.target.closest('.js-scout-create');
+          if (analyzeBtn) mbHandleAnalyze(analyzeBtn.closest('.manual-scout-card'));
+          if (createBtn)  mbHandleCreate(createBtn.closest('.manual-scout-card'));
+        });
+
+        // Delegated input/change handler for stale detection
+        wrap.addEventListener('input',  e => mbHandleInputChange(e));
+        wrap.addEventListener('change', e => mbHandleInputChange(e));
+      }
+
+      function mbHandleInputChange(e) {
+        const field = e.target.closest('.js-scout-market, .js-scout-odd, .js-scout-stake');
+        if (!field) return;
+
+        // When market changes, auto-fill default odd from fixture data
+        if (field.classList.contains('js-scout-market')) {
+          const card = field.closest('.manual-scout-card');
+          if (!card) return;
+          const market = field.value;
+          const oddEl  = card.querySelector('.js-scout-odd');
+          if (oddEl) {
+            const oddO25  = parseFloat(card.dataset.oddO25  || '') || null;
+            const oddBTTS = parseFloat(card.dataset.oddBtts || '') || null;
+            const defOdd  = market === 'O2.5' ? oddO25 : market === 'BTTS' ? oddBTTS : null;
+            if (defOdd) oddEl.value = defOdd.toFixed(2);
+          }
+        }
+
+        // Stale detection
+        const card = e.target.closest('.manual-scout-card');
+        if (!card) return;
+        const mk = card.dataset.matchKey;
+        if (!mk) return;
+        const cached = (window._mbAnalysisCache || {})[mk];
+        if (!cached) return;
+        const curr = mbScoutGetCardValues(card);
+        const currentKey = mbScoutBuildCacheKey(mk, curr.market, curr.odd, curr.stake);
+        renderScoutAnalysisPanel(card, cached, currentKey !== cached.cacheKey);
+      }
+
+      function mbHandleAnalyze(card) {
+        if (!card) return;
+        const mk      = card.dataset.matchKey;
+        const league  = card.dataset.league;
+        const game    = card.dataset.game;
+        const curr    = mbScoutGetCardValues(card);
+        const msgEl   = card.querySelector('.js-scout-msg');
+
+        const odd   = parseFloat(curr.odd);
+        const stake = parseFloat(curr.stake);
+
+        if (!curr.market) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Selecciona um mercado.'; }
+          return;
+        }
+        if (!curr.odd || isNaN(odd) || odd < 1.01) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Insere uma odd válida (≥ 1.01).'; }
+          return;
+        }
+        if (!curr.stake || isNaN(stake) || stake <= 0) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Insere um stake válido (> 0).'; }
+          return;
+        }
+        if (msgEl) msgEl.style.display = 'none';
+
+        const cacheKey = mbScoutBuildCacheKey(mk, curr.market, odd, stake);
+
+        // Return cached result if values unchanged
+        const existing = (window._mbAnalysisCache || {})[mk];
+        if (existing && existing.cacheKey === cacheKey) {
+          renderScoutAnalysisPanel(card, existing, false);
+          return;
+        }
+
+        // Run fresh analysis
+        if (!window._mbAnalysisCache) window._mbAnalysisCache = {};
+        const result = computeManualAnalysis(league, curr.market, odd, stake);
+        const snapshot = {
+          cacheKey,
+          timestamp: new Date().toISOString(),
+          market: curr.market,
+          odd,
+          stake,
+          ...result
+        };
+        window._mbAnalysisCache[mk] = snapshot;
+        renderScoutAnalysisPanel(card, snapshot, false);
+      }
+
+      function mbHandleCreate(card) {
+        if (!card) return;
+        const mk    = card.dataset.matchKey;
+        const date  = card.dataset.date;
+        const league = card.dataset.league;
+        const game  = card.dataset.game;
+        const curr  = mbScoutGetCardValues(card);
+        const msgEl = card.querySelector('.js-scout-msg');
+
+        const odd   = parseFloat(curr.odd);
+        const stake = parseFloat(curr.stake);
+
+        if (!curr.market) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Selecciona um mercado.'; }
+          return;
+        }
+        if (!curr.odd || isNaN(odd) || odd < 1.01) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Insere uma odd válida (≥ 1.01).'; }
+          return;
+        }
+        if (!curr.stake || isNaN(stake) || stake <= 0) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Insere um stake válido (> 0).'; }
+          return;
+        }
+        if (msgEl) msgEl.style.display = 'none';
+
+        const snapshot = (window._mbAnalysisCache || {})[mk] || null;
+
+        addManualBetFromFixture({
+          data: date,
+          liga: league,
+          jogo: game,
+          mercado: mbScoutMarketLabel(curr.market),
+          odd: String(odd),
+          stake: String(stake),
+          snapshot
+        });
+
+        // Feedback
+        const btn = card.querySelector('.js-scout-create');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = '✓ Criada';
+          btn.disabled = true;
+          setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+        }
+      }
+
+      function addManualBetFromFixture({ data, liga, jogo, mercado, odd, stake, snapshot }) {
+        state.manualBets.push({
+          id: makeManualId(),
+          data: normalizeDateString(data),
+          liga: cleanString(liga),
+          jogo: cleanString(jogo),
+          mercado: cleanString(mercado),
+          odd: cleanString(odd),
+          stake: cleanString(stake),
+          resultado: '',
+          notas: '',
+          hadAnalysis:     !!snapshot,
+          botOpinion:      snapshot?.opinion      ?? null,
+          edgeAtAnalysis:  snapshot?.edge         ?? null,
+          scoreAtAnalysis: snapshot?.score        ?? null,
+          analysisSnapshot: snapshot              ?? null
+        });
+        markDirty();
+        rerenderManualOnly();
+      }
+
+      // ── END PHASE 17 ────────────────────────────────────────────────
+
       function renderManualBets() {
         const rows = sortManualRowsForDisplay(getManualRowsMerged());
 
+        const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };
         document.getElementById('manualRows').innerHTML = rows.length
-          ? rows.map(b => `
+          ? rows.map(b => {
+              const analysisBadge = b.hadAnalysis
+                ? `<span class="mini good">Sim</span>`
+                : `<span class="mini" style="opacity:0.4;">—</span>`;
+              const opinionBadge = b.botOpinion
+                ? `<span class="mini ${opinionClsMap[b.botOpinion] || 'info'}">${escapeHtml(b.botOpinion)}</span>`
+                : `<span class="mini" style="opacity:0.4;">—</span>`;
+              return `
               <tr>
                 <td><span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span></td>
                 <td>${escapeHtml(b.data || '—')}</td>
@@ -6082,14 +6634,16 @@ button.dirty {
                 <td>${resultBadge(b.resultado)}</td>
                 <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
                 <td>${escapeHtml(b.notas || '—')}</td>
+                <td>${analysisBadge}</td>
+                <td>${opinionBadge}</td>
                 <td>
                   ${b.isLocal
                     ? `<button class="js-delete-manual" type="button" data-id="${escapeHtml(b.id)}" style="padding:8px 10px;width:auto;">Remover</button>`
                     : `<span class="manual-remote-note">CSV</span>`}
                 </td>
-              </tr>
-            `).join('')
-          : '<tr><td colspan="11"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
+              </tr>`;
+            }).join('')
+          : '<tr><td colspan="13"><div class="note">Sem apostas manuais neste momento.</div></td></tr>';
       }
 
 
@@ -6279,9 +6833,11 @@ button.dirty {
       }
       
       function bindManualControls() {
+        bindManualScoutEvents();
+
         if (window._manualBound) return;
         window._manualBound = true;
-        
+
         document.querySelectorAll('.js-delete-manual').forEach(el => {
           if (el.dataset.bound === '1') return;
           el.dataset.bound = '1';
@@ -8764,6 +9320,7 @@ buttons.forEach(btn => {
       }
 
       function rerenderManualOnly() {
+        try { renderManualScout(); } catch (e) { console.error('renderManualScout', e); }
         try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
       }
 
