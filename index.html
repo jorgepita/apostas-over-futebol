@@ -2482,6 +2482,21 @@ button.dirty {
           </div>
         </div>
 
+        <!-- SECTION I: Model Calibration -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">I — Model Calibration</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Model Calibration</div>
+            <div class="note">Compara expectativa do modelo com resultados reais.</div>
+          </div>
+          <div id="modelCalibrationWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -4890,6 +4905,7 @@ button.dirty {
         try { renderPerformanceOverTime(); } catch (e) { console.error('renderPerformanceOverTime', e); }
         try { renderEdgeValidation(); } catch (e) { console.error('renderEdgeValidation', e); }
         try { renderStrategyValidation(); } catch (e) { console.error('renderStrategyValidation', e); }
+        try { renderModelCalibration(); } catch (e) { console.error('renderModelCalibration', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -6654,6 +6670,228 @@ buttons.forEach(btn => {
             : `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Dados insuficientes para gerar insights (mín. ${MIN_PICKS} picks por segmento).</div>`);
 
         wrap.innerHTML = edgeSection + oddsSection + leagueSection + marketSection + daySection + kickoffSection + scorecardSection + insightsSection;
+      }
+
+      function renderModelCalibration() {
+        const wrap = document.getElementById('modelCalibrationWrap');
+        if (!wrap) return;
+
+        const botRows = getRealResolvedBotHistory();
+
+        // Build per-bet records: edge, odds, expectedProb, result, stake, lucro
+        const bets = botRows.map(r => {
+          const edge = num(r['Edge%'] ?? r['Edge']);
+          const odds = r._oddRealNum;
+          if (edge === null || edge < 0 || odds === null || odds <= 1.0) return null;
+          if (!['W', 'L', 'P'].includes(r._resultKey)) return null;
+          const fairProb = 1 / odds;
+          const expectedProb = Math.min(fairProb * (1 + edge / 100), 1);
+          return {
+            edge,
+            result: r._resultKey,
+            stake: r._stakeRealNum ?? 0,
+            lucro: r._lucroRealLocal ?? 0,
+            expectedProb
+          };
+        }).filter(b => b !== null);
+
+        if (!bets.length) {
+          wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem apostas com edge e odds registados para calibração.</div>`;
+          return;
+        }
+
+        const BUCKETS = [
+          { label: '0–2%',  min: 0, max: 2 },
+          { label: '2–4%',  min: 2, max: 4 },
+          { label: '4–6%',  min: 4, max: 6 },
+          { label: '6–8%',  min: 6, max: 8 },
+          { label: '8%+',   min: 8, max: Infinity }
+        ];
+
+        const buckets = BUCKETS.map(b => {
+          const rows = bets.filter(r => r.edge >= b.min && r.edge < b.max);
+          const picks = rows.length;
+          const stake = sum(rows.map(r => r.stake));
+          const lucro = sum(rows.map(r => r.lucro));
+          const wins = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const settled = wins + losses;
+          const avgEdge = picks > 0 ? rows.reduce((s, r) => s + r.edge, 0) / picks : null;
+          const expectedWR = picks > 0 ? (rows.reduce((s, r) => s + r.expectedProb, 0) / picks) * 100 : null;
+          const actualWR = settled > 0 ? (wins / settled) * 100 : null;
+          const wrDelta = (expectedWR !== null && actualWR !== null) ? actualWR - expectedWR : null;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const lowSample = picks < 10;
+          return { label: b.label, picks, stake, lucro, wins, losses, settled, avgEdge, expectedWR, actualWR, wrDelta, roi, lowSample };
+        });
+
+        // Qualified buckets (>= 10 picks, both WR values available)
+        const qual = buckets.filter(b => !b.lowSample && b.wrDelta !== null);
+
+        // ── Calibration Score ─────────────────────────────────
+        let calScore = '—', calColor = 'var(--muted)', calCls = '', calSub = 'Dados insuficientes';
+        if (qual.length) {
+          const avgAbsDelta = qual.reduce((s, b) => s + Math.abs(b.wrDelta), 0) / qual.length;
+          if (avgAbsDelta < 5)  { calScore = 'GOOD'; calColor = 'var(--ok)';   calCls = 'kpi-ok';   calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+          else if (avgAbsDelta < 10) { calScore = 'FAIR'; calColor = 'var(--warn)'; calCls = 'kpi-warn'; calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+          else                  { calScore = 'POOR'; calColor = 'var(--bad)';  calCls = 'kpi-bad';  calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+        }
+
+        // ── Edge Reliability (ROI monotonicity over qual buckets) ──
+        let relScore = '—', relColor = 'var(--muted)', relCls = '', relSub = 'Dados insuficientes';
+        if (qual.length >= 2) {
+          let up = 0, down = 0;
+          for (let i = 1; i < qual.length; i++) {
+            if (qual[i].roi > qual[i - 1].roi) up++;
+            else if (qual[i].roi < qual[i - 1].roi) down++;
+          }
+          if (up > down * 1.5)     { relScore = 'HIGH';   relColor = 'var(--ok)';   relCls = 'kpi-ok';   relSub = 'Edge mais alto → melhor ROI'; }
+          else if (up >= down)     { relScore = 'MEDIUM'; relColor = 'var(--warn)'; relCls = 'kpi-warn'; relSub = 'Tendência mista mas positiva'; }
+          else                     { relScore = 'LOW';    relColor = 'var(--bad)';  relCls = 'kpi-bad';  relSub = 'Sem correlação com ROI'; }
+        }
+
+        // ── Edge Trend (ROI progression label) ───────────────
+        let trendScore = '—', trendColor = 'var(--muted)', trendCls = '', trendSub = 'Dados insuficientes';
+        if (qual.length >= 2) {
+          let up = 0, down = 0;
+          for (let i = 1; i < qual.length; i++) {
+            if (qual[i].roi > qual[i - 1].roi) up++;
+            else if (qual[i].roi < qual[i - 1].roi) down++;
+          }
+          const total = up + down;
+          if (total === 0 || up === down) { trendScore = 'FLAT';      trendColor = 'var(--warn)'; trendCls = 'kpi-warn'; trendSub = 'ROI sem tendência clara'; }
+          else if (up > down)             { trendScore = 'IMPROVING'; trendColor = 'var(--ok)';   trendCls = 'kpi-ok';   trendSub = 'ROI cresce com o edge'; }
+          else                            { trendScore = 'INVERTED';  trendColor = 'var(--bad)';  trendCls = 'kpi-bad';  trendSub = 'ROI decresce com o edge'; }
+        }
+
+        // ── Model Diagnostic ──────────────────────────────────
+        let diagText = '—', diagColor = 'var(--muted)', diagNote = '';
+        if (qual.length >= 2) {
+          const deltas = qual.map(b => b.wrDelta);
+          const avgDelta = deltas.reduce((s, d) => s + d, 0) / deltas.length;
+          const avgAbsDelta = deltas.reduce((s, d) => s + Math.abs(d), 0) / deltas.length;
+          const allNeg = deltas.every(d => d < 0);
+          const allPos = deltas.every(d => d > 0);
+          if (avgAbsDelta < 3) {
+            diagText = 'MODEL WELL CALIBRATED';
+            diagColor = 'var(--ok)';
+            diagNote = 'WR real próximo da WR esperada em todos os buckets.';
+          } else if (allNeg || avgDelta < -3) {
+            diagText = 'MODEL SLIGHTLY OVERCONFIDENT';
+            diagColor = 'var(--warn)';
+            diagNote = 'WR real consistentemente abaixo da WR esperada.';
+          } else if (allPos || avgDelta > 3) {
+            diagText = 'MODEL SLIGHTLY UNDERCONFIDENT';
+            diagColor = 'var(--info)';
+            diagNote = 'WR real consistentemente acima da WR esperada.';
+          } else {
+            diagText = 'MODEL POORLY CALIBRATED';
+            diagColor = 'var(--bad)';
+            diagNote = 'Deltas grandes e inconsistentes — calibração fraca.';
+          }
+        }
+
+        // ── KPI Row ───────────────────────────────────────────
+        const kpiHtml = `
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px;">
+            <div class="kpi-hero ${calCls}">
+              <div class="kpi-label">Calibration Score</div>
+              <div class="kpi-value" style="font-size:20px;">${calScore}</div>
+              <div class="kpi-sub">${calSub}</div>
+            </div>
+            <div class="kpi-hero ${relCls}">
+              <div class="kpi-label">Edge Reliability</div>
+              <div class="kpi-value" style="font-size:20px;">${relScore}</div>
+              <div class="kpi-sub">${relSub}</div>
+            </div>
+            <div class="kpi-hero ${trendCls}">
+              <div class="kpi-label">Edge Trend</div>
+              <div class="kpi-value" style="font-size:20px;">${trendScore}</div>
+              <div class="kpi-sub">${trendSub}</div>
+            </div>
+          </div>`;
+
+        // ── Calibration Table ─────────────────────────────────
+        const tableHtml = `
+          <div class="table-wrap" style="margin-bottom:16px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Edge Range</th>
+                  <th>Picks</th>
+                  <th>Avg Edge</th>
+                  <th>Expected WR</th>
+                  <th>Actual WR</th>
+                  <th>WR Delta</th>
+                  <th>ROI</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${buckets.map(b => {
+                  const deltaAttr = b.wrDelta !== null
+                    ? (b.wrDelta > 0.5 ? 'style="color:var(--ok)"' : b.wrDelta < -0.5 ? 'style="color:var(--bad)"' : 'style="color:var(--muted)"')
+                    : '';
+                  return `
+                    <tr style="${b.lowSample ? 'opacity:0.4;' : ''}">
+                      <td style="font-weight:700;">${b.label}</td>
+                      <td>
+                        ${b.picks}
+                        ${b.lowSample ? `<span class="mini bad" style="font-size:9px;margin-left:4px;">LOW</span>` : ''}
+                      </td>
+                      <td style="color:var(--muted);">${b.avgEdge !== null ? `${fmt(b.avgEdge)}%` : '—'}</td>
+                      <td style="color:var(--muted);">${b.expectedWR !== null ? pct(b.expectedWR) : '—'}</td>
+                      <td>${b.actualWR !== null ? pct(b.actualWR) : '—'}</td>
+                      <td ${deltaAttr}>${b.wrDelta !== null ? `${b.wrDelta >= 0 ? '+' : ''}${pct(b.wrDelta)}` : '—'}</td>
+                      <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
+                    </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`;
+
+        // ── Calibration Chart ─────────────────────────────────
+        const chartHtml = `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;">Calibration Chart — Expected vs Actual WR</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Edge Bucket</th>
+                    <th>Expected WR</th>
+                    <th>Actual WR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${buckets.map(b => {
+                    const actualColor = b.actualWR !== null && b.expectedWR !== null
+                      ? (b.actualWR >= b.expectedWR ? 'color:var(--ok)' : 'color:var(--bad)')
+                      : '';
+                    return `
+                      <tr style="${b.lowSample ? 'opacity:0.4;' : ''}">
+                        <td style="font-weight:600;">${b.label}${b.lowSample ? ` <span class="mini bad" style="font-size:9px;">LOW</span>` : ''}</td>
+                        <td style="color:var(--muted);">${b.expectedWR !== null ? pct(b.expectedWR) : '—'}</td>
+                        <td style="${actualColor}">${b.actualWR !== null ? pct(b.actualWR) : '—'}</td>
+                      </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+
+        // ── Model Diagnostic Card ─────────────────────────────
+        const diagHtml = qual.length >= 2
+          ? `
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;border-left:4px solid ${diagColor};">
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Model Diagnostic</div>
+                <div style="font-size:18px;font-weight:900;color:${diagColor};">${diagText}</div>
+                <div class="note" style="margin-top:4px;">${diagNote}</div>
+              </div>
+            </div>`
+          : `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Diagnóstico requer mín. 2 buckets com 10+ picks.</div>`;
+
+        wrap.innerHTML = kpiHtml + tableHtml + chartHtml + diagHtml;
       }
 
       function renderLeagueClassification() {
