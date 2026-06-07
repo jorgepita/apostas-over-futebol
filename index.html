@@ -1657,6 +1657,17 @@ button.dirty {
           </div>
         </div>
 
+        <!-- Bankroll not configured warning -->
+        <div id="homeBankrollWarning" style="display:none;">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:10px;">
+            <span style="font-size:20px;">⚠️</span>
+            <div>
+              <div style="font-weight:700;color:var(--warn);font-size:14px;">Banca inicial não configurada</div>
+              <div class="note" style="margin-top:2px;">Acede à página <strong>Bankroll</strong> ou <strong>Definições</strong> para definir a banca inicial. Os cálculos financeiros estão desativados.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- ROW 1: Primary Financial KPIs -->
         <div class="section-header">
           <span class="section-header-title">Performance financeira</span>
@@ -2658,7 +2669,7 @@ button.dirty {
         footballDaily: [],
         footballHistory: [],
         leagueStats: [],
-        bankrollInicial: 1000,
+        bankrollInicial: null,
         bankrollInicialSet: false,
         localEdits: {},
         manualBets: [],
@@ -3641,9 +3652,13 @@ button.dirty {
         const savedActiveTab = localStorage.getItem(STORAGE_KEYS.activeTab);
         const savedMobileActions = localStorage.getItem(STORAGE_KEYS.mobileActionsOpen);
 
-        const bankrollParsed = num(savedBankroll);
-        if (bankrollParsed !== null && bankrollParsed >= 0) state.bankrollInicial = bankrollParsed;
         state.bankrollInicialSet = savedBankrollSet === '1';
+        if (state.bankrollInicialSet) {
+          const bankrollParsed = num(savedBankroll);
+          state.bankrollInicial = (bankrollParsed !== null && bankrollParsed >= 0) ? bankrollParsed : null;
+        } else {
+          state.bankrollInicial = null;
+        }
 
         try {
           state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
@@ -3669,7 +3684,11 @@ button.dirty {
       }
 
       function saveLocalState() {
-        localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+        if (state.bankrollInicial !== null) {
+          localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+        } else {
+          localStorage.removeItem(STORAGE_KEYS.bankroll);
+        }
         localStorage.setItem(STORAGE_KEYS.bankrollSet, state.bankrollInicialSet ? '1' : '0');
         localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
         localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
@@ -3957,7 +3976,7 @@ button.dirty {
         const realResolvedCount = botRealRows.length + manualRows.length;
         const realRoi = realStake > 0 ? (realProfit / realStake) * 100 : 0;
         const realWr = (realWins + realLosses) > 0 ? (realWins / (realWins + realLosses)) * 100 : 0;
-        const realBankroll = state.bankrollInicial + realProfit;
+        const realBankroll = state.bankrollInicial !== null ? state.bankrollInicial + realProfit : null;
 
         const modelO25 = botHistoryRows.filter(r => marketMatches(r, 'Over 2.5'));
         const modelBTTS = botHistoryRows.filter(r => marketMatches(r, 'BTTS'));
@@ -4016,6 +4035,19 @@ button.dirty {
         const lucroReal =
           sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
           sum(getResolvedManualBets().map(b => b._lucro));
+
+        if (!state.bankrollInicialSet || state.bankrollInicial === null) {
+          return {
+            initialBankroll: null,
+            totalDeposits: movTotals.deposits,
+            totalWithdrawals: movTotals.withdrawals,
+            lucroReal,
+            totalAccountValue: null,
+            globalResult: null,
+            configured: false
+          };
+        }
+
         const totalAccountValue =
           state.bankrollInicial + movTotals.deposits - movTotals.withdrawals + lucroReal;
         const globalResult = totalAccountValue - state.bankrollInicial;
@@ -4025,7 +4057,8 @@ button.dirty {
           totalWithdrawals: movTotals.withdrawals,
           lucroReal,
           totalAccountValue,
-          globalResult
+          globalResult,
+          configured: true
         };
       }
 
@@ -4039,7 +4072,7 @@ button.dirty {
 
         const bk = getBankrollState();
         const bancaAtual = bk.totalAccountValue;
-        const bancaDisponivel = bancaAtual - stakeOpen;
+        const bancaDisponivel = bancaAtual !== null ? bancaAtual - stakeOpen : null;
 
         return {
           openCount: openBets.length,
@@ -4115,7 +4148,7 @@ button.dirty {
       function getStakeContext() {
         const dynamicStake = computeDynamicStake();
         const risk = getRiskMetrics();
-        const bankroll = risk.bancaAtual > 0 ? risk.bancaAtual : state.bankrollInicial;
+        const bankroll = risk.bancaAtual !== null && risk.bancaAtual > 0 ? risk.bancaAtual : (state.bankrollInicial ?? null);
 
         return {
           bankroll,
@@ -4472,8 +4505,11 @@ button.dirty {
 
         safeSetText('sessionLabel', `Sessão atual: desde ${formatDatePt(getSessionStartDate())}`);
         safeSetText('lastUpdateLabel', `Última atualização: ${state.lastUpdated ? formatDateTimePt(state.lastUpdated) : '—'}`);
-        safeSetText('bankrollLabelTop', `€${fmt(state.bankrollInicial)}`);
-        safeSetText('currentBankrollTop', `€${fmt(risk.bancaAtual)}`);
+        safeSetText('bankrollLabelTop', state.bankrollInicial !== null ? `€${fmt(state.bankrollInicial)}` : '—');
+        safeSetText('currentBankrollTop', risk.bancaAtual !== null ? `€${fmt(risk.bancaAtual)}` : '—');
+
+        const hw = document.getElementById('homeBankrollWarning');
+        if (hw) hw.style.display = state.bankrollInicialSet ? 'none' : 'block';
         safeSetText('openExposureTop', `€${fmt(risk.stakeOpen)}`);
         safeSetText('availableBankrollTop', `€${fmt(risk.bancaDisponivel)}`);
 
@@ -4525,8 +4561,12 @@ button.dirty {
         }
         const bankEl = document.getElementById('currentBankrollTop')?.closest?.('.kpi-hero');
         if (bankEl) {
-          const delta = risk.bancaAtual - state.bankrollInicial;
-          bankEl.className = `kpi-hero kpi-primary${delta > 0 ? ' kpi-ok' : delta < -50 ? ' kpi-bad' : ''}`;
+          if (risk.bancaAtual !== null && state.bankrollInicial !== null) {
+            const delta = risk.bancaAtual - state.bankrollInicial;
+            bankEl.className = `kpi-hero kpi-primary${delta > 0 ? ' kpi-ok' : delta < -50 ? ' kpi-bad' : ''}`;
+          } else {
+            bankEl.className = 'kpi-hero kpi-primary';
+          }
         }
       }
 
@@ -4926,6 +4966,11 @@ button.dirty {
       function renderBankrollChart() {
         const wrap = document.getElementById('bankrollChartWrap');
         const rows = getFilteredRealClosedRows(getSummaryFilters());
+
+        if (!state.bankrollInicialSet || state.bankrollInicial === null) {
+          wrap.innerHTML = `<div class="chart-empty">Configura a banca inicial para ver a evolução da banca.</div>`;
+          return;
+        }
 
         if (!rows.length) {
           wrap.innerHTML = `<div class="chart-empty">Sem fechadas reais suficientes para desenhar o gráfico.</div>`;
@@ -5571,20 +5616,19 @@ buttons.forEach(btn => {
 
       function renderBankrollOverview() {
         const bk = getBankrollState();
-        const risk = getRiskMetrics();
         const m = getMetrics().geral;
-        const pnlClass = bk.lucroReal > 0 ? 'kpi-ok' : bk.lucroReal < 0 ? 'kpi-bad' : '';
-        const roiClass = m.realRoi > 0 ? 'kpi-ok' : m.realRoi < 0 ? 'kpi-bad' : '';
-        const globalClass = bk.globalResult > 0 ? 'kpi-ok' : bk.globalResult < 0 ? 'kpi-bad' : '';
-
         const kpiRow = document.getElementById('bankrollKpiRow');
         if (!kpiRow) return;
+
+        const pnlClass = bk.lucroReal > 0 ? 'kpi-ok' : bk.lucroReal < 0 ? 'kpi-bad' : '';
+        const roiClass = m.realRoi > 0 ? 'kpi-ok' : m.realRoi < 0 ? 'kpi-bad' : '';
+        const globalClass = bk.configured && bk.globalResult > 0 ? 'kpi-ok' : bk.configured && bk.globalResult < 0 ? 'kpi-bad' : '';
 
         kpiRow.innerHTML = `
           <div class="kpi-hero kpi-primary">
             <div class="kpi-label">Banca atual</div>
-            <div class="kpi-value">€${fmt(bk.totalAccountValue)}</div>
-            <div class="kpi-sub">Inicial: €${fmt(bk.initialBankroll)}</div>
+            <div class="kpi-value">${bk.configured ? `€${fmt(bk.totalAccountValue)}` : '—'}</div>
+            <div class="kpi-sub">Inicial: ${bk.configured ? `€${fmt(bk.initialBankroll)}` : 'Não configurada'}</div>
           </div>
           <div class="kpi-hero ${pnlClass}">
             <div class="kpi-label">P/L apostas</div>
@@ -5598,12 +5642,12 @@ buttons.forEach(btn => {
           </div>
           <div class="kpi-hero">
             <div class="kpi-label">Banca inicial</div>
-            <div class="kpi-value">€${fmt(bk.initialBankroll)}</div>
-            <div class="kpi-sub">Base configurada</div>
+            <div class="kpi-value">${bk.configured ? `€${fmt(bk.initialBankroll)}` : '—'}</div>
+            <div class="kpi-sub">${bk.configured ? 'Base configurada' : 'Não configurada'}</div>
           </div>
           <div class="kpi-hero ${globalClass}">
             <div class="kpi-label">Resultado global</div>
-            <div class="kpi-value">${bk.globalResult >= 0 ? '+' : ''}€${fmt(bk.globalResult)}</div>
+            <div class="kpi-value">${bk.configured ? `${bk.globalResult >= 0 ? '+' : ''}€${fmt(bk.globalResult)}` : '—'}</div>
             <div class="kpi-sub">Conta vs. banca inicial</div>
           </div>
         `;
@@ -5613,6 +5657,12 @@ buttons.forEach(btn => {
         const wrap = document.getElementById('bankrollCompositionRow');
         if (!wrap) return;
         const bk = getBankrollState();
+
+        if (!bk.configured) {
+          wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;color:var(--warn);">Configure a banca inicial para ver a composição financeira da conta.</div>`;
+          return;
+        }
+
         const pnlColor = bk.lucroReal >= 0 ? 'var(--ok)' : 'var(--bad)';
         const totalColor = bk.globalResult > 0 ? 'var(--ok)' : bk.globalResult < 0 ? 'var(--bad)' : 'var(--text)';
 
@@ -5715,6 +5765,11 @@ buttons.forEach(btn => {
         const wrap = document.getElementById('bankrollEvolutionWrap');
         if (!wrap) return;
 
+        if (!state.bankrollInicialSet || state.bankrollInicial === null) {
+          wrap.innerHTML = `<div class="chart-empty">Configura a banca inicial para ver o gráfico de evolução.</div>`;
+          return;
+        }
+
         const rows = getFilteredRealClosedRows(getSummaryFilters());
         if (!rows.length) {
           wrap.innerHTML = `<div class="chart-empty">Sem apostas fechadas reais suficientes para o gráfico.</div>`;
@@ -5802,12 +5857,13 @@ buttons.forEach(btn => {
           return d !== 0 ? d : (a.id || '').localeCompare(b.id || '');
         });
 
-        let running = state.bankrollInicial;
+        const balanceBase = state.bankrollInicialSet && state.bankrollInicial !== null ? state.bankrollInicial : null;
+        let running = balanceBase ?? 0;
         const balanceAfter = new Map();
         chronological.forEach(m => {
           const amt = num(m.amount) || 0;
           running += m.type === 'deposit' ? amt : -amt;
-          balanceAfter.set(m.id, running);
+          balanceAfter.set(m.id, balanceBase !== null ? running : null);
         });
 
         // Display newest-first.
@@ -5889,7 +5945,7 @@ buttons.forEach(btn => {
       function renderBankrollConfig() {
         const configInput = document.getElementById('bankrollConfigInput');
         if (configInput && configInput !== document.activeElement) {
-          configInput.value = state.bankrollInicial;
+          configInput.value = state.bankrollInicial !== null ? state.bankrollInicial : '';
         }
         applyBankrollImmutability();
 
@@ -5897,21 +5953,27 @@ buttons.forEach(btn => {
         if (!summary) return;
         const risk = getRiskMetrics();
         const movTotals = getMovementTotals();
+        const biText = state.bankrollInicial !== null ? `€${fmt(state.bankrollInicial)}` : '—';
+        const baText = risk.bancaAtual !== null ? `€${fmt(risk.bancaAtual)}` : '—';
+        const bdText = risk.bancaDisponivel !== null ? `€${fmt(risk.bancaDisponivel)}` : '—';
+        const baColor = risk.bancaAtual !== null && state.bankrollInicial !== null
+          ? (risk.bancaAtual >= state.bankrollInicial ? 'var(--ok)' : 'var(--bad)')
+          : 'var(--text)';
 
         summary.innerHTML = `
           <div class="label" style="margin-bottom:8px;">Resumo da configuração</div>
           <div class="section-stack" style="gap:0;">
             <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid var(--line);">
               <span style="color:var(--muted);">Banca inicial</span>
-              <span style="font-weight:700;">€${fmt(state.bankrollInicial)}</span>
+              <span style="font-weight:700;">${biText}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid var(--line);">
               <span style="color:var(--muted);">Banca atual (apostas)</span>
-              <span style="font-weight:700;color:${risk.bancaAtual >= state.bankrollInicial ? 'var(--ok)' : 'var(--bad)'};">€${fmt(risk.bancaAtual)}</span>
+              <span style="font-weight:700;color:${baColor};">${baText}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid var(--line);">
               <span style="color:var(--muted);">Disponível</span>
-              <span style="font-weight:700;">€${fmt(risk.bancaDisponivel)}</span>
+              <span style="font-weight:700;">${bdText}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid var(--line);">
               <span style="color:var(--muted);">Exposição aberta</span>
@@ -6201,13 +6263,13 @@ buttons.forEach(btn => {
         localStorage.removeItem(STORAGE_KEYS.bankroll);
         localStorage.removeItem(STORAGE_KEYS.bankrollSet);
         localStorage.removeItem(STORAGE_KEYS.movements);
-        state.bankrollInicial = 1000;
+        state.bankrollInicial = null;
         state.bankrollInicialSet = false;
         state.movements = [];
         const bi = document.getElementById('bankrollInput');
-        if (bi) bi.value = 1000;
+        if (bi) bi.value = '';
         const bci = document.getElementById('bankrollConfigInput');
-        if (bci) bci.value = 1000;
+        if (bci) bci.value = '';
         applyBankrollImmutability();
         rerenderAll();
       }
@@ -6283,9 +6345,10 @@ buttons.forEach(btn => {
         const bankrollInput = document.getElementById('bankrollInput');
         if (bankrollInput) {
           bankrollInput.addEventListener('blur', e => {
-            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial; return; }
+            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial !== null ? state.bankrollInicial : ''; return; }
             const v = num(e.target.value);
-            state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+            if (v === null || v < 0) { e.target.value = ''; return; }
+            state.bankrollInicial = v;
             state.bankrollInicialSet = true;
             const cfgInput = document.getElementById('bankrollConfigInput');
             if (cfgInput) cfgInput.value = state.bankrollInicial;
@@ -6298,9 +6361,10 @@ buttons.forEach(btn => {
         const bankrollConfigInput = document.getElementById('bankrollConfigInput');
         if (bankrollConfigInput) {
           bankrollConfigInput.addEventListener('blur', e => {
-            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial; return; }
+            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial !== null ? state.bankrollInicial : ''; return; }
             const v = num(e.target.value);
-            state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+            if (v === null || v < 0) { e.target.value = ''; return; }
+            state.bankrollInicial = v;
             state.bankrollInicialSet = true;
             const settingsInput = document.getElementById('bankrollInput');
             if (settingsInput) settingsInput.value = state.bankrollInicial;
@@ -6327,10 +6391,10 @@ buttons.forEach(btn => {
         loadCompactMode();
         loadLocalState();
         if (document.getElementById('bankrollInput')) {
-          document.getElementById('bankrollInput').value = state.bankrollInicial;
+          document.getElementById('bankrollInput').value = state.bankrollInicial !== null ? state.bankrollInicial : '';
         }
         if (document.getElementById('bankrollConfigInput')) {
-          document.getElementById('bankrollConfigInput').value = state.bankrollInicial;
+          document.getElementById('bankrollConfigInput').value = state.bankrollInicial !== null ? state.bankrollInicial : '';
         }
         applyBankrollImmutability();
 
