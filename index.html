@@ -4157,6 +4157,7 @@ button.dirty {
       isRemote:         false,
       isLocal:          true,
       status:           b.status            || 'pending',
+      analysisStale:    b.analysisStale    ?? false,
       hadAnalysis:      b.hadAnalysis      ?? false,
       botOpinion:       b.botOpinion       ?? null,
       edgeAtAnalysis:   b.edgeAtAnalysis   ?? null,
@@ -6777,6 +6778,7 @@ button.dirty {
           resultado: '',
           notas: '',
           status:           'pending',
+          analysisStale:    false,
           hadAnalysis:      !!snapshot,
           botOpinion:       snapshot?.opinion      ?? null,
           edgeAtAnalysis:   snapshot?.EdgePercent  ?? snapshot?.edge ?? null,
@@ -6790,6 +6792,19 @@ button.dirty {
       // ── END PHASE 17 ────────────────────────────────────────────────
 
       function renderManualBets() {
+        // Capture live input values before re-render so edit mode survives refreshes
+        if (window._mbEditState?.id) {
+          const editTr = document.querySelector('#manualRows tr[data-edit-id]');
+          if (editTr) {
+            const oddEl   = editTr.querySelector('.js-mbedit-odd');
+            const stakeEl = editTr.querySelector('.js-mbedit-stake');
+            const notasEl = editTr.querySelector('.js-mbedit-notas');
+            if (oddEl)   window._mbEditState.odd   = oddEl.value;
+            if (stakeEl) window._mbEditState.stake = stakeEl.value;
+            if (notasEl) window._mbEditState.notas = notasEl.value;
+          }
+        }
+
         const rows = sortManualRowsForDisplay(getManualRowsMerged());
 
         const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };
@@ -6799,7 +6814,8 @@ button.dirty {
 
         document.getElementById('manualRows').innerHTML = rows.length
           ? rows.map(b => {
-              const status = b.status || 'pending';
+              const status    = b.status    || 'pending';
+              const isEditing = window._mbEditState?.id && String(window._mbEditState.id) === String(b.id);
 
               const analysisBadge = b.hadAnalysis
                 ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis ?? '—'}</span>
@@ -6807,7 +6823,11 @@ button.dirty {
                      b.edgeAtAnalysis !== null && b.edgeAtAnalysis !== undefined
                        ? (b.edgeAtAnalysis >= 0 ? '+' : '') + fmt(b.edgeAtAnalysis) + '%'
                        : ''
-                   }</span>`
+                   }</span>${
+                     b.analysisStale
+                       ? `<span style="display:block;font-size:10px;color:var(--warn-text,#f59e0b);margin-top:2px;">⚠ Desatualizada</span>`
+                       : ''
+                   }`
                 : `<span class="mini" style="opacity:0.4;">—</span>`;
 
               const opinionBadge = b.botOpinion
@@ -6816,8 +6836,41 @@ button.dirty {
 
               const estadoBadge = `<span class="mini ${statusCls[status] || 'warn'}">${statusLabel[status] || 'Pendente'}</span>`;
 
+              if (isEditing) {
+                const es = window._mbEditState;
+                return `
+                <tr data-edit-id="${escapeHtml(b.id)}" style="background:rgba(99,102,241,0.06);">
+                  <td><span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span></td>
+                  <td>${escapeHtml(b.data || '—')}</td>
+                  <td>${escapeHtml(b.liga || '—')}</td>
+                  <td>${escapeHtml(b.jogo || '—')}</td>
+                  <td>${escapeHtml(b.mercado || '—')}</td>
+                  <td><input class="js-mbedit-odd" type="number" step="0.01" min="1.01"
+                    value="${escapeHtml(es.odd)}" style="width:72px;font-size:12px;" /></td>
+                  <td><input class="js-mbedit-stake" type="number" step="0.5" min="0.5"
+                    value="${escapeHtml(es.stake)}" style="width:72px;font-size:12px;" /></td>
+                  <td>${resultBadge(b.resultado)}</td>
+                  <td ${profitClass(b._lucro)}>${b._lucro === null ? '—' : `€${fmt(b._lucro)}`}</td>
+                  <td><input class="js-mbedit-notas" type="text"
+                    value="${escapeHtml(es.notas)}" style="width:120px;font-size:12px;" /></td>
+                  <td>${analysisBadge}</td>
+                  <td>${opinionBadge}</td>
+                  <td>${estadoBadge}</td>
+                  <td>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                      <button class="js-mbedit-save" type="button" data-id="${escapeHtml(b.id)}"
+                        style="${btnBase}background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);">Guardar</button>
+                      <button class="js-mbedit-cancel" type="button"
+                        style="${btnBase}">Cancelar</button>
+                    </div>
+                  </td>
+                </tr>`;
+              }
+
               const localActions = b.isLocal ? `
                 <div style="display:flex;flex-wrap:wrap;gap:4px;min-width:200px;">
+                  <button class="js-edit-manual" type="button" data-id="${escapeHtml(b.id)}"
+                    style="${btnBase}">Editar</button>
                   <button class="js-analyze-manual" type="button" data-id="${escapeHtml(b.id)}"
                     style="${btnBase}">${b.hadAnalysis ? 'Reanalisar' : 'Analisar'}</button>
                   ${status !== 'approved' ? `<button class="js-approve-manual" type="button" data-id="${escapeHtml(b.id)}"
@@ -7063,6 +7116,7 @@ button.dirty {
           state.manualBets[betIdx] = {
             ...state.manualBets[betIdx],
             hadAnalysis:      true,
+            analysisStale:    false,
             botOpinion:       result.opinion,
             edgeAtAnalysis:   result.EdgePercent,
             scoreAtAnalysis:  result.score,
@@ -7076,6 +7130,53 @@ button.dirty {
           btn.textContent = b.hadAnalysis ? 'Reanalisar' : 'Analisar';
           alert('Erro na análise. Verifica a consola.');
         }
+      }
+
+      function mbHandleRowEdit(id) {
+        const bet = state.manualBets.find(b => String(b.id) === String(id));
+        if (!bet) return;
+        window._mbEditState = { id, odd: bet.odd || '', stake: bet.stake || '', notas: bet.notas || '' };
+        rerenderManualOnly();
+      }
+
+      function mbHandleRowSave(saveBtn) {
+        const id = saveBtn?.dataset?.id;
+        const betIdx = id !== undefined ? state.manualBets.findIndex(b => String(b.id) === String(id)) : -1;
+        if (betIdx === -1) { mbHandleRowCancel(); return; }
+
+        const tr       = saveBtn.closest('tr[data-edit-id]');
+        const newOdd   = tr?.querySelector('.js-mbedit-odd')?.value?.trim()   ?? '';
+        const newStake = tr?.querySelector('.js-mbedit-stake')?.value?.trim() ?? '';
+        const newNotas = tr?.querySelector('.js-mbedit-notas')?.value?.trim() ?? '';
+
+        const oddNum   = parseFloat(newOdd);
+        const stakeNum = parseFloat(newStake);
+        if (isNaN(oddNum)   || oddNum < 1.01)  { alert('Odd inválida (mínimo 1.01).'); return; }
+        if (isNaN(stakeNum) || stakeNum <= 0)   { alert('Stake inválida (deve ser > 0).'); return; }
+
+        const b            = state.manualBets[betIdx];
+        const oddChanged   = Math.abs(oddNum   - parseFloat(b.odd   || 0)) > 0.001;
+        const stakeChanged = Math.abs(stakeNum - parseFloat(b.stake || 0)) > 0.001;
+        const analysisStale = b.hadAnalysis
+          ? (b.analysisStale || oddChanged || stakeChanged)
+          : false;
+
+        state.manualBets[betIdx] = {
+          ...b,
+          odd:           String(oddNum),
+          stake:         String(stakeNum),
+          notas:         newNotas,
+          analysisStale
+        };
+
+        window._mbEditState = null;
+        markDirty();
+        rerenderManualOnly();
+      }
+
+      function mbHandleRowCancel() {
+        window._mbEditState = null;
+        rerenderManualOnly();
       }
 
       function mbHandleRowApprove(id) {
@@ -7105,6 +7206,9 @@ button.dirty {
           const analyzeBtn = e.target.closest('.js-analyze-manual');
           const approveBtn = e.target.closest('.js-approve-manual');
           const rejectBtn  = e.target.closest('.js-reject-manual');
+          const editBtn    = e.target.closest('.js-edit-manual');
+          const saveBtn    = e.target.closest('.js-mbedit-save');
+          const cancelBtn  = e.target.closest('.js-mbedit-cancel');
 
           if (deleteBtn) {
             const id = deleteBtn.dataset.id;
@@ -7112,6 +7216,12 @@ button.dirty {
             state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
             markDirty();
             rerenderAll();
+          } else if (editBtn) {
+            mbHandleRowEdit(editBtn.dataset.id);
+          } else if (saveBtn) {
+            mbHandleRowSave(saveBtn);
+          } else if (cancelBtn) {
+            mbHandleRowCancel();
           } else if (analyzeBtn) {
             mbHandleRowAnalyze(analyzeBtn);
           } else if (approveBtn) {
@@ -7220,6 +7330,7 @@ button.dirty {
             : '',
           notas: cleanString(item.notas || ''),
           status:           ['pending','approved','rejected'].includes(item.status) ? item.status : 'pending',
+          analysisStale:    !!item.analysisStale,
           hadAnalysis:      !!item.hadAnalysis,
           botOpinion:       item.botOpinion       ?? null,
           edgeAtAnalysis:   item.edgeAtAnalysis   ?? null,
@@ -9651,7 +9762,8 @@ buttons.forEach(btn => {
           stake: cleanString(stake),
           resultado: cleanString(resultado).toUpperCase(),
           notas: cleanString(notas),
-          status: 'pending'
+          status: 'pending',
+          analysisStale: false
         });
 
         markDirty();
