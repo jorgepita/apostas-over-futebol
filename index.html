@@ -1444,7 +1444,7 @@ button.dirty {
 ========================= */
 .bankroll-kpi-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -1579,7 +1579,13 @@ button.dirty {
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
+  .bankroll-kpi-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
   .bankroll-kpi-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3990,6 +3996,26 @@ button.dirty {
         };
       }
 
+      // Single source of truth for all bankroll values.
+      // Every page and widget must consume this — never compute bancaAtual inline.
+      function getBankrollState() {
+        const movTotals = getMovementTotals();
+        const lucroReal =
+          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
+          sum(getResolvedManualBets().map(b => b._lucro));
+        const totalAccountValue =
+          state.bankrollInicial + movTotals.deposits - movTotals.withdrawals + lucroReal;
+        const globalResult = totalAccountValue - state.bankrollInicial;
+        return {
+          initialBankroll: state.bankrollInicial,
+          totalDeposits: movTotals.deposits,
+          totalWithdrawals: movTotals.withdrawals,
+          lucroReal,
+          totalAccountValue,
+          globalResult
+        };
+      }
+
       function getRiskMetrics() {
         const openBets = getHistoryRowsMerged().filter(r => r._apostadaBool && r._resultKey === 'pending');
         const stakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
@@ -3998,18 +4024,15 @@ button.dirty {
           return r._stakeRealNum * (r._oddRealNum - 1);
         }).filter(v => v !== null));
 
-        const lucroReal =
-          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
-          sum(getResolvedManualBets().map(b => b._lucro));
-
-        const bancaAtual = state.bankrollInicial + lucroReal;
+        const bk = getBankrollState();
+        const bancaAtual = bk.totalAccountValue;
         const bancaDisponivel = bancaAtual - stakeOpen;
 
         return {
           openCount: openBets.length,
           stakeOpen,
           potencialLucro,
-          lucroReal,
+          lucroReal: bk.lucroReal,
           bancaAtual,
           bancaDisponivel,
           picksHoje: getDailyRowsMerged().length
@@ -5534,11 +5557,12 @@ buttons.forEach(btn => {
       }
 
       function renderBankrollOverview() {
+        const bk = getBankrollState();
         const risk = getRiskMetrics();
         const m = getMetrics().geral;
-        const pnl = risk.lucroReal;
-        const pnlClass = pnl > 0 ? 'kpi-ok' : pnl < 0 ? 'kpi-bad' : '';
+        const pnlClass = bk.lucroReal > 0 ? 'kpi-ok' : bk.lucroReal < 0 ? 'kpi-bad' : '';
         const roiClass = m.realRoi > 0 ? 'kpi-ok' : m.realRoi < 0 ? 'kpi-bad' : '';
+        const globalClass = bk.globalResult > 0 ? 'kpi-ok' : bk.globalResult < 0 ? 'kpi-bad' : '';
 
         const kpiRow = document.getElementById('bankrollKpiRow');
         if (!kpiRow) return;
@@ -5546,23 +5570,28 @@ buttons.forEach(btn => {
         kpiRow.innerHTML = `
           <div class="kpi-hero kpi-primary">
             <div class="kpi-label">Banca atual</div>
-            <div class="kpi-value">€${fmt(risk.bancaAtual)}</div>
-            <div class="kpi-sub">Capital operacional</div>
+            <div class="kpi-value">€${fmt(bk.totalAccountValue)}</div>
+            <div class="kpi-sub">Inicial: €${fmt(bk.initialBankroll)}</div>
           </div>
           <div class="kpi-hero ${pnlClass}">
-            <div class="kpi-label">Lucro / Prejuízo</div>
-            <div class="kpi-value">${pnl >= 0 ? '+' : ''}€${fmt(pnl)}</div>
-            <div class="kpi-sub">De apostas fechadas</div>
+            <div class="kpi-label">P/L apostas</div>
+            <div class="kpi-value">${bk.lucroReal >= 0 ? '+' : ''}€${fmt(bk.lucroReal)}</div>
+            <div class="kpi-sub">Bot + manuais fechados</div>
           </div>
           <div class="kpi-hero ${roiClass}">
-            <div class="kpi-label">ROI global</div>
+            <div class="kpi-label">ROI apostas</div>
             <div class="kpi-value">${m.realRoi > 0 ? '+' : ''}${pct(m.realRoi)}</div>
             <div class="kpi-sub">Apostas reais fechadas</div>
           </div>
           <div class="kpi-hero">
             <div class="kpi-label">Banca inicial</div>
-            <div class="kpi-value">€${fmt(state.bankrollInicial)}</div>
+            <div class="kpi-value">€${fmt(bk.initialBankroll)}</div>
             <div class="kpi-sub">Base configurada</div>
+          </div>
+          <div class="kpi-hero ${globalClass}">
+            <div class="kpi-label">Resultado global</div>
+            <div class="kpi-value">${bk.globalResult >= 0 ? '+' : ''}€${fmt(bk.globalResult)}</div>
+            <div class="kpi-sub">Conta vs. banca inicial</div>
           </div>
         `;
       }
@@ -5570,41 +5599,39 @@ buttons.forEach(btn => {
       function renderBankrollComposition() {
         const wrap = document.getElementById('bankrollCompositionRow');
         if (!wrap) return;
-        const risk = getRiskMetrics();
-        const movTotals = getMovementTotals();
-        const total = state.bankrollInicial + movTotals.deposits - movTotals.withdrawals + risk.lucroReal;
-        const pnlColor = risk.lucroReal >= 0 ? 'var(--ok)' : 'var(--bad)';
-        const totalColor = total >= state.bankrollInicial ? 'var(--ok)' : 'var(--bad)';
+        const bk = getBankrollState();
+        const pnlColor = bk.lucroReal >= 0 ? 'var(--ok)' : 'var(--bad)';
+        const totalColor = bk.globalResult > 0 ? 'var(--ok)' : bk.globalResult < 0 ? 'var(--bad)' : 'var(--text)';
 
         wrap.innerHTML = `
           <div class="bankroll-comp-item">
             <div class="bankroll-comp-label">Banca inicial</div>
-            <div class="bankroll-comp-value">€${fmt(state.bankrollInicial)}</div>
+            <div class="bankroll-comp-value">€${fmt(bk.initialBankroll)}</div>
             <div style="font-size:10px;color:var(--muted);">Base configurada</div>
           </div>
           <div class="bankroll-comp-op">+</div>
           <div class="bankroll-comp-item">
             <div class="bankroll-comp-label">Depósitos</div>
-            <div class="bankroll-comp-value" style="color:var(--ok);">+€${fmt(movTotals.deposits)}</div>
+            <div class="bankroll-comp-value" style="color:var(--ok);">+€${fmt(bk.totalDeposits)}</div>
             <div style="font-size:10px;color:var(--muted);">${state.movements.filter(m=>m.type==='deposit').length} entrada(s)</div>
           </div>
           <div class="bankroll-comp-op" style="color:var(--bad);">−</div>
           <div class="bankroll-comp-item">
             <div class="bankroll-comp-label">Levantamentos</div>
-            <div class="bankroll-comp-value" style="color:var(--bad);">−€${fmt(movTotals.withdrawals)}</div>
+            <div class="bankroll-comp-value" style="color:var(--bad);">−€${fmt(bk.totalWithdrawals)}</div>
             <div style="font-size:10px;color:var(--muted);">${state.movements.filter(m=>m.type==='withdrawal').length} saída(s)</div>
           </div>
           <div class="bankroll-comp-op">+</div>
           <div class="bankroll-comp-item">
             <div class="bankroll-comp-label">P/L apostas</div>
-            <div class="bankroll-comp-value" style="color:${pnlColor};">${risk.lucroReal >= 0 ? '+' : ''}€${fmt(risk.lucroReal)}</div>
+            <div class="bankroll-comp-value" style="color:${pnlColor};">${bk.lucroReal >= 0 ? '+' : ''}€${fmt(bk.lucroReal)}</div>
             <div style="font-size:10px;color:var(--muted);">Bot + manual</div>
           </div>
           <div class="bankroll-comp-op" style="color:var(--accent);">=</div>
           <div class="bankroll-comp-item comp-total">
             <div class="bankroll-comp-label">Total conta</div>
-            <div class="bankroll-comp-value" style="color:${totalColor};">€${fmt(total)}</div>
-            <div style="font-size:10px;color:var(--muted);">Valor total estimado</div>
+            <div class="bankroll-comp-value" style="color:${totalColor};">€${fmt(bk.totalAccountValue)}</div>
+            <div style="font-size:10px;color:var(--muted);">Resultado global: ${bk.globalResult >= 0 ? '+' : ''}€${fmt(bk.globalResult)}</div>
           </div>
         `;
       }
