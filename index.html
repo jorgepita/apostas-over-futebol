@@ -6162,6 +6162,196 @@ button.dirty {
         URL.revokeObjectURL(url);
       }
 
+      // ── PHASE 17.2: REAL MODEL ENGINE ───────────────────────────────
+
+      const MB_HISTORY_CFG = {
+        window: 12,
+        decay: 0.88,
+        minGamesHome: 8,
+        minGamesAway: 8,
+        lambdaBoost: 1.12,
+        leagueLambdaBoost: { japao: 1.0, coreia: 1.0, finlandia: 1.0, islandia: 1.0, brasil: 1.0 }
+      };
+
+      const MB_DATA_RAW_BASE = 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/data_raw/';
+
+      // Ported from src/calculations.py — do NOT change formulas
+      function mbWeightedMean(values, decay) {
+        const v = (Array.isArray(values) ? values : []).map(x => parseFloat(x)).filter(x => !isNaN(x));
+        if (!v.length) return 0;
+        const n = v.length;
+        const weights = v.map((_, i) => Math.pow(decay, n - 1 - i));
+        const num = v.reduce((s, x, i) => s + x * weights[i], 0);
+        const den = weights.reduce((s, w) => s + w, 0);
+        return den > 0 ? num / den : 0;
+      }
+
+      function mbPoissonCdf(k, lam) {
+        if (lam <= 0) return 1;
+        let term = Math.exp(-lam);
+        let s = term;
+        for (let i = 1; i <= k; i++) { term *= lam / i; s += term; }
+        return Math.min(1, Math.max(0, s));
+      }
+
+      function mbProbOver25(lamTotal) {
+        return 1 - mbPoissonCdf(2, lamTotal);
+      }
+
+      function mbProbBttsAdjusted(lamH, lamA) {
+        lamH = Math.max(0, lamH);
+        lamA = Math.max(0, lamA);
+        const ph0 = Math.exp(-lamH), pa0 = Math.exp(-lamA);
+        let adj = (1 - ph0 - pa0 + ph0 * pa0) * 0.885;
+        const bigger = Math.max(lamH, lamA), smaller = Math.min(lamH, lamA);
+        const ratio = smaller > 0 ? bigger / smaller : 99;
+        const gap = Math.abs(lamH - lamA);
+        const product = lamH * lamA;
+        if (ratio >= 2.50) adj *= 0.88; else if (ratio >= 2.10) adj *= 0.93;
+        if (gap >= 1.10) adj *= 0.90; else if (gap >= 0.90) adj *= 0.95;
+        if (smaller < 0.55) adj *= 0.91; else if (smaller < 0.70) adj *= 0.96;
+        if (product < 0.55) adj *= 0.92; else if (product < 0.70) adj *= 0.97;
+        return Math.min(1, Math.max(0, adj));
+      }
+
+      function mbKellyFraction(p, odd) {
+        if (!odd || odd <= 1.01) return 0;
+        return Math.max(0, (p * odd - 1) / (odd - 1));
+      }
+
+      function mbClampStrength(x) { return Math.min(1.30, Math.max(0.80, x)); }
+      function mbClampProbO25(p)   { return Math.min(0.72, Math.max(0.22, p)); }
+      function mbClampProbBtts(p)  { return Math.min(0.68, Math.max(0.22, p)); }
+      function mbClampEdgeO25(e)   { return Math.min(0.16, Math.max(-0.20, e)); }
+      function mbClampEdgeBtts(e)  { return Math.min(0.14, Math.max(-0.20, e)); }
+
+      function mbParseHistDate(s) {
+        const p = String(s || '').split('/');
+        if (p.length === 3) return new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
+        return new Date(s);
+      }
+
+      function mbComputeLambdas(rows, homeTeam, awayTeam) {
+        const cfg = MB_HISTORY_CFG;
+        const allH = rows.map(r => parseFloat(r.FTHG)).filter(x => !isNaN(x));
+        const allA = rows.map(r => parseFloat(r.FTAG)).filter(x => !isNaN(x));
+        let avgHome = allH.length ? allH.reduce((s, x) => s + x, 0) / allH.length : 0;
+        let avgAway = allA.length ? allA.reduce((s, x) => s + x, 0) / allA.length : 0;
+        if (avgHome <= 0) avgHome = 1.20;
+        if (avgAway <= 0) avgAway = 1.00;
+
+        const hRows = rows.filter(r => r.HomeTeam === homeTeam)
+          .sort((a, b) => mbParseHistDate(a.Date) - mbParseHistDate(b.Date))
+          .slice(-cfg.window);
+        const aRows = rows.filter(r => r.AwayTeam === awayTeam)
+          .sort((a, b) => mbParseHistDate(a.Date) - mbParseHistDate(b.Date))
+          .slice(-cfg.window);
+
+        const sampleSize = Math.min(hRows.length, aRows.length);
+
+        if (hRows.length < cfg.minGamesHome || aRows.length < cfg.minGamesAway) {
+          const lamHome = Math.min(2.20, Math.max(0.25, avgHome));
+          const lamAway = Math.min(1.90, Math.max(0.20, avgAway));
+          return { lamHome, lamAway, lamTotal: lamHome + lamAway, usedFallback: true, sampleSize };
+        }
+
+        const homeScored   = mbWeightedMean(hRows.map(r => r.FTHG), cfg.decay);
+        const homeConceded = mbWeightedMean(hRows.map(r => r.FTAG), cfg.decay);
+        const awayScored   = mbWeightedMean(aRows.map(r => r.FTAG), cfg.decay);
+        const awayConceded = mbWeightedMean(aRows.map(r => r.FTHG), cfg.decay);
+
+        const homeAttack  = mbClampStrength(avgHome > 0 ? homeScored   / avgHome : 1);
+        const homeDefense = mbClampStrength(avgAway > 0 ? homeConceded / avgAway : 1);
+        const awayAttack  = mbClampStrength(avgAway > 0 ? awayScored   / avgAway : 1);
+        const awayDefense = mbClampStrength(avgHome > 0 ? awayConceded / avgHome : 1);
+
+        let lamHome = Math.min(2.20, Math.max(0.25, avgHome * homeAttack * awayDefense));
+        let lamAway = Math.min(1.90, Math.max(0.20, avgAway * awayAttack * homeDefense));
+        return { lamHome, lamAway, lamTotal: lamHome + lamAway, usedFallback: false, sampleSize };
+      }
+
+      async function loadLeagueHistory(leagueKey) {
+        if (!window._leagueHistoryCache) window._leagueHistoryCache = {};
+        if (Object.prototype.hasOwnProperty.call(window._leagueHistoryCache, leagueKey)) {
+          return window._leagueHistoryCache[leagueKey];
+        }
+        try {
+          const res = await fetch(`${MB_DATA_RAW_BASE}${leagueKey}.csv`, { cache: 'default' });
+          if (!res.ok) { window._leagueHistoryCache[leagueKey] = null; return null; }
+          const rows = parseAutoCsv(await res.text());
+          window._leagueHistoryCache[leagueKey] = rows;
+          return rows;
+        } catch {
+          window._leagueHistoryCache[leagueKey] = null;
+          return null;
+        }
+      }
+
+      async function analyzeFixture(leagueKey, homeTeam, awayTeam, market, userOdd, userStake) {
+        const cfg = MB_HISTORY_CFG;
+        const normMarket = mbScoutNormMarket(market);
+        const boost = cfg.leagueLambdaBoost[leagueKey] ?? cfg.lambdaBoost;
+
+        const histRows = await loadLeagueHistory(leagueKey);
+
+        let lamH, lamA, lamT, usedFallback, sampleSize;
+        if (!histRows || !histRows.length) {
+          lamH = 1.20; lamA = 1.00; lamT = 2.20;
+          usedFallback = true; sampleSize = 0;
+        } else {
+          const r = mbComputeLambdas(histRows, homeTeam, awayTeam);
+          lamH = r.lamHome; lamA = r.lamAway; lamT = r.lamTotal;
+          usedFallback = r.usedFallback; sampleSize = r.sampleSize;
+        }
+
+        if (boost && boost !== 1.0) {
+          lamH = Math.min(2.20, Math.max(0.25, lamH * boost));
+          lamA = Math.min(1.90, Math.max(0.20, lamA * boost));
+          lamT = lamH + lamA;
+        }
+
+        let probModel, probMarket, edge;
+        if (normMarket === 'O2.5') {
+          probModel  = mbClampProbO25(mbProbOver25(lamT));
+          probMarket = Math.min(0.99, Math.max(0.01, 1 / userOdd));
+          edge       = mbClampEdgeO25(probModel - probMarket);
+        } else {
+          probModel  = mbClampProbBtts(mbProbBttsAdjusted(lamH, lamA));
+          probMarket = Math.min(0.99, Math.max(0.01, 1 / userOdd));
+          edge       = mbClampEdgeBtts(probModel - probMarket);
+        }
+
+        const fairOdd    = probModel > 0 ? 1 / probModel : null;
+        const kellyTrue  = mbKellyFraction(probModel, userOdd);
+        const edgePercent = edge * 100;
+        const ev         = userStake * (probModel * userOdd - 1);
+
+        // Score uses existing computePickScore for full compatibility with bot picks
+        const score    = computePickScore({ 'Edge%': edgePercent, 'Odd': userOdd, 'Stake€': userStake });
+        const scoreCls = score >= 75 ? 'good' : score >= 60 ? 'info' : score >= 45 ? 'warn' : 'bad';
+
+        let opinion, opinionCls;
+        if (edgePercent >= 8 || score >= 75)      { opinion = 'STRONG BUY'; opinionCls = 'good'; }
+        else if (edgePercent >= 4 || score >= 60) { opinion = 'BUY';        opinionCls = 'info'; }
+        else if (edgePercent >= 0 || score >= 45) { opinion = 'NEUTRAL';    opinionCls = 'warn'; }
+        else                                      { opinion = 'AVOID';      opinionCls = 'bad';  }
+
+        const dataQuality = sampleSize === 0 ? 'NONE'
+          : !usedFallback ? 'HIGH'
+          : sampleSize >= Math.floor(cfg.minGamesHome / 2) ? 'MEDIUM'
+          : 'LOW';
+
+        return {
+          ProbModel: probModel, ProbMarket: probMarket,
+          Edge: edge, EdgePercent: edgePercent, fairOdd,
+          KellyTrue: kellyTrue, EV: ev,
+          score, scoreCls, opinion, opinionCls,
+          LambdaHome: lamH, LambdaAway: lamA, LambdaTotal: lamT,
+          usedFallback, sampleSize, dataQuality,
+          timestamp: new Date().toISOString()
+        };
+      }
+
       // ── PHASE 17: MANUAL SCOUT — HELPER FUNCTIONS ──────────────────
 
       function mbScoutMarketLabel(val) {
@@ -6175,57 +6365,6 @@ button.dirty {
         if (u === 'O2.5' || u === 'OVER2.5') return 'O2.5';
         if (u === 'BTTS') return 'BTTS';
         return u;
-      }
-
-      function findLeagueStatsForAnalysis(league, market) {
-        const rows = Array.isArray(state.leagueStats) ? state.leagueStats : [];
-        const normLeague = cleanString(league || '').toLowerCase();
-        const normMarket = mbScoutNormMarket(market);
-        return rows.find(r => {
-          const rLeague = cleanString(r.League || r.Liga || '').toLowerCase();
-          const rMarket = mbScoutNormMarket(normalizeMarket(r) || r.Market || '');
-          return rLeague === normLeague && rMarket === normMarket;
-        }) || null;
-      }
-
-      function computeManualAnalysis(league, market, userOdd, userStake) {
-        const statsRow = findLeagueStatsForAnalysis(league, market);
-        const totalPicks = statsRow ? (num(statsRow.TotalPicks) ?? 0) : 0;
-        const rawWR = statsRow ? num(statsRow['WinRate%']) : null;
-
-        // Use historical win rate if sample is meaningful (≥5 picks), else defaults
-        let modelProb;
-        if (rawWR !== null && totalPicks >= 5) {
-          modelProb = clamp(rawWR / 100, 0.01, 0.99);
-        } else {
-          const defaults = { 'O2.5': 0.54, 'BTTS': 0.50 };
-          modelProb = defaults[mbScoutNormMarket(market)] ?? 0.52;
-        }
-
-        const marketProb = clamp(1 / userOdd, 0.01, 0.99);
-        const edge = (modelProb - marketProb) * 100;
-        const fairOdd = modelProb > 0 ? 1 / modelProb : null;
-        const ev = userStake * ((modelProb * userOdd) - 1);
-
-        // Score (same formula as computePickScore adapted for manual analysis)
-        let score = 50;
-        score += clamp(edge * 3, -20, 30);
-        if (userOdd >= 1.7 && userOdd <= 2.2) score += 8;
-        else if (userOdd > 2.2 && userOdd <= 2.6) score += 4;
-        else if (userOdd > 2.6) score -= 4;
-        if (userStake >= 3) score += 6;
-        if (userStake >= 5) score += 6;
-        score = clamp(Math.round(score), 0, 100);
-        const scoreCls = score >= 75 ? 'good' : score >= 60 ? 'info' : score >= 45 ? 'warn' : 'bad';
-
-        // Opinion
-        let opinion, opinionCls;
-        if (edge >= 8 || score >= 75)      { opinion = 'STRONG BUY'; opinionCls = 'good'; }
-        else if (edge >= 4 || score >= 60) { opinion = 'BUY';        opinionCls = 'info'; }
-        else if (edge >= 0 || score >= 45) { opinion = 'NEUTRAL';    opinionCls = 'warn'; }
-        else                               { opinion = 'AVOID';      opinionCls = 'bad';  }
-
-        return { modelProb, marketProb, edge, fairOdd, ev, score, scoreCls, opinion, opinionCls };
       }
 
       function mbScoutBuildCacheKey(matchKey, market, odd, stake) {
@@ -6251,10 +6390,24 @@ button.dirty {
           ? `<div class="scout-stale-warn">⚠ Análise desatualizada — clique Reanalisar</div>`
           : '';
 
-        const evSign = result.ev >= 0 ? '+' : '';
-        const edgeSign = result.edge >= 0 ? '+' : '';
-        const edgeColor = result.edge >= 0 ? 'var(--ok)' : 'var(--bad)';
-        const evColor = result.ev >= 0 ? 'var(--ok)' : 'var(--bad)';
+        const ep      = result.EdgePercent ?? (result.Edge * 100);
+        const edgeSign  = ep >= 0 ? '+' : '';
+        const edgeColor = ep >= 0 ? 'var(--ok)' : 'var(--bad)';
+        const ev        = result.EV ?? result.ev ?? 0;
+        const evSign    = ev >= 0 ? '+' : '';
+        const evColor   = ev >= 0 ? 'var(--ok)' : 'var(--bad)';
+        const pm        = result.ProbModel ?? result.modelProb ?? 0;
+        const fo        = result.fairOdd;
+        const dq        = result.dataQuality || (result.usedFallback ? 'LOW' : 'HIGH');
+        const dqCls     = dq === 'HIGH' ? 'good' : dq === 'MEDIUM' ? 'warn' : dq === 'LOW' ? 'bad' : 'bad';
+        const lamH      = result.LambdaHome ?? null;
+        const lamA      = result.LambdaAway ?? null;
+        const lambdaHtml = (lamH !== null && lamA !== null)
+          ? `<div class="scout-analysis-kpi">λ Home / Away<strong>${fmt(lamH, 3)} / ${fmt(lamA, 3)}</strong></div>`
+          : '';
+        const fallbackHtml = result.usedFallback
+          ? `<div class="scout-stale-warn" style="margin-top:4px;">⚠ Histórico limitado — médias da liga usadas</div>`
+          : '';
 
         panel.style.display = '';
         panel.innerHTML = `
@@ -6262,25 +6415,31 @@ button.dirty {
           <div class="scout-analysis-grid">
             <div class="scout-analysis-kpi">
               Prob. Modelo
-              <strong>${(result.modelProb * 100).toFixed(1)}%</strong>
+              <strong>${(pm * 100).toFixed(1)}%</strong>
             </div>
             <div class="scout-analysis-kpi">
               Odd Justa
-              <strong>${result.fairOdd ? fmt(result.fairOdd) : '—'}</strong>
+              <strong>${fo ? fmt(fo) : '—'}</strong>
             </div>
             <div class="scout-analysis-kpi">
               Edge
-              <strong style="color:${edgeColor};">${edgeSign}${fmt(result.edge)}%</strong>
+              <strong style="color:${edgeColor};">${edgeSign}${fmt(ep)}%</strong>
             </div>
             <div class="scout-analysis-kpi">
               EV
-              <strong style="color:${evColor};">${evSign}€${fmt(Math.abs(result.ev))}</strong>
+              <strong style="color:${evColor};">${evSign}€${fmt(Math.abs(ev))}</strong>
+            </div>
+            ${lambdaHtml}
+            <div class="scout-analysis-kpi">
+              Qualidade
+              <strong><span class="mini ${dqCls}" style="font-size:10px;">${escapeHtml(dq)}</span></strong>
             </div>
           </div>
-          <div>
+          <div style="margin-top:4px;">
             <span class="mini ${result.scoreCls}">Score ${result.score}</span>
             <span class="mini ${result.opinionCls}" style="margin-left:6px;">${escapeHtml(result.opinion)}</span>
           </div>
+          ${fallbackHtml}
         `;
       }
 
@@ -6369,6 +6528,8 @@ button.dirty {
                 data-league="${escapeHtml(league)}"
                 data-game="${escapeHtml(game)}"
                 data-date="${escapeHtml(date)}"
+                data-home-team="${escapeHtml(home)}"
+                data-away-team="${escapeHtml(away)}"
                 data-odd-o25="${escapeHtml(String(oddO25))}"
                 data-odd-btts="${escapeHtml(String(oddBTTS))}">
 
@@ -6490,13 +6651,15 @@ button.dirty {
         renderScoutAnalysisPanel(card, cached, currentKey !== cached.cacheKey);
       }
 
-      function mbHandleAnalyze(card) {
+      async function mbHandleAnalyze(card) {
         if (!card) return;
-        const mk      = card.dataset.matchKey;
-        const league  = card.dataset.league;
-        const game    = card.dataset.game;
-        const curr    = mbScoutGetCardValues(card);
-        const msgEl   = card.querySelector('.js-scout-msg');
+        const mk        = card.dataset.matchKey;
+        const league    = card.dataset.league;
+        const homeTeam  = card.dataset.homeTeam;
+        const awayTeam  = card.dataset.awayTeam;
+        const curr      = mbScoutGetCardValues(card);
+        const msgEl     = card.querySelector('.js-scout-msg');
+        const analyzeBtn = card.querySelector('.js-scout-analyze');
 
         const odd   = parseFloat(curr.odd);
         const stake = parseFloat(curr.stake);
@@ -6524,19 +6687,26 @@ button.dirty {
           return;
         }
 
-        // Run fresh analysis
-        if (!window._mbAnalysisCache) window._mbAnalysisCache = {};
-        const result = computeManualAnalysis(league, curr.market, odd, stake);
-        const snapshot = {
-          cacheKey,
-          timestamp: new Date().toISOString(),
-          market: curr.market,
-          odd,
-          stake,
-          ...result
-        };
-        window._mbAnalysisCache[mk] = snapshot;
-        renderScoutAnalysisPanel(card, snapshot, false);
+        // Loading state
+        if (analyzeBtn) { analyzeBtn.disabled = true; analyzeBtn.textContent = 'A calcular…'; }
+
+        try {
+          if (!window._mbAnalysisCache) window._mbAnalysisCache = {};
+          const result = await analyzeFixture(league, homeTeam, awayTeam, curr.market, odd, stake);
+          const snapshot = {
+            cacheKey,
+            market: curr.market,
+            odd,
+            stake,
+            ...result
+          };
+          window._mbAnalysisCache[mk] = snapshot;
+          renderScoutAnalysisPanel(card, snapshot, false);
+        } catch (err) {
+          console.error('mbHandleAnalyze error', err);
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Erro na análise. Verifica a consola.'; }
+          if (analyzeBtn) { analyzeBtn.disabled = false; analyzeBtn.textContent = 'Analisar'; }
+        }
       }
 
       function mbHandleCreate(card) {
@@ -6600,7 +6770,7 @@ button.dirty {
           notas: '',
           hadAnalysis:     !!snapshot,
           botOpinion:      snapshot?.opinion      ?? null,
-          edgeAtAnalysis:  snapshot?.edge         ?? null,
+          edgeAtAnalysis:  snapshot?.EdgePercent  ?? snapshot?.edge ?? null,
           scoreAtAnalysis: snapshot?.score        ?? null,
           analysisSnapshot: snapshot              ?? null
         });
