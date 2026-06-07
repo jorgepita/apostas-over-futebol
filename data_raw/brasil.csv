@@ -1,0 +1,1521 @@
+Date,HomeTeam,AwayTeam,FTHG,FTAG
+09/04/2022,Fluminense,Santos,0,0
+09/04/2022,Atletico Goianiense,Flamengo,1,1
+10/04/2022,Palmeiras,Ceara,2,3
+10/04/2022,Coritiba,Goias,3,0
+10/04/2022,Botafogo,Corinthians,1,3
+10/04/2022,Atletico-MG,Internacional,2,0
+10/04/2022,Fortaleza EC,Cuiaba,0,1
+10/04/2022,Sao Paulo,Atletico Paranaense,4,0
+10/04/2022,Avai,America Mineiro,1,0
+11/04/2022,Juventude,RB Bragantino,2,2
+16/04/2022,Goias,Palmeiras,1,1
+16/04/2022,America Mineiro,Juventude,4,1
+16/04/2022,Corinthians,Avai,3,0
+17/04/2022,Cuiaba,Fluminense,0,1
+17/04/2022,Santos,Coritiba,2,1
+17/04/2022,Flamengo,Sao Paulo,3,1
+17/04/2022,Internacional,Fortaleza EC,2,1
+17/04/2022,Atletico Paranaense,Atletico-MG,0,1
+17/04/2022,RB Bragantino,Atletico Goianiense,4,0
+17/04/2022,Ceara,Botafogo,1,3
+20/04/2022,Flamengo,Palmeiras,0,0
+23/04/2022,Atletico Paranaense,Flamengo,1,0
+23/04/2022,RB Bragantino,Sao Paulo,1,1
+23/04/2022,Palmeiras,Corinthians,3,0
+23/04/2022,Fluminense,Internacional,0,1
+24/04/2022,Atletico-MG,Coritiba,2,2
+24/04/2022,Santos,America Mineiro,3,0
+24/04/2022,Juventude,Cuiaba,0,1
+24/04/2022,Atletico Goianiense,Botafogo,1,1
+25/04/2022,Avai,Goias,3,2
+30/04/2022,America Mineiro,Atletico Paranaense,1,0
+30/04/2022,Ceara,RB Bragantino,0,1
+30/04/2022,Goias,Atletico-MG,2,2
+30/04/2022,Cuiaba,Atletico Goianiense,1,1
+01/05/2022,Botafogo,Juventude,1,1
+01/05/2022,Corinthians,Fortaleza EC,1,0
+01/05/2022,Coritiba,Fluminense,3,2
+01/05/2022,Internacional,Avai,0,0
+02/05/2022,Sao Paulo,Santos,2,1
+07/05/2022,Atletico-MG,America Mineiro,1,2
+07/05/2022,Atletico Paranaense,Ceara,1,0
+08/05/2022,Flamengo,Botafogo,0,1
+08/05/2022,Palmeiras,Fluminense,1,1
+08/05/2022,Atletico Goianiense,Goias,0,1
+08/05/2022,Santos,Cuiaba,4,1
+08/05/2022,RB Bragantino,Corinthians,0,1
+08/05/2022,Juventude,Internacional,1,1
+08/05/2022,Fortaleza EC,Sao Paulo,1,1
+09/05/2022,Avai,Coritiba,2,1
+11/05/2022,RB Bragantino,Atletico-MG,1,1
+14/05/2022,Palmeiras,RB Bragantino,2,0
+14/05/2022,Ceara,Flamengo,2,2
+14/05/2022,Internacional,Corinthians,2,2
+14/05/2022,Atletico-MG,Atletico Goianiense,2,0
+15/05/2022,Fluminense,Atletico Paranaense,2,1
+15/05/2022,Sao Paulo,Cuiaba,2,1
+15/05/2022,Coritiba,America Mineiro,1,0
+15/05/2022,Botafogo,Fortaleza EC,3,1
+15/05/2022,Avai,Juventude,1,2
+15/05/2022,Goias,Santos,1,0
+21/05/2022,Flamengo,Goias,1,0
+21/05/2022,Atletico Goianiense,Coritiba,2,0
+21/05/2022,Santos,Ceara,0,0
+21/05/2022,Juventude,Palmeiras,0,3
+22/05/2022,America Mineiro,Botafogo,1,1
+22/05/2022,Cuiaba,Internacional,1,1
+22/05/2022,Corinthians,Sao Paulo,1,1
+22/05/2022,Fortaleza EC,Fluminense,0,1
+22/05/2022,Atletico Paranaense,Avai,2,1
+28/05/2022,Goias,RB Bragantino,1,1
+28/05/2022,Sao Paulo,Ceara,2,2
+28/05/2022,Fortaleza EC,Juventude,1,1
+29/05/2022,Santos,Palmeiras,0,1
+29/05/2022,Coritiba,Botafogo,1,0
+29/05/2022,Fluminense,Flamengo,1,2
+29/05/2022,Corinthians,America Mineiro,1,1
+29/05/2022,Cuiaba,Atletico Paranaense,0,1
+29/05/2022,Atletico-MG,Avai,2,1
+30/05/2022,Internacional,Atletico Goianiense,1,1
+01/06/2022,Fortaleza EC,Ceara,0,1
+04/06/2022,America Mineiro,Cuiaba,2,1
+04/06/2022,Ceara,Coritiba,1,1
+04/06/2022,Atletico Paranaense,Santos,2,2
+04/06/2022,Avai,Sao Paulo,1,1
+04/06/2022,Atletico Goianiense,Corinthians,0,1
+05/06/2022,Juventude,Fluminense,1,0
+05/06/2022,Palmeiras,Atletico-MG,0,0
+05/06/2022,Flamengo,Fortaleza EC,1,2
+05/06/2022,RB Bragantino,Internacional,0,2
+06/06/2022,Botafogo,Goias,1,2
+08/06/2022,Cuiaba,Corinthians,1,0
+08/06/2022,America Mineiro,Ceara,0,2
+08/06/2022,Juventude,Atletico Paranaense,1,3
+08/06/2022,Atletico Goianiense,Avai,2,1
+08/06/2022,RB Bragantino,Flamengo,1,0
+09/06/2022,Fluminense,Atletico-MG,5,3
+09/06/2022,Santos,Internacional,1,1
+09/06/2022,Palmeiras,Botafogo,4,0
+09/06/2022,Coritiba,Sao Paulo,1,1
+09/06/2022,Fortaleza EC,Goias,1,1
+11/06/2022,Corinthians,Juventude,2,0
+11/06/2022,Fluminense,Atletico Goianiense,0,2
+11/06/2022,Atletico-MG,Santos,1,1
+11/06/2022,Cuiaba,RB Bragantino,1,1
+12/06/2022,Internacional,Flamengo,3,1
+12/06/2022,Sao Paulo,America Mineiro,1,0
+12/06/2022,Goias,Ceara,1,1
+12/06/2022,Coritiba,Palmeiras,0,2
+12/06/2022,Fortaleza EC,Atletico Paranaense,0,0
+13/06/2022,Botafogo,Avai,0,1
+15/06/2022,Juventude,Santos,1,2
+15/06/2022,Ceara,Atletico-MG,0,0
+15/06/2022,RB Bragantino,Coritiba,4,2
+15/06/2022,Flamengo,Cuiaba,2,0
+15/06/2022,Goias,Internacional,1,2
+16/06/2022,America Mineiro,Fluminense,0,0
+16/06/2022,Atletico Paranaense,Corinthians,1,1
+16/06/2022,Botafogo,Sao Paulo,1,0
+16/06/2022,Palmeiras,Atletico Goianiense,4,2
+16/06/2022,Avai,Fortaleza EC,3,2
+18/06/2022,Cuiaba,Ceara,0,0
+19/06/2022,Santos,RB Bragantino,2,2
+19/06/2022,Corinthians,Goias,1,0
+19/06/2022,Coritiba,Atletico Paranaense,0,1
+19/06/2022,Atletico-MG,Flamengo,2,0
+19/06/2022,Internacional,Botafogo,2,3
+19/06/2022,Atletico Goianiense,Juventude,3,1
+19/06/2022,Fortaleza EC,America Mineiro,1,0
+19/06/2022,Fluminense,Avai,2,0
+20/06/2022,Sao Paulo,Palmeiras,1,2
+25/06/2022,Internacional,Coritiba,3,0
+25/06/2022,Atletico Paranaense,RB Bragantino,4,2
+25/06/2022,Flamengo,America Mineiro,3,0
+25/06/2022,Corinthians,Santos,0,0
+26/06/2022,Atletico-MG,Fortaleza EC,3,2
+26/06/2022,Botafogo,Fluminense,0,1
+26/06/2022,Avai,Palmeiras,2,2
+26/06/2022,Sao Paulo,Juventude,0,0
+26/06/2022,Ceara,Atletico Goianiense,1,1
+26/06/2022,Goias,Cuiaba,1,0
+02/07/2022,Fluminense,Corinthians,4,0
+02/07/2022,Juventude,Atletico-MG,1,2
+02/07/2022,Santos,Flamengo,1,2
+02/07/2022,Ceara,Internacional,1,1
+03/07/2022,Palmeiras,Atletico Paranaense,0,2
+03/07/2022,Avai,Cuiaba,1,2
+03/07/2022,Atletico Goianiense,Sao Paulo,1,2
+03/07/2022,America Mineiro,Goias,1,0
+03/07/2022,Coritiba,Fortaleza EC,2,1
+04/07/2022,RB Bragantino,Botafogo,0,1
+09/07/2022,RB Bragantino,Avai,4,0
+09/07/2022,Fluminense,Ceara,2,1
+09/07/2022,Goias,Atletico Paranaense,2,1
+10/07/2022,Coritiba,Juventude,2,2
+10/07/2022,Corinthians,Flamengo,1,0
+10/07/2022,Santos,Atletico Goianiense,1,0
+10/07/2022,Fortaleza EC,Palmeiras,0,0
+10/07/2022,Atletico-MG,Sao Paulo,0,0
+10/07/2022,Cuiaba,Botafogo,2,0
+11/07/2022,Internacional,America Mineiro,1,0
+16/07/2022,Atletico Paranaense,Internacional,0,0
+16/07/2022,Flamengo,Coritiba,2,0
+16/07/2022,Avai,Santos,1,0
+17/07/2022,Ceara,Corinthians,3,1
+17/07/2022,Juventude,Goias,0,0
+17/07/2022,Sao Paulo,Fluminense,2,2
+17/07/2022,Botafogo,Atletico-MG,0,1
+17/07/2022,Atletico Goianiense,Fortaleza EC,0,1
+17/07/2022,America Mineiro,RB Bragantino,0,3
+18/07/2022,Palmeiras,Cuiaba,1,0
+20/07/2022,Ceara,Avai,1,0
+20/07/2022,Goias,Fluminense,2,3
+20/07/2022,RB Bragantino,Fortaleza EC,2,1
+20/07/2022,Atletico Paranaense,Atletico Goianiense,4,1
+20/07/2022,Internacional,Sao Paulo,3,3
+20/07/2022,Flamengo,Juventude,4,0
+21/07/2022,Santos,Botafogo,2,0
+21/07/2022,Corinthians,Coritiba,3,1
+21/07/2022,Cuiaba,Atletico-MG,1,1
+21/07/2022,America Mineiro,Palmeiras,0,1
+23/07/2022,Sao Paulo,Goias,3,3
+24/07/2022,Botafogo,Atletico Paranaense,2,0
+24/07/2022,Avai,Flamengo,1,2
+24/07/2022,Palmeiras,Internacional,2,1
+24/07/2022,Fluminense,RB Bragantino,2,1
+24/07/2022,Juventude,Ceara,1,0
+24/07/2022,Atletico Goianiense,America Mineiro,0,1
+24/07/2022,Atletico-MG,Corinthians,1,2
+24/07/2022,Fortaleza EC,Santos,0,0
+25/07/2022,Coritiba,Cuiaba,1,0
+30/07/2022,Ceara,Palmeiras,1,2
+30/07/2022,Goias,Coritiba,1,0
+30/07/2022,Corinthians,Botafogo,1,0
+30/07/2022,Flamengo,Atletico Goianiense,4,1
+31/07/2022,Internacional,Atletico-MG,3,0
+31/07/2022,Atletico Paranaense,Sao Paulo,1,0
+31/07/2022,America Mineiro,Avai,3,1
+31/07/2022,Cuiaba,Fortaleza EC,0,1
+31/07/2022,RB Bragantino,Juventude,1,0
+01/08/2022,Santos,Fluminense,2,2
+06/08/2022,Botafogo,Ceara,1,1
+06/08/2022,Juventude,America Mineiro,0,1
+06/08/2022,Atletico Goianiense,RB Bragantino,2,1
+06/08/2022,Avai,Corinthians,1,1
+06/08/2022,Sao Paulo,Flamengo,0,2
+07/08/2022,Palmeiras,Goias,3,0
+07/08/2022,Fluminense,Cuiaba,1,0
+07/08/2022,Fortaleza EC,Internacional,3,0
+07/08/2022,Atletico-MG,Atletico Paranaense,2,3
+08/08/2022,Coritiba,Santos,1,2
+13/08/2022,Goias,Avai,1,1
+13/08/2022,Corinthians,Palmeiras,0,1
+13/08/2022,Cuiaba,Juventude,1,0
+14/08/2022,Botafogo,Atletico Goianiense,0,0
+14/08/2022,Coritiba,Atletico-MG,0,1
+14/08/2022,Sao Paulo,RB Bragantino,3,0
+14/08/2022,Flamengo,Atletico Paranaense,5,0
+14/08/2022,Ceara,Fortaleza EC,0,1
+14/08/2022,America Mineiro,Santos,1,0
+14/08/2022,Internacional,Fluminense,3,0
+20/08/2022,Atletico-MG,Goias,0,1
+20/08/2022,Fluminense,Coritiba,5,2
+21/08/2022,Juventude,Botafogo,2,2
+21/08/2022,Palmeiras,Flamengo,1,1
+21/08/2022,Atletico Paranaense,America Mineiro,1,1
+21/08/2022,Atletico Goianiense,Cuiaba,1,1
+21/08/2022,Fortaleza EC,Corinthians,1,0
+21/08/2022,RB Bragantino,Ceara,1,1
+21/08/2022,Santos,Sao Paulo,1,0
+22/08/2022,Avai,Internacional,0,1
+27/08/2022,Coritiba,Avai,1,0
+27/08/2022,Goias,Atletico Goianiense,2,1
+27/08/2022,Fluminense,Palmeiras,1,1
+28/08/2022,Ceara,Atletico Paranaense,0,0
+28/08/2022,America Mineiro,Atletico-MG,1,1
+28/08/2022,Sao Paulo,Fortaleza EC,0,1
+28/08/2022,Botafogo,Flamengo,0,1
+28/08/2022,Cuiaba,Santos,0,0
+29/08/2022,Internacional,Juventude,4,0
+30/08/2022,Corinthians,RB Bragantino,1,0
+03/09/2022,Juventude,Avai,1,1
+03/09/2022,Atletico Paranaense,Fluminense,1,0
+03/09/2022,RB Bragantino,Palmeiras,2,2
+03/09/2022,America Mineiro,Coritiba,2,0
+04/09/2022,Flamengo,Ceara,1,1
+04/09/2022,Corinthians,Internacional,2,2
+04/09/2022,Fortaleza EC,Botafogo,1,3
+04/09/2022,Atletico Goianiense,Atletico-MG,0,2
+04/09/2022,Cuiaba,Sao Paulo,1,1
+05/09/2022,Santos,Goias,1,2
+07/09/2022,Atletico-MG,RB Bragantino,1,1
+10/09/2022,Internacional,Cuiaba,1,0
+10/09/2022,Ceara,Santos,2,1
+10/09/2022,Fluminense,Fortaleza EC,2,1
+11/09/2022,Palmeiras,Juventude,2,1
+11/09/2022,Botafogo,America Mineiro,0,0
+11/09/2022,Avai,Atletico Paranaense,1,1
+11/09/2022,Sao Paulo,Corinthians,1,1
+11/09/2022,Coritiba,Atletico Goianiense,2,0
+11/09/2022,Goias,Flamengo,1,1
+17/09/2022,Avai,Atletico-MG,1,0
+17/09/2022,Botafogo,Coritiba,2,0
+18/09/2022,RB Bragantino,Goias,1,1
+18/09/2022,Flamengo,Fluminense,1,2
+18/09/2022,Ceara,Sao Paulo,0,2
+18/09/2022,America Mineiro,Corinthians,1,0
+18/09/2022,Juventude,Fortaleza EC,1,1
+18/09/2022,Palmeiras,Santos,1,0
+18/09/2022,Atletico Paranaense,Cuiaba,2,2
+19/09/2022,Atletico Goianiense,Internacional,1,2
+25/09/2022,Sao Paulo,Avai,4,0
+28/09/2022,Santos,Atletico Paranaense,2,0
+28/09/2022,Fluminense,Juventude,4,0
+28/09/2022,Corinthians,Atletico Goianiense,2,1
+28/09/2022,Coritiba,Ceara,1,0
+28/09/2022,Fortaleza EC,Flamengo,3,2
+29/09/2022,Cuiaba,America Mineiro,2,1
+29/09/2022,Internacional,RB Bragantino,0,0
+29/09/2022,Goias,Botafogo,0,1
+29/09/2022,Atletico-MG,Palmeiras,0,1
+01/10/2022,Internacional,Santos,1,0
+01/10/2022,Ceara,America Mineiro,1,2
+01/10/2022,Atletico-MG,Fluminense,2,0
+01/10/2022,Flamengo,RB Bragantino,4,1
+01/10/2022,Atletico Paranaense,Juventude,2,0
+01/10/2022,Avai,Atletico Goianiense,1,2
+01/10/2022,Goias,Fortaleza EC,0,1
+02/10/2022,Corinthians,Cuiaba,2,0
+03/10/2022,Botafogo,Palmeiras,1,3
+05/10/2022,Juventude,Corinthians,2,2
+05/10/2022,Ceara,Goias,1,1
+05/10/2022,Atletico Goianiense,Fluminense,3,2
+05/10/2022,RB Bragantino,Cuiaba,2,1
+05/10/2022,Atletico Paranaense,Fortaleza EC,1,1
+06/10/2022,Flamengo,Internacional,0,0
+06/10/2022,Santos,Atletico-MG,1,2
+06/10/2022,Palmeiras,Coritiba,4,0
+06/10/2022,America Mineiro,Sao Paulo,1,2
+06/10/2022,Avai,Botafogo,1,2
+08/10/2022,Cuiaba,Flamengo,1,2
+09/10/2022,Corinthians,Atletico Paranaense,2,1
+09/10/2022,Internacional,Goias,4,2
+09/10/2022,Sao Paulo,Botafogo,0,1
+09/10/2022,Fortaleza EC,Avai,2,0
+09/10/2022,Fluminense,America Mineiro,0,2
+09/10/2022,Coritiba,RB Bragantino,2,1
+09/10/2022,Atletico-MG,Ceara,0,0
+10/10/2022,Atletico Goianiense,Palmeiras,1,1
+10/10/2022,Santos,Juventude,4,1
+15/10/2022,America Mineiro,Fortaleza EC,1,2
+15/10/2022,Flamengo,Atletico-MG,1,0
+16/10/2022,Palmeiras,Sao Paulo,0,0
+16/10/2022,Ceara,Cuiaba,1,1
+16/10/2022,Botafogo,Internacional,0,1
+16/10/2022,Juventude,Atletico Goianiense,1,1
+16/10/2022,Atletico Paranaense,Coritiba,1,0
+16/10/2022,Avai,Fluminense,0,3
+17/10/2022,RB Bragantino,Santos,0,2
+20/10/2022,Sao Paulo,Coritiba,3,1
+22/10/2022,RB Bragantino,Atletico Paranaense,4,2
+22/10/2022,America Mineiro,Flamengo,1,2
+22/10/2022,Santos,Corinthians,0,1
+23/10/2022,Palmeiras,Avai,3,0
+23/10/2022,Fluminense,Botafogo,2,2
+23/10/2022,Juventude,Sao Paulo,1,2
+23/10/2022,Atletico Goianiense,Ceara,1,0
+23/10/2022,Coritiba,Internacional,1,1
+23/10/2022,Cuiaba,Goias,1,2
+24/10/2022,Fortaleza EC,Atletico-MG,0,0
+26/10/2022,Flamengo,Santos,3,2
+26/10/2022,Atletico Paranaense,Palmeiras,1,3
+26/10/2022,Botafogo,RB Bragantino,2,1
+27/10/2022,Internacional,Ceara,2,1
+27/10/2022,Corinthians,Fluminense,0,2
+27/10/2022,Goias,America Mineiro,2,2
+27/10/2022,Sao Paulo,Atletico Goianiense,2,1
+27/10/2022,Fortaleza EC,Coritiba,3,1
+27/10/2022,Atletico-MG,Juventude,1,0
+27/10/2022,Cuiaba,Avai,1,0
+29/10/2022,Goias,Corinthians,0,0
+31/10/2022,Botafogo,Cuiaba,0,2
+31/10/2022,Ceara,Fluminense,0,1
+01/11/2022,Atletico Goianiense,Santos,2,3
+01/11/2022,Avai,RB Bragantino,1,2
+01/11/2022,Juventude,Coritiba,0,1
+02/11/2022,Sao Paulo,Atletico-MG,2,2
+02/11/2022,America Mineiro,Internacional,1,0
+02/11/2022,Atletico Paranaense,Goias,3,2
+03/11/2022,Palmeiras,Fortaleza EC,4,0
+03/11/2022,Flamengo,Corinthians,1,2
+04/11/2022,Goias,Juventude,1,0
+04/11/2022,RB Bragantino,America Mineiro,1,4
+05/11/2022,Fluminense,Sao Paulo,3,1
+05/11/2022,Santos,Avai,1,1
+05/11/2022,Corinthians,Ceara,1,0
+06/11/2022,Internacional,Atletico Paranaense,2,0
+06/11/2022,Coritiba,Flamengo,1,0
+06/11/2022,Fortaleza EC,Atletico Goianiense,1,1
+06/11/2022,Cuiaba,Palmeiras,1,1
+07/11/2022,Atletico-MG,Botafogo,0,2
+08/11/2022,Fluminense,Goias,3,0
+08/11/2022,Avai,Ceara,2,0
+08/11/2022,Coritiba,Corinthians,2,2
+09/11/2022,Sao Paulo,Internacional,0,1
+09/11/2022,Fortaleza EC,RB Bragantino,6,0
+10/11/2022,Palmeiras,America Mineiro,2,1
+10/11/2022,Atletico Goianiense,Atletico Paranaense,1,1
+10/11/2022,Juventude,Flamengo,2,2
+10/11/2022,Botafogo,Santos,3,0
+10/11/2022,Atletico-MG,Cuiaba,3,0
+12/11/2022,Flamengo,Avai,1,2
+13/11/2022,Internacional,Palmeiras,3,0
+13/11/2022,America Mineiro,Atletico Goianiense,1,1
+13/11/2022,Santos,Fortaleza EC,0,2
+13/11/2022,Ceara,Juventude,4,1
+13/11/2022,Corinthians,Atletico-MG,0,1
+13/11/2022,Atletico Paranaense,Botafogo,3,0
+13/11/2022,Goias,Sao Paulo,0,4
+13/11/2022,RB Bragantino,Fluminense,0,1
+13/11/2022,Cuiaba,Coritiba,2,1
+15/04/2023,Palmeiras,Cuiaba,2,1
+15/04/2023,America Mineiro,Fluminense,0,3
+15/04/2023,Botafogo,Sao Paulo,2,1
+15/04/2023,Atletico Paranaense,Goias,2,0
+15/04/2023,Fortaleza EC,Internacional,1,1
+15/04/2023,RB Bragantino,Bahia,2,1
+16/04/2023,Atletico-MG,Vasco DA Gama,1,2
+16/04/2023,Flamengo,Coritiba,3,0
+16/04/2023,Corinthians,Cruzeiro,2,1
+16/04/2023,Gremio,Santos,1,0
+22/04/2023,Fluminense,Atletico Paranaense,2,0
+22/04/2023,Sao Paulo,America Mineiro,3,0
+22/04/2023,Cuiaba,RB Bragantino,1,1
+23/04/2023,Cruzeiro,Gremio,1,0
+23/04/2023,Internacional,Flamengo,2,1
+23/04/2023,Santos,Atletico-MG,0,0
+23/04/2023,Vasco DA Gama,Palmeiras,2,2
+23/04/2023,Coritiba,Fortaleza EC,0,3
+23/04/2023,Goias,Corinthians,3,1
+24/04/2023,Bahia,Botafogo,1,2
+29/04/2023,Coritiba,Sao Paulo,1,1
+29/04/2023,Fortaleza EC,Fluminense,4,2
+29/04/2023,Palmeiras,Corinthians,2,1
+29/04/2023,Santos,America Mineiro,3,2
+29/04/2023,RB Bragantino,Cruzeiro,0,3
+30/04/2023,Atletico-MG,Atletico Paranaense,2,1
+30/04/2023,Flamengo,Botafogo,2,3
+30/04/2023,Internacional,Goias,1,0
+30/04/2023,Cuiaba,Gremio,1,2
+01/05/2023,Vasco DA Gama,Bahia,0,1
+06/05/2023,Cruzeiro,Santos,2,1
+07/05/2023,Fluminense,Vasco DA Gama,1,1
+07/05/2023,America Mineiro,Cuiaba,1,2
+07/05/2023,Bahia,Coritiba,3,1
+07/05/2023,Sao Paulo,Internacional,2,0
+07/05/2023,Atletico Paranaense,Flamengo,2,1
+07/05/2023,Botafogo,Atletico-MG,2,0
+07/05/2023,Gremio,RB Bragantino,3,3
+07/05/2023,Goias,Palmeiras,0,5
+08/05/2023,Corinthians,Fortaleza EC,1,1
+10/05/2023,Internacional,Atletico Paranaense,0,2
+10/05/2023,Santos,Bahia,3,0
+10/05/2023,RB Bragantino,America Mineiro,2,2
+10/05/2023,Flamengo,Goias,2,0
+10/05/2023,Cuiaba,Atletico-MG,0,4
+11/05/2023,Palmeiras,Gremio,4,1
+11/05/2023,Cruzeiro,Fluminense,0,2
+11/05/2023,Coritiba,Vasco DA Gama,1,1
+11/05/2023,Botafogo,Corinthians,3,0
+11/05/2023,Fortaleza EC,Sao Paulo,0,0
+13/05/2023,Bahia,Flamengo,2,3
+13/05/2023,Palmeiras,RB Bragantino,1,1
+13/05/2023,Fluminense,Cuiaba,2,0
+14/05/2023,Atletico-MG,Internacional,2,0
+14/05/2023,Gremio,Fortaleza EC,0,0
+14/05/2023,Corinthians,Sao Paulo,1,1
+14/05/2023,Vasco DA Gama,Santos,0,1
+14/05/2023,America Mineiro,Cruzeiro,0,4
+14/05/2023,Atletico Paranaense,Coritiba,3,2
+14/05/2023,Goias,Botafogo,2,1
+20/05/2023,Bahia,Goias,1,1
+20/05/2023,Botafogo,Fluminense,1,0
+20/05/2023,America Mineiro,Fortaleza EC,2,1
+20/05/2023,Sao Paulo,Vasco DA Gama,4,2
+20/05/2023,Coritiba,Atletico-MG,1,2
+20/05/2023,RB Bragantino,Atletico Paranaense,2,0
+21/05/2023,Santos,Palmeiras,0,0
+21/05/2023,Flamengo,Corinthians,1,0
+21/05/2023,Gremio,Internacional,3,1
+22/05/2023,Cruzeiro,Cuiaba,0,1
+27/05/2023,Atletico Paranaense,Gremio,1,2
+27/05/2023,Fortaleza EC,Vasco DA Gama,2,0
+27/05/2023,Flamengo,Cruzeiro,1,1
+27/05/2023,Cuiaba,Coritiba,1,1
+28/05/2023,Sao Paulo,Goias,2,1
+28/05/2023,Internacional,Bahia,2,0
+28/05/2023,Corinthians,Fluminense,2,0
+28/05/2023,RB Bragantino,Santos,2,0
+28/05/2023,Atletico-MG,Palmeiras,1,1
+28/05/2023,Botafogo,America Mineiro,2,0
+03/06/2023,Fortaleza EC,Bahia,0,0
+03/06/2023,America Mineiro,Corinthians,2,0
+03/06/2023,Atletico Paranaense,Botafogo,1,0
+03/06/2023,Cruzeiro,Atletico-MG,0,1
+04/06/2023,Santos,Internacional,1,1
+04/06/2023,Fluminense,RB Bragantino,2,1
+04/06/2023,Gremio,Sao Paulo,2,1
+04/06/2023,Palmeiras,Coritiba,3,1
+04/06/2023,Goias,Cuiaba,0,1
+05/06/2023,Vasco DA Gama,Flamengo,1,4
+10/06/2023,Coritiba,Santos,0,0
+10/06/2023,Bahia,Cruzeiro,2,2
+10/06/2023,Corinthians,Cuiaba,1,1
+10/06/2023,Atletico-MG,RB Bragantino,1,1
+11/06/2023,Botafogo,Fortaleza EC,2,0
+11/06/2023,America Mineiro,Atletico Paranaense,2,2
+11/06/2023,Internacional,Vasco DA Gama,2,1
+11/06/2023,Sao Paulo,Palmeiras,0,2
+11/06/2023,Flamengo,Gremio,3,0
+11/06/2023,Goias,Fluminense,2,2
+21/06/2023,Sao Paulo,Atletico Paranaense,2,1
+21/06/2023,Cruzeiro,Fortaleza EC,0,1
+21/06/2023,Santos,Corinthians,0,2
+22/06/2023,Bahia,Palmeiras,1,0
+22/06/2023,Fluminense,Atletico-MG,1,1
+22/06/2023,Gremio,America Mineiro,3,1
+22/06/2023,Vasco DA Gama,Goias,0,1
+22/06/2023,Coritiba,Internacional,0,1
+22/06/2023,Cuiaba,Botafogo,0,1
+23/06/2023,RB Bragantino,Flamengo,4,0
+24/06/2023,Atletico Paranaense,Corinthians,1,0
+24/06/2023,Fluminense,Bahia,2,1
+24/06/2023,Fortaleza EC,Atletico-MG,2,1
+25/06/2023,Cruzeiro,Sao Paulo,1,0
+25/06/2023,Palmeiras,Botafogo,0,1
+25/06/2023,Gremio,Coritiba,5,1
+25/06/2023,America Mineiro,Internacional,1,2
+25/06/2023,Santos,Flamengo,2,3
+25/06/2023,RB Bragantino,Goias,2,0
+27/06/2023,Vasco DA Gama,Cuiaba,1,0
+01/07/2023,Sao Paulo,Fluminense,1,0
+01/07/2023,Bahia,Gremio,1,2
+01/07/2023,Flamengo,Fortaleza EC,2,0
+02/07/2023,Internacional,Cruzeiro,0,0
+02/07/2023,Corinthians,RB Bragantino,0,1
+02/07/2023,Botafogo,Vasco DA Gama,2,0
+02/07/2023,Atletico Paranaense,Palmeiras,2,2
+02/07/2023,Atletico-MG,America Mineiro,2,2
+02/07/2023,Cuiaba,Santos,3,0
+03/07/2023,Goias,Coritiba,1,2
+08/07/2023,Vasco DA Gama,Cruzeiro,0,1
+08/07/2023,Cuiaba,Bahia,1,1
+08/07/2023,Coritiba,America Mineiro,3,1
+08/07/2023,Atletico-MG,Corinthians,0,1
+09/07/2023,Palmeiras,Flamengo,1,1
+09/07/2023,Santos,Goias,4,3
+09/07/2023,Fluminense,Internacional,2,0
+09/07/2023,RB Bragantino,Sao Paulo,0,0
+09/07/2023,Gremio,Botafogo,0,2
+09/07/2023,Fortaleza EC,Atletico Paranaense,1,0
+16/07/2023,Botafogo,RB Bragantino,2,0
+16/07/2023,Cruzeiro,Coritiba,0,0
+16/07/2023,Fluminense,Flamengo,0,0
+16/07/2023,Sao Paulo,Santos,4,1
+16/07/2023,Fortaleza EC,Cuiaba,0,1
+16/07/2023,Internacional,Palmeiras,0,0
+16/07/2023,Atletico Paranaense,Bahia,2,0
+17/07/2023,Goias,Atletico-MG,0,0
+22/07/2023,Palmeiras,Fortaleza EC,3,1
+22/07/2023,Flamengo,America Mineiro,1,1
+22/07/2023,Bahia,Corinthians,0,0
+22/07/2023,Cuiaba,Sao Paulo,2,1
+23/07/2023,Gremio,Atletico-MG,1,0
+23/07/2023,Santos,Botafogo,2,2
+23/07/2023,Cruzeiro,Goias,0,1
+23/07/2023,RB Bragantino,Internacional,0,0
+23/07/2023,Vasco DA Gama,Atletico Paranaense,0,2
+24/07/2023,Coritiba,Fluminense,2,0
+29/07/2023,Internacional,Cuiaba,1,2
+29/07/2023,Fluminense,Santos,1,0
+29/07/2023,Atletico Paranaense,Cruzeiro,3,3
+29/07/2023,Corinthians,Vasco DA Gama,3,1
+29/07/2023,Fortaleza EC,RB Bragantino,0,3
+30/07/2023,Atletico-MG,Flamengo,1,2
+30/07/2023,Sao Paulo,Bahia,0,0
+30/07/2023,Botafogo,Coritiba,4,1
+30/07/2023,America Mineiro,Palmeiras,1,4
+30/07/2023,Goias,Gremio,1,1
+05/08/2023,Santos,Atletico Paranaense,1,1
+05/08/2023,Internacional,Corinthians,2,2
+05/08/2023,Goias,Fortaleza EC,1,0
+06/08/2023,Fluminense,Palmeiras,2,1
+06/08/2023,Sao Paulo,Atletico-MG,0,2
+06/08/2023,Vasco DA Gama,Gremio,1,0
+06/08/2023,Bahia,America Mineiro,3,1
+06/08/2023,Cruzeiro,Botafogo,0,0
+06/08/2023,Coritiba,RB Bragantino,0,1
+06/08/2023,Cuiaba,Flamengo,3,0
+13/08/2023,Botafogo,Internacional,3,1
+13/08/2023,Atletico-MG,Bahia,1,0
+13/08/2023,America Mineiro,Goias,0,1
+13/08/2023,Gremio,Fluminense,2,1
+13/08/2023,Corinthians,Coritiba,3,1
+13/08/2023,Flamengo,Sao Paulo,1,1
+13/08/2023,Fortaleza EC,Santos,4,0
+14/08/2023,Palmeiras,Cruzeiro,1,0
+15/08/2023,RB Bragantino,Vasco DA Gama,1,1
+15/08/2023,Atletico Paranaense,Cuiaba,2,0
+19/08/2023,Internacional,Fortaleza EC,0,1
+19/08/2023,Sao Paulo,Botafogo,0,0
+19/08/2023,Fluminense,America Mineiro,3,1
+19/08/2023,Cuiaba,Palmeiras,0,2
+20/08/2023,Cruzeiro,Corinthians,1,1
+20/08/2023,Vasco DA Gama,Atletico-MG,1,0
+20/08/2023,Bahia,RB Bragantino,4,0
+20/08/2023,Santos,Gremio,2,1
+20/08/2023,Coritiba,Flamengo,2,3
+21/08/2023,Goias,Atletico Paranaense,1,1
+26/08/2023,Flamengo,Internacional,0,0
+27/08/2023,Corinthians,Goias,1,1
+27/08/2023,RB Bragantino,Cuiaba,2,0
+27/08/2023,Botafogo,Bahia,3,0
+27/08/2023,America Mineiro,Sao Paulo,2,1
+27/08/2023,Atletico-MG,Santos,2,0
+27/08/2023,Palmeiras,Vasco DA Gama,1,0
+27/08/2023,Atletico Paranaense,Fluminense,2,2
+27/08/2023,Fortaleza EC,Coritiba,3,1
+27/08/2023,Gremio,Cruzeiro,3,0
+02/09/2023,Atletico Paranaense,Atletico-MG,1,1
+02/09/2023,Goias,Internacional,0,0
+03/09/2023,Botafogo,Flamengo,1,2
+03/09/2023,Gremio,Cuiaba,2,0
+03/09/2023,Fluminense,Fortaleza EC,1,0
+03/09/2023,Corinthians,Palmeiras,0,0
+03/09/2023,Bahia,Vasco DA Gama,1,1
+03/09/2023,America Mineiro,Santos,2,0
+03/09/2023,Cruzeiro,RB Bragantino,0,0
+14/09/2023,Internacional,Sao Paulo,2,1
+14/09/2023,Flamengo,Atletico Paranaense,0,3
+14/09/2023,Santos,Cruzeiro,0,3
+14/09/2023,Fortaleza EC,Corinthians,2,1
+14/09/2023,Coritiba,Bahia,2,4
+15/09/2023,RB Bragantino,Gremio,2,0
+15/09/2023,Cuiaba,America Mineiro,2,2
+16/09/2023,Palmeiras,Goias,1,0
+16/09/2023,Vasco DA Gama,Fluminense,4,2
+17/09/2023,Atletico-MG,Botafogo,1,0
+18/09/2023,Bahia,Santos,1,2
+19/09/2023,Corinthians,Gremio,4,4
+20/09/2023,America Mineiro,RB Bragantino,0,2
+20/09/2023,Goias,Flamengo,0,0
+21/09/2023,Fluminense,Cruzeiro,1,0
+21/09/2023,Sao Paulo,Fortaleza EC,1,2
+21/09/2023,Vasco DA Gama,Coritiba,5,1
+21/09/2023,Atletico Paranaense,Internacional,2,1
+22/09/2023,Gremio,Palmeiras,1,0
+22/09/2023,Corinthians,Botafogo,1,0
+24/09/2023,Atletico-MG,Cuiaba,1,0
+25/09/2023,America Mineiro,Vasco DA Gama,0,1
+27/09/2023,Sao Paulo,Coritiba,2,1
+30/09/2023,Flamengo,Bahia,1,0
+30/09/2023,Fortaleza EC,Gremio,1,1
+30/09/2023,Sao Paulo,Corinthians,2,1
+30/09/2023,Cuiaba,Fluminense,3,0
+01/10/2023,Internacional,Atletico-MG,0,2
+01/10/2023,Santos,Vasco DA Gama,4,1
+01/10/2023,Cruzeiro,America Mineiro,1,1
+01/10/2023,Coritiba,Atletico Paranaense,2,0
+01/10/2023,RB Bragantino,Palmeiras,2,1
+02/10/2023,Botafogo,Goias,1,1
+07/10/2023,Goias,Bahia,4,6
+07/10/2023,Vasco DA Gama,Sao Paulo,0,0
+08/10/2023,Corinthians,Flamengo,1,1
+08/10/2023,Internacional,Gremio,3,2
+08/10/2023,Palmeiras,Santos,1,2
+08/10/2023,Fluminense,Botafogo,0,2
+08/10/2023,Atletico Paranaense,RB Bragantino,1,1
+08/10/2023,Fortaleza EC,America Mineiro,3,2
+08/10/2023,Atletico-MG,Coritiba,1,2
+15/10/2023,Cuiaba,Cruzeiro,0,0
+18/10/2023,Gremio,Atletico Paranaense,1,2
+18/10/2023,America Mineiro,Botafogo,1,2
+18/10/2023,Coritiba,Cuiaba,0,3
+19/10/2023,Bahia,Internacional,1,0
+19/10/2023,Vasco DA Gama,Fortaleza EC,1,0
+19/10/2023,Goias,Sao Paulo,2,0
+19/10/2023,Palmeiras,Atletico-MG,0,2
+19/10/2023,Cruzeiro,Flamengo,0,2
+19/10/2023,Santos,RB Bragantino,1,3
+20/10/2023,Fluminense,Corinthians,3,3
+21/10/2023,Bahia,Fortaleza EC,2,0
+21/10/2023,Sao Paulo,Gremio,3,0
+21/10/2023,Cuiaba,Goias,1,1
+22/10/2023,Botafogo,Atletico Paranaense,1,1
+22/10/2023,Internacional,Santos,7,1
+22/10/2023,Flamengo,Vasco DA Gama,1,0
+22/10/2023,Atletico-MG,Cruzeiro,0,1
+22/10/2023,Corinthians,America Mineiro,1,1
+22/10/2023,Coritiba,Palmeiras,0,2
+22/10/2023,RB Bragantino,Fluminense,1,0
+25/10/2023,Palmeiras,Sao Paulo,5,0
+25/10/2023,Cruzeiro,Bahia,3,0
+26/10/2023,Gremio,Flamengo,3,2
+26/10/2023,Cuiaba,Corinthians,0,1
+26/10/2023,Fluminense,Goias,5,3
+26/10/2023,Atletico Paranaense,America Mineiro,3,2
+26/10/2023,RB Bragantino,Atletico-MG,1,2
+27/10/2023,Santos,Coritiba,2,1
+27/10/2023,Vasco DA Gama,Internacional,1,2
+28/10/2023,Palmeiras,Bahia,1,0
+28/10/2023,America Mineiro,Gremio,3,4
+29/10/2023,Atletico-MG,Fluminense,2,0
+29/10/2023,Atletico Paranaense,Sao Paulo,1,1
+29/10/2023,Goias,Vasco DA Gama,1,1
+29/10/2023,Internacional,Coritiba,3,4
+29/10/2023,Corinthians,Santos,1,1
+29/10/2023,Botafogo,Cuiaba,0,1
+31/10/2023,Bahia,Fluminense,1,0
+01/11/2023,Internacional,America Mineiro,1,1
+01/11/2023,Corinthians,Atletico Paranaense,1,0
+01/11/2023,Flamengo,Santos,1,2
+01/11/2023,Coritiba,Gremio,1,2
+02/11/2023,Botafogo,Palmeiras,3,4
+02/11/2023,Atletico-MG,Fortaleza EC,3,1
+02/11/2023,Cuiaba,Vasco DA Gama,0,2
+02/11/2023,Goias,RB Bragantino,0,2
+02/11/2023,Sao Paulo,Cruzeiro,1,0
+04/11/2023,America Mineiro,Atletico-MG,1,1
+04/11/2023,Gremio,Bahia,1,0
+05/11/2023,Palmeiras,Atletico Paranaense,1,0
+05/11/2023,Cruzeiro,Internacional,1,2
+05/11/2023,Fortaleza EC,Flamengo,0,2
+05/11/2023,RB Bragantino,Corinthians,1,0
+05/11/2023,Coritiba,Goias,0,1
+06/11/2023,Vasco DA Gama,Botafogo,1,0
+07/11/2023,Santos,Cuiaba,0,0
+08/11/2023,Internacional,Fluminense,0,0
+08/11/2023,America Mineiro,Coritiba,0,3
+08/11/2023,Sao Paulo,RB Bragantino,1,0
+08/11/2023,Atletico Paranaense,Fortaleza EC,1,1
+09/11/2023,Flamengo,Palmeiras,3,0
+09/11/2023,Corinthians,Atletico-MG,1,1
+09/11/2023,Goias,Santos,0,1
+09/11/2023,Bahia,Cuiaba,0,3
+09/11/2023,Botafogo,Gremio,3,4
+11/11/2023,Coritiba,Cruzeiro,1,0
+11/11/2023,Flamengo,Fluminense,1,1
+12/11/2023,Palmeiras,Internacional,3,0
+12/11/2023,Gremio,Corinthians,0,1
+12/11/2023,RB Bragantino,Botafogo,2,2
+12/11/2023,Bahia,Atletico Paranaense,1,1
+12/11/2023,Santos,Sao Paulo,0,0
+12/11/2023,Vasco DA Gama,America Mineiro,2,1
+12/11/2023,Atletico-MG,Goias,2,1
+12/11/2023,Cuiaba,Fortaleza EC,2,1
+18/11/2023,Fortaleza EC,Cruzeiro,0,1
+22/11/2023,Cruzeiro,Vasco DA Gama,2,2
+23/11/2023,Fluminense,Sao Paulo,1,0
+23/11/2023,Fortaleza EC,Botafogo,2,2
+24/11/2023,Flamengo,RB Bragantino,1,0
+25/11/2023,Corinthians,Bahia,1,5
+25/11/2023,Atletico Paranaense,Vasco DA Gama,0,0
+26/11/2023,Fluminense,Coritiba,2,1
+26/11/2023,Botafogo,Santos,1,1
+26/11/2023,Atletico-MG,Gremio,3,0
+26/11/2023,Internacional,RB Bragantino,1,0
+26/11/2023,America Mineiro,Flamengo,0,3
+26/11/2023,Sao Paulo,Cuiaba,0,0
+26/11/2023,Fortaleza EC,Palmeiras,2,2
+28/11/2023,Goias,Cruzeiro,0,1
+29/11/2023,Vasco DA Gama,Corinthians,2,4
+29/11/2023,Santos,Fluminense,0,3
+29/11/2023,Flamengo,Atletico-MG,0,3
+29/11/2023,Bahia,Sao Paulo,0,1
+29/11/2023,Cuiaba,Internacional,0,2
+30/11/2023,Palmeiras,America Mineiro,4,0
+30/11/2023,Coritiba,Botafogo,1,1
+30/11/2023,Gremio,Goias,2,1
+30/11/2023,Cruzeiro,Atletico Paranaense,1,1
+30/11/2023,RB Bragantino,Fortaleza EC,1,2
+02/12/2023,Corinthians,Internacional,1,2
+03/12/2023,Atletico-MG,Sao Paulo,2,1
+03/12/2023,Palmeiras,Fluminense,1,0
+03/12/2023,Flamengo,Cuiaba,2,1
+03/12/2023,Botafogo,Cruzeiro,0,0
+03/12/2023,America Mineiro,Bahia,3,2
+03/12/2023,Gremio,Vasco DA Gama,1,0
+03/12/2023,Atletico Paranaense,Santos,3,0
+03/12/2023,Fortaleza EC,Goias,1,0
+03/12/2023,RB Bragantino,Coritiba,1,0
+06/12/2023,Goias,America Mineiro,1,0
+07/12/2023,Bahia,Atletico-MG,4,1
+07/12/2023,Internacional,Botafogo,3,1
+07/12/2023,Fluminense,Gremio,2,3
+07/12/2023,Sao Paulo,Flamengo,1,0
+07/12/2023,Santos,Fortaleza EC,1,2
+07/12/2023,Vasco DA Gama,RB Bragantino,2,1
+07/12/2023,Cruzeiro,Palmeiras,1,1
+07/12/2023,Coritiba,Corinthians,0,2
+07/12/2023,Cuiaba,Atletico Paranaense,3,0
+13/04/2024,Internacional,Bahia,2,1
+13/04/2024,Criciuma,Juventude,1,1
+14/04/2024,Fluminense,RB Bragantino,2,2
+14/04/2024,Sao Paulo,Fortaleza EC,1,2
+14/04/2024,Corinthians,Atletico-MG,0,0
+14/04/2024,Vasco DA Gama,Gremio,2,1
+14/04/2024,Atletico Paranaense,Cuiaba,4,0
+14/04/2024,Atletico Goianiense,Flamengo,1,2
+14/04/2024,Cruzeiro,Botafogo,3,2
+14/04/2024,Vitoria,Palmeiras,0,1
+17/04/2024,Bahia,Fluminense,2,1
+17/04/2024,Gremio,Atletico Paranaense,2,0
+17/04/2024,RB Bragantino,Vasco DA Gama,2,1
+17/04/2024,Palmeiras,Internacional,0,1
+17/04/2024,Juventude,Corinthians,2,0
+17/04/2024,Fortaleza EC,Cruzeiro,1,1
+17/04/2024,Atletico-MG,Criciuma,1,1
+18/04/2024,Flamengo,Sao Paulo,2,1
+19/04/2024,Botafogo,Atletico Goianiense,1,0
+20/04/2024,Fluminense,Vasco DA Gama,2,1
+20/04/2024,Gremio,Cuiaba,1,0
+20/04/2024,RB Bragantino,Corinthians,1,0
+21/04/2024,Atletico-MG,Cruzeiro,3,0
+21/04/2024,Palmeiras,Flamengo,0,0
+21/04/2024,Atletico Paranaense,Internacional,1,0
+21/04/2024,Vitoria,Bahia,2,2
+21/04/2024,Botafogo,Juventude,5,1
+21/04/2024,Atletico Goianiense,Sao Paulo,0,3
+27/04/2024,Vasco DA Gama,Criciuma,0,4
+27/04/2024,Cuiaba,Atletico-MG,0,3
+28/04/2024,Bahia,Gremio,1,0
+28/04/2024,Flamengo,Botafogo,0,2
+28/04/2024,Corinthians,Fluminense,3,0
+28/04/2024,Cruzeiro,Vitoria,3,1
+28/04/2024,Juventude,Atletico Paranaense,1,1
+28/04/2024,Fortaleza EC,RB Bragantino,1,1
+28/04/2024,Internacional,Atletico Goianiense,1,1
+29/04/2024,Sao Paulo,Palmeiras,0,0
+04/05/2024,Fluminense,Atletico-MG,2,2
+04/05/2024,RB Bragantino,Flamengo,1,1
+05/05/2024,Corinthians,Fortaleza EC,0,0
+05/05/2024,Atletico Paranaense,Vasco DA Gama,1,0
+05/05/2024,Vitoria,Sao Paulo,1,3
+05/05/2024,Botafogo,Bahia,1,2
+05/05/2024,Cuiaba,Palmeiras,0,2
+11/05/2024,Flamengo,Corinthians,2,0
+12/05/2024,Palmeiras,Atletico Paranaense,0,2
+12/05/2024,Atletico Goianiense,Cruzeiro,0,1
+12/05/2024,Fortaleza EC,Botafogo,1,1
+12/05/2024,Bahia,RB Bragantino,1,0
+12/05/2024,Vasco DA Gama,Vitoria,2,1
+13/05/2024,Sao Paulo,Fluminense,2,1
+01/06/2024,Gremio,RB Bragantino,0,2
+01/06/2024,Vitoria,Atletico Goianiense,0,2
+01/06/2024,Fluminense,Juventude,1,1
+01/06/2024,Cuiaba,Internacional,0,1
+02/06/2024,Corinthians,Botafogo,0,1
+02/06/2024,Vasco DA Gama,Flamengo,1,6
+02/06/2024,Criciuma,Palmeiras,1,2
+02/06/2024,Atletico-MG,Bahia,1,1
+02/06/2024,Sao Paulo,Cruzeiro,2,0
+02/06/2024,Fortaleza EC,Atletico Paranaense,1,0
+05/06/2024,Juventude,Atletico Goianiense,1,0
+05/06/2024,Cuiaba,Vitoria,0,0
+09/06/2024,Criciuma,Cuiaba,2,5
+11/06/2024,Atletico Goianiense,Corinthians,2,2
+11/06/2024,Juventude,Vitoria,1,1
+11/06/2024,Botafogo,Fluminense,1,0
+12/06/2024,RB Bragantino,Atletico-MG,1,2
+13/06/2024,Cruzeiro,Cuiaba,2,1
+13/06/2024,Internacional,Sao Paulo,0,0
+13/06/2024,Flamengo,Gremio,2,1
+13/06/2024,Atletico Paranaense,Criciuma,3,1
+14/06/2024,Bahia,Fortaleza EC,1,0
+14/06/2024,Palmeiras,Vasco DA Gama,2,0
+15/06/2024,RB Bragantino,Juventude,2,1
+16/06/2024,Fluminense,Atletico Goianiense,1,2
+16/06/2024,Corinthians,Sao Paulo,2,2
+16/06/2024,Atletico Paranaense,Flamengo,1,1
+16/06/2024,Vitoria,Internacional,2,1
+16/06/2024,Gremio,Botafogo,1,2
+16/06/2024,Vasco DA Gama,Cruzeiro,0,0
+16/06/2024,Criciuma,Bahia,2,2
+16/06/2024,Cuiaba,Fortaleza EC,5,0
+17/06/2024,Atletico-MG,Palmeiras,0,4
+19/06/2024,Botafogo,Atletico Paranaense,1,1
+19/06/2024,Atletico Goianiense,Criciuma,1,2
+19/06/2024,Sao Paulo,Cuiaba,0,1
+19/06/2024,Juventude,Vasco DA Gama,2,0
+19/06/2024,Fortaleza EC,Gremio,1,0
+20/06/2024,Internacional,Corinthians,1,0
+20/06/2024,Cruzeiro,Fluminense,2,0
+20/06/2024,Vitoria,Atletico-MG,4,2
+20/06/2024,Flamengo,Bahia,2,1
+21/06/2024,Palmeiras,RB Bragantino,2,1
+22/06/2024,Criciuma,Botafogo,2,1
+22/06/2024,Gremio,Internacional,0,1
+22/06/2024,Cuiaba,Atletico Goianiense,0,0
+23/06/2024,Vasco DA Gama,Sao Paulo,4,1
+23/06/2024,Bahia,Cruzeiro,4,1
+23/06/2024,Fluminense,Flamengo,0,1
+23/06/2024,Atletico Paranaense,Corinthians,1,1
+23/06/2024,Palmeiras,Juventude,3,1
+23/06/2024,RB Bragantino,Vitoria,2,1
+23/06/2024,Atletico-MG,Fortaleza EC,1,1
+26/06/2024,Botafogo,RB Bragantino,2,1
+26/06/2024,Cruzeiro,Atletico Paranaense,2,0
+26/06/2024,Corinthians,Cuiaba,1,1
+26/06/2024,Atletico Goianiense,Gremio,1,1
+26/06/2024,Juventude,Flamengo,2,1
+27/06/2024,Bahia,Vasco DA Gama,2,1
+27/06/2024,Internacional,Atletico-MG,1,2
+27/06/2024,Fortaleza EC,Palmeiras,3,0
+27/06/2024,Fluminense,Vitoria,0,1
+27/06/2024,Sao Paulo,Criciuma,2,1
+29/06/2024,Vasco DA Gama,Botafogo,1,1
+29/06/2024,Cuiaba,RB Bragantino,1,1
+30/06/2024,Atletico-MG,Atletico Goianiense,1,1
+30/06/2024,Sao Paulo,Bahia,3,1
+30/06/2024,Gremio,Fluminense,1,0
+30/06/2024,Fortaleza EC,Juventude,2,1
+30/06/2024,Flamengo,Cruzeiro,2,1
+30/06/2024,Vitoria,Atletico Paranaense,0,1
+30/06/2024,Criciuma,Internacional,1,1
+01/07/2024,Palmeiras,Corinthians,2,0
+03/07/2024,Cuiaba,Botafogo,1,2
+03/07/2024,Vasco DA Gama,Fortaleza EC,2,0
+03/07/2024,Criciuma,Cruzeiro,1,0
+04/07/2024,Atletico Paranaense,Sao Paulo,1,2
+04/07/2024,RB Bragantino,Atletico Goianiense,3,1
+04/07/2024,Atletico-MG,Flamengo,2,4
+04/07/2024,Bahia,Juventude,2,0
+04/07/2024,Gremio,Palmeiras,2,2
+04/07/2024,Fluminense,Internacional,1,1
+04/07/2024,Corinthians,Vitoria,3,2
+06/07/2024,Sao Paulo,RB Bragantino,2,0
+06/07/2024,Flamengo,Cuiaba,1,1
+07/07/2024,Cruzeiro,Corinthians,3,0
+07/07/2024,Juventude,Gremio,3,0
+07/07/2024,Fortaleza EC,Fluminense,1,0
+07/07/2024,Internacional,Vasco DA Gama,1,2
+07/07/2024,Palmeiras,Bahia,2,0
+07/07/2024,Vitoria,Criciuma,2,1
+07/07/2024,Atletico Goianiense,Atletico Paranaense,1,2
+07/07/2024,Botafogo,Atletico-MG,3,0
+10/07/2024,Gremio,Cruzeiro,0,2
+10/07/2024,Vasco DA Gama,Corinthians,2,0
+10/07/2024,Atletico Paranaense,Bahia,1,3
+11/07/2024,Palmeiras,Atletico Goianiense,3,1
+11/07/2024,Flamengo,Fortaleza EC,1,2
+11/07/2024,Criciuma,Fluminense,1,1
+12/07/2024,Vitoria,Botafogo,0,1
+12/07/2024,Atletico-MG,Sao Paulo,2,1
+13/07/2024,Bahia,Cuiaba,1,2
+13/07/2024,Cruzeiro,RB Bragantino,2,1
+16/07/2024,Juventude,Atletico-MG,1,1
+17/07/2024,Corinthians,Criciuma,2,1
+17/07/2024,Atletico Goianiense,Vasco DA Gama,0,1
+17/07/2024,Sao Paulo,Gremio,1,0
+18/07/2024,Botafogo,Palmeiras,1,0
+18/07/2024,Fortaleza EC,Vitoria,3,1
+20/07/2024,Flamengo,Criciuma,2,1
+20/07/2024,Botafogo,Internacional,1,0
+21/07/2024,Palmeiras,Cruzeiro,2,0
+21/07/2024,Gremio,Vitoria,2,0
+21/07/2024,Bahia,Corinthians,0,1
+21/07/2024,Atletico-MG,Vasco DA Gama,2,0
+21/07/2024,Juventude,Sao Paulo,0,0
+21/07/2024,Fortaleza EC,Atletico Goianiense,3,1
+21/07/2024,RB Bragantino,Atletico Paranaense,1,0
+21/07/2024,Cuiaba,Fluminense,0,1
+24/07/2024,Cruzeiro,Juventude,2,0
+24/07/2024,Criciuma,Fortaleza EC,1,1
+24/07/2024,Sao Paulo,Botafogo,2,2
+24/07/2024,Vitoria,Flamengo,1,2
+25/07/2024,Fluminense,Palmeiras,1,0
+25/07/2024,Atletico Goianiense,Bahia,1,1
+25/07/2024,Corinthians,Gremio,2,2
+27/07/2024,Palmeiras,Vitoria,0,2
+27/07/2024,Juventude,Criciuma,1,2
+27/07/2024,Bahia,Internacional,1,1
+28/07/2024,Botafogo,Cruzeiro,0,3
+28/07/2024,Fortaleza EC,Sao Paulo,1,0
+28/07/2024,RB Bragantino,Fluminense,0,1
+28/07/2024,Flamengo,Atletico Goianiense,2,0
+28/07/2024,Gremio,Vasco DA Gama,1,0
+28/07/2024,Atletico-MG,Corinthians,2,1
+28/07/2024,Cuiaba,Atletico Paranaense,1,2
+03/08/2024,Vitoria,Cuiaba,1,0
+03/08/2024,Vasco DA Gama,RB Bragantino,2,2
+03/08/2024,Criciuma,Atletico-MG,2,1
+03/08/2024,Atletico Goianiense,Botafogo,1,4
+04/08/2024,Sao Paulo,Flamengo,1,0
+04/08/2024,Fluminense,Bahia,1,0
+04/08/2024,Corinthians,Juventude,1,1
+04/08/2024,Atletico Paranaense,Gremio,0,2
+04/08/2024,Internacional,Palmeiras,1,1
+06/08/2024,Cruzeiro,Fortaleza EC,1,2
+10/08/2024,Fortaleza EC,Criciuma,1,0
+10/08/2024,Cuiaba,Gremio,1,3
+11/08/2024,Corinthians,RB Bragantino,1,1
+11/08/2024,Vasco DA Gama,Fluminense,2,0
+11/08/2024,Cruzeiro,Atletico-MG,0,0
+11/08/2024,Juventude,Botafogo,3,2
+11/08/2024,Bahia,Vitoria,2,0
+11/08/2024,Sao Paulo,Atletico Goianiense,1,0
+11/08/2024,Flamengo,Palmeiras,1,1
+11/08/2024,Internacional,Atletico Paranaense,2,2
+14/08/2024,Internacional,Juventude,2,1
+17/08/2024,Gremio,Bahia,0,2
+17/08/2024,Atletico-MG,Cuiaba,1,1
+17/08/2024,RB Bragantino,Fortaleza EC,1,2
+18/08/2024,Fluminense,Corinthians,0,0
+18/08/2024,Palmeiras,Sao Paulo,2,1
+18/08/2024,Criciuma,Vasco DA Gama,2,2
+18/08/2024,Atletico Goianiense,Internacional,1,0
+18/08/2024,Botafogo,Flamengo,4,1
+18/08/2024,Atletico Paranaense,Juventude,1,2
+19/08/2024,Vitoria,Cruzeiro,2,2
+24/08/2024,Atletico Goianiense,Juventude,2,1
+24/08/2024,Palmeiras,Cuiaba,5,0
+25/08/2024,Atletico-MG,Fluminense,0,2
+25/08/2024,Bahia,Botafogo,0,0
+25/08/2024,Criciuma,Gremio,0,1
+25/08/2024,Fortaleza EC,Corinthians,1,0
+25/08/2024,Sao Paulo,Vitoria,2,1
+25/08/2024,Internacional,Cruzeiro,1,0
+25/08/2024,Flamengo,RB Bragantino,2,1
+27/08/2024,Vasco DA Gama,Atletico Paranaense,2,1
+28/08/2024,Cruzeiro,Internacional,0,0
+28/08/2024,Criciuma,RB Bragantino,1,0
+31/08/2024,Cuiaba,Criciuma,2,1
+01/09/2024,Botafogo,Fortaleza EC,2,0
+01/09/2024,Gremio,Atletico-MG,2,3
+01/09/2024,Cruzeiro,Atletico Goianiense,3,1
+01/09/2024,Corinthians,Flamengo,2,1
+01/09/2024,Fluminense,Sao Paulo,2,0
+01/09/2024,Atletico Paranaense,Palmeiras,0,2
+01/09/2024,Vitoria,Vasco DA Gama,0,1
+01/09/2024,Juventude,Internacional,1,3
+01/09/2024,RB Bragantino,Bahia,2,1
+05/09/2024,Cuiaba,Juventude,0,0
+11/09/2024,Internacional,Fortaleza EC,2,1
+14/09/2024,Atletico Goianiense,Vitoria,0,2
+14/09/2024,Atletico Paranaense,Fortaleza EC,1,1
+15/09/2024,Botafogo,Corinthians,2,1
+15/09/2024,Palmeiras,Criciuma,5,0
+15/09/2024,Juventude,Fluminense,2,1
+15/09/2024,RB Bragantino,Gremio,2,2
+15/09/2024,Bahia,Atletico-MG,3,0
+15/09/2024,Flamengo,Vasco DA Gama,1,1
+15/09/2024,Cruzeiro,Sao Paulo,0,1
+16/09/2024,Internacional,Cuiaba,3,0
+21/09/2024,Corinthians,Atletico Goianiense,3,0
+21/09/2024,Vitoria,Juventude,1,0
+21/09/2024,Fluminense,Botafogo,0,1
+22/09/2024,Fortaleza EC,Bahia,4,1
+22/09/2024,Vasco DA Gama,Palmeiras,0,1
+22/09/2024,Atletico-MG,RB Bragantino,3,0
+22/09/2024,Sao Paulo,Internacional,1,3
+22/09/2024,Gremio,Flamengo,3,2
+22/09/2024,Cuiaba,Cruzeiro,0,0
+23/09/2024,Criciuma,Atletico Paranaense,0,0
+25/09/2024,Gremio,Criciuma,1,2
+25/09/2024,RB Bragantino,Internacional,2,2
+28/09/2024,Palmeiras,Atletico-MG,2,1
+29/09/2024,Botafogo,Gremio,0,0
+29/09/2024,Juventude,RB Bragantino,1,1
+29/09/2024,Sao Paulo,Corinthians,3,1
+29/09/2024,Atletico Goianiense,Fluminense,1,0
+29/09/2024,Fortaleza EC,Cuiaba,1,0
+29/09/2024,Bahia,Criciuma,1,0
+29/09/2024,Internacional,Vitoria,3,1
+29/09/2024,Cruzeiro,Vasco DA Gama,1,1
+29/09/2024,Flamengo,Atletico Paranaense,1,0
+03/10/2024,Criciuma,Atletico Goianiense,2,0
+04/10/2024,Fluminense,Cruzeiro,1,0
+05/10/2024,Gremio,Fortaleza EC,3,1
+05/10/2024,Atletico Paranaense,Botafogo,0,1
+05/10/2024,RB Bragantino,Palmeiras,0,0
+05/10/2024,Atletico-MG,Vitoria,2,2
+05/10/2024,Bahia,Flamengo,0,2
+05/10/2024,Corinthians,Internacional,2,2
+05/10/2024,Cuiaba,Sao Paulo,2,0
+06/10/2024,Vasco DA Gama,Juventude,1,1
+09/10/2024,Atletico-MG,Gremio,2,1
+17/10/2024,Sao Paulo,Vasco DA Gama,3,0
+17/10/2024,Fortaleza EC,Atletico-MG,1,1
+17/10/2024,Flamengo,Fluminense,0,2
+17/10/2024,Corinthians,Atletico Paranaense,5,2
+18/10/2024,Atletico Goianiense,Cuiaba,0,0
+18/10/2024,Botafogo,Criciuma,1,1
+19/10/2024,Cruzeiro,Bahia,1,1
+19/10/2024,Internacional,Gremio,1,0
+19/10/2024,Vitoria,RB Bragantino,1,0
+20/10/2024,Juventude,Palmeiras,3,5
+22/10/2024,Fluminense,Atletico Paranaense,1,0
+25/10/2024,Vasco DA Gama,Cuiaba,1,0
+26/10/2024,Palmeiras,Fortaleza EC,2,2
+26/10/2024,Flamengo,Juventude,4,2
+26/10/2024,Gremio,Atletico Goianiense,3,1
+26/10/2024,Vitoria,Fluminense,2,1
+26/10/2024,Atletico Paranaense,Cruzeiro,3,0
+26/10/2024,RB Bragantino,Botafogo,0,1
+26/10/2024,Atletico-MG,Internacional,1,3
+27/10/2024,Criciuma,Sao Paulo,1,1
+28/10/2024,Cuiaba,Corinthians,0,1
+29/10/2024,Vasco DA Gama,Bahia,3,2
+30/10/2024,Internacional,Flamengo,1,1
+02/11/2024,Fluminense,Gremio,2,2
+02/11/2024,RB Bragantino,Cuiaba,0,0
+02/11/2024,Atletico Paranaense,Vitoria,1,2
+02/11/2024,Juventude,Fortaleza EC,0,3
+04/11/2024,Corinthians,Palmeiras,2,0
+06/11/2024,Bahia,Sao Paulo,0,3
+06/11/2024,Internacional,Criciuma,2,0
+06/11/2024,Botafogo,Vasco DA Gama,3,0
+07/11/2024,Cruzeiro,Flamengo,0,1
+07/11/2024,Atletico Goianiense,Atletico-MG,1,0
+08/11/2024,Internacional,Fluminense,2,0
+09/11/2024,Palmeiras,Gremio,1,0
+09/11/2024,Botafogo,Cuiaba,0,0
+09/11/2024,Vitoria,Corinthians,1,2
+09/11/2024,Cruzeiro,Criciuma,2,1
+09/11/2024,Atletico Goianiense,RB Bragantino,0,0
+09/11/2024,Juventude,Bahia,2,1
+09/11/2024,Fortaleza EC,Vasco DA Gama,3,0
+10/11/2024,Sao Paulo,Atletico Paranaense,2,1
+13/11/2024,Flamengo,Atletico-MG,0,0
+16/11/2024,Atletico Paranaense,Atletico-MG,1,0
+20/11/2024,Corinthians,Cruzeiro,2,1
+20/11/2024,Atletico Paranaense,Atletico Goianiense,2,0
+20/11/2024,Criciuma,Vitoria,0,1
+20/11/2024,RB Bragantino,Sao Paulo,1,1
+20/11/2024,Bahia,Palmeiras,1,2
+20/11/2024,Gremio,Juventude,2,2
+20/11/2024,Cuiaba,Flamengo,1,2
+21/11/2024,Atletico-MG,Botafogo,0,0
+21/11/2024,Vasco DA Gama,Internacional,0,1
+23/11/2024,Fluminense,Fortaleza EC,2,2
+23/11/2024,Botafogo,Vitoria,1,1
+23/11/2024,Atletico Goianiense,Palmeiras,0,1
+23/11/2024,Juventude,Cuiaba,1,1
+24/11/2024,Sao Paulo,Atletico-MG,2,2
+24/11/2024,Bahia,Atletico Paranaense,1,1
+24/11/2024,Internacional,RB Bragantino,4,1
+24/11/2024,Corinthians,Vasco DA Gama,3,1
+26/11/2024,Fluminense,Criciuma,0,0
+26/11/2024,Fortaleza EC,Flamengo,0,0
+27/11/2024,Palmeiras,Botafogo,1,3
+27/11/2024,Atletico-MG,Juventude,2,3
+28/11/2024,Cruzeiro,Gremio,1,1
+30/11/2024,Criciuma,Corinthians,2,4
+30/11/2024,Cuiaba,Bahia,1,2
+01/12/2024,Vasco DA Gama,Atletico Goianiense,2,2
+01/12/2024,Flamengo,Internacional,3,2
+01/12/2024,Gremio,Sao Paulo,2,1
+01/12/2024,Atletico Paranaense,Fluminense,1,1
+01/12/2024,Vitoria,Fortaleza EC,2,0
+01/12/2024,RB Bragantino,Cruzeiro,1,1
+03/12/2024,Corinthians,Bahia,3,0
+04/12/2024,Vasco DA Gama,Atletico-MG,2,0
+04/12/2024,Sao Paulo,Juventude,1,2
+04/12/2024,Vitoria,Gremio,1,1
+04/12/2024,Criciuma,Flamengo,0,3
+05/12/2024,Internacional,Botafogo,0,1
+05/12/2024,Cruzeiro,Palmeiras,1,2
+05/12/2024,Atletico Goianiense,Fortaleza EC,3,1
+05/12/2024,Fluminense,Cuiaba,1,0
+05/12/2024,Atletico Paranaense,RB Bragantino,1,2
+08/12/2024,Bahia,Atletico Goianiense,2,0
+08/12/2024,Botafogo,Sao Paulo,2,1
+08/12/2024,Palmeiras,Fluminense,0,1
+08/12/2024,Flamengo,Vitoria,2,2
+08/12/2024,Gremio,Corinthians,0,3
+08/12/2024,Juventude,Cruzeiro,0,1
+08/12/2024,Fortaleza EC,Internacional,3,0
+08/12/2024,RB Bragantino,Criciuma,5,1
+08/12/2024,Atletico-MG,Atletico Paranaense,1,0
+08/12/2024,Cuiaba,Vasco DA Gama,1,2
+29/03/2025,Sao Paulo,Sport Recife,0,0
+29/03/2025,Gremio,Atletico-MG,2,1
+29/03/2025,Cruzeiro,Mirassol,2,1
+29/03/2025,Juventude,Vitoria,2,0
+29/03/2025,Fortaleza EC,Fluminense,2,0
+30/03/2025,Flamengo,Internacional,1,1
+30/03/2025,Palmeiras,Botafogo,0,0
+30/03/2025,Vasco DA Gama,Santos,2,1
+30/03/2025,Bahia,Corinthians,1,1
+31/03/2025,RB Bragantino,Ceara,2,2
+05/04/2025,Ceara,Gremio,2,0
+05/04/2025,Corinthians,Vasco DA Gama,3,0
+06/04/2025,Botafogo,Juventude,2,0
+06/04/2025,Fluminense,RB Bragantino,2,1
+06/04/2025,Atletico-MG,Sao Paulo,0,0
+06/04/2025,Internacional,Cruzeiro,3,0
+06/04/2025,Sport Recife,Palmeiras,1,2
+06/04/2025,Vitoria,Flamengo,1,2
+06/04/2025,Mirassol,Fortaleza EC,1,1
+06/04/2025,Santos,Bahia,2,2
+12/04/2025,Juventude,Ceara,2,1
+12/04/2025,RB Bragantino,Botafogo,1,0
+12/04/2025,Palmeiras,Corinthians,2,0
+13/04/2025,Vasco DA Gama,Sport Recife,3,1
+13/04/2025,Bahia,Mirassol,1,1
+13/04/2025,Sao Paulo,Cruzeiro,1,1
+13/04/2025,Gremio,Flamengo,0,2
+13/04/2025,Fluminense,Santos,1,0
+13/04/2025,Fortaleza EC,Internacional,0,0
+13/04/2025,Atletico-MG,Vitoria,2,2
+16/04/2025,Ceara,Vasco DA Gama,2,1
+16/04/2025,Botafogo,Sao Paulo,2,2
+16/04/2025,Sport Recife,RB Bragantino,0,1
+16/04/2025,Mirassol,Gremio,4,1
+16/04/2025,Internacional,Palmeiras,0,1
+16/04/2025,Corinthians,Fluminense,0,2
+17/04/2025,Flamengo,Juventude,6,0
+17/04/2025,Santos,Atletico-MG,2,0
+17/04/2025,Vitoria,Fortaleza EC,2,1
+18/04/2025,Cruzeiro,Bahia,3,0
+19/04/2025,Corinthians,Sport Recife,2,1
+19/04/2025,Vasco DA Gama,Flamengo,0,0
+20/04/2025,Gremio,Internacional,1,1
+20/04/2025,Juventude,Mirassol,2,2
+20/04/2025,Sao Paulo,Santos,2,1
+20/04/2025,Atletico-MG,Botafogo,1,0
+20/04/2025,Fluminense,Vitoria,1,1
+20/04/2025,Fortaleza EC,Palmeiras,1,2
+20/04/2025,RB Bragantino,Cruzeiro,1,0
+21/04/2025,Bahia,Ceara,1,0
+26/04/2025,Internacional,Juventude,3,1
+26/04/2025,Ceara,Sao Paulo,1,1
+26/04/2025,Mirassol,Atletico-MG,2,2
+26/04/2025,Sport Recife,Fortaleza EC,0,0
+27/04/2025,Botafogo,Fluminense,2,0
+27/04/2025,Flamengo,Corinthians,4,0
+27/04/2025,Palmeiras,Bahia,0,1
+27/04/2025,Cruzeiro,Vasco DA Gama,1,0
+27/04/2025,Vitoria,Gremio,1,1
+27/04/2025,Santos,RB Bragantino,1,2
+03/05/2025,Sao Paulo,Fortaleza EC,0,0
+03/05/2025,Fluminense,Sport Recife,2,1
+03/05/2025,Ceara,Vitoria,1,0
+03/05/2025,Corinthians,Internacional,4,2
+04/05/2025,Bahia,Botafogo,1,0
+04/05/2025,Gremio,Santos,1,0
+04/05/2025,Vasco DA Gama,Palmeiras,0,1
+04/05/2025,Cruzeiro,Flamengo,2,1
+05/05/2025,RB Bragantino,Mirassol,1,0
+05/05/2025,Juventude,Atletico-MG,0,1
+10/05/2025,Fortaleza EC,Juventude,5,0
+10/05/2025,Gremio,RB Bragantino,1,1
+10/05/2025,Vitoria,Vasco DA Gama,2,1
+10/05/2025,Mirassol,Corinthians,2,1
+11/05/2025,Flamengo,Bahia,1,0
+11/05/2025,Sport Recife,Cruzeiro,0,4
+11/05/2025,Palmeiras,Sao Paulo,1,0
+11/05/2025,Atletico-MG,Fluminense,3,2
+11/05/2025,Botafogo,Internacional,4,0
+12/05/2025,Santos,Ceara,0,0
+17/05/2025,Ceara,Sport Recife,2,0
+17/05/2025,Vasco DA Gama,Fortaleza EC,3,0
+18/05/2025,Sao Paulo,Gremio,2,1
+18/05/2025,Bahia,Vitoria,2,1
+18/05/2025,Corinthians,Santos,1,0
+18/05/2025,Juventude,Fluminense,1,1
+18/05/2025,Flamengo,Botafogo,0,0
+18/05/2025,RB Bragantino,Palmeiras,1,2
+18/05/2025,Internacional,Mirassol,1,1
+18/05/2025,Cruzeiro,Atletico-MG,0,0
+24/05/2025,Fluminense,Vasco DA Gama,2,1
+24/05/2025,Sao Paulo,Mirassol,0,2
+25/05/2025,Atletico-MG,Corinthians,0,0
+25/05/2025,Gremio,Bahia,1,0
+25/05/2025,Palmeiras,Flamengo,0,2
+25/05/2025,Sport Recife,Internacional,1,1
+25/05/2025,Vitoria,Santos,0,1
+25/05/2025,Fortaleza EC,Cruzeiro,0,2
+26/05/2025,RB Bragantino,Juventude,1,0
+31/05/2025,Bahia,Sao Paulo,2,1
+01/06/2025,Vasco DA Gama,RB Bragantino,0,2
+01/06/2025,Mirassol,Sport Recife,1,0
+01/06/2025,Santos,Botafogo,0,1
+01/06/2025,Juventude,Gremio,0,2
+01/06/2025,Flamengo,Fortaleza EC,5,0
+01/06/2025,Ceara,Atletico-MG,0,1
+01/06/2025,Corinthians,Vitoria,0,0
+01/06/2025,Cruzeiro,Palmeiras,2,1
+01/06/2025,Internacional,Fluminense,0,2
+04/06/2025,Botafogo,Ceara,3,2
+12/06/2025,Vitoria,Cruzeiro,0,0
+12/06/2025,RB Bragantino,Bahia,0,3
+12/06/2025,Fortaleza EC,Santos,2,3
+12/06/2025,Gremio,Corinthians,1,1
+13/06/2025,Sao Paulo,Vasco DA Gama,1,3
+13/06/2025,Atletico-MG,Internacional,2,0
+12/07/2025,Internacional,Vitoria,1,0
+12/07/2025,Flamengo,Sao Paulo,2,0
+12/07/2025,Vasco DA Gama,Botafogo,0,2
+13/07/2025,Bahia,Atletico-MG,2,1
+13/07/2025,Corinthians,RB Bragantino,1,2
+13/07/2025,Cruzeiro,Gremio,4,1
+13/07/2025,Fortaleza EC,Ceara,0,1
+14/07/2025,Juventude,Sport Recife,2,0
+16/07/2025,Palmeiras,Mirassol,1,1
+16/07/2025,Ceara,Corinthians,0,1
+16/07/2025,Santos,Flamengo,1,0
+17/07/2025,Botafogo,Vitoria,0,0
+17/07/2025,RB Bragantino,Sao Paulo,2,2
+17/07/2025,Fluminense,Cruzeiro,0,2
+19/07/2025,Fortaleza EC,Bahia,1,1
+19/07/2025,Vasco DA Gama,Gremio,1,1
+19/07/2025,Mirassol,Santos,3,0
+20/07/2025,Sao Paulo,Corinthians,2,0
+20/07/2025,Internacional,Ceara,1,0
+20/07/2025,Cruzeiro,Juventude,4,0
+20/07/2025,Vitoria,RB Bragantino,1,0
+20/07/2025,Palmeiras,Atletico-MG,3,2
+20/07/2025,Sport Recife,Botafogo,0,1
+20/07/2025,Flamengo,Fluminense,1,0
+23/07/2025,Fluminense,Palmeiras,1,2
+23/07/2025,Ceara,Mirassol,0,2
+23/07/2025,Corinthians,Cruzeiro,0,0
+24/07/2025,Santos,Internacional,1,2
+24/07/2025,Vitoria,Sport Recife,2,2
+24/07/2025,RB Bragantino,Flamengo,1,2
+24/07/2025,Juventude,Sao Paulo,0,1
+26/07/2025,Botafogo,Corinthians,1,1
+26/07/2025,Sport Recife,Santos,2,2
+26/07/2025,Fortaleza EC,RB Bragantino,3,1
+26/07/2025,Mirassol,Vitoria,1,1
+27/07/2025,Palmeiras,Gremio,1,0
+27/07/2025,Sao Paulo,Fluminense,3,1
+27/07/2025,Cruzeiro,Ceara,1,2
+27/07/2025,Bahia,Juventude,3,0
+27/07/2025,Internacional,Vasco DA Gama,1,1
+27/07/2025,Flamengo,Atletico-MG,1,0
+29/07/2025,Gremio,Fortaleza EC,2,1
+02/08/2025,Sport Recife,Bahia,0,0
+02/08/2025,Mirassol,Vasco DA Gama,3,2
+03/08/2025,Fluminense,Gremio,1,0
+03/08/2025,Botafogo,Cruzeiro,0,2
+03/08/2025,Corinthians,Fortaleza EC,1,1
+03/08/2025,Ceara,Flamengo,1,1
+03/08/2025,Atletico-MG,RB Bragantino,2,1
+03/08/2025,Vitoria,Palmeiras,2,2
+03/08/2025,Internacional,Sao Paulo,1,2
+04/08/2025,Santos,Juventude,3,1
+09/08/2025,Sao Paulo,Vitoria,2,0
+09/08/2025,Flamengo,Mirassol,2,1
+09/08/2025,RB Bragantino,Internacional,1,3
+09/08/2025,Fortaleza EC,Botafogo,0,5
+10/08/2025,Bahia,Fluminense,3,3
+10/08/2025,Palmeiras,Ceara,2,1
+10/08/2025,Vasco DA Gama,Atletico-MG,1,1
+10/08/2025,Cruzeiro,Santos,1,2
+10/08/2025,Gremio,Sport Recife,0,1
+11/08/2025,Juventude,Corinthians,2,1
+16/08/2025,Fluminense,Fortaleza EC,2,1
+16/08/2025,Ceara,RB Bragantino,1,0
+16/08/2025,Sport Recife,Sao Paulo,2,2
+16/08/2025,Vitoria,Juventude,2,2
+17/08/2025,Corinthians,Bahia,1,2
+17/08/2025,Santos,Vasco DA Gama,0,6
+17/08/2025,Atletico-MG,Gremio,1,3
+17/08/2025,Internacional,Flamengo,1,3
+17/08/2025,Botafogo,Palmeiras,0,1
+18/08/2025,Mirassol,Cruzeiro,1,1
+20/08/2025,Juventude,Vasco DA Gama,2,0
+23/08/2025,RB Bragantino,Fluminense,4,2
+23/08/2025,Cruzeiro,Internacional,2,1
+24/08/2025,Gremio,Ceara,0,0
+24/08/2025,Bahia,Santos,2,0
+24/08/2025,Vasco DA Gama,Corinthians,2,3
+24/08/2025,Juventude,Botafogo,1,3
+24/08/2025,Fortaleza EC,Mirassol,0,1
+24/08/2025,Sao Paulo,Atletico-MG,2,0
+25/08/2025,Palmeiras,Sport Recife,3,0
+26/08/2025,Flamengo,Vitoria,8,0
+30/08/2025,Ceara,Juventude,0,1
+30/08/2025,Botafogo,RB Bragantino,4,1
+31/08/2025,Cruzeiro,Sao Paulo,1,0
+31/08/2025,Flamengo,Gremio,1,1
+31/08/2025,Santos,Fluminense,0,0
+31/08/2025,Corinthians,Palmeiras,1,1
+31/08/2025,Vitoria,Atletico-MG,1,0
+31/08/2025,Mirassol,Bahia,5,1
+31/08/2025,Internacional,Fortaleza EC,2,1
+31/08/2025,Sport Recife,Vasco DA Gama,2,3
+13/09/2025,Gremio,Mirassol,0,1
+13/09/2025,Fortaleza EC,Vitoria,2,0
+13/09/2025,Palmeiras,Internacional,4,1
+14/09/2025,Fluminense,Corinthians,0,1
+14/09/2025,RB Bragantino,Sport Recife,1,1
+14/09/2025,Juventude,Flamengo,0,2
+14/09/2025,Atletico-MG,Santos,1,1
+14/09/2025,Sao Paulo,Botafogo,1,0
+14/09/2025,Vasco DA Gama,Ceara,2,2
+15/09/2025,Bahia,Cruzeiro,1,2
+17/09/2025,Botafogo,Mirassol,3,3
+20/09/2025,Vitoria,Fluminense,0,1
+20/09/2025,Botafogo,Atletico-MG,1,0
+20/09/2025,Ceara,Bahia,1,1
+21/09/2025,Palmeiras,Fortaleza EC,4,1
+21/09/2025,Mirassol,Juventude,2,0
+21/09/2025,Internacional,Gremio,2,3
+21/09/2025,Sport Recife,Corinthians,1,0
+21/09/2025,Flamengo,Vasco DA Gama,1,1
+21/09/2025,Santos,Sao Paulo,1,0
+21/09/2025,Cruzeiro,RB Bragantino,2,1
+24/09/2025,Gremio,Botafogo,1,1
+24/09/2025,Vasco DA Gama,Bahia,3,1
+27/09/2025,Fortaleza EC,Sport Recife,1,0
+27/09/2025,Vasco DA Gama,Cruzeiro,2,0
+27/09/2025,Juventude,Internacional,1,1
+28/09/2025,Atletico-MG,Mirassol,1,0
+28/09/2025,Gremio,Vitoria,3,1
+28/09/2025,Bahia,Palmeiras,1,0
+28/09/2025,Fluminense,Botafogo,2,0
+28/09/2025,RB Bragantino,Santos,2,2
+28/09/2025,Corinthians,Flamengo,1,2
+29/09/2025,Sao Paulo,Ceara,0,1
+01/10/2025,Atletico-MG,Juventude,0,0
+01/10/2025,Palmeiras,Vasco DA Gama,3,0
+01/10/2025,Sport Recife,Fluminense,2,2
+01/10/2025,Mirassol,RB Bragantino,1,1
+01/10/2025,Internacional,Corinthians,1,1
+02/10/2025,Botafogo,Bahia,2,1
+02/10/2025,Santos,Gremio,1,1
+02/10/2025,Vitoria,Ceara,1,0
+02/10/2025,Fortaleza EC,Sao Paulo,0,2
+02/10/2025,Flamengo,Cruzeiro,0,0
+04/10/2025,Internacional,Botafogo,2,0
+04/10/2025,Fluminense,Atletico-MG,3,0
+04/10/2025,RB Bragantino,Gremio,1,0
+05/10/2025,Corinthians,Mirassol,3,0
+05/10/2025,Sao Paulo,Palmeiras,2,3
+05/10/2025,Vasco DA Gama,Vitoria,4,3
+05/10/2025,Bahia,Flamengo,1,0
+05/10/2025,Juventude,Fortaleza EC,1,2
+05/10/2025,Ceara,Santos,3,0
+05/10/2025,Cruzeiro,Sport Recife,1,1
+08/10/2025,Atletico-MG,Sport Recife,3,1
+09/10/2025,Mirassol,Fluminense,2,1
+11/10/2025,Palmeiras,Juventude,4,1
+15/10/2025,Palmeiras,RB Bragantino,5,1
+15/10/2025,Botafogo,Flamengo,0,3
+15/10/2025,Sport Recife,Ceara,1,1
+15/10/2025,Mirassol,Internacional,3,1
+16/10/2025,Santos,Corinthians,3,1
+16/10/2025,Fortaleza EC,Vasco DA Gama,0,2
+16/10/2025,Atletico-MG,Cruzeiro,1,1
+16/10/2025,Gremio,Sao Paulo,2,0
+17/10/2025,Fluminense,Juventude,1,0
+17/10/2025,Vitoria,Bahia,2,1
+18/10/2025,Corinthians,Atletico-MG,1,0
+19/10/2025,Cruzeiro,Fortaleza EC,1,0
+19/10/2025,Flamengo,Palmeiras,3,2
+19/10/2025,Internacional,Sport Recife,2,0
+19/10/2025,Ceara,Botafogo,0,2
+19/10/2025,Mirassol,Sao Paulo,3,0
+19/10/2025,Bahia,Gremio,4,0
+20/10/2025,Juventude,RB Bragantino,1,0
+20/10/2025,Vasco DA Gama,Fluminense,2,0
+21/10/2025,Santos,Vitoria,0,1
+22/10/2025,Bahia,Internacional,1,0
+25/10/2025,Vitoria,Corinthians,0,1
+25/10/2025,Atletico-MG,Ceara,1,0
+25/10/2025,Fluminense,Internacional,1,0
+25/10/2025,Sport Recife,Mirassol,1,2
+25/10/2025,Fortaleza EC,Flamengo,1,0
+26/10/2025,Sao Paulo,Bahia,2,0
+26/10/2025,Botafogo,Santos,2,2
+26/10/2025,Gremio,Juventude,3,1
+26/10/2025,RB Bragantino,Vasco DA Gama,0,3
+26/10/2025,Palmeiras,Cruzeiro,0,0
+29/10/2025,Fluminense,Ceara,1,0
+01/11/2025,Santos,Fortaleza EC,1,1
+01/11/2025,Cruzeiro,Vitoria,3,1
+01/11/2025,Mirassol,Botafogo,0,0
+02/11/2025,Flamengo,Sport Recife,3,0
+02/11/2025,Bahia,RB Bragantino,2,1
+02/11/2025,Ceara,Fluminense,2,0
+02/11/2025,Corinthians,Gremio,2,0
+02/11/2025,Internacional,Atletico-MG,0,0
+02/11/2025,Juventude,Palmeiras,0,2
+02/11/2025,Vasco DA Gama,Sao Paulo,0,2
+05/11/2025,Sport Recife,Juventude,0,2
+05/11/2025,Vitoria,Internacional,1,0
+05/11/2025,RB Bragantino,Corinthians,2,1
+05/11/2025,Botafogo,Vasco DA Gama,3,0
+05/11/2025,Gremio,Cruzeiro,0,1
+05/11/2025,Atletico-MG,Bahia,3,0
+06/11/2025,Sao Paulo,Flamengo,2,2
+06/11/2025,Fluminense,Mirassol,1,0
+06/11/2025,Ceara,Fortaleza EC,1,1
+07/11/2025,Palmeiras,Santos,2,0
+08/11/2025,Sport Recife,Atletico-MG,2,4
+08/11/2025,Vasco DA Gama,Juventude,1,3
+08/11/2025,Internacional,Bahia,2,2
+09/11/2025,Sao Paulo,RB Bragantino,0,1
+09/11/2025,Corinthians,Ceara,0,1
+09/11/2025,Cruzeiro,Fluminense,0,0
+09/11/2025,Vitoria,Botafogo,0,0
+09/11/2025,Flamengo,Santos,3,2
+09/11/2025,Fortaleza EC,Gremio,2,2
+09/11/2025,Mirassol,Palmeiras,2,1
+12/11/2025,Atletico-MG,Fortaleza EC,3,3
+15/11/2025,Sport Recife,Flamengo,1,5
+16/11/2025,Santos,Palmeiras,1,0
+16/11/2025,RB Bragantino,Atletico-MG,2,0
+18/11/2025,Botafogo,Sport Recife,3,2
+19/11/2025,Palmeiras,Vitoria,0,0
+20/11/2025,Fluminense,Flamengo,2,1
+20/11/2025,Santos,Mirassol,1,1
+20/11/2025,Gremio,Vasco DA Gama,2,0
+20/11/2025,Juventude,Cruzeiro,3,3
+20/11/2025,Bahia,Fortaleza EC,2,3
+20/11/2025,Corinthians,Sao Paulo,3,1
+21/11/2025,Ceara,Internacional,1,2
+22/11/2025,Botafogo,Gremio,3,2
+23/11/2025,Palmeiras,Fluminense,0,0
+23/11/2025,Flamengo,RB Bragantino,3,0
+23/11/2025,Bahia,Vasco DA Gama,1,0
+23/11/2025,Sao Paulo,Juventude,2,1
+23/11/2025,Sport Recife,Vitoria,1,3
+23/11/2025,Cruzeiro,Corinthians,3,0
+24/11/2025,Mirassol,Ceara,3,0
+25/11/2025,Internacional,Santos,1,1
+26/11/2025,Gremio,Palmeiras,3,2
+26/11/2025,Atletico-MG,Flamengo,1,1
+26/11/2025,RB Bragantino,Fortaleza EC,0,1
+27/11/2025,Fluminense,Sao Paulo,6,0
+28/11/2025,Juventude,Bahia,1,1
+28/11/2025,Vasco DA Gama,Internacional,5,1
+29/11/2025,Santos,Sport Recife,3,0
+29/11/2025,Vitoria,Mirassol,2,0
+30/11/2025,Ceara,Cruzeiro,1,1
+30/11/2025,Corinthians,Botafogo,2,2
+30/11/2025,Fortaleza EC,Atletico-MG,1,0
+02/12/2025,Vasco DA Gama,Mirassol,0,2
+03/12/2025,Gremio,Fluminense,1,2
+03/12/2025,Fortaleza EC,Corinthians,2,1
+03/12/2025,RB Bragantino,Vitoria,4,0
+03/12/2025,Juventude,Santos,0,3
+03/12/2025,Bahia,Sport Recife,2,0
+03/12/2025,Sao Paulo,Internacional,3,0
+04/12/2025,Flamengo,Ceara,1,0
+04/12/2025,Atletico-MG,Palmeiras,0,3
+04/12/2025,Cruzeiro,Botafogo,2,2
+06/12/2025,Mirassol,Flamengo,3,3
+07/12/2025,Internacional,RB Bragantino,3,1
+07/12/2025,Botafogo,Fortaleza EC,4,2
+07/12/2025,Sport Recife,Gremio,0,4
+07/12/2025,Fluminense,Bahia,2,0
+07/12/2025,Santos,Cruzeiro,3,0
+07/12/2025,Ceara,Palmeiras,1,3
+07/12/2025,Corinthians,Juventude,1,1
+07/12/2025,Vitoria,Sao Paulo,1,0
+07/12/2025,Atletico-MG,Vasco DA Gama,5,0

@@ -1,0 +1,313 @@
+Date,HomeTeam,AwayTeam,FTHG,FTAG
+29/03/2025,Fredrikstad,Brann,3,0
+29/03/2025,Stromsgodset,Rosenborg,1,2
+30/03/2025,Bryne,Bodo/Glimt,0,1
+30/03/2025,Ham-Kam,Kristiansund BK,2,1
+30/03/2025,KFUM Oslo,Sandefjord,3,1
+30/03/2025,Molde,Sarpsborg 08 FF,0,2
+30/03/2025,Tromso,Haugesund,1,0
+30/03/2025,Valerenga,Viking,3,1
+05/04/2025,Bodo/Glimt,Ham-Kam,3,0
+05/04/2025,Rosenborg,Fredrikstad,1,0
+06/04/2025,Brann,Tromso,3,1
+06/04/2025,Haugesund,Stromsgodset,0,5
+06/04/2025,Kristiansund BK,Bryne,2,1
+06/04/2025,Sandefjord,Molde,3,0
+06/04/2025,Sarpsborg 08 FF,Valerenga,1,1
+06/04/2025,Viking,KFUM Oslo,3,1
+09/04/2025,Fredrikstad,Valerenga,2,0
+10/04/2025,Brann,Stromsgodset,2,1
+10/04/2025,Viking,Kristiansund BK,3,1
+20/04/2025,Tromso,Kristiansund BK,2,3
+21/04/2025,Bryne,Haugesund,3,1
+21/04/2025,Fredrikstad,Sandefjord,3,1
+21/04/2025,Ham-Kam,Viking,2,5
+21/04/2025,KFUM Oslo,Sarpsborg 08 FF,1,3
+21/04/2025,Molde,Bodo/Glimt,2,2
+21/04/2025,Stromsgodset,Brann,1,2
+21/04/2025,Valerenga,Rosenborg,0,2
+27/04/2025,Bodo/Glimt,KFUM Oslo,3,0
+27/04/2025,Brann,Bryne,3,2
+27/04/2025,Haugesund,Fredrikstad,0,0
+27/04/2025,Kristiansund BK,Valerenga,0,2
+27/04/2025,Rosenborg,Molde,0,0
+27/04/2025,Sandefjord,Ham-Kam,2,0
+27/04/2025,Sarpsborg 08 FF,Stromsgodset,2,3
+27/04/2025,Viking,Tromso,4,4
+30/04/2025,Viking,Haugesund,5,1
+01/05/2025,Rosenborg,Kristiansund BK,1,1
+02/05/2025,Ham-Kam,KFUM Oslo,0,0
+03/05/2025,Valerenga,Brann,2,4
+04/05/2025,Molde,Haugesund,2,1
+04/05/2025,Rosenborg,Bryne,3,0
+04/05/2025,Stromsgodset,Kristiansund BK,1,2
+04/05/2025,Tromso,Sandefjord,0,1
+04/05/2025,Viking,Sarpsborg 08 FF,0,0
+11/05/2025,Brann,Rosenborg,0,0
+11/05/2025,Bryne,Molde,0,3
+11/05/2025,Haugesund,Viking,1,4
+11/05/2025,KFUM Oslo,Tromso,1,3
+11/05/2025,Kristiansund BK,Fredrikstad,0,1
+11/05/2025,Sandefjord,Valerenga,2,1
+11/05/2025,Sarpsborg 08 FF,Ham-Kam,4,0
+16/05/2025,Brann,Sarpsborg 08 FF,2,2
+16/05/2025,Fredrikstad,KFUM Oslo,1,0
+16/05/2025,Molde,Kristiansund BK,0,1
+16/05/2025,Rosenborg,Haugesund,1,0
+16/05/2025,Stromsgodset,Bryne,0,2
+16/05/2025,Tromso,Bodo/Glimt,2,1
+16/05/2025,Valerenga,Ham-Kam,1,1
+16/05/2025,Viking,Sandefjord,3,1
+24/05/2025,Bodo/Glimt,Rosenborg,4,0
+24/05/2025,Bryne,Fredrikstad,4,3
+25/05/2025,Ham-Kam,Molde,2,1
+25/05/2025,Haugesund,Brann,0,2
+25/05/2025,Kristiansund BK,Viking,0,1
+25/05/2025,Sandefjord,Stromsgodset,3,2
+25/05/2025,Sarpsborg 08 FF,Tromso,0,1
+26/05/2025,KFUM Oslo,Valerenga,0,1
+28/05/2025,Bodo/Glimt,Viking,2,4
+28/05/2025,Fredrikstad,Rosenborg,0,2
+29/05/2025,Brann,Molde,0,3
+31/05/2025,Stromsgodset,Ham-Kam,0,3
+31/05/2025,Tromso,Valerenga,2,1
+01/06/2025,Brann,Kristiansund BK,4,2
+01/06/2025,Bryne,Sandefjord,3,2
+01/06/2025,Fredrikstad,Sarpsborg 08 FF,1,1
+01/06/2025,Haugesund,Bodo/Glimt,0,4
+01/06/2025,Molde,Viking,0,1
+01/06/2025,Rosenborg,KFUM Oslo,1,1
+21/06/2025,Bodo/Glimt,Brann,3,0
+22/06/2025,Ham-Kam,Tromso,1,3
+22/06/2025,KFUM Oslo,Stromsgodset,5,0
+22/06/2025,Kristiansund BK,Rosenborg,4,1
+22/06/2025,Sandefjord,Haugesund,4,0
+22/06/2025,Sarpsborg 08 FF,Bryne,1,1
+22/06/2025,Valerenga,Molde,2,3
+22/06/2025,Viking,Fredrikstad,3,0
+28/06/2025,Rosenborg,Viking,1,1
+29/06/2025,Bodo/Glimt,Sarpsborg 08 FF,1,2
+29/06/2025,Bryne,Ham-Kam,1,1
+29/06/2025,Fredrikstad,Tromso,0,1
+29/06/2025,Haugesund,Kristiansund BK,0,0
+29/06/2025,Molde,KFUM Oslo,2,3
+29/06/2025,Stromsgodset,Valerenga,0,2
+30/06/2025,Brann,Sandefjord,1,0
+05/07/2025,Ham-Kam,Brann,1,1
+05/07/2025,Kristiansund BK,Bodo/Glimt,1,1
+05/07/2025,Tromso,Molde,1,0
+05/07/2025,Valerenga,Fredrikstad,1,1
+05/07/2025,Viking,Stromsgodset,1,0
+06/07/2025,KFUM Oslo,Bryne,1,1
+06/07/2025,Sandefjord,Rosenborg,2,0
+06/07/2025,Sarpsborg 08 FF,Haugesund,3,1
+12/07/2025,Bodo/Glimt,Sandefjord,2,0
+12/07/2025,Fredrikstad,Molde,4,2
+13/07/2025,Brann,Viking,3,1
+13/07/2025,Bryne,Valerenga,1,0
+13/07/2025,Haugesund,KFUM Oslo,0,2
+13/07/2025,Kristiansund BK,Sarpsborg 08 FF,0,0
+13/07/2025,Rosenborg,Ham-Kam,2,0
+13/07/2025,Stromsgodset,Tromso,2,3
+16/07/2025,Fredrikstad,Bodo/Glimt,0,1
+18/07/2025,Sarpsborg 08 FF,Rosenborg,2,2
+19/07/2025,KFUM Oslo,Brann,2,0
+19/07/2025,Molde,Stromsgodset,4,1
+19/07/2025,Viking,Bodo/Glimt,2,4
+20/07/2025,Ham-Kam,Fredrikstad,1,1
+20/07/2025,Sandefjord,Kristiansund BK,6,0
+20/07/2025,Tromso,Bryne,3,1
+20/07/2025,Valerenga,Haugesund,3,0
+25/07/2025,Fredrikstad,Stromsgodset,3,2
+26/07/2025,Bodo/Glimt,Valerenga,7,2
+26/07/2025,Haugesund,Ham-Kam,0,3
+26/07/2025,Kristiansund BK,KFUM Oslo,0,5
+26/07/2025,Sandefjord,Sarpsborg 08 FF,3,2
+27/07/2025,Bryne,Viking,1,3
+27/07/2025,Rosenborg,Tromso,4,1
+30/07/2025,Bodo/Glimt,Stromsgodset,1,0
+02/08/2025,Sarpsborg 08 FF,Brann,1,4
+02/08/2025,Tromso,Fredrikstad,0,0
+03/08/2025,Ham-Kam,Bodo/Glimt,1,3
+03/08/2025,KFUM Oslo,Rosenborg,4,1
+03/08/2025,Molde,Bryne,2,0
+03/08/2025,Stromsgodset,Haugesund,2,0
+03/08/2025,Valerenga,Sandefjord,2,1
+09/08/2025,Bodo/Glimt,Tromso,1,1
+09/08/2025,Molde,Ham-Kam,1,0
+10/08/2025,Bryne,KFUM Oslo,0,0
+10/08/2025,Haugesund,Sarpsborg 08 FF,3,2
+10/08/2025,Sandefjord,Viking,1,2
+15/08/2025,Stromsgodset,Bodo/Glimt,0,5
+17/08/2025,Ham-Kam,Bryne,1,0
+17/08/2025,KFUM Oslo,Molde,0,0
+17/08/2025,Kristiansund BK,Sandefjord,2,2
+17/08/2025,Tromso,Brann,1,2
+17/08/2025,Valerenga,Sarpsborg 08 FF,4,0
+22/08/2025,KFUM Oslo,Ham-Kam,2,2
+24/08/2025,Bryne,Stromsgodset,2,2
+24/08/2025,Haugesund,Valerenga,2,3
+24/08/2025,Molde,Tromso,2,0
+25/08/2025,Sarpsborg 08 FF,Kristiansund BK,0,1
+30/08/2025,Valerenga,Bryne,3,2
+31/08/2025,Fredrikstad,Haugesund,2,2
+31/08/2025,Ham-Kam,Sarpsborg 08 FF,1,3
+31/08/2025,Kristiansund BK,Brann,2,2
+31/08/2025,Sandefjord,Bodo/Glimt,1,2
+31/08/2025,Stromsgodset,Molde,3,1
+31/08/2025,Tromso,KFUM Oslo,2,0
+31/08/2025,Viking,Rosenborg,2,1
+12/09/2025,Bodo/Glimt,Kristiansund BK,7,1
+13/09/2025,Brann,Valerenga,3,2
+13/09/2025,Molde,Fredrikstad,1,2
+14/09/2025,Bryne,Tromso,0,2
+14/09/2025,Ham-Kam,Stromsgodset,1,2
+14/09/2025,Haugesund,Rosenborg,0,3
+14/09/2025,KFUM Oslo,Viking,2,2
+14/09/2025,Sarpsborg 08 FF,Sandefjord,2,1
+20/09/2025,Fredrikstad,Bryne,1,1
+20/09/2025,Sandefjord,Brann,0,3
+20/09/2025,Valerenga,KFUM Oslo,1,1
+21/09/2025,Kristiansund BK,Haugesund,2,0
+21/09/2025,Rosenborg,Bodo/Glimt,1,1
+21/09/2025,Stromsgodset,Sarpsborg 08 FF,2,1
+21/09/2025,Tromso,Ham-Kam,1,0
+21/09/2025,Viking,Molde,1,0
+27/09/2025,Sarpsborg 08 FF,Viking,3,3
+28/09/2025,Brann,Fredrikstad,1,0
+28/09/2025,Bryne,Kristiansund BK,2,0
+28/09/2025,Ham-Kam,Rosenborg,4,0
+28/09/2025,Molde,Valerenga,4,1
+28/09/2025,Tromso,Stromsgodset,3,1
+29/09/2025,Haugesund,Sandefjord,2,3
+01/10/2025,KFUM Oslo,Fredrikstad,2,1
+04/10/2025,Kristiansund BK,Molde,2,1
+04/10/2025,Sandefjord,Bryne,1,0
+04/10/2025,Valerenga,Tromso,1,0
+05/10/2025,Bodo/Glimt,Haugesund,2,0
+05/10/2025,Fredrikstad,Ham-Kam,1,1
+05/10/2025,Rosenborg,Sarpsborg 08 FF,2,3
+05/10/2025,Stromsgodset,KFUM Oslo,1,1
+05/10/2025,Viking,Brann,3,0
+18/10/2025,Brann,Haugesund,4,1
+18/10/2025,Bryne,Rosenborg,2,2
+18/10/2025,Sarpsborg 08 FF,Bodo/Glimt,2,5
+19/10/2025,Ham-Kam,Valerenga,2,1
+19/10/2025,KFUM Oslo,Kristiansund BK,1,1
+19/10/2025,Molde,Sandefjord,1,3
+19/10/2025,Stromsgodset,Fredrikstad,0,3
+19/10/2025,Tromso,Viking,1,3
+25/10/2025,Sarpsborg 08 FF,KFUM Oslo,2,1
+25/10/2025,Viking,Bryne,5,1
+26/10/2025,Bodo/Glimt,Molde,4,1
+26/10/2025,Haugesund,Tromso,2,3
+26/10/2025,Kristiansund BK,Ham-Kam,1,3
+26/10/2025,Rosenborg,Brann,2,3
+26/10/2025,Sandefjord,Fredrikstad,0,0
+26/10/2025,Valerenga,Stromsgodset,2,1
+29/10/2025,Brann,Bodo/Glimt,1,2
+29/10/2025,Rosenborg,Sandefjord,1,1
+01/11/2025,Molde,Rosenborg,4,2
+01/11/2025,Valerenga,Bodo/Glimt,3,1
+02/11/2025,Bryne,Brann,2,1
+02/11/2025,Fredrikstad,Kristiansund BK,3,1
+02/11/2025,Ham-Kam,Sandefjord,3,1
+02/11/2025,KFUM Oslo,Haugesund,1,4
+02/11/2025,Stromsgodset,Viking,1,2
+02/11/2025,Tromso,Sarpsborg 08 FF,4,0
+08/11/2025,Sarpsborg 08 FF,Fredrikstad,0,2
+08/11/2025,Viking,Ham-Kam,3,0
+09/11/2025,Bodo/Glimt,Bryne,5,0
+09/11/2025,Brann,KFUM Oslo,1,1
+09/11/2025,Haugesund,Molde,0,2
+09/11/2025,Kristiansund BK,Stromsgodset,2,1
+09/11/2025,Rosenborg,Valerenga,1,0
+09/11/2025,Sandefjord,Tromso,1,0
+21/11/2025,KFUM Oslo,Bodo/Glimt,1,2
+22/11/2025,Molde,Brann,4,0
+22/11/2025,Stromsgodset,Sandefjord,2,6
+22/11/2025,Tromso,Rosenborg,1,0
+23/11/2025,Bryne,Sarpsborg 08 FF,0,3
+23/11/2025,Fredrikstad,Viking,0,1
+23/11/2025,Ham-Kam,Haugesund,5,0
+30/11/2025,Bodo/Glimt,Fredrikstad,5,0
+30/11/2025,Brann,Ham-Kam,3,1
+30/11/2025,Haugesund,Bryne,1,4
+30/11/2025,Kristiansund BK,Tromso,1,3
+30/11/2025,Rosenborg,Stromsgodset,6,0
+30/11/2025,Sandefjord,KFUM Oslo,2,0
+30/11/2025,Sarpsborg 08 FF,Molde,1,0
+30/11/2025,Viking,Valerenga,5,1
+07/12/2025,Bryne,Aalesund,0,4
+11/12/2025,Aalesund,Bryne,0,1
+14/03/2026,Ham-Kam,Viking,2,1
+14/03/2026,Molde,Rosenborg,2,0
+15/03/2026,Aalesund,Lillestrom,1,3
+15/03/2026,KFUM Oslo,Start,2,0
+15/03/2026,Kristiansund BK,Brann,3,2
+15/03/2026,Tromso,Fredrikstad,4,0
+15/03/2026,Valerenga,Sandefjord,1,0
+21/03/2026,Start,Aalesund,1,1
+21/03/2026,Viking,Molde,4,1
+22/03/2026,Brann,Tromso,1,2
+22/03/2026,Fredrikstad,KFUM Oslo,3,1
+22/03/2026,Rosenborg,Valerenga,0,2
+22/03/2026,Sandefjord,Sarpsborg 08 FF,0,2
+06/04/2026,Ham-Kam,Brann,1,5
+06/04/2026,Kristiansund BK,Bodo/Glimt,0,3
+06/04/2026,Molde,Lillestrom,0,1
+06/04/2026,Sarpsborg 08 FF,Start,1,1
+06/04/2026,Tromso,Rosenborg,2,0
+06/04/2026,Valerenga,Viking,0,1
+07/04/2026,Aalesund,Fredrikstad,2,3
+07/04/2026,KFUM Oslo,Sandefjord,1,2
+11/04/2026,Lillestrom,Start,3,1
+11/04/2026,Tromso,Kristiansund BK,2,0
+11/04/2026,Viking,Bodo/Glimt,5,0
+12/04/2026,Aalesund,KFUM Oslo,2,2
+12/04/2026,Brann,Sandefjord,0,1
+12/04/2026,Fredrikstad,Valerenga,1,1
+12/04/2026,Molde,Ham-Kam,4,1
+12/04/2026,Rosenborg,Sarpsborg 08 FF,2,1
+15/04/2026,Sarpsborg 08 FF,Bodo/Glimt,1,1
+15/04/2026,Tromso,Lillestrom,0,0
+18/04/2026,Bodo/Glimt,Aalesund,3,0
+18/04/2026,Sandefjord,Rosenborg,0,0
+18/04/2026,Viking,Brann,3,2
+19/04/2026,Ham-Kam,KFUM Oslo,4,0
+19/04/2026,Kristiansund BK,Fredrikstad,2,0
+19/04/2026,Sarpsborg 08 FF,Tromso,0,1
+19/04/2026,Start,Molde,1,1
+19/04/2026,Valerenga,Lillestrom,0,2
+25/04/2026,Fredrikstad,Viking,1,2
+25/04/2026,Rosenborg,Brann,1,1
+26/04/2026,Aalesund,Kristiansund BK,1,1
+26/04/2026,Ham-Kam,Start,2,1
+26/04/2026,KFUM Oslo,Sarpsborg 08 FF,1,0
+26/04/2026,Lillestrom,Bodo/Glimt,0,2
+26/04/2026,Molde,Valerenga,5,1
+26/04/2026,Tromso,Sandefjord,3,1
+29/04/2026,Tromso,Brann,0,5
+30/04/2026,Bodo/Glimt,Start,5,0
+01/05/2026,Viking,Rosenborg,3,0
+02/05/2026,Brann,Fredrikstad,3,1
+03/05/2026,Kristiansund BK,Ham-Kam,1,1
+03/05/2026,Lillestrom,Sarpsborg 08 FF,4,0
+03/05/2026,Sandefjord,Aalesund,1,0
+03/05/2026,Start,Tromso,1,1
+03/05/2026,Valerenga,KFUM Oslo,2,2
+04/05/2026,Bodo/Glimt,Molde,0,1
+08/05/2026,Ham-Kam,Valerenga,1,0
+09/05/2026,Sarpsborg 08 FF,Fredrikstad,2,1
+10/05/2026,KFUM Oslo,Viking,0,2
+10/05/2026,Rosenborg,Lillestrom,2,0
+10/05/2026,Sandefjord,Kristiansund BK,2,0
+10/05/2026,Tromso,Molde,2,0
+16/05/2026,Bodo/Glimt,Tromso,5,0
+16/05/2026,Brann,KFUM Oslo,2,1
+16/05/2026,Fredrikstad,Ham-Kam,2,1
+16/05/2026,Lillestrom,Sandefjord,3,1
+16/05/2026,Molde,Kristiansund BK,1,0
+16/05/2026,Rosenborg,Aalesund,2,3
+16/05/2026,Valerenga,Sarpsborg 08 FF,3,2
+16/05/2026,Viking,Start,6,3
