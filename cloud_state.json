@@ -1942,7 +1942,8 @@
     "2026-05-29|Ligue 1|Nice vs Saint Etienne|BTTS": {
       "apostada": true,
       "oddReal": "2",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "resultadoManual": "P"
     },
     "2026-05-31|Jupiler Pro League|Gent vs Genk|Over 2.5": {
       "apostada": true,
@@ -1975,10 +1976,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-07T19:59:46.199Z",
+  "lastUpdated": "2026-06-07T21:34:56.148Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [],
   "manualBetsRemote": []
 }
