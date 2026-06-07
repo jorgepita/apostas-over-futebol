@@ -2275,7 +2275,7 @@ button.dirty {
               <thead>
                 <tr>
                   <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
-                  <th scope="col">Market</th>
+                  <th class="league-analytics-sort" data-sort-key="Market" scope="col" aria-sort="none"><span class="sort-head">Market<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th scope="col" class="league-analytics-emphasis">Action</th>
                   <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence<span class="sort-indicator" aria-hidden="true"></span></span></th>
@@ -2284,6 +2284,8 @@ button.dirty {
                   <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">Avg Kelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="HistStake" scope="col" aria-sort="none"><span class="sort-head">Stake €<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="HistLucro" scope="col" aria-sort="none"><span class="sort-head">P/L €<span class="sort-indicator" aria-hidden="true"></span></span></th>
                 </tr>
               </thead>
               <tbody class="league-analytics-body"></tbody>
@@ -2291,9 +2293,48 @@ button.dirty {
           </div>
         </div>
 
-        <!-- SECTION B: Market Performance -->
-        <div class="section-header">
-          <span class="section-header-title">B — Market Performance</span>
+        <!-- SECTION B: League Classification -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">B — League Classification</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="leagueClassificationWrap">
+          <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+        </div>
+
+        <!-- SECTION C: Market Intelligence -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">C — Market Intelligence</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;">Performance por mercado (histórico real)</div>
+            <div class="note">Edge consistency por tipo de aposta</div>
+          </div>
+          <div id="marketIntelligenceWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
+        <!-- SECTION D: Performance Over Time -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">D — Performance Over Time</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;">Evolução de performance por período</div>
+            <div class="note">Apostas reais fechadas (bot + manuais)</div>
+          </div>
+          <div id="perfOverTimeWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
+        <!-- SECTION E: Market Performance -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">E — Market &amp; Source Performance</span>
           <div class="section-header-line"></div>
         </div>
 
@@ -2349,12 +2390,12 @@ button.dirty {
           </div>
         </div>
 
-        <!-- SECTION C & D: Top + Worst Performers -->
+        <!-- SECTION F: Top + Worst Performers -->
         <div class="grid grid-2">
-          <!-- SECTION C: Top Performers -->
+          <!-- Top Performers -->
           <div>
             <div class="section-header">
-              <span class="section-header-title">C — Top Performers</span>
+              <span class="section-header-title">F — Top Performers</span>
               <div class="section-header-line"></div>
             </div>
             <div class="card">
@@ -2389,10 +2430,10 @@ button.dirty {
             </div>
           </div>
 
-          <!-- SECTION D: Worst Performers -->
+          <!-- Worst Performers -->
           <div>
             <div class="section-header">
-              <span class="section-header-title">D — Worst Performers</span>
+              <span class="section-header-title">F — Worst Performers</span>
               <div class="section-header-line"></div>
             </div>
             <div class="card">
@@ -2961,6 +3002,8 @@ button.dirty {
         switch (key) {
           case 'League':
             return cleanString(row.League || '').toLowerCase();
+          case 'Market':
+            return cleanString(row.Market || '').toLowerCase();
           case 'ROI%':
             return num(row['ROI%']) ?? -Infinity;
           case 'ConfidenceScore':
@@ -2975,13 +3018,17 @@ button.dirty {
             return LEAGUE_TIER_SORT[row.Tier] ?? 0;
           case 'Picks':
             return num(row.TotalPicks) ?? -Infinity;
+          case 'HistStake':
+            return row._histStake ?? -Infinity;
+          case 'HistLucro':
+            return row._histLucro ?? -Infinity;
           default:
             return 0;
         }
       }
 
       function defaultLeagueSortDir(key) {
-        return key === 'League' || key === 'Tier' ? 'asc' : 'desc';
+        return key === 'League' || key === 'Market' || key === 'Tier' ? 'asc' : 'desc';
       }
 
       function sortLeagueStatsRows(rows, key = leagueAnalyticsSort.key, dir = leagueAnalyticsSort.dir) {
@@ -3254,13 +3301,27 @@ button.dirty {
         const bodies = document.querySelectorAll('.league-analytics-body');
         if (!bodies.length) return;
 
+        // Enrich leagueStats rows with actual bet history data (joined by league name)
+        const actualRows = getFilteredRealClosedRows(getSummaryFilters());
+        const histByLeague = new Map();
+        buildAnalytics(actualRows, 'league').forEach(r => {
+          histByLeague.set(cleanString(r.key).toLowerCase(), r);
+        });
+
         const baseRows = getLeagueAnalyticsRows();
         const filteredRows = applyLeagueAnalyticsFilters(baseRows);
-        const rows = sortLeagueStatsRows(filteredRows);
+
+        const enrichedFiltered = filteredRows.map(row => {
+          const key = cleanString(row.League || '').toLowerCase();
+          const hist = histByLeague.get(key);
+          return { ...row, _histStake: hist ? hist.stake : null, _histLucro: hist ? hist.lucro : null };
+        });
+
+        const rows = sortLeagueStatsRows(enrichedFiltered);
 
         renderLeagueAnalyticsInsights(filteredRows);
 
-        const colSpan = 10;
+        const colSpan = 12;
         let html;
         if (!baseRows.length) {
           html = `<tr><td colspan="${colSpan}" class="note">Sem dados em league_stats.csv.</td></tr>`;
@@ -3281,6 +3342,7 @@ button.dirty {
             const picks = num(row.TotalPicks);
             const roi = num(row['ROI%']);
             const roiCls = roi !== null && roi < 0 ? 'bad' : roi !== null && roi > 0 ? 'good' : '';
+            const histLucroCls = row._histLucro !== null ? (row._histLucro > 0 ? 'color:var(--ok)' : row._histLucro < 0 ? 'color:var(--bad)' : '') : '';
 
             return `
               <tr class="${rowCls}">
@@ -3294,6 +3356,8 @@ button.dirty {
                 <td>${kelly === null ? '—' : escapeHtml(fmt(kelly, kelly >= 1 ? 2 : 4))}</td>
                 <td><span class="mini ${tierCls}">${escapeHtml(tier)}</span></td>
                 <td>${picks === null ? '—' : escapeHtml(String(Math.round(picks)))}</td>
+                <td style="color:var(--muted);">${row._histStake === null ? '—' : `€${fmt(row._histStake)}`}</td>
+                <td style="${histLucroCls};font-weight:600;">${row._histLucro === null ? '—' : `${row._histLucro >= 0 ? '+' : ''}€${fmt(row._histLucro)}`}</td>
               </tr>
             `;
           }).join('');
@@ -4791,6 +4855,9 @@ button.dirty {
         renderAnalyticsTable('analyticsSourceRows', buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key })), 'sourceLabel');
         renderStreaks();
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
+        try { renderLeagueClassification(); } catch (e) { console.error('renderLeagueClassification', e); }
+        try { renderMarketIntelligence(); } catch (e) { console.error('renderMarketIntelligence', e); }
+        try { renderPerformanceOverTime(); } catch (e) { console.error('renderPerformanceOverTime', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -6045,6 +6112,151 @@ buttons.forEach(btn => {
       }
 
       // ============================================================
+
+      function renderLeagueClassification() {
+        const wrap = document.getElementById('leagueClassificationWrap');
+        if (!wrap) return;
+
+        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const leagueData = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
+
+        const promote = leagueData.filter(r => r.roi > 5 && r.apostas >= 10).sort((a, b) => b.roi - a.roi);
+        const reduce = leagueData.filter(r => r.roi < -5 && r.apostas >= 10).sort((a, b) => a.roi - b.roi);
+        const neutral = leagueData.filter(r => r.roi >= -5 && r.roi <= 5).sort((a, b) => b.roi - a.roi);
+
+        function groupRows(leagues, badge) {
+          if (!leagues.length) return `<div class="note" style="color:var(--muted);padding:8px 0;text-align:center;">Nenhuma liga nesta categoria.</div>`;
+          return leagues.map(r => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--card-alt);border-radius:7px;margin-bottom:4px;gap:8px;">
+              <span style="font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(r.league)}</span>
+              <span style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted);white-space:nowrap;">
+                ${r.apostas}p &nbsp;•&nbsp; P/L <strong style="${r.lucro >= 0 ? 'color:var(--ok)' : 'color:var(--bad)'};">${r.lucro >= 0 ? '+' : ''}€${fmt(r.lucro)}</strong>
+                <span class="mini ${badge}">${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</span>
+              </span>
+            </div>`).join('');
+        }
+
+        wrap.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+            <div class="card" style="border-top:3px solid var(--ok);">
+              <div style="font-weight:800;color:var(--ok);margin-bottom:4px;font-size:13px;">▲ PROMOTE (${promote.length})</div>
+              <div class="note" style="margin-bottom:10px;">ROI &gt; 5% • mín. 10 picks</div>
+              ${groupRows(promote, 'good')}
+            </div>
+            <div class="card" style="border-top:3px solid var(--muted);">
+              <div style="font-weight:800;color:var(--muted);margin-bottom:4px;font-size:13px;">— NEUTRAL (${neutral.length})</div>
+              <div class="note" style="margin-bottom:10px;">ROI entre −5% e +5%</div>
+              ${groupRows(neutral, 'info')}
+            </div>
+            <div class="card" style="border-top:3px solid var(--bad);">
+              <div style="font-weight:800;color:var(--bad);margin-bottom:4px;font-size:13px;">▼ REDUCE (${reduce.length})</div>
+              <div class="note" style="margin-bottom:10px;">ROI &lt; −5% • mín. 10 picks</div>
+              ${groupRows(reduce, 'bad')}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderMarketIntelligence() {
+        const wrap = document.getElementById('marketIntelligenceWrap');
+        if (!wrap) return;
+
+        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const marketData = buildAnalytics(rows, 'market')
+          .map(r => ({ ...r, market: r.key }))
+          .sort((a, b) => b.apostas - a.apostas);
+
+        if (!marketData.length) {
+          wrap.innerHTML = `<div class="note" style="padding:16px;text-align:center;opacity:0.5;">Sem dados suficientes.</div>`;
+          return;
+        }
+
+        wrap.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mercado</th>
+                  <th>Picks</th>
+                  <th>Win Rate</th>
+                  <th>ROI</th>
+                  <th>Profit/Loss</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${marketData.map(r => `
+                  <tr>
+                    <td style="font-weight:600;">${escapeHtml(r.market)}</td>
+                    <td>${r.apostas}</td>
+                    <td>${(r.apostas > 0) ? pct(r.winRate) : '—'}</td>
+                    <td ${profitClass(r.roi)}>${r.roi >= 0 ? '+' : ''}${pct(r.roi)}</td>
+                    <td ${profitClass(r.lucro)}>${r.lucro >= 0 ? '+' : ''}€${fmt(r.lucro)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      function renderPerformanceOverTime() {
+        const wrap = document.getElementById('perfOverTimeWrap');
+        if (!wrap) return;
+
+        const allRows = getFilteredRealClosedRows(getSummaryFilters());
+        const todayStr = todayIso();
+
+        function cutoffDate(days) {
+          const d = new Date(todayStr);
+          d.setDate(d.getDate() - days);
+          return d.toISOString().slice(0, 10);
+        }
+
+        function calcPeriod(filtered) {
+          const stake = sum(filtered.map(r => r.stake));
+          const lucro = sum(filtered.map(r => r.lucro));
+          const wins = filtered.filter(r => r.result === 'W').length;
+          const losses = filtered.filter(r => r.result === 'L').length;
+          const roi = stake > 0 ? (lucro / stake) * 100 : null;
+          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          return { picks: filtered.length, wr, roi, lucro };
+        }
+
+        const periods = [
+          { label: 'Últimos 7 dias', rows: allRows.filter(r => (r.date || '') >= cutoffDate(7)) },
+          { label: 'Últimos 30 dias', rows: allRows.filter(r => (r.date || '') >= cutoffDate(30)) },
+          { label: 'Últimos 90 dias', rows: allRows.filter(r => (r.date || '') >= cutoffDate(90)) },
+          { label: 'Todo o tempo', rows: allRows }
+        ];
+
+        wrap.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th>Picks</th>
+                  <th>Win Rate</th>
+                  <th>ROI</th>
+                  <th>Profit/Loss</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${periods.map(p => {
+                  const s = calcPeriod(p.rows);
+                  return `
+                    <tr>
+                      <td style="font-weight:600;">${p.label}</td>
+                      <td>${s.picks}</td>
+                      <td>${s.wr !== null ? pct(s.wr) : '—'}</td>
+                      <td ${s.roi !== null ? profitClass(s.roi) : ''}>${s.roi !== null ? `${s.roi >= 0 ? '+' : ''}${pct(s.roi)}` : '—'}</td>
+                      <td ${profitClass(s.lucro)}>${s.lucro >= 0 ? '+' : ''}€${fmt(s.lucro)}</td>
+                    </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
 
       function renderAnalyticsPerformers() {
         const rows = getFilteredRealClosedRows(getSummaryFilters());
