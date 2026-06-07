@@ -6677,8 +6677,8 @@ buttons.forEach(btn => {
         if (!wrap) return;
 
         const botRows = getRealResolvedBotHistory();
+        const totalSettled = botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
 
-        // Build per-bet records: edge, odds, expectedProb, result, stake, lucro
         const bets = botRows.map(r => {
           const edge = num(r['Edge%'] ?? r['Edge']);
           const odds = r._oddRealNum;
@@ -6686,14 +6686,11 @@ buttons.forEach(btn => {
           if (!['W', 'L', 'P'].includes(r._resultKey)) return null;
           const fairProb = 1 / odds;
           const expectedProb = Math.min(fairProb * (1 + edge / 100), 1);
-          return {
-            edge,
-            result: r._resultKey,
-            stake: r._stakeRealNum ?? 0,
-            lucro: r._lucroRealLocal ?? 0,
-            expectedProb
-          };
+          return { edge, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0, expectedProb };
         }).filter(b => b !== null);
+
+        const settledWithEdge = bets.length;
+        const coveragePct = totalSettled > 0 ? (settledWithEdge / totalSettled) * 100 : 0;
 
         if (!bets.length) {
           wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem apostas com edge e odds registados para calibração.</div>`;
@@ -6721,93 +6718,99 @@ buttons.forEach(btn => {
           const actualWR = settled > 0 ? (wins / settled) * 100 : null;
           const wrDelta = (expectedWR !== null && actualWR !== null) ? actualWR - expectedWR : null;
           const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const lowSample = picks < 10;
-          return { label: b.label, picks, stake, lucro, wins, losses, settled, avgEdge, expectedWR, actualWR, wrDelta, roi, lowSample };
+          return { label: b.label, picks, stake, lucro, wins, losses, settled, avgEdge, expectedWR, actualWR, wrDelta, roi };
         });
 
-        // Qualified buckets (>= 10 picks, both WR values available)
-        const qual = buckets.filter(b => !b.lowSample && b.wrDelta !== null);
+        // Strict (≥10 picks) vs Observational (≥3 picks)
+        const strictQual = buckets.filter(b => b.picks >= 10 && b.wrDelta !== null);
+        const obsQual    = buckets.filter(b => b.picks >= 3  && b.wrDelta !== null);
+        const useStrict  = strictQual.length >= 2;
+        const activeQual = useStrict ? strictQual : obsQual;
+        const isObs      = !useStrict;
+
+        // ── Mode Banner ───────────────────────────────────────
+        const modeBanner = isObs ? `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;margin-bottom:14px;">
+            <span style="color:var(--warn);font-weight:700;flex-shrink:0;">⚠</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--warn);">Insufficient sample for strict validation. Showing observational analysis.</div>
+              <div class="note" style="margin-top:2px;">Strict mode requires ≥ 10 picks per bucket (${strictQual.length} qualified). Results are directional only.</div>
+            </div>
+          </div>` : '';
 
         // ── Calibration Score ─────────────────────────────────
-        let calScore = '—', calColor = 'var(--muted)', calCls = '', calSub = 'Dados insuficientes';
-        if (qual.length) {
-          const avgAbsDelta = qual.reduce((s, b) => s + Math.abs(b.wrDelta), 0) / qual.length;
-          if (avgAbsDelta < 5)  { calScore = 'GOOD'; calColor = 'var(--ok)';   calCls = 'kpi-ok';   calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
-          else if (avgAbsDelta < 10) { calScore = 'FAIR'; calColor = 'var(--warn)'; calCls = 'kpi-warn'; calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
-          else                  { calScore = 'POOR'; calColor = 'var(--bad)';  calCls = 'kpi-bad';  calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+        const calLabel = isObs ? 'Observational Score' : 'Calibration Score';
+        const calNote  = isObs ? 'Directional only. Sample size not yet validated.' : null;
+        let calScore = '—', calCls = '', calSub = 'Dados insuficientes';
+        if (activeQual.length) {
+          const avgAbsDelta = activeQual.reduce((s, b) => s + Math.abs(b.wrDelta), 0) / activeQual.length;
+          if (avgAbsDelta < 5)       { calScore = 'GOOD'; calCls = 'kpi-ok';   calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+          else if (avgAbsDelta < 10) { calScore = 'FAIR'; calCls = 'kpi-warn'; calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
+          else                       { calScore = 'POOR'; calCls = 'kpi-bad';  calSub = `Δ médio ${fmt(avgAbsDelta)}pp`; }
         }
 
-        // ── Edge Reliability (ROI monotonicity over qual buckets) ──
-        let relScore = '—', relColor = 'var(--muted)', relCls = '', relSub = 'Dados insuficientes';
-        if (qual.length >= 2) {
+        // ── Edge Monotonicity ─────────────────────────────────
+        let monoScore = '—', monoCls = '', monoSub = 'Dados insuficientes';
+        if (activeQual.length >= 2) {
           let up = 0, down = 0;
-          for (let i = 1; i < qual.length; i++) {
-            if (qual[i].roi > qual[i - 1].roi) up++;
-            else if (qual[i].roi < qual[i - 1].roi) down++;
-          }
-          if (up > down * 1.5)     { relScore = 'HIGH';   relColor = 'var(--ok)';   relCls = 'kpi-ok';   relSub = 'Edge mais alto → melhor ROI'; }
-          else if (up >= down)     { relScore = 'MEDIUM'; relColor = 'var(--warn)'; relCls = 'kpi-warn'; relSub = 'Tendência mista mas positiva'; }
-          else                     { relScore = 'LOW';    relColor = 'var(--bad)';  relCls = 'kpi-bad';  relSub = 'Sem correlação com ROI'; }
-        }
-
-        // ── Edge Trend (ROI progression label) ───────────────
-        let trendScore = '—', trendColor = 'var(--muted)', trendCls = '', trendSub = 'Dados insuficientes';
-        if (qual.length >= 2) {
-          let up = 0, down = 0;
-          for (let i = 1; i < qual.length; i++) {
-            if (qual[i].roi > qual[i - 1].roi) up++;
-            else if (qual[i].roi < qual[i - 1].roi) down++;
+          for (let i = 1; i < activeQual.length; i++) {
+            if (activeQual[i].roi > activeQual[i - 1].roi) up++;
+            else if (activeQual[i].roi < activeQual[i - 1].roi) down++;
           }
           const total = up + down;
-          if (total === 0 || up === down) { trendScore = 'FLAT';      trendColor = 'var(--warn)'; trendCls = 'kpi-warn'; trendSub = 'ROI sem tendência clara'; }
-          else if (up > down)             { trendScore = 'IMPROVING'; trendColor = 'var(--ok)';   trendCls = 'kpi-ok';   trendSub = 'ROI cresce com o edge'; }
-          else                            { trendScore = 'INVERTED';  trendColor = 'var(--bad)';  trendCls = 'kpi-bad';  trendSub = 'ROI decresce com o edge'; }
+          if (total === 0)          { monoScore = 'WEAK';     monoCls = '';          monoSub = 'Sem pares para comparar'; }
+          else if (up / total > 0.66){ monoScore = 'STRONG';  monoCls = 'kpi-ok';   monoSub = 'Edge mais alto → ROI consistentemente maior'; }
+          else if (up > down)       { monoScore = 'MODERATE'; monoCls = 'kpi-warn'; monoSub = 'Tendência positiva mas mista'; }
+          else if (up === down)     { monoScore = 'WEAK';     monoCls = '';          monoSub = 'Sem padrão de monotonia'; }
+          else                      { monoScore = 'INVERTED'; monoCls = 'kpi-bad';  monoSub = 'Edge mais alto → ROI menor'; }
         }
 
-        // ── Model Diagnostic ──────────────────────────────────
-        let diagText = '—', diagColor = 'var(--muted)', diagNote = '';
-        if (qual.length >= 2) {
-          const deltas = qual.map(b => b.wrDelta);
-          const avgDelta = deltas.reduce((s, d) => s + d, 0) / deltas.length;
-          const avgAbsDelta = deltas.reduce((s, d) => s + Math.abs(d), 0) / deltas.length;
-          const allNeg = deltas.every(d => d < 0);
-          const allPos = deltas.every(d => d > 0);
-          if (avgAbsDelta < 3) {
-            diagText = 'MODEL WELL CALIBRATED';
-            diagColor = 'var(--ok)';
-            diagNote = 'WR real próximo da WR esperada em todos os buckets.';
-          } else if (allNeg || avgDelta < -3) {
-            diagText = 'MODEL SLIGHTLY OVERCONFIDENT';
-            diagColor = 'var(--warn)';
-            diagNote = 'WR real consistentemente abaixo da WR esperada.';
-          } else if (allPos || avgDelta > 3) {
-            diagText = 'MODEL SLIGHTLY UNDERCONFIDENT';
-            diagColor = 'var(--info)';
-            diagNote = 'WR real consistentemente acima da WR esperada.';
-          } else {
-            diagText = 'MODEL POORLY CALIBRATED';
-            diagColor = 'var(--bad)';
-            diagNote = 'Deltas grandes e inconsistentes — calibração fraca.';
-          }
-        }
+        // ── Confidence Level ──────────────────────────────────
+        let confScore, confCls, confSub;
+        if (settledWithEdge >= 100)     { confScore = 'HIGH';   confCls = 'kpi-ok';   confSub = `${settledWithEdge} apostas com edge`; }
+        else if (settledWithEdge >= 25) { confScore = 'MEDIUM'; confCls = 'kpi-warn'; confSub = `${settledWithEdge} apostas com edge`; }
+        else                            { confScore = 'LOW';    confCls = 'kpi-bad';  confSub = `${settledWithEdge} apostas com edge`; }
 
-        // ── KPI Row ───────────────────────────────────────────
-        const kpiHtml = `
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px;">
+        // ── Readiness ─────────────────────────────────────────
+        let readScore, readCls, readTarget;
+        if (settledWithEdge >= 200)     { readScore = 'MATURE';     readCls = 'kpi-ok';   readTarget = 200; }
+        else if (settledWithEdge >= 50) { readScore = 'DEVELOPING'; readCls = 'kpi-warn'; readTarget = 200; }
+        else                            { readScore = 'EARLY';      readCls = 'kpi-bad';  readTarget = 50; }
+        const readSub = `${settledWithEdge} / ${readTarget} apostas`;
+
+        // ── KPI Row 1: Score + Monotonicity + Confidence ──────
+        const kpiRow1 = `
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px;">
             <div class="kpi-hero ${calCls}">
-              <div class="kpi-label">Calibration Score</div>
+              <div class="kpi-label">${calLabel}</div>
               <div class="kpi-value" style="font-size:20px;">${calScore}</div>
               <div class="kpi-sub">${calSub}</div>
+              ${calNote ? `<div class="note" style="margin-top:4px;font-size:10px;opacity:0.7;">${calNote}</div>` : ''}
             </div>
-            <div class="kpi-hero ${relCls}">
-              <div class="kpi-label">Edge Reliability</div>
-              <div class="kpi-value" style="font-size:20px;">${relScore}</div>
-              <div class="kpi-sub">${relSub}</div>
+            <div class="kpi-hero ${monoCls}">
+              <div class="kpi-label">Edge Monotonicity</div>
+              <div class="kpi-value" style="font-size:20px;">${monoScore}</div>
+              <div class="kpi-sub">${monoSub}</div>
             </div>
-            <div class="kpi-hero ${trendCls}">
-              <div class="kpi-label">Edge Trend</div>
-              <div class="kpi-value" style="font-size:20px;">${trendScore}</div>
-              <div class="kpi-sub">${trendSub}</div>
+            <div class="kpi-hero ${confCls}">
+              <div class="kpi-label">Confidence Level</div>
+              <div class="kpi-value" style="font-size:20px;">${confScore}</div>
+              <div class="kpi-sub">${confSub}</div>
+            </div>
+          </div>`;
+
+        // ── KPI Row 2: Readiness + Edge Coverage ──────────────
+        const kpiRow2 = `
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px;">
+            <div class="kpi-hero ${readCls}">
+              <div class="kpi-label">Readiness</div>
+              <div class="kpi-value" style="font-size:20px;">${readScore}</div>
+              <div class="kpi-sub">${readSub}</div>
+            </div>
+            <div class="kpi-hero" style="grid-column:span 2;">
+              <div class="kpi-label">Edge Coverage</div>
+              <div class="kpi-value" style="font-size:20px;">${settledWithEdge} / ${totalSettled}</div>
+              <div class="kpi-sub">${fmt(coveragePct)}% das apostas fechadas têm edge registado</div>
             </div>
           </div>`;
 
@@ -6828,20 +6831,23 @@ buttons.forEach(btn => {
               </thead>
               <tbody>
                 ${buckets.map(b => {
-                  const deltaAttr = b.wrDelta !== null
+                  const isStrict = b.picks >= 10;
+                  const isLow    = b.picks >= 3 && b.picks < 10;
+                  const isEmpty  = b.picks < 3;
+                  const rowOpacity = isEmpty ? '0.3' : isLow ? '0.65' : '1';
+                  const badge = isLow   ? `<span class="mini warn" style="font-size:9px;margin-left:4px;">LOW</span>`
+                              : isEmpty ? `<span class="mini bad"  style="font-size:9px;margin-left:4px;">NONE</span>` : '';
+                  const dAttr = b.wrDelta !== null
                     ? (b.wrDelta > 0.5 ? 'style="color:var(--ok)"' : b.wrDelta < -0.5 ? 'style="color:var(--bad)"' : 'style="color:var(--muted)"')
                     : '';
                   return `
-                    <tr style="${b.lowSample ? 'opacity:0.4;' : ''}">
+                    <tr style="opacity:${rowOpacity};">
                       <td style="font-weight:700;">${b.label}</td>
-                      <td>
-                        ${b.picks}
-                        ${b.lowSample ? `<span class="mini bad" style="font-size:9px;margin-left:4px;">LOW</span>` : ''}
-                      </td>
+                      <td>${b.picks}${badge}</td>
                       <td style="color:var(--muted);">${b.avgEdge !== null ? `${fmt(b.avgEdge)}%` : '—'}</td>
                       <td style="color:var(--muted);">${b.expectedWR !== null ? pct(b.expectedWR) : '—'}</td>
                       <td>${b.actualWR !== null ? pct(b.actualWR) : '—'}</td>
-                      <td ${deltaAttr}>${b.wrDelta !== null ? `${b.wrDelta >= 0 ? '+' : ''}${pct(b.wrDelta)}` : '—'}</td>
+                      <td ${dAttr}>${b.wrDelta !== null ? `${b.wrDelta >= 0 ? '+' : ''}${pct(b.wrDelta)}` : '—'}</td>
                       <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? `${b.roi >= 0 ? '+' : ''}${pct(b.roi)}` : '—'}</td>
                     </tr>`;
                 }).join('')}
@@ -6856,22 +6862,22 @@ buttons.forEach(btn => {
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr>
-                    <th>Edge Bucket</th>
-                    <th>Expected WR</th>
-                    <th>Actual WR</th>
-                  </tr>
+                  <tr><th>Edge Bucket</th><th>Expected WR</th><th>Actual WR</th></tr>
                 </thead>
                 <tbody>
                   ${buckets.map(b => {
-                    const actualColor = b.actualWR !== null && b.expectedWR !== null
-                      ? (b.actualWR >= b.expectedWR ? 'color:var(--ok)' : 'color:var(--bad)')
-                      : '';
+                    const isEmpty  = b.picks < 3;
+                    const isLow    = b.picks >= 3 && b.picks < 10;
+                    const rowOpacity = isEmpty ? '0.3' : isLow ? '0.65' : '1';
+                    const tag = isLow   ? ` <span class="mini warn" style="font-size:9px;">LOW</span>`
+                              : isEmpty ? ` <span class="mini bad"  style="font-size:9px;">NONE</span>` : '';
+                    const actualStyle = b.actualWR !== null && b.expectedWR !== null
+                      ? (b.actualWR >= b.expectedWR ? 'color:var(--ok)' : 'color:var(--bad)') : '';
                     return `
-                      <tr style="${b.lowSample ? 'opacity:0.4;' : ''}">
-                        <td style="font-weight:600;">${b.label}${b.lowSample ? ` <span class="mini bad" style="font-size:9px;">LOW</span>` : ''}</td>
+                      <tr style="opacity:${rowOpacity};">
+                        <td style="font-weight:600;">${b.label}${tag}</td>
                         <td style="color:var(--muted);">${b.expectedWR !== null ? pct(b.expectedWR) : '—'}</td>
-                        <td style="${actualColor}">${b.actualWR !== null ? pct(b.actualWR) : '—'}</td>
+                        <td style="${actualStyle}">${b.actualWR !== null ? pct(b.actualWR) : '—'}</td>
                       </tr>`;
                   }).join('')}
                 </tbody>
@@ -6879,19 +6885,58 @@ buttons.forEach(btn => {
             </div>
           </div>`;
 
-        // ── Model Diagnostic Card ─────────────────────────────
-        const diagHtml = qual.length >= 2
-          ? `
-            <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;border-left:4px solid ${diagColor};">
-              <div style="flex:1;">
-                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Model Diagnostic</div>
-                <div style="font-size:18px;font-weight:900;color:${diagColor};">${diagText}</div>
-                <div class="note" style="margin-top:4px;">${diagNote}</div>
-              </div>
-            </div>`
-          : `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Diagnóstico requer mín. 2 buckets com 10+ picks.</div>`;
+        // ── Model Diagnostic ──────────────────────────────────
+        const diagLines = [];
+        let diagColor = 'var(--muted)';
 
-        wrap.innerHTML = kpiHtml + tableHtml + chartHtml + diagHtml;
+        if (activeQual.length < 2) {
+          diagLines.push('Sample size remains too small for reliable conclusions.');
+        } else {
+          const deltas  = activeQual.map(b => b.wrDelta);
+          const avgDelta    = deltas.reduce((s, d) => s + d, 0) / deltas.length;
+          const avgAbsDelta = deltas.reduce((s, d) => s + Math.abs(d), 0) / deltas.length;
+          const allNeg = deltas.every(d => d < 0);
+          const allPos = deltas.every(d => d > 0);
+
+          // Monotonicity finding
+          let monoUp = 0, monoDown = 0;
+          for (let i = 1; i < activeQual.length; i++) {
+            if (activeQual[i].roi > activeQual[i - 1].roi) monoUp++;
+            else if (activeQual[i].roi < activeQual[i - 1].roi) monoDown++;
+          }
+          if (monoDown > monoUp) diagLines.push('High-edge selections are not yet outperforming low-edge selections.');
+
+          // WR alignment finding
+          if (allNeg) {
+            diagLines.push('Expected WR exceeds actual WR across all buckets.');
+            diagLines.push('Model currently appears overconfident.');
+            diagColor = 'var(--warn)';
+          } else if (allPos) {
+            diagLines.push('Actual WR exceeds expected WR across all buckets.');
+            diagLines.push('Model currently appears underconfident.');
+            diagColor = 'var(--info)';
+          } else if (avgAbsDelta < 3) {
+            diagLines.push('WR real alinhada com WR esperada em todos os buckets.');
+            diagColor = 'var(--ok)';
+          } else {
+            diagLines.push('Deltas large and inconsistent across buckets — weak calibration.');
+            diagColor = 'var(--bad)';
+          }
+
+          if (isObs && settledWithEdge < 50) diagLines.push('Sample size remains too small for reliable conclusions.');
+        }
+
+        const diagHtml = `
+          <div style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;border-left:4px solid ${diagColor};">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Model Diagnostic</div>
+            ${diagLines.map(line => `
+              <div style="display:flex;gap:8px;align-items:flex-start;">
+                <span style="color:${diagColor};font-weight:700;flex-shrink:0;">→</span>
+                <span style="font-size:13px;line-height:1.5;">${line}</span>
+              </div>`).join('')}
+          </div>`;
+
+        wrap.innerHTML = modeBanner + kpiRow1 + kpiRow2 + tableHtml + chartHtml + diagHtml;
       }
 
       function renderLeagueClassification() {
