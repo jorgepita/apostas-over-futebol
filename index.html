@@ -7,32 +7,42 @@
 
   <style>
     :root {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #475569;
-      --line: #e2e8f0;
-      --accent: #0f172a;
-      --sidebar-width: 180px;
-      --nav-bg: #1e293b;
-      --nav-text: #f8fafc;
-      --nav-hover: #334155;
-      --nav-active: #2563eb;
-      --transition: all 0.3s ease;
+      --bg: #0a0f1e;
+      --bg2: #0f172a;
+      --card: #1a2235;
+      --card-alt: #151f30;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --line: rgba(148, 163, 184, 0.12);
+      --line-strong: rgba(148, 163, 184, 0.22);
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --sidebar-width: 200px;
+      --nav-bg: #080d19;
+      --nav-text: #8892a4;
+      --nav-hover: rgba(59, 130, 246, 0.1);
+      --nav-active: #3b82f6;
+      --transition: all 0.2s ease;
 
-      --ok: #16a34a;
-      --ok-bg: #ecfdf5;
+      --ok: #22c55e;
+      --ok-bg: rgba(34, 197, 94, 0.12);
+      --ok-border: rgba(34, 197, 94, 0.25);
 
-      --bad: #dc2626;
-      --bad-bg: #fef2f2;
+      --bad: #ef4444;
+      --bad-bg: rgba(239, 68, 68, 0.12);
+      --bad-border: rgba(239, 68, 68, 0.25);
 
-      --warn: #b45309;
-      --warn-bg: #fffbeb;
+      --warn: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.12);
+      --warn-border: rgba(245, 158, 11, 0.25);
 
-      --info: #2563eb;
-      --info-bg: #eff6ff;
+      --info: #3b82f6;
+      --info-bg: rgba(59, 130, 246, 0.12);
+      --info-border: rgba(59, 130, 246, 0.25);
 
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --glow-accent: 0 0 20px rgba(59, 130, 246, 0.15);
     }
 
     * { box-sizing: border-box; }
@@ -43,10 +53,11 @@
 
     body {
       margin: 0;
-      font-family: Inter, system-ui, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* App Layout */
@@ -72,13 +83,29 @@
     }
 
     .sidebar-header {
-      padding: 16px;
-      font-size: 18px;
-      font-weight: 700;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 20px 16px 16px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+      border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .sidebar-header .logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      font-size: 14px;
+      margin-right: 8px;
+      flex-shrink: 0;
     }
 
     .sidebar-nav {
@@ -90,52 +117,67 @@
     .nav-item {
       display: flex;
       align-items: center;
-      padding: 8px 16px;
+      padding: 10px 16px;
       color: var(--nav-text);
       text-decoration: none;
       font-weight: 500;
       transition: var(--transition);
       cursor: pointer;
-      border-left: 4px solid transparent;
-      margin-bottom: 2px;
-      font-size: 13.5px;
+      border-left: 3px solid transparent;
+      margin: 1px 8px;
+      border-radius: 8px;
+      font-size: 13px;
     }
 
     .nav-item:hover {
       background: var(--nav-hover);
+      color: var(--text);
     }
 
     .nav-item.active {
-      background: var(--nav-hover);
+      background: rgba(59, 130, 246, 0.15);
       border-left-color: var(--nav-active);
       color: #fff;
     }
 
     .nav-icon {
-      margin-right: 12px;
-      width: 20px;
+      margin-right: 10px;
+      width: 18px;
       text-align: center;
+      font-size: 14px;
+    }
+
+    .nav-section-label {
+      padding: 12px 16px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.6;
     }
 
     .main-content {
       flex: 1;
       margin-left: var(--sidebar-width);
-      padding: 12px;
+      padding: 16px;
       width: calc(100% - var(--sidebar-width));
       min-width: 0;
       transition: var(--transition);
+      background: var(--bg);
     }
 
     .mobile-header {
       display: none;
       background: var(--nav-bg);
-      color: var(--nav-text);
+      color: var(--text);
       padding: 12px 18px;
       position: sticky;
       top: 0;
       z-index: 900;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid var(--line);
     }
 
     .hamburger {
@@ -182,15 +224,15 @@
 
     /* Page Titles */
     .page-title {
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--line);
     }
 
     .page-title .value {
       font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
+      font-weight: 800;
+      color: var(--text);
     }
 
     /* Existing styles adaptation */
@@ -202,14 +244,14 @@
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
     }
 
     .grid {
       display: grid;
-      gap: 8px;
+      gap: 10px;
     }
 
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -225,38 +267,43 @@
     .stat {
       border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 10px;
-      background: #fff;
+      padding: 14px;
+      background: var(--card);
       min-width: 0;
     }
 
     .label {
-      font-size: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       color: var(--muted);
     }
 
     .value {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       margin-top: 6px;
       line-height: 1.15;
       word-break: break-word;
+      color: var(--text);
     }
 
     .stat .value {
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
     }
 
     .card .value {
       font-size: 18px;
     }
-    
+
     .note {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--muted);
-      margin-top: 4px;
-      line-height: 1.45;
+      margin-top: 5px;
+      line-height: 1.5;
     }
 
     .game-main {
@@ -278,17 +325,17 @@
       white-space: nowrap;
     }
 
-    .good { background: var(--ok-bg); color: var(--ok); }
-    .warn { background: var(--warn-bg); color: var(--warn); }
-    .bad { background: var(--bad-bg); color: var(--bad); }
-    .info { background: var(--info-bg); color: var(--info); }
-    .neutral { background: #f1f5f9; color: #64748b; }
+    .good { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+    .warn { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+    .bad { background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad-border); }
+    .info { background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
+    .neutral { background: rgba(148, 163, 184, 0.1); color: var(--muted); border: 1px solid rgba(148, 163, 184, 0.2); }
 
-    .tier-elite { background: var(--ok-bg); color: var(--ok); }
-    .tier-strong { background: var(--info-bg); color: var(--info); }
-    .tier-neutral { background: var(--warn-bg); color: var(--warn); }
-    .tier-weak { background: var(--bad-bg); color: var(--bad); }
-    .tier-unproven { background: #f1f5f9; color: #64748b; }
+    .tier-elite { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+    .tier-strong { background: var(--info-bg); color: var(--info); border: 1px solid var(--info-border); }
+    .tier-neutral { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+    .tier-weak { background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad-border); }
+    .tier-unproven { background: rgba(148, 163, 184, 0.1); color: var(--muted); border: 1px solid rgba(148, 163, 184, 0.2); }
 
     table {
       width: 100%;
@@ -297,20 +344,31 @@
     }
 
     th, td {
-      padding: 4px 4px;
+      padding: 8px 8px;
       border-top: 1px solid var(--line);
       font-size: 11.5px;
       vertical-align: top;
-      line-height: 1.25;
+      line-height: 1.35;
+      color: var(--text);
     }
 
     th {
       text-align: left;
-      background: #fafafa;
+      background: var(--card-alt);
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       position: sticky;
       top: 0;
       z-index: 10;
       white-space: nowrap;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
     }
 
     .league-analytics-table th.league-analytics-sort {
@@ -382,8 +440,8 @@
       max-height: min(70vh, 560px);
       -webkit-overflow-scrolling: touch;
       border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fff;
+      border-radius: 12px;
+      background: var(--card);
     }
 
     .league-analytics-table {
@@ -395,7 +453,7 @@
       position: sticky;
       top: 0;
       z-index: 3;
-      background: #fafafa;
+      background: var(--card-alt);
       box-shadow: 0 1px 0 var(--line);
     }
 
@@ -409,27 +467,27 @@
     }
 
     .league-analytics-table tbody tr.league-tier-elite td {
-      background: #f0fdf4;
+      background: rgba(34, 197, 94, 0.06);
     }
 
     .league-analytics-table tbody tr.league-tier-strong td {
-      background: #eff6ff;
+      background: rgba(59, 130, 246, 0.06);
     }
 
     .league-analytics-table tbody tr.league-tier-neutral td {
-      background: #fff7ed;
+      background: rgba(245, 158, 11, 0.05);
     }
 
     .league-analytics-table tbody tr.league-tier-weak td {
-      background: #fef2f2;
+      background: rgba(239, 68, 68, 0.06);
     }
 
     .league-analytics-table tbody tr.league-tier-unproven td {
-      background: #f1f5f9;
+      background: rgba(148, 163, 184, 0.04);
     }
 
     .league-analytics-table tbody tr.league-tier-row:hover td {
-      box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.045);
+      box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.04);
     }
 
     .league-analytics-table tbody tr td.league-confidence-cell {
@@ -501,13 +559,13 @@
     button,
     .button-link,
     .tab-btn {
-      border: 1px solid var(--line);
-      background: #fff;
+      border: 1px solid var(--line-strong);
+      background: var(--card);
       color: var(--text);
-      border-radius: 10px;
-      padding: 6px 10px;
+      border-radius: 8px;
+      padding: 6px 12px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       transition: 0.15s ease;
@@ -515,14 +573,14 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      min-height: 32px;
+      min-height: 34px;
     }
 
     button:hover,
     .button-link:hover,
     .tab-btn:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
+      border-color: rgba(148, 163, 184, 0.35);
+      background: var(--card-alt);
     }
 
     .tab-btn.active {
@@ -567,7 +625,7 @@
 
     .section-stack {
       display: grid;
-      gap: 12px;
+      gap: 14px;
     }
 
     .tab-panel { display: none; }
@@ -579,6 +637,7 @@
       z-index: 20;
       background: var(--bg);
       padding-bottom: 12px;
+      padding-top: 4px;
     }
 
     .tooltip-wrap {
@@ -667,19 +726,25 @@
     }
 
     .market-chip {
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: var(--text);
+      border: 1px solid var(--line-strong);
+      background: var(--card-alt);
+      color: var(--muted);
       border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
+      padding: 6px 14px;
+      font-size: 11.5px;
+      font-weight: 600;
       cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .market-chip:hover {
+      background: var(--card);
+      color: var(--text);
     }
 
     .market-chip.active {
       background: var(--accent);
-      color: #ffffff;
+      color: #fff;
       border-color: var(--accent);
     }
 
@@ -687,8 +752,8 @@
       width: 100%;
       min-height: 280px;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 12px;
+      background: var(--card-alt);
       padding: 12px;
     }
 
@@ -704,6 +769,7 @@
       place-items: center;
       color: var(--muted);
       font-size: 13px;
+      opacity: 0.6;
     }
 
     .page-title {
@@ -712,7 +778,7 @@
       gap: 12px;
       align-items: flex-start;
       flex-wrap: wrap;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .table-wrap {
@@ -728,9 +794,9 @@
     }
 
     .muted-box {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 14px;
+      background: var(--card-alt);
+      border: 1px dashed var(--line-strong);
+      border-radius: 10px;
       padding: 12px;
     }
 
@@ -760,9 +826,10 @@
     .small-input {
       width: 70px;
       padding: 4px 6px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--line-strong);
       border-radius: 6px;
-      background: #fff;
+      background: var(--card-alt);
+      color: var(--text);
       font-size: 11px;
     }
 
@@ -770,12 +837,24 @@
     select {
       font: inherit;
       width: 100%;
-      padding: 3px 6px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fff;
+      padding: 7px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--card-alt);
       color: var(--text);
-      font-size: 11.5px;
+      font-size: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    select option {
+      background: var(--card);
+      color: var(--text);
     }
 
     .section-tabs {
@@ -792,16 +871,18 @@
       .grid-4 {
         grid-template-columns: 1fr;
       }
-      
+
+      .grid-3 > .card[style*="grid-column: span 2"] {
+        grid-column: span 1;
+      }
+
       .toolbar-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       }
 
       .wrap { padding: 8px; }
 
-      .card { padding: 10px; }
-
-      .page-title .value { font-size: 18px; }
+      .card { padding: 12px; }
 
       .top-actions {
         width: 100%;
@@ -842,6 +923,16 @@
         max-width: none;
       }
     }
+
+    @media (max-width: 1200px) {
+      .kpi-grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .picks-kpi-row,
+      .history-kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
     /* =========================
    COMPACT MODE (toggle)
 ========================= */
@@ -850,7 +941,15 @@ body.compact {
 }
 
 body.compact .card {
-  padding: 10px;
+  padding: 12px;
+}
+
+body.compact .kpi-hero {
+  padding: 12px 14px;
+}
+
+body.compact .kpi-hero .kpi-value {
+  font-size: 20px;
 }
 
 body.compact button,
@@ -875,6 +974,14 @@ body.compact select {
 
 body.compact .small-input {
   width: 60px;
+}
+
+body.compact .stat {
+  padding: 10px 12px;
+}
+
+body.compact .stat .value {
+  font-size: 18px;
 }
 
 /* =========================
@@ -911,36 +1018,52 @@ button,
 .table-wrap td:nth-child(1) {
   position: sticky;
   left: 0;
-  background: #fff;
+  background: var(--card);
   z-index: 3;
   min-width: 46px;
+}
+
+.table-wrap th:nth-child(1) {
+  background: var(--card-alt);
 }
 
 .table-wrap th:nth-child(2),
 .table-wrap td:nth-child(2) {
   position: sticky;
   left: 46px;
-  background: #fff;
+  background: var(--card);
   z-index: 3;
   min-width: 90px;
+}
+
+.table-wrap th:nth-child(2) {
+  background: var(--card-alt);
 }
 
 .table-wrap th:nth-child(3),
 .table-wrap td:nth-child(3) {
   position: sticky;
   left: 136px;
-  background: #fff;
+  background: var(--card);
   z-index: 3;
   min-width: 110px;
+}
+
+.table-wrap th:nth-child(3) {
+  background: var(--card-alt);
 }
 
 .table-wrap th:nth-child(4),
 .table-wrap td:nth-child(4) {
   position: sticky;
   left: 246px;
-  background: #fff;
+  background: var(--card);
   z-index: 3;
   min-width: 180px;
+}
+
+.table-wrap th:nth-child(4) {
+  background: var(--card-alt);
 }
 
 /* sombra subtil */
@@ -949,30 +1072,30 @@ button,
   box-shadow: 4px 0 6px rgba(0,0,0,0.05);
 }
 
-/* League Analytics: tier row backgrounds (override sticky column whites) */
+/* League Analytics: tier row backgrounds (override sticky column colors) */
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-elite td,
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-elite) td {
-  background: #f0fdf4;
+  background: rgba(34, 197, 94, 0.06);
 }
 
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-strong td,
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-strong) td {
-  background: #eff6ff;
+  background: rgba(59, 130, 246, 0.06);
 }
 
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-neutral td,
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-neutral) td {
-  background: #fff7ed;
+  background: rgba(245, 158, 11, 0.05);
 }
 
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-weak td,
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-weak) td {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.06);
 }
 
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr.league-tier-unproven td,
 .league-analytics-scroll.table-wrap .league-analytics-table tbody tr:has(.tier-unproven) td {
-  background: #f1f5f9;
+  background: rgba(148, 163, 184, 0.04);
 }
 
 /* =========================
@@ -1023,14 +1146,314 @@ table {
 }
 
 button.saving {
-  background: #e0f2fe;
-  border-color: #38bdf8;
+  background: var(--info-bg);
+  border-color: var(--info);
+  color: var(--info);
 }
 
 button.dirty {
-  background: #fef3c7;
-  border-color: #f59e0b;
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+/* =========================
+   KPI HERO CARDS (big metrics top row)
+========================= */
+.kpi-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.kpi-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.kpi-grid-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+.kpi-hero {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+  min-width: 0;
+}
+
+.kpi-hero:hover {
+  border-color: var(--line-strong);
+}
+
+.kpi-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.kpi-hero:hover::before {
+  opacity: 1;
+}
+
+.kpi-hero.kpi-primary::before {
+  opacity: 1;
+  background: var(--accent);
+}
+
+.kpi-hero.kpi-ok::before { opacity: 1; background: var(--ok); }
+.kpi-hero.kpi-bad::before { opacity: 1; background: var(--bad); }
+.kpi-hero.kpi-warn::before { opacity: 1; background: var(--warn); }
+
+.kpi-hero .kpi-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.kpi-hero .kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.kpi-hero .kpi-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.kpi-hero .kpi-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+/* =========================
+   SECTION HEADERS
+========================= */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  margin-top: 4px;
+}
+
+.section-header-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.section-header-line {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* =========================
+   DECISION BADGE
+========================= */
+.decision-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+/* =========================
+   OPERATIONAL CARD (alert/status)
+========================= */
+.op-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.op-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.op-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.op-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.op-card-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.op-card-note {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* =========================
+   STREAK CARD
+========================= */
+.streak-card {
+  background: var(--card-alt);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: center;
+  flex: 1;
+}
+
+.streak-card .streak-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.streak-card .streak-value {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+
+.streak-card .streak-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.streak-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================
+   TOP/WORST PERFORMERS CARD
+========================= */
+.performer-card {
+  background: var(--card-alt);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.performer-rank {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.performer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.performer-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.performer-market {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.performer-metric {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* =========================
+   PICKS PAGE KPI ROW
+========================= */
+.picks-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* =========================
+   HISTORY KPI ROW
+========================= */
+.history-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Responsive overrides */
+@media (max-width: 900px) {
+  .kpi-grid-4, .kpi-grid-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .kpi-hero .kpi-value {
+    font-size: 22px;
+  }
+  .picks-kpi-row, .history-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .streak-row {
+    flex-wrap: wrap;
+  }
+}
   </style>
 </head>
 <body>
@@ -1038,31 +1461,38 @@ button.dirty {
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <span>Apostas Bot</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="logo-icon">⚽</span>
+          <span>Football Bot</span>
+        </div>
         <button class="hamburger" id="closeSidebar" style="display:none;">&times;</button>
       </div>
       <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
         <div class="nav-item active" data-tab-target="tab-summary">
           <span class="nav-icon">🏠</span> Home
         </div>
+        <div class="nav-section-label">Operations</div>
         <div class="nav-item" data-tab-target="tab-day">
           <span class="nav-icon">🎯</span> Picks
         </div>
         <div class="nav-item" data-tab-target="tab-history">
           <span class="nav-icon">📜</span> History
         </div>
-        <div class="nav-item" data-tab-target="tab-analytics">
-          <span class="nav-icon">📊</span> Analytics
-        </div>
         <div class="nav-item" data-tab-target="tab-manual">
           <span class="nav-icon">✍️</span> Manual Bets
         </div>
+        <div class="nav-section-label">Intelligence</div>
+        <div class="nav-item" data-tab-target="tab-analytics">
+          <span class="nav-icon">📊</span> Analytics
+        </div>
+        <div class="nav-section-label">System</div>
         <div class="nav-item" data-tab-target="tab-settings">
           <span class="nav-icon">⚙️</span> Settings
         </div>
       </nav>
-      <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <button id="refreshBtn" type="button" style="width:100%; padding:10px; background:var(--nav-active); color:white; border:none; border-radius:8px; cursor:pointer;">Atualizar agora</button>
+      <div style="padding: 12px 16px; border-top: 1px solid var(--line);">
+        <button id="refreshBtn" type="button" style="width:100%; padding:10px; background:var(--accent); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px;">Atualizar agora</button>
       </div>
     </aside>
 
@@ -1078,196 +1508,216 @@ button.dirty {
 
     <div id="tab-summary" class="tab-panel active">
       <div class="section-stack">
+
+        <!-- PAGE TITLE -->
+        <div class="page-title">
+          <div>
+            <div style="font-size:24px;font-weight:900;color:var(--text);letter-spacing:-0.02em;">Dashboard Overview</div>
+            <div class="note" style="margin-top:4px;">Painel operacional em tempo real</div>
+          </div>
+        </div>
+
+        <!-- ROW 1: Primary Financial KPIs -->
+        <div class="section-header">
+          <span class="section-header-title">Performance financeira</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="kpi-grid kpi-grid-4">
+          <div class="kpi-hero kpi-primary">
+            <div class="kpi-label">Banca atual</div>
+            <div class="kpi-value" id="currentBankrollTop">€—</div>
+            <div class="kpi-sub">Base: <span id="bankrollLabelTop">€1000.00</span></div>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">ROI real</div>
+            <div class="kpi-value" id="summaryRoiStat">—</div>
+            <div class="kpi-sub">Fechadas reais</div>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Lucro / Prejuízo</div>
+            <div class="kpi-value" id="summaryProfitStat">€—</div>
+            <div class="kpi-sub">Bot executado + manuais</div>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Win Rate</div>
+            <div class="kpi-value" id="summaryWrStat">—</div>
+            <div class="kpi-sub">Decisões reais</div>
+          </div>
+        </div>
+
+        <!-- ROW 2: Operational Status -->
+        <div class="section-header" style="margin-top:8px;">
+          <span class="section-header-title">Estado operacional</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="kpi-grid kpi-grid-4">
+          <div class="kpi-hero">
+            <div class="kpi-label">Exposição aberta</div>
+            <div class="kpi-value" id="openExposureTop">€—</div>
+            <div class="kpi-sub">Disponível: <span id="availableBankrollTop">€—</span></div>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Alertas ativos</div>
+            <div class="kpi-value" id="autoAlertsValue">0</div>
+            <div class="kpi-sub" id="autoAlertsNote">Sem alertas ativos</div>
+            <span class="kpi-badge decision-badge info" id="alertsBadge">OK</span>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Modo decisão</div>
+            <div class="kpi-value" id="decisionModeValue">—</div>
+            <div class="kpi-sub" id="decisionModeNote">A calcular estado</div>
+            <span class="kpi-badge decision-badge info" id="decisionBadge">Neutro</span>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Stake dinâmica</div>
+            <div class="kpi-value" id="dynamicStakeValue">Normal</div>
+            <div class="kpi-sub" id="dynamicStakeNote">Sem ajuste</div>
+            <span class="kpi-badge decision-badge info" id="dynamicStakeBadge">×1.00</span>
+          </div>
+        </div>
+
+        <!-- ROW 3: Bet Counts -->
+        <div class="section-header" style="margin-top:8px;">
+          <span class="section-header-title">Contagens de apostas</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="kpi-grid kpi-grid-4">
+          <div class="kpi-hero">
+            <div class="kpi-label">Apostas fechadas</div>
+            <div class="kpi-value" id="summaryResolvedCountStat">0</div>
+            <div class="kpi-sub">Total resolvido real</div>
+          </div>
+
+          <div class="kpi-hero">
+            <div class="kpi-label">Pendentes abertas</div>
+            <div class="kpi-value" id="summaryPendingOpenStat">0</div>
+            <div class="kpi-sub">Executadas sem resultado</div>
+          </div>
+
+          <div class="kpi-hero kpi-ok">
+            <div class="kpi-label">Ganhas</div>
+            <div class="kpi-value" id="summaryWinsStat">0</div>
+            <div class="kpi-sub">Fechadas reais</div>
+          </div>
+
+          <div class="kpi-hero kpi-bad">
+            <div class="kpi-label">Perdidas</div>
+            <div class="kpi-value" id="summaryLossesStat">0</div>
+            <div class="kpi-sub">Fechadas reais</div>
+          </div>
+        </div>
+
+        <!-- PERFORMANCE SUMMARY: Streaks + Chart -->
+        <div class="section-header" style="margin-top:8px;">
+          <span class="section-header-title">Performance Summary</span>
+          <div class="section-header-line"></div>
+        </div>
         <div class="grid grid-3">
           <div class="card">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-              <div>
-                <div class="label">Modo decisão</div>
-                <div class="value" id="decisionModeValue">A analisar…</div>
-              </div>
-              <span class="decision-badge info" id="decisionBadge">Neutro</span>
-            </div>
-            <div class="note" id="decisionModeNote" style="margin-top:10px;">A aguardar cálculo do estado atual.</div>
+            <div class="label" style="margin-bottom:12px;">Streak Summary</div>
+            <div id="streakCards" class="streak-row"></div>
+          </div>
+
+          <div class="card" style="grid-column: span 2;">
+            <div class="label" style="margin-bottom:12px;">Evolução da banca</div>
+            <div id="bankrollChartWrap" class="chart-box"></div>
+          </div>
+        </div>
+
+        <!-- OPERATIONAL STATUS: Alerts + Summary -->
+        <div class="section-header" style="margin-top:8px;">
+          <span class="section-header-title">Operational Status</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="label" style="margin-bottom:12px;">Centro de alertas</div>
+            <div id="alertsCenter" class="section-stack" style="gap:8px;"></div>
           </div>
 
           <div class="card">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-              <div>
-                <div class="label">Alertas automáticos</div>
-                <div class="value" id="autoAlertsValue">0 ativos</div>
-              </div>
-              <span class="decision-badge info" id="alertsBadge">OK</span>
-            </div>
-            <div class="note" id="autoAlertsNote" style="margin-top:10px;">Sem alertas relevantes neste momento.</div>
-          </div>
-
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-              <div>
-                <div class="label">Stake dinâmica</div>
-                <div class="value" id="dynamicStakeValue">Normal</div>
-              </div>
-              <span class="decision-badge info" id="dynamicStakeBadge">x1.00</span>
-            </div>
-            <div class="note" id="dynamicStakeNote" style="margin-top:10px;">Sem ajuste automático.</div>
+            <div class="label" style="margin-bottom:12px;">Resumo operacional</div>
+            <div id="summaryList" class="section-stack" style="gap:6px;"></div>
           </div>
         </div>
 
-        <div class="grid grid-4">
-          <div class="stat">
-            <div class="label">Banca inicial</div>
-            <div class="value" id="bankrollLabelTop">€1000.00</div>
-            <div class="note">Base usada nos cálculos</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Banca atual</div>
-            <div class="value" id="currentBankrollTop">€—</div>
-            <div class="note">Resultado real fechado</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Exposição aberta</div>
-            <div class="value" id="openExposureTop">€—</div>
-            <div class="note">Stake em aberto</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Disponível</div>
-            <div class="value" id="availableBankrollTop">€—</div>
-            <div class="note">Banca após abertas</div>
-          </div>
-        </div>
-
-        <div class="grid grid-4">
-          <div class="stat">
-            <div class="label">ROI real</div>
-            <div class="value" id="summaryRoiStat">—</div>
-            <div class="note">Fechadas reais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Lucro real</div>
-            <div class="value" id="summaryProfitStat">€—</div>
-            <div class="note">Bot executado + manuais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Win rate</div>
-            <div class="value" id="summaryWrStat">—</div>
-            <div class="note">Decisões reais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Apostas fechadas</div>
-            <div class="value" id="summaryResolvedCountStat">0</div>
-            <div class="note">Total resolvido real</div>
-          </div>
-        </div>
-
-        <div class="grid grid-4">
-          <div class="stat">
-            <div class="label">Ganhas</div>
-           <div class="value" id="summaryWinsStat">0</div>
-           <div class="note">Fechadas reais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Perdidas</div>
-            <div class="value" id="summaryLossesStat">0</div>
-            <div class="note">Fechadas reais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Push</div>
-            <div class="value" id="summaryPushesStat">0</div>
-            <div class="note">Fechadas reais</div>
-          </div>
-
-          <div class="stat">
-            <div class="label">Pendentes abertas</div>
-            <div class="value" id="summaryPendingOpenStat">0</div>
-            <div class="note">Executadas sem resultado</div>
-          </div>
-        </div>
-
-        
-
-        <div class="grid grid-3">
-          <div class="card">
-            <div class="label">Streaks</div>
-            <div class="note" style="margin-bottom:12px;">Sequências reais globais.</div>
-            <div id="streakCards" class="grid"></div>
-          </div>
-
-
-          <div class="card">
-            <div class="label">Notas operacionais</div>
-            <div class="note" style="margin-bottom:12px;">Leitura rápida do estado do dashboard.</div>
-            <div class="muted-box">
-              <div class="note">Este separador concentra banca, ROI, lucro, alertas, abertas, analytics, streaks e gráfico.</div>
-              <div class="note">As operações de consulta detalhada ficam separadas nas tabs de dia, histórico e manuais.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-3">
-          <div class="card">
-      <div class="label">Centro de alertas</div>
-      <div class="note" style="margin-bottom:12px;">Alertas automáticos e avisos operacionais.</div>
-      <div id="alertsCenter" class="grid"></div>
-    </div>
-
-    <div class="card">
-      <div class="label">Resumo operacional</div>
-      <div class="note" style="margin-bottom:12px;">Leitura rápida do estado atual.</div>
-      <div id="summaryList" class="grid"></div>
-    </div>
-
-    <div class="card">
-      <div class="label">Evolução da banca</div>
-      <div class="note" style="margin-bottom:12px;">Gráfico com base nas fechadas reais.</div>
-      <div id="bankrollChartWrap" class="chart-box"></div>
-        </div>
       </div>
     </div>
-  </div>
 
   <div id="tab-day" class="tab-panel">
       <div class="section-stack">
         <div class="page-title">
           <div>
-            <div class="value" style="font-size:28px;">Apostas do dia / pendentes</div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Picks do dia</div>
+            <div class="note" style="margin-top:4px;">Apostas pendentes e do dia geradas pelo bot</div>
           </div>
         </div>
 
-        
-        <div class="card">
-          <div class="label">Filtros desta página</div>
-          <div class="note" style="margin-bottom:12px;">Sem filtro de data.</div>
+        <!-- PICKS KPI ROW -->
+        <div class="picks-kpi-row" id="picksKpiRow">
+          <div class="kpi-hero">
+            <div class="kpi-label">Picks Hoje</div>
+            <div class="kpi-value" id="picksKpiToday">—</div>
+            <div class="kpi-sub">Geradas hoje</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Odd Média</div>
+            <div class="kpi-value" id="picksKpiAvgOdd">—</div>
+            <div class="kpi-sub">Picks do dia</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Edge Médio</div>
+            <div class="kpi-value" id="picksKpiAvgEdge">—</div>
+            <div class="kpi-sub">Picks do dia</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Exposição aberta</div>
+            <div class="kpi-value" id="picksKpiExposure">€—</div>
+            <div class="kpi-sub">Stake em aberto</div>
+          </div>
+        </div>
 
-          <div class="toolbar-grid">
+        <!-- FILTERS -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="label">Filtros</div>
+            <div class="market-quick-wrap">
+              <button type="button" class="market-chip active" data-day-market-quick="">Todos</button>
+              <button type="button" class="market-chip" data-day-market-quick="Over 2.5">Over 2.5</button>
+              <button type="button" class="market-chip" data-day-market-quick="BTTS">BTTS</button>
+              <button type="button" class="market-chip" data-day-market-quick="O3.5" style="display:none;">O3.5</button>
+              <button type="button" class="market-chip" data-day-market-quick="O1.5" style="display:none;">O1.5</button>
+            </div>
+          </div>
+
+          <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">
             <div>
-              <label class="label" for="daySearch">Pesquisar</label>
+              <label class="label" for="daySearch" style="display:block;margin-bottom:4px;">Pesquisar</label>
               <input id="daySearch" type="text" placeholder="Jogo, liga ou mercado" />
             </div>
 
             <div>
-              <label class="label" for="dayLeagueFilter">Liga</label>
+              <label class="label" for="dayLeagueFilter" style="display:block;margin-bottom:4px;">Liga</label>
               <select id="dayLeagueFilter">
                 <option value="">Todas as ligas</option>
               </select>
             </div>
 
             <div>
-              <label class="label" for="dayMarketFilter">Mercado</label>
+              <label class="label" for="dayMarketFilter" style="display:block;margin-bottom:4px;">Mercado</label>
               <select id="dayMarketFilter">
                 <option value="">Todos os mercados</option>
               </select>
             </div>
 
             <div>
-              <label class="label" for="dayResultFilter">Resultado</label>
+              <label class="label" for="dayResultFilter" style="display:block;margin-bottom:4px;">Resultado</label>
               <select id="dayResultFilter">
                 <option value="">Todos</option>
                 <option value="pending">Pendentes</option>
@@ -1278,7 +1728,7 @@ button.dirty {
             </div>
 
             <div>
-              <label class="label" for="dayExecutionFilter">Execução</label>
+              <label class="label" for="dayExecutionFilter" style="display:block;margin-bottom:4px;">Execução</label>
               <select id="dayExecutionFilter">
                 <option value="">Toda</option>
                 <option value="executed">Executadas</option>
@@ -1286,20 +1736,16 @@ button.dirty {
               </select>
             </div>
           </div>
-
-          <div class="market-quick-wrap" style="margin-top:14px;">
-            <span class="label">Filtro rápido:</span>
-            <button type="button" class="market-chip active" data-day-market-quick="">Todos</button>
-            <button type="button" class="market-chip" data-day-market-quick="Over 2.5">Over 2.5</button>
-            <button type="button" class="market-chip" data-day-market-quick="BTTS">BTTS</button>
-            <button type="button" class="market-chip" data-day-market-quick="O3.5" style="display:none;">O3.5</button>
-            <button type="button" class="market-chip" data-day-market-quick="O1.5" style="display:none;">O1.5</button>
-          </div>
         </div>
 
+        <!-- PICKS TABLE -->
         <div class="card">
-          <div class="label">Picks do dia (bot)</div>
-          <div class="note" style="margin-bottom:12px;">Com stake recomendada, score e sinais por pick.</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Picks do dia (bot)</div>
+              <div class="note">Com stake recomendada, score e sinais por pick</div>
+            </div>
+          </div>
 
           <div class="table-wrap">
             <table>
@@ -1327,9 +1773,14 @@ button.dirty {
           </div>
         </div>
 
+        <!-- HISTORY TABLE -->
         <div class="card">
-          <div class="label">Histórico / pendentes do bot</div>
-          <div class="note" style="margin-bottom:12px;">Inclui picks anteriores ainda úteis para análise e execução.</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico / pendentes do bot</div>
+              <div class="note">Picks anteriores úteis para análise e execução</div>
+            </div>
+          </div>
 
           <div class="table-wrap">
             <table>
@@ -1365,24 +1816,51 @@ button.dirty {
       <div class="section-stack">
         <div class="page-title">
           <div>
-            <div class="label">Página 3</div>
-            <div class="value" style="font-size:28px;">Histórico (fechadas)</div>
-            <div class="note">Consulta operacional do histórico do bot e das fechadas reais.</div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Histórico</div>
+            <div class="note" style="margin-top:4px;">Consulta operacional do histórico do bot e fechadas reais</div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="label">Filtros desta página</div>
-          <div class="note" style="margin-bottom:12px;">Inclui Execução.</div>
+        <!-- HISTORY KPI SUMMARY -->
+        <div class="history-kpi-row" id="historyKpiRow">
+          <div class="kpi-hero">
+            <div class="kpi-label">Apostas fechadas</div>
+            <div class="kpi-value" id="histKpiTotal">—</div>
+            <div class="kpi-sub">Total resolvido</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">ROI</div>
+            <div class="kpi-value" id="histKpiRoi">—</div>
+            <div class="kpi-sub">Fechadas reais</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Lucro</div>
+            <div class="kpi-value" id="histKpiProfit">€—</div>
+            <div class="kpi-sub">Total acumulado</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Win Rate</div>
+            <div class="kpi-value" id="histKpiWr">—</div>
+            <div class="kpi-sub">W / (W+L)</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Odd Média</div>
+            <div class="kpi-value" id="histKpiAvgOdd">—</div>
+            <div class="kpi-sub">Fechadas reais</div>
+          </div>
+        </div>
 
-          <div class="toolbar-grid">
+        <!-- FILTERS -->
+        <div class="card">
+          <div class="label" style="margin-bottom:12px;">Filtros</div>
+          <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));">
             <div>
-              <label class="label" for="historySearch">Pesquisar</label>
+              <label class="label" for="historySearch" style="display:block;margin-bottom:4px;">Pesquisar</label>
               <input id="historySearch" type="text" placeholder="Jogo, liga ou mercado" />
             </div>
 
             <div>
-              <label class="label" for="historySourceFilter">Origem</label>
+              <label class="label" for="historySourceFilter" style="display:block;margin-bottom:4px;">Origem</label>
               <select id="historySourceFilter">
                 <option value="">Todas</option>
                 <option value="bot">Só bot</option>
@@ -1391,7 +1869,7 @@ button.dirty {
             </div>
 
             <div>
-              <label class="label" for="historyDateFilter">Data</label>
+              <label class="label" for="historyDateFilter" style="display:block;margin-bottom:4px;">Data</label>
               <select id="historyDateFilter">
                 <option value="">Todas</option>
                 <option value="today">Hoje</option>
@@ -1401,21 +1879,21 @@ button.dirty {
             </div>
 
             <div>
-              <label class="label" for="historyLeagueFilter">Liga</label>
+              <label class="label" for="historyLeagueFilter" style="display:block;margin-bottom:4px;">Liga</label>
               <select id="historyLeagueFilter">
                 <option value="">Todas as ligas</option>
               </select>
             </div>
 
             <div>
-              <label class="label" for="historyMarketFilter">Mercado</label>
+              <label class="label" for="historyMarketFilter" style="display:block;margin-bottom:4px;">Mercado</label>
               <select id="historyMarketFilter">
                 <option value="">Todos os mercados</option>
               </select>
             </div>
 
             <div>
-              <label class="label" for="historyResultFilter">Resultado</label>
+              <label class="label" for="historyResultFilter" style="display:block;margin-bottom:4px;">Resultado</label>
               <select id="historyResultFilter">
                 <option value="">Todos</option>
                 <option value="pending">Pendentes</option>
@@ -1426,7 +1904,7 @@ button.dirty {
             </div>
 
             <div>
-              <label class="label" for="historyExecutionFilter">Execução</label>
+              <label class="label" for="historyExecutionFilter" style="display:block;margin-bottom:4px;">Execução</label>
               <select id="historyExecutionFilter">
                 <option value="">Toda</option>
                 <option value="executed">Executadas</option>
@@ -1436,9 +1914,12 @@ button.dirty {
           </div>
         </div>
 
+        <!-- OPERATIONAL BOT HISTORY TABLE -->
         <div class="card">
-          <div class="label">Histórico operacional do bot</div>
-          <div class="note" style="margin-bottom:12px;">Mantém os mesmos campos editáveis da versão anterior.</div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico operacional do bot</div>
+            <div class="note">Campos editáveis para controlo de execução e resultado</div>
+          </div>
 
           <div class="table-wrap">
             <table>
@@ -1467,9 +1948,12 @@ button.dirty {
           </div>
         </div>
 
+        <!-- CLOSED REAL TABLE -->
         <div class="card">
-          <div class="label">Fechadas reais filtradas</div>
-          <div class="note" style="margin-bottom:12px;">Bot executado + manuais.</div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Fechadas reais filtradas</div>
+            <div class="note">Bot executado + manuais com resultado definido</div>
+          </div>
 
           <div class="table-wrap">
             <table>
@@ -1497,9 +1981,8 @@ button.dirty {
       <div class="section-stack">
         <div class="page-title">
           <div>
-            <div class="label">Página 4</div>
-            <div class="value" style="font-size:28px;">Apostas manuais</div>
-            <div class="note">Criação, listagem e gestão de apostas manuais locais, com leitura adicional das remotas.</div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Apostas manuais</div>
+            <div class="note" style="margin-top:4px;">Criação e gestão de apostas manuais locais e remotas</div>
           </div>
         </div>
 
@@ -1590,21 +2073,35 @@ button.dirty {
     <div id="tab-analytics" class="tab-panel">
       <div class="section-stack">
         <div class="page-title">
-          <div class="value" style="font-size:28px;">League Analytics</div>
-          <div class="note">Resumo analítico por liga e mercado.</div>
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Analytics</div>
+            <div class="note" style="margin-top:4px;">Análise de performance por liga, mercado e origem</div>
+          </div>
         </div>
 
-        <div class="grid grid-4 league-analytics-insights" style="margin-bottom:12px;"></div>
+        <!-- LEAGUE ANALYTICS INSIGHTS -->
+        <div class="grid grid-4 league-analytics-insights" style="margin-bottom:4px;"></div>
+
+        <!-- SECTION A: League Performance -->
+        <div class="section-header">
+          <span class="section-header-title">A — League Performance</span>
+          <div class="section-header-line"></div>
+        </div>
 
         <div class="card">
-          <div class="label">Filtros de Analytics</div>
-          <div class="toolbar-grid league-analytics-filters" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            <div class="label">Filtros de liga</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="league-analytics-compact-btn">Compacto</button>
+            </div>
+          </div>
+          <div class="toolbar-grid league-analytics-filters" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-bottom:12px;">
             <div>
-              <label class="label">Pesquisar liga</label>
+              <label class="label" style="display:block;margin-bottom:4px;">Pesquisar liga</label>
               <input class="league-analytics-search" type="text" placeholder="Nome da liga" autocomplete="off" />
             </div>
             <div>
-              <label class="label">Tier</label>
+              <label class="label" style="display:block;margin-bottom:4px;">Tier</label>
               <select class="league-analytics-tier-filter">
                 <option value="">Todos os tiers</option>
                 <option value="Elite">Elite</option>
@@ -1615,18 +2112,13 @@ button.dirty {
               </select>
             </div>
             <div>
-              <label class="label">Mercado</label>
+              <label class="label" style="display:block;margin-bottom:4px;">Mercado</label>
               <select class="league-analytics-market-filter">
                 <option value="">Todos os mercados</option>
               </select>
             </div>
           </div>
-          <div class="league-analytics-toolbar">
-            <button type="button" class="league-analytics-compact-btn">Densidade compacta</button>
-          </div>
-        </div>
 
-        <div class="card">
           <div class="table-wrap league-analytics-scroll">
             <table class="league-analytics-table">
               <thead>
@@ -1634,11 +2126,11 @@ button.dirty {
                   <th class="league-analytics-sort" data-sort-key="League" scope="col" aria-sort="none"><span class="sort-head">League<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th scope="col">Market</th>
                   <th class="league-analytics-sort is-sorted is-desc league-analytics-emphasis" data-sort-key="ROI%" scope="col" aria-sort="descending"><span class="sort-head">ROI%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-                  <th scope="col" class="league-analytics-emphasis">Recommended Action</th>
-                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence Score<span class="sort-indicator" aria-hidden="true"></span></span></th>
-                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dynamic Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
-                  <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">WinRate%<span class="sort-indicator" aria-hidden="true"></span></span></th>
-                  <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">AvgKelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th scope="col" class="league-analytics-emphasis">Action</th>
+                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="ConfidenceScore" scope="col" aria-sort="none"><span class="sort-head">Confidence<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort league-analytics-emphasis" data-sort-key="DynamicStake" scope="col" aria-sort="none"><span class="sort-head">Dyn. Stake<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="WinRate%" scope="col" aria-sort="none"><span class="sort-head">Win Rate<span class="sort-indicator" aria-hidden="true"></span></span></th>
+                  <th class="league-analytics-sort" data-sort-key="AvgKelly" scope="col" aria-sort="none"><span class="sort-head">Avg Kelly<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th class="league-analytics-sort" data-sort-key="Tier" scope="col" aria-sort="none"><span class="sort-head">Tier<span class="sort-indicator" aria-hidden="true"></span></span></th>
                   <th class="league-analytics-sort" data-sort-key="Picks" scope="col" aria-sort="none"><span class="sort-head">Picks<span class="sort-indicator" aria-hidden="true"></span></span></th>
                 </tr>
@@ -1648,34 +2140,19 @@ button.dirty {
           </div>
         </div>
 
-        <div class="grid grid-3">
-          <div class="card">
-            <div class="label">Analytics por liga</div>
-            <div class="note" style="margin-bottom:12px;">Apenas apostas reais fechadas.</div>
-            <div class="table-wrap" style="max-height:360px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Liga</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsLeagueRows"></tbody>
-              </table>
-            </div>
-          </div>
+        <!-- SECTION B: Market Performance -->
+        <div class="section-header">
+          <span class="section-header-title">B — Market Performance</span>
+          <div class="section-header-line"></div>
+        </div>
 
+        <div class="grid grid-2">
           <div class="card">
-            <div class="label">Analytics por mercado</div>
-            <div class="note" style="margin-bottom:12px;">Onde performas melhor.</div>
-            <div class="table-wrap" style="max-height:360px;">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por mercado</div>
+              <div class="note">Onde a edge é mais consistente</div>
+            </div>
+            <div class="table-wrap" style="max-height:320px;">
               <table>
                 <thead>
                   <tr>
@@ -1696,9 +2173,11 @@ button.dirty {
           </div>
 
           <div class="card">
-            <div class="label">Analytics por origem</div>
-            <div class="note" style="margin-bottom:12px;">Bot vs manual.</div>
-            <div class="table-wrap" style="max-height:360px;">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por origem</div>
+              <div class="note">Bot vs apostas manuais</div>
+            </div>
+            <div class="table-wrap" style="max-height:320px;">
               <table>
                 <thead>
                   <tr>
@@ -1718,14 +2197,79 @@ button.dirty {
             </div>
           </div>
         </div>
+
+        <!-- SECTION C & D: Top + Worst Performers -->
+        <div class="grid grid-2">
+          <!-- SECTION C: Top Performers -->
+          <div>
+            <div class="section-header">
+              <span class="section-header-title">C — Top Performers</span>
+              <div class="section-header-line"></div>
+            </div>
+            <div class="card">
+              <div style="margin-bottom:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Melhores ligas por ROI</div>
+                <div class="note">Ligas com maior retorno real fechado</div>
+              </div>
+              <div id="analyticsTopPerformers" class="section-stack" style="gap:6px;">
+                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Performance por liga</div>
+                <div class="table-wrap" style="max-height:280px;">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Liga</th>
+                        <th>Apostas</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>P</th>
+                        <th>WR</th>
+                        <th>Stake</th>
+                        <th>Lucro</th>
+                        <th>ROI</th>
+                      </tr>
+                    </thead>
+                    <tbody id="analyticsLeagueRows"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION D: Worst Performers -->
+          <div>
+            <div class="section-header">
+              <span class="section-header-title">D — Worst Performers</span>
+              <div class="section-header-line"></div>
+            </div>
+            <div class="card">
+              <div style="margin-bottom:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Ligas com pior ROI</div>
+                <div class="note">Ligas a monitorizar ou reduzir stake</div>
+              </div>
+              <div id="analyticsWorstPerformers" class="section-stack" style="gap:6px;">
+                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Streak Summary</div>
+                <div id="streakCardsAnalytics" class="streak-row"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
     <div id="tab-settings" class="tab-panel">
       <div class="section-stack">
         <div class="page-title">
-          <div class="value" style="font-size:22px;">Definições e Sistema</div>
-          <div class="note">Gestão de cloud, exportação, banca e estado local.</div>
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Definições e Sistema</div>
+            <div class="note" style="margin-top:4px;">Gestão de cloud, exportação, banca e estado local</div>
+          </div>
         </div>
 
         <div class="grid grid-2">
@@ -1782,7 +2326,7 @@ button.dirty {
         <div class="card">
           <div class="label">Links Úteis</div>
           <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); margin-top:4px;">
-            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:6px; background:var(--nav-bg); color:white; text-decoration:none; border-radius:8px; font-size:12px;">Abrir GitHub Project</a>
+            <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:8px; background:var(--accent); color:white; text-decoration:none; border-radius:8px; font-size:12px; font-weight:700;">Abrir GitHub Project</a>
           </div>
         </div>
       </div>
@@ -3578,20 +4122,29 @@ button.dirty {
           decisionBadge.textContent = decision.label;
         }
         safeSetText('decisionModeNote', decision.note);
+        const decisionHero = document.getElementById('decisionModeValue')?.closest?.('.kpi-hero');
+        if (decisionHero) {
+          const cls = decision.badge === 'good' ? ' kpi-ok' : decision.badge === 'bad' ? ' kpi-bad' : decision.badge === 'warn' ? ' kpi-warn' : '';
+          decisionHero.className = `kpi-hero${cls}`;
+        }
 
-        safeSetText('autoAlertsValue', `${alerts.length} ativos`);
+        safeSetText('autoAlertsValue', String(alerts.length));
         const alertsBadge = document.getElementById('alertsBadge');
         if (alertsBadge) {
           alertsBadge.className = `decision-badge ${alerts.length === 0 ? 'info' : alerts.length >= 2 ? 'bad' : 'warn'}`;
           alertsBadge.textContent = alerts.length === 0 ? 'OK' : alerts.length >= 2 ? 'Alerta' : 'Atenção';
         }
-        safeSetText('autoAlertsNote', alerts.length ? alerts.map(a => a.text).join(' • ') : 'Sem alertas relevantes neste momento.');
+        safeSetText('autoAlertsNote', alerts.length ? alerts.map(a => a.text).join(' • ') : 'Sem alertas ativos');
+        const alertsHero = document.getElementById('autoAlertsValue')?.closest?.('.kpi-hero');
+        if (alertsHero) {
+          alertsHero.className = `kpi-hero${alerts.length === 0 ? '' : alerts.length >= 2 ? ' kpi-bad' : ' kpi-warn'}`;
+        }
 
         safeSetText('dynamicStakeValue', stake.label);
         const dynamicStakeBadge = document.getElementById('dynamicStakeBadge');
         if (dynamicStakeBadge) {
           dynamicStakeBadge.className = `decision-badge ${stake.badge}`;
-          dynamicStakeBadge.textContent = `x${fmt(stake.multiplier)}`;
+          dynamicStakeBadge.textContent = `×${fmt(stake.multiplier)}`;
         }
         safeSetText('dynamicStakeNote', stake.note);
 
@@ -3630,14 +4183,29 @@ button.dirty {
         const roi = stake > 0 ? (lucro / stake) * 100 : 0;
         const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
 
-        safeSetText('summaryRoiStat', pct(roi));
-        safeSetText('summaryProfitStat', `€${fmt(lucro)}`);
-        safeSetText('summaryWrStat', pct(wr));
+        safeSetText('summaryRoiStat', rows.length > 0 ? pct(roi) : '—');
+        safeSetText('summaryProfitStat', rows.length > 0 ? `€${fmt(lucro)}` : '€—');
+        safeSetText('summaryWrStat', rows.length > 0 ? pct(wr) : '—');
         safeSetText('summaryResolvedCountStat', String(rows.length));
         safeSetText('summaryWinsStat', String(wins));
         safeSetText('summaryLossesStat', String(losses));
         safeSetText('summaryPushesStat', String(pushes));
         safeSetText('summaryPendingOpenStat', String(risk.openCount));
+
+        // Dynamic KPI hero coloring
+        const roiEl = document.getElementById('summaryRoiStat')?.closest?.('.kpi-hero');
+        if (roiEl && rows.length > 0) {
+          roiEl.className = `kpi-hero${roi > 5 ? ' kpi-ok' : roi < -5 ? ' kpi-bad' : ''}`;
+        }
+        const profitEl = document.getElementById('summaryProfitStat')?.closest?.('.kpi-hero');
+        if (profitEl && rows.length > 0) {
+          profitEl.className = `kpi-hero${lucro > 0 ? ' kpi-ok' : lucro < 0 ? ' kpi-bad' : ''}`;
+        }
+        const bankEl = document.getElementById('currentBankrollTop')?.closest?.('.kpi-hero');
+        if (bankEl) {
+          const delta = risk.bancaAtual - state.bankrollInicial;
+          bankEl.className = `kpi-hero kpi-primary${delta > 0 ? ' kpi-ok' : delta < -50 ? ' kpi-bad' : ''}`;
+        }
       }
 
       function renderAlertsCenter() {
@@ -3688,15 +4256,12 @@ button.dirty {
         }
 
         document.getElementById('alertsCenter').innerHTML = items.map(item => `
-          <div class="stat">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
-              <div>
-                <div class="label">${escapeHtml(item.title)}</div>
-                <div class="value" style="font-size:18px;">${escapeHtml(item.text)}</div>
-              </div>
-              <span class="decision-badge ${item.cls}">${escapeHtml(item.title)}</span>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;">
+            <span class="decision-badge ${item.cls}" style="flex-shrink:0;">${escapeHtml(item.title.split(' ')[0])}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--text);">${escapeHtml(item.text)}</div>
+              <div class="note">${escapeHtml(item.sub)}</div>
             </div>
-            <div class="note">${escapeHtml(item.sub)}</div>
           </div>
         `).join('');
       }
@@ -3836,18 +4401,25 @@ button.dirty {
         const rows = getFilteredRealClosedRows(getSummaryFilters());
         const s = computeStreaks(rows);
 
-        safeSetHTML('streakCards', [
-          { label: 'Win streak atual', value: s.currentWin, note: 'Sequência ativa de ganhos' },
-          { label: 'Loss streak atual', value: s.currentLoss, note: 'Sequência ativa de perdas' },
-          { label: 'Maior win streak', value: s.longestWin, note: 'Melhor sequência histórica' },
-          { label: 'Maior loss streak', value: s.longestLoss, note: 'Pior sequência histórica' }
-        ].map(card => `
-          <div class="stat">
-            <div class="label">${card.label}</div>
-            <div class="value">${card.value}</div>
-            <div class="note">${card.note}</div>
-          </div>
-        `).join(''));
+        const cards = [
+          { label: 'Win streak', value: s.currentWin, note: 'Ativa', isWin: true, isCurrent: true },
+          { label: 'Loss streak', value: s.currentLoss, note: 'Ativa', isWin: false, isCurrent: true },
+          { label: 'Best streak', value: s.longestWin, note: 'Histórico', isWin: true, isCurrent: false },
+          { label: 'Worst streak', value: s.longestLoss, note: 'Histórico', isWin: false, isCurrent: false }
+        ];
+
+        const html = cards.map(c => {
+          const color = c.value > 0 ? (c.isWin ? 'color:var(--ok);' : 'color:var(--bad);') : '';
+          return `
+            <div class="streak-card">
+              <div class="streak-label">${c.label}</div>
+              <div class="streak-value" style="${color}">${c.value}</div>
+              <div class="streak-sub">${c.note}</div>
+            </div>
+          `;
+        }).join('');
+
+        safeSetHTML('streakCards', html);
       }
 
       function renderAnalytics() {
@@ -3856,6 +4428,7 @@ button.dirty {
         renderAnalyticsTable('analyticsMarketRows', buildAnalytics(rows, 'market').map(r => ({ ...r, market: r.key })), 'market');
         renderAnalyticsTable('analyticsSourceRows', buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key })), 'sourceLabel');
         renderStreaks();
+        try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
       }
 
       function formatPickSignalHtml(row) {
@@ -4022,7 +4595,7 @@ button.dirty {
         );
 
         document.getElementById('summaryList').innerHTML = items.map(t => `
-          <div class="stat">
+          <div style="padding:9px 12px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;">
             <div class="note">${escapeHtml(t)}</div>
           </div>
         `).join('');
@@ -4071,21 +4644,28 @@ button.dirty {
 
         const path = pointsData.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(p.y)}`).join(' ');
         const gridLines = 5;
+        const lastY = pointsData[pointsData.length - 1]?.y ?? state.bankrollInicial;
+        const isProfit = lastY >= state.bankrollInicial;
+        const lineColor = isProfit ? '#22c55e' : '#ef4444';
+        const areaColor = isProfit ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)';
+
         const gridHtml = Array.from({ length: gridLines }, (_, i) => {
           const yValue = minY + ((gridLines - 1 - i) / (gridLines - 1)) * yRange;
           const y = padTop + (i / (gridLines - 1)) * usableH;
           return `
-            <line x1="${padX}" y1="${y}" x2="${width - padX}" y2="${y}" stroke="#e2e8f0" stroke-width="1" />
-            <text x="6" y="${y + 4}" font-size="11" fill="#64748b">€${fmt(yValue)}</text>
+            <line x1="${padX}" y1="${y}" x2="${width - padX}" y2="${y}" stroke="rgba(148,163,184,0.1)" stroke-width="1" />
+            <text x="6" y="${y + 4}" font-size="10" fill="#8892a4">€${fmt(yValue)}</text>
           `;
         }).join('');
+
+        const areaPath = `${path} L ${xPos(pointsData.length - 1)} ${height - padBottom} L ${xPos(0)} ${height - padBottom} Z`;
 
         const pointsHtml = pointsData.map((p, i) => {
           const cx = xPos(i);
           const cy = yPos(p.y);
           return `
             <g>
-              <circle cx="${cx}" cy="${cy}" r="4" fill="#0f172a">
+              <circle cx="${cx}" cy="${cy}" r="3" fill="${lineColor}" stroke="var(--card-alt)" stroke-width="2">
                 <title>${escapeHtml(p.label)}</title>
               </circle>
             </g>
@@ -4095,8 +4675,9 @@ button.dirty {
         wrap.innerHTML = `
           <svg class="chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolução da banca">
             ${gridHtml}
-            <line x1="${padX}" y1="${height - padBottom}" x2="${width - padX}" y2="${height - padBottom}" stroke="#cbd5e1" stroke-width="1.2" />
-            <path d="${path}" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="${areaPath}" fill="${areaColor}"></path>
+            <line x1="${padX}" y1="${height - padBottom}" x2="${width - padX}" y2="${height - padBottom}" stroke="rgba(148,163,184,0.2)" stroke-width="1" />
+            <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
             ${pointsHtml}
           </svg>
           <div class="note" style="margin-top:8px;">Início: €${fmt(state.bankrollInicial)} • Final: €${fmt(pointsData[pointsData.length - 1].y)}</div>
@@ -4563,6 +5144,126 @@ buttons.forEach(btn => {
         });
       }
 
+      function renderPicksKpiRow() {
+        const todayRows = getTodaysDailyRows();
+        const allDaily = getDailyRowsMerged();
+        const risk = getRiskMetrics();
+
+        const count = todayRows.length;
+        const validOdds = todayRows.map(r => num(r['Odd'])).filter(v => v !== null);
+        const validEdges = todayRows.map(r => num(r['Edge%'] ?? r['Edge'])).filter(v => v !== null);
+        const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
+        const avgEdge = validEdges.length ? validEdges.reduce((a, b) => a + b, 0) / validEdges.length : null;
+
+        safeSetText('picksKpiToday', String(count));
+        safeSetText('picksKpiAvgOdd', avgOdd !== null ? fmt(avgOdd) : '—');
+        safeSetText('picksKpiAvgEdge', avgEdge !== null ? `${fmt(avgEdge)}%` : '—');
+        safeSetText('picksKpiExposure', `€${fmt(risk.stakeOpen)}`);
+
+        const heroExposure = document.getElementById('picksKpiExposure')?.closest?.('.kpi-hero');
+        if (heroExposure) {
+          heroExposure.className = `kpi-hero${risk.stakeOpen > 0 ? ' kpi-warn' : ''}`;
+        }
+      }
+
+      function renderHistoryKpiRow() {
+        const rows = getFilteredRealClosedRows(getHistoryFilters());
+        const wins = rows.filter(r => r.result === 'W').length;
+        const losses = rows.filter(r => r.result === 'L').length;
+        const total = rows.length;
+        const stake = sum(rows.map(r => r.stake));
+        const lucro = sum(rows.map(r => r.lucro));
+        const roi = stake > 0 ? (lucro / stake) * 100 : 0;
+        const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
+        const validOdds = rows.map(r => r.odd).filter(v => v !== null);
+        const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
+
+        safeSetText('histKpiTotal', String(total));
+        safeSetText('histKpiRoi', total > 0 ? pct(roi) : '—');
+        safeSetText('histKpiProfit', total > 0 ? `€${fmt(lucro)}` : '€—');
+        safeSetText('histKpiWr', total > 0 ? pct(wr) : '—');
+        safeSetText('histKpiAvgOdd', avgOdd !== null ? fmt(avgOdd) : '—');
+
+        const roiEl = document.getElementById('histKpiRoi')?.closest?.('.kpi-hero');
+        if (roiEl && total > 0) {
+          roiEl.className = `kpi-hero${roi > 0 ? ' kpi-ok' : roi < -5 ? ' kpi-bad' : ''}`;
+        }
+        const profitEl = document.getElementById('histKpiProfit')?.closest?.('.kpi-hero');
+        if (profitEl && total > 0) {
+          profitEl.className = `kpi-hero${lucro > 0 ? ' kpi-ok' : lucro < 0 ? ' kpi-bad' : ''}`;
+        }
+      }
+
+      function buildPerformerCardHtml(rank, item, metric, isTop) {
+        const label = item[metric] !== undefined ? item[metric] : item.key;
+        const roiVal = item.roi;
+        const roiStr = `${roiVal >= 0 ? '+' : ''}${fmt(roiVal)}%`;
+        const cls = isTop
+          ? (rank === 1 ? 'good' : rank === 2 ? 'info' : 'neutral')
+          : (rank === 1 ? 'bad' : rank === 2 ? 'warn' : 'neutral');
+        const rankBg = isTop
+          ? (rank === 1 ? 'var(--ok-bg)' : rank === 2 ? 'var(--info-bg)' : 'rgba(148,163,184,0.1)')
+          : (rank === 1 ? 'var(--bad-bg)' : rank === 2 ? 'var(--warn-bg)' : 'rgba(148,163,184,0.1)');
+        const rankColor = isTop
+          ? (rank === 1 ? 'var(--ok)' : rank === 2 ? 'var(--info)' : 'var(--muted)')
+          : (rank === 1 ? 'var(--bad)' : rank === 2 ? 'var(--warn)' : 'var(--muted)');
+
+        return `
+          <div class="performer-card">
+            <div class="performer-rank" style="background:${rankBg};color:${rankColor};">#${rank}</div>
+            <div class="performer-info">
+              <div class="performer-name">${escapeHtml(label || '—')}</div>
+              <div class="performer-market">${escapeHtml(item.apostas)} apostas • WR ${pct(item.winRate)}</div>
+            </div>
+            <div class="performer-metric" style="color:${isTop ? 'var(--ok)' : 'var(--bad)'};">${roiStr}</div>
+          </div>
+        `;
+      }
+
+      function renderAnalyticsPerformers() {
+        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const leagueData = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
+
+        const qualified = leagueData.filter(r => r.apostas >= 2);
+
+        const sorted = [...qualified].sort((a, b) => b.roi - a.roi);
+        const top3 = sorted.slice(0, 3);
+        const worst3 = sorted.filter(r => r.roi < 0).slice(-3).reverse();
+
+        const topWrap = document.getElementById('analyticsTopPerformers');
+        const worstWrap = document.getElementById('analyticsWorstPerformers');
+
+        if (topWrap) {
+          topWrap.innerHTML = top3.length
+            ? top3.map((r, i) => buildPerformerCardHtml(i + 1, r, 'league', true)).join('')
+            : '<div class="note" style="opacity:0.5;padding:8px;">Sem dados suficientes (mín. 2 apostas por liga).</div>';
+        }
+
+        if (worstWrap) {
+          worstWrap.innerHTML = worst3.length
+            ? worst3.map((r, i) => buildPerformerCardHtml(i + 1, r, 'league', false)).join('')
+            : '<div class="note" style="opacity:0.5;padding:8px;">Sem ligas com ROI negativo actualmente.</div>';
+        }
+
+        const streakAnalytics = document.getElementById('streakCardsAnalytics');
+        if (streakAnalytics) {
+          const allRows = getFilteredRealClosedRows(getSummaryFilters());
+          const s = computeStreaks(allRows);
+          streakAnalytics.innerHTML = [
+            { label: 'Win streak', value: s.currentWin, note: 'Ativa' },
+            { label: 'Loss streak', value: s.currentLoss, note: 'Ativa' },
+            { label: 'Best streak', value: s.longestWin, note: 'Histórico' },
+            { label: 'Worst streak', value: s.longestLoss, note: 'Histórico' }
+          ].map(c => `
+            <div class="streak-card">
+              <div class="streak-label">${c.label}</div>
+              <div class="streak-value" style="${c.value > 0 && c.label.includes('Win') ? 'color:var(--ok);' : c.value > 0 && c.label.includes('Loss') ? 'color:var(--bad);' : ''}">${c.value}</div>
+              <div class="streak-sub">${c.note}</div>
+            </div>
+          `).join('');
+        }
+      }
+
       function rerenderSummaryOnly() {
         try { renderTopDecisionBlock(); } catch (e) { console.error('renderTopDecisionBlock', e); }
         try { renderSummaryHeadlineStats(); } catch (e) { console.error('renderSummaryHeadlineStats', e); }
@@ -4571,6 +5272,7 @@ buttons.forEach(btn => {
         try { renderAnalytics(); } catch (e) { console.error('renderAnalytics', e); }
         try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
         try { renderBankrollChart(); } catch (e) { console.error('renderBankrollChart', e); }
+        try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
       }
 
       function rerenderDayOnly() {
@@ -4579,11 +5281,13 @@ buttons.forEach(btn => {
         try { renderFootball(); } catch (e) { console.error('renderFootball', e); }
         try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
         try { syncQuickMarketButtons(); } catch (e) { console.error('syncQuickMarketButtons', e); }
+        try { renderPicksKpiRow(); } catch (e) { console.error('renderPicksKpiRow', e); }
       }
 
       function rerenderHistoryOnly() {
         try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
         try { renderClosedRealTable(); } catch (e) { console.error('renderClosedRealTable', e); }
+        try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
       }
 
       function rerenderManualOnly() {
@@ -4597,6 +5301,9 @@ buttons.forEach(btn => {
         rerenderDayOnly();
         rerenderHistoryOnly();
         rerenderManualOnly();
+        try { renderPicksKpiRow(); } catch (e) { console.error('renderPicksKpiRow', e); }
+        try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
+        try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
 
         try { renderLeagueAnalytics(); } catch (e) { console.error('renderLeagueAnalytics', e); }
 
