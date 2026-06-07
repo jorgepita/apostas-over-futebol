@@ -2462,6 +2462,12 @@ button.dirty {
               <button id="clearManualBtn" type="button">Apagar manuais</button>
             </div>
           </div>
+
+          <div class="card" style="border:1px solid var(--bad-border);background:var(--bad-bg);">
+            <div class="label" style="color:var(--bad);">Reset Financeiro</div>
+            <div class="note" style="margin-bottom:8px;">Remove banca inicial e todos os movimentos (depósitos/levantamentos). O histórico de apostas é preservado.</div>
+            <button id="resetFinancialBtn" type="button" style="width:100%;color:var(--bad);border-color:var(--bad-border);background:rgba(239,68,68,0.08);">Reset Financial Configuration</button>
+          </div>
         </div>
 
         <div class="card">
@@ -2640,7 +2646,8 @@ button.dirty {
         sessionStartDate: 'apostas_bot_session_start_date_v3',
         activeTab: 'apostas_bot_active_tab_v2',
         mobileActionsOpen: 'apostas_bot_mobile_actions_open_v1',
-        movements: 'apostas_bot_movements_v1'
+        movements: 'apostas_bot_movements_v1',
+        bankrollSet: 'apostas_bot_bankroll_set_v1'
       };
 
       let autoSaveInFlight = false;
@@ -2652,6 +2659,7 @@ button.dirty {
         footballHistory: [],
         leagueStats: [],
         bankrollInicial: 1000,
+        bankrollInicialSet: false,
         localEdits: {},
         manualBets: [],
         movements: [],
@@ -3625,6 +3633,7 @@ button.dirty {
 
       function loadLocalState() {
         const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
+        const savedBankrollSet = localStorage.getItem(STORAGE_KEYS.bankrollSet);
         const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
         const savedManual = localStorage.getItem(STORAGE_KEYS.manual);
         const savedMovements = localStorage.getItem(STORAGE_KEYS.movements);
@@ -3634,6 +3643,7 @@ button.dirty {
 
         const bankrollParsed = num(savedBankroll);
         if (bankrollParsed !== null && bankrollParsed >= 0) state.bankrollInicial = bankrollParsed;
+        state.bankrollInicialSet = savedBankrollSet === '1';
 
         try {
           state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
@@ -3660,6 +3670,7 @@ button.dirty {
 
       function saveLocalState() {
         localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
+        localStorage.setItem(STORAGE_KEYS.bankrollSet, state.bankrollInicialSet ? '1' : '0');
         localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
         localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
         localStorage.setItem(STORAGE_KEYS.movements, JSON.stringify(state.movements));
@@ -5844,37 +5855,34 @@ buttons.forEach(btn => {
         });
       }
 
-      function applyBankrollLock() {
-        const locked = state.movements.length > 0;
-        const warningHTML = locked
-          ? `<div class="note" style="padding:6px 10px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:6px;color:var(--warn);line-height:1.5;">
-               A banca inicial está bloqueada porque existem movimentos registados.
-               Remove todos os movimentos para alterar o valor inicial.
-             </div>`
+      function applyBankrollImmutability() {
+        const locked = state.bankrollInicialSet;
+        const badgeHTML = locked
+          ? `<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--info-bg);border:1px solid var(--info-border);border-radius:20px;font-size:11px;color:var(--info);font-weight:600;margin-top:8px;">🔒 Locked after first configuration</div>`
           : '';
 
         const cfgInput = document.getElementById('bankrollConfigInput');
         if (cfgInput) {
           cfgInput.disabled = locked;
-          cfgInput.style.opacity = locked ? '0.5' : '';
+          cfgInput.style.opacity = locked ? '0.55' : '';
           cfgInput.style.cursor = locked ? 'not-allowed' : '';
         }
         const cfgWarn = document.getElementById('bankrollLockWarning');
         if (cfgWarn) {
           cfgWarn.style.display = locked ? 'block' : 'none';
-          cfgWarn.innerHTML = warningHTML;
+          cfgWarn.innerHTML = badgeHTML;
         }
 
         const settingsInput = document.getElementById('bankrollInput');
         if (settingsInput) {
           settingsInput.disabled = locked;
-          settingsInput.style.opacity = locked ? '0.5' : '';
+          settingsInput.style.opacity = locked ? '0.55' : '';
           settingsInput.style.cursor = locked ? 'not-allowed' : '';
         }
         const settingsWarn = document.getElementById('bankrollSettingsLockWarning');
         if (settingsWarn) {
           settingsWarn.style.display = locked ? 'block' : 'none';
-          settingsWarn.innerHTML = warningHTML;
+          settingsWarn.innerHTML = badgeHTML;
         }
       }
 
@@ -5883,7 +5891,7 @@ buttons.forEach(btn => {
         if (configInput && configInput !== document.activeElement) {
           configInput.value = state.bankrollInicial;
         }
-        applyBankrollLock();
+        applyBankrollImmutability();
 
         const summary = document.getElementById('bkConfigSummary');
         if (!summary) return;
@@ -6072,7 +6080,7 @@ buttons.forEach(btn => {
 
         updateApostasButton();
         updateApostasTooltip();
-        applyBankrollLock();
+        applyBankrollImmutability();
 
         setActiveTab(state.activeTab);
       }
@@ -6175,24 +6183,32 @@ buttons.forEach(btn => {
       }
 
       function resetLocalControls() {
-        localStorage.removeItem(STORAGE_KEYS.bankroll);
         localStorage.removeItem(STORAGE_KEYS.picks);
         localStorage.removeItem(STORAGE_KEYS.sessionStartDate);
         localStorage.removeItem(STORAGE_KEYS.activeTab);
         localStorage.removeItem(STORAGE_KEYS.mobileActionsOpen);
 
-        state.bankrollInicial = 1000;
         state.localEdits = {};
         state.sessionStartDate = todayIso();
         state.activeTab = 'tab-summary';
         state.mobileActionsOpen = false;
 
-        if (document.getElementById('bankrollInput')) {
-          document.getElementById('bankrollInput').value = 1000;
-        }
-        if (document.getElementById('bankrollConfigInput')) {
-          document.getElementById('bankrollConfigInput').value = 1000;
-        }
+        rerenderAll();
+      }
+
+      function resetFinancialConfig() {
+        if (!confirm('This will permanently remove the initial bankroll and all deposits/withdrawals. Betting history will be preserved.')) return;
+        localStorage.removeItem(STORAGE_KEYS.bankroll);
+        localStorage.removeItem(STORAGE_KEYS.bankrollSet);
+        localStorage.removeItem(STORAGE_KEYS.movements);
+        state.bankrollInicial = 1000;
+        state.bankrollInicialSet = false;
+        state.movements = [];
+        const bi = document.getElementById('bankrollInput');
+        if (bi) bi.value = 1000;
+        const bci = document.getElementById('bankrollConfigInput');
+        if (bci) bci.value = 1000;
+        applyBankrollImmutability();
         rerenderAll();
       }
 
@@ -6221,6 +6237,7 @@ buttons.forEach(btn => {
 });
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
+        bindElementAction('resetFinancialBtn', resetFinancialConfig);
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
@@ -6266,12 +6283,14 @@ buttons.forEach(btn => {
         const bankrollInput = document.getElementById('bankrollInput');
         if (bankrollInput) {
           bankrollInput.addEventListener('blur', e => {
-            if (state.movements.length > 0) { e.target.value = state.bankrollInicial; return; }
+            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial; return; }
             const v = num(e.target.value);
             state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+            state.bankrollInicialSet = true;
             const cfgInput = document.getElementById('bankrollConfigInput');
             if (cfgInput) cfgInput.value = state.bankrollInicial;
             saveLocalState();
+            applyBankrollImmutability();
             rerenderAll();
           });
         }
@@ -6279,12 +6298,14 @@ buttons.forEach(btn => {
         const bankrollConfigInput = document.getElementById('bankrollConfigInput');
         if (bankrollConfigInput) {
           bankrollConfigInput.addEventListener('blur', e => {
-            if (state.movements.length > 0) { e.target.value = state.bankrollInicial; return; }
+            if (state.bankrollInicialSet) { e.target.value = state.bankrollInicial; return; }
             const v = num(e.target.value);
             state.bankrollInicial = v !== null && v >= 0 ? v : 0;
+            state.bankrollInicialSet = true;
             const settingsInput = document.getElementById('bankrollInput');
             if (settingsInput) settingsInput.value = state.bankrollInicial;
             saveLocalState();
+            applyBankrollImmutability();
             rerenderAll();
           });
         }
@@ -6311,6 +6332,7 @@ buttons.forEach(btn => {
         if (document.getElementById('bankrollConfigInput')) {
           document.getElementById('bankrollConfigInput').value = state.bankrollInicial;
         }
+        applyBankrollImmutability();
 
         bindTabButtons();
         bindQuickMarketButtons();
