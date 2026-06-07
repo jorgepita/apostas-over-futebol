@@ -2088,6 +2088,9 @@ button.dirty {
         <!-- HISTORY TIMELINE -->
         <div id="histTimelineWrap"></div>
 
+        <!-- EQUITY CURVE & DRAWDOWN -->
+        <div id="histEquityWrap"></div>
+
         <!-- OPERATIONAL BOT HISTORY TABLE -->
         <div class="card">
           <div style="margin-bottom:12px;">
@@ -5626,6 +5629,416 @@ button.dirty {
         `;
       }
 
+      // ── Drawdown computation ─────────────────────────────────────────────
+      function computeDrawdownAnalysis(settled) {
+        if (!settled.length) return null;
+
+        // Sort chronologically
+        const sorted = settled.slice().sort((a, b) => {
+          const da = parseDateSafe(a.date), db = parseDateSafe(b.date);
+          if (!da && !db) return 0;
+          if (!da) return 1;
+          if (!db) return -1;
+          return da - db;
+        });
+
+        // Equity curve: equityCurve[0] = 0 (before any bet),
+        //               equityCurve[i+1] = equity after sorted[i]
+        const equityCurve = [0];
+        const equityDates = [sorted[0].date]; // index 0 = "before first bet"
+        sorted.forEach(r => {
+          equityCurve.push(equityCurve[equityCurve.length - 1] + (r.lucro || 0));
+          equityDates.push(r.date);
+        });
+
+        const n = equityCurve.length;
+        const currentEquity = equityCurve[n - 1];
+
+        // Peak equity (highest point on curve, including starting 0)
+        const peakEquity = Math.max(...equityCurve);
+        const peakIdx    = equityCurve.lastIndexOf(peakEquity);
+
+        // Running high-water mark series and drawdown event detection
+        let hwm = 0, hwmIdx = 0;
+        let inDD = false;
+        let ddPeakVal = 0, ddPeakIdx = 0;
+        let ddBottomVal = 0, ddBottomIdx = 0;
+        const completedEvents = [];
+
+        equityCurve.forEach((eq, i) => {
+          if (eq >= hwm) {
+            if (inDD) {
+              // Recovery complete — equity returned to HWM
+              completedEvents.push({
+                startDate:    equityDates[ddPeakIdx],
+                bottomDate:   equityDates[ddBottomIdx],
+                recoveryDate: equityDates[i],
+                ddEur: ddPeakVal - ddBottomVal,
+                ddPct: ddPeakVal !== 0 ? (ddPeakVal - ddBottomVal) / Math.abs(ddPeakVal) * 100 : 0,
+                recovered: true
+              });
+              inDD = false;
+            }
+            hwm = eq;
+            hwmIdx = i;
+          } else {
+            if (!inDD) {
+              inDD = true;
+              ddPeakVal  = hwm;  ddPeakIdx  = hwmIdx;
+              ddBottomVal = eq;  ddBottomIdx = i;
+            } else if (eq < ddBottomVal) {
+              ddBottomVal = eq;  ddBottomIdx = i;
+            }
+          }
+        });
+
+        // Compute recovery duration for completed events
+        completedEvents.forEach(e => {
+          const d1 = parseDateSafe(e.startDate), d2 = parseDateSafe(e.recoveryDate);
+          e.days = d1 && d2 ? Math.round((d2 - d1) / 86400000) : 0;
+        });
+
+        // Active drawdown (if still ongoing at the last point)
+        let activeDD = null;
+        if (inDD) {
+          const d1 = parseDateSafe(equityDates[ddPeakIdx]);
+          const d2 = parseDateSafe(equityDates[n - 1]);
+          const daysActive = d1 && d2 ? Math.round((d2 - d1) / 86400000) : 0;
+          activeDD = {
+            startDate:    equityDates[ddPeakIdx],
+            bottomDate:   equityDates[ddBottomIdx],
+            recoveryDate: null,
+            ddEur: ddPeakVal - ddBottomVal,
+            ddPct: ddPeakVal !== 0 ? (ddPeakVal - ddBottomVal) / Math.abs(ddPeakVal) * 100 : 0,
+            daysActive,
+            recovered: false
+          };
+        }
+
+        // Max drawdown: worst event (completed or active)
+        const allDDs = [...completedEvents, ...(activeDD ? [activeDD] : [])];
+        const maxDDEvent = allDDs.length ? allDDs.reduce((a, b) => b.ddEur > a.ddEur ? b : a) : null;
+        const maxDrawdown = maxDDEvent ? { eur: maxDDEvent.ddEur, pct: maxDDEvent.ddPct } : { eur: 0, pct: 0 };
+
+        // Current drawdown from all-time peak
+        const currentDDFromPeak    = Math.max(0, peakEquity - currentEquity);
+        const currentDDFromPeakPct = peakEquity > 0 ? currentDDFromPeak / peakEquity * 100 : 0;
+
+        // Recovery stats
+        const recDays      = completedEvents.filter(e => e.days > 0).map(e => e.days);
+        const avgRecDays   = recDays.length ? recDays.reduce((a, b) => a + b, 0) / recDays.length : 0;
+        const longestRec   = recDays.length ? Math.max(...recDays) : 0;
+        const completedCnt = completedEvents.length;
+
+        // Recovery table: active (if any) first, then completed newest first
+        const recoveryTable = [];
+        if (activeDD) recoveryTable.push(activeDD);
+        [...completedEvents].reverse().forEach(e => recoveryTable.push(e));
+
+        // High-water mark curve (for chart overlay)
+        const hwmCurve = [];
+        let runHwm = 0;
+        equityCurve.forEach(eq => { runHwm = Math.max(runHwm, eq); hwmCurve.push(runHwm); });
+
+        // Risk Stability Score (0–100, higher = more stable)
+        const ddPts     = Math.max(0, 25 - maxDrawdown.pct / 2);
+        const recPts    = completedCnt > 0
+          ? Math.max(0, 25 - avgRecDays / 2.4)
+          : (inDD ? 0 : 20);
+        const lucros    = sorted.map(r => r.lucro || 0);
+        const meanL     = lucros.reduce((a, b) => a + b, 0) / lucros.length;
+        const stdL      = lucros.length > 1
+          ? Math.sqrt(lucros.map(l => (l - meanL) * (l - meanL)).reduce((a, b) => a + b, 0) / lucros.length)
+          : 0;
+        const avgStk    = sorted.reduce((a, r) => a + (r.stake || 0), 0) / sorted.length || 1;
+        const smoothPts = Math.max(0, 25 - (stdL / avgStk) * 12.5);
+        const samplePts = Math.min(sorted.length / 100 * 25, 25);
+        const riskScore = Math.round(ddPts + recPts + smoothPts + samplePts);
+        const riskLabel = riskScore >= 67 ? 'HIGH' : riskScore >= 34 ? 'MEDIUM' : 'LOW';
+        const riskCls   = riskScore >= 67 ? 'kpi-ok'  : riskScore >= 34 ? 'kpi-warn'  : 'kpi-bad';
+        const riskColor = riskScore >= 67 ? 'var(--ok)' : riskScore >= 34 ? 'var(--warn)' : 'var(--bad)';
+
+        return {
+          equityCurve, equityDates, hwmCurve, sorted, n,
+          peakEquity, peakIdx, currentEquity,
+          maxDrawdown, currentDDFromPeak, currentDDFromPeakPct,
+          completedCnt, avgRecDays, longestRec,
+          recoveryTable, activeDD, isInDD: inDD,
+          riskScore, riskLabel, riskCls, riskColor,
+          ddPts, recPts, smoothPts, samplePts
+        };
+      }
+
+      // ── Equity Curve & Drawdown renderer ────────────────────────────────
+      function renderHistoryEquity() {
+        const wrap = document.getElementById('histEquityWrap');
+        if (!wrap) return;
+        const rows    = getHistoryFilteredRows();
+        const settled = rows.filter(r => ['W','L','P'].includes(r.result));
+
+        if (!settled.length) { wrap.innerHTML = ''; return; }
+        if (settled.length < 2) {
+          wrap.innerHTML = `<div class="card"><div class="note" style="padding:10px;">São necessárias pelo menos 2 apostas resolvidas para análise de equity.</div></div>`;
+          return;
+        }
+
+        const a = computeDrawdownAnalysis(settled);
+        if (!a) { wrap.innerHTML = ''; return; }
+
+        // ── Section A: Equity Curve SVG ──────────────────────────────────
+        const W = 900, H = 200;
+        const padL = 50, padR = 12, padT = 16, padB = 30;
+        const uw = W - padL - padR;
+        const uh = H - padT - padB;
+
+        const minY = Math.min(0, ...a.equityCurve);
+        const maxY = Math.max(0, ...a.equityCurve);
+        const yRange = maxY === minY ? 1 : maxY - minY;
+        const n = a.n;
+
+        function xp(i) { return n <= 1 ? padL + uw / 2 : padL + (i / (n - 1)) * uw; }
+        function yp(v) { return padT + ((maxY - v) / yRange) * uh; }
+
+        const zeroY = yp(0);
+        const isProfit = a.currentEquity >= 0;
+        const lineColor = isProfit ? '#22c55e' : '#ef4444';
+        const areaFill  = isProfit ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)';
+
+        // Grid lines
+        const gridVals = [minY, minY + yRange * 0.25, minY + yRange * 0.5, minY + yRange * 0.75, maxY];
+        const gridHtml = gridVals.map(v => {
+          const y = yp(v).toFixed(1);
+          return `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+                  <text x="4" y="${(parseFloat(y) + 4).toFixed(0)}" font-size="10" fill="#8892a4">€${fmt(v)}</text>`;
+        }).join('');
+
+        // Paths
+        const eqPath  = a.equityCurve.map((v, i) => `${i === 0 ? 'M' : 'L'}${xp(i).toFixed(1)},${yp(v).toFixed(1)}`).join(' ');
+        const hwmPath = a.hwmCurve.map((v, i)  => `${i === 0 ? 'M' : 'L'}${xp(i).toFixed(1)},${yp(v).toFixed(1)}`).join(' ');
+        const areaPath = `${eqPath} L${xp(n-1).toFixed(1)},${zeroY.toFixed(1)} L${padL},${zeroY.toFixed(1)} Z`;
+
+        // Key point markers
+        function marker(i, v, label, color, r) {
+          const cx = xp(i).toFixed(1), cy = yp(v).toFixed(1);
+          const textAnchor = i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle';
+          return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" stroke="var(--card-alt)" stroke-width="1.5"/>
+                  <text x="${cx}" y="${(parseFloat(cy) - r - 3).toFixed(0)}" font-size="9" fill="${color}" text-anchor="${textAnchor}">${escapeHtml(label)}</text>`;
+        }
+
+        const markersHtml = [
+          marker(0, 0, '€0', '#8892a4', 3),
+          ...(a.peakIdx > 0 && a.peakIdx < n - 1 ? [marker(a.peakIdx, a.peakEquity, `Pico €${fmt(a.peakEquity)}`, '#22c55e', 4)] : []),
+          marker(n - 1, a.currentEquity, `€${fmt(a.currentEquity)}`, lineColor, 4)
+        ].join('');
+
+        const chartHtml = `
+          <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;" role="img" aria-label="Equity curve">
+            ${gridHtml}
+            <line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W - padR}" y2="${zeroY.toFixed(1)}"
+              stroke="rgba(148,163,184,0.35)" stroke-width="1" stroke-dasharray="6,4"/>
+            <path d="${areaPath}" fill="${areaFill}"/>
+            <path d="${hwmPath}" fill="none" stroke="rgba(251,191,36,0.45)" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <path d="${eqPath}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            ${markersHtml}
+          </svg>
+          <div style="display:flex;gap:18px;margin-top:6px;flex-wrap:wrap;align-items:center;">
+            <span class="note">Início: €0 &nbsp;•&nbsp; Pico: €${fmt(a.peakEquity)} &nbsp;•&nbsp; Atual: €${fmt(a.currentEquity)} &nbsp;•&nbsp; ${a.sorted.length} apostas</span>
+            <span class="note" style="display:flex;align-items:center;gap:5px;">
+              <svg width="20" height="6"><line x1="0" y1="3" x2="20" y2="3" stroke="rgba(251,191,36,0.6)" stroke-width="1.5" stroke-dasharray="5,3"/></svg>
+              High-water mark
+            </span>
+          </div>`;
+
+        // ── Section B: Drawdown KPIs ──────────────────────────────────────
+        function ddKpi(label, value, sub, good) {
+          const cls   = good ? 'kpi-ok' : 'kpi-bad';
+          const color = good ? 'var(--ok)' : 'var(--bad)';
+          return `<div class="kpi-hero ${cls}" style="flex:1;min-width:140px;">
+            <div class="kpi-label">${escapeHtml(label)}</div>
+            <div class="kpi-value" style="color:${color};font-size:20px;">${escapeHtml(value)}</div>
+            <div class="kpi-sub">${escapeHtml(sub)}</div>
+          </div>`;
+        }
+
+        const kpiB = [
+          ddKpi('Peak Equity',      `€${fmt(a.peakEquity)}`,
+            'Máximo histórico',   a.peakEquity >= 0),
+          ddKpi('Current Equity',   `€${fmt(a.currentEquity)}`,
+            'Lucro acumulado',    a.currentEquity >= 0),
+          ddKpi('Max Drawdown',
+            a.maxDrawdown.eur > 0 ? `-${pct(a.maxDrawdown.pct, 1)}` : '0.00%',
+            a.maxDrawdown.eur > 0 ? `-€${fmt(a.maxDrawdown.eur)}` : 'Sem drawdown',
+            a.maxDrawdown.eur === 0),
+          ddKpi('Current Drawdown',
+            a.currentDDFromPeak > 0.005 ? `-${pct(a.currentDDFromPeakPct, 1)}` : '0.00%',
+            a.currentDDFromPeak > 0.005 ? `-€${fmt(a.currentDDFromPeak)} do pico` : 'No máximo histórico',
+            a.currentDDFromPeak <= 0.005)
+        ].join('');
+
+        // ── Section C: Drawdown Analysis ─────────────────────────────────
+        function metricCell(label, value, cls) {
+          return `<div style="padding:10px 12px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+            <div class="label" style="font-size:10px;margin-bottom:4px;">${escapeHtml(label)}</div>
+            <div style="font-size:16px;font-weight:800;color:${cls};">${escapeHtml(value)}</div>
+          </div>`;
+        }
+
+        const metricsC = [
+          metricCell('Maior Drawdown %',
+            a.maxDrawdown.pct > 0 ? `-${pct(a.maxDrawdown.pct, 1)}` : '—',
+            a.maxDrawdown.pct > 0 ? 'var(--bad)' : 'var(--muted)'),
+          metricCell('Maior Drawdown €',
+            a.maxDrawdown.eur > 0 ? `-€${fmt(a.maxDrawdown.eur)}` : '—',
+            a.maxDrawdown.eur > 0 ? 'var(--bad)' : 'var(--muted)'),
+          metricCell('Maior Recuperação',
+            a.longestRec > 0 ? `${a.longestRec} dias` : '—',
+            'var(--text)'),
+          metricCell('Drawdown Atual (dias)',
+            a.isInDD && a.activeDD ? `${a.activeDD.daysActive} dias` : '—',
+            a.isInDD ? 'var(--warn)' : 'var(--muted)'),
+          metricCell('Recuperações Concluídas',
+            String(a.completedCnt),
+            a.completedCnt > 0 ? 'var(--ok)' : 'var(--muted)')
+        ].join('');
+
+        // ── Section D: Recovery Table ─────────────────────────────────────
+        const recRowsHtml = a.recoveryTable.length
+          ? a.recoveryTable.map(e => `
+              <tr>
+                <td>${escapeHtml(e.startDate || '—')}</td>
+                <td>${escapeHtml(e.bottomDate || '—')}</td>
+                <td>${e.recovered ? escapeHtml(e.recoveryDate || '—') : '<span class="mini warn">Active</span>'}</td>
+                <td ${e.ddPct > 0 ? 'style="color:var(--bad);font-weight:700;"' : ''}>-${pct(e.ddPct, 1)}</td>
+                <td ${e.ddEur > 0 ? 'style="color:var(--bad);font-weight:700;"' : ''}>-€${fmt(e.ddEur)}</td>
+                <td>${e.recovered ? (e.days != null ? e.days + ' dias' : '—') : (e.daysActive != null ? e.daysActive + ' dias' : '—')}</td>
+              </tr>`)
+            .join('')
+          : `<tr><td colspan="6"><div class="note" style="padding:8px;">Sem drawdowns registados.</div></td></tr>`;
+
+        const recoveryTableHtml = `
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Recovery Events</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Início</th><th>Fundo</th><th>Recuperação</th>
+                    <th>DD %</th><th>DD €</th><th>Duração</th>
+                  </tr>
+                </thead>
+                <tbody>${recRowsHtml}</tbody>
+              </table>
+            </div>
+          </div>`;
+
+        // ── Section E: Risk Stability Score ──────────────────────────────
+        const riskText = a.riskScore >= 67
+          ? `Sistema estável: drawdown controlado (${pct(a.maxDrawdown.pct, 1)}), recuperações rápidas (${Math.round(a.avgRecDays)} d avg), ${a.sorted.length} apostas.`
+          : a.riskScore >= 34
+          ? `Risco moderado: max drawdown ${pct(a.maxDrawdown.pct, 1)}, ${a.completedCnt} recuperações concluídas, amostra em crescimento.`
+          : `Risco elevado ou amostra insuficiente: ${a.sorted.length} apostas, max drawdown ${pct(a.maxDrawdown.pct, 1)}.`;
+
+        const riskHtml = `
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Risk Stability Score</div>
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:16px;">
+              <div class="kpi-hero ${a.riskCls}" style="min-width:110px;text-align:center;flex-shrink:0;">
+                <div class="kpi-label">Score</div>
+                <div class="kpi-value" style="color:${a.riskColor};">${a.riskScore}</div>
+                <div class="kpi-sub">${a.riskLabel}</div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="height:8px;background:var(--line);border-radius:4px;margin-bottom:8px;overflow:hidden;">
+                  <div style="height:100%;width:${a.riskScore}%;background:${a.riskColor};border-radius:4px;"></div>
+                </div>
+                <div class="note">${escapeHtml(riskText)}</div>
+                <div class="note" style="margin-top:4px;opacity:0.7;">
+                  Drawdown: ${fmt(a.ddPts, 1)}/25 &nbsp;•&nbsp;
+                  Recuperação: ${fmt(a.recPts, 1)}/25 &nbsp;•&nbsp;
+                  Estabilidade: ${fmt(a.smoothPts, 1)}/25 &nbsp;•&nbsp;
+                  Amostra: ${fmt(a.samplePts, 1)}/25
+                </div>
+              </div>
+            </div>
+          </div>`;
+
+        // ── Section F: Risk Insights ──────────────────────────────────────
+        const insights = [];
+
+        if (a.currentDDFromPeak > 0.005) {
+          insights.push({ cls: 'bad', icon: '▼',
+            text: `Equity atual ${pct(a.currentDDFromPeakPct, 1)} abaixo do pico histórico (-€${fmt(a.currentDDFromPeak)}).` });
+        } else {
+          insights.push({ cls: 'good', icon: '★',
+            text: `Equity atual está no pico histórico (€${fmt(a.currentEquity)}).` });
+        }
+
+        if (a.maxDrawdown.eur > 0.005) {
+          insights.push({ cls: 'warn', icon: '◆',
+            text: `Maior drawdown histórico: -${pct(a.maxDrawdown.pct, 1)} (-€${fmt(a.maxDrawdown.eur)}).` });
+        }
+
+        if (a.completedCnt > 0 && a.avgRecDays > 0) {
+          insights.push({ cls: 'info', icon: '◆',
+            text: `Recuperação média concluída em ${Math.round(a.avgRecDays)} dias (${a.completedCnt} evento${a.completedCnt > 1 ? 's' : ''}).` });
+        }
+
+        if (a.completedCnt > 0 && !a.isInDD) {
+          insights.push({ cls: 'good', icon: '✓',
+            text: `Sistema recuperou de todos os drawdowns históricos (${a.completedCnt} no total).` });
+        } else if (a.isInDD && a.activeDD) {
+          insights.push({ cls: 'bad', icon: '▼',
+            text: `Recuperação ativa em curso desde ${a.activeDD.startDate || '—'} (${a.activeDD.daysActive} dias).` });
+        }
+
+        if (a.longestRec > 0) {
+          insights.push({ cls: 'info', icon: '◆',
+            text: `Maior período de recuperação registado: ${a.longestRec} dias.` });
+        }
+
+        const shownInsights = insights.slice(0, 5);
+        const insightColorMap = { good: 'var(--ok)', bad: 'var(--bad)', warn: 'var(--warn)', info: 'var(--info)' };
+
+        const insightsHtml = shownInsights.length ? `
+          <div class="card">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Risk Insights</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${shownInsights.map(ins => {
+                const c = insightColorMap[ins.cls] || 'var(--info)';
+                return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card-alt);border-radius:8px;border-left:3px solid ${c};">
+                  <span style="font-size:13px;font-weight:900;color:${c};flex-shrink:0;">${ins.icon}</span>
+                  <span class="note" style="flex:1;line-height:1.5;">${escapeHtml(ins.text)}</span>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>` : '';
+
+        // ── Assemble ──────────────────────────────────────────────────────
+        wrap.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:0;">
+            <div style="font-size:15px;font-weight:800;color:var(--text);padding:2px 0;">Equity Curve &amp; Drawdown Intelligence</div>
+
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Equity Curve</div>
+              ${chartHtml}
+            </div>
+
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Drawdown KPIs</div>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;">${kpiB}</div>
+            </div>
+
+            <div class="card">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Drawdown Analysis</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">${metricsC}</div>
+            </div>
+
+            ${recoveryTableHtml}
+            ${riskHtml}
+            ${insightsHtml}
+          </div>`;
+      }
+
       function exportFilteredHistory() {
         const rows = getHistoryFilteredRows();
         if (!rows.length) { alert('Sem dados para exportar com os filtros atuais.'); return; }
@@ -8347,6 +8760,7 @@ buttons.forEach(btn => {
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
         try { renderHistoryIntelligence(); } catch (e) { console.error('renderHistoryIntelligence', e); }
         try { renderHistoryTimeline(); } catch (e) { console.error('renderHistoryTimeline', e); }
+        try { renderHistoryEquity(); } catch (e) { console.error('renderHistoryEquity', e); }
       }
 
       function rerenderManualOnly() {
