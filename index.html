@@ -1999,11 +1999,16 @@ button.dirty {
             <div class="kpi-value" id="histKpiAvgOdd">—</div>
             <div class="kpi-sub">Fechadas reais</div>
           </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Stake Total</div>
+            <div class="kpi-value" id="histKpiStake">€—</div>
+            <div class="kpi-sub">Volume apostado</div>
+          </div>
         </div>
 
         <!-- FILTERS -->
         <div class="card">
-          <div class="label" style="margin-bottom:12px;">Filtros</div>
+          <div class="label" style="margin-bottom:12px;">Filtros <span id="histFilterBadge" style="display:none;margin-left:8px;font-size:11px;padding:2px 8px;background:var(--info);color:#fff;border-radius:10px;font-weight:700;vertical-align:middle;"></span></div>
           <div class="toolbar-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));">
             <div>
               <label class="label" for="historySearch" style="display:block;margin-bottom:4px;">Pesquisar</label>
@@ -2062,8 +2067,23 @@ button.dirty {
                 <option value="not_executed">Não executadas</option>
               </select>
             </div>
+
+            <div>
+              <label class="label" for="historyOddsFilter" style="display:block;margin-bottom:4px;">Intervalo Odd</label>
+              <select id="historyOddsFilter">
+                <option value="">Todas</option>
+                <option value="u1.5">Até 1.50</option>
+                <option value="1.5-1.8">1.50 – 1.80</option>
+                <option value="1.8-2.2">1.80 – 2.20</option>
+                <option value="2.2-2.8">2.20 – 2.80</option>
+                <option value="o2.8">Acima 2.80</option>
+              </select>
+            </div>
           </div>
         </div>
+
+        <!-- HISTORY INTELLIGENCE -->
+        <div id="histIntelligenceWrap"></div>
 
         <!-- OPERATIONAL BOT HISTORY TABLE -->
         <div class="card">
@@ -2101,9 +2121,12 @@ button.dirty {
 
         <!-- CLOSED REAL TABLE -->
         <div class="card">
-          <div style="margin-bottom:12px;">
-            <div style="font-size:13px;font-weight:700;color:var(--text);">Fechadas reais filtradas</div>
-            <div class="note">Bot executado + manuais com resultado definido</div>
+          <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Fechadas reais filtradas</div>
+              <div class="note">Bot executado + manuais com resultado definido — clique numa linha para detalhes</div>
+            </div>
+            <button id="exportHistoryBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Exportar CSV</button>
           </div>
 
           <div class="table-wrap">
@@ -2119,6 +2142,7 @@ button.dirty {
                   <th>Odd</th>
                   <th>Stake</th>
                   <th>Lucro</th>
+                  <th style="width:28px;"></th>
                 </tr>
               </thead>
               <tbody id="closedRealRows"></tbody>
@@ -4426,8 +4450,28 @@ button.dirty {
           market: document.getElementById('historyMarketFilter').value,
           result: document.getElementById('historyResultFilter').value,
           execution: document.getElementById('historyExecutionFilter').value,
-          date: document.getElementById('historyDateFilter').value
+          date: document.getElementById('historyDateFilter').value,
+          oddsRange: (document.getElementById('historyOddsFilter') || {}).value || ''
         };
+      }
+
+      function getHistoryFilteredRows() {
+        const filters = getHistoryFilters();
+        let rows = getFilteredRealClosedRows(filters);
+        const range = filters.oddsRange;
+        if (range) {
+          rows = rows.filter(r => {
+            const o = r.odd;
+            if (o === null) return false;
+            if (range === 'u1.5')    return o < 1.5;
+            if (range === '1.5-1.8') return o >= 1.5 && o < 1.8;
+            if (range === '1.8-2.2') return o >= 1.8 && o < 2.2;
+            if (range === '2.2-2.8') return o >= 2.2 && o < 2.8;
+            if (range === 'o2.8')    return o >= 2.8;
+            return true;
+          });
+        }
+        return rows;
       }
 
       function matchDateFilter(dateStr, dateFilterValue) {
@@ -5035,23 +5079,296 @@ button.dirty {
       }
 
       function renderClosedRealTable() {
-        const rows = getFilteredRealClosedRows(getHistoryFilters());
+        const rows = getHistoryFilteredRows();
+        const tbody = document.getElementById('closedRealRows');
+        if (!tbody) return;
 
-        document.getElementById('closedRealRows').innerHTML = rows.length
-          ? rows.map(r => `
-              <tr>
-                <td>${escapeHtml(r.sourceLabel || '—')}</td>
-                <td>${escapeHtml(r.date || '—')}</td>
-                <td>${escapeHtml(r.league || '—')}</td>
-                <td>${escapeHtml(r.game || '—')}</td>
-                <td>${escapeHtml(r.market || '—')}</td>
-                <td>${resultBadge(r.result)}</td>
-                <td>${r.odd === null ? '—' : fmt(r.odd)}</td>
-                <td>€${fmt(r.stake)}</td>
-                <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
-              </tr>
-            `).join('')
-          : '<tr><td colspan="9"><div class="note">Sem fechadas reais com os filtros atuais.</div></td></tr>';
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="10"><div class="note">Sem fechadas reais com os filtros atuais.</div></td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map((r, idx) => {
+          const roiColor = r.lucro > 0 ? 'var(--ok)' : r.lucro < 0 ? 'var(--bad)' : 'var(--muted)';
+          const detail = `
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:10px 12px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+              <div><div class="label" style="font-size:10px;">Origem</div><div style="font-size:13px;">${escapeHtml(r.sourceLabel || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Data</div><div style="font-size:13px;">${escapeHtml(r.date || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Liga</div><div style="font-size:13px;">${escapeHtml(r.league || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Jogo</div><div style="font-size:13px;">${escapeHtml(r.game || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Mercado</div><div style="font-size:13px;">${escapeHtml(r.market || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Resultado</div><div>${resultBadge(r.result)}</div></div>
+              <div><div class="label" style="font-size:10px;">Odd</div><div style="font-size:16px;font-weight:700;">${r.odd === null ? '—' : fmt(r.odd)}</div></div>
+              <div><div class="label" style="font-size:10px;">Stake</div><div style="font-size:14px;font-weight:700;">€${fmt(r.stake)}</div></div>
+              <div><div class="label" style="font-size:10px;">Lucro</div><div style="font-size:16px;font-weight:900;color:${roiColor};">€${fmt(r.lucro)}</div></div>
+            </div>`;
+          return `
+            <tr class="hist-sum-row" data-drill-idx="${idx}" style="cursor:pointer;" title="Clique para ver detalhes">
+              <td>${escapeHtml(r.sourceLabel || '—')}</td>
+              <td>${escapeHtml(r.date || '—')}</td>
+              <td>${escapeHtml(r.league || '—')}</td>
+              <td>${escapeHtml(r.game || '—')}</td>
+              <td>${escapeHtml(r.market || '—')}</td>
+              <td>${resultBadge(r.result)}</td>
+              <td>${r.odd === null ? '—' : fmt(r.odd)}</td>
+              <td>€${fmt(r.stake)}</td>
+              <td ${profitClass(r.lucro)}>€${fmt(r.lucro)}</td>
+              <td style="text-align:center;color:var(--muted);font-size:11px;user-select:none;" class="hist-drill-toggle">▶</td>
+            </tr>
+            <tr id="hist-drill-${idx}" style="display:none;">
+              <td colspan="10" style="padding:0 0 6px 0;">${detail}</td>
+            </tr>`;
+        }).join('');
+
+        bindHistDrilldown();
+      }
+
+      function bindHistDrilldown() {
+        document.querySelectorAll('.hist-sum-row').forEach(row => {
+          if (row.dataset.drillBound === '1') return;
+          row.dataset.drillBound = '1';
+          row.addEventListener('click', () => {
+            const idx = row.dataset.drillIdx;
+            const drill = document.getElementById(`hist-drill-${idx}`);
+            if (!drill) return;
+            const open = drill.style.display !== 'none';
+            drill.style.display = open ? 'none' : '';
+            const toggle = row.querySelector('.hist-drill-toggle');
+            if (toggle) toggle.textContent = open ? '▶' : '▼';
+          });
+        });
+      }
+
+      function renderHistoryIntelligence() {
+        const wrap = document.getElementById('histIntelligenceWrap');
+        if (!wrap) return;
+        const rows = getHistoryFilteredRows();
+        if (!rows.length) { wrap.innerHTML = ''; return; }
+
+        // --- Result Distribution ---
+        const wins = rows.filter(r => r.result === 'W').length;
+        const losses = rows.filter(r => r.result === 'L').length;
+        const pushes = rows.filter(r => r.result === 'P').length;
+        const open = rows.filter(r => !['W','L','P'].includes(r.result)).length;
+        const total = rows.length;
+        const decided = wins + losses;
+
+        function distBar(count, color) {
+          const pct100 = total > 0 ? (count / total * 100).toFixed(1) : 0;
+          return `<div style="margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:12px;font-weight:600;">${count}</span>
+              <span class="note">${pct100}%</span>
+            </div>
+            <div style="height:6px;background:var(--line);border-radius:3px;">
+              <div style="height:100%;width:${pct100}%;background:${color};border-radius:3px;"></div>
+            </div>
+          </div>`;
+        }
+
+        // --- Streak Analysis ---
+        const streaks = computeStreaks(rows);
+
+        // --- Odds Analysis ---
+        const BUCKETS = [
+          { label: 'Até 1.50',    key: 'u1.5',    test: o => o < 1.5 },
+          { label: '1.50 – 1.80', key: '1.5-1.8', test: o => o >= 1.5 && o < 1.8 },
+          { label: '1.80 – 2.20', key: '1.8-2.2', test: o => o >= 1.8 && o < 2.2 },
+          { label: '2.20 – 2.80', key: '2.2-2.8', test: o => o >= 2.2 && o < 2.8 },
+          { label: 'Acima 2.80',  key: 'o2.8',    test: o => o >= 2.8 }
+        ];
+        const oddsRows = rows.filter(r => r.odd !== null && ['W','L','P'].includes(r.result));
+        const oddsBuckets = BUCKETS.map(b => {
+          const br = oddsRows.filter(r => b.test(r.odd));
+          const bw = br.filter(r => r.result === 'W').length;
+          const bl = br.filter(r => r.result === 'L').length;
+          const bs = sum(br.map(r => r.stake));
+          const bp = sum(br.map(r => r.lucro));
+          const bwr = (bw + bl) > 0 ? bw / (bw + bl) * 100 : null;
+          const broi = bs > 0 ? bp / bs * 100 : null;
+          return { label: b.label, picks: br.length, wins: bw, losses: bl, wr: bwr, roi: broi, profit: bp };
+        });
+
+        // --- Anomaly Highlights ---
+        const closedRows = rows.filter(r => ['W','L','P'].includes(r.result));
+        const highestProfit = closedRows.length ? closedRows.reduce((a, b) => b.lucro > a.lucro ? b : a) : null;
+        const worstLoss = closedRows.filter(r => r.lucro < 0).length
+          ? closedRows.filter(r => r.lucro < 0).reduce((a, b) => b.lucro < a.lucro ? b : a) : null;
+        const highestOddsWin = closedRows.filter(r => r.result === 'W' && r.odd !== null).length
+          ? closedRows.filter(r => r.result === 'W' && r.odd !== null).reduce((a, b) => b.odd > a.odd ? b : a) : null;
+
+        // edge anomaly from bot history cross-ref
+        let highestEdge = null;
+        try {
+          const botRows = getRealResolvedBotHistory();
+          if (botRows.length) {
+            const edgeRows = botRows.filter(r => r['Edge%'] !== undefined && r['Edge%'] !== '' && !isNaN(parseFloat(r['Edge%'])));
+            if (edgeRows.length) {
+              highestEdge = edgeRows.reduce((a, b) => parseFloat(b['Edge%']) > parseFloat(a['Edge%']) ? b : a);
+            }
+          }
+        } catch(e) {}
+
+        function anomalyCard(label, icon, color, content) {
+          return `<div style="flex:1;min-width:180px;padding:12px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;border-left:3px solid ${color};">
+            <div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;margin-bottom:4px;">${icon} ${escapeHtml(label)}</div>
+            ${content}
+          </div>`;
+        }
+
+        const anomalies = [];
+        if (highestProfit) {
+          anomalies.push(anomalyCard('Maior Lucro', '★', 'var(--ok)',
+            `<div style="font-size:15px;font-weight:900;color:var(--ok);">€${fmt(highestProfit.lucro)}</div>
+             <div class="note">${escapeHtml(highestProfit.game || '—')} • ${escapeHtml(highestProfit.date || '—')}</div>`));
+        }
+        if (worstLoss) {
+          anomalies.push(anomalyCard('Maior Perda', '▼', 'var(--bad)',
+            `<div style="font-size:15px;font-weight:900;color:var(--bad);">€${fmt(worstLoss.lucro)}</div>
+             <div class="note">${escapeHtml(worstLoss.game || '—')} • ${escapeHtml(worstLoss.date || '—')}</div>`));
+        }
+        if (highestOddsWin) {
+          anomalies.push(anomalyCard('Maior Odd Vencida', '🎯', 'var(--info)',
+            `<div style="font-size:15px;font-weight:900;color:var(--info);">${fmt(highestOddsWin.odd)}</div>
+             <div class="note">${escapeHtml(highestOddsWin.game || '—')} • ${escapeHtml(highestOddsWin.date || '—')}</div>`));
+        }
+        if (highestEdge) {
+          anomalies.push(anomalyCard('Maior Edge', '◆', 'var(--warn)',
+            `<div style="font-size:15px;font-weight:900;color:var(--warn);">${fmt(parseFloat(highestEdge['Edge%']))}%</div>
+             <div class="note">${escapeHtml(highestEdge['Jogo'] || highestEdge['Game'] || '—')}</div>`));
+        }
+
+        wrap.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0;" class="hist-intel-grid">
+
+            <!-- Result Distribution -->
+            <div class="card" style="margin-bottom:0;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Distribuição de Resultados</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div>
+                  <div class="label" style="margin-bottom:6px;font-size:11px;">Vitórias</div>
+                  ${distBar(wins, 'var(--ok)')}
+                </div>
+                <div>
+                  <div class="label" style="margin-bottom:6px;font-size:11px;">Derrotas</div>
+                  ${distBar(losses, 'var(--bad)')}
+                </div>
+                <div>
+                  <div class="label" style="margin-bottom:6px;font-size:11px;">Push</div>
+                  ${distBar(pushes, 'var(--muted)')}
+                </div>
+                <div>
+                  <div class="label" style="margin-bottom:6px;font-size:11px;">Em aberto</div>
+                  ${distBar(open, 'var(--warn)')}
+                </div>
+              </div>
+              <div class="note" style="margin-top:10px;text-align:center;">${total} picks no filtro atual • ${decided > 0 ? pct(wins/decided*100) : '—'} WR</div>
+            </div>
+
+            <!-- Streak Analysis -->
+            <div class="card" style="margin-bottom:0;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Análise de Sequências</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="text-align:center;padding:10px;background:var(--ok-bg);border-radius:8px;border:1px solid var(--ok);">
+                  <div class="label" style="font-size:10px;">Sequência Atual</div>
+                  <div style="font-size:26px;font-weight:900;color:var(--ok);">${streaks.currentWin}</div>
+                  <div class="note">Vitórias</div>
+                </div>
+                <div style="text-align:center;padding:10px;background:var(--bad-bg);border-radius:8px;border:1px solid var(--bad);">
+                  <div class="label" style="font-size:10px;">Sequência Atual</div>
+                  <div style="font-size:26px;font-weight:900;color:var(--bad);">${streaks.currentLoss}</div>
+                  <div class="note">Derrotas</div>
+                </div>
+                <div style="text-align:center;padding:10px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+                  <div class="label" style="font-size:10px;">Maior Sequência</div>
+                  <div style="font-size:22px;font-weight:900;color:var(--ok);">${streaks.longestWin}</div>
+                  <div class="note">Vitórias</div>
+                </div>
+                <div style="text-align:center;padding:10px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+                  <div class="label" style="font-size:10px;">Maior Sequência</div>
+                  <div style="font-size:22px;font-weight:900;color:var(--bad);">${streaks.longestLoss}</div>
+                  <div class="note">Derrotas</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Odds Analysis -->
+          <div class="card" style="margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Análise por Intervalo de Odds</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Intervalo</th>
+                    <th>Picks</th>
+                    <th>Vitórias</th>
+                    <th>Derrotas</th>
+                    <th>Win Rate</th>
+                    <th>ROI</th>
+                    <th>Lucro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${oddsBuckets.map(b => `
+                    <tr style="${b.picks === 0 ? 'opacity:0.4;' : ''}">
+                      <td>${escapeHtml(b.label)}</td>
+                      <td>${b.picks}</td>
+                      <td>${b.wins}</td>
+                      <td>${b.losses}</td>
+                      <td>${b.wr !== null ? pct(b.wr) : '—'}</td>
+                      <td ${b.roi !== null ? profitClass(b.roi) : ''}>${b.roi !== null ? pct(b.roi) : '—'}</td>
+                      <td ${profitClass(b.profit)}>€${fmt(b.profit)}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Anomaly Highlights -->
+          ${anomalies.length ? `
+          <div class="card" style="margin-top:12px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">Destaques</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              ${anomalies.join('')}
+            </div>
+          </div>` : ''}
+        `;
+
+        // inject responsive grid style if not present
+        if (!document.getElementById('hist-intel-style')) {
+          const s = document.createElement('style');
+          s.id = 'hist-intel-style';
+          s.textContent = '@media(max-width:640px){.hist-intel-grid{grid-template-columns:1fr!important;}}';
+          document.head.appendChild(s);
+        }
+      }
+
+      function exportFilteredHistory() {
+        const rows = getHistoryFilteredRows();
+        if (!rows.length) { alert('Sem dados para exportar com os filtros atuais.'); return; }
+        const header = ['Origem','Data','Liga','Jogo','Mercado','Resultado','Odd','Stake','Lucro'];
+        const lines = [header.join(',')];
+        rows.forEach(r => {
+          lines.push([
+            `"${(r.sourceLabel || '').replace(/"/g,'""')}"`,
+            `"${(r.date || '').replace(/"/g,'""')}"`,
+            `"${(r.league || '').replace(/"/g,'""')}"`,
+            `"${(r.game || '').replace(/"/g,'""')}"`,
+            `"${(r.market || '').replace(/"/g,'""')}"`,
+            `"${(r.result || '').replace(/"/g,'""')}"`,
+            r.odd !== null ? fmt(r.odd) : '',
+            fmt(r.stake),
+            fmt(r.lucro)
+          ].join(','));
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `historico_filtrado_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
       }
 
       function renderManualBets() {
@@ -5681,13 +5998,13 @@ buttons.forEach(btn => {
       }
 
       function renderHistoryKpiRow() {
-        const rows = getFilteredRealClosedRows(getHistoryFilters());
+        const rows = getHistoryFilteredRows();
         const wins = rows.filter(r => r.result === 'W').length;
         const losses = rows.filter(r => r.result === 'L').length;
         const total = rows.length;
-        const stake = sum(rows.map(r => r.stake));
+        const stakeTotal = sum(rows.map(r => r.stake));
         const lucro = sum(rows.map(r => r.lucro));
-        const roi = stake > 0 ? (lucro / stake) * 100 : 0;
+        const roi = stakeTotal > 0 ? (lucro / stakeTotal) * 100 : 0;
         const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
         const validOdds = rows.map(r => r.odd).filter(v => v !== null);
         const avgOdd = validOdds.length ? validOdds.reduce((a, b) => a + b, 0) / validOdds.length : null;
@@ -5697,6 +6014,7 @@ buttons.forEach(btn => {
         safeSetText('histKpiProfit', total > 0 ? `€${fmt(lucro)}` : '€—');
         safeSetText('histKpiWr', total > 0 ? pct(wr) : '—');
         safeSetText('histKpiAvgOdd', avgOdd !== null ? fmt(avgOdd) : '—');
+        safeSetText('histKpiStake', total > 0 ? `€${fmt(stakeTotal)}` : '€—');
 
         const roiEl = document.getElementById('histKpiRoi')?.closest?.('.kpi-hero');
         if (roiEl && total > 0) {
@@ -5705,6 +6023,20 @@ buttons.forEach(btn => {
         const profitEl = document.getElementById('histKpiProfit')?.closest?.('.kpi-hero');
         if (profitEl && total > 0) {
           profitEl.className = `kpi-hero${lucro > 0 ? ' kpi-ok' : lucro < 0 ? ' kpi-bad' : ''}`;
+        }
+
+        // active filter badge
+        const filters = getHistoryFilters();
+        const activeCount = [filters.q, filters.source, filters.league, filters.market,
+          filters.result, filters.date, filters.oddsRange].filter(Boolean).length;
+        const badge = document.getElementById('histFilterBadge');
+        if (badge) {
+          if (activeCount > 0) {
+            badge.textContent = `${activeCount} filtro${activeCount > 1 ? 's' : ''} ativo${activeCount > 1 ? 's' : ''}`;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
         }
       }
 
@@ -7731,6 +8063,7 @@ buttons.forEach(btn => {
         try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
         try { renderClosedRealTable(); } catch (e) { console.error('renderClosedRealTable', e); }
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
+        try { renderHistoryIntelligence(); } catch (e) { console.error('renderHistoryIntelligence', e); }
       }
 
       function rerenderManualOnly() {
@@ -7957,6 +8290,8 @@ buttons.forEach(btn => {
         safeBind('historyMarketFilter', 'change', rerenderHistoryOnly);
         safeBind('historyResultFilter', 'change', rerenderHistoryOnly);
         safeBind('historyExecutionFilter', 'change', rerenderHistoryOnly);
+        safeBind('historyOddsFilter', 'change', rerenderHistoryOnly);
+        safeBind('exportHistoryBtn', 'click', exportFilteredHistory);
 
         const bankrollInput = document.getElementById('bankrollInput');
         if (bankrollInput) {
