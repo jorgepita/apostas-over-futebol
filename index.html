@@ -1720,6 +1720,9 @@ button.dirty {
         <div class="nav-item" data-tab-target="tab-analytics">
           <span class="nav-icon">📊</span> Analytics
         </div>
+        <div class="nav-item" data-tab-target="tab-versus">
+          <span class="nav-icon">⚔️</span> Bot vs Manual
+        </div>
         <div class="nav-section-label">Finance</div>
         <div class="nav-item" data-tab-target="tab-bankroll">
           <span class="nav-icon">💰</span> Bankroll
@@ -2828,6 +2831,47 @@ button.dirty {
             <a class="button-link" href="https://github.com/jorgepita/apostas-over-futebol" target="_blank" rel="noreferrer" style="text-align:center; display:block; padding:8px; background:var(--accent); color:white; text-decoration:none; border-radius:8px; font-size:12px; font-weight:700;">Abrir GitHub Project</a>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         BOT vs MANUAL PAGE
+    ============================= -->
+    <div id="tab-versus" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Bot vs Manual</div>
+            <div class="note" style="margin-top:4px;">Performance comparativa: apostas do bot vs apostas manuais</div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-header-title">A — Performance Head-to-Head</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusKpiRow"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">B — P&L Mensal</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div id="versusMonthlyTable"></div>
+        </div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">C — Drawdown</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusDrawdown"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">D — Sequências</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusStreaks"></div>
+
       </div>
     </div>
 
@@ -4043,7 +4087,7 @@ button.dirty {
         }
 
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
+        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-versus', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
         state.mobileActionsOpen = savedMobileActions === '1';
       }
 
@@ -5978,6 +6022,21 @@ button.dirty {
           riskScore, riskLabel, riskCls, riskColor,
           ddPts, recPts, smoothPts, samplePts
         };
+      }
+
+      function groupByMonth(rows) {
+        const map = {};
+        rows.forEach(r => {
+          const d = parseDateSafe(r.date);
+          if (!d) return;
+          const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          if (!map[key]) map[key] = { month: key, profit: 0, count: 0, wins: 0, losses: 0 };
+          map[key].profit += r.lucro || 0;
+          map[key].count++;
+          if (r.result === 'W') map[key].wins++;
+          if (r.result === 'L') map[key].losses++;
+        });
+        return Object.values(map).sort((a, b) => a.month.localeCompare(b.month));
       }
 
       // ── Equity Curve & Drawdown renderer ────────────────────────────────
@@ -8096,6 +8155,209 @@ buttons.forEach(btn => {
         `;
       }
 
+      function renderVersus() {
+        const kpiEl = document.getElementById('versusKpiRow');
+        if (!kpiEl) return;
+
+        const botRows = getRealResolvedBotHistory();
+        const manualRows = getResolvedManualBets();
+
+        // ─── Bot stats ───────────────────────────────────────────────────
+        const botStake   = sum(botRows.map(r => r._stakeRealNum).filter(v => v !== null));
+        const botProfit  = sum(botRows.map(r => r._lucroRealLocal).filter(v => v !== null));
+        const botWins    = botRows.filter(r => r._resultKey === 'W').length;
+        const botLosses  = botRows.filter(r => r._resultKey === 'L').length;
+        const botSettled = botRows.length;
+        const botRoi     = botStake > 0 ? (botProfit / botStake) * 100 : 0;
+        const botWr      = (botWins + botLosses) > 0 ? (botWins / (botWins + botLosses)) * 100 : 0;
+        const botOdds    = botRows.map(r => r._oddRealNum).filter(v => v !== null);
+        const botAvgOdd  = botOdds.length > 0 ? sum(botOdds) / botOdds.length : null;
+        const botAvgStk  = botSettled > 0 && botStake > 0 ? botStake / botSettled : null;
+
+        // ─── Manual stats ────────────────────────────────────────────────
+        const manStake   = sum(manualRows.map(b => num(b.stake)).filter(v => v !== null));
+        const manProfit  = sum(manualRows.map(b => b._lucro).filter(v => v !== null));
+        const manWins    = manualRows.filter(b => b._resultKey === 'W').length;
+        const manLosses  = manualRows.filter(b => b._resultKey === 'L').length;
+        const manSettled = manualRows.length;
+        const manRoi     = manStake > 0 ? (manProfit / manStake) * 100 : 0;
+        const manWr      = (manWins + manLosses) > 0 ? (manWins / (manWins + manLosses)) * 100 : 0;
+        const manOdds    = manualRows.map(b => num(b.odd)).filter(v => v !== null);
+        const manAvgOdd  = manOdds.length > 0 ? sum(manOdds) / manOdds.length : null;
+        const manAvgStk  = manSettled > 0 && manStake > 0 ? manStake / manSettled : null;
+
+        // ─── Section A: KPI cards ────────────────────────────────────────
+        function profColor(v) {
+          return v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : 'var(--text)';
+        }
+
+        function kpiCell(label, text, color) {
+          return `<div style="background:var(--card-alt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
+            <div class="kpi-label">${label}</div>
+            <div style="font-size:16px;font-weight:800;${color ? 'color:' + color + ';' : ''}">${text}</div>
+          </div>`;
+        }
+
+        function sourceCard(title, icon, accent, s) {
+          return `<div class="card">
+            <div class="bankroll-split-header">
+              <span style="font-size:18px;">${icon}</span>
+              <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);">${s.wins}W / ${s.losses}L</span>
+            </div>
+            <div class="kpi-grid kpi-grid-4" style="margin-bottom:0;">
+              ${kpiCell('Lucro', (s.profit >= 0 ? '+' : '') + '€' + fmt(s.profit), profColor(s.profit))}
+              ${kpiCell('ROI', (s.roi > 0 ? '+' : '') + pct(s.roi), profColor(s.roi))}
+              ${kpiCell('Win Rate', s.settled > 0 ? pct(s.wr) : '—', '')}
+              ${kpiCell('Fechadas', String(s.settled), '')}
+              ${kpiCell('Total Stake', '€' + fmt(s.stake), '')}
+              ${kpiCell('Odd Média', s.avgOdd !== null ? fmt(s.avgOdd) : '—', '')}
+              ${kpiCell('Stake Médio', s.avgStk !== null ? '€' + fmt(s.avgStk) : '—', '')}
+            </div>
+          </div>`;
+        }
+
+        kpiEl.innerHTML = `<div class="bankroll-split-grid">
+          ${sourceCard('Bot', '🤖', 'var(--accent)', { profit: botProfit, roi: botRoi, wr: botWr, settled: botSettled, stake: botStake, avgOdd: botAvgOdd, avgStk: botAvgStk, wins: botWins, losses: botLosses })}
+          ${sourceCard('Manual', '✋', 'var(--ok)', { profit: manProfit, roi: manRoi, wr: manWr, settled: manSettled, stake: manStake, avgOdd: manAvgOdd, avgStk: manAvgStk, wins: manWins, losses: manLosses })}
+        </div>`;
+
+        // ─── Section B: Monthly P&L table ────────────────────────────────
+        const monthlyEl = document.getElementById('versusMonthlyTable');
+        if (monthlyEl) {
+          const botMonthly = groupByMonth(botRows.map(r => ({
+            date: normalizeDateString(r['Data'] || '') || '',
+            lucro: r._lucroRealLocal || 0,
+            result: r._resultKey
+          })));
+          const manMonthly = groupByMonth(manualRows.map(b => ({
+            date: b.data || '',
+            lucro: b._lucro || 0,
+            result: b._resultKey
+          })));
+
+          const allMonths = [...new Set([...botMonthly.map(m => m.month), ...manMonthly.map(m => m.month)])].sort();
+
+          if (!allMonths.length) {
+            monthlyEl.innerHTML = `<div class="note" style="text-align:center;padding:20px;">Sem dados para exibir</div>`;
+          } else {
+            const botByMonth = Object.fromEntries(botMonthly.map(m => [m.month, m]));
+            const manByMonth = Object.fromEntries(manMonthly.map(m => [m.month, m]));
+
+            function profitCell(v) {
+              if (v === null) return `<td style="color:var(--muted);text-align:right;padding:8px 12px;">—</td>`;
+              const c = v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : 'var(--text)';
+              return `<td style="font-weight:700;color:${c};text-align:right;padding:8px 12px;">${v >= 0 ? '+' : ''}€${fmt(v)}</td>`;
+            }
+
+            const tableRows = allMonths.map(month => {
+              const bM = botByMonth[month];
+              const mM = manByMonth[month];
+              const bP = bM ? bM.profit : null;
+              const mP = mM ? mM.profit : null;
+              const total = (bP ?? 0) + (mP ?? 0);
+              const tc = total > 0 ? 'var(--ok)' : total < 0 ? 'var(--bad)' : 'var(--text)';
+              return `<tr>
+                <td style="font-weight:600;padding:8px 12px;">${month}</td>
+                ${profitCell(bP)}
+                ${profitCell(mP)}
+                <td style="font-weight:800;color:${tc};text-align:right;padding:8px 12px;">${total >= 0 ? '+' : ''}€${fmt(total)}</td>
+              </tr>`;
+            }).join('');
+
+            monthlyEl.innerHTML = `<div class="table-wrap"><table class="data-table">
+              <thead><tr>
+                <th>Mês</th>
+                <th style="text-align:right;">🤖 Bot</th>
+                <th style="text-align:right;">✋ Manual</th>
+                <th style="text-align:right;">Total</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table></div>`;
+          }
+        }
+
+        // ─── Section C: Drawdown ─────────────────────────────────────────
+        const drawdownEl = document.getElementById('versusDrawdown');
+        if (drawdownEl) {
+          const botDD = computeDrawdownAnalysis(botRows.map(r => ({
+            date: normalizeDateString(r['Data'] || '') || '',
+            lucro: r._lucroRealLocal || 0
+          })));
+          const manDD = computeDrawdownAnalysis(manualRows.map(b => ({
+            date: b.data || '',
+            lucro: b._lucro || 0
+          })));
+
+          function ddCard(title, icon, accent, dd) {
+            if (!dd) return `<div class="card">
+              <div class="bankroll-split-header">
+                <span style="font-size:18px;">${icon}</span>
+                <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
+              </div>
+              <div class="note" style="text-align:center;padding:12px;">Sem dados suficientes</div>
+            </div>`;
+            const activeDDText = dd.activeDD ? '-€' + fmt(dd.activeDD.ddEur) : '—';
+            const activeDDColor = dd.activeDD ? 'var(--bad)' : '';
+            const riskColor = dd.riskColor;
+            return `<div class="card">
+              <div class="bankroll-split-header">
+                <span style="font-size:18px;">${icon}</span>
+                <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
+                <span style="margin-left:auto;font-size:11px;font-weight:700;color:${riskColor};">Risk ${dd.riskLabel}</span>
+              </div>
+              <div class="kpi-grid kpi-grid-4">
+                ${kpiCell('Max DD (€)', dd.maxDrawdown.eur > 0 ? '-€' + fmt(dd.maxDrawdown.eur) : '—', dd.maxDrawdown.eur > 0 ? 'var(--bad)' : '')}
+                ${kpiCell('Max DD (%)', dd.maxDrawdown.pct > 0 ? '-' + pct(dd.maxDrawdown.pct) : '—', dd.maxDrawdown.pct > 0 ? 'var(--bad)' : '')}
+                ${kpiCell('Eventos DD', String(dd.completedCnt), '')}
+                ${kpiCell('DD Atual', activeDDText, activeDDColor)}
+              </div>
+            </div>`;
+          }
+
+          drawdownEl.innerHTML = `<div class="bankroll-split-grid">
+            ${ddCard('Bot', '🤖', 'var(--accent)', botDD)}
+            ${ddCard('Manual', '✋', 'var(--ok)', manDD)}
+          </div>`;
+        }
+
+        // ─── Section D: Streaks ──────────────────────────────────────────
+        const streaksEl = document.getElementById('versusStreaks');
+        if (streaksEl) {
+          const botS = computeStreaks(botRows.map(r => ({ result: r._resultKey })));
+          const manS = computeStreaks(manualRows.map(b => ({ result: b._resultKey })));
+
+          function sCard(label, value, note, isWin) {
+            const color = value > 0 ? (isWin ? 'color:var(--ok);' : 'color:var(--bad);') : '';
+            return `<div class="streak-card">
+              <div class="streak-label">${label}</div>
+              <div class="streak-value" style="${color}">${value}</div>
+              <div class="streak-sub">${note}</div>
+            </div>`;
+          }
+
+          function streakCard(title, icon, accent, s) {
+            return `<div class="card">
+              <div class="bankroll-split-header">
+                <span style="font-size:18px;">${icon}</span>
+                <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
+              </div>
+              <div class="streak-row">
+                ${sCard('Win streak', s.currentWin, 'Ativa', true)}
+                ${sCard('Loss streak', s.currentLoss, 'Ativa', false)}
+                ${sCard('Best streak', s.longestWin, 'Histórico', true)}
+                ${sCard('Worst streak', s.longestLoss, 'Histórico', false)}
+              </div>
+            </div>`;
+          }
+
+          streaksEl.innerHTML = `<div class="bankroll-split-grid">
+            ${streakCard('Bot', '🤖', 'var(--accent)', botS)}
+            ${streakCard('Manual', '✋', 'var(--ok)', manS)}
+          </div>`;
+        }
+      }
+
       function renderMovementsTable() {
         const wrap = document.getElementById('movementsTableWrap');
         if (!wrap) return;
@@ -10122,6 +10384,7 @@ buttons.forEach(btn => {
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
         try { renderBankrollPage(); } catch (e) { console.error('renderBankrollPage', e); }
+        try { renderVersus(); } catch (e) { console.error('renderVersus', e); }
 
         try { renderLeagueAnalytics(); } catch (e) { console.error('renderLeagueAnalytics', e); }
 
