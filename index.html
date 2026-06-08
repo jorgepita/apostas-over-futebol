@@ -2872,6 +2872,38 @@ button.dirty {
         </div>
         <div id="versusStreaks"></div>
 
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">E — Market Intelligence</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusMarkets"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">F — League Intelligence</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div id="versusLeagues"></div>
+        </div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">G — Performance Insights</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusInsights"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">H — Confidence Score</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusConfidence"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">I — Winner Summary</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusWinner"></div>
+
       </div>
     </div>
 
@@ -8186,6 +8218,62 @@ buttons.forEach(btn => {
         const manAvgOdd  = manOdds.length > 0 ? sum(manOdds) / manOdds.length : null;
         const manAvgStk  = manSettled > 0 && manStake > 0 ? manStake / manSettled : null;
 
+        // ─── Market stats (E, G) ─────────────────────────────────────────
+        function manMktMatch(b, mkt) {
+          const raw = String(b.mercado || '').trim().toUpperCase();
+          if (mkt === 'Over 2.5') return raw.includes('OVER 2.5') || raw.includes('O2.5') || raw === 'O25' || raw.includes('OVER_2.5');
+          if (mkt === 'BTTS')     return raw.includes('BTTS') || raw.includes('BOTH TEAMS') || raw.includes('AMBAS');
+          return false;
+        }
+        function calcMktStats(rows, isManual, mkt) {
+          const subset = isManual ? rows.filter(b => manMktMatch(b, mkt)) : rows.filter(r => marketMatches(r, mkt));
+          const stake  = sum(isManual ? subset.map(b => num(b.stake)).filter(v=>v!==null)    : subset.map(r=>r._stakeRealNum).filter(v=>v!==null));
+          const profit = sum(isManual ? subset.map(b => b._lucro).filter(v=>v!==null)        : subset.map(r=>r._lucroRealLocal).filter(v=>v!==null));
+          const wins   = subset.filter(r => r._resultKey === 'W').length;
+          const losses = subset.filter(r => r._resultKey === 'L').length;
+          const roi    = stake > 0 ? (profit / stake) * 100 : null;
+          const wr     = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+          return { count: subset.length, wins, losses, stake, profit, roi, wr };
+        }
+        const mkts = [
+          { key: 'Over 2.5', bot: calcMktStats(botRows, false, 'Over 2.5'), man: calcMktStats(manualRows, true, 'Over 2.5') },
+          { key: 'BTTS',     bot: calcMktStats(botRows, false, 'BTTS'),     man: calcMktStats(manualRows, true, 'BTTS') }
+        ];
+
+        // ─── League stats (F, G, I) ──────────────────────────────────────
+        const lgMap = new Map();
+        function addLg(lgKey, isManual, row) {
+          const k = lgKey && lgKey !== '—' ? lgKey : null;
+          if (!k) return;
+          if (!lgMap.has(k)) lgMap.set(k, { bot: null, man: null });
+          const entry = lgMap.get(k);
+          const side = isManual ? 'man' : 'bot';
+          if (!entry[side]) entry[side] = { count: 0, wins: 0, losses: 0, stake: 0, profit: 0 };
+          const s = entry[side];
+          s.count++;
+          if (row._resultKey === 'W') s.wins++;
+          if (row._resultKey === 'L') s.losses++;
+          if (isManual) { s.stake += num(row.stake) ?? 0; s.profit += row._lucro ?? 0; }
+          else          { s.stake += row._stakeRealNum ?? 0; s.profit += row._lucroRealLocal ?? 0; }
+        }
+        botRows.forEach(r    => addLg(cleanString(r['Liga'] || ''), false, r));
+        manualRows.forEach(b => addLg(cleanString(b.liga || ''), true, b));
+        function lgRoi(s) { return s && s.stake > 0 ? (s.profit / s.stake) * 100 : null; }
+        const leagueEntries = [...lgMap.entries()].map(([league, data]) => {
+          const bRoi = lgRoi(data.bot);
+          const mRoi = lgRoi(data.man);
+          const diff = (bRoi !== null && mRoi !== null) ? Math.abs(bRoi - mRoi) : 0;
+          let winner = '—';
+          if (bRoi !== null && mRoi !== null) { winner = Math.abs(bRoi - mRoi) < 1 ? 'TIE' : bRoi > mRoi ? 'BOT' : 'MANUAL'; }
+          else if (bRoi !== null)             { winner = 'BOT'; }
+          else if (mRoi !== null)             { winner = 'MANUAL'; }
+          return { league, bRoi, mRoi, diff, winner, botCount: data.bot?.count || 0, manCount: data.man?.count || 0 };
+        }).sort((a, b) => b.diff - a.diff);
+
+        // ─── Drawdown hoisted (C, G, I) ──────────────────────────────────
+        const _botDD = computeDrawdownAnalysis(botRows.map(r => ({ date: normalizeDateString(r['Data']||'')||'', lucro: r._lucroRealLocal||0 })));
+        const _manDD = computeDrawdownAnalysis(manualRows.map(b => ({ date: b.data||'', lucro: b._lucro||0 })));
+
         // ─── Section A: KPI cards ────────────────────────────────────────
         function profColor(v) {
           return v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : 'var(--text)';
@@ -8280,15 +8368,6 @@ buttons.forEach(btn => {
         // ─── Section C: Drawdown ─────────────────────────────────────────
         const drawdownEl = document.getElementById('versusDrawdown');
         if (drawdownEl) {
-          const botDD = computeDrawdownAnalysis(botRows.map(r => ({
-            date: normalizeDateString(r['Data'] || '') || '',
-            lucro: r._lucroRealLocal || 0
-          })));
-          const manDD = computeDrawdownAnalysis(manualRows.map(b => ({
-            date: b.data || '',
-            lucro: b._lucro || 0
-          })));
-
           function ddCard(title, icon, accent, dd) {
             if (!dd) return `<div class="card">
               <div class="bankroll-split-header">
@@ -8316,8 +8395,8 @@ buttons.forEach(btn => {
           }
 
           drawdownEl.innerHTML = `<div class="bankroll-split-grid">
-            ${ddCard('Bot', '🤖', 'var(--accent)', botDD)}
-            ${ddCard('Manual', '✋', 'var(--ok)', manDD)}
+            ${ddCard('Bot', '🤖', 'var(--accent)', _botDD)}
+            ${ddCard('Manual', '✋', 'var(--ok)', _manDD)}
           </div>`;
         }
 
@@ -8354,6 +8433,241 @@ buttons.forEach(btn => {
           streaksEl.innerHTML = `<div class="bankroll-split-grid">
             ${streakCard('Bot', '🤖', 'var(--accent)', botS)}
             ${streakCard('Manual', '✋', 'var(--ok)', manS)}
+          </div>`;
+        }
+
+        // ─── Section E: Market Intelligence ─────────────────────────────
+        const marketsEl = document.getElementById('versusMarkets');
+        if (marketsEl) {
+          function mktStatBlock(label, s) {
+            if (!s.count) return `<div class="note" style="text-align:center;padding:8px;font-size:12px;">Sem dados</div>`;
+            return `<div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">${label}</div>
+              <div class="kpi-grid kpi-grid-4">
+                ${kpiCell('Apostas', String(s.count), '')}
+                ${kpiCell('WR', s.wr !== null ? pct(s.wr) : '—', '')}
+                ${kpiCell('ROI', s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—', s.roi !== null ? profColor(s.roi) : '')}
+                ${kpiCell('Lucro', (s.profit >= 0 ? '+' : '') + '€' + fmt(s.profit), profColor(s.profit))}
+              </div>`;
+          }
+          const mktCards = mkts.filter(m => m.bot.count > 0 || m.man.count > 0).map(m => {
+            const botAhead = m.bot.roi !== null && m.man.roi !== null && m.bot.roi > m.man.roi + 1;
+            const manAhead = m.bot.roi !== null && m.man.roi !== null && m.man.roi > m.bot.roi + 1;
+            const badge = botAhead ? `<span style="font-size:11px;font-weight:700;color:var(--accent);">🤖 Bot lidera</span>`
+                        : manAhead ? `<span style="font-size:11px;font-weight:700;color:var(--ok);">✋ Manual lidera</span>`
+                        : `<span style="font-size:11px;color:var(--muted);">Equivalente</span>`;
+            return `<div class="card">
+              <div class="bankroll-split-header">
+                <span class="bankroll-split-title" style="font-size:15px;">${escapeHtml(m.key)}</span>
+                ${badge}
+              </div>
+              <div class="bankroll-split-grid">
+                <div>${mktStatBlock('🤖 Bot', m.bot)}</div>
+                <div>${mktStatBlock('✋ Manual', m.man)}</div>
+              </div>
+            </div>`;
+          });
+          marketsEl.innerHTML = mktCards.length
+            ? mktCards.join('')
+            : `<div class="note" style="text-align:center;padding:20px;">Sem dados de mercado (Over 2.5 / BTTS) para exibir</div>`;
+        }
+
+        // ─── Section F: League Intelligence ──────────────────────────────
+        const leaguesEl = document.getElementById('versusLeagues');
+        if (leaguesEl) {
+          if (!leagueEntries.length) {
+            leaguesEl.innerHTML = `<div class="note" style="text-align:center;padding:20px;">Sem dados de liga para exibir</div>`;
+          } else {
+            function roiCell(v) {
+              if (v === null) return `<td style="color:var(--muted);text-align:right;padding:8px 12px;">—</td>`;
+              const c = v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : 'var(--text)';
+              return `<td style="font-weight:700;color:${c};text-align:right;padding:8px 12px;">${v >= 0 ? '+' : ''}${pct(v)}</td>`;
+            }
+            function wBadge(w) {
+              if (w === 'BOT')    return `<span style="color:var(--accent);font-weight:700;font-size:11px;">🤖 BOT</span>`;
+              if (w === 'MANUAL') return `<span style="color:var(--ok);font-weight:700;font-size:11px;">✋ MANUAL</span>`;
+              if (w === 'TIE')    return `<span style="color:var(--muted);font-size:11px;">TIE</span>`;
+              return `<span style="color:var(--muted);font-size:11px;">—</span>`;
+            }
+            const lgRows = leagueEntries.map(e => `<tr>
+              <td style="padding:8px 12px;font-weight:600;">${escapeHtml(e.league)}</td>
+              <td style="padding:8px 12px;color:var(--muted);font-size:11px;text-align:center;">${e.botCount || '—'}</td>
+              ${roiCell(e.bRoi)}
+              <td style="padding:8px 12px;color:var(--muted);font-size:11px;text-align:center;">${e.manCount || '—'}</td>
+              ${roiCell(e.mRoi)}
+              <td style="padding:8px 12px;text-align:center;">${wBadge(e.winner)}</td>
+            </tr>`).join('');
+            leaguesEl.innerHTML = `<div class="table-wrap"><table class="data-table">
+              <thead><tr>
+                <th>Liga</th>
+                <th style="text-align:center;">Bot n</th>
+                <th style="text-align:right;">🤖 Bot ROI</th>
+                <th style="text-align:center;">Man n</th>
+                <th style="text-align:right;">✋ Manual ROI</th>
+                <th style="text-align:center;">Vencedor</th>
+              </tr></thead>
+              <tbody>${lgRows}</tbody>
+            </table></div>`;
+          }
+        }
+
+        // ─── Section G: Performance Insights ─────────────────────────────
+        const insightsEl = document.getElementById('versusInsights');
+        if (insightsEl) {
+          const MIN = 5;
+          const insights = [];
+
+          // G1: ROI comparison
+          if (botSettled >= MIN && manSettled >= MIN) {
+            const diff = manRoi - botRoi;
+            if (Math.abs(diff) >= 1) {
+              const leader = diff > 0 ? 'Manual' : 'Bot';
+              const loser  = diff > 0 ? 'Bot' : 'Manual';
+              insights.push({ text: `${leader} ROI exceeds ${loser} ROI by ${diff > 0 ? '+' : ''}${pct(Math.abs(diff), 1)} pp (${pct(manRoi, 1)} Manual vs ${pct(botRoi, 1)} Bot).`, type: diff > 0 ? 'manual' : 'bot' });
+            }
+          }
+
+          // G2: Sample size
+          if (botSettled >= 1 && manSettled >= 1) {
+            const mx = Math.max(botSettled, manSettled);
+            const mn = Math.min(botSettled, manSettled);
+            if (mx / mn >= 2) {
+              const larger  = botSettled > manSettled ? 'Bot' : 'Manual';
+              const smaller = botSettled > manSettled ? 'Manual' : 'Bot';
+              insights.push({ text: `${larger} sample is ${fmt(mx / mn, 1)}× larger than ${smaller} (${mx} vs ${mn} bets settled).`, type: 'info' });
+            }
+          }
+
+          // G3: WR vs Odds tradeoff
+          if (botSettled >= MIN && manSettled >= MIN && botAvgOdd !== null && manAvgOdd !== null) {
+            if (manWr > botWr + 2 && manAvgOdd < botAvgOdd - 0.05) {
+              insights.push({ text: `Manual has higher Win Rate (${pct(manWr, 1)} vs ${pct(botWr, 1)}) but bets on shorter odds (avg ${fmt(manAvgOdd)} vs ${fmt(botAvgOdd)}).`, type: 'info' });
+            } else if (botWr > manWr + 2 && botAvgOdd < manAvgOdd - 0.05) {
+              insights.push({ text: `Bot has higher Win Rate (${pct(botWr, 1)} vs ${pct(manWr, 1)}) but bets on shorter odds (avg ${fmt(botAvgOdd)} vs ${fmt(manAvgOdd)}).`, type: 'info' });
+            }
+          }
+
+          // G4: Drawdown
+          if (_botDD && _manDD) {
+            const bd = _botDD.maxDrawdown.eur, md = _manDD.maxDrawdown.eur;
+            if (bd < md - 1) insights.push({ text: `Bot has lower max drawdown (€${fmt(bd)}) vs Manual (€${fmt(md)}) — better risk stability.`, type: 'bot' });
+            else if (md < bd - 1) insights.push({ text: `Manual has lower max drawdown (€${fmt(md)}) vs Bot (€${fmt(bd)}) — better risk stability.`, type: 'manual' });
+          }
+
+          // G5 & G6: Market edge
+          mkts.forEach(m => {
+            if (m.bot.roi !== null && m.man.roi !== null) {
+              if (m.man.roi > m.bot.roi + 3 && m.man.count >= 3) insights.push({ text: `Manual outperforms Bot in ${m.key}: ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} vs ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} ROI.`, type: 'manual' });
+              else if (m.bot.roi > m.man.roi + 3 && m.bot.count >= 3) insights.push({ text: `Bot outperforms Manual in ${m.key}: ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} vs ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} ROI.`, type: 'bot' });
+            }
+          });
+
+          // G7 & G8: Best league per source
+          const lgB = leagueEntries.filter(e => e.winner === 'BOT'    && e.bRoi !== null && e.bRoi > 5 && e.botCount >= 3).sort((a,b) => b.bRoi - a.bRoi);
+          const lgM = leagueEntries.filter(e => e.winner === 'MANUAL' && e.mRoi !== null && e.mRoi > 5 && e.manCount >= 3).sort((a,b) => b.mRoi - a.mRoi);
+          if (lgB.length) insights.push({ text: `Bot's strongest league: ${escapeHtml(lgB[0].league)} (ROI ${lgB[0].bRoi >= 0 ? '+' : ''}${pct(lgB[0].bRoi, 1)}, ${lgB[0].botCount} bets).`, type: 'bot' });
+          if (lgM.length) insights.push({ text: `Manual's strongest league: ${escapeHtml(lgM[0].league)} (ROI ${lgM[0].mRoi >= 0 ? '+' : ''}${pct(lgM[0].mRoi, 1)}, ${lgM[0].manCount} bets).`, type: 'manual' });
+
+          if (!insights.length) {
+            insightsEl.innerHTML = `<div class="card"><div class="note" style="text-align:center;padding:16px;">Dados insuficientes para gerar insights. São necessárias pelo menos ${MIN} apostas resolvidas em cada lado.</div></div>`;
+          } else {
+            const body = insights.slice(0, 8).map(ins => {
+              const dot = ins.type === 'bot' ? 'var(--accent)' : ins.type === 'manual' ? 'var(--ok)' : 'var(--muted)';
+              return `<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">
+                <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px;"></div>
+                <div style="font-size:13px;color:var(--text);">${ins.text}</div>
+              </div>`;
+            }).join('');
+            insightsEl.innerHTML = `<div class="card">${body}</div>`;
+          }
+        }
+
+        // ─── Section H: Confidence Score ─────────────────────────────────
+        const confEl = document.getElementById('versusConfidence');
+        if (confEl) {
+          const totalSettled  = botSettled + manSettled;
+          const minSide       = Math.min(botSettled, manSettled);
+          const maxSide       = Math.max(botSettled, manSettled);
+          const sampleScore   = Math.min(totalSettled / 200 * 40, 40);
+          const balanceScore  = maxSide > 0 ? Math.min((minSide / maxSide) * 20, 20) : 0;
+          const leagueScore   = Math.min(lgMap.size / 10 * 20, 20);
+          const mktsCovered   = mkts.filter(m => m.bot.count >= 5 || m.man.count >= 5).length;
+          const marketScore   = mktsCovered >= 2 ? 20 : mktsCovered === 1 ? 10 : 0;
+          const confScore     = Math.round(sampleScore + balanceScore + leagueScore + marketScore);
+          const confLabel     = confScore >= 67 ? 'HIGH' : confScore >= 34 ? 'MEDIUM' : 'LOW';
+          const confColor     = confScore >= 67 ? 'var(--ok)' : confScore >= 34 ? 'var(--warn)' : 'var(--bad)';
+          confEl.innerHTML = `<div class="card">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div style="text-align:center;min-width:80px;">
+                <div style="font-size:36px;font-weight:900;color:${confColor};">${confScore}</div>
+                <div style="font-size:13px;font-weight:700;color:${confColor};">${confLabel}</div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="background:var(--line);border-radius:8px;height:10px;overflow:hidden;margin-bottom:12px;">
+                  <div style="background:${confColor};width:${confScore}%;height:100%;border-radius:8px;"></div>
+                </div>
+                <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:6px;">
+                  ${kpiCell('Amostra', Math.round(sampleScore) + '/40', '')}
+                  ${kpiCell('Equilíbrio', Math.round(balanceScore) + '/20', '')}
+                  ${kpiCell('Ligas', Math.round(leagueScore) + '/20', '')}
+                  ${kpiCell('Mercados', Math.round(marketScore) + '/20', '')}
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }
+
+        // ─── Section I: Winner Summary ────────────────────────────────────
+        const winnerEl = document.getElementById('versusWinner');
+        if (winnerEl) {
+          function pickWinner(bv, mv, higherBetter) {
+            if (bv === null && mv === null) return '—';
+            if (bv === null) return 'MANUAL';
+            if (mv === null) return 'BOT';
+            const diff = bv - mv;
+            if (Math.abs(diff) < 0.01) return 'TIE';
+            return (higherBetter ? diff > 0 : diff < 0) ? 'BOT' : 'MANUAL';
+          }
+          const botMaxDD2 = _botDD ? _botDD.maxDrawdown.eur : null;
+          const manMaxDD2 = _manDD ? _manDD.maxDrawdown.eur : null;
+          const dims = [
+            { label: 'ROI',      winner: pickWinner(botRoi, manRoi, true),          botVal: (botRoi >= 0 ? '+' : '') + pct(botRoi, 1),          manVal: (manRoi >= 0 ? '+' : '') + pct(manRoi, 1) },
+            { label: 'Win Rate', winner: pickWinner(botWr, manWr, true),             botVal: pct(botWr, 1),                                        manVal: pct(manWr, 1) },
+            { label: 'Profit',   winner: pickWinner(botProfit, manProfit, true),     botVal: (botProfit >= 0 ? '+' : '') + '€' + fmt(botProfit),   manVal: (manProfit >= 0 ? '+' : '') + '€' + fmt(manProfit) },
+            { label: 'Drawdown', winner: pickWinner(botMaxDD2, manMaxDD2, false),    botVal: botMaxDD2 !== null ? '-€' + fmt(botMaxDD2) : '—',     manVal: manMaxDD2 !== null ? '-€' + fmt(manMaxDD2) : '—' },
+            { label: 'Volume',   winner: pickWinner(botSettled, manSettled, true),   botVal: botSettled + ' bets',                                 manVal: manSettled + ' bets' }
+          ];
+          const botW = dims.filter(d => d.winner === 'BOT').length;
+          const manW = dims.filter(d => d.winner === 'MANUAL').length;
+          const overall = botW > manW ? 'BOT' : manW > botW ? 'MANUAL' : 'TIE';
+          const oColor  = overall === 'BOT' ? 'var(--accent)' : overall === 'MANUAL' ? 'var(--ok)' : 'var(--muted)';
+          const oLabel  = overall === 'BOT' ? '🤖 BOT' : overall === 'MANUAL' ? '✋ MANUAL' : 'TIE';
+          const oScore  = overall !== 'TIE' ? `${Math.max(botW, manW)}/${dims.length}` : `${botW}/${dims.length} each`;
+          function dimRow(d) {
+            const badge = d.winner === 'BOT'    ? `<span style="color:var(--accent);font-weight:700;font-size:11px;">🤖 BOT</span>`
+                        : d.winner === 'MANUAL' ? `<span style="color:var(--ok);font-weight:700;font-size:11px;">✋ MANUAL</span>`
+                        : `<span style="color:var(--muted);font-size:11px;">TIE</span>`;
+            return `<tr>
+              <td style="padding:8px 12px;font-weight:700;">${d.label}</td>
+              <td style="padding:8px 12px;text-align:right;font-size:12px;">${d.botVal}</td>
+              <td style="padding:8px 12px;text-align:right;font-size:12px;">${d.manVal}</td>
+              <td style="padding:8px 12px;text-align:center;">${badge}</td>
+            </tr>`;
+          }
+          winnerEl.innerHTML = `<div class="card">
+            <div class="table-wrap" style="margin-bottom:16px;"><table class="data-table">
+              <thead><tr>
+                <th>Dimensão</th>
+                <th style="text-align:right;">🤖 Bot</th>
+                <th style="text-align:right;">✋ Manual</th>
+                <th style="text-align:center;">Vencedor</th>
+              </tr></thead>
+              <tbody>${dims.map(dimRow).join('')}</tbody>
+            </table></div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:12px;background:var(--card-alt);border-radius:10px;border:1px solid var(--line);">
+              <div style="font-size:13px;font-weight:700;color:var(--muted);">Overall Winner</div>
+              <div style="font-size:20px;font-weight:900;color:${oColor};">${oLabel}</div>
+              <div style="font-size:13px;color:var(--muted);">(${oScore})</div>
+            </div>
           </div>`;
         }
       }
