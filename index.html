@@ -6501,10 +6501,27 @@ button.dirty {
           return `${y}-${mo}-${da}`;
         })();
 
+        // Build set of match keys that already have a decided manual bet (approved or rejected).
+        // Uses the same key formula as the scout card: date_league_home_away (lowercase, spaces→_).
+        const processedMatchKeys = new Set(
+          (Array.isArray(state.manualBets) ? state.manualBets : [])
+            .filter(b => b.status === 'approved' || b.status === 'rejected')
+            .map(b => {
+              const p = String(b.jogo || '').split(' vs ');
+              return `${b.data || ''}_${b.liga || ''}_${(p[0] || '').trim()}_${(p[1] || '').trim()}`
+                .replace(/\s+/g, '_').toLowerCase();
+            })
+        );
+
         const fixtures = (Array.isArray(state.fixtures) ? state.fixtures : [])
           .filter(f => {
             const d = normalizeDateString(f.Date || f.date || '');
-            return d && d >= today && d <= maxDate;
+            if (!d || d < today || d > maxDate) return false;
+            const league = cleanString(f.League || f.Liga || '');
+            const home   = cleanString(f.HomeTeam || f.Home || '');
+            const away   = cleanString(f.AwayTeam || f.Away || '');
+            const mk = `${d}_${league}_${home}_${away}`.replace(/\s+/g, '_').toLowerCase();
+            return !processedMatchKeys.has(mk);
           });
 
         if (!fixtures.length) {
