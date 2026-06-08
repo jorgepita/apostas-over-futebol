@@ -8187,6 +8187,10 @@ buttons.forEach(btn => {
         `;
       }
 
+      const MIN_SAMPLE_COMPARE = 5;
+      const MIN_SAMPLE_MARKET  = 3;
+      const MIN_SAMPLE_LEAGUE  = 3;
+
       function renderVersus() {
         const kpiEl = document.getElementById('versusKpiRow');
         if (!kpiEl) return;
@@ -8287,12 +8291,17 @@ buttons.forEach(btn => {
         }
 
         function sourceCard(title, icon, accent, s) {
+          const lowSample = s.settled < MIN_SAMPLE_COMPARE;
+          const sampleBadge = lowSample
+            ? `<span style="background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;margin-left:8px;">LOW SAMPLE</span>`
+            : '';
           return `<div class="card">
             <div class="bankroll-split-header">
               <span style="font-size:18px;">${icon}</span>
               <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
-              <span style="margin-left:auto;font-size:11px;color:var(--muted);">${s.wins}W / ${s.losses}L</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);">${s.wins}W / ${s.losses}L${sampleBadge}</span>
             </div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Sample: <strong>${s.settled}</strong> bets${lowSample ? ' — insuficiente para comparações' : ''}</div>
             <div class="kpi-grid kpi-grid-4" style="margin-bottom:0;">
               ${kpiCell('Lucro', (s.profit >= 0 ? '+' : '') + '€' + fmt(s.profit), profColor(s.profit))}
               ${kpiCell('ROI', (s.roi > 0 ? '+' : '') + pct(s.roi), profColor(s.roi))}
@@ -8513,11 +8522,11 @@ buttons.forEach(btn => {
         // ─── Section G: Performance Insights ─────────────────────────────
         const insightsEl = document.getElementById('versusInsights');
         if (insightsEl) {
-          const MIN = 5;
+          const bothHaveSample = botSettled >= MIN_SAMPLE_COMPARE && manSettled >= MIN_SAMPLE_COMPARE;
           const insights = [];
 
           // G1: ROI comparison
-          if (botSettled >= MIN && manSettled >= MIN) {
+          if (botSettled >= MIN_SAMPLE_COMPARE && manSettled >= MIN_SAMPLE_COMPARE) {
             const diff = manRoi - botRoi;
             if (Math.abs(diff) >= 1) {
               const leader = diff > 0 ? 'Manual' : 'Bot';
@@ -8538,7 +8547,7 @@ buttons.forEach(btn => {
           }
 
           // G3: WR vs Odds tradeoff
-          if (botSettled >= MIN && manSettled >= MIN && botAvgOdd !== null && manAvgOdd !== null) {
+          if (botSettled >= MIN_SAMPLE_COMPARE && manSettled >= MIN_SAMPLE_COMPARE && botAvgOdd !== null && manAvgOdd !== null) {
             if (manWr > botWr + 2 && manAvgOdd < botAvgOdd - 0.05) {
               insights.push({ text: `Manual has higher Win Rate (${pct(manWr, 1)} vs ${pct(botWr, 1)}) but bets on shorter odds (avg ${fmt(manAvgOdd)} vs ${fmt(botAvgOdd)}).`, type: 'info' });
             } else if (botWr > manWr + 2 && botAvgOdd < manAvgOdd - 0.05) {
@@ -8547,7 +8556,7 @@ buttons.forEach(btn => {
           }
 
           // G4: Drawdown
-          if (_botDD && _manDD) {
+          if (_botDD && _manDD && bothHaveSample) {
             const bd = _botDD.maxDrawdown.eur, md = _manDD.maxDrawdown.eur;
             if (bd < md - 1) insights.push({ text: `Bot has lower max drawdown (€${fmt(bd)}) vs Manual (€${fmt(md)}) — better risk stability.`, type: 'bot' });
             else if (md < bd - 1) insights.push({ text: `Manual has lower max drawdown (€${fmt(md)}) vs Bot (€${fmt(bd)}) — better risk stability.`, type: 'manual' });
@@ -8555,20 +8564,20 @@ buttons.forEach(btn => {
 
           // G5 & G6: Market edge
           mkts.forEach(m => {
-            if (m.bot.roi !== null && m.man.roi !== null) {
-              if (m.man.roi > m.bot.roi + 3 && m.man.count >= 3) insights.push({ text: `Manual outperforms Bot in ${m.key}: ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} vs ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} ROI.`, type: 'manual' });
-              else if (m.bot.roi > m.man.roi + 3 && m.bot.count >= 3) insights.push({ text: `Bot outperforms Manual in ${m.key}: ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} vs ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} ROI.`, type: 'bot' });
+            if (m.bot.roi !== null && m.man.roi !== null && bothHaveSample) {
+              if (m.man.roi > m.bot.roi + 3 && m.man.count >= MIN_SAMPLE_MARKET) insights.push({ text: `Manual outperforms Bot in ${m.key}: ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} vs ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} ROI.`, type: 'manual' });
+              else if (m.bot.roi > m.man.roi + 3 && m.bot.count >= MIN_SAMPLE_MARKET) insights.push({ text: `Bot outperforms Manual in ${m.key}: ${m.bot.roi >= 0 ? '+' : ''}${pct(m.bot.roi, 1)} vs ${m.man.roi >= 0 ? '+' : ''}${pct(m.man.roi, 1)} ROI.`, type: 'bot' });
             }
           });
 
           // G7 & G8: Best league per source
-          const lgB = leagueEntries.filter(e => e.winner === 'BOT'    && e.bRoi !== null && e.bRoi > 5 && e.botCount >= 3).sort((a,b) => b.bRoi - a.bRoi);
-          const lgM = leagueEntries.filter(e => e.winner === 'MANUAL' && e.mRoi !== null && e.mRoi > 5 && e.manCount >= 3).sort((a,b) => b.mRoi - a.mRoi);
+          const lgB = bothHaveSample ? leagueEntries.filter(e => e.winner === 'BOT'    && e.bRoi !== null && e.bRoi > 5 && e.botCount >= MIN_SAMPLE_LEAGUE).sort((a,b) => b.bRoi - a.bRoi) : [];
+          const lgM = bothHaveSample ? leagueEntries.filter(e => e.winner === 'MANUAL' && e.mRoi !== null && e.mRoi > 5 && e.manCount >= MIN_SAMPLE_LEAGUE).sort((a,b) => b.mRoi - a.mRoi) : [];
           if (lgB.length) insights.push({ text: `Bot's strongest league: ${escapeHtml(lgB[0].league)} (ROI ${lgB[0].bRoi >= 0 ? '+' : ''}${pct(lgB[0].bRoi, 1)}, ${lgB[0].botCount} bets).`, type: 'bot' });
           if (lgM.length) insights.push({ text: `Manual's strongest league: ${escapeHtml(lgM[0].league)} (ROI ${lgM[0].mRoi >= 0 ? '+' : ''}${pct(lgM[0].mRoi, 1)}, ${lgM[0].manCount} bets).`, type: 'manual' });
 
           if (!insights.length) {
-            insightsEl.innerHTML = `<div class="card"><div class="note" style="text-align:center;padding:16px;">Dados insuficientes para gerar insights. São necessárias pelo menos ${MIN} apostas resolvidas em cada lado.</div></div>`;
+            insightsEl.innerHTML = `<div class="card"><div class="note" style="text-align:center;padding:16px;">Dados insuficientes para gerar insights. São necessárias pelo menos ${MIN_SAMPLE_COMPARE} apostas resolvidas em cada lado.</div></div>`;
           } else {
             const body = insights.slice(0, 8).map(ins => {
               const dot = ins.type === 'bot' ? 'var(--accent)' : ins.type === 'manual' ? 'var(--ok)' : 'var(--muted)';
@@ -8592,7 +8601,8 @@ buttons.forEach(btn => {
           const leagueScore   = Math.min(lgMap.size / 10 * 20, 20);
           const mktsCovered   = mkts.filter(m => m.bot.count >= 5 || m.man.count >= 5).length;
           const marketScore   = mktsCovered >= 2 ? 20 : mktsCovered === 1 ? 10 : 0;
-          const confScore     = Math.round(sampleScore + balanceScore + leagueScore + marketScore);
+          const rawScore      = Math.round(sampleScore + balanceScore + leagueScore + marketScore);
+          const confScore     = (botSettled < MIN_SAMPLE_COMPARE || manSettled < MIN_SAMPLE_COMPARE) ? Math.min(rawScore, 30) : rawScore;
           const confLabel     = confScore >= 67 ? 'HIGH' : confScore >= 34 ? 'MEDIUM' : 'LOW';
           const confColor     = confScore >= 67 ? 'var(--ok)' : confScore >= 34 ? 'var(--warn)' : 'var(--bad)';
           confEl.innerHTML = `<div class="card">
@@ -8619,7 +8629,9 @@ buttons.forEach(btn => {
         // ─── Section I: Winner Summary ────────────────────────────────────
         const winnerEl = document.getElementById('versusWinner');
         if (winnerEl) {
+          const bothSampled = botSettled >= MIN_SAMPLE_COMPARE && manSettled >= MIN_SAMPLE_COMPARE;
           function pickWinner(bv, mv, higherBetter) {
+            if (!bothSampled) return 'N/A';
             if (bv === null && mv === null) return '—';
             if (bv === null) return 'MANUAL';
             if (mv === null) return 'BOT';
@@ -8638,13 +8650,14 @@ buttons.forEach(btn => {
           ];
           const botW = dims.filter(d => d.winner === 'BOT').length;
           const manW = dims.filter(d => d.winner === 'MANUAL').length;
-          const overall = botW > manW ? 'BOT' : manW > botW ? 'MANUAL' : 'TIE';
-          const oColor  = overall === 'BOT' ? 'var(--accent)' : overall === 'MANUAL' ? 'var(--ok)' : 'var(--muted)';
-          const oLabel  = overall === 'BOT' ? '🤖 BOT' : overall === 'MANUAL' ? '✋ MANUAL' : 'TIE';
-          const oScore  = overall !== 'TIE' ? `${Math.max(botW, manW)}/${dims.length}` : `${botW}/${dims.length} each`;
+          const overall = !bothSampled ? 'INSUFFICIENT' : botW > manW ? 'BOT' : manW > botW ? 'MANUAL' : 'TIE';
+          const oColor  = overall === 'BOT' ? 'var(--accent)' : overall === 'MANUAL' ? 'var(--ok)' : overall === 'INSUFFICIENT' ? 'var(--warn)' : 'var(--muted)';
+          const oLabel  = overall === 'BOT' ? '🤖 BOT' : overall === 'MANUAL' ? '✋ MANUAL' : overall === 'INSUFFICIENT' ? 'INSUFFICIENT SAMPLE' : 'TIE';
+          const oScore  = overall === 'INSUFFICIENT' ? `min. ${MIN_SAMPLE_COMPARE} bets per side required` : overall !== 'TIE' ? `${Math.max(botW, manW)}/${dims.length}` : `${botW}/${dims.length} each`;
           function dimRow(d) {
             const badge = d.winner === 'BOT'    ? `<span style="color:var(--accent);font-weight:700;font-size:11px;">🤖 BOT</span>`
                         : d.winner === 'MANUAL' ? `<span style="color:var(--ok);font-weight:700;font-size:11px;">✋ MANUAL</span>`
+                        : d.winner === 'N/A'    ? `<span style="color:var(--warn);font-size:11px;">Insufficient Sample</span>`
                         : `<span style="color:var(--muted);font-size:11px;">TIE</span>`;
             return `<tr>
               <td style="padding:8px 12px;font-weight:700;">${d.label}</td>
