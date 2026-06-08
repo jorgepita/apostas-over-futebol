@@ -2940,6 +2940,36 @@ button.dirty {
         </div>
         <div id="versusOpinionInsights"></div>
 
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">P — Edge Band Performance</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusEdgeBands"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Q — Edge Calibration</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusEdgeCalib"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">R — Expected vs Realized</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusEdgeRealized"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">S — Edge Insights</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusEdgeInsights"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">T — Model Efficiency Score</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusEdgeEfficiency"></div>
+
       </div>
     </div>
 
@@ -9113,6 +9143,240 @@ buttons.forEach(btn => {
               }).join('');
               opinionInsEl.innerHTML = `<div class="card">${body}</div>`;
             }
+          }
+        }
+
+        // ── Sections P–T: Edge Realization Intelligence ─────────────────────
+        const edgeBandEl  = document.getElementById('versusEdgeBands');
+        const edgeCalibEl = document.getElementById('versusEdgeCalib');
+        const edgeRealEl  = document.getElementById('versusEdgeRealized');
+        const edgeInsEl   = document.getElementById('versusEdgeInsights');
+        const edgeEffEl   = document.getElementById('versusEdgeEfficiency');
+        if (edgeBandEl || edgeCalibEl || edgeRealEl || edgeInsEl || edgeEffEl) {
+
+          const edgeBets = getResolvedManualBets().filter(b =>
+            b.hadAnalysis === true &&
+            b.analysisSnapshot &&
+            typeof b.edgeAtAnalysis === 'number' &&
+            ['W', 'L', 'P'].includes(b._resultKey)
+          );
+
+          const EDGE_BANDS = [
+            { label: '10%+',     min:  10,       max: Infinity  },
+            { label: '5–10%',    min:   5,       max: 10        },
+            { label: '2–5%',     min:   2,       max:  5        },
+            { label: '0–2%',     min:   0,       max:  2        },
+            { label: 'Negative', min: -Infinity, max:  0        }
+          ];
+
+          function edgeBS(lo, hi) {
+            const s      = edgeBets.filter(b => hi === Infinity ? b.edgeAtAnalysis >= lo : lo === -Infinity ? b.edgeAtAnalysis < hi : b.edgeAtAnalysis >= lo && b.edgeAtAnalysis < hi);
+            const wins   = s.filter(b => b._resultKey === 'W').length;
+            const losses = s.filter(b => b._resultKey === 'L').length;
+            const pushes = s.filter(b => b._resultKey === 'P').length;
+            const stk    = sum(s.map(b => num(b.stake)));
+            const prf    = sum(s.map(b => num(b._lucro)));
+            const edges  = s.map(b => b.edgeAtAnalysis);
+            const avgEdge = edges.length ? sum(edges) / edges.length : null;
+            const wr     = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+            const roi    = stk > 0 ? (prf / stk) * 100 : null;
+            return { count: s.length, wins, losses, pushes, stk, prf, wr, roi, avgEdge };
+          }
+
+          const eBands = EDGE_BANDS.map(bd => ({ ...bd, stats: edgeBS(bd.min, bd.max) }));
+
+          // Calibration — computed once, shared by Q and T
+          const ePairs = [
+            [eBands[0].stats, eBands[1].stats],
+            [eBands[1].stats, eBands[2].stats],
+            [eBands[2].stats, eBands[3].stats],
+            [eBands[3].stats, eBands[4].stats]
+          ];
+          let eInv = 0; let ePairsCk = 0;
+          for (const [hi, lo] of ePairs) {
+            if (hi.count >= MIN_SAMPLE_COMPARE && lo.count >= MIN_SAMPLE_COMPARE && hi.roi !== null && lo.roi !== null) {
+              ePairsCk++;
+              if (hi.roi <= lo.roi) eInv++;
+            }
+          }
+          const negSt       = eBands[4].stats;
+          const posWithSamp = eBands.slice(0, 4).filter(bd => bd.stats.count >= MIN_SAMPLE_COMPARE && bd.stats.roi !== null);
+          const negBeatsPos = negSt.count >= MIN_SAMPLE_COMPARE && negSt.roi !== null && posWithSamp.some(bd => negSt.roi > bd.stats.roi);
+          const eVerdict    = ePairsCk === 0 ? 'INSUFFICIENT SAMPLE'
+                            : (eInv === 0 && !negBeatsPos) ? 'GOOD'
+                            : (eInv <= 2 && !negBeatsPos)  ? 'MIXED' : 'POOR';
+          const eVColor     = eVerdict === 'GOOD' ? 'var(--ok)' : eVerdict === 'POOR' ? 'var(--bad)' : 'var(--warn)';
+
+          // Edge capture — computed once, shared by R, S, T
+          const avgEdgeAll = edgeBets.length ? sum(edgeBets.map(b => b.edgeAtAnalysis)) / edgeBets.length : null;
+          const eTotalStk  = sum(edgeBets.map(b => num(b.stake)));
+          const eTotalPrf  = sum(edgeBets.map(b => num(b._lucro)));
+          const eRealROI   = eTotalStk > 0 ? (eTotalPrf / eTotalStk) * 100 : null;
+          const eCapture   = avgEdgeAll !== null && avgEdgeAll > 0 && eRealROI !== null ? (eRealROI / avgEdgeAll) * 100 : null;
+          const eCapLbl    = eCapture === null ? '—' : eCapture >= 80 ? 'EXCELLENT' : eCapture >= 60 ? 'GOOD' : eCapture >= 40 ? 'MODERATE' : 'WEAK';
+          const eCapClr    = eCapture === null ? 'var(--muted)' : eCapture >= 60 ? 'var(--ok)' : eCapture >= 40 ? 'var(--warn)' : 'var(--bad)';
+
+          // ── P: Edge Band Table ───────────────────────────────────────────
+          if (edgeBandEl) {
+            if (!edgeBets.length) {
+              edgeBandEl.innerHTML = `<div class="note" style="text-align:center;padding:20px;color:var(--muted);">Sem apostas manuais analisadas com edge e resultado resolvido.</div>`;
+            } else {
+              const eRows = eBands.map(bd => {
+                const s     = bd.stats;
+                const insuf = s.count < MIN_SAMPLE_LEAGUE;
+                const rClr  = s.roi !== null ? (s.roi > 0 ? 'var(--ok)' : s.roi < 0 ? 'var(--bad)' : 'var(--text)') : 'var(--text)';
+                const pClr  = s.prf > 0 ? 'var(--ok)' : s.prf < 0 ? 'var(--bad)' : 'var(--text)';
+                const bClr  = bd.min >= 10 ? 'var(--ok)' : bd.max <= 0 ? 'var(--bad)' : 'var(--muted)';
+                if (insuf) {
+                  return `<tr>
+                    <td style="padding:8px 12px;font-weight:700;color:${bClr};">${bd.label}</td>
+                    <td style="padding:8px 12px;text-align:center;color:var(--muted);">${s.count}</td>
+                    <td colspan="5" style="padding:8px 12px;color:var(--muted);font-size:11px;">Insufficient Sample (min. ${MIN_SAMPLE_LEAGUE})</td>
+                  </tr>`;
+                }
+                return `<tr>
+                  <td style="padding:8px 12px;font-weight:700;color:${bClr};">${bd.label}</td>
+                  <td style="padding:8px 12px;text-align:center;">${s.count}</td>
+                  <td style="padding:8px 12px;text-align:right;">${s.avgEdge !== null ? (s.avgEdge >= 0 ? '+' : '') + pct(s.avgEdge, 1) : '—'}</td>
+                  <td style="padding:8px 12px;text-align:center;">${s.wins}-${s.losses}-${s.pushes}</td>
+                  <td style="padding:8px 12px;text-align:right;">${s.wr !== null ? pct(s.wr) : '—'}</td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700;color:${pClr};">${s.prf >= 0 ? '+' : ''}€${fmt(s.prf)}</td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700;color:${rClr};">${s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—'}</td>
+                </tr>`;
+              }).join('');
+              edgeBandEl.innerHTML = `<div class="card"><div class="table-wrap"><table class="data-table">
+                <thead><tr>
+                  <th>Edge Band</th>
+                  <th style="text-align:center;">Bets</th>
+                  <th style="text-align:right;">Avg Edge</th>
+                  <th style="text-align:center;">W-L-P</th>
+                  <th style="text-align:right;">WR</th>
+                  <th style="text-align:right;">Profit</th>
+                  <th style="text-align:right;">ROI</th>
+                </tr></thead>
+                <tbody>${eRows}</tbody>
+              </table></div></div>`;
+            }
+          }
+
+          // ── Q: Edge Calibration ──────────────────────────────────────────
+          if (edgeCalibEl) {
+            edgeCalibEl.innerHTML = `<div class="card">
+              <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+                <span style="font-size:12px;font-weight:700;color:var(--muted);">Edge Calibration:</span>
+                <span style="font-size:16px;font-weight:900;color:${eVColor};">${eVerdict}</span>
+                ${ePairsCk > 0 ? `<span style="font-size:11px;color:var(--muted);">${ePairsCk} pair${ePairsCk !== 1 ? 's' : ''} · ${eInv} inversion${eInv !== 1 ? 's' : ''}</span>` : ''}
+              </div>
+            </div>`;
+          }
+
+          // ── R: Expected vs Realized ──────────────────────────────────────
+          if (edgeRealEl) {
+            function eStatCard(title, val, sub, color) {
+              return `<div style="background:var(--card-alt);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${title}</div>
+                <div style="font-size:22px;font-weight:900;color:${color};">${val}</div>
+                ${sub ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;">${sub}</div>` : ''}
+              </div>`;
+            }
+            const aeDisp  = avgEdgeAll !== null ? (avgEdgeAll >= 0 ? '+' : '') + pct(avgEdgeAll, 1) : '—';
+            const rrDisp  = eRealROI !== null   ? (eRealROI >= 0 ? '+' : '')   + pct(eRealROI, 1)  : '—';
+            const ecDisp  = eCapture !== null   ? pct(eCapture, 1)             : '—';
+            const aeColor = avgEdgeAll !== null ? (avgEdgeAll > 0 ? 'var(--ok)' : 'var(--bad)') : 'var(--muted)';
+            const rrColor = eRealROI !== null   ? (eRealROI > 0  ? 'var(--ok)' : 'var(--bad)') : 'var(--muted)';
+            edgeRealEl.innerHTML = `<div class="card">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                ${eStatCard('Average Edge', aeDisp, edgeBets.length + ' bets', aeColor)}
+                ${eStatCard('Realized ROI', rrDisp, 'actual performance', rrColor)}
+                ${eStatCard('Edge Capture', ecDisp, eCapLbl, eCapClr)}
+              </div>
+            </div>`;
+          }
+
+          // ── S: Edge Insights ─────────────────────────────────────────────
+          if (edgeInsEl) {
+            const eIns   = [];
+            const validEB = eBands.filter(bd => bd.stats.count >= MIN_SAMPLE_LEAGUE && bd.stats.roi !== null);
+            const topBand = eBands[0].stats;
+            const negBand = eBands[4].stats;
+
+            if (topBand.count >= MIN_SAMPLE_LEAGUE && topBand.roi !== null) {
+              eIns.push({ text: topBand.roi >= 0
+                ? `10%+ edge bets are strongly profitable (${topBand.roi >= 0 ? '+' : ''}${pct(topBand.roi, 1)} ROI, ${topBand.count} bets).`
+                : `10%+ edge bets are currently unprofitable despite high expected edge (${pct(topBand.roi, 1)} ROI, ${topBand.count} bets).`,
+                type: topBand.roi > 0 ? 'ok' : 'warn' });
+            }
+
+            if (negBand.count >= MIN_SAMPLE_LEAGUE && negBand.roi !== null && negBand.roi < 0) {
+              eIns.push({ text: `Negative-edge bets remain unprofitable (${pct(negBand.roi, 1)} ROI, ${negBand.count} bets).`, type: 'ok' });
+            }
+
+            if (validEB.length >= 3) {
+              const roisEB = validEB.map(bd => bd.stats.roi);
+              if (roisEB.every((v, i) => i === 0 || v <= roisEB[i - 1])) {
+                eIns.push({ text: `Higher edge generally corresponds to higher ROI across ${validEB.length} measured band${validEB.length !== 1 ? 's' : ''}.`, type: 'ok' });
+              }
+            }
+
+            if (eCapture !== null && edgeBets.length >= MIN_SAMPLE_COMPARE) {
+              if (eCapture >= 80) {
+                eIns.push({ text: `Edge capture currently exceeds 80% (${pct(eCapture, 1)}) — model is efficiently converting theoretical edge into real profit.`, type: 'ok' });
+              } else if (eCapture < 40 && eCapture >= 0) {
+                eIns.push({ text: `Realized ROI significantly lags expected edge — capture rate is only ${pct(eCapture, 1)}. Review model assumptions.`, type: 'warn' });
+              }
+            }
+
+            if (eVerdict === 'GOOD' && ePairsCk >= 2) {
+              eIns.push({ text: `Edge model appears well calibrated — consistent ROI ordering across ${ePairsCk} measured band pair${ePairsCk !== 1 ? 's' : ''}.`, type: 'ok' });
+            } else if (eVerdict === 'POOR') {
+              eIns.push({ text: `Edge model shows poor calibration — ROI ordering does not match expected edge hierarchy.`, type: 'warn' });
+            }
+
+            if (validEB.length && eRealROI !== null) {
+              const bestEB = validEB.reduce((a, b) => b.stats.roi > a.stats.roi ? b : a);
+              if (bestEB.stats.roi > eRealROI + 5) {
+                eIns.push({ text: `${bestEB.label} edge band (${bestEB.stats.roi >= 0 ? '+' : ''}${pct(bestEB.stats.roi, 1)}) outperforms overall ROI by ${pct(bestEB.stats.roi - eRealROI, 1)} pp.`, type: 'ok' });
+              }
+            }
+
+            if (!eIns.length) {
+              edgeInsEl.innerHTML = `<div class="card"><div class="note" style="text-align:center;padding:16px;color:var(--muted);">Dados insuficientes para gerar insights de edge. São necessárias pelo menos ${MIN_SAMPLE_LEAGUE} apostas analisadas e resolvidas.</div></div>`;
+            } else {
+              const body = eIns.slice(0, 6).map(ins => {
+                const dot = ins.type === 'ok' ? 'var(--ok)' : ins.type === 'warn' ? 'var(--warn)' : 'var(--muted)';
+                return `<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px;"></div>
+                  <div style="font-size:13px;color:var(--text);">${ins.text}</div>
+                </div>`;
+              }).join('');
+              edgeInsEl.innerHTML = `<div class="card">${body}</div>`;
+            }
+          }
+
+          // ── T: Model Efficiency Score ────────────────────────────────────
+          if (edgeEffEl) {
+            const capFac  = eCapture === null ? 0 : eCapture >= 80 ? 35 : eCapture >= 60 ? 25 : eCapture >= 40 ? 15 : eCapture >= 0 ? 5 : 0;
+            const calFac  = eVerdict === 'GOOD' ? 30 : eVerdict === 'MIXED' ? 15 : 0;
+            const smpFac  = edgeBets.length >= 50 ? 20 : edgeBets.length >= 20 ? 15 : edgeBets.length >= 10 ? 10 : edgeBets.length >= 1 ? 5 : 0;
+            let cPairs = 0; let cOk = 0;
+            for (const [hi, lo] of ePairs) {
+              if (hi.count >= MIN_SAMPLE_LEAGUE && lo.count >= MIN_SAMPLE_LEAGUE && hi.roi !== null && lo.roi !== null) {
+                cPairs++;
+                if (hi.roi > lo.roi) cOk++;
+              }
+            }
+            const conFac  = cPairs === 0 ? 0 : Math.round((cOk / cPairs) * 15);
+            const effRaw  = Math.round(capFac + calFac + smpFac + conFac);
+            const lowConf = edgeBets.length < 20;
+            const effLbl  = lowConf ? 'LOW CONFIDENCE' : effRaw >= 67 ? 'HIGH' : effRaw >= 34 ? 'MEDIUM' : 'LOW';
+            const effClr  = lowConf ? 'var(--warn)' : effRaw >= 67 ? 'var(--ok)' : effRaw >= 34 ? 'var(--warn)' : 'var(--bad)';
+            edgeEffEl.innerHTML = `<div class="card">
+              <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Model Efficiency Score</div>
+                <div style="font-size:28px;font-weight:900;color:${effClr};">${effRaw} <span style="font-size:16px;">${effLbl}</span></div>
+                <div style="font-size:11px;color:var(--muted);margin-top:6px;">${lowConf ? 'min. 20 bets required for reliable score' : 'edge capture · calibration · sample · band consistency'}</div>
+              </div>
+            </div>`;
           }
         }
       }
