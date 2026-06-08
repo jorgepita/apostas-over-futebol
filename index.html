@@ -2970,6 +2970,41 @@ button.dirty {
         </div>
         <div id="versusEdgeEfficiency"></div>
 
+        <div class="section-header" style="margin-top:16px;border-top:2px solid var(--line);padding-top:16px;">
+          <span class="section-header-title" style="color:var(--accent);font-size:13px;letter-spacing:.08em;">ANALYSIS QUALITY ASSESSMENT</span>
+          <div class="section-header-line"></div>
+        </div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">U — Analysis Quality Score</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusQualityScore"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">V — Quality Breakdown</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusQualityBreakdown"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">W — Strengths &amp; Weaknesses</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusStrengthsWeaknesses"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">X — Trust Level</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusTrustLevel"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Y — Executive Summary</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusExecSummary"></div>
+
       </div>
     </div>
 
@@ -9377,6 +9412,230 @@ buttons.forEach(btn => {
                 <div style="font-size:11px;color:var(--muted);margin-top:6px;">${lowConf ? 'min. 20 bets required for reliable score' : 'edge capture · calibration · sample · band consistency'}</div>
               </div>
             </div>`;
+          }
+        }
+
+        // ── Sections U–Y: Analysis Quality Score ────────────────────────────
+        const qualScoreEl = document.getElementById('versusQualityScore');
+        const qualBreakEl = document.getElementById('versusQualityBreakdown');
+        const swEl        = document.getElementById('versusStrengthsWeaknesses');
+        const trustEl     = document.getElementById('versusTrustLevel');
+        const execEl      = document.getElementById('versusExecSummary');
+        if (qualScoreEl || qualBreakEl || swEl || trustEl || execEl) {
+
+          const analyzedAll = getResolvedManualBets().filter(b =>
+            b.hadAnalysis === true &&
+            b.analysisSnapshot &&
+            ['W', 'L', 'P'].includes(b._resultKey)
+          );
+          const analyzedN = analyzedAll.length;
+
+          const insuffMsg = `<div class="card"><div style="text-align:center;padding:24px;">
+            <div style="font-size:18px;font-weight:700;color:var(--warn);margin-bottom:8px;">INSUFFICIENT SAMPLE</div>
+            <div style="font-size:13px;color:var(--muted);">Need at least 20 analyzed settled bets. Currently: ${analyzedN}.</div>
+          </div></div>`;
+
+          if (analyzedN < 20) {
+            [qualScoreEl, qualBreakEl, swEl, trustEl, execEl].forEach(el => { if (el) el.innerHTML = insuffMsg; });
+          } else {
+            // Re-derive score calibration
+            const scoredU = getResolvedManualBets().filter(b =>
+              b.hadAnalysis === true &&
+              b.analysisSnapshot &&
+              typeof b.scoreAtAnalysis === 'number' &&
+              ['W', 'L', 'P'].includes(b._resultKey)
+            );
+            function sGrpRoi(minS, maxS) {
+              const s   = scoredU.filter(b => b.scoreAtAnalysis >= minS && b.scoreAtAnalysis <= maxS);
+              const stk = sum(s.map(b => num(b.stake)));
+              const prf = sum(s.map(b => num(b._lucro)));
+              return { count: s.length, roi: stk > 0 ? (prf / stk) * 100 : null };
+            }
+            const sGLow  = sGrpRoi(0, 59);
+            const sGMed  = sGrpRoi(60, 79);
+            const sGHigh = sGrpRoi(80, 100);
+            const sCalibOk = sGLow.count >= MIN_SAMPLE_COMPARE && sGMed.count >= MIN_SAMPLE_COMPARE && sGHigh.count >= MIN_SAMPLE_COMPARE && sGLow.roi !== null && sGMed.roi !== null && sGHigh.roi !== null;
+            const sCalib = !sCalibOk ? 'INSUFFICIENT'
+              : sGHigh.roi > sGMed.roi && sGMed.roi > sGLow.roi ? 'GOOD'
+              : sGHigh.roi <= sGLow.roi ? 'POOR' : 'MIXED';
+
+            // Re-derive opinion calibration
+            const opinionU = getResolvedManualBets().filter(b =>
+              b.hadAnalysis === true &&
+              b.analysisSnapshot &&
+              b.botOpinion &&
+              ['W', 'L', 'P'].includes(b._resultKey)
+            );
+            function oRoi(op) {
+              const s   = opinionU.filter(b => b.botOpinion === op);
+              const stk = sum(s.map(b => num(b.stake)));
+              const prf = sum(s.map(b => num(b._lucro)));
+              return { count: s.length, roi: stk > 0 ? (prf / stk) * 100 : null };
+            }
+            const sbU = oRoi('STRONG BUY');
+            const buU = oRoi('BUY');
+            const neU = oRoi('NEUTRAL');
+            const avU = oRoi('AVOID');
+            function oPairOk(a, b) { return a.count >= MIN_SAMPLE_COMPARE && b.count >= MIN_SAMPLE_COMPARE && a.roi !== null && b.roi !== null; }
+            let oInv = 0; let oPairs = 0;
+            if (oPairOk(sbU, buU)) { oPairs++; if (sbU.roi <= buU.roi) oInv++; }
+            if (oPairOk(buU, neU)) { oPairs++; if (buU.roi <= neU.roi) oInv++; }
+            if (oPairOk(neU, avU)) { oPairs++; if (neU.roi <= avU.roi) oInv++; }
+            const oAvBuInv = oPairOk(avU, buU) && avU.roi > buU.roi;
+            const oCalib = oPairs === 0 ? 'INSUFFICIENT'
+              : oInv === 0 && !oAvBuInv ? 'GOOD'
+              : oInv === 1 && !oAvBuInv ? 'MIXED' : 'POOR';
+
+            // Re-derive edge capture
+            const edgeU    = getResolvedManualBets().filter(b =>
+              b.hadAnalysis === true &&
+              b.analysisSnapshot &&
+              typeof b.edgeAtAnalysis === 'number' &&
+              ['W', 'L', 'P'].includes(b._resultKey)
+            );
+            const avgEdgeU  = edgeU.length ? sum(edgeU.map(b => b.edgeAtAnalysis)) / edgeU.length : null;
+            const eStkU     = sum(edgeU.map(b => num(b.stake)));
+            const ePrfU     = sum(edgeU.map(b => num(b._lucro)));
+            const eRoiU     = eStkU > 0 ? (ePrfU / eStkU) * 100 : null;
+            const eCaptureU = avgEdgeU !== null && avgEdgeU > 0 && eRoiU !== null ? (eRoiU / avgEdgeU) * 100 : null;
+            const eCapU     = eCaptureU === null ? 'INSUFFICIENT' : eCaptureU >= 80 ? 'EXCELLENT' : eCaptureU >= 60 ? 'GOOD' : eCaptureU >= 40 ? 'MODERATE' : 'WEAK';
+
+            // Score components
+            const scoreCalibPts = sCalib === 'GOOD' ? 25 : sCalib === 'MIXED' ? 15 : 0;
+            const opCalibPts    = oCalib === 'GOOD' ? 25 : oCalib === 'MIXED' ? 15 : 0;
+            const edgeRealPts   = eCapU === 'EXCELLENT' ? 25 : eCapU === 'GOOD' ? 20 : eCapU === 'MODERATE' ? 10 : 0;
+            const samplePts     = analyzedN >= 100 ? 25 : analyzedN >= 50 ? 18 : analyzedN >= 20 ? 10 : 0;
+            const totalQuality  = scoreCalibPts + opCalibPts + edgeRealPts + samplePts;
+            const qLabel = totalQuality >= 70 ? 'HIGH' : totalQuality >= 40 ? 'MEDIUM' : 'LOW';
+            const qColor = totalQuality >= 70 ? 'var(--ok)' : totalQuality >= 40 ? 'var(--warn)' : 'var(--bad)';
+
+            const trustLevel = totalQuality >= 70 && analyzedN >= 50 ? 'HIGH TRUST'
+              : totalQuality >= 40 ? 'MEDIUM TRUST' : 'LOW TRUST';
+            const trustColor = trustLevel === 'HIGH TRUST' ? 'var(--ok)' : trustLevel === 'MEDIUM TRUST' ? 'var(--warn)' : 'var(--bad)';
+
+            // ── U: Analysis Quality Score ──────────────────────────────────
+            if (qualScoreEl) {
+              const filled = Math.round(totalQuality / 10);
+              const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+              qualScoreEl.innerHTML = `<div class="card" style="text-align:center;padding:24px;">
+                <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Analysis Quality Score</div>
+                <div style="font-size:52px;font-weight:900;color:${qColor};line-height:1;">${totalQuality}</div>
+                <div style="font-size:14px;color:var(--muted);margin:4px 0 10px;">/ 100</div>
+                <div style="font-size:20px;font-weight:900;color:${qColor};margin-bottom:12px;">${qLabel}</div>
+                <div style="font-family:monospace;font-size:20px;color:${qColor};letter-spacing:3px;">${bar}</div>
+              </div>`;
+            }
+
+            // ── V: Quality Breakdown ────────────────────────────────────────
+            if (qualBreakEl) {
+              function bRow(label, pts, max, badge) {
+                const c = pts === max ? 'var(--ok)' : pts > 0 ? 'var(--warn)' : 'var(--bad)';
+                return `<tr>
+                  <td style="padding:8px 12px;color:var(--text);">${label}<span style="font-size:10px;font-weight:700;color:${c};margin-left:8px;">${badge}</span></td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700;color:${c};">${pts} / ${max}</td>
+                </tr>`;
+              }
+              const totClr = totalQuality >= 70 ? 'var(--ok)' : totalQuality >= 40 ? 'var(--warn)' : 'var(--bad)';
+              const sCalibBadge = sCalib !== 'INSUFFICIENT' ? sCalib : 'INSUF.';
+              const oCalibBadge = oCalib !== 'INSUFFICIENT' ? oCalib : 'INSUF.';
+              const eCapBadge   = eCapU  !== 'INSUFFICIENT' ? eCapU  : 'INSUF.';
+              qualBreakEl.innerHTML = `<div class="card"><div class="table-wrap"><table class="data-table">
+                <tbody>
+                  ${bRow('Score Calibration',   scoreCalibPts, 25, sCalibBadge)}
+                  ${bRow('Opinion Calibration', opCalibPts,    25, oCalibBadge)}
+                  ${bRow('Edge Realization',    edgeRealPts,   25, eCapBadge)}
+                  ${bRow('Sample Confidence',   samplePts,     25, analyzedN + ' bets')}
+                  <tr><td colspan="2" style="padding:4px 12px;border-top:2px solid var(--line);"></td></tr>
+                  <tr>
+                    <td style="padding:8px 12px;font-weight:700;color:var(--text);">Total</td>
+                    <td style="padding:8px 12px;text-align:right;font-weight:900;color:${totClr};">${totalQuality} / 100</td>
+                  </tr>
+                </tbody>
+              </table></div></div>`;
+            }
+
+            // ── W: Strengths & Weaknesses ───────────────────────────────────
+            if (swEl) {
+              const strengths  = [];
+              const weaknesses = [];
+
+              if (sCalib === 'GOOD') strengths.push('Strong score calibration');
+              if (oCalib === 'GOOD') strengths.push('Opinion hierarchy well aligned');
+              if (eCapU === 'EXCELLENT') strengths.push(`High edge capture (${eCaptureU !== null ? pct(eCaptureU, 1) : '—'})`);
+              else if (eCapU === 'GOOD') strengths.push(`Good edge capture (${eCaptureU !== null ? pct(eCaptureU, 1) : '—'})`);
+              if (sCalibOk && sGHigh.roi !== null && sGHigh.roi > 10) strengths.push('Consistent high-score profitability');
+              if (analyzedN >= 50) strengths.push(`Solid sample size (${analyzedN} bets)`);
+
+              if (analyzedN < 50) weaknesses.push(`Limited sample size (${analyzedN} bets)`);
+              if (sCalib === 'POOR') weaknesses.push('Score calibration weak — review score thresholds');
+              else if (sCalib === 'MIXED') weaknesses.push('Score calibration inconsistency detected');
+              if (oCalib === 'POOR') weaknesses.push('Opinion hierarchy misaligned');
+              else if (oCalib === 'MIXED') weaknesses.push('Opinion hierarchy not fully aligned');
+              if (eCapU === 'WEAK') weaknesses.push(`Edge capture poor (${eCaptureU !== null ? pct(eCaptureU, 1) : '—'})`);
+              else if (eCapU === 'MODERATE') weaknesses.push(`Edge capture below expectations (${eCaptureU !== null ? pct(eCaptureU, 1) : '—'})`);
+              if (sCalibOk && sGMed.roi !== null && sGHigh.roi !== null && sGMed.roi > sGHigh.roi + 3) weaknesses.push('Medium-score bets outperforming high-score bets');
+              if (neU.count >= MIN_SAMPLE_LEAGUE && buU.count >= MIN_SAMPLE_LEAGUE && neU.roi !== null && buU.roi !== null && neU.roi > buU.roi + 3) weaknesses.push('NEUTRAL bets outperforming BUY — unusual pattern');
+
+              const sHtml = strengths.slice(0, 3).map(s => `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;">
+                <span style="color:var(--ok);font-weight:900;flex-shrink:0;">✓</span>
+                <span style="font-size:13px;color:var(--text);">${s}</span>
+              </div>`).join('');
+              const wHtml = weaknesses.slice(0, 3).map(w => `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;">
+                <span style="color:var(--bad);font-weight:900;flex-shrink:0;">✗</span>
+                <span style="font-size:13px;color:var(--text);">${w}</span>
+              </div>`).join('');
+
+              swEl.innerHTML = `<div class="card">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Strengths</div>
+                    ${sHtml || '<div style="font-size:12px;color:var(--muted);">—</div>'}
+                  </div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;color:var(--bad);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Weaknesses</div>
+                    ${wHtml || '<div style="font-size:12px;color:var(--muted);">—</div>'}
+                  </div>
+                </div>
+              </div>`;
+            }
+
+            // ── X: Trust Level ─────────────────────────────────────────────
+            if (trustEl) {
+              const trustDesc = trustLevel === 'HIGH TRUST'
+                ? `Quality Score ${totalQuality}/100 and ${analyzedN} analyzed bets — analysis signals are reliable.`
+                : trustLevel === 'MEDIUM TRUST'
+                ? `Quality Score ${totalQuality}/100 — signals are directionally useful but require more data.`
+                : `Quality Score ${totalQuality}/100 — analysis signals should not be used for decision-making yet.`;
+              trustEl.innerHTML = `<div class="card" style="text-align:center;padding:20px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Can I Trust This Analysis?</div>
+                <div style="font-size:26px;font-weight:900;color:${trustColor};margin-bottom:10px;">${trustLevel}</div>
+                <div style="font-size:12px;color:var(--muted);">${trustDesc}</div>
+              </div>`;
+            }
+
+            // ── Y: Executive Summary ────────────────────────────────────────
+            if (execEl) {
+              const sentences = [];
+              if (totalQuality >= 70) {
+                sentences.push('The analysis engine appears well calibrated.');
+                if (sCalib === 'GOOD') sentences.push('Higher scores consistently outperform lower scores.');
+                if (eCapU === 'EXCELLENT' || eCapU === 'GOOD') sentences.push('Edge realization remains strong.');
+                sentences.push(`Current confidence is HIGH (${totalQuality}/100).`);
+              } else if (totalQuality >= 40) {
+                sentences.push('The analysis engine shows mixed calibration.');
+                if (oCalib !== 'GOOD') sentences.push('Opinion hierarchy is not fully consistent.');
+                if (analyzedN < 50) sentences.push('More sample size will improve reliability.');
+                sentences.push(`Current confidence is MEDIUM (${totalQuality}/100).`);
+              } else {
+                sentences.push('The analysis engine is not yet reliable.');
+                if (sCalib === 'POOR' || sCalib === 'INSUFFICIENT') sentences.push('Score calibration remains weak or unproven.');
+                if (analyzedN < 50) sentences.push('Sample size is insufficient for firm conclusions.');
+                sentences.push(`Current confidence is LOW (${totalQuality}/100).`);
+              }
+              execEl.innerHTML = `<div class="card" style="padding:16px 20px;">
+                ${sentences.map(s => `<div style="font-size:13px;color:var(--text);padding:4px 0;line-height:1.7;">${s}</div>`).join('')}
+              </div>`;
+            }
           }
         }
       }
