@@ -2922,6 +2922,24 @@ button.dirty {
         </div>
         <div id="versusScoreInsights"></div>
 
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">M — Opinion Performance</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusOpinionTable"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">N — Opinion Calibration</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusOpinionCalib"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">O — Opinion Insights</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusOpinionInsights"></div>
+
       </div>
     </div>
 
@@ -8886,6 +8904,214 @@ buttons.forEach(btn => {
                 </div>`;
               }).join('');
               scoreInsEl.innerHTML = `<div class="card">${body}</div>`;
+            }
+          }
+        }
+
+        // ── Sections M, N, O: Opinion Intelligence ─────────────────────────
+        const opinionTableEl = document.getElementById('versusOpinionTable');
+        const opinionCalibEl = document.getElementById('versusOpinionCalib');
+        const opinionInsEl   = document.getElementById('versusOpinionInsights');
+        if (opinionTableEl || opinionCalibEl || opinionInsEl) {
+
+          const opinionBets = getResolvedManualBets().filter(b =>
+            b.hadAnalysis === true &&
+            b.analysisSnapshot &&
+            b.botOpinion &&
+            ['W', 'L', 'P'].includes(b._resultKey)
+          );
+
+          const OPINIONS = ['STRONG BUY', 'BUY', 'NEUTRAL', 'AVOID'];
+          const OPN_COLOR = {
+            'STRONG BUY': 'var(--ok)',
+            'BUY':        'var(--accent)',
+            'NEUTRAL':    'var(--warn)',
+            'AVOID':      'var(--bad)'
+          };
+
+          function opnStats(opinion) {
+            const s      = opinionBets.filter(b => b.botOpinion === opinion);
+            const wins   = s.filter(b => b._resultKey === 'W').length;
+            const losses = s.filter(b => b._resultKey === 'L').length;
+            const pushes = s.filter(b => b._resultKey === 'P').length;
+            const stk    = sum(s.map(b => num(b.stake)));
+            const prf    = sum(s.map(b => num(b._lucro)));
+            const oddsArr= s.map(b => num(b.odd)).filter(v => v !== null);
+            const avgOdd = oddsArr.length ? sum(oddsArr) / oddsArr.length : null;
+            const wr     = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+            const roi    = stk > 0 ? (prf / stk) * 100 : null;
+            return { count: s.length, wins, losses, pushes, stk, prf, wr, roi, avgOdd };
+          }
+
+          const opnData = OPINIONS.map(o => ({ opinion: o, stats: opnStats(o) }));
+
+          // ── M: Opinion Performance Table ────────────────────────────────
+          if (opinionTableEl) {
+            if (!opinionBets.length) {
+              opinionTableEl.innerHTML = `<div class="note" style="text-align:center;padding:20px;color:var(--muted);">Sem apostas manuais com opinião resolvida.</div>`;
+            } else {
+              const oRows = opnData.map(({ opinion, stats: s }) => {
+                const insuf = s.count < MIN_SAMPLE_LEAGUE;
+                const rClr  = s.roi !== null ? (s.roi > 0 ? 'var(--ok)' : s.roi < 0 ? 'var(--bad)' : 'var(--text)') : 'var(--text)';
+                const pClr  = s.prf > 0 ? 'var(--ok)' : s.prf < 0 ? 'var(--bad)' : 'var(--text)';
+                const oClr  = OPN_COLOR[opinion] || 'var(--text)';
+                if (insuf) {
+                  return `<tr>
+                    <td style="padding:8px 12px;font-weight:700;color:${oClr};">${opinion}</td>
+                    <td style="padding:8px 12px;text-align:center;color:var(--muted);">${s.count}</td>
+                    <td colspan="5" style="padding:8px 12px;color:var(--muted);font-size:11px;">Insufficient Sample (min. ${MIN_SAMPLE_LEAGUE})</td>
+                  </tr>`;
+                }
+                return `<tr>
+                  <td style="padding:8px 12px;font-weight:700;color:${oClr};">${opinion}</td>
+                  <td style="padding:8px 12px;text-align:center;">${s.count}</td>
+                  <td style="padding:8px 12px;text-align:center;">${s.wins}-${s.losses}-${s.pushes}</td>
+                  <td style="padding:8px 12px;text-align:right;">${s.wr !== null ? pct(s.wr) : '—'}</td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700;color:${pClr};">${s.prf >= 0 ? '+' : ''}€${fmt(s.prf)}</td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700;color:${rClr};">${s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—'}</td>
+                  <td style="padding:8px 12px;text-align:right;">${s.avgOdd !== null ? fmt(s.avgOdd) : '—'}</td>
+                </tr>`;
+              }).join('');
+
+              const ranked = opnData
+                .filter(({ stats: s }) => s.count >= MIN_SAMPLE_LEAGUE && s.roi !== null)
+                .sort((a, b) => b.stats.roi - a.stats.roi);
+              const rankHtml = ranked.length
+                ? `<div style="margin-top:14px;padding:10px 14px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
+                    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Opinion Ranking by ROI</div>
+                    ${ranked.map((d, i) => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+                      <span style="font-size:12px;color:var(--muted);width:16px;">${i + 1}.</span>
+                      <span style="font-size:13px;font-weight:700;color:${OPN_COLOR[d.opinion] || 'var(--text)'};">${d.opinion}</span>
+                      <span style="font-size:13px;color:${d.stats.roi >= 0 ? 'var(--ok)' : 'var(--bad)'};">(${d.stats.roi >= 0 ? '+' : ''}${pct(d.stats.roi, 1)})</span>
+                    </div>`).join('')}
+                  </div>`
+                : '';
+
+              opinionTableEl.innerHTML = `<div class="card"><div class="table-wrap"><table class="data-table">
+                <thead><tr>
+                  <th>Opinion</th>
+                  <th style="text-align:center;">Bets</th>
+                  <th style="text-align:center;">W-L-P</th>
+                  <th style="text-align:right;">WR</th>
+                  <th style="text-align:right;">Profit</th>
+                  <th style="text-align:right;">ROI</th>
+                  <th style="text-align:right;">Avg Odd</th>
+                </tr></thead>
+                <tbody>${oRows}</tbody>
+              </table></div>${rankHtml}</div>`;
+            }
+          }
+
+          // ── N: Opinion Calibration + Quality Score ───────────────────────
+          if (opinionCalibEl) {
+            const sbS = opnData.find(d => d.opinion === 'STRONG BUY').stats;
+            const buS = opnData.find(d => d.opinion === 'BUY').stats;
+            const neS = opnData.find(d => d.opinion === 'NEUTRAL').stats;
+            const avS = opnData.find(d => d.opinion === 'AVOID').stats;
+
+            function pairValid(a, b) {
+              return a.count >= MIN_SAMPLE_COMPARE && b.count >= MIN_SAMPLE_COMPARE && a.roi !== null && b.roi !== null;
+            }
+            const p_sb_bu = pairValid(sbS, buS);
+            const p_bu_ne = pairValid(buS, neS);
+            const p_ne_av = pairValid(neS, avS);
+
+            let inversions   = 0;
+            let pairsChecked = 0;
+            if (p_sb_bu) { pairsChecked++; if (sbS.roi <= buS.roi) inversions++; }
+            if (p_bu_ne) { pairsChecked++; if (buS.roi <= neS.roi) inversions++; }
+            if (p_ne_av) { pairsChecked++; if (neS.roi <= avS.roi) inversions++; }
+
+            const avoidBuyInv = pairValid(avS, buS) && avS.roi > buS.roi;
+            let calibResult = 'INSUFFICIENT SAMPLE';
+            let calibColor  = 'var(--warn)';
+            if (pairsChecked > 0) {
+              if (inversions === 0)                        { calibResult = 'GOOD';  calibColor = 'var(--ok)'; }
+              else if (inversions === 1 && !avoidBuyInv)  { calibResult = 'MIXED'; calibColor = 'var(--warn)'; }
+              else                                         { calibResult = 'POOR';  calibColor = 'var(--bad)'; }
+            }
+
+            // Quality Score factors
+            const anySmall = opnData.some(({ stats: s }) => s.count > 0 && s.count < MIN_SAMPLE_COMPARE);
+            const totalOpn = opinionBets.length;
+            const sampleFactor = totalOpn >= 50 ? 30 : totalOpn >= 20 ? 20 : totalOpn >= 10 ? 10 : totalOpn >= 1 ? 5 : 0;
+            let hierFactor = 0;
+            if (p_sb_bu && sbS.roi > buS.roi) hierFactor += 14;
+            if (p_bu_ne && buS.roi > neS.roi) hierFactor += 13;
+            if (p_ne_av && neS.roi > avS.roi) hierFactor += 13;
+            const validRois = opnData.filter(d => d.stats.count >= MIN_SAMPLE_COMPARE && d.stats.roi !== null).map(d => d.stats.roi);
+            const spread    = validRois.length >= 2 ? Math.max(...validRois) - Math.min(...validRois) : 0;
+            const sepFactor = spread >= 15 ? 20 : spread >= 10 ? 15 : spread >= 5 ? 10 : spread > 0 ? 5 : 0;
+            let consFactor = 0;
+            if (sbS.count >= MIN_SAMPLE_COMPARE && sbS.roi !== null && sbS.roi > 0) consFactor += 5;
+            if (avS.count >= MIN_SAMPLE_COMPARE && avS.roi !== null && avS.roi < 0) consFactor += 5;
+
+            const rawQuality = Math.round(sampleFactor + hierFactor + sepFactor + consFactor);
+            const qualScore  = anySmall ? Math.min(rawQuality, 30) : rawQuality;
+            const qualLabel  = qualScore >= 67 ? 'HIGH' : qualScore >= 34 ? 'MEDIUM' : 'LOW';
+            const qualColor  = qualScore >= 67 ? 'var(--ok)' : qualScore >= 34 ? 'var(--warn)' : 'var(--bad)';
+
+            opinionCalibEl.innerHTML = `<div class="card">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Opinion Calibration</div>
+                  <div style="font-size:22px;font-weight:900;color:${calibColor};">${calibResult}</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:4px;">${pairsChecked} pair${pairsChecked !== 1 ? 's' : ''} compared · ${inversions} inversion${inversions !== 1 ? 's' : ''}</div>
+                </div>
+                <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Opinion Quality Score</div>
+                  <div style="font-size:22px;font-weight:900;color:${qualColor};">${qualScore} <span style="font-size:14px;">${qualLabel}</span></div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:4px;">${anySmall ? 'capped · low sample' : 'sample · hierarchy · separation · consistency'}</div>
+                </div>
+              </div>
+            </div>`;
+          }
+
+          // ── O: Opinion Insights ────────────────────────────────────────
+          if (opinionInsEl) {
+            const opnIns  = [];
+            const validOpn  = opnData.filter(d => d.stats.count >= MIN_SAMPLE_LEAGUE && d.stats.roi !== null);
+            const sbI = opnData.find(d => d.opinion === 'STRONG BUY').stats;
+            const buI = opnData.find(d => d.opinion === 'BUY').stats;
+            const neI = opnData.find(d => d.opinion === 'NEUTRAL').stats;
+            const avI = opnData.find(d => d.opinion === 'AVOID').stats;
+
+            if (validOpn.length) {
+              const best = validOpn.reduce((a, b) => b.stats.roi > a.stats.roi ? b : a);
+              opnIns.push({ text: `${best.opinion} is currently the best-performing opinion (${best.stats.roi >= 0 ? '+' : ''}${pct(best.stats.roi, 1)} ROI, ${best.stats.count} bets).`, type: best.stats.roi > 0 ? 'ok' : 'warn' });
+            }
+
+            if (avI.count >= MIN_SAMPLE_LEAGUE && avI.roi !== null && avI.roi < 0) {
+              opnIns.push({ text: `AVOID bets remain strongly unprofitable (${pct(avI.roi, 1)} ROI, ${avI.count} bets).`, type: 'ok' });
+            }
+
+            if (sbI.count >= MIN_SAMPLE_LEAGUE && buI.count >= MIN_SAMPLE_LEAGUE && sbI.roi !== null && buI.roi !== null && Math.abs(sbI.roi - buI.roi) < 3) {
+              opnIns.push({ text: `BUY and STRONG BUY perform similarly (${sbI.roi >= 0 ? '+' : ''}${pct(sbI.roi, 1)} vs ${buI.roi >= 0 ? '+' : ''}${pct(buI.roi, 1)} ROI) — score differentiation may add more signal.`, type: 'info' });
+            }
+
+            if (buI.count >= MIN_SAMPLE_LEAGUE && neI.count >= MIN_SAMPLE_LEAGUE && buI.roi !== null && neI.roi !== null && neI.roi > buI.roi + 3) {
+              opnIns.push({ text: `NEUTRAL bets (${neI.roi >= 0 ? '+' : ''}${pct(neI.roi, 1)}) are currently outperforming BUY (${buI.roi >= 0 ? '+' : ''}${pct(buI.roi, 1)}) — unusual pattern.`, type: 'warn' });
+            }
+
+            const allFourC = opnData.every(d => d.stats.count >= MIN_SAMPLE_COMPARE && d.stats.roi !== null);
+            if (allFourC) {
+              const rois = OPINIONS.map(o => opnData.find(d => d.opinion === o).stats.roi);
+              if (rois[0] > rois[1] && rois[1] > rois[2] && rois[2] > rois[3]) {
+                opnIns.push({ text: `Opinion hierarchy appears well calibrated — all four opinions follow the expected ROI ordering.`, type: 'ok' });
+              }
+            }
+
+            if (!opnIns.length) {
+              opinionInsEl.innerHTML = `<div class="card"><div class="note" style="text-align:center;padding:16px;color:var(--muted);">Dados insuficientes para gerar insights de opinião. São necessárias pelo menos ${MIN_SAMPLE_LEAGUE} apostas por opinião.</div></div>`;
+            } else {
+              const body = opnIns.slice(0, 5).map(ins => {
+                const dot = ins.type === 'ok' ? 'var(--ok)' : ins.type === 'warn' ? 'var(--warn)' : 'var(--muted)';
+                return `<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px;"></div>
+                  <div style="font-size:13px;color:var(--text);">${ins.text}</div>
+                </div>`;
+              }).join('');
+              opinionInsEl.innerHTML = `<div class="card">${body}</div>`;
             }
           }
         }
