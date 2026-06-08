@@ -6840,7 +6840,9 @@ button.dirty {
           }
         }
 
-        const rows = sortManualRowsForDisplay(getManualRowsMerged());
+        const rows = sortManualRowsForDisplay(
+          getManualRowsMerged().filter(b => !b.isLocal || b.status !== 'approved')
+        );
 
         const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };
         const statusCls     = { pending: 'warn', approved: 'good', rejected: 'bad' };
