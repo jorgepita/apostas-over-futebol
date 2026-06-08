@@ -9843,8 +9843,10 @@ buttons.forEach(btn => {
       // ── PHASE 19: PENDING QUEUE ──────────────────────────────────────
 
       function getPendingRows() {
+        const today = todayIso();
+
         const manualRows = getManualRowsMerged()
-          .filter(b => b.isLocal && b.status === 'approved')
+          .filter(b => b.isLocal && b.status === 'approved' && b.data > today)
           .map(b => ({
             id:            b.id,
             source:        'Manual',
@@ -9861,7 +9863,10 @@ buttons.forEach(btn => {
           }));
 
         const botRows = getAllBotRowsMergedUnique()
-          .filter(r => r._apostadaBool && !['W', 'L', 'P'].includes(r._resultKey))
+          .filter(r => {
+            const d = normalizeDateString(r['Data'] || '');
+            return r._apostadaBool && !['W', 'L', 'P'].includes(r._resultKey) && d > today;
+          })
           .map(r => ({
             id:            r._pickKey,
             source:        'Bot',
