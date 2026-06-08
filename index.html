@@ -1710,6 +1710,9 @@ button.dirty {
         <div class="nav-item" data-tab-target="tab-pending">
           <span class="nav-icon">⏳</span> Pending
         </div>
+        <div class="nav-item" data-tab-target="tab-live">
+          <span class="nav-icon">🔴</span> Live
+        </div>
         <div class="nav-item" data-tab-target="tab-history">
           <span class="nav-icon">📜</span> History
         </div>
@@ -2377,6 +2380,65 @@ button.dirty {
                 </tr>
               </thead>
               <tbody id="pendingRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         LIVE CENTER PAGE
+    ============================= -->
+    <div id="tab-live" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Live Center</div>
+            <div class="note" style="margin-top:4px;">Apostas aprovadas com kickoff já iniciado.</div>
+          </div>
+        </div>
+        <div class="kpi-grid kpi-grid-4">
+          <div class="kpi-hero kpi-primary">
+            <div class="kpi-label">Live Bets</div>
+            <div class="kpi-value" id="liveKpiCount">0</div>
+            <div class="kpi-sub">Em jogo agora</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Stake Live</div>
+            <div class="kpi-value" id="liveKpiStake">€—</div>
+            <div class="kpi-sub">Capital em jogo</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Bot Live</div>
+            <div class="kpi-value" id="liveKpiBot">0</div>
+            <div class="kpi-sub">Picks do bot</div>
+          </div>
+          <div class="kpi-hero">
+            <div class="kpi-label">Manual Live</div>
+            <div class="kpi-value" id="liveKpiManual">0</div>
+            <div class="kpi-sub">Apostas manuais</div>
+          </div>
+        </div>
+        <div class="card" id="liveSummaryCard">
+          <!-- Rendered by renderLiveCenter() -->
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Kickoff</th>
+                  <th>League</th>
+                  <th>Game</th>
+                  <th>Market</th>
+                  <th>Odd</th>
+                  <th>Stake</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="liveRows"></tbody>
             </table>
           </div>
         </div>
@@ -3980,7 +4042,7 @@ button.dirty {
         }
 
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-analytics', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
+        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
         state.mobileActionsOpen = savedMobileActions === '1';
       }
 
@@ -9775,6 +9837,7 @@ buttons.forEach(btn => {
         try { renderManualScout(); } catch (e) { console.error('renderManualScout', e); }
         try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
         try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue (from manual)', e); }
+        try { renderLiveCenter(); } catch (e) { console.error('renderLiveCenter (from manual)', e); }
       }
 
       // ── PHASE 19: PENDING QUEUE ──────────────────────────────────────
@@ -9869,6 +9932,118 @@ buttons.forEach(btn => {
 
       // ── END PHASE 19 ─────────────────────────────────────────────────
 
+      // ── PHASE 20: LIVE CENTER ─────────────────────────────────────────
+
+      function getLiveRows() {
+        const today = todayIso();
+
+        const manualRows = getManualRowsMerged()
+          .filter(b =>
+            b.isLocal &&
+            b.status === 'approved' &&
+            !['W', 'L', 'P'].includes(b._resultKey) &&
+            b.data && b.data <= today
+          )
+          .map(b => ({
+            id:             b.id,
+            source:         'Manual',
+            date:           b.data   || '',
+            league:         b.liga   || '',
+            game:           b.jogo   || '',
+            market:         b.mercado || '',
+            odd:            b.odd    || '',
+            stake:          b.stake  || '',
+            stakeNum:       num(b.stake),
+            scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
+              ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
+              : `<span class="mini" style="opacity:0.4;">—</span>`,
+            _type: 'manual'
+          }));
+
+        const botRows = getAllBotRowsMergedUnique()
+          .filter(r => {
+            const d = normalizeDateString(r['Data'] || '');
+            return r._apostadaBool &&
+              !['W', 'L', 'P'].includes(r._resultKey) &&
+              d && d <= today;
+          })
+          .map(r => ({
+            id:             r._pickKey,
+            source:         'Bot',
+            date:           normalizeDateString(r['Data'] || '') || '',
+            league:         cleanString(r['Liga']   || ''),
+            game:           cleanString(r['Jogo']   || ''),
+            market:         normalizeMarket(r),
+            odd:            r._oddModeloNum   !== null ? fmt(r._oddModeloNum)   : '',
+            stake:          r._stakeModeloNum !== null ? fmt(r._stakeModeloNum) : '',
+            stakeNum:       r._stakeRealNum ?? r._stakeModeloNum,
+            scoreBadgeHtml: formatPickSignalHtml(r).score,
+            _type: 'bot'
+          }));
+
+        return [...manualRows, ...botRows].sort((a, b) => {
+          const da = parseDateSafe(a.date)?.getTime() || 0;
+          const db = parseDateSafe(b.date)?.getTime() || 0;
+          return da - db;
+        });
+      }
+
+      function renderLiveCenter() {
+        const rows      = getLiveRows();
+        const botCount  = rows.filter(r => r._type === 'bot').length;
+        const manCount  = rows.filter(r => r._type === 'manual').length;
+        const stakeSum  = sum(rows.map(r => r.stakeNum).filter(v => v !== null));
+
+        safeSetText('liveKpiCount',  String(rows.length));
+        safeSetText('liveKpiStake',  `€${fmt(stakeSum)}`);
+        safeSetText('liveKpiBot',    String(botCount));
+        safeSetText('liveKpiManual', String(manCount));
+
+        // KPI hero colour — primary lights up when there are live bets
+        const hero = document.getElementById('liveKpiCount')?.closest?.('.kpi-hero');
+        if (hero) hero.className = `kpi-hero kpi-primary${rows.length > 0 ? ' kpi-ok' : ''}`;
+
+        // Insights summary panel
+        const summaryCard = document.getElementById('liveSummaryCard');
+        if (summaryCard) {
+          summaryCard.innerHTML = `
+            <div class="label" style="margin-bottom:10px;">Live Summary</div>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;">
+              <div><span class="note">Bot Bets:</span>&nbsp;<strong>${botCount}</strong></div>
+              <div><span class="note">Manual Bets:</span>&nbsp;<strong>${manCount}</strong></div>
+              <div><span class="note">Live Stake:</span>&nbsp;<strong>€${fmt(stakeSum)}</strong></div>
+            </div>`;
+        }
+
+        // Table
+        const tbody = document.getElementById('liveRows');
+        if (!tbody) return;
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="9"><div class="note" style="text-align:center;padding:20px;opacity:0.6;">No live bets at this time.</div></td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><span class="mini ${r._type === 'bot' ? 'info' : 'warn'}">${escapeHtml(r.source)}</span></td>
+            <td>${escapeHtml(r.date   || '—')}</td>
+            <td>${escapeHtml(r.league || '—')}</td>
+            <td>${escapeHtml(r.game   || '—')}</td>
+            <td>${escapeHtml(r.market || '—')}</td>
+            <td>${escapeHtml(r.odd    || '—')}</td>
+            <td>${r.stake ? `€${escapeHtml(r.stake)}` : '—'}</td>
+            <td>${r.scoreBadgeHtml}</td>
+            <td><span class="mini good">LIVE</span></td>
+          </tr>`).join('');
+      }
+
+      function rerenderLiveOnly() {
+        try { renderLiveCenter(); } catch (e) { console.error('renderLiveCenter', e); }
+      }
+
+      // ── END PHASE 20 ─────────────────────────────────────────────────
+
       function rerenderAll() {
         fillFilters();
 
@@ -9876,6 +10051,7 @@ buttons.forEach(btn => {
         rerenderDayOnly();
         rerenderHistoryOnly();
         rerenderManualOnly();
+        rerenderLiveOnly();
         try { renderPicksKpiRow(); } catch (e) { console.error('renderPicksKpiRow', e); }
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
