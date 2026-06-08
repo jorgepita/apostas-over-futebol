@@ -1707,6 +1707,9 @@ button.dirty {
         <div class="nav-item" data-tab-target="tab-manual">
           <span class="nav-icon">✍️</span> Manual Bets
         </div>
+        <div class="nav-item" data-tab-target="tab-pending">
+          <span class="nav-icon">⏳</span> Pending
+        </div>
         <div class="nav-item" data-tab-target="tab-history">
           <span class="nav-icon">📜</span> History
         </div>
@@ -2342,6 +2345,38 @@ button.dirty {
                 </tr>
               </thead>
               <tbody id="manualRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-pending" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Pending Queue</div>
+            <div class="note" style="margin-top:4px;">Picks aprovadas aguardando kickoff.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Origem</th>
+                  <th>Data</th>
+                  <th>Liga</th>
+                  <th>Jogo</th>
+                  <th>Mercado</th>
+                  <th>Odd</th>
+                  <th>Stake</th>
+                  <th>Score</th>
+                  <th>Estado</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="pendingRows"></tbody>
             </table>
           </div>
         </div>
@@ -7206,11 +7241,14 @@ button.dirty {
           const analyzeBtn = e.target.closest('.js-analyze-manual');
           const approveBtn = e.target.closest('.js-approve-manual');
           const rejectBtn  = e.target.closest('.js-reject-manual');
-          const editBtn    = e.target.closest('.js-edit-manual');
-          const saveBtn    = e.target.closest('.js-mbedit-save');
-          const cancelBtn  = e.target.closest('.js-mbedit-cancel');
+          const editBtn       = e.target.closest('.js-edit-manual');
+          const saveBtn       = e.target.closest('.js-mbedit-save');
+          const cancelBtn     = e.target.closest('.js-mbedit-cancel');
+          const pendingCanBtn = e.target.closest('.js-pending-cancel');
 
-          if (deleteBtn) {
+          if (pendingCanBtn) {
+            pendingCancel(pendingCanBtn.dataset.id, pendingCanBtn.dataset.type);
+          } else if (deleteBtn) {
             const id = deleteBtn.dataset.id;
             if (!id) return;
             state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
@@ -9709,7 +9747,100 @@ buttons.forEach(btn => {
       function rerenderManualOnly() {
         try { renderManualScout(); } catch (e) { console.error('renderManualScout', e); }
         try { renderManualBets(); } catch (e) { console.error('renderManualBets', e); }
+        try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue (from manual)', e); }
       }
+
+      // ── PHASE 19: PENDING QUEUE ──────────────────────────────────────
+
+      function getPendingRows() {
+        const manualRows = getManualRowsMerged()
+          .filter(b => b.isLocal && b.status === 'approved')
+          .map(b => ({
+            id:            b.id,
+            source:        'Manual',
+            date:          b.data   || '',
+            league:        b.liga   || '',
+            game:          b.jogo   || '',
+            market:        b.mercado || '',
+            odd:           b.odd    || '',
+            stake:         b.stake  || '',
+            scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
+              ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
+              : `<span class="mini" style="opacity:0.4;">—</span>`,
+            _type: 'manual'
+          }));
+
+        const botRows = getAllBotRowsMergedUnique()
+          .filter(r => r._apostadaBool && !['W', 'L', 'P'].includes(r._resultKey))
+          .map(r => ({
+            id:            r._pickKey,
+            source:        'Bot',
+            date:          normalizeDateString(r['Data'] || '') || '',
+            league:        cleanString(r['Liga']    || ''),
+            game:          cleanString(r['Jogo']    || ''),
+            market:        normalizeMarket(r),
+            odd:           r._oddModeloNum   !== null ? fmt(r._oddModeloNum)   : '',
+            stake:         r._stakeModeloNum !== null ? fmt(r._stakeModeloNum) : '',
+            scoreBadgeHtml: formatPickSignalHtml(r).score,
+            _type: 'bot'
+          }));
+
+        return [...manualRows, ...botRows].sort((a, b) => {
+          const da = parseDateSafe(a.date)?.getTime() || 0;
+          const db = parseDateSafe(b.date)?.getTime() || 0;
+          return da - db;
+        });
+      }
+
+      function renderPendingQueue() {
+        const tbody = document.getElementById('pendingRows');
+        if (!tbody) return;
+        const rows = getPendingRows();
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="10"><div class="note" style="text-align:center;padding:20px;opacity:0.6;">Sem picks aprovadas aguardando kickoff.</div></td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><span class="mini ${r.source === 'Bot' ? 'info' : 'warn'}">${escapeHtml(r.source)}</span></td>
+            <td>${escapeHtml(r.date   || '—')}</td>
+            <td>${escapeHtml(r.league || '—')}</td>
+            <td>${escapeHtml(r.game   || '—')}</td>
+            <td>${escapeHtml(r.market || '—')}</td>
+            <td>${escapeHtml(r.odd    || '—')}</td>
+            <td>${r.stake ? `€${escapeHtml(r.stake)}` : '—'}</td>
+            <td>${r.scoreBadgeHtml}</td>
+            <td><span class="mini good">Aprovada</span></td>
+            <td>
+              <button class="js-pending-cancel" type="button"
+                data-id="${escapeHtml(r.id)}"
+                data-type="${escapeHtml(r._type)}"
+                style="padding:5px 8px;width:auto;font-size:11px;">Cancelar</button>
+            </td>
+          </tr>`).join('');
+      }
+
+      function pendingCancel(id, type) {
+        if (type === 'manual') {
+          const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
+          if (betIdx !== -1) {
+            state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'pending' };
+          }
+        } else if (type === 'bot') {
+          const edit = ensureEditObject(id);
+          edit.apostada = false;
+        }
+        markDirty();
+        rerenderPendingOnly();
+        rerenderManualOnly();
+        rerenderDayOnly();
+      }
+
+      function rerenderPendingOnly() {
+        try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue', e); }
+      }
+
+      // ── END PHASE 19 ─────────────────────────────────────────────────
 
       function rerenderAll() {
         fillFilters();
