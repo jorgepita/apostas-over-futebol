@@ -4373,18 +4373,26 @@ button.dirty {
 
       function getRiskMetrics() {
         const openBets = getHistoryRowsMerged().filter(r => r._apostadaBool && r._resultKey === 'pending');
-        const stakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
+        const botStakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
         const potencialLucro = sum(openBets.map(r => {
           if (r._stakeRealNum === null || r._oddRealNum === null || r._oddRealNum <= 1.01) return null;
           return r._stakeRealNum * (r._oddRealNum - 1);
         }).filter(v => v !== null));
+
+        const openManualBets = getManualRowsMerged().filter(b =>
+          b.isLocal && b.status === 'approved' && !['W', 'L', 'P'].includes(b._resultKey)
+        );
+        const manualStakeOpen = sum(openManualBets.map(b => num(b.stake)).filter(v => v !== null));
+
+        const stakeOpen = botStakeOpen + manualStakeOpen;
+        const openCount = openBets.length + openManualBets.length;
 
         const bk = getBankrollState();
         const bancaAtual = bk.totalAccountValue;
         const bancaDisponivel = bancaAtual !== null ? bancaAtual - stakeOpen : null;
 
         return {
-          openCount: openBets.length,
+          openCount,
           stakeOpen,
           potencialLucro,
           lucroReal: bk.lucroReal,
