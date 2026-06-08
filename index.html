@@ -6576,7 +6576,7 @@ button.dirty {
         // Uses the same key formula as the scout card: date_league_home_away (lowercase, spaces→_).
         const processedMatchKeys = new Set(
           (Array.isArray(state.manualBets) ? state.manualBets : [])
-            .filter(b => b.status === 'approved' || b.status === 'rejected')
+            .filter(b => b.status === 'approved' || b.status === 'rejected' || b.status === 'settled')
             .map(b => {
               const p = String(b.jogo || '').split(' vs ');
               return `${b.data || ''}_${b.liga || ''}_${(p[0] || '').trim()}_${(p[1] || '').trim()}`
@@ -6929,7 +6929,7 @@ button.dirty {
         }
 
         const rows = sortManualRowsForDisplay(
-          getManualRowsMerged().filter(b => !b.isLocal || b.status !== 'approved')
+          getManualRowsMerged().filter(b => !b.isLocal || (b.status !== 'approved' && b.status !== 'settled'))
         );
 
         const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };
@@ -10076,14 +10076,23 @@ buttons.forEach(btn => {
       function settleManualBet(id, result) {
         const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
         if (betIdx === -1) return;
-        state.manualBets[betIdx] = { ...state.manualBets[betIdx], resultado: result };
+        const current = state.manualBets[betIdx];
+        if (['W', 'L', 'P'].includes(String(current.resultado || '').toUpperCase())) return;
+        state.manualBets[betIdx] = {
+          ...current,
+          resultado: result,
+          status: 'settled',
+          settledAt: new Date().toISOString()
+        };
         markDirty();
         rerenderAll();
       }
 
       function settleBotBet(pickKey, result) {
         const edit = ensureEditObject(pickKey);
+        if (['W', 'L', 'P'].includes(String(edit.resultadoManual || '').toUpperCase())) return;
         edit.resultadoManual = result;
+        if (!edit.settledAt) edit.settledAt = new Date().toISOString();
         markDirty();
         saveLocalState();
         rerenderAll();
