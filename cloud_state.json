@@ -1951,7 +1951,82 @@
       "stakeReal": "1.5"
     }
   },
-  "manualBets": [],
+  "manualBets": [
+    {
+      "id": "manual_1780953561796_tdyegr",
+      "data": "2026-06-09",
+      "liga": "mls",
+      "jogo": "Minnesota United II vs Sporting KC II",
+      "mercado": "Over 2.5",
+      "odd": "1.45",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -1.9268141740962808,
+      "scoreAtAnalysis": 44,
+      "analysisSnapshot": {
+        "ProbModel": 0.6703870306728303,
+        "ProbMarket": 0.6896551724137931,
+        "Edge": -0.019268141740962808,
+        "EdgePercent": -1.9268141740962808,
+        "fairOdd": 1.4916756354853038,
+        "KellyTrue": 0,
+        "EV": -0.027938805524395982,
+        "score": 44,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.934822888283379,
+        "LambdaAway": 1.518256130790191,
+        "LambdaTotal": 3.45307901907357,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "timestamp": "2026-06-08T21:19:29.940Z"
+      }
+    },
+    {
+      "id": "manual_1780953565027_fixpon",
+      "data": "2026-06-11",
+      "liga": "mls",
+      "jogo": "Vancouver Whitecaps II vs North Texas",
+      "mercado": "Over 2.5",
+      "odd": "1.45",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -1.9268141740962808,
+      "scoreAtAnalysis": 44,
+      "analysisSnapshot": {
+        "ProbModel": 0.6703870306728303,
+        "ProbMarket": 0.6896551724137931,
+        "Edge": -0.019268141740962808,
+        "EdgePercent": -1.9268141740962808,
+        "fairOdd": 1.4916756354853038,
+        "KellyTrue": 0,
+        "EV": -0.027938805524395982,
+        "score": 44,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.934822888283379,
+        "LambdaAway": 1.518256130790191,
+        "LambdaTotal": 3.45307901907357,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "timestamp": "2026-06-08T21:19:34.673Z"
+      }
+    }
+  ],
   "movements": [
     {
       "id": "mov_1780853300006_hr7j3",
@@ -1976,10 +2051,59 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-07T21:34:56.148Z",
+  "lastUpdated": "2026-06-08T21:19:32.235Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
-  "fixtures": [],
+  "fixtures": [
+    {
+      "Date": "2026-06-09",
+      "League": "mls",
+      "HomeTeam": "Minnesota United II",
+      "AwayTeam": "Sporting KC II",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.52"
+    },
+    {
+      "Date": "2026-06-11",
+      "League": "mls",
+      "HomeTeam": "Vancouver Whitecaps II",
+      "AwayTeam": "North Texas",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.38"
+    },
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "HomeTeam": "FF Jaro",
+      "AwayTeam": "HJK Helsinki",
+      "Odd_Over25": "1.78",
+      "Odd_BTTS_Yes": "1.70"
+    },
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "HomeTeam": "Ilves",
+      "AwayTeam": "Turku PS",
+      "Odd_Over25": "1.73",
+      "Odd_BTTS_Yes": "1.62"
+    },
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "HomeTeam": "Inter Turku",
+      "AwayTeam": "AC Oulu",
+      "Odd_Over25": "1.98",
+      "Odd_BTTS_Yes": "1.91"
+    },
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "HomeTeam": "Lahti",
+      "AwayTeam": "SJK",
+      "Odd_Over25": "1.96",
+      "Odd_BTTS_Yes": "1.75"
+    }
+  ],
   "manualBetsRemote": []
 }
