@@ -2056,6 +2056,12 @@
       "apostada": true,
       "oddReal": "1.73",
       "stakeReal": "1"
+    },
+    "2026-06-13|Veikkausliiga|Lahti vs SJK|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-13|Veikkausliiga|Ilves vs Turku PS|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2158,18 +2164,18 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-09T01:33:09.330Z",
+  "lastUpdated": "2026-06-09T22:03:05.921Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-11",
       "League": "mls",
       "HomeTeam": "Vancouver Whitecaps II",
       "AwayTeam": "North Texas",
-      "Odd_Over25": "1.45",
-      "Odd_BTTS_Yes": "1.38"
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.40"
     },
     {
       "Date": "2026-06-13",
