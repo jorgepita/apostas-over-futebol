@@ -1,5 +1,70 @@
 {
-  "footballDaily": [],
+  "footballDaily": [
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "LeagueName": "Veikkausliiga",
+      "HomeTeam": "Lahti",
+      "AwayTeam": "SJK",
+      "LambdaHome": "1.604",
+      "LambdaAway": "1.505",
+      "LambdaTotal": "3.108",
+      "Market": "O2.5",
+      "ProbModel": 0.601,
+      "Odd": "1.96",
+      "ProbMarket": 0.51,
+      "Edge": 0.09099999999999997,
+      "KellyTrue": "0.1845",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0225",
+      "EdgeMinFinal": "0.0225",
+      "ProbGap": "0.09099999999999997",
+      "StakeFracRaw": "0.03",
+      "StakeFrac": "0.03",
+      "Stake€": "1.5",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-06-13",
+      "Liga": "finlandia",
+      "Jogo": "Lahti vs SJK",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 9.099999999999998
+    },
+    {
+      "Date": "2026-06-13",
+      "League": "finlandia",
+      "LeagueName": "Veikkausliiga",
+      "HomeTeam": "Ilves",
+      "AwayTeam": "Turku PS",
+      "LambdaHome": "1.604",
+      "LambdaAway": "1.505",
+      "LambdaTotal": "3.108",
+      "Market": "O2.5",
+      "ProbModel": 0.601,
+      "Odd": "1.73",
+      "ProbMarket": 0.578,
+      "Edge": 0.02300000000000002,
+      "KellyTrue": "0.0535",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.02300000000000002",
+      "StakeFracRaw": "0.0022",
+      "StakeFrac": "0.0022",
+      "Stake€": "0.11",
+      "DailyScale": "1.0",
+      "Bankroll€": "50.0",
+      "Data": "2026-06-13",
+      "Liga": "finlandia",
+      "Jogo": "Ilves vs Turku PS",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 2.300000000000002
+    }
+  ],
   "footballHistory": [
     {
       "Data": "2026-05-20",
@@ -432,6 +497,38 @@
       "Lucro€": "-2.0",
       "LucroReal€": "",
       "Edge": 13.86
+    },
+    {
+      "Data": "2026-06-13",
+      "Liga": "Veikkausliiga",
+      "Jogo": "Ilves vs Turku PS",
+      "Mercado": "Over 2.5",
+      "Odd": "1.73",
+      "Stake€": "0.11",
+      "Edge%": 2.26,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "Edge": 2.26
+    },
+    {
+      "Data": "2026-06-13",
+      "Liga": "Veikkausliiga",
+      "Jogo": "Lahti vs SJK",
+      "Mercado": "Over 2.5",
+      "Odd": "1.96",
+      "Stake€": "1.5",
+      "Edge%": 9.04,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal€": "",
+      "Resultado": "",
+      "Lucro€": "",
+      "LucroReal€": "",
+      "Edge": 9.04
     }
   ],
   "leagueStats": [
@@ -1949,6 +2046,16 @@
       "apostada": true,
       "oddReal": "1.7",
       "stakeReal": "1.5"
+    },
+    "2026-06-13|finlandia|Lahti vs SJK|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.96",
+      "stakeReal": "1"
+    },
+    "2026-06-13|finlandia|Ilves vs Turku PS|Over 2.5": {
+      "apostada": true,
+      "oddReal": "1.73",
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -2051,19 +2158,11 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-08T21:19:32.235Z",
+  "lastUpdated": "2026-06-09T01:33:09.330Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
-    {
-      "Date": "2026-06-09",
-      "League": "mls",
-      "HomeTeam": "Minnesota United II",
-      "AwayTeam": "Sporting KC II",
-      "Odd_Over25": "1.45",
-      "Odd_BTTS_Yes": "1.52"
-    },
     {
       "Date": "2026-06-11",
       "League": "mls",
