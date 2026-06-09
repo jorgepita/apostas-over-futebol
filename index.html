@@ -2829,6 +2829,12 @@ button.dirty {
             <div class="note" style="margin-bottom:8px;">Archive the current season and start a new one. All data is permanently saved before any reset.</div>
             <button id="closeSeasonBtn" type="button" style="width:100%;color:var(--warn);border-color:var(--warn-border);background:rgba(245,158,11,0.08);">Close Season</button>
           </div>
+
+          <div class="card">
+            <div class="label">Season Archives</div>
+            <div class="note" style="margin-bottom:8px;">View previously archived seasons.</div>
+            <button id="viewArchivesBtn" type="button" style="width:100%;">View Archives</button>
+          </div>
         </div>
 
         <div class="card">
@@ -12288,6 +12294,280 @@ buttons.forEach(btn => {
 
       // ── Close Season Modal ───────────────────────────────────────
 
+      // ===== SEASON ARCHIVE VIEWER — Phase 23.2A =====
+
+      function openArchiveListModal() {
+        renderArchiveList();
+        const m = document.getElementById('archiveListModal');
+        if (m) m.style.display = 'flex';
+      }
+
+      function closeArchiveListModal() {
+        const m = document.getElementById('archiveListModal');
+        if (m) m.style.display = 'none';
+      }
+
+      function openArchiveDetail(archiveId) {
+        const archive = getSeasonArchives().find(a => a.id === archiveId);
+        if (!archive) return;
+        closeArchiveListModal();
+        renderArchiveDetail(archive);
+        const m = document.getElementById('archiveDetailModal');
+        if (m) m.style.display = 'flex';
+      }
+
+      function closeArchiveDetail() {
+        const m = document.getElementById('archiveDetailModal');
+        if (m) m.style.display = 'none';
+      }
+
+      function backToArchiveList() {
+        closeArchiveDetail();
+        openArchiveListModal();
+      }
+
+      function renderArchiveList() {
+        const container = document.getElementById('almContent');
+        if (!container) return;
+
+        const archives = getSeasonArchives();
+        const sorted   = [...archives].sort((a, b) =>
+          (b.closedAt || '').localeCompare(a.closedAt || ''));
+
+        const header = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);">Season Archives</div>
+            <button type="button" onclick="closeArchiveListModal()"
+              style="background:none;border:1px solid var(--line-strong);color:var(--muted);border-radius:8px;padding:4px 12px;font-size:13px;cursor:pointer;">✕</button>
+          </div>`;
+
+        if (!sorted.length) {
+          container.innerHTML = header +
+            `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px;">No archived seasons yet.</div>`;
+          return;
+        }
+
+        const rows = sorted.map(a => {
+          const fin  = a.financial   || {};
+          const perf = a.performance || {};
+          const profit = fin.profit;
+          const roi    = fin.roi;
+          const bets   = perf.resolvedBets;
+          const wr     = perf.winRate;
+
+          const profitStr   = (profit !== null && profit !== undefined) ? `${profit >= 0 ? '+' : ''}€${fmt(Math.abs(profit))}` : '—';
+          const profitColor = profit > 0 ? 'var(--ok)' : profit < 0 ? 'var(--bad)' : 'var(--text)';
+          const roiStr      = (roi !== null && roi !== undefined) ? `${roi >= 0 ? '+' : ''}${fmt(roi, 1)}%` : '—';
+          const roiColor    = roi > 0 ? 'var(--ok)' : roi < 0 ? 'var(--bad)' : 'var(--text)';
+          const startBk     = (fin.startingBankroll !== null && fin.startingBankroll !== undefined) ? `€${fmt(fin.startingBankroll)}` : '—';
+          const finalBk     = (fin.finalBankroll    !== null && fin.finalBankroll    !== undefined) ? `€${fmt(fin.finalBankroll)}`    : '—';
+          const wrStr       = (wr !== null && wr !== undefined) ? `${fmt(wr, 1)}%` : '—';
+          const betsStr     = (bets !== null && bets !== undefined) ? String(Math.round(bets)) : '—';
+          const archivedStr = a.closedAt ? formatDatePt(a.closedAt.slice(0, 10)) : '—';
+
+          return `<tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:10px 12px;font-weight:700;color:var(--text);white-space:nowrap;">${escapeHtml(a.seasonName || '—')}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${formatDatePt(a.startDate)}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${formatDatePt(a.endDate)}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${startBk}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${finalBk}</td>
+            <td style="padding:10px 12px;font-weight:600;color:${profitColor};white-space:nowrap;">${profitStr}</td>
+            <td style="padding:10px 12px;font-weight:600;color:${roiColor};white-space:nowrap;">${roiStr}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${betsStr}</td>
+            <td style="padding:10px 12px;white-space:nowrap;">${wrStr}</td>
+            <td style="padding:10px 12px;white-space:nowrap;color:var(--muted);font-size:11px;">${archivedStr}</td>
+            <td style="padding:10px 12px;">
+              <button type="button" onclick="openArchiveDetail('${a.id}')"
+                style="font-size:11px;padding:4px 12px;white-space:nowrap;">View</button>
+            </td>
+          </tr>`;
+        }).join('');
+
+        container.innerHTML = header + `
+          <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--line-strong);">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;color:var(--muted);">
+              <thead>
+                <tr style="border-bottom:1px solid var(--line-strong);text-transform:uppercase;font-size:10px;letter-spacing:0.05em;">
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Season</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Start Date</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">End Date</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Starting Bankroll</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Final Bankroll</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Profit</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">ROI</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Bets</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Win Rate</th>
+                  <th style="padding:10px 12px;text-align:left;font-weight:600;">Archived At</th>
+                  <th style="padding:10px 12px;"></th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+      }
+
+      function renderArchiveDetail(archive) {
+        const container = document.getElementById('admContent');
+        if (!container) return;
+
+        const fin  = archive.financial   || {};
+        const perf = archive.performance || {};
+        const meta = archive.meta        || {};
+        const data = archive.data        || {};
+
+        function row(label, value, color) {
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);">
+            <span style="color:var(--muted);font-size:12px;">${label}</span>
+            <span style="font-weight:600;font-size:12px;${color ? `color:${color};` : ''}">${value}</span>
+          </div>`;
+        }
+
+        function sHead(title) {
+          return `<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid rgba(59,130,246,0.25);">${title}</div>`;
+        }
+
+        function fmtEur(v) {
+          return (v !== null && v !== undefined) ? `€${fmt(v)}` : '—';
+        }
+        function fmtSigned(v) {
+          if (v === null || v === undefined) return { str: '—', color: null };
+          return {
+            str:   `${v >= 0 ? '+' : ''}€${fmt(Math.abs(v))}`,
+            color: v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : null
+          };
+        }
+        function fmtSignedPct(v, d) {
+          d = d || 1;
+          if (v === null || v === undefined) return { str: '—', color: null };
+          return {
+            str:   `${v >= 0 ? '+' : ''}${fmt(v, d)}%`,
+            color: v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : null
+          };
+        }
+        function fmtInt(v) {
+          if (v === null || v === undefined) return '—';
+          return String(Math.round(Number(v)));
+        }
+
+        // A — Overview
+        const sA = [
+          sHead('A — Overview'),
+          row('Season Name',     escapeHtml(archive.seasonName || '—')),
+          row('Start Date',      formatDatePt(archive.startDate)),
+          row('End Date',        formatDatePt(archive.endDate)),
+          row('Archived At',     archive.closedAt ? formatDateTimePt(new Date(archive.closedAt)) : '—'),
+          row('Archive Version', String(archive.archiveVersion ?? '—'))
+        ].join('');
+
+        // B — Financial Summary
+        const p  = fmtSigned(fin.profit);
+        const r  = fmtSignedPct(fin.roi);
+        const rs = fmtSignedPct(fin.roiOnStake);
+        const ba = fmtSigned(fin.bankrollAdjustment);
+        const sB = [
+          sHead('B — Financial Summary'),
+          row('Starting Bankroll',    fmtEur(fin.startingBankroll)),
+          row('Final Bankroll',       fmtEur(fin.finalBankroll)),
+          row('Transferred Bankroll', fmtEur(fin.transferredBankroll)),
+          row('Bankroll Adjustment',  ba.str, ba.color),
+          row('Deposits',             fmtEur(fin.totalDeposits)),
+          row('Withdrawals',          fmtEur(fin.totalWithdrawals)),
+          row('Profit',               p.str,  p.color),
+          row('ROI',                  r.str,  r.color),
+          row('ROI on Stake',         rs.str, rs.color)
+        ].join('');
+
+        // C — Performance Summary
+        const maxDd  = perf.maxDrawdown || {};
+        const ddStr  = (maxDd.pct !== undefined && maxDd.eur !== undefined)
+          ? `${fmt(maxDd.pct, 1)}% (€${fmt(maxDd.eur)})` : '—';
+        const wrVal  = perf.winRate;
+        const wrStr  = (wrVal !== null && wrVal !== undefined) ? `${fmt(wrVal, 1)}%` : '—';
+        const wrColor = (wrVal !== null && wrVal !== undefined)
+          ? (wrVal >= 55 ? 'var(--ok)' : wrVal < 45 ? 'var(--bad)' : null) : null;
+        const sC = [
+          sHead('C — Performance Summary'),
+          row('Total Bets',    fmtInt(perf.totalBetsExecuted)),
+          row('Resolved Bets', fmtInt(perf.resolvedBets)),
+          row('Wins',          fmtInt(perf.wins),   perf.wins   > 0 ? 'var(--ok)'  : null),
+          row('Losses',        fmtInt(perf.losses), perf.losses > 0 ? 'var(--bad)' : null),
+          row('Pushes',        fmtInt(perf.pushes)),
+          row('Win Rate',      wrStr, wrColor),
+          row('Total Stake',   fmtEur(perf.totalStake)),
+          row('Max Drawdown',  ddStr, maxDd.pct > 0 ? 'var(--bad)' : null)
+        ].join('');
+
+        // D — Bot vs Manual
+        const bp = fmtSigned(perf.botProfit);
+        const br = fmtSignedPct(perf.botRoi);
+        const mp = fmtSigned(perf.manualProfit);
+        const mr = fmtSignedPct(perf.manualRoi);
+        const sD = sHead('D — Bot vs Manual') + `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+            <div style="border:1px solid var(--line-strong);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Bot</div>
+              ${row('Bets',   fmtInt(perf.botBetsExecuted))}
+              ${row('Profit', bp.str, bp.color)}
+              ${row('ROI',    br.str, br.color)}
+            </div>
+            <div style="border:1px solid var(--line-strong);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Manual</div>
+              ${row('Bets',   fmtInt(perf.manualBetsCount))}
+              ${row('Profit', mp.str, mp.color)}
+              ${row('ROI',    mr.str, mr.color)}
+            </div>
+          </div>`;
+
+        // E — Season Snapshot
+        const freshStr = meta.dataFreshAtClose === true ? 'Yes' : meta.dataFreshAtClose === false ? 'No' : '—';
+        const sE = [
+          sHead('E — Season Snapshot'),
+          row('Open Bets At Close',  fmtInt(meta.openBetsAtClose)),
+          row('Data Fresh At Close', freshStr),
+          row('Last GitHub Update',  meta.lastGithubUpdate ? formatDateTimePt(new Date(meta.lastGithubUpdate)) : '—')
+        ].join('');
+
+        // F — Stored Data Counts
+        const movCount   = Array.isArray(data.movements)        ? data.movements.length        : null;
+        const manCount   = Array.isArray(data.manualBets)        ? data.manualBets.length        : null;
+        const editsCount = (data.localEdits && typeof data.localEdits === 'object')
+          ? Object.keys(data.localEdits).length : null;
+        const botCount   = Array.isArray(data.executedBotPicks)  ? data.executedBotPicks.length  : null;
+        const sF = [
+          sHead('F — Stored Data Counts'),
+          row('Movements',          fmtInt(movCount)),
+          row('Manual Bets',        fmtInt(manCount)),
+          row('Local Edits',        fmtInt(editsCount)),
+          row('Executed Bot Picks', fmtInt(botCount))
+        ].join('');
+
+        // G — Storage Info
+        const sizeKb = (JSON.stringify(archive).length * 2 / 1024).toFixed(1);
+        const sG = [
+          sHead('G — Storage Info'),
+          row('Archive JSON Size', `${sizeKb} KB`)
+        ].join('');
+
+        container.innerHTML = `
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;gap:12px;">
+            <div>
+              <div style="font-size:18px;font-weight:800;color:var(--text);">${escapeHtml(archive.seasonName || 'Archive Detail')}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px;">ID: ${escapeHtml(archive.id)}</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <button type="button" onclick="backToArchiveList()" style="font-size:12px;padding:6px 14px;">← Back</button>
+              <button type="button" onclick="closeArchiveDetail()"
+                style="background:none;border:1px solid var(--line-strong);color:var(--muted);border-radius:8px;padding:4px 12px;font-size:13px;cursor:pointer;">✕</button>
+            </div>
+          </div>
+          ${sA}${sB}${sC}${sD}${sE}${sF}${sG}
+          <div style="margin-top:24px;text-align:center;">
+            <button type="button" onclick="backToArchiveList()" style="font-size:12px;padding:6px 20px;">← Back to Archives</button>
+          </div>`;
+      }
+
+      // ===== END ARCHIVE VIEWER =====
+
       let _csmData = {};
 
       function openCloseSeasonModal() {
@@ -12674,6 +12954,7 @@ buttons.forEach(btn => {
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
         bindElementAction('closeSeasonBtn', openCloseSeasonModal);
+        bindElementAction('viewArchivesBtn', openArchiveListModal);
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
@@ -12806,6 +13087,20 @@ buttons.forEach(btn => {
   <div id="closeSeasonModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
     <div style="background:var(--card);border-radius:16px;max-width:560px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);">
       <div id="csmContent" style="padding:28px;"></div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE LIST MODAL — Phase 23.2A -->
+  <div id="archiveListModal" style="display:none;position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card);border-radius:16px;max-width:900px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);">
+      <div id="almContent" style="padding:28px;"></div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE DETAIL MODAL — Phase 23.2A -->
+  <div id="archiveDetailModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card);border-radius:16px;max-width:560px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);">
+      <div id="admContent" style="padding:28px;"></div>
     </div>
   </div>
 
