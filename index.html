@@ -2823,6 +2823,12 @@ button.dirty {
             <div class="note" style="margin-bottom:8px;">Remove banca inicial e todos os movimentos (depósitos/levantamentos). O histórico de apostas é preservado.</div>
             <button id="resetFinancialBtn" type="button" style="width:100%;color:var(--bad);border-color:var(--bad-border);background:rgba(239,68,68,0.08);">Reset Financial Configuration</button>
           </div>
+
+          <div class="card" style="border:1px solid var(--warn-border);background:var(--warn-bg);">
+            <div class="label" style="color:var(--warn);">Season Management</div>
+            <div class="note" style="margin-bottom:8px;">Archive the current season and start a new one. All data is permanently saved before any reset.</div>
+            <button id="closeSeasonBtn" type="button" style="width:100%;color:var(--warn);border-color:var(--warn-border);background:rgba(245,158,11,0.08);">Close Season</button>
+          </div>
         </div>
 
         <div class="card">
@@ -3005,6 +3011,35 @@ button.dirty {
         </div>
         <div id="versusExecSummary"></div>
 
+        <div class="section-header" style="margin-top:16px;border-top:2px solid var(--line);padding-top:16px;">
+          <span class="section-header-title" style="color:var(--accent);font-size:13px;letter-spacing:.08em;">ACTION ENGINE</span>
+          <div class="section-header-line"></div>
+        </div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Z — Analysis Recommendations</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusActionEngine"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">AA — Model Health</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusModelHealth"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">AB — Improvement Priorities</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusImprovements"></div>
+
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">AC — Decision Summary</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusDecision"></div>
+
       </div>
     </div>
 
@@ -3178,6 +3213,9 @@ button.dirty {
         movements: 'apostas_bot_movements_v1',
         bankrollSet: 'apostas_bot_bankroll_set_v1'
       };
+
+      const SEASON_ARCHIVES_KEY = 'apostas_season_archives_v1';
+      const SEASON_CLOSE_PENDING_KEY = 'apostas_season_close_pending';
 
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
@@ -7776,9 +7814,24 @@ button.dirty {
     const res = await fetch(`${API_URL}/load`);
     const content = await res.json();
 
+    // Season recency guard: refuse to overwrite a newer local season with an older cloud season.
+    // This prevents a failed Step-12 cloud sync from resurrecting an archived season when the
+    // user clicks "Load Cloud" after a season close.
+    const cloudSession = content.sessionStartDate || '';
+    const localSession = state.sessionStartDate   || '';
+    if (cloudSession && localSession && cloudSession < localSession) {
+      alert(
+        `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
+        `but your current season started on ${localSession}.\n\n` +
+        `Loading would overwrite your newer season with an older, archived one.\n\n` +
+        `If you intentionally want to restore an old season, that feature will be available in Phase 23.2.`
+      );
+      return;
+    }
+
     state.cloudAvailable = true;
     updateCloudStatus();
-    
+
     state.bankrollInicial = content.bankrollInicial || 1000;
     state.manualBets = content.manualBets || [];
     state.localEdits = content.localEdits || {};
@@ -9416,12 +9469,16 @@ buttons.forEach(btn => {
         }
 
         // ── Sections U–Y: Analysis Quality Score ────────────────────────────
-        const qualScoreEl = document.getElementById('versusQualityScore');
-        const qualBreakEl = document.getElementById('versusQualityBreakdown');
-        const swEl        = document.getElementById('versusStrengthsWeaknesses');
-        const trustEl     = document.getElementById('versusTrustLevel');
-        const execEl      = document.getElementById('versusExecSummary');
-        if (qualScoreEl || qualBreakEl || swEl || trustEl || execEl) {
+        const qualScoreEl  = document.getElementById('versusQualityScore');
+        const qualBreakEl  = document.getElementById('versusQualityBreakdown');
+        const swEl         = document.getElementById('versusStrengthsWeaknesses');
+        const trustEl      = document.getElementById('versusTrustLevel');
+        const execEl       = document.getElementById('versusExecSummary');
+        const actionEl     = document.getElementById('versusActionEngine');
+        const healthEl     = document.getElementById('versusModelHealth');
+        const prioritiesEl = document.getElementById('versusImprovements');
+        const decisionEl   = document.getElementById('versusDecision');
+        if (qualScoreEl || qualBreakEl || swEl || trustEl || execEl || actionEl || healthEl || prioritiesEl || decisionEl) {
 
           const analyzedAll = getResolvedManualBets().filter(b =>
             b.hadAnalysis === true &&
@@ -9437,6 +9494,11 @@ buttons.forEach(btn => {
 
           if (analyzedN < 20) {
             [qualScoreEl, qualBreakEl, swEl, trustEl, execEl].forEach(el => { if (el) el.innerHTML = insuffMsg; });
+            const noDataNote = `<div class="card"><div class="note" style="text-align:center;padding:16px;color:var(--muted);">Collect more analyzed settled bets (min. 20).</div></div>`;
+            if (actionEl)     actionEl.innerHTML     = noDataNote;
+            if (healthEl)     healthEl.innerHTML     = `<div class="card"><div style="text-align:center;padding:16px;font-size:16px;font-weight:700;color:var(--warn);">INSUFFICIENT SAMPLE</div></div>`;
+            if (prioritiesEl) prioritiesEl.innerHTML = noDataNote;
+            if (decisionEl)   decisionEl.innerHTML   = noDataNote;
           } else {
             // Re-derive score calibration
             const scoredU = getResolvedManualBets().filter(b =>
@@ -11817,6 +11879,780 @@ buttons.forEach(btn => {
         rerenderAll();
       }
 
+      // ============================================================
+      // SEASON ARCHIVE — Phase 23.1
+      // ============================================================
+
+      function getSeasonArchives() {
+        try {
+          const raw = localStorage.getItem(SEASON_ARCHIVES_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function estimateLocalStorageUsage() {
+        let total = 0;
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const val = localStorage.getItem(key) || '';
+            total += (key.length + val.length) * 2;
+          }
+        } catch (e) {}
+        return total;
+      }
+
+      function buildSeasonArchiveObject(seasonName, newBankroll) {
+        const now = new Date();
+        const archiveId = 'season_' + now.getTime();
+
+        const bk = getBankrollState();
+        const m = getMetrics();
+        const movTotals = getMovementTotals();
+
+        // All closed rows — use the empty summary filters (all-pass)
+        const allClosedRows = getFilteredRealClosedRows(getSummaryFilters());
+
+        // Drawdown analysis
+        let maxDrawdown = { eur: 0, pct: 0 };
+        let drawdownEvents = [];
+        if (allClosedRows.length) {
+          try {
+            const dd = computeDrawdownAnalysis(allClosedRows);
+            if (dd) {
+              maxDrawdown = dd.maxDrawdown;
+              drawdownEvents = dd.recoveryTable || [];
+            }
+          } catch (e) { console.warn('[Archive] drawdown skipped:', e); }
+        }
+
+        // Bankroll curve series
+        let bankrollCurve = [];
+        if (bk.initialBankroll !== null) {
+          let running = bk.initialBankroll;
+          bankrollCurve = allClosedRows.map(r => {
+            running += (r.lucro || 0);
+            return { date: r.date, value: running };
+          });
+        }
+
+        // Executed bot picks in current session.
+        // Uses getAllBotRowsMergedUnique() (footballHistory ∪ footballDaily, deduped)
+        // so picks placed today are not omitted from the archive.
+        const executedBotPicks = getAllBotRowsMergedUnique()
+          .filter(r => r._apostadaBool === true && isOnOrAfterSession(r['Data']))
+          .map(r => ({
+            data:        r['Data']       || '',
+            liga:        r['Liga']       || '',
+            jogo:        r['Jogo']       || '',
+            mercado:     r['Mercado']    || '',
+            oddModelo:   r._oddModeloNum,
+            stakeModelo: r._stakeModeloNum,
+            oddReal:     r._oddRealNum,
+            stakeReal:   r._stakeRealNum,
+            resultado:   r._resultadoFinal || '',
+            resultKey:   r._resultKey   || '',
+            lucro:       r._lucroRealLocal
+          }));
+
+        // Analytics snapshots (all closed rows, no active UI filters)
+        let analyticsSnapshots = { byLeague: [], byMarket: [], bySource: [] };
+        try {
+          analyticsSnapshots = {
+            byLeague: buildAnalytics(allClosedRows, 'league'),
+            byMarket: buildAnalytics(allClosedRows, 'market'),
+            bySource: buildAnalytics(allClosedRows, 'sourceLabel')
+          };
+        } catch (e) { console.warn('[Archive] analytics snapshot skipped:', e); }
+
+        // Bot vs Manual split performance
+        const botClosedRows    = allClosedRows.filter(r => r.source === 'bot');
+        const manualClosedRows = allClosedRows.filter(r => r.source === 'manual');
+
+        function calcPerf(rows) {
+          const wins   = rows.filter(r => r.result === 'W').length;
+          const losses = rows.filter(r => r.result === 'L').length;
+          const pushes = rows.filter(r => r.result === 'P').length;
+          const stake  = rows.reduce((a, r) => a + (r.stake || 0), 0);
+          const profit = rows.reduce((a, r) => a + (r.lucro || 0), 0);
+          return {
+            count: rows.length, wins, losses, pushes, stake, profit,
+            winRate: (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0,
+            roi:     stake > 0 ? (profit / stake) * 100 : 0
+          };
+        }
+
+        // Open bets at close time — includes pending (not yet approved) manual bets
+        // and today's open bot picks via getAllBotRowsMergedUnique()
+        const openManual = (state.manualBets || []).filter(b =>
+          (b.status === 'approved' || b.status === 'pending') &&
+          !['W', 'L', 'P'].includes((b.resultado || '').toUpperCase())
+        ).length;
+        const openBot = getAllBotRowsMergedUnique().filter(r =>
+          r._apostadaBool === true && r._resultKey === 'pending' && isOnOrAfterSession(r['Data'])
+        ).length;
+        const openBetsAtClose = openBot + openManual;
+
+        const finalBankroll = bk.configured ? bk.totalAccountValue : null;
+        const profitVal     = bk.configured ? bk.lucroReal : 0;
+        const roiOnInitial  = (bk.configured && bk.initialBankroll && bk.initialBankroll > 0)
+          ? ((finalBankroll - bk.initialBankroll) / bk.initialBankroll) * 100
+          : 0;
+
+        const botPerf    = calcPerf(botClosedRows);
+        const manualPerf = calcPerf(manualClosedRows);
+
+        return {
+          id:             archiveId,
+          seasonName:     String(seasonName).trim(),
+          closedAt:       now.toISOString(),
+          archiveVersion: 1,
+          startDate:      state.sessionStartDate || todayIso(),
+          endDate:        todayIso(),
+
+          financial: {
+            startingBankroll:    state.bankrollInicial,
+            finalBankroll:       finalBankroll,
+            transferredBankroll: newBankroll,
+            bankrollAdjustment:  (newBankroll !== null && finalBankroll !== null)
+                                   ? (newBankroll - finalBankroll) : 0,
+            totalDeposits:       movTotals.deposits,
+            totalWithdrawals:    movTotals.withdrawals,
+            netMovements:        movTotals.net,
+            profit:              profitVal,
+            roi:                 roiOnInitial,
+            roiOnStake:          m.geral.realStake > 0
+                                   ? (profitVal / m.geral.realStake) * 100 : 0
+          },
+
+          performance: {
+            totalBetsExecuted: m.geral.realResolvedCount + openBetsAtClose,
+            resolvedBets:      m.geral.realResolvedCount,
+            wins:              m.geral.realWins,
+            losses:            m.geral.realLosses,
+            pushes:            allClosedRows.filter(r => r.result === 'P').length,
+            winRate:           m.geral.realWr,
+            totalStake:        m.geral.realStake,
+            maxDrawdown,
+            botBetsExecuted:   executedBotPicks.length,
+            botWins:           botPerf.wins,
+            botLosses:         botPerf.losses,
+            botProfit:         botPerf.profit,
+            botRoi:            botPerf.roi,
+            manualBetsCount:   manualPerf.count,
+            manualWins:        manualPerf.wins,
+            manualLosses:      manualPerf.losses,
+            manualProfit:      manualPerf.profit,
+            manualRoi:         manualPerf.roi
+          },
+
+          data: {
+            movements:        JSON.parse(JSON.stringify(state.movements  || [])),
+            manualBets:       JSON.parse(JSON.stringify(state.manualBets || [])),
+            localEdits:       JSON.parse(JSON.stringify(state.localEdits || {})),
+            executedBotPicks
+          },
+
+          snapshots: {
+            analytics:  analyticsSnapshots,
+            botVsManual: { bot: botPerf, manual: manualPerf },
+            bankrollCurve,
+            drawdownEvents
+          },
+
+          meta: {
+            openBetsAtClose,
+            dataFreshAtClose:  state.lastUpdated !== null,
+            lastGithubUpdate:  state.lastUpdated ? state.lastUpdated.toISOString() : null
+          }
+        };
+      }
+
+      function validateArchive(archive) {
+        if (!archive || typeof archive !== 'object')
+          return { ok: false, reason: 'Invalid archive object' };
+        if (!archive.id || typeof archive.id !== 'string')
+          return { ok: false, reason: 'Missing archive ID' };
+        if (!archive.seasonName || typeof archive.seasonName !== 'string')
+          return { ok: false, reason: 'Missing season name' };
+        if (!archive.startDate)
+          return { ok: false, reason: 'Missing start date' };
+        if (!archive.endDate)
+          return { ok: false, reason: 'Missing end date' };
+        if (!archive.archiveVersion)
+          return { ok: false, reason: 'Missing archive version' };
+        if (!archive.financial || typeof archive.financial !== 'object')
+          return { ok: false, reason: 'Missing financial summary' };
+        if (!archive.data || typeof archive.data !== 'object')
+          return { ok: false, reason: 'Missing data payload' };
+        return { ok: true };
+      }
+
+      async function executeSeasonClose(archive, newBankroll) {
+        // STEP 1: Serialize
+        let archiveJson;
+        try {
+          archiveJson = JSON.stringify(archive);
+        } catch (e) {
+          throw new Error('Serialization failed: ' + e.message);
+        }
+
+        // STEP 2: Validate
+        const validation = validateArchive(archive);
+        if (!validation.ok)
+          throw new Error('Archive validation failed: ' + validation.reason);
+
+        // STEP 3: Storage capacity pre-flight (4 MB safe ceiling)
+        const currentUsage = estimateLocalStorageUsage();
+        const archiveSize  = archiveJson.length * 2;
+        if ((currentUsage + archiveSize) > 4 * 1024 * 1024)
+          throw new Error(
+            `Storage limit risk: current usage ${Math.round(currentUsage / 1024)} KB + ` +
+            `archive ${Math.round(archiveSize / 1024)} KB would exceed the 4 MB safe limit. ` +
+            `Export or clear older archives first.`
+          );
+
+        // STEP 4: Duplicate check (same name + same date range)
+        const existing  = getSeasonArchives();
+        const duplicate = existing.find(a =>
+          a.startDate  === archive.startDate &&
+          a.endDate    === archive.endDate   &&
+          a.seasonName === archive.seasonName
+        );
+        if (duplicate)
+          throw new Error(
+            `An archive named "${archive.seasonName}" with the same date range already exists. ` +
+            `Choose a different season name.`
+          );
+
+        // STEP 5: Write commit flag (crash guard).
+        // Stores archiveId + intended new season values so recovery can reconstruct
+        // the correct new season even if the crash happened before Step 8.
+        const pendingRecord = JSON.stringify({
+          archiveId:           archive.id,
+          newBankroll:         newBankroll,
+          newSessionStartDate: todayIso()
+        });
+        localStorage.setItem(SEASON_CLOSE_PENDING_KEY, pendingRecord);
+
+        // STEP 6: Write archive
+        try {
+          localStorage.setItem(SEASON_ARCHIVES_KEY, JSON.stringify([...existing, archive]));
+        } catch (e) {
+          localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+          throw new Error('Storage write failed: ' + e.message);
+        }
+
+        // STEP 7: Read-back verification
+        try {
+          const readBack = JSON.parse(localStorage.getItem(SEASON_ARCHIVES_KEY) || '[]');
+          if (!readBack.find(a => a.id === archive.id)) {
+            localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+            throw new Error('Archive write verification failed: archive not found after save.');
+          }
+        } catch (e) {
+          if (e.message.includes('verification failed')) { localStorage.removeItem(SEASON_CLOSE_PENDING_KEY); throw e; }
+          localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+          throw new Error('Archive read-back failed: ' + e.message);
+        }
+
+        // STEP 8: Initialize new season bankroll in storage
+        localStorage.setItem(STORAGE_KEYS.bankroll,          String(newBankroll));
+        localStorage.setItem(STORAGE_KEYS.bankrollSet,       '1');
+        localStorage.setItem(STORAGE_KEYS.sessionStartDate,  todayIso());
+
+        // STEP 9: Clear current season from storage
+        localStorage.removeItem(STORAGE_KEYS.picks);
+        localStorage.removeItem(STORAGE_KEYS.manual);
+        localStorage.removeItem(STORAGE_KEYS.movements);
+
+        // STEP 10: Update in-memory state
+        state.localEdits        = {};
+        state.manualBets        = [];
+        state.movements         = [];
+        state.bankrollInicial   = newBankroll;
+        state.bankrollInicialSet = true;
+        state.sessionStartDate  = todayIso();
+        state.activeTab         = 'tab-summary';
+
+        const biEl  = document.getElementById('bankrollInput');
+        if (biEl)  biEl.value  = newBankroll;
+        const bciEl = document.getElementById('bankrollConfigInput');
+        if (bciEl) bciEl.value = newBankroll;
+
+        // STEP 11: Remove commit flag — process complete
+        localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+
+        // STEP 12: Push clean new season to cloud.
+        // Uses waitForCloudSyncAfterClose() to handle the autoSaveInFlight guard —
+        // no silent bypass: if a save is in flight we wait for it to finish first.
+        try { await waitForCloudSyncAfterClose(); }
+        catch (e) {
+          // Cloud sync failed or deferred — mark dirty so the user can see and act.
+          hasPendingCloudChanges = true;
+          updateCloudStatus();
+          console.warn('[Season Archive] Cloud sync after close:', e.message);
+        }
+      }
+
+      // Waits for any in-flight cloud save to finish, then syncs the new season state.
+      // Prevents the autoSaveInFlight guard in saveCloudState() from silently bypassing
+      // the post-season-close sync.
+      async function waitForCloudSyncAfterClose(maxWaitMs = 8000) {
+        const pollMs = 200;
+        let waited   = 0;
+        while (autoSaveInFlight && waited < maxWaitMs) {
+          await new Promise(r => setTimeout(r, pollMs));
+          waited += pollMs;
+        }
+        if (autoSaveInFlight) {
+          throw new Error(
+            `Cloud sync deferred: a previous save was still in progress after ${maxWaitMs / 1000}s. ` +
+            `The season close completed successfully. Please use "Guardar cloud" to sync manually.`
+          );
+        }
+        await saveCloudState();
+      }
+
+      function checkStartupRecovery() {
+        const raw = localStorage.getItem(SEASON_CLOSE_PENDING_KEY);
+        if (!raw) return;
+
+        // Parse the commit flag — supports JSON format (new) and plain archiveId string (legacy).
+        let archiveId, newBankroll, newSessionStartDate;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            archiveId          = parsed.archiveId;
+            newBankroll        = parsed.newBankroll;
+            newSessionStartDate = parsed.newSessionStartDate;
+          } else {
+            archiveId = raw;  // legacy plain-string format
+          }
+        } catch (e) {
+          archiveId = raw;    // legacy plain-string format
+        }
+
+        if (!archiveId) {
+          localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+          return;
+        }
+
+        try {
+          const archives     = JSON.parse(localStorage.getItem(SEASON_ARCHIVES_KEY) || '[]');
+          const archiveFound = Array.isArray(archives) && archives.some(a => a.id === archiveId);
+
+          if (archiveFound) {
+            // Archive was saved — apply the intended new season state so recovery is
+            // consistent regardless of where between Steps 7 and 11 the crash occurred.
+            if (newBankroll !== null && newBankroll !== undefined && Number(newBankroll) > 0) {
+              localStorage.setItem(STORAGE_KEYS.bankroll,    String(newBankroll));
+              localStorage.setItem(STORAGE_KEYS.bankrollSet, '1');
+            }
+            if (newSessionStartDate) {
+              localStorage.setItem(STORAGE_KEYS.sessionStartDate, newSessionStartDate);
+            }
+            localStorage.removeItem(STORAGE_KEYS.picks);
+            localStorage.removeItem(STORAGE_KEYS.manual);
+            localStorage.removeItem(STORAGE_KEYS.movements);
+            localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+            console.log('[Season Archive] Startup recovery: completed partial reset for', archiveId);
+          } else {
+            // Archive write never completed — preserve all current data
+            localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+            console.warn('[Season Archive] Startup recovery: archive missing, current data preserved.');
+            setTimeout(() => {
+              const el = document.createElement('div');
+              el.style.cssText = [
+                'position:fixed', 'top:20px', 'left:50%', 'transform:translateX(-50%)',
+                'z-index:99999', 'background:var(--card)', 'border:1px solid var(--warn-border)',
+                'color:var(--warn)', 'padding:14px 22px', 'border-radius:10px',
+                'font-size:13px', 'max-width:90vw', 'text-align:center',
+                'box-shadow:var(--shadow)', 'cursor:pointer', 'line-height:1.5'
+              ].join(';');
+              el.textContent = 'A previous season close did not complete. Your current data has been preserved. Click to dismiss.';
+              el.addEventListener('click', () => el.remove());
+              document.body.appendChild(el);
+              setTimeout(() => { if (el.parentNode) el.remove(); }, 10000);
+            }, 2000);
+          }
+        } catch (e) {
+          localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
+          console.error('[Season Archive] Startup recovery check failed:', e);
+        }
+      }
+
+      // ── Close Season Modal ───────────────────────────────────────
+
+      let _csmData = {};
+
+      function openCloseSeasonModal() {
+        const startYear     = state.sessionStartDate ? state.sessionStartDate.slice(0, 4) : String(new Date().getFullYear());
+        const endYear       = new Date().getFullYear();
+        const suggestedName = `Temporada ${startYear}/${String(endYear).slice(-2)}`;
+
+        _csmData = {
+          step:           1,
+          seasonName:     suggestedName,
+          bankrollChoice: 'current',
+          customBankroll: '',
+          newBankroll:    null,
+          processing:     false
+        };
+
+        csmRenderStep1();
+        const modal = document.getElementById('closeSeasonModal');
+        if (modal) modal.style.display = 'flex';
+      }
+
+      function closeCloseSeasonModal() {
+        const modal = document.getElementById('closeSeasonModal');
+        if (modal) modal.style.display = 'none';
+        _csmData = {};
+      }
+
+      function csmRenderStep1() {
+        const openManual = (state.manualBets || []).filter(b =>
+          (b.status === 'approved' || b.status === 'pending') &&
+          !['W', 'L', 'P'].includes((b.resultado || '').toUpperCase())
+        ).length;
+        const openBot = getAllBotRowsMergedUnique().filter(r =>
+          r._apostadaBool === true && r._resultKey === 'pending' && isOnOrAfterSession(r['Data'])
+        ).length;
+        const openTotal   = openBot + openManual;
+        const dataFresh   = state.lastUpdated !== null;
+        const minutesAgo  = state.lastUpdated
+          ? Math.round((Date.now() - state.lastUpdated.getTime()) / 60000) : null;
+
+        let warningsHtml = '';
+
+        if (openTotal > 0) {
+          warningsHtml += `
+            <div style="display:flex;gap:10px;padding:12px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;margin-bottom:10px;">
+              <span style="color:var(--warn);font-size:15px;flex-shrink:0;margin-top:1px;">⚠</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--warn);">Open Bets</div>
+                <div class="note" style="margin-top:2px;">You have <strong>${openTotal}</strong> open bet${openTotal !== 1 ? 's' : ''} (${openBot} bot, ${openManual} manual). They will be archived as pending.</div>
+              </div>
+            </div>`;
+        }
+
+        if (!dataFresh) {
+          warningsHtml += `
+            <div style="display:flex;gap:10px;padding:12px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;margin-bottom:10px;">
+              <span style="color:var(--warn);font-size:15px;flex-shrink:0;margin-top:1px;">⚠</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--warn);">GitHub Data Not Loaded</div>
+                <div class="note" style="margin-top:2px;">Bot history was not loaded this session. The archive may miss some executed bot picks. Consider refreshing first.</div>
+              </div>
+            </div>`;
+        } else if (minutesAgo !== null && minutesAgo > 15) {
+          warningsHtml += `
+            <div style="display:flex;gap:10px;padding:12px;background:var(--info-bg);border:1px solid var(--info-border);border-radius:8px;margin-bottom:10px;">
+              <span style="color:var(--info);font-size:15px;flex-shrink:0;margin-top:1px;">ℹ</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--info);">Data Last Refreshed ${minutesAgo}m Ago</div>
+                <div class="note" style="margin-top:2px;">Consider refreshing data before closing the season for a more complete bot picks archive.</div>
+              </div>
+            </div>`;
+        }
+
+        if (!warningsHtml) {
+          warningsHtml = `
+            <div style="display:flex;gap:10px;padding:12px;background:var(--ok-bg);border:1px solid var(--ok-border);border-radius:8px;margin-bottom:10px;">
+              <span style="color:var(--ok);font-size:15px;flex-shrink:0;margin-top:1px;">✓</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--ok);">Ready to Archive</div>
+                <div class="note" style="margin-top:2px;">No open bets. GitHub data is fresh. You can proceed.</div>
+              </div>
+            </div>`;
+        }
+
+        safeSetHTML('csmContent', `
+          <div style="margin-bottom:20px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Close Season</div>
+            <div class="note">Step 1 of 4 — Review warnings before proceeding.</div>
+          </div>
+          ${warningsHtml}
+          <div class="note" style="margin-top:6px;line-height:1.6;">
+            This process will <strong>permanently archive all current season data</strong> then start a fresh new season.
+            Data is saved completely before any reset occurs.
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+            <button type="button" onclick="closeCloseSeasonModal()" style="min-width:80px;">Cancel</button>
+            <button type="button" onclick="csmGoStep2()" style="min-width:120px;background:var(--accent);color:white;border-color:var(--accent);">Continue →</button>
+          </div>
+        `);
+      }
+
+      function csmGoStep2() {
+        safeSetHTML('csmContent', `
+          <div style="margin-bottom:20px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Season Name</div>
+            <div class="note">Step 2 of 4 — Name the season being closed.</div>
+          </div>
+          <div class="card" style="background:var(--card-alt);margin-bottom:16px;">
+            <div class="label" style="margin-bottom:8px;">Season Name</div>
+            <input id="csmSeasonNameInput" type="text"
+              value="${escapeHtml(_csmData.seasonName)}"
+              placeholder="e.g. Temporada 2024/25"
+              style="width:100%;" maxlength="80"
+              oninput="_csmData.seasonName = this.value" />
+            <div class="note" style="margin-top:6px;">Current season started: <strong>${state.sessionStartDate || '—'}</strong></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+            <button type="button" onclick="csmRenderStep1()" style="min-width:80px;">← Back</button>
+            <button type="button" onclick="csmGoStep3()" style="min-width:120px;background:var(--accent);color:white;border-color:var(--accent);">Continue →</button>
+          </div>
+        `);
+        setTimeout(() => {
+          const inp = document.getElementById('csmSeasonNameInput');
+          if (inp) { inp.focus(); inp.select(); }
+        }, 50);
+      }
+
+      function csmGoStep3() {
+        const nameVal = (_csmData.seasonName || '').trim();
+        if (!nameVal) { alert('Please enter a season name.'); return; }
+        _csmData.seasonName = nameVal;
+
+        const bk               = getBankrollState();
+        const currentBankroll  = bk.configured ? bk.totalAccountValue : null;
+        const currentDisplay   = currentBankroll !== null ? `€${fmt(currentBankroll)}` : 'Not configured';
+        const optADisabled     = currentBankroll === null;
+
+        safeSetHTML('csmContent', `
+          <div style="margin-bottom:20px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">New Season Bankroll</div>
+            <div class="note">Step 3 of 4 — Choose the starting bankroll for the new season.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+            <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--card-alt);cursor:${optADisabled ? 'not-allowed' : 'pointer'};opacity:${optADisabled ? '0.5' : '1'};">
+              <input type="radio" name="csmBankrollChoice" value="current" id="csmRadioCurrent"
+                ${_csmData.bankrollChoice === 'current' && !optADisabled ? 'checked' : ''}
+                ${optADisabled ? 'disabled' : ''}
+                onchange="_csmData.bankrollChoice='current';document.getElementById('csmCustomWrap').style.display='none';"
+                style="margin-top:2px;flex-shrink:0;" />
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Option A — Use Current Bankroll</div>
+                <div class="note" style="margin-top:2px;">Start new season with the current balance: <strong>${currentDisplay}</strong>${optADisabled ? ' (not configured)' : ''}</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--card-alt);cursor:pointer;">
+              <input type="radio" name="csmBankrollChoice" value="custom" id="csmRadioCustom"
+                ${_csmData.bankrollChoice === 'custom' || optADisabled ? 'checked' : ''}
+                onchange="_csmData.bankrollChoice='custom';document.getElementById('csmCustomWrap').style.display='block';"
+                style="margin-top:2px;flex-shrink:0;" />
+              <div style="width:100%;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Option B — Custom Amount</div>
+                <div class="note" style="margin-top:2px;">Define a custom starting bankroll for the new season.</div>
+                <div id="csmCustomWrap" style="display:${_csmData.bankrollChoice === 'custom' || optADisabled ? 'block' : 'none'};margin-top:8px;">
+                  <input type="number" id="csmCustomBankrollInput" step="0.01" min="0.01"
+                    value="${_csmData.customBankroll || ''}" placeholder="e.g. 1000.00"
+                    oninput="_csmData.customBankroll = this.value"
+                    style="width:100%;" />
+                </div>
+              </div>
+            </label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+            <button type="button" onclick="csmGoStep2()" style="min-width:80px;">← Back</button>
+            <button type="button" onclick="csmGoStep4()" style="min-width:120px;background:var(--accent);color:white;border-color:var(--accent);">Continue →</button>
+          </div>
+        `);
+        if (optADisabled) _csmData.bankrollChoice = 'custom';
+      }
+
+      function csmGoStep4() {
+        // Resolve the new bankroll value before rendering review
+        const bk = getBankrollState();
+        let newBankroll;
+
+        if (_csmData.bankrollChoice === 'current') {
+          if (!bk.configured || bk.totalAccountValue === null) {
+            alert('Current bankroll is not configured. Choose Option B to set a custom amount.');
+            return;
+          }
+          newBankroll = bk.totalAccountValue;
+        } else {
+          const v = num(_csmData.customBankroll);
+          if (v === null || v <= 0) {
+            alert('Please enter a valid custom bankroll amount greater than 0.');
+            return;
+          }
+          newBankroll = v;
+        }
+        _csmData.newBankroll = newBankroll;
+
+        // Build preview metrics
+        const m            = getMetrics();
+        const allClosed    = getFilteredRealClosedRows(getSummaryFilters());
+        const finalBkTxt   = bk.configured ? `€${fmt(bk.totalAccountValue)}` : '—';
+        const profitTxt    = `${m.geral.realProfit >= 0 ? '+' : ''}€${fmt(m.geral.realProfit)}`;
+        const roiTxt       = `${m.geral.realRoi >= 0 ? '+' : ''}${fmt(m.geral.realRoi, 1)}%`;
+        const wrTxt        = `${fmt(m.geral.realWr, 1)}%`;
+        const betsTxt      = `${m.geral.realResolvedCount} resolved`;
+
+        let maxDrawdownTxt = 'No drawdown';
+        try {
+          const dd = computeDrawdownAnalysis(allClosed);
+          if (dd && dd.maxDrawdown.eur > 0.005)
+            maxDrawdownTxt = `-${fmt(dd.maxDrawdown.pct, 1)}% (-€${fmt(dd.maxDrawdown.eur)})`;
+        } catch (e) {}
+
+        function kpiCell(label, value, color) {
+          return `<div style="padding:8px;background:var(--bg2);border-radius:6px;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">${escapeHtml(label)}</div>
+            <div style="font-size:13px;font-weight:700;color:${color || 'var(--text)'};">${value}</div>
+          </div>`;
+        }
+
+        safeSetHTML('csmContent', `
+          <div style="margin-bottom:16px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">Review &amp; Confirm</div>
+            <div class="note">Step 4 of 4 — Verify the summary, then type ARCHIVE to proceed.</div>
+          </div>
+
+          <div class="card" style="background:var(--card-alt);margin-bottom:12px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Season Summary</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              ${kpiCell('Season', escapeHtml(_csmData.seasonName))}
+              ${kpiCell('Period', `${state.sessionStartDate || '—'} → ${todayIso()}`)}
+              ${kpiCell('Final Bankroll', finalBkTxt)}
+              ${kpiCell('New Season Starts With', `€${fmt(newBankroll)}`)}
+              ${kpiCell('Profit', profitTxt, m.geral.realProfit >= 0 ? 'var(--ok)' : 'var(--bad)')}
+              ${kpiCell('ROI', roiTxt, m.geral.realRoi >= 0 ? 'var(--ok)' : 'var(--bad)')}
+              ${kpiCell('Win Rate', wrTxt)}
+              ${kpiCell('Bets', betsTxt)}
+              ${kpiCell('Max Drawdown', maxDrawdownTxt, maxDrawdownTxt !== 'No drawdown' ? 'var(--bad)' : 'var(--ok)')}
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;font-size:11px;">
+            <div style="padding:10px;background:var(--ok-bg);border:1px solid var(--ok-border);border-radius:8px;">
+              <div style="font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">ARCHIVED</div>
+              <div class="note" style="line-height:1.75;">Financial history<br>All movements<br>Manual bets<br>Bot executions<br>Analytics snapshots<br>Bankroll curve</div>
+            </div>
+            <div style="padding:10px;background:var(--bad-bg);border:1px solid var(--bad-border);border-radius:8px;">
+              <div style="font-weight:700;color:var(--bad);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">RESET</div>
+              <div class="note" style="line-height:1.75;">Current bankroll<br>Manual bets<br>Bot overrides<br>Movements<br>Session start date</div>
+            </div>
+            <div style="padding:10px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;">
+              <div style="font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">PRESERVED</div>
+              <div class="note" style="line-height:1.75;">App settings<br>UI preferences<br>Compact mode<br>League config<br>GitHub CSV data</div>
+            </div>
+          </div>
+
+          <div style="padding:14px;background:var(--bad-bg);border:1px solid var(--bad-border);border-radius:10px;">
+            <div style="font-size:12px;font-weight:700;color:var(--bad);margin-bottom:6px;">Type ARCHIVE to confirm</div>
+            <div class="note" style="margin-bottom:10px;">This action cannot be undone. The current season will be permanently archived and the state will be reset.</div>
+            <input type="text" id="csmConfirmInput" placeholder="Type: ARCHIVE"
+              style="width:100%;margin-bottom:12px;font-family:monospace;letter-spacing:0.12em;text-transform:uppercase;" />
+            <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+              <button type="button" onclick="csmGoStep3()" style="min-width:80px;">← Back</button>
+              <button type="button" id="csmConfirmBtn" disabled
+                onclick="csmExecute()"
+                style="min-width:190px;color:var(--bad);border-color:var(--bad-border);background:rgba(239,68,68,0.12);font-weight:700;opacity:0.45;cursor:not-allowed;">
+                Confirm &amp; Archive Season
+              </button>
+            </div>
+          </div>
+        `);
+
+        const confirmInput = document.getElementById('csmConfirmInput');
+        if (confirmInput) {
+          confirmInput.addEventListener('input', () => {
+            const btn = document.getElementById('csmConfirmBtn');
+            if (!btn) return;
+            const ok = confirmInput.value === 'ARCHIVE';
+            btn.disabled = !ok;
+            btn.style.opacity = ok ? '1' : '0.45';
+            btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+          });
+          confirmInput.focus();
+        }
+      }
+
+      async function csmExecute() {
+        if (_csmData.processing) return;
+        const confirmInput = document.getElementById('csmConfirmInput');
+        if (!confirmInput || confirmInput.value !== 'ARCHIVE') return;
+
+        _csmData.processing = true;
+
+        safeSetHTML('csmContent', `
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:20px;">Processing...</div>
+            <div id="csmProgressLog" style="text-align:left;font-size:12px;color:var(--muted);font-family:monospace;background:var(--card-alt);padding:14px;border-radius:8px;line-height:2;"></div>
+          </div>
+        `);
+
+        function logStep(msg) {
+          const log = document.getElementById('csmProgressLog');
+          if (!log) return;
+          const line = document.createElement('div');
+          line.textContent = '▸ ' + msg;
+          log.appendChild(line);
+        }
+
+        try {
+          logStep('Collecting season data...');
+          const archive = buildSeasonArchiveObject(_csmData.seasonName, _csmData.newBankroll);
+
+          logStep('Validating archive...');
+          const validation = validateArchive(archive);
+          if (!validation.ok) throw new Error(validation.reason);
+
+          logStep('Writing archive to storage...');
+          await executeSeasonClose(archive, _csmData.newBankroll);
+
+          logStep('Syncing cloud...');
+          logStep('Done.');
+
+          applyBankrollImmutability();
+          rerenderAll(false);
+          setActiveTab('tab-summary');
+
+          safeSetHTML('csmContent', `
+            <div style="text-align:center;padding:48px 24px;">
+              <div style="font-size:44px;margin-bottom:16px;color:var(--ok);">✓</div>
+              <div style="font-size:20px;font-weight:800;color:var(--ok);margin-bottom:10px;">Season Archived</div>
+              <div class="note" style="margin-bottom:24px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.6;">
+                <strong>${escapeHtml(_csmData.seasonName)}</strong> has been permanently archived.
+                Your new season has started with <strong>€${fmt(_csmData.newBankroll)}</strong>.
+              </div>
+              <button type="button" onclick="closeCloseSeasonModal()"
+                style="min-width:140px;background:var(--accent);color:white;border-color:var(--accent);">
+                Go to Dashboard
+              </button>
+            </div>
+          `);
+
+        } catch (e) {
+          _csmData.processing = false;
+          safeSetHTML('csmContent', `
+            <div style="padding:20px;">
+              <div style="font-size:18px;font-weight:800;color:var(--bad);margin-bottom:12px;">Archive Failed</div>
+              <div style="padding:12px 14px;background:var(--bad-bg);border:1px solid var(--bad-border);border-radius:8px;font-size:12px;color:var(--bad);font-family:monospace;word-break:break-word;margin-bottom:16px;">${escapeHtml(e.message)}</div>
+              <div class="note" style="margin-bottom:20px;line-height:1.6;">No data has been lost or changed. Your current season is intact. You may try again.</div>
+              <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" onclick="closeCloseSeasonModal()">Close</button>
+                <button type="button" onclick="csmGoStep4()"
+                  style="background:var(--accent);color:white;border-color:var(--accent);">
+                  Try Again
+                </button>
+              </div>
+            </div>
+          `);
+        }
+      }
+
+      // ── end Season Archive ───────────────────────────────────────
+
       function bindElementAction(elementId, handler) {
         const el = document.getElementById(elementId);
         if (!el || el.dataset.bound === '1') return;
@@ -11837,6 +12673,7 @@ buttons.forEach(btn => {
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
+        bindElementAction('closeSeasonBtn', openCloseSeasonModal);
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
@@ -11927,6 +12764,7 @@ buttons.forEach(btn => {
       }
 
       async function boot() {
+        checkStartupRecovery();
         loadCompactMode();
         loadLocalState();
         if (document.getElementById('bankrollInput')) {
@@ -11962,6 +12800,15 @@ buttons.forEach(btn => {
 
       boot();
     </script>
+  <!-- ============================
+       CLOSE SEASON MODAL — Phase 23.1
+  ============================= -->
+  <div id="closeSeasonModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:var(--card);border-radius:16px;max-width:560px;width:100%;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);">
+      <div id="csmContent" style="padding:28px;"></div>
+    </div>
+  </div>
+
   <div class="landscape-hint" id="landscapeHint">
     <div class="landscape-hint-icon">📱</div>
     <div style="font-size:20px; font-weight:700; margin-bottom:8px;">Modo Paisagem Recomendado</div>
