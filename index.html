@@ -7953,9 +7953,12 @@ button.dirty {
     // Season recency guard: refuse to overwrite a newer local season with an older cloud season.
     // This prevents a failed Step-12 cloud sync from resurrecting an archived season when the
     // user clicks "Load Cloud" after a season close.
+    // localSessionStored guards against fresh devices where sessionStartDate is a todayIso()
+    // runtime default (never written to localStorage) — those have no real local season to protect.
     const cloudSession = content.sessionStartDate || '';
     const localSession = state.sessionStartDate   || '';
-    if (cloudSession && localSession && cloudSession < localSession) {
+    const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+    if (cloudSession && localSession && localSessionStored && cloudSession < localSession) {
       alert(
         `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
         `but your current season started on ${localSession}.\n\n` +
