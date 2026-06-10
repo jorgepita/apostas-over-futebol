@@ -7970,7 +7970,12 @@ button.dirty {
           cloudSession,
           localSession,
           localSessionStored,
-          storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate)
+          storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate),
+          bankrollInicialSet: state.bankrollInicialSet,
+          bankrollInicial: state.bankrollInicial,
+          manualBetsCount: Array.isArray(state.manualBets) ? state.manualBets.length : 0,
+          movementsCount: Array.isArray(state.movements) ? state.movements.length : 0,
+          localEditsCount: state.localEdits ? Object.keys(state.localEdits).length : 0
         },
         null,
         2
