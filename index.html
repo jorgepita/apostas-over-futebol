@@ -3261,6 +3261,7 @@ button.dirty {
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
       let initialLoadDone = false;
+      let _autoSaveTimer = null;  // Phase 26.1 — debounce handle for auto cloud save
 
       const state = {
         footballDaily: [],
@@ -7950,8 +7951,8 @@ button.dirty {
   } catch (e) {
     console.error(e);
     state.cloudAvailable = false;
+    // hasPendingCloudChanges remains true — next markDirty() will schedule a retry
     updateCloudStatus();
-    alert('Erro ao guardar');
 
   } finally {
   autoSaveInFlight = false;
@@ -8067,6 +8068,13 @@ buttons.forEach(btn => {
         updateCloudStatus();
         rerenderSummaryOnly();
         updateSaveCloudButton();
+        // Phase 26.1 — schedule auto cloud save; collapses multiple rapid edits into one
+        clearTimeout(_autoSaveTimer);
+        _autoSaveTimer = setTimeout(() => {
+          if (hasPendingCloudChanges && !autoSaveInFlight) {
+            saveCloudState();
+          }
+        }, 4000);
       }
 
       function updateLocalEdit(key, changes) {
