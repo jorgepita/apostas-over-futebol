@@ -1989,14 +1989,6 @@ button.dirty {
               </select>
             </div>
 
-            <div>
-              <label class="label" for="dayExecutionFilter" style="display:block;margin-bottom:4px;">Execução</label>
-              <select id="dayExecutionFilter">
-                <option value="">Toda</option>
-                <option value="executed">Executadas</option>
-                <option value="not_executed">Não executadas</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -2022,8 +2014,7 @@ button.dirty {
                   <th>Stake rec.</th>
                   <th>Score</th>
                   <th>Sinais</th>
-                  <th>Executada</th>
-                  <th>Marcar</th>
+                  <th>Aprovar</th>
                   <th>Execução</th>
                   <th>Resultado</th>
                   <th>Lucro mod.</th>
@@ -2060,8 +2051,7 @@ button.dirty {
                   <th>Stake rec.</th>
                   <th>Score</th>
                   <th>Sinais</th>
-                  <th>Executada</th>
-                  <th>Marcar</th>
+                  <th>Aprovar</th>
                   <th>Execução</th>
                   <th>Resultado</th>
                   <th>Lucro mod.</th>
@@ -2174,14 +2164,6 @@ button.dirty {
               </select>
             </div>
 
-            <div>
-              <label class="label" for="historyExecutionFilter" style="display:block;margin-bottom:4px;">Execução</label>
-              <select id="historyExecutionFilter">
-                <option value="">Toda</option>
-                <option value="executed">Executadas</option>
-                <option value="not_executed">Não executadas</option>
-              </select>
-            </div>
 
             <div>
               <label class="label" for="historyOddsFilter" style="display:block;margin-bottom:4px;">Intervalo Odd</label>
@@ -2227,8 +2209,7 @@ button.dirty {
                   <th>Stake rec.</th>
                   <th>Score</th>
                   <th>Sinais</th>
-                  <th>Executada</th>
-                  <th>Marcar</th>
+                  <th>Aprovar</th>
                   <th>Execução</th>
                   <th>Resultado</th>
                   <th>Lucro mod.</th>
@@ -4909,7 +4890,6 @@ button.dirty {
           league: document.getElementById('dayLeagueFilter').value,
           market: document.getElementById('dayMarketFilter').value,
           result: document.getElementById('dayResultFilter').value,
-          execution: document.getElementById('dayExecutionFilter').value,
           date: '' // No date filter by default to show all future picks
         };
       }
@@ -4921,7 +4901,6 @@ button.dirty {
           league: document.getElementById('historyLeagueFilter').value,
           market: document.getElementById('historyMarketFilter').value,
           result: document.getElementById('historyResultFilter').value,
-          execution: document.getElementById('historyExecutionFilter').value,
           date: document.getElementById('historyDateFilter').value,
           oddsRange: (document.getElementById('historyOddsFilter') || {}).value || ''
         };
@@ -4974,19 +4953,14 @@ button.dirty {
           }
 
           const okResult = !filters.result || r._resultKey === filters.result;
-          const okExecution =
-            !filters.execution ||
-            (filters.execution === 'executed' && r._apostadaBool) ||
-            (filters.execution === 'not_executed' && !r._apostadaBool);
-          
           const okDate = matchDateFilter(r['Data'] || r['Date'] || r.data || '', filters.date);
 
-          const ok = okSearch && okSource && okLeague && okMarket && okResult && okExecution && okDate;
+          const ok = okSearch && okSource && okLeague && okMarket && okResult && okDate;
 
           if (!ok && rMarket.includes('BTTS') && fMarket.includes('BTTS')) {
              console.log('[DEBUG REJECTED BTTS]', {
                game: r['Jogo'] || r.jogo,
-               okSearch, okSource, okLeague, okMarket, okResult, okExecution, okDate,
+               okSearch, okSource, okLeague, okMarket, okResult, okDate,
                filters,
                rMarket
              });
@@ -5472,7 +5446,6 @@ button.dirty {
 
       function buildBotRowHtml(rows) {
         return rows.map(r => {
-          const checked = r._apostadaBool ? 'checked' : '';
           const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
           const signal = formatPickSignalHtml(r);
 
@@ -5490,9 +5463,10 @@ button.dirty {
               <td>${signal.recStake}</td>
               <td>${signal.score}</td>
               <td>${signal.alerts}</td>
-              <td>${r._apostadaBool ? '<span class="mini good">Sim</span>' : '<span class="mini warn">Não</span>'}</td>
               <td>
-                <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
+                ${r._apostadaBool
+                  ? '<span class="mini good">Aprovada</span>'
+                  : `<button class="js-bot-approve" type="button" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:4px 8px;width:auto;font-size:11px;">Aprovar</button>`}
               </td>
               <td>
                 <div style="display:flex;flex-direction:column;gap:2px;">
@@ -5537,7 +5511,6 @@ button.dirty {
         }
         return rows.map(r => {
           const signal         = getPrimaryPickSignal(r);
-          const checked        = r._apostadaBool ? 'checked' : '';
           const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
           const edgeVal        = num(r['Edge%']);
           const edgeCls        = edgeVal !== null && edgeVal >= 8 ? 'good'
@@ -5595,10 +5568,11 @@ button.dirty {
               </div>
               ${oddStakeHtml}
               <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
-                <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;">
-                  <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
-                  Executada
-                </label>
+                <div style="margin-bottom:6px;">
+                  ${r._apostadaBool
+                    ? '<span class="mini good">Aprovada</span>'
+                    : `<button class="js-bot-approve" type="button" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:5px 10px;width:auto;font-size:12px;">Aprovar</button>`}
+                </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
                   <input class="js-odd-real small-input" type="text" inputmode="decimal"
                     data-pick-key="${escapeHtml(r._pickKey)}"
@@ -7557,13 +7531,10 @@ button.dirty {
           if (rerender) rerenderAll();
         }
 
-        document.querySelectorAll('.js-apostada').forEach(el => {
-          el.onchange = e => {
+        document.querySelectorAll('.js-bot-approve').forEach(el => {
+          el.onclick = e => {
             const key = e.target.dataset.pickKey;
-
-            update(key, {
-              apostada: e.target.checked
-            }, true);
+            update(key, { apostada: true }, true);
           };
         });
 
@@ -13478,7 +13449,6 @@ button.dirty {
         safeBind('dayLeagueFilter', 'change', rerenderDayOnly);
         safeBind('dayMarketFilter', 'change', rerenderDayOnly);
         safeBind('dayResultFilter', 'change', rerenderDayOnly);
-        safeBind('dayExecutionFilter', 'change', rerenderDayOnly);
 
         safeBind('historySearch', 'input', rerenderHistoryOnly);
         safeBind('historySourceFilter', 'change', rerenderHistoryOnly);
@@ -13486,7 +13456,6 @@ button.dirty {
         safeBind('historyLeagueFilter', 'change', rerenderHistoryOnly);
         safeBind('historyMarketFilter', 'change', rerenderHistoryOnly);
         safeBind('historyResultFilter', 'change', rerenderHistoryOnly);
-        safeBind('historyExecutionFilter', 'change', rerenderHistoryOnly);
         safeBind('historyOddsFilter', 'change', rerenderHistoryOnly);
         safeBind('exportHistoryBtn', 'click', exportFilteredHistory);
 
