@@ -1800,7 +1800,7 @@ button.dirty {
           <div class="kpi-hero">
             <div class="kpi-label">Lucro / Prejuízo</div>
             <div class="kpi-value" id="summaryProfitStat">€—</div>
-            <div class="kpi-sub">Bot executado + manuais</div>
+            <div class="kpi-sub">Bot aprovado + manuais</div>
           </div>
 
           <div class="kpi-hero">
@@ -1859,7 +1859,7 @@ button.dirty {
           <div class="kpi-hero">
             <div class="kpi-label">Pendentes abertas</div>
             <div class="kpi-value" id="summaryPendingOpenStat">0</div>
-            <div class="kpi-sub">Executadas sem resultado</div>
+            <div class="kpi-sub">Aprovadas sem resultado</div>
           </div>
 
           <div class="kpi-hero kpi-ok">
@@ -2033,7 +2033,7 @@ button.dirty {
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
             <div>
               <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico / pendentes do bot</div>
-              <div class="note">Picks anteriores úteis para análise e execução</div>
+              <div class="note">Picks anteriores úteis para análise e acompanhamento</div>
             </div>
           </div>
 
@@ -2192,7 +2192,7 @@ button.dirty {
         <div class="card">
           <div style="margin-bottom:12px;">
             <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico operacional do bot</div>
-            <div class="note">Campos editáveis para controlo de execução e resultado</div>
+            <div class="note">Campos editáveis para controlo de aprovação e resultado</div>
           </div>
 
           <div class="table-wrap">
@@ -2226,7 +2226,7 @@ button.dirty {
           <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
             <div>
               <div style="font-size:13px;font-weight:700;color:var(--text);">Fechadas reais filtradas</div>
-              <div class="note">Bot executado + manuais com resultado definido — clique numa linha para detalhes</div>
+              <div class="note">Bot aprovado + manuais com resultado definido — clique numa linha para detalhes</div>
             </div>
             <button id="exportHistoryBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Exportar CSV</button>
           </div>
@@ -5234,7 +5234,7 @@ button.dirty {
               cls: a.cls,
               title: 'Alerta automático',
               text: a.text,
-              sub: 'Verificar execução e exposição'
+              sub: 'Verificar aprovação e exposição'
             });
           });
         } else {
@@ -11616,7 +11616,7 @@ button.dirty {
                   ${needsAction}
                 </div>
                 <div style="font-size:11px;color:${naColor};opacity:0.75;margin-top:5px;">
-                  picks não executados · score ≥50
+                  picks por aprovar · score ≥50
                 </div>
               </div>
 
@@ -13002,7 +13002,7 @@ button.dirty {
           row('Movements',          fmtInt(movCount)),
           row('Manual Bets',        fmtInt(manCount)),
           row('Local Edits',        fmtInt(editsCount)),
-          row('Executed Bot Picks', fmtInt(botCount))
+          row('Approved Bot Picks', fmtInt(botCount))
         ].join('');
 
         // G — Storage Info
@@ -13279,7 +13279,7 @@ button.dirty {
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;font-size:11px;">
             <div style="padding:10px;background:var(--ok-bg);border:1px solid var(--ok-border);border-radius:8px;">
               <div style="font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">ARCHIVED</div>
-              <div class="note" style="line-height:1.75;">Financial history<br>All movements<br>Manual bets<br>Bot executions<br>Analytics snapshots<br>Bankroll curve</div>
+              <div class="note" style="line-height:1.75;">Financial history<br>All movements<br>Manual bets<br>Bot approved picks<br>Analytics snapshots<br>Bankroll curve</div>
             </div>
             <div style="padding:10px;background:var(--bad-bg);border:1px solid var(--bad-border);border-radius:8px;">
               <div style="font-weight:700;color:var(--bad);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">RESET</div>
