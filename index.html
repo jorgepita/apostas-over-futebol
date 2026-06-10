@@ -1744,6 +1744,14 @@ button.dirty {
         <div style="width:24px;"></div> <!-- Spacer -->
       </header>
 
+      <!-- FETCH ERROR BANNER — Phase 25.1.1 -->
+      <div id="fetchErrorBanner" style="display:none; padding:6px 16px 0 16px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:10px;">
+          <span style="font-size:18px;">⚠️</span>
+          <span id="fetchErrorMsg" style="font-size:13px;font-weight:600;color:var(--warn);"></span>
+        </div>
+      </div>
+
       <div class="wrap">
         <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
 
@@ -5523,7 +5531,7 @@ button.dirty {
 
       function renderBotHistoryOperational() {
         const historyMerged = getHistoryRowsMerged();
-        const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()));
+        const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()), true);
         const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()), true);
 
         document.getElementById('historyRowsDay').innerHTML = dayRows.length
@@ -11933,6 +11941,22 @@ buttons.forEach(btn => {
         rerenderAll();
       }
 
+      // ===== FETCH ERROR TRACKING — Phase 25.1.1 =====
+      let _loadDataFailCount = 0;
+      function _setFetchBanner(count) {
+        const banner = document.getElementById('fetchErrorBanner');
+        const msg    = document.getElementById('fetchErrorMsg');
+        if (!banner || !msg) return;
+        if (count === 0) {
+          banner.style.display = 'none';
+          return;
+        }
+        msg.textContent = count >= 3
+          ? 'Não foi possível atualizar os dados após várias tentativas.'
+          : 'Última atualização falhou. Nova tentativa em breve.';
+        banner.style.display = 'block';
+      }
+
       async function loadData(markUpdated = true) {
         try {
           const [dailyRes, bttsRes, historyRes, manualRes] = await Promise.all([
@@ -11979,11 +12003,14 @@ buttons.forEach(btn => {
 
           state.manualBetsRemote = parseAutoCsv(manualText).map(normalizeManualCsvRow).filter(r => r['Data'] && r['Jogo']);
           if (markUpdated) state.lastUpdated = new Date();
+          _loadDataFailCount = 0;
+          _setFetchBanner(0);
           rerenderAll(false);
           return true;
         } catch (e) {
           console.error('loadData error:', e);
-          alert(`Erro a carregar os CSV do GitHub: ${e.message}`);
+          _loadDataFailCount++;
+          _setFetchBanner(_loadDataFailCount);
           return false;
         }
       }
