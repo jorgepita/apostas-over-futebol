@@ -2802,10 +2802,7 @@ button.dirty {
           <div class="card">
             <div class="label">Sincronização Cloud (Railway)</div>
             <div class="note" style="margin-bottom:8px;">Sincronizar estado das edições e manuais.</div>
-            <div class="toolbar-grid" style="grid-template-columns: 1fr 1fr;">
-              <button id="loadCloudBtn" type="button">Carregar cloud</button>
-              <button id="saveCloudBtn" type="button" disabled>Guardar cloud</button>
-            </div>
+            <button id="loadCloudBtn" type="button" style="width:100%;">Carregar cloud</button>
           </div>
 
           <div class="card">
@@ -7909,22 +7906,10 @@ button.dirty {
 
       async function saveCloudState() {
         if (autoSaveInFlight) return;
-        
-  const buttons = [
-    document.getElementById('saveCloudBtn')
-  ].filter(Boolean);
 
   try {
   autoSaveInFlight = true;
   updateCloudStatus();
-
-  console.log('CLICK SAVE');
-
-    // 🔹 UI: loading
-    buttons.forEach(btn => {
-      btn.disabled = true;
-      btn.textContent = 'A guardar...';
-    });
 
     hasPendingCloudChanges = true;
     updateCloudStatus();
@@ -7963,11 +7948,6 @@ button.dirty {
   autoSaveInFlight = false;
   updateCloudStatus();
 
-  // 🔹 UI: reset botão
-    buttons.forEach(btn => {
-      btn.disabled = false;
-      btn.textContent = 'Guardar cloud';
-    });
   // Phase 26.1.1 — if changes arrived during this save, schedule another save
   if (hasPendingCloudChanges) {
     clearTimeout(_autoSaveTimer);
@@ -8016,33 +7996,6 @@ button.dirty {
   }
 }
       
-      function updateSaveCloudButton() {
-  const buttons = [
-  document.getElementById('saveCloudBtn')
-].filter(Boolean);
-
-buttons.forEach(btn => {
-  btn.classList.remove('saving', 'dirty');
-
-  if (autoSaveInFlight) {
-    btn.classList.add('saving');
-    btn.textContent = 'A guardar...';
-    btn.disabled = true;
-    return;
-  }
-
-  if (hasPendingCloudChanges) {
-    btn.classList.add('dirty');
-    btn.textContent = 'Guardar cloud *';
-    btn.disabled = false;
-    return;
-  }
-
-  btn.textContent = 'Guardar cloud';
-  btn.disabled = false;
-});
-}
-
       function updateCloudStatus() {
   const el = document.getElementById('cloudStatusLabel');
   if (!el) return;
@@ -8071,8 +8024,6 @@ buttons.forEach(btn => {
   // 🔹 Estado: sincronizado
   el.className = 'decision-badge good';
   el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
-
-  updateSaveCloudButton();
 }
       
       function markDirty() {
@@ -8080,7 +8031,6 @@ buttons.forEach(btn => {
         hasPendingCloudChanges = true;
         updateCloudStatus();
         rerenderSummaryOnly();
-        updateSaveCloudButton();
         // Phase 26.1 — schedule auto cloud save; collapses multiple rapid edits into one
         clearTimeout(_autoSaveTimer);
         _autoSaveTimer = setTimeout(() => {
@@ -13489,10 +13439,6 @@ buttons.forEach(btn => {
           loadLeagueStats();
         });
         bindElementAction('loadCloudBtn', () => loadCloudState());
-        bindElementAction('saveCloudBtn', () => {
-  console.log('CLICK SAVE');
-  saveCloudState();
-});
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
