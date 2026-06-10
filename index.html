@@ -2009,7 +2009,7 @@ button.dirty {
             </div>
           </div>
 
-          <div class="table-wrap">
+          <div class="table-wrap" id="footballTableWrap">
             <table>
               <thead>
                 <tr>
@@ -2033,6 +2033,8 @@ button.dirty {
               <tbody id="footballRows"></tbody>
             </table>
           </div>
+          <!-- Phase 25.2 — mobile picks cards -->
+          <div id="footballCards" style="display:none;"></div>
         </div>
 
         <!-- HISTORY TABLE -->
@@ -2044,7 +2046,7 @@ button.dirty {
             </div>
           </div>
 
-          <div class="table-wrap">
+          <div class="table-wrap" id="historyDayTableWrap">
             <table>
               <thead>
                 <tr>
@@ -2069,6 +2071,8 @@ button.dirty {
               <tbody id="historyRowsDay"></tbody>
             </table>
           </div>
+          <!-- Phase 25.2 — mobile history cards -->
+          <div id="historyDayCards" style="display:none;"></div>
         </div>
 
       </div>
@@ -5520,23 +5524,138 @@ button.dirty {
         return getDailyRowsMerged().filter(r => normalizeDateString(r['Data']) === today);
       }
 
+      // ===== MOBILE PICKS CARDS — Phase 25.2 =====
+      function buildPicksCardHtml(rows, section) {
+        if (!rows.length) {
+          const msg = section === 'day'
+            ? 'Nenhuma pick do bot encontrada com os filtros atuais.'
+            : 'Nenhuma linha encontrada com os filtros atuais.';
+          return `<div class="note" style="padding:12px;">${msg}</div>`;
+        }
+        return rows.map(r => {
+          const signal         = getPrimaryPickSignal(r);
+          const checked        = r._apostadaBool ? 'checked' : '';
+          const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
+          const edgeVal        = num(r['Edge%']);
+          const edgeCls        = edgeVal !== null && edgeVal >= 8 ? 'good'
+                               : edgeVal !== null && edgeVal >= 4 ? 'info' : 'warn';
+
+          const resultBadge = resultadoAtual === 'W' ? '<span class="mini good">W</span>'
+                            : resultadoAtual === 'L' ? '<span class="mini bad">L</span>'
+                            : resultadoAtual === 'P' ? '<span class="mini info">P</span>'
+                            : '';
+
+          const plVal  = r._lucroRealLocal !== null ? r._lucroRealLocal : r._lucroModeloLocal;
+          const plStr  = plVal !== null ? `${plVal >= 0 ? '+' : ''}€${fmt(plVal)}` : null;
+          const plColor = plVal !== null && plVal > 0 ? 'var(--ok)'
+                        : plVal !== null && plVal < 0 ? 'var(--bad)' : 'var(--muted)';
+
+          const jogoLine = escapeHtml(cleanString(r['Jogo']    || '—'));
+          const ligaLine = escapeHtml(cleanString(r['Liga']    || ''));
+          const mercLine = escapeHtml(cleanString(r['Mercado'] || '—'));
+          const dataLine = escapeHtml(r['Data'] || '');
+          const oddVal   = r._oddModeloNum !== null ? fmt(r._oddModeloNum) : null;
+
+          const subLine = ligaLine
+            ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${ligaLine} · ${mercLine}</div>`
+            : `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${mercLine}</div>`;
+
+          const dateHtml = section === 'hist' && dataLine
+            ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;">${dataLine}</div>`
+            : '';
+
+          const oddStakeHtml = section === 'day' && oddVal !== null
+            ? `<div style="display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--muted);">
+                 <span>Odd: <strong style="color:var(--text);">${oddVal}</strong></span>
+                 <span>Stake: <strong style="color:var(--text);">€${fmt(signal.recStake.value)}</strong></span>
+               </div>`
+            : '';
+
+          const edgeHtml = edgeVal !== null
+            ? `<span class="mini ${edgeCls}">Edge ${pct(edgeVal)}</span>`
+            : '';
+
+          const plHtml = section === 'hist' && plStr !== null
+            ? `<span style="font-size:12px;color:${plColor};font-weight:700;">${plStr}</span>`
+            : '';
+
+          return `
+            <div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:800;color:var(--text);">${jogoLine}</div>
+              ${subLine}
+              ${dateHtml}
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+                <span class="mini ${signal.scoreBadge.cls}">${escapeHtml(signal.scoreBadge.label)}</span>
+                ${edgeHtml}
+                ${resultBadge}
+                ${plHtml}
+              </div>
+              ${oddStakeHtml}
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;">
+                  <input class="js-apostada" type="checkbox" data-pick-key="${escapeHtml(r._pickKey)}" ${checked} style="width:auto;padding:0;border:none;" />
+                  Executada
+                </label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+                  <input class="js-odd-real small-input" type="text" inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r.OddReal || '')}"
+                    placeholder="odd real" />
+                  <input class="js-stake-real small-input" type="text" inputmode="decimal"
+                    data-pick-key="${escapeHtml(r._pickKey)}"
+                    value="${escapeHtml(r.StakeReal || '')}"
+                    placeholder="stake real" />
+                </div>
+                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="width:100%;margin-top:6px;">
+                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
+                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
+                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
+                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
+                </select>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
       function renderFootball() {
         const filters = getDayFilters();
         const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
 
-        document.getElementById('footballRows').innerHTML = rows.length
-          ? buildBotRowHtml(rows)
-          : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
+        if (isMobileDashboard()) {
+          const wrap  = document.getElementById('footballTableWrap');
+          const cards = document.getElementById('footballCards');
+          if (wrap)  wrap.style.display  = 'none';
+          if (cards) { cards.style.display = 'block'; cards.innerHTML = buildPicksCardHtml(rows, 'day'); }
+        } else {
+          const wrap  = document.getElementById('footballTableWrap');
+          const cards = document.getElementById('footballCards');
+          if (wrap)  wrap.style.display  = '';
+          if (cards) cards.style.display = 'none';
+          document.getElementById('footballRows').innerHTML = rows.length
+            ? buildBotRowHtml(rows)
+            : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
+        }
       }
 
       function renderBotHistoryOperational() {
         const historyMerged = getHistoryRowsMerged();
-        const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()), true);
+        const dayRows     = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()), true);
         const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()), true);
 
-        document.getElementById('historyRowsDay').innerHTML = dayRows.length
-          ? buildBotRowHtml(dayRows)
-          : '<tr><td colspan="16"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
+        if (isMobileDashboard()) {
+          const wrap  = document.getElementById('historyDayTableWrap');
+          const cards = document.getElementById('historyDayCards');
+          if (wrap)  wrap.style.display  = 'none';
+          if (cards) { cards.style.display = 'block'; cards.innerHTML = buildPicksCardHtml(dayRows, 'hist'); }
+        } else {
+          const wrap  = document.getElementById('historyDayTableWrap');
+          const cards = document.getElementById('historyDayCards');
+          if (wrap)  wrap.style.display  = '';
+          if (cards) cards.style.display = 'none';
+          document.getElementById('historyRowsDay').innerHTML = dayRows.length
+            ? buildBotRowHtml(dayRows)
+            : '<tr><td colspan="16"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
+        }
 
         document.getElementById('historyRows').innerHTML = historyRows.length
           ? buildBotRowHtml(historyRows)
@@ -13362,6 +13481,10 @@ buttons.forEach(btn => {
           clearTimeout(_mobileDashResizeTimer);
           _mobileDashResizeTimer = setTimeout(() => {
             if (state.activeTab === 'tab-summary') renderMobileHomeDash();
+            if (state.activeTab === 'tab-day') {
+              try { renderFootball(); } catch (e) { console.error('renderFootball (resize)', e); }
+              try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational (resize)', e); }
+            }
           }, 150);
         });
         bindMobileActionsButton();
