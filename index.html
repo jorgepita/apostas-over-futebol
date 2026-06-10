@@ -7953,35 +7953,23 @@ button.dirty {
     // Season recency guard: refuse to overwrite a newer local season with an older cloud season.
     // This prevents a failed Step-12 cloud sync from resurrecting an archived season when the
     // user clicks "Load Cloud" after a season close.
-    // localSessionStored guards against fresh devices where sessionStartDate is a todayIso()
-    // runtime default (never written to localStorage) — those have no real local season to protect.
+    // hasRealLocalSeason prevents the guard from blocking fresh/empty bootstrap states that
+    // happen to have a stored sessionStartDate but contain no actual data.
     const cloudSession = content.sessionStartDate || '';
     const localSession = state.sessionStartDate   || '';
     const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
-    console.log('[loadCloudState season guard]', {
-      cloudSession,
-      localSession,
-      localSessionStored,
-      storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate)
-    });
-    alert(
-      JSON.stringify(
-        {
-          cloudSession,
-          localSession,
-          localSessionStored,
-          storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate),
-          bankrollInicialSet: state.bankrollInicialSet,
-          bankrollInicial: state.bankrollInicial,
-          manualBetsCount: Array.isArray(state.manualBets) ? state.manualBets.length : 0,
-          movementsCount: Array.isArray(state.movements) ? state.movements.length : 0,
-          localEditsCount: state.localEdits ? Object.keys(state.localEdits).length : 0
-        },
-        null,
-        2
-      )
-    );
-    if (cloudSession && localSession && localSessionStored && cloudSession < localSession) {
+    const hasRealLocalSeason =
+      state.bankrollInicialSet ||
+      (Array.isArray(state.manualBets) && state.manualBets.length > 0) ||
+      (Array.isArray(state.movements)  && state.movements.length  > 0) ||
+      (state.localEdits && Object.keys(state.localEdits).length   > 0);
+    if (
+      cloudSession &&
+      localSession &&
+      localSessionStored &&
+      hasRealLocalSeason &&
+      cloudSession < localSession
+    ) {
       alert(
         `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
         `but your current season started on ${localSession}.\n\n` +
