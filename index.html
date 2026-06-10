@@ -4517,11 +4517,11 @@ button.dirty {
         return !!d && d >= getSessionStartDate();
       }
 
-      function sortBotRowsForDisplay(rows) {
+      function sortBotRowsForDisplay(rows, descending) {
         return [...rows].sort((a, b) => {
           const ad = parseDateSafe(a['Data'])?.getTime() || 0;
           const bd = parseDateSafe(b['Data'])?.getTime() || 0;
-          if (ad !== bd) return ad - bd;
+          if (ad !== bd) return descending ? bd - ad : ad - bd;
 
           const aEdge = num(a['Edge%']) ?? -9999;
           const bEdge = num(b['Edge%']) ?? -9999;
@@ -5522,7 +5522,7 @@ button.dirty {
       function renderBotHistoryOperational() {
         const historyMerged = getHistoryRowsMerged();
         const dayRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()));
-        const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()));
+        const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()), true);
 
         document.getElementById('historyRowsDay').innerHTML = dayRows.length
           ? buildBotRowHtml(dayRows)
@@ -5534,7 +5534,7 @@ button.dirty {
       }
 
       function renderClosedRealTable() {
-        const rows = getHistoryFilteredRows();
+        const rows = getHistoryFilteredRows().slice().reverse();
         const tbody = document.getElementById('closedRealRows');
         if (!tbody) return;
 
