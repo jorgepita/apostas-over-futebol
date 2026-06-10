@@ -2835,6 +2835,20 @@ button.dirty {
             <div class="note" style="margin-bottom:8px;">View previously archived seasons.</div>
             <button id="viewArchivesBtn" type="button" style="width:100%;">View Archives</button>
           </div>
+
+          <div class="card">
+            <div class="label">Telegram Notifications</div>
+            <div class="note" style="margin-bottom:8px;">Receber alertas de picks pendentes via Telegram quando o kickoff se aproxima.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <input id="tgBotTokenInput" type="text" placeholder="Bot Token (ex: 123456:ABC…)" style="font-size:12px;" autocomplete="off" />
+              <input id="tgChatIdInput"   type="text" placeholder="Chat ID (ex: -100123456789)"  style="font-size:12px;" autocomplete="off" />
+              <div class="toolbar-grid" style="grid-template-columns:1fr 1fr;">
+                <button id="saveTgConfigBtn" type="button">Guardar</button>
+                <button id="testTgConfigBtn" type="button">Testar</button>
+              </div>
+            </div>
+            <div id="tgConfigStatus" style="display:none;margin-top:8px;font-size:11px;"></div>
+          </div>
         </div>
 
         <div class="card">
@@ -3222,6 +3236,9 @@ button.dirty {
 
       const SEASON_ARCHIVES_KEY = 'apostas_season_archives_v1';
       const SEASON_CLOSE_PENDING_KEY = 'apostas_season_close_pending';
+
+      const TG_CONFIG_KEYS = { token: 'apostas_tg_bot_token', chatId: 'apostas_tg_chat_id' };
+      const TG_ALERTS_KEY  = 'apostas_tg_alerts_sent_v1';
 
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
@@ -12294,6 +12311,134 @@ buttons.forEach(btn => {
 
       // ── Close Season Modal ───────────────────────────────────────
 
+      // ===== TELEGRAM NOTIFICATIONS — Phase 24.1 =====
+
+      function getTelegramAlertsSent() {
+        try {
+          const raw = localStorage.getItem(TG_ALERTS_KEY);
+          return raw ? new Set(JSON.parse(raw)) : new Set();
+        } catch (e) {
+          return new Set();
+        }
+      }
+
+      function loadTelegramConfigUI() {
+        const t = localStorage.getItem(TG_CONFIG_KEYS.token)  || '';
+        const c = localStorage.getItem(TG_CONFIG_KEYS.chatId) || '';
+        const te = document.getElementById('tgBotTokenInput');
+        const ce = document.getElementById('tgChatIdInput');
+        if (te) te.value = t;
+        if (ce) ce.value = c;
+      }
+
+      function showTgStatus(msg, color) {
+        const el = document.getElementById('tgConfigStatus');
+        if (!el) return;
+        el.textContent    = msg;
+        el.style.color    = color || 'var(--muted)';
+        el.style.display  = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 4000);
+      }
+
+      function saveTelegramConfig() {
+        const token  = (document.getElementById('tgBotTokenInput')?.value || '').trim();
+        const chatId = (document.getElementById('tgChatIdInput')?.value   || '').trim();
+        localStorage.setItem(TG_CONFIG_KEYS.token,  token);
+        localStorage.setItem(TG_CONFIG_KEYS.chatId, chatId);
+        showTgStatus('Configuração guardada.', 'var(--ok)');
+      }
+
+      async function sendTelegramMessage(text) {
+        const token  = localStorage.getItem(TG_CONFIG_KEYS.token)  || '';
+        const chatId = localStorage.getItem(TG_CONFIG_KEYS.chatId) || '';
+        if (!token || !chatId) throw new Error('Token ou Chat ID não configurados.');
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ chat_id: chatId, text })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.description || `HTTP ${res.status}`);
+        }
+        return true;
+      }
+
+      async function testTelegramConfig() {
+        showTgStatus('A enviar mensagem de teste…', 'var(--muted)');
+        try {
+          await sendTelegramMessage('⚠️ Football Bot\n\nMensagem de teste. Configuração OK ✅');
+          showTgStatus('Mensagem enviada! ✅', 'var(--ok)');
+        } catch (e) {
+          showTgStatus(`Erro: ${e.message}`, 'var(--bad)');
+        }
+      }
+
+      function getMinutesUntilKickoff(row) {
+        const raw = (row['Hora'] || row['Hour'] || row['KickoffTime'] || row['Time'] || row['Kickoff'] || '').trim();
+        const m   = raw.match(/^(\d{1,2}):(\d{2})$/);
+        if (!m) return null;
+        // Use the match's own date as the base so midnight-crossing picks are correct.
+        // e.g. row['Data']="2026-06-11", Hora="00:15", now=23:30 → +45 min, not −1395 min.
+        const matchDateStr = normalizeDateString(row['Data'] || '');
+        const base    = matchDateStr ? new Date(matchDateStr + 'T00:00:00') : new Date();
+        const kickoff = new Date(base.getFullYear(), base.getMonth(), base.getDate(),
+          parseInt(m[1], 10), parseInt(m[2], 10), 0, 0);
+        return (kickoff.getTime() - Date.now()) / 60000;
+      }
+
+      async function checkPendingAlerts() {
+        if (!localStorage.getItem(TG_CONFIG_KEYS.token) ||
+            !localStorage.getItem(TG_CONFIG_KEYS.chatId)) return;
+
+        const alertsSent = getTelegramAlertsSent();
+
+        // Pre-filter cheap conditions, then compute score+mins once per row.
+        // Date check is ">= today" (not "=== today") so midnight-crossing picks
+        // (match date = tomorrow, kickoff = 00:15, now = 23:30) are not discarded
+        // before the minutes gate in the second filter can evaluate them.
+        const qualifying = getAllBotRowsMergedUnique()
+          .filter(r =>
+            normalizeDateString(r['Data'] || '') >= todayIso() &&
+            r._apostadaBool !== true &&
+            !['W', 'L', 'P'].includes(r._resultKey || '')
+          )
+          .map(r => ({ r, score: computePickScore(r), mins: getMinutesUntilKickoff(r) }))
+          .filter(({ r, score, mins }) =>
+            score >= 50 &&
+            mins !== null && mins > 0 && mins <= 60 &&
+            !alertsSent.has(r._pickKey)
+          );
+
+        if (!qualifying.length) return;
+
+        const count      = qualifying.length;
+        const maxScore   = Math.max(...qualifying.map(q => q.score));
+        const minMins    = Math.min(...qualifying.map(q => q.mins));
+        const earliest   = qualifying.find(q => q.mins === minMins);
+        const kickoffStr = (earliest.r['Hora'] || earliest.r['Hour'] || '').trim() || '—';
+        const minsDisp   = Math.round(minMins);
+        const dashUrl    = window.location.href;
+
+        const text = count === 1
+          ? `⚠️ Football Bot\n\n1 pick aguarda decisão.\n\n🔥 Score: ${qualifying[0].score}\n\nPróximo jogo: ${kickoffStr}\n(${minsDisp} min)\n\n👉 Abrir Dashboard\n${dashUrl}`
+          : `⚠️ Football Bot\n\n${count} picks aguardam decisão.\n\n🔥 Score ≥50: ${count}\n⭐ Melhor score: ${maxScore}\n\nPróximo jogo: ${kickoffStr}\n(${minsDisp} min)\n\n👉 Abrir Dashboard\n${dashUrl}`;
+
+        try {
+          await sendTelegramMessage(text);
+          // Re-read to guard against any concurrent write before persisting
+          const sent = getTelegramAlertsSent();
+          qualifying.forEach(q => sent.add(q.r._pickKey));
+          localStorage.setItem(TG_ALERTS_KEY, JSON.stringify([...sent]));
+          console.log('[Telegram] Pending alert sent for', count, 'pick(s).');
+        } catch (e) {
+          // Do not mark as sent — retry next interval
+          console.warn('[Telegram] Alert send failed:', e.message);
+        }
+      }
+
+      // ===== END TELEGRAM NOTIFICATIONS =====
+
       // ===== SEASON ARCHIVE VIEWER — Phase 23.2A =====
 
       function openArchiveListModal() {
@@ -12955,6 +13100,8 @@ buttons.forEach(btn => {
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
         bindElementAction('closeSeasonBtn', openCloseSeasonModal);
         bindElementAction('viewArchivesBtn', openArchiveListModal);
+        bindElementAction('saveTgConfigBtn', saveTelegramConfig);
+        bindElementAction('testTgConfigBtn', testTelegramConfig);
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
@@ -13048,6 +13195,7 @@ buttons.forEach(btn => {
         checkStartupRecovery();
         loadCompactMode();
         loadLocalState();
+        loadTelegramConfigUI();
         if (document.getElementById('bankrollInput')) {
           document.getElementById('bankrollInput').value = state.bankrollInicial !== null ? state.bankrollInicial : '';
         }
@@ -13071,11 +13219,13 @@ buttons.forEach(btn => {
         rerenderAll(false);
 
         await Promise.all([loadData(true), loadLeagueStats()]);
+        checkPendingAlerts().catch(() => {});
 
         initialLoadDone = true;
         setInterval(() => {
           loadData(true);
           loadLeagueStats();
+          checkPendingAlerts().catch(() => {});
         }, 60000);
       }
 
