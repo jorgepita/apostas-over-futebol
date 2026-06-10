@@ -7983,6 +7983,9 @@ button.dirty {
     updateCloudStatus();
 
     state.bankrollInicial = content.bankrollInicial || 1000;
+    if (content.bankrollInicial != null) {
+      state.bankrollInicialSet = true;
+    }
     state.manualBets = content.manualBets || [];
     state.localEdits = content.localEdits || {};
     state.sessionStartDate = content.sessionStartDate || '';
