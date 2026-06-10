@@ -2380,7 +2380,7 @@ button.dirty {
           </div>
         </div>
         <div class="card">
-          <div class="table-wrap">
+          <div class="table-wrap" id="pendingTableWrap">
             <table>
               <thead>
                 <tr>
@@ -2399,6 +2399,8 @@ button.dirty {
               <tbody id="pendingRows"></tbody>
             </table>
           </div>
+          <!-- Phase 25.3 — mobile pending cards -->
+          <div id="pendingCards" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -2440,7 +2442,7 @@ button.dirty {
           <!-- Rendered by renderLiveCenter() -->
         </div>
         <div class="card">
-          <div class="table-wrap">
+          <div class="table-wrap" id="liveTableWrap">
             <table>
               <thead>
                 <tr>
@@ -2459,6 +2461,8 @@ button.dirty {
               <tbody id="liveRows"></tbody>
             </table>
           </div>
+          <!-- Phase 25.3 — mobile live cards -->
+          <div id="liveCards" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -11775,10 +11779,62 @@ buttons.forEach(btn => {
         });
       }
 
+      // ===== MOBILE PENDING CARDS — Phase 25.3 =====
+      function buildPendingCardHtml(rows) {
+        return rows.map(r => {
+          const srcCls   = r.source === 'Bot' ? 'info' : 'warn';
+          const oddStr   = r.odd   ? escapeHtml(r.odd)   : '—';
+          const stakeStr = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          const subLine  = (r.league && r.market) ? `${escapeHtml(r.league)} · ${escapeHtml(r.market)}`
+                         : escapeHtml(r.league || r.market || '');
+          return `
+            <div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:800;color:var(--text);">${escapeHtml(r.game || '—')}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${subLine}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}</div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+                ${r.scoreBadgeHtml}
+                <span class="mini good">Aprovada</span>
+                <span class="mini ${srcCls}">${escapeHtml(r.source)}</span>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--muted);">
+                <span>Odd: <strong style="color:var(--text);">${oddStr}</strong></span>
+                <span>Stake: <strong style="color:var(--text);">${stakeStr}</strong></span>
+              </div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+                <button class="js-pending-cancel" type="button"
+                  data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                  style="padding:8px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid var(--bad-border);background:var(--bad-bg);color:var(--bad);cursor:pointer;width:100%;">
+                  Cancelar
+                </button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
       function renderPendingQueue() {
+        const rows = getPendingRows();
+
+        if (isMobileDashboard()) {
+          const wrap  = document.getElementById('pendingTableWrap');
+          const cards = document.getElementById('pendingCards');
+          if (wrap)  wrap.style.display  = 'none';
+          if (cards) {
+            cards.style.display = 'block';
+            cards.innerHTML = rows.length
+              ? buildPendingCardHtml(rows)
+              : '<div class="note" style="text-align:center;padding:20px;opacity:0.6;">Sem picks aprovadas aguardando kickoff.</div>';
+          }
+          return;
+        }
+
+        const wrap  = document.getElementById('pendingTableWrap');
+        const cards = document.getElementById('pendingCards');
+        if (wrap)  wrap.style.display  = '';
+        if (cards) cards.style.display = 'none';
+
         const tbody = document.getElementById('pendingRows');
         if (!tbody) return;
-        const rows = getPendingRows();
         if (!rows.length) {
           tbody.innerHTML = '<tr><td colspan="10"><div class="note" style="text-align:center;padding:20px;opacity:0.6;">Sem picks aprovadas aguardando kickoff.</div></td></tr>';
           return;
@@ -11881,22 +11937,58 @@ buttons.forEach(btn => {
         });
       }
 
+      // ===== MOBILE LIVE CARDS — Phase 25.3 =====
+      function buildLiveCardHtml(rows) {
+        const btnBase = 'flex:1;padding:8px;font-size:14px;font-weight:800;border-radius:8px;cursor:pointer;border:1px solid;';
+        return rows.map(r => {
+          const srcCls   = r._type === 'bot' ? 'info' : 'warn';
+          const oddStr   = r.odd   ? escapeHtml(r.odd)   : '—';
+          const stakeStr = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          return `
+            <div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);margin-bottom:8px;">
+              <div style="font-size:14px;font-weight:800;color:var(--text);">${escapeHtml(r.game || '—')}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                <span class="mini ${srcCls}" style="font-size:10px;">${escapeHtml(r.source)}</span>
+                &nbsp;${escapeHtml(r.market || '')}
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}</div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+                ${r.scoreBadgeHtml}
+                <span class="mini good">LIVE</span>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--muted);">
+                <span>Odd: <strong style="color:var(--text);">${oddStr}</strong></span>
+                <span>Stake: <strong style="color:var(--text);">${stakeStr}</strong></span>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
+                <button class="js-live-win" type="button"
+                  data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                  style="${btnBase}background:rgba(34,197,94,0.15);color:#22c55e;border-color:rgba(34,197,94,0.3);">W</button>
+                <button class="js-live-loss" type="button"
+                  data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                  style="${btnBase}background:rgba(239,68,68,0.15);color:#f87171;border-color:rgba(239,68,68,0.3);">L</button>
+                <button class="js-live-push" type="button"
+                  data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                  style="${btnBase}background:rgba(234,179,8,0.15);color:#eab308;border-color:rgba(234,179,8,0.3);">P</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
       function renderLiveCenter() {
-        const rows      = getLiveRows();
-        const botCount  = rows.filter(r => r._type === 'bot').length;
-        const manCount  = rows.filter(r => r._type === 'manual').length;
-        const stakeSum  = sum(rows.map(r => r.stakeNum).filter(v => v !== null));
+        const rows     = getLiveRows();
+        const botCount = rows.filter(r => r._type === 'bot').length;
+        const manCount = rows.filter(r => r._type === 'manual').length;
+        const stakeSum = sum(rows.map(r => r.stakeNum).filter(v => v !== null));
 
         safeSetText('liveKpiCount',  String(rows.length));
         safeSetText('liveKpiStake',  `€${fmt(stakeSum)}`);
         safeSetText('liveKpiBot',    String(botCount));
         safeSetText('liveKpiManual', String(manCount));
 
-        // KPI hero colour — primary lights up when there are live bets
         const hero = document.getElementById('liveKpiCount')?.closest?.('.kpi-hero');
         if (hero) hero.className = `kpi-hero kpi-primary${rows.length > 0 ? ' kpi-ok' : ''}`;
 
-        // Insights summary panel
         const summaryCard = document.getElementById('liveSummaryCard');
         if (summaryCard) {
           summaryCard.innerHTML = `
@@ -11908,7 +12000,24 @@ buttons.forEach(btn => {
             </div>`;
         }
 
-        // Table
+        if (isMobileDashboard()) {
+          const wrap  = document.getElementById('liveTableWrap');
+          const cards = document.getElementById('liveCards');
+          if (wrap)  wrap.style.display  = 'none';
+          if (cards) {
+            cards.style.display = 'block';
+            cards.innerHTML = rows.length
+              ? buildLiveCardHtml(rows)
+              : '<div class="note" style="text-align:center;padding:20px;opacity:0.6;">No live bets at this time.</div>';
+          }
+          return;
+        }
+
+        const wrap  = document.getElementById('liveTableWrap');
+        const cards = document.getElementById('liveCards');
+        if (wrap)  wrap.style.display  = '';
+        if (cards) cards.style.display = 'none';
+
         const tbody = document.getElementById('liveRows');
         if (!tbody) return;
 
@@ -13484,6 +13593,12 @@ buttons.forEach(btn => {
             if (state.activeTab === 'tab-day') {
               try { renderFootball(); } catch (e) { console.error('renderFootball (resize)', e); }
               try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational (resize)', e); }
+            }
+            if (state.activeTab === 'tab-pending') {
+              try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue (resize)', e); }
+            }
+            if (state.activeTab === 'tab-live') {
+              try { renderLiveCenter(); } catch (e) { console.error('renderLiveCenter (resize)', e); }
             }
           }, 150);
         });
