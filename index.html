@@ -7958,6 +7958,24 @@ button.dirty {
     const cloudSession = content.sessionStartDate || '';
     const localSession = state.sessionStartDate   || '';
     const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+    console.log('[loadCloudState season guard]', {
+      cloudSession,
+      localSession,
+      localSessionStored,
+      storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate)
+    });
+    alert(
+      JSON.stringify(
+        {
+          cloudSession,
+          localSession,
+          localSessionStored,
+          storedValue: localStorage.getItem(STORAGE_KEYS.sessionStartDate)
+        },
+        null,
+        2
+      )
+    );
     if (cloudSession && localSession && localSessionStored && cloudSession < localSession) {
       alert(
         `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
