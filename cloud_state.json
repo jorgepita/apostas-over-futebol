@@ -2058,10 +2058,14 @@
       "stakeReal": "1"
     },
     "2026-06-13|Veikkausliiga|Lahti vs SJK|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.96",
+      "stakeReal": "1"
     },
     "2026-06-13|Veikkausliiga|Ilves vs Turku PS|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.73",
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -2073,9 +2077,9 @@
       "mercado": "Over 2.5",
       "odd": "1.45",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -2100,7 +2104,8 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-08T21:19:29.940Z"
-      }
+      },
+      "settledAt": "2026-06-10T10:14:48.176Z"
     },
     {
       "id": "manual_1780953565027_fixpon",
@@ -2138,6 +2143,154 @@
         "dataQuality": "NONE",
         "timestamp": "2026-06-08T21:19:34.673Z"
       }
+    },
+    {
+      "id": "manual_1781086613760_bdpnjr",
+      "data": "2026-06-13",
+      "liga": "finlandia",
+      "jogo": "FF Jaro vs HJK Helsinki",
+      "mercado": "Over 2.5",
+      "odd": "1.78",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "NEUTRAL",
+      "edgeAtAnalysis": -1.1223257241686047,
+      "scoreAtAnalysis": 55,
+      "analysisSnapshot": {
+        "ProbModel": 0.5505744955673028,
+        "ProbMarket": 0.5617977528089888,
+        "Edge": -0.011223257241686047,
+        "EdgePercent": -1.1223257241686047,
+        "fairOdd": 1.816284640954203,
+        "KellyTrue": 0,
+        "EV": -0.019977397890201032,
+        "score": 55,
+        "scoreCls": "warn",
+        "opinion": "NEUTRAL",
+        "opinionCls": "warn",
+        "LambdaHome": 1.1008741689970287,
+        "LambdaAway": 1.7841961415842782,
+        "LambdaTotal": 2.885070310581307,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-06-10T10:19:04.817Z"
+      }
+    },
+    {
+      "id": "manual_1781086619670_tartfs",
+      "data": "2026-06-13",
+      "liga": "finlandia",
+      "jogo": "Lahti vs SJK",
+      "mercado": "Over 2.5",
+      "odd": "1.96",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "STRONG BUY",
+      "edgeAtAnalysis": 9.03853372956619,
+      "scoreAtAnalysis": 85,
+      "analysisSnapshot": {
+        "ProbModel": 0.600589418928315,
+        "ProbMarket": 0.5102040816326531,
+        "Edge": 0.0903853372956619,
+        "EdgePercent": 9.03853372956619,
+        "fairOdd": 1.6650309986885696,
+        "KellyTrue": 0.18453673031197637,
+        "EV": 0.1771552610994973,
+        "score": 85,
+        "scoreCls": "good",
+        "opinion": "STRONG BUY",
+        "opinionCls": "good",
+        "LambdaHome": 1.6036036036036037,
+        "LambdaAway": 1.5045045045045045,
+        "LambdaTotal": 3.108108108108108,
+        "usedFallback": true,
+        "sampleSize": 3,
+        "dataQuality": "LOW",
+        "timestamp": "2026-06-10T10:19:49.291Z"
+      }
+    },
+    {
+      "id": "manual_1781086628048_5sh3xc",
+      "data": "2026-06-13",
+      "liga": "finlandia",
+      "jogo": "Ilves vs Turku PS",
+      "mercado": "Over 2.5",
+      "odd": "1.73",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "BUY",
+      "edgeAtAnalysis": 2.2554736847390067,
+      "scoreAtAnalysis": 65,
+      "analysisSnapshot": {
+        "ProbModel": 0.600589418928315,
+        "ProbMarket": 0.5780346820809249,
+        "Edge": 0.022554736847390067,
+        "EdgePercent": 2.2554736847390067,
+        "fairOdd": 1.6650309986885696,
+        "KellyTrue": 0.05345163663833545,
+        "EV": 0.03901969474598488,
+        "score": 65,
+        "scoreCls": "info",
+        "opinion": "BUY",
+        "opinionCls": "info",
+        "LambdaHome": 1.6036036036036037,
+        "LambdaAway": 1.5045045045045045,
+        "LambdaTotal": 3.108108108108108,
+        "usedFallback": true,
+        "sampleSize": 4,
+        "dataQuality": "MEDIUM",
+        "timestamp": "2026-06-10T10:19:40.216Z"
+      }
+    },
+    {
+      "id": "manual_1781086699836_0vo07k",
+      "data": "2026-06-13",
+      "liga": "finlandia",
+      "jogo": "Inter Turku vs AC Oulu",
+      "mercado": "Over 2.5",
+      "odd": "1.9",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "rejected",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -8.243023612680888,
+      "scoreAtAnalysis": 38,
+      "analysisSnapshot": {
+        "ProbModel": 0.4438855533468753,
+        "ProbMarket": 0.5263157894736842,
+        "Edge": -0.08243023612680889,
+        "EdgePercent": -8.243023612680888,
+        "fairOdd": 2.2528329486284226,
+        "KellyTrue": 0,
+        "EV": -0.15661744864093696,
+        "score": 38,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.3180924942950791,
+        "LambdaAway": 1.1341746927466367,
+        "LambdaTotal": 2.452267187041716,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-06-10T10:19:44.955Z"
+      }
     }
   ],
   "movements": [
@@ -2164,10 +2317,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-09T22:03:05.921Z",
+  "lastUpdated": "2026-06-10T10:30:33.155Z",
   "activeTab": "tab-settings",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-11",
