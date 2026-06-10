@@ -1748,7 +1748,9 @@ button.dirty {
         <input id="importManualFile" type="file" accept=".json,application/json" style="display:none;" />
 
     <div id="tab-summary" class="tab-panel active">
-      <div class="section-stack">
+      <!-- MOBILE HOME DASHBOARD — Phase 25.1 (hidden on desktop) -->
+      <div id="mobileHomeDash" style="display:none;"></div>
+      <div class="section-stack" id="summaryDesktopContent">
 
         <!-- PAGE TITLE -->
         <div class="page-title">
@@ -11442,6 +11444,125 @@ buttons.forEach(btn => {
         }
       }
 
+      // ===== MOBILE HOME DASHBOARD — Phase 25.1 =====
+
+      function isMobileDashboard() {
+        return window.innerWidth <= 768;
+      }
+
+      function renderMobileHomeDash() {
+        const el    = document.getElementById('mobileHomeDash');
+        const stack = document.getElementById('summaryDesktopContent');
+        if (!el) return;
+
+        if (!isMobileDashboard()) {
+          el.style.display    = 'none';
+          if (stack) stack.style.display = '';
+          return;
+        }
+
+        el.style.display = 'block';
+        if (stack) stack.style.display = 'none';
+
+        // ── Data (all from existing functions, no new calculations) ──
+        const bk   = getBankrollState();
+        const risk = getRiskMetrics();
+
+        const currentBankroll = bk.configured ? bk.totalAccountValue : null;
+        const openExposure    = risk.stakeOpen;
+        const picksToday      = getTodaysDailyRows().length;
+        const pendingCount    = getPendingRows().length;
+        const liveCount       = getLiveRows().length;
+
+        // Today's P/L: filter closed rows for today's date, sum lucro
+        const todayClosedRows = getFilteredRealClosedRows(getSummaryFilters())
+          .filter(r => r.date === todayIso());
+        const todayPL = todayClosedRows.reduce((s, r) => s + (r.lucro || 0), 0);
+
+        // Needs Action: unexecuted today bot picks with score >= 50
+        const needsAction = getAllBotRowsMergedUnique()
+          .filter(r =>
+            normalizeDateString(r['Data'] || '') === todayIso() &&
+            r._apostadaBool !== true &&
+            !['W', 'L', 'P'].includes(r._resultKey || '') &&
+            computePickScore(r) >= 50
+          ).length;
+
+        // ── Formatting ──
+        const fmtEur = v => (v !== null && v !== undefined) ? `€${fmt(v)}` : '—';
+        const todayPLStr = (todayPL >= 0 ? '+' : '-') + '€' + fmt(Math.abs(todayPL));
+        const plColor    = todayPL > 0 ? 'var(--ok)' : todayPL < 0 ? 'var(--bad)' : 'var(--muted)';
+
+        const naColor  = needsAction === 0 ? 'var(--ok)'
+                       : needsAction <= 2  ? 'var(--warn)' : 'var(--bad)';
+        const naBg     = needsAction === 0 ? 'var(--ok-bg)'
+                       : needsAction <= 2  ? 'var(--warn-bg)' : 'var(--bad-bg)';
+        const naBorder = needsAction === 0 ? 'var(--ok-border)'
+                       : needsAction <= 2  ? 'var(--warn-border)' : 'var(--bad-border)';
+
+        // ── Helpers ──
+        function kpi(label, value, color) {
+          return `<div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);">
+            <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">${label}</div>
+            <div style="font-size:20px;font-weight:800;color:${color || 'var(--text)'};">${value}</div>
+          </div>`;
+        }
+
+        function actionBtn(label, emoji, tabId) {
+          return `<button type="button" onclick="setActiveTab('${tabId}')"
+            style="padding:14px 8px;font-size:13px;font-weight:700;border-radius:12px;
+                   border:1px solid var(--line);background:var(--card);color:var(--text);
+                   cursor:pointer;display:flex;flex-direction:column;align-items:center;
+                   gap:5px;min-height:66px;justify-content:center;width:100%;">
+            <span style="font-size:22px;">${emoji}</span>
+            <span>${label}</span>
+          </button>`;
+        }
+
+        // ── Render ──
+        el.innerHTML = `
+          <div style="padding:12px;max-width:540px;margin:0 auto;">
+
+            <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:12px;">
+              Dashboard
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+              ${kpi('Banca atual',      fmtEur(currentBankroll), 'var(--text)')}
+              ${kpi('Exposição aberta', fmtEur(openExposure),    'var(--text)')}
+              ${kpi('Picks hoje',       String(picksToday),      'var(--text)')}
+              ${kpi('P/L hoje',         todayPLStr,              plColor)}
+
+              <div style="grid-column:1/-1;background:${naBg};border-radius:12px;
+                          padding:16px 14px;border:1px solid ${naBorder};">
+                <div style="font-size:10px;font-weight:600;color:${naColor};
+                            text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">
+                  Precisa Ação
+                </div>
+                <div style="font-size:36px;font-weight:900;color:${naColor};line-height:1;">
+                  ${needsAction}
+                </div>
+                <div style="font-size:11px;color:${naColor};opacity:0.75;margin-top:5px;">
+                  picks não executados · score ≥50
+                </div>
+              </div>
+
+              ${kpi('Pendentes', String(pendingCount), pendingCount > 0 ? 'var(--text)' : 'var(--muted)')}
+              ${kpi('Live',      String(liveCount),    liveCount    > 0 ? 'var(--ok)'   : 'var(--muted)')}
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              ${actionBtn('Picks',     '📋', 'tab-day')}
+              ${actionBtn('Pendentes', '⏳', 'tab-pending')}
+              ${actionBtn('Live',      '🔴', 'tab-live')}
+              ${actionBtn('Histórico', '📜', 'tab-history')}
+            </div>
+
+          </div>`;
+      }
+
+      // ===== END MOBILE HOME DASHBOARD =====
+
       function rerenderSummaryOnly() {
         try { renderTopDecisionBlock(); } catch (e) { console.error('renderTopDecisionBlock', e); }
         try { renderSummaryHeadlineStats(); } catch (e) { console.error('renderSummaryHeadlineStats', e); }
@@ -11452,6 +11573,7 @@ buttons.forEach(btn => {
         try { renderBankrollChart(); } catch (e) { console.error('renderBankrollChart', e); }
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
         try { renderBankrollPage(); } catch (e) { console.error('renderBankrollPage', e); }
+        try { renderMobileHomeDash(); } catch (e) { console.error('renderMobileHomeDash', e); }
       }
 
       function rerenderDayOnly() {
@@ -13208,6 +13330,13 @@ buttons.forEach(btn => {
         bindQuickMarketButtons();
         bindStaticButtons();
         bindStaticInputs();
+        let _mobileDashResizeTimer = null;
+        window.addEventListener('resize', () => {
+          clearTimeout(_mobileDashResizeTimer);
+          _mobileDashResizeTimer = setTimeout(() => {
+            if (state.activeTab === 'tab-summary') renderMobileHomeDash();
+          }, 150);
+        });
         bindMobileActionsButton();
         bindLeagueAnalyticsSort();
         bindLeagueAnalyticsFilters();
