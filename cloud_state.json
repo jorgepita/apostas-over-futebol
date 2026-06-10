@@ -2290,7 +2290,7 @@
       "liga": "finlandia",
       "jogo": "Inter Turku vs AC Oulu",
       "mercado": "Over 2.5",
-      "odd": "1.9",
+      "odd": "1.72",
       "stake": "1",
       "resultado": "",
       "notas": "",
@@ -2298,16 +2298,16 @@
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
-      "edgeAtAnalysis": -8.243023612680888,
+      "edgeAtAnalysis": -13.750979549033405,
       "scoreAtAnalysis": 38,
       "analysisSnapshot": {
         "ProbModel": 0.4438855533468753,
-        "ProbMarket": 0.5263157894736842,
-        "Edge": -0.08243023612680889,
-        "EdgePercent": -8.243023612680888,
+        "ProbMarket": 0.5813953488372093,
+        "Edge": -0.13750979549033404,
+        "EdgePercent": -13.750979549033405,
         "fairOdd": 2.2528329486284226,
         "KellyTrue": 0,
-        "EV": -0.15661744864093696,
+        "EV": -0.2365168482433745,
         "score": 38,
         "scoreCls": "bad",
         "opinion": "AVOID",
@@ -2318,7 +2318,7 @@
         "usedFallback": false,
         "sampleSize": 12,
         "dataQuality": "HIGH",
-        "timestamp": "2026-06-10T13:42:50.364Z"
+        "timestamp": "2026-06-10T13:43:21.599Z"
       }
     }
   ],
@@ -2349,7 +2349,7 @@
   "lastUpdated": "2026-06-10T13:42:38.395Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-11",
