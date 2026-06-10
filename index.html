@@ -7783,6 +7783,23 @@ button.dirty {
         });
 
         if (scrollToTop) window.scrollTo(0, 0);
+
+        // Re-render the activated tab with the current viewport width so mobile/desktop
+        // layout is always correct regardless of when the tab was last rendered.
+        try {
+          if (tabId === 'tab-summary') {
+            renderMobileHomeDash();
+          } else if (tabId === 'tab-day') {
+            renderFootball();
+            renderBotHistoryOperational();
+          } else if (tabId === 'tab-pending') {
+            renderPendingQueue();
+          } else if (tabId === 'tab-live') {
+            renderLiveCenter();
+          }
+        } catch (e) {
+          console.error('setActiveTab render error:', e);
+        }
       }
 
       function bindMobileActionsButton() {
@@ -13524,17 +13541,7 @@ button.dirty {
         window.addEventListener('resize', () => {
           clearTimeout(_mobileDashResizeTimer);
           _mobileDashResizeTimer = setTimeout(() => {
-            if (state.activeTab === 'tab-summary') renderMobileHomeDash();
-            if (state.activeTab === 'tab-day') {
-              try { renderFootball(); } catch (e) { console.error('renderFootball (resize)', e); }
-              try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational (resize)', e); }
-            }
-            if (state.activeTab === 'tab-pending') {
-              try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue (resize)', e); }
-            }
-            if (state.activeTab === 'tab-live') {
-              try { renderLiveCenter(); } catch (e) { console.error('renderLiveCenter (resize)', e); }
-            }
+            rerenderAll(false);
           }, 150);
         });
         bindMobileActionsButton();
