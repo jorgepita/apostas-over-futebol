@@ -3261,7 +3261,8 @@ button.dirty {
       let autoSaveInFlight = false;
       let hasPendingCloudChanges = false;
       let initialLoadDone = false;
-      let _autoSaveTimer = null;  // Phase 26.1 — debounce handle for auto cloud save
+      let _autoSaveTimer = null;     // Phase 26.1  — debounce handle for auto cloud save
+      let _dirtyGeneration = 0;      // Phase 26.1.1 — increments on every markDirty; detects mid-save changes
 
       const state = {
         footballDaily: [],
@@ -7928,6 +7929,7 @@ button.dirty {
     hasPendingCloudChanges = true;
     updateCloudStatus();
 
+    const capturedGen = _dirtyGeneration;  // Phase 26.1.1 — snapshot generation at serialisation time
     const data = state;
 
     const res = await fetch(`${API_URL}/save`, {
@@ -7943,7 +7945,10 @@ button.dirty {
     const result = await res.json();
 
     state.cloudAvailable = true;
-    hasPendingCloudChanges = false;
+    // Phase 26.1.1 — only clear if no new change arrived while the fetch was in-flight
+    if (_dirtyGeneration === capturedGen) {
+      hasPendingCloudChanges = false;
+    }
     updateCloudStatus();
 
     console.log('Guardado com sucesso:', result);
@@ -7951,7 +7956,7 @@ button.dirty {
   } catch (e) {
     console.error(e);
     state.cloudAvailable = false;
-    // hasPendingCloudChanges remains true — next markDirty() will schedule a retry
+    // hasPendingCloudChanges remains true — finally block will schedule a retry
     updateCloudStatus();
 
   } finally {
@@ -7963,6 +7968,13 @@ button.dirty {
       btn.disabled = false;
       btn.textContent = 'Guardar cloud';
     });
+  // Phase 26.1.1 — if changes arrived during this save, schedule another save
+  if (hasPendingCloudChanges) {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(() => {
+      if (hasPendingCloudChanges && !autoSaveInFlight) saveCloudState();
+    }, 4000);
+  }
   }
 }
 
@@ -8064,6 +8076,7 @@ buttons.forEach(btn => {
 }
       
       function markDirty() {
+        _dirtyGeneration++;          // Phase 26.1.1 — stamp every change so mid-save arrivals are detectable
         hasPendingCloudChanges = true;
         updateCloudStatus();
         rerenderSummaryOnly();
