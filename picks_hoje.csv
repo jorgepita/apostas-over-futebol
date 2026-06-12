@@ -1,3 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-06-13;finlandia;Veikkausliiga;Lahti;SJK;1.604;1.505;3.108;O2.5;0.601;1.91;0.524;0.077;0.1617;True;;0.0225;0.0225;0.07699999999999996;0.0224;0.0224;1.12;1.0;50.0
 2026-06-13;finlandia;Veikkausliiga;Ilves;Turku PS;1.604;1.505;3.108;O2.5;0.601;1.78;0.562;0.0388;0.0885;True;;0.0175;0.0175;0.038999999999999924;0.0062;0.0062;0.31;1.0;50.0
+2026-06-13;mls;MLS;Real Monarchs;Portland Timbers II;1.935;1.518;3.453;O2.5;0.67;1.58;0.633;0.0375;0.1021;True;;0.0075;0.0075;0.03700000000000003;0.0069;0.0069;0.34;1.0;50.0
+2026-06-14;mls;MLS;Atlanta United II;Chattanooga;1.935;1.518;3.453;O2.5;0.67;1.57;0.637;0.0334;0.0921;True;;0.0075;0.0075;0.03300000000000003;0.0055;0.0055;0.28;1.0;50.0
