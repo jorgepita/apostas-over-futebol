@@ -2438,9 +2438,9 @@
       "mercado": "Over 2.5",
       "odd": "1.45",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -2465,7 +2465,8 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-08T21:19:34.673Z"
-      }
+      },
+      "settledAt": "2026-06-13T13:08:31.178Z"
     },
     {
       "id": "manual_1781086613760_bdpnjr",
@@ -2825,8 +2826,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T13:03:21.980Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-06-13T13:08:21.953Z",
+  "activeTab": "tab-live",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
