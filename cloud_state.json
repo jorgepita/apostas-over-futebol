@@ -2846,6 +2846,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781372231484_0qtruq",
+      "data": "2026-06-14",
+      "liga": "mls",
+      "jogo": "Huntsville City vs Orlando City II",
+      "mercado": "Over 2.5",
+      "odd": "1.44",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -2872,10 +2890,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T17:36:23.455Z",
+  "lastUpdated": "2026-06-13T17:37:04.575Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-13",
