@@ -2808,15 +2808,16 @@
       "mercado": "Over 2.5",
       "odd": "1.95",
       "stake": "1.5",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": false,
       "botOpinion": null,
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
-      "analysisSnapshot": null
+      "analysisSnapshot": null,
+      "settledAt": "2026-06-13T18:28:43.323Z"
     },
     {
       "id": "manual_1781372461030_qdbqgk",
