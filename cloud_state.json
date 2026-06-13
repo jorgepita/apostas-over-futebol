@@ -2404,6 +2404,12 @@
     },
     "2026-06-14|MLS|Atlanta United II vs Chattanooga|Over 2.5": {
       "apostada": true
+    },
+    "2026-06-13|mls|Real Monarchs vs Portland Timbers II|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-14|mls|Atlanta United II vs Chattanooga|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2841,7 +2847,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T14:23:01.454Z",
+  "lastUpdated": "2026-06-13T14:46:38.380Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": false,
