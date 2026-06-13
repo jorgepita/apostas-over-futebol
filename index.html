@@ -2028,43 +2028,6 @@ button.dirty {
           <div id="footballCards" style="display:none;"></div>
         </div>
 
-        <!-- HISTORY TABLE -->
-        <div class="card">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico / pendentes do bot</div>
-              <div class="note">Picks anteriores úteis para análise e acompanhamento</div>
-            </div>
-          </div>
-
-          <div class="table-wrap" id="historyDayTableWrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Origem</th>
-                  <th>Data</th>
-                  <th>Liga</th>
-                  <th>Jogo</th>
-                  <th>Mercado</th>
-                  <th>Odd</th>
-                  <th>Stake mod.</th>
-                  <th>Stake rec.</th>
-                  <th>Score</th>
-                  <th>Sinais</th>
-                  <th>Aprovar</th>
-                  <th>Execução</th>
-                  <th>Resultado</th>
-                  <th>Lucro mod.</th>
-                  <th>Lucro real</th>
-                </tr>
-              </thead>
-              <tbody id="historyRowsDay"></tbody>
-            </table>
-          </div>
-          <!-- Phase 25.2 — mobile history cards -->
-          <div id="historyDayCards" style="display:none;"></div>
-        </div>
-
       </div>
     </div>
 
@@ -2187,38 +2150,6 @@ button.dirty {
 
         <!-- EQUITY CURVE & DRAWDOWN -->
         <div id="histEquityWrap"></div>
-
-        <!-- OPERATIONAL BOT HISTORY TABLE -->
-        <div class="card">
-          <div style="margin-bottom:12px;">
-            <div style="font-size:13px;font-weight:700;color:var(--text);">Histórico operacional do bot</div>
-            <div class="note">Campos editáveis para controlo de aprovação e resultado</div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Origem</th>
-                  <th>Data</th>
-                  <th>Liga</th>
-                  <th>Jogo</th>
-                  <th>Odd</th>
-                  <th>Stake mod.</th>
-                  <th>Stake rec.</th>
-                  <th>Score</th>
-                  <th>Sinais</th>
-                  <th>Aprovar</th>
-                  <th>Execução</th>
-                  <th>Resultado</th>
-                  <th>Lucro mod.</th>
-                  <th>Lucro real</th>
-                </tr>
-              </thead>
-              <tbody id="historyRows"></tbody>
-            </table>
-          </div>
-        </div>
 
         <!-- CLOSED REAL TABLE -->
         <div class="card">
@@ -5613,31 +5544,6 @@ button.dirty {
         }
       }
 
-      function renderBotHistoryOperational() {
-        const historyMerged = getHistoryRowsMerged();
-        const dayRows     = sortBotRowsForDisplay(filterBotRows(historyMerged, getDayFilters()), true);
-        const historyRows = sortBotRowsForDisplay(filterBotRows(historyMerged, getHistoryFilters()), true);
-
-        if (isMobileDashboard()) {
-          const wrap  = document.getElementById('historyDayTableWrap');
-          const cards = document.getElementById('historyDayCards');
-          if (wrap)  wrap.style.display  = 'none';
-          if (cards) { cards.style.display = 'block'; cards.innerHTML = buildPicksCardHtml(dayRows, 'hist'); }
-        } else {
-          const wrap  = document.getElementById('historyDayTableWrap');
-          const cards = document.getElementById('historyDayCards');
-          if (wrap)  wrap.style.display  = '';
-          if (cards) cards.style.display = 'none';
-          document.getElementById('historyRowsDay').innerHTML = dayRows.length
-            ? buildBotRowHtml(dayRows)
-            : '<tr><td colspan="16"><div class="note">Nenhuma linha encontrada com os filtros atuais.</div></td></tr>';
-        }
-
-        document.getElementById('historyRows').innerHTML = historyRows.length
-          ? buildBotRowHtml(historyRows)
-          : '<tr><td colspan="16"><div class="note">Nenhuma linha do histórico encontrada com os filtros atuais.</div></td></tr>';
-      }
-
       function renderClosedRealTable() {
         const rows = getHistoryFilteredRows().slice().reverse();
         const tbody = document.getElementById('closedRealRows');
@@ -7791,7 +7697,6 @@ button.dirty {
             renderMobileHomeDash();
           } else if (tabId === 'tab-day') {
             renderFootball();
-            renderBotHistoryOperational();
           } else if (tabId === 'tab-pending') {
             renderPendingQueue();
           } else if (tabId === 'tab-live') {
@@ -11686,13 +11591,11 @@ button.dirty {
         console.log('TRACE: rerenderDayOnly');
         try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
         try { renderFootball(); } catch (e) { console.error('renderFootball', e); }
-        try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
         try { syncQuickMarketButtons(); } catch (e) { console.error('syncQuickMarketButtons', e); }
         try { renderPicksKpiRow(); } catch (e) { console.error('renderPicksKpiRow', e); }
       }
 
       function rerenderHistoryOnly() {
-        try { renderBotHistoryOperational(); } catch (e) { console.error('renderBotHistoryOperational', e); }
         try { renderClosedRealTable(); } catch (e) { console.error('renderClosedRealTable', e); }
         try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
         try { renderHistoryIntelligence(); } catch (e) { console.error('renderHistoryIntelligence', e); }
