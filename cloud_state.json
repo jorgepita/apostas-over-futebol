@@ -2862,6 +2862,24 @@
         "dataQuality": "NONE",
         "timestamp": "2026-06-13T13:04:05.394Z"
       }
+    },
+    {
+      "id": "manual_1781371068576_quctau",
+      "data": "2026-06-13",
+      "liga": "finlandia",
+      "jogo": "Mariehamn vs Gnistan",
+      "mercado": "Over 2.5",
+      "odd": "1.95",
+      "stake": "1.5",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -2888,10 +2906,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T16:58:45.918Z",
+  "lastUpdated": "2026-06-13T17:17:12.079Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-13",
