@@ -11592,7 +11592,12 @@ button.dirty {
         const today = todayIso();
 
         const manualRows = getManualRowsMerged()
-          .filter(b => b.isLocal && b.status === 'approved' && b.data > today)
+          .filter(b => {
+            if (!b.isLocal || b.status !== 'approved') return false;
+            const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+            if (kickoffMs !== null) return kickoffMs > Date.now();
+            return b.data > today;
+          })
           .map(b => ({
             id:            b.id,
             source:        'Manual',
@@ -11785,12 +11790,14 @@ button.dirty {
         const today = todayIso();
 
         const manualRows = getManualRowsMerged()
-          .filter(b =>
-            b.isLocal &&
-            b.status === 'approved' &&
-            !['W', 'L', 'P'].includes(b._resultKey) &&
-            b.data && b.data <= today
-          )
+          .filter(b => {
+            if (!b.isLocal || b.status !== 'approved') return false;
+            if (['W', 'L', 'P'].includes(b._resultKey)) return false;
+            if (!b.data) return false;
+            const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+            if (kickoffMs !== null) return kickoffMs <= Date.now();
+            return b.data <= today;
+          })
           .map(b => ({
             id:             b.id,
             source:         'Manual',
@@ -12687,7 +12694,7 @@ button.dirty {
         const ms = parseKickoffUTC(utcStr);
         if (ms === null) return '—';
         const d = new Date(ms);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false });
       }
 
       function fmtCountdown(kickoffMs) {
