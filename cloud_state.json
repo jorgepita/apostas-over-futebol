@@ -2,39 +2,6 @@
   "footballDaily": [
     {
       "Date": "2026-06-13",
-      "League": "finlandia",
-      "LeagueName": "Veikkausliiga",
-      "HomeTeam": "Lahti",
-      "AwayTeam": "SJK",
-      "LambdaHome": "1.604",
-      "LambdaAway": "1.505",
-      "LambdaTotal": "3.108",
-      "KickoffUTC": "2026-06-13T17:00:00+01:00",
-      "Market": "O2.5",
-      "ProbModel": 0.601,
-      "Odd": "1.82",
-      "ProbMarket": 0.549,
-      "Edge": 0.051999999999999935,
-      "KellyTrue": "0.1135",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0175",
-      "EdgeMinFinal": "0.0175",
-      "ProbGap": "0.051999999999999935",
-      "StakeFracRaw": "0.0104",
-      "StakeFrac": "0.0104",
-      "Stake€": "0.52",
-      "DailyScale": "1.0",
-      "Bankroll€": "50.0",
-      "Data": "2026-06-13",
-      "Liga": "finlandia",
-      "Jogo": "Lahti vs SJK",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 5.199999999999994
-    },
-    {
-      "Date": "2026-06-13",
       "League": "mls",
       "LeagueName": "MLS",
       "HomeTeam": "Real Monarchs",
@@ -2615,9 +2582,9 @@
       "mercado": "Over 2.5",
       "odd": "1.73",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -2642,7 +2609,8 @@
         "sampleSize": 4,
         "dataQuality": "MEDIUM",
         "timestamp": "2026-06-10T10:19:40.216Z"
-      }
+      },
+      "settledAt": "2026-06-13T18:27:58.499Z"
     },
     {
       "id": "manual_1781086699836_0vo07k",
@@ -2909,29 +2877,11 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T17:41:52.378Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-13T18:27:36.912Z",
+  "activeTab": "tab-live",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
-    {
-      "Date": "2026-06-13",
-      "League": "finlandia",
-      "HomeTeam": "Lahti",
-      "AwayTeam": "SJK",
-      "Odd_Over25": "1.82",
-      "Odd_BTTS_Yes": "1.67",
-      "KickoffUTC": "2026-06-13T17:00:00+01:00"
-    },
-    {
-      "Date": "2026-06-13",
-      "League": "finlandia",
-      "HomeTeam": "Mariehamn",
-      "AwayTeam": "Gnistan",
-      "Odd_Over25": "1.95",
-      "Odd_BTTS_Yes": "1.80",
-      "KickoffUTC": "2026-06-13T17:00:00+01:00"
-    },
     {
       "Date": "2026-06-13",
       "League": "mls",
@@ -2974,7 +2924,7 @@
       "HomeTeam": "Ventura County",
       "AwayTeam": "Colorado Rapids II",
       "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.55",
+      "Odd_BTTS_Yes": "1.51",
       "KickoffUTC": "2026-06-14T03:00:00+01:00"
     },
     {
