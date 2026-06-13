@@ -11597,7 +11597,7 @@ button.dirty {
             market:        b.mercado || '',
             odd:           b.odd    || '',
             stake:         b.stake  || '',
-            kickoffUTC:    '',
+            kickoffUTC:    findFixtureKickoff(b.data, b.liga, b.jogo),
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -11796,7 +11796,7 @@ button.dirty {
             odd:            b.odd    || '',
             stake:          b.stake  || '',
             stakeNum:       num(b.stake),
-            kickoffUTC:     '',
+            kickoffUTC:     findFixtureKickoff(b.data, b.liga, b.jogo),
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -12660,6 +12660,22 @@ button.dirty {
         if (!str) return null;
         const t = new Date(str).getTime();
         return isNaN(t) ? null : t;
+      }
+
+      function findFixtureKickoff(date, liga, jogo) {
+        const parts = String(jogo || '').split(' vs ');
+        const home  = cleanString(parts[0] || '');
+        const away  = cleanString(parts[1] || '');
+        if (!home || !away) return '';
+        const leagueKey = cleanString(liga || '');
+        const fixtures  = Array.isArray(state.fixtures) ? state.fixtures : [];
+        const match = fixtures.find(f =>
+          normalizeDateString(f.Date || f.date || '') === date &&
+          cleanString(f.League || f.Liga || '') === leagueKey &&
+          cleanString(f.HomeTeam || '') === home &&
+          cleanString(f.AwayTeam || '') === away
+        );
+        return match ? (match.KickoffUTC || '') : '';
       }
 
       function fmtKickoffTime(utcStr) {
