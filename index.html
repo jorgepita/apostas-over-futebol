@@ -4933,8 +4933,8 @@ button.dirty {
       function getFilteredRealClosedRows(filters) {
         const activeFilters = filters || getSummaryFilters();
 
-        const botClosed = filterBotRows(getHistoryRowsMerged(), activeFilters)
-          .filter(r => r._apostadaBool && r._lucroRealLocal !== null)
+        const botClosed = filterBotRows(getAllBotRowsMergedUnique(), activeFilters)
+          .filter(r => r._apostadaBool && (r._lucroRealLocal !== null || r._lucroModeloLocal !== null))
           .map(r => ({
             source: 'bot',
             sourceLabel: 'Bot',
@@ -4943,9 +4943,9 @@ button.dirty {
             game: cleanString(r['Jogo'] || '—'),
             date: normalizeDateString(r['Data'] || ''),
             result: r._resultKey,
-            odd: r._oddRealNum,
-            stake: r._stakeRealNum ?? 0,
-            lucro: r._lucroRealLocal ?? 0,
+            odd: r._oddRealNum ?? r._oddModeloNum,
+            stake: r._stakeRealNum ?? r._stakeModeloNum ?? 0,
+            lucro: r._lucroRealLocal ?? r._lucroModeloLocal ?? 0,
             kickoffUTC: r['KickoffUTC'] || ''
           }));
 
