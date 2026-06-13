@@ -11945,8 +11945,6 @@ button.dirty {
 
         try { renderLeagueAnalytics(); } catch (e) { console.error('renderLeagueAnalytics', e); }
 
-        bindBotTableControls();
-        bindManualControls();
         bindTabButtons();
         bindQuickMarketButtons();
 
@@ -11955,6 +11953,8 @@ button.dirty {
         applyBankrollImmutability();
 
         setActiveTab(state.activeTab, { scrollToTop: false });
+        bindBotTableControls();
+        bindManualControls();
       }
 
       function addManualBet() {
