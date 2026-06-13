@@ -2857,7 +2857,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": false,
       "botOpinion": null,
