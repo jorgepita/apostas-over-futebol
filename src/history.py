@@ -5,7 +5,7 @@ import pandas as pd
 HISTORY_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Lucro€", "LucroReal€",
+    "Resultado", "Lucro€", "LucroReal€", "KickoffUTC",
 ]
 
 BASE = Path(__file__).resolve().parent.parent

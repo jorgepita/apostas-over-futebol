@@ -11590,8 +11590,11 @@ button.dirty {
 
         const botRows = getAllBotRowsMergedUnique()
           .filter(r => {
+            if (!r._apostadaBool || ['W', 'L', 'P'].includes(r._resultKey)) return false;
+            const kickoffMs = parseKickoffUTC(r['KickoffUTC'] || '');
+            if (kickoffMs !== null) return kickoffMs > Date.now();
             const d = normalizeDateString(r['Data'] || '');
-            return r._apostadaBool && !['W', 'L', 'P'].includes(r._resultKey) && d > today;
+            return d > today;
           })
           .map(r => ({
             id:            r._pickKey,
@@ -11774,10 +11777,11 @@ button.dirty {
 
         const botRows = getAllBotRowsMergedUnique()
           .filter(r => {
+            if (!r._apostadaBool || ['W', 'L', 'P'].includes(r._resultKey)) return false;
+            const kickoffMs = parseKickoffUTC(r['KickoffUTC'] || '');
+            if (kickoffMs !== null) return kickoffMs <= Date.now();
             const d = normalizeDateString(r['Data'] || '');
-            return r._apostadaBool &&
-              !['W', 'L', 'P'].includes(r._resultKey) &&
-              d && d <= today;
+            return d && d <= today;
           })
           .map(r => ({
             id:             r._pickKey,
@@ -12614,7 +12618,18 @@ button.dirty {
         }
       }
 
+      function parseKickoffUTC(str) {
+        if (!str) return null;
+        const t = new Date(str).getTime();
+        return isNaN(t) ? null : t;
+      }
+
       function getMinutesUntilKickoff(row) {
+        // Try KickoffUTC ISO datetime first (e.g. "2026-06-13T18:30:00+00:00")
+        const utcMs = parseKickoffUTC(row['KickoffUTC'] || '');
+        if (utcMs !== null) return (utcMs - Date.now()) / 60000;
+
+        // Fall back to legacy HH:MM local-time field
         const raw = (row['Hora'] || row['Hour'] || row['KickoffTime'] || row['Time'] || row['Kickoff'] || '').trim();
         const m   = raw.match(/^(\d{1,2}):(\d{2})$/);
         if (!m) return null;

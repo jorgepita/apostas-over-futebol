@@ -24,6 +24,7 @@ def build_base_row(fx: pd.Series, league_key: str, league_name: str, lam_h: floa
         "LambdaHome": lam_h,
         "LambdaAway": lam_a,
         "LambdaTotal": lam_t,
+        "KickoffUTC": str(fx.get("KickoffUTC", "") or ""),
     }
 
 

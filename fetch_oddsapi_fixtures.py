@@ -1050,7 +1050,7 @@ def main():
         with open(fixtures_path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(
                 f,
-                fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25", "Odd_BTTS_Yes"],
+                fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25", "Odd_BTTS_Yes", "KickoffUTC"],
                 delimiter=";",
             )
             w.writeheader()
@@ -1117,6 +1117,7 @@ def main():
                 "AwayTeam": fx["away"],
                 "Odd_Over25": (f"{odd_o25:.2f}" if odd_o25 is not None else ""),
                 "Odd_BTTS_Yes": (f"{odd_btts:.2f}" if odd_btts is not None else ""),
+                "KickoffUTC": fx.get("api_fixture_date", ""),
             }
         )
 
@@ -1142,7 +1143,7 @@ def main():
     with open(fixtures_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
-            fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25", "Odd_BTTS_Yes"],
+            fieldnames=["Date", "League", "HomeTeam", "AwayTeam", "Odd_Over25", "Odd_BTTS_Yes", "KickoffUTC"],
             delimiter=";",
         )
         w.writeheader()
