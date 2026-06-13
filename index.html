@@ -4473,7 +4473,9 @@ button.dirty {
       }
 
       function getRealResolvedBotHistory() {
-        return getHistoryRowsMerged().filter(r => r._apostadaBool && r._lucroRealLocal !== null);
+        return getAllBotRowsMergedUnique().filter(
+          r => r._apostadaBool && (r._lucroRealLocal !== null || r._lucroModeloLocal !== null)
+        );
       }
 
       function getResolvedManualBets() {
@@ -4570,7 +4572,7 @@ button.dirty {
       function getBankrollState() {
         const movTotals = getMovementTotals();
         const lucroReal =
-          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal)) +
+          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal ?? r._lucroModeloLocal)) +
           sum(getResolvedManualBets().map(b => b._lucro));
 
         if (!state.bankrollInicialSet || state.bankrollInicial === null) {
@@ -8228,8 +8230,8 @@ button.dirty {
             const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : 0;
             return { stake, profit, wins, losses, settled: rows.length, roi, wr };
           } else {
-            const stake = sum(rows.map(r => r._stakeRealNum).filter(v => v !== null));
-            const profit = sum(rows.map(r => r._lucroRealLocal).filter(v => v !== null));
+            const stake = sum(rows.map(r => r._stakeRealNum ?? r._stakeModeloNum).filter(v => v !== null));
+            const profit = sum(rows.map(r => r._lucroRealLocal ?? r._lucroModeloLocal).filter(v => v !== null));
             const wins = rows.filter(r => r._resultKey === 'W').length;
             const losses = rows.filter(r => r._resultKey === 'L').length;
             const roi = stake > 0 ? (profit / stake) * 100 : 0;
