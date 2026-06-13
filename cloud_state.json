@@ -2380,7 +2380,9 @@
     "2026-06-13|Veikkausliiga|Ilves vs Turku PS|Over 2.5": {
       "apostada": true,
       "oddReal": "1.73",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "resultadoManual": "L",
+      "settledAt": "2026-06-13T18:28:55.543Z"
     },
     "2026-06-17|Veikkausliiga|Gnistan vs Lahti|Over 2.5": {
       "apostada": false
