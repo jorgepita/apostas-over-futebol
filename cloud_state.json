@@ -2375,7 +2375,9 @@
     "2026-06-13|Veikkausliiga|Lahti vs SJK|Over 2.5": {
       "apostada": true,
       "oddReal": "1.96",
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "resultadoManual": "W",
+      "settledAt": "2026-06-13T18:29:01.803Z"
     },
     "2026-06-13|Veikkausliiga|Ilves vs Turku PS|Over 2.5": {
       "apostada": true,
@@ -2884,7 +2886,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-06-13T18:28:36.928Z",
-  "activeTab": "tab-live",
+  "activeTab": "tab-history",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
