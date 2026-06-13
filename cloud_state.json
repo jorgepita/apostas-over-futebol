@@ -2859,11 +2859,30 @@
       "notas": "",
       "status": "pending",
       "analysisStale": false,
-      "hadAnalysis": false,
-      "botOpinion": null,
-      "edgeAtAnalysis": null,
-      "scoreAtAnalysis": null,
-      "analysisSnapshot": null
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -2.405741377161408,
+      "scoreAtAnalysis": 43,
+      "analysisSnapshot": {
+        "ProbModel": 0.6703870306728303,
+        "ProbMarket": 0.6944444444444444,
+        "Edge": -0.024057413771614078,
+        "EdgePercent": -2.405741377161408,
+        "fairOdd": 1.4916756354853038,
+        "KellyTrue": 0,
+        "EV": -0.03464267583112435,
+        "score": 43,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.934822888283379,
+        "LambdaAway": 1.518256130790191,
+        "LambdaTotal": 3.45307901907357,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "timestamp": "2026-06-13T17:37:49.824Z"
+      }
     }
   ],
   "movements": [
