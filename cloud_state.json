@@ -2395,6 +2395,15 @@
     },
     "2026-06-17|Veikkausliiga|HJK Helsinki vs Inter Turku|Over 2.5": {
       "apostada": true
+    },
+    "2026-06-17|Veikkausliiga|Turku PS vs KuPS|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-17|Veikkausliiga|Ilves vs FF Jaro|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-14|MLS|Atlanta United II vs Chattanooga|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2832,7 +2841,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T13:09:21.972Z",
+  "lastUpdated": "2026-06-13T13:10:23.738Z",
   "activeTab": "tab-history",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
