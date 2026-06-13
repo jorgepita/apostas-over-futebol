@@ -2389,6 +2389,12 @@
       "apostada": true,
       "oddReal": "1.73",
       "stakeReal": "1"
+    },
+    "2026-06-17|Veikkausliiga|Gnistan vs Lahti|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-17|Veikkausliiga|HJK Helsinki vs Inter Turku|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2826,8 +2832,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T13:08:21.953Z",
-  "activeTab": "tab-live",
+  "lastUpdated": "2026-06-13T13:09:21.972Z",
+  "activeTab": "tab-history",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
