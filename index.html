@@ -2293,6 +2293,7 @@ button.dirty {
                 <tr>
                   <th>Origem</th>
                   <th>Data</th>
+                  <th>Kickoff</th>
                   <th>Liga</th>
                   <th>Jogo</th>
                   <th>Mercado</th>
@@ -4944,7 +4945,8 @@ button.dirty {
             result: r._resultKey,
             odd: r._oddRealNum,
             stake: r._stakeRealNum ?? 0,
-            lucro: r._lucroRealLocal ?? 0
+            lucro: r._lucroRealLocal ?? 0,
+            kickoffUTC: r['KickoffUTC'] || ''
           }));
 
         const manualClosed = filterManualRows(getManualRowsMerged(), activeFilters)
@@ -5195,9 +5197,10 @@ button.dirty {
             ? r._stakeRealNum * (r._oddRealNum - 1)
             : null;
 
+          const kickoffStr = fmtKickoffTime(r['KickoffUTC'] || '');
           return `
             <div class="stat">
-              <div class="label">${escapeHtml(cleanString(r['Liga'] || '—'))} • ${escapeHtml(formatDatePt(r['Data']))}</div>
+              <div class="label">${escapeHtml(cleanString(r['Liga'] || '—'))} • ${escapeHtml(formatDatePt(r['Data']))}${kickoffStr !== '—' ? ` • Kickoff: ${kickoffStr}` : ''}</div>
               <div class="value" style="font-size:18px;">${escapeHtml(cleanString(r['Jogo'] || '—'))}</div>
               <div class="note">${escapeHtml(cleanString(r['Mercado'] || '—'))}</div>
               <div class="note">Stake real: €${fmt(r._stakeRealNum)} • Odd real: ${fmt(r._oddRealNum)} • Potencial: €${fmt(potencial)}</div>
@@ -5379,7 +5382,10 @@ button.dirty {
           return `
             <tr>
               <td><span class="mini info">Bot</span></td>
-              <td>${escapeHtml(r['Data'] || '—')}</td>
+              <td>
+                <div>${escapeHtml(r['Data'] || '—')}</div>
+                <div class="note" style="font-size:10px;">Kickoff: ${fmtKickoffTime(r['KickoffUTC'] || '')}</div>
+              </td>
               <td>${escapeHtml(cleanString(r['Liga'] || '—'))}</td>
               <td>
                 <div>${escapeHtml(cleanString(r['Jogo'] || '-'))}</div>
@@ -5430,11 +5436,12 @@ button.dirty {
           const plColor = plVal !== null && plVal > 0 ? 'var(--ok)'
                         : plVal !== null && plVal < 0 ? 'var(--bad)' : 'var(--muted)';
 
-          const jogoLine = escapeHtml(cleanString(r['Jogo']    || '—'));
-          const ligaLine = escapeHtml(cleanString(r['Liga']    || ''));
-          const mercLine = escapeHtml(cleanString(r['Mercado'] || '—'));
-          const dataLine = escapeHtml(r['Data'] || '');
-          const oddVal   = r._oddModeloNum !== null ? fmt(r._oddModeloNum) : null;
+          const jogoLine    = escapeHtml(cleanString(r['Jogo']    || '—'));
+          const ligaLine    = escapeHtml(cleanString(r['Liga']    || ''));
+          const mercLine    = escapeHtml(cleanString(r['Mercado'] || '—'));
+          const dataLine    = escapeHtml(r['Data'] || '');
+          const oddVal      = r._oddModeloNum !== null ? fmt(r._oddModeloNum) : null;
+          const kickoffTime = fmtKickoffTime(r['KickoffUTC'] || '');
 
           const subLine = ligaLine
             ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${ligaLine} · ${mercLine}</div>`
@@ -5442,6 +5449,10 @@ button.dirty {
 
           const dateHtml = section === 'hist' && dataLine
             ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;">${dataLine}</div>`
+            : '';
+
+          const kickoffHtml = section === 'day'
+            ? `<div style="font-size:10px;color:var(--muted);margin-top:2px;">Kickoff: <strong style="color:var(--text);">${kickoffTime}</strong></div>`
             : '';
 
           const oddStakeHtml = section === 'day' && oddVal !== null
@@ -5464,6 +5475,7 @@ button.dirty {
               <div style="font-size:14px;font-weight:800;color:var(--text);">${jogoLine}</div>
               ${subLine}
               ${dateHtml}
+              ${kickoffHtml}
               <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
                 <span class="mini ${signal.scoreBadge.cls}">${escapeHtml(signal.scoreBadge.label)}</span>
                 ${edgeHtml}
@@ -5516,6 +5528,7 @@ button.dirty {
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:10px 12px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
               <div><div class="label" style="font-size:10px;">Origem</div><div style="font-size:13px;">${escapeHtml(r.sourceLabel || '—')}</div></div>
               <div><div class="label" style="font-size:10px;">Data</div><div style="font-size:13px;">${escapeHtml(r.date || '—')}</div></div>
+              <div><div class="label" style="font-size:10px;">Kickoff</div><div style="font-size:13px;font-weight:600;">${fmtKickoffTime(r.kickoffUTC || '')}</div></div>
               <div><div class="label" style="font-size:10px;">Liga</div><div style="font-size:13px;">${escapeHtml(r.league || '—')}</div></div>
               <div><div class="label" style="font-size:10px;">Jogo</div><div style="font-size:13px;">${escapeHtml(r.game || '—')}</div></div>
               <div><div class="label" style="font-size:10px;">Mercado</div><div style="font-size:13px;">${escapeHtml(r.market || '—')}</div></div>
@@ -11584,6 +11597,7 @@ button.dirty {
             market:        b.mercado || '',
             odd:           b.odd    || '',
             stake:         b.stake  || '',
+            kickoffUTC:    '',
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -11609,6 +11623,7 @@ button.dirty {
             stake:         r._stakeModeloNum !== null ? fmt(r._stakeModeloNum) : '',
             oddReal:       r._oddRealNum   !== null ? fmt(r._oddRealNum)   : '',
             stakeReal:     r._stakeRealNum !== null ? fmt(r._stakeRealNum) : '',
+            kickoffUTC:    r['KickoffUTC'] || '',
             scoreBadgeHtml: formatPickSignalHtml(r).score,
             _type: 'bot'
           }));
@@ -11623,16 +11638,19 @@ button.dirty {
       // ===== MOBILE PENDING CARDS — Phase 25.3 =====
       function buildPendingCardHtml(rows) {
         return rows.map(r => {
-          const srcCls   = r.source === 'Bot' ? 'info' : 'warn';
-          const oddStr   = r.odd   ? escapeHtml(r.odd)   : '—';
-          const stakeStr = r.stake ? `€${escapeHtml(r.stake)}` : '—';
-          const subLine  = (r.league && r.market) ? `${escapeHtml(r.league)} · ${escapeHtml(r.market)}`
-                         : escapeHtml(r.league || r.market || '');
+          const srcCls      = r.source === 'Bot' ? 'info' : 'warn';
+          const oddStr      = r.odd   ? escapeHtml(r.odd)   : '—';
+          const stakeStr    = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          const subLine     = (r.league && r.market) ? `${escapeHtml(r.league)} · ${escapeHtml(r.market)}`
+                            : escapeHtml(r.league || r.market || '');
+          const kickoffMs   = parseKickoffUTC(r.kickoffUTC || '');
+          const kickoffTime = fmtKickoffTime(r.kickoffUTC || '');
+          const countdown   = kickoffMs !== null ? fmtCountdown(kickoffMs) : '';
           return `
             <div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);margin-bottom:8px;">
               <div style="font-size:14px;font-weight:800;color:var(--text);">${escapeHtml(r.game || '—')}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px;">${subLine}</div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}${kickoffTime !== '—' ? ` · Kickoff: <strong style="color:var(--text);">${kickoffTime}</strong>${countdown ? ` <span style="color:var(--info);">(${countdown})</span>` : ''}` : ''}</div>
               <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
                 ${r.scoreBadgeHtml}
                 <span class="mini good">Aprovada</span>
@@ -11692,13 +11710,19 @@ button.dirty {
         const tbody = document.getElementById('pendingRows');
         if (!tbody) return;
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="12"><div class="note" style="text-align:center;padding:20px;opacity:0.6;">Sem picks aprovadas aguardando kickoff.</div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="13"><div class="note" style="text-align:center;padding:20px;opacity:0.6;">Sem picks aprovadas aguardando kickoff.</div></td></tr>';
           return;
         }
-        tbody.innerHTML = rows.map(r => `
+        tbody.innerHTML = rows.map(r => {
+          const kickoffMs   = parseKickoffUTC(r.kickoffUTC || '');
+          const kickoffTime = fmtKickoffTime(r.kickoffUTC || '');
+          const countdown   = kickoffMs !== null ? fmtCountdown(kickoffMs) : '';
+          const kickoffCell = `<div style="font-weight:600;">${kickoffTime}</div>${countdown ? `<div style="font-size:10px;color:var(--muted);">${countdown}</div>` : ''}`;
+          return `
           <tr>
             <td><span class="mini ${r.source === 'Bot' ? 'info' : 'warn'}">${escapeHtml(r.source)}</span></td>
             <td>${escapeHtml(r.date   || '—')}</td>
+            <td style="white-space:nowrap;font-size:11px;">${kickoffCell}</td>
             <td>${escapeHtml(r.league || '—')}</td>
             <td>${escapeHtml(r.game   || '—')}</td>
             <td>${escapeHtml(r.market || '—')}</td>
@@ -11724,7 +11748,8 @@ button.dirty {
                 data-type="${escapeHtml(r._type)}"
                 style="padding:5px 8px;width:auto;font-size:11px;">Cancelar</button>
             </td>
-          </tr>`).join('');
+          </tr>`;
+        }).join('');
       }
 
       function pendingCancel(id, type) {
@@ -11771,6 +11796,7 @@ button.dirty {
             odd:            b.odd    || '',
             stake:          b.stake  || '',
             stakeNum:       num(b.stake),
+            kickoffUTC:     '',
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -11795,6 +11821,7 @@ button.dirty {
             odd:            r._oddModeloNum   !== null ? fmt(r._oddModeloNum)   : '',
             stake:          r._stakeModeloNum !== null ? fmt(r._stakeModeloNum) : '',
             stakeNum:       r._stakeRealNum ?? r._stakeModeloNum,
+            kickoffUTC:     r['KickoffUTC'] || '',
             scoreBadgeHtml: formatPickSignalHtml(r).score,
             _type: 'bot'
           }));
@@ -11810,9 +11837,12 @@ button.dirty {
       function buildLiveCardHtml(rows) {
         const btnBase = 'flex:1;padding:8px;font-size:14px;font-weight:800;border-radius:8px;cursor:pointer;border:1px solid;';
         return rows.map(r => {
-          const srcCls   = r._type === 'bot' ? 'info' : 'warn';
-          const oddStr   = r.odd   ? escapeHtml(r.odd)   : '—';
-          const stakeStr = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          const srcCls      = r._type === 'bot' ? 'info' : 'warn';
+          const oddStr      = r.odd   ? escapeHtml(r.odd)   : '—';
+          const stakeStr    = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          const kickoffMs   = parseKickoffUTC(r.kickoffUTC || '');
+          const kickoffTime = fmtKickoffTime(r.kickoffUTC || '');
+          const elapsed     = kickoffMs !== null ? fmtElapsed(kickoffMs) : '';
           return `
             <div style="background:var(--card);border-radius:12px;padding:14px 12px;border:1px solid var(--line);margin-bottom:8px;">
               <div style="font-size:14px;font-weight:800;color:var(--text);">${escapeHtml(r.game || '—')}</div>
@@ -11820,7 +11850,7 @@ button.dirty {
                 <span class="mini ${srcCls}" style="font-size:10px;">${escapeHtml(r.source)}</span>
                 &nbsp;${escapeHtml(r.market || '')}
               </div>
-              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px;">${escapeHtml(r.date || '')}${kickoffTime !== '—' ? ` · Kickoff: <strong style="color:var(--text);">${kickoffTime}</strong>${elapsed ? ` <span style="color:var(--ok);">(${elapsed})</span>` : ''}` : ''}</div>
               <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
                 ${r.scoreBadgeHtml}
                 <span class="mini good">LIVE</span>
@@ -11896,10 +11926,15 @@ button.dirty {
         }
 
         const btnBase = 'padding:4px 7px;width:auto;font-size:11px;font-weight:700;border-radius:5px;cursor:pointer;border:1px solid;';
-        tbody.innerHTML = rows.map(r => `
+        tbody.innerHTML = rows.map(r => {
+          const kickoffMs   = parseKickoffUTC(r.kickoffUTC || '');
+          const kickoffTime = fmtKickoffTime(r.kickoffUTC || '');
+          const elapsed     = kickoffMs !== null ? fmtElapsed(kickoffMs) : '';
+          const kickoffCell = `<div style="font-weight:600;">${kickoffTime}</div>${elapsed ? `<div style="font-size:10px;color:var(--ok);">${elapsed}</div>` : ''}`;
+          return `
           <tr>
             <td><span class="mini ${r._type === 'bot' ? 'info' : 'warn'}">${escapeHtml(r.source)}</span></td>
-            <td>${escapeHtml(r.date   || '—')}</td>
+            <td style="white-space:nowrap;font-size:11px;">${kickoffCell}</td>
             <td>${escapeHtml(r.league || '—')}</td>
             <td>${escapeHtml(r.game   || '—')}</td>
             <td>${escapeHtml(r.market || '—')}</td>
@@ -11918,7 +11953,8 @@ button.dirty {
                 data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
                 style="${btnBase}background:rgba(234,179,8,0.15);color:#eab308;border-color:rgba(234,179,8,0.3);">P</button>
             </td>
-          </tr>`).join('');
+          </tr>`;
+        }).join('');
       }
 
       function rerenderLiveOnly() {
@@ -12624,6 +12660,33 @@ button.dirty {
         if (!str) return null;
         const t = new Date(str).getTime();
         return isNaN(t) ? null : t;
+      }
+
+      function fmtKickoffTime(utcStr) {
+        const ms = parseKickoffUTC(utcStr);
+        if (ms === null) return '—';
+        const d = new Date(ms);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+
+      function fmtCountdown(kickoffMs) {
+        if (kickoffMs === null) return '';
+        const diffMin = Math.round((kickoffMs - Date.now()) / 60000);
+        if (diffMin < 0) return '';
+        if (diffMin < 60) return `${diffMin}m`;
+        const h = Math.floor(diffMin / 60);
+        const m = diffMin % 60;
+        return m > 0 ? `${h}h ${m}m` : `${h}h`;
+      }
+
+      function fmtElapsed(kickoffMs) {
+        if (kickoffMs === null) return '';
+        const diffMin = Math.round((Date.now() - kickoffMs) / 60000);
+        if (diffMin < 0) return '';
+        if (diffMin < 60) return `${diffMin}'`;
+        const h = Math.floor(diffMin / 60);
+        const m = diffMin % 60;
+        return m > 0 ? `${h}h ${m}'` : `${h}h`;
       }
 
       function getMinutesUntilKickoff(row) {
