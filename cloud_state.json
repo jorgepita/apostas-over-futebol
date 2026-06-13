@@ -2830,43 +2830,6 @@
       }
     },
     {
-      "id": "manual_1781355831211_3mrjw8",
-      "data": "2026-06-14",
-      "liga": "mls",
-      "jogo": "Huntsville City vs Orlando City II",
-      "mercado": "Over 2.5",
-      "odd": "1.44",
-      "stake": "1",
-      "resultado": "",
-      "notas": "",
-      "status": "pending",
-      "analysisStale": false,
-      "hadAnalysis": true,
-      "botOpinion": "AVOID",
-      "edgeAtAnalysis": -2.405741377161408,
-      "scoreAtAnalysis": 43,
-      "analysisSnapshot": {
-        "ProbModel": 0.6703870306728303,
-        "ProbMarket": 0.6944444444444444,
-        "Edge": -0.024057413771614078,
-        "EdgePercent": -2.405741377161408,
-        "fairOdd": 1.4916756354853038,
-        "KellyTrue": 0,
-        "EV": -0.03464267583112435,
-        "score": 43,
-        "scoreCls": "bad",
-        "opinion": "AVOID",
-        "opinionCls": "bad",
-        "LambdaHome": 1.934822888283379,
-        "LambdaAway": 1.518256130790191,
-        "LambdaTotal": 3.45307901907357,
-        "usedFallback": true,
-        "sampleSize": 0,
-        "dataQuality": "NONE",
-        "timestamp": "2026-06-13T17:36:51.545Z"
-      }
-    },
-    {
       "id": "manual_1781371068576_quctau",
       "data": "2026-06-13",
       "liga": "finlandia",
@@ -2912,7 +2875,7 @@
   "lastUpdated": "2026-06-13T17:36:23.455Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-13",
