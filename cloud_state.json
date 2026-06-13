@@ -2436,7 +2436,8 @@
       "stakeReal": "2"
     },
     "2026-06-14|mls|Atlanta United II vs Chattanooga|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.75"
     },
     "2026-06-17|finlandia|Ilves vs FF Jaro|Over 2.5": {
       "apostada": false
@@ -2889,7 +2890,7 @@
   "lastUpdated": "2026-06-13T16:58:45.918Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-13",
