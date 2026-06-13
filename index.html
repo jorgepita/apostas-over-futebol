@@ -6884,8 +6884,9 @@ button.dirty {
             const game   = `${home} vs ${away}`;
             const matchKey = `${date}_${league}_${home}_${away}`.replace(/\s+/g, '_').toLowerCase();
 
-            const oddO25  = num(f.Odd_Over25)  ?? '';
-            const oddBTTS = num(f.Odd_BTTS_Yes) ?? '';
+            const oddO25      = num(f.Odd_Over25)  ?? '';
+            const oddBTTS     = num(f.Odd_BTTS_Yes) ?? '';
+            const kickoffTime = fmtKickoffTime(f.KickoffUTC || '');
 
             html += `
               <div class="manual-scout-card"
@@ -6903,7 +6904,7 @@ button.dirty {
                     <span class="mini info">${escapeHtml(league)}</span>
                     <strong>${escapeHtml(game)}</strong>
                   </div>
-                  <div class="note">${escapeHtml(date)}</div>
+                  <div class="note">${escapeHtml(date)}<br>Kickoff: ${escapeHtml(kickoffTime)}</div>
                 </div>
 
                 <div class="scout-card-controls">
