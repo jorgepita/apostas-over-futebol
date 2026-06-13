@@ -7387,8 +7387,10 @@ button.dirty {
 
           markDirty();
 
+          saveLocalState();
+
           localStorage.setItem('dashboardState', JSON.stringify(state));
-          
+
           if (rerender) rerenderAll();
         }
 
