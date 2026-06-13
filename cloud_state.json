@@ -2622,9 +2622,9 @@
       "mercado": "Over 2.5",
       "odd": "1.72",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -2649,7 +2649,8 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-10T13:43:21.599Z"
-      }
+      },
+      "settledAt": "2026-06-13T18:28:34.240Z"
     },
     {
       "id": "manual_1781355798502_fbo32w",
@@ -2879,7 +2880,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T18:27:36.912Z",
+  "lastUpdated": "2026-06-13T18:28:36.928Z",
   "activeTab": "tab-live",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
