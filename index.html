@@ -7194,12 +7194,16 @@ button.dirty {
 
               const estadoBadge = `<span class="mini ${statusCls[status] || 'warn'}">${statusLabel[status] || 'Pendente'}</span>`;
 
+              const kickoffUTC  = findFixtureKickoff(b.data, b.liga, b.jogo);
+              const kickoffTime = fmtKickoffTime(kickoffUTC);
+              const dateCell    = `<div>${escapeHtml(b.data || '—')}</div><div class="note">Kickoff: ${escapeHtml(kickoffTime)}</div>`;
+
               if (isEditing) {
                 const es = window._mbEditState;
                 return `
                 <tr data-edit-id="${escapeHtml(b.id)}" style="background:rgba(99,102,241,0.06);">
                   <td><span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span></td>
-                  <td>${escapeHtml(b.data || '—')}</td>
+                  <td>${dateCell}</td>
                   <td>${escapeHtml(b.liga || '—')}</td>
                   <td>${escapeHtml(b.jogo || '—')}</td>
                   <td>${escapeHtml(b.mercado || '—')}</td>
@@ -7242,7 +7246,7 @@ button.dirty {
               return `
               <tr>
                 <td><span class="mini ${b.isRemote ? 'info' : 'warn'}">${b.isRemote ? 'Manual CSV' : 'Manual Local'}</span></td>
-                <td>${escapeHtml(b.data || '—')}</td>
+                <td>${dateCell}</td>
                 <td>${escapeHtml(b.liga || '—')}</td>
                 <td>${escapeHtml(b.jogo || '—')}</td>
                 <td>${escapeHtml(b.mercado || '—')}</td>
