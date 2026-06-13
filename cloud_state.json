@@ -2451,6 +2451,9 @@
     },
     "2026-06-17|finlandia|Gnistan vs Lahti|Over 2.5": {
       "apostada": true
+    },
+    "2026-06-14|mls|Carolina Core vs Crown Legacy|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2906,10 +2909,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T17:20:12.315Z",
+  "lastUpdated": "2026-06-13T17:30:22.242Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-13",
