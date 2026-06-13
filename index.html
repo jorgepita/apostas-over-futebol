@@ -2015,10 +2015,6 @@ button.dirty {
                   <th>Score</th>
                   <th>Sinais</th>
                   <th>Aprovar</th>
-                  <th>Execução</th>
-                  <th>Resultado</th>
-                  <th>Lucro mod.</th>
-                  <th>Lucro real</th>
                 </tr>
               </thead>
               <tbody id="footballRows"></tbody>
@@ -5376,7 +5372,6 @@ button.dirty {
 
       function buildBotRowHtml(rows) {
         return rows.map(r => {
-          const resultadoAtual = ['W', 'L', 'P'].includes(r._resultadoFinal) ? r._resultadoFinal : '';
           const signal = formatPickSignalHtml(r);
 
           return `
@@ -5398,29 +5393,6 @@ button.dirty {
                   ? '<span class="mini good">Aprovada</span>'
                   : `<button class="js-bot-approve" type="button" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:4px 8px;width:auto;font-size:11px;">Aprovar</button>`}
               </td>
-              <td>
-                <div style="display:flex;flex-direction:column;gap:2px;">
-                  <input class="js-odd-real small-input" type="text" inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r.OddReal || '')}"
-                    placeholder="odd" />
-
-                  <input class="js-stake-real small-input" type="text" inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r.StakeReal || '')}"
-                    placeholder="stake" />
-                </div>
-              </td>
-              <td>
-                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="width:auto;">
-                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
-                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
-                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
-                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
-                </select>
-              </td>
-              <td ${profitClass(r._lucroModeloLocal)}>${r._lucroModeloLocal === null ? '—' : `€${fmt(r._lucroModeloLocal)}`}</td>
-              <td ${profitClass(r._lucroRealLocal)}>${r._lucroRealLocal === null ? '—' : `€${fmt(r._lucroRealLocal)}`}</td>
             </tr>
           `;
         }).join('');
@@ -5498,27 +5470,9 @@ button.dirty {
               </div>
               ${oddStakeHtml}
               <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line);">
-                <div style="margin-bottom:6px;">
-                  ${r._apostadaBool
-                    ? '<span class="mini good">Aprovada</span>'
-                    : `<button class="js-bot-approve" type="button" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:5px 10px;width:auto;font-size:12px;">Aprovar</button>`}
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
-                  <input class="js-odd-real small-input" type="text" inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r.OddReal || '')}"
-                    placeholder="odd real" />
-                  <input class="js-stake-real small-input" type="text" inputmode="decimal"
-                    data-pick-key="${escapeHtml(r._pickKey)}"
-                    value="${escapeHtml(r.StakeReal || '')}"
-                    placeholder="stake real" />
-                </div>
-                <select class="js-bot-resultado" data-pick-key="${escapeHtml(r._pickKey)}" style="width:100%;margin-top:6px;">
-                  <option value="" ${!resultadoAtual ? 'selected' : ''}>Pend.</option>
-                  <option value="W" ${resultadoAtual === 'W' ? 'selected' : ''}>W</option>
-                  <option value="L" ${resultadoAtual === 'L' ? 'selected' : ''}>L</option>
-                  <option value="P" ${resultadoAtual === 'P' ? 'selected' : ''}>P</option>
-                </select>
+                ${r._apostadaBool
+                  ? '<span class="mini good">Aprovada</span>'
+                  : `<button class="js-bot-approve" type="button" data-pick-key="${escapeHtml(r._pickKey)}" style="padding:5px 10px;width:auto;font-size:12px;">Aprovar</button>`}
               </div>
             </div>`;
         }).join('');
@@ -5526,7 +5480,7 @@ button.dirty {
 
       function renderFootball() {
         const filters = getDayFilters();
-        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters));
+        const rows = sortBotRowsForDisplay(filterBotRows(getDailyRowsMerged(), filters)).filter(r => !r._apostadaBool);
 
         if (isMobileDashboard()) {
           const wrap  = document.getElementById('footballTableWrap');
@@ -5540,7 +5494,7 @@ button.dirty {
           if (cards) cards.style.display = 'none';
           document.getElementById('footballRows').innerHTML = rows.length
             ? buildBotRowHtml(rows)
-            : '<tr><td colspan="16"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
+            : '<tr><td colspan="10"><div class="note">Nenhuma pick do bot encontrada com os filtros atuais.</div></td></tr>';
         }
       }
 
