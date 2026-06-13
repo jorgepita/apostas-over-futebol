@@ -2546,9 +2546,9 @@
       "mercado": "Over 2.5",
       "odd": "1.96",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -2573,7 +2573,8 @@
         "sampleSize": 3,
         "dataQuality": "LOW",
         "timestamp": "2026-06-10T10:19:49.291Z"
-      }
+      },
+      "settledAt": "2026-06-13T18:28:25.048Z"
     },
     {
       "id": "manual_1781086628048_5sh3xc",
