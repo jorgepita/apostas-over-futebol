@@ -2762,7 +2762,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -2836,7 +2836,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -2906,8 +2906,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T17:18:12.266Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-13T17:19:12.072Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
