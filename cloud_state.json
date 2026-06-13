@@ -2441,7 +2441,7 @@
       "stakeReal": "1"
     },
     "2026-06-17|finlandia|Ilves vs FF Jaro|Over 2.5": {
-      "apostada": false
+      "apostada": true
     },
     "2026-06-17|finlandia|HJK Helsinki vs Inter Turku|Over 2.5": {
       "apostada": true
@@ -2910,9 +2910,9 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-06-13T17:30:22.242Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-13",
