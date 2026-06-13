@@ -2725,7 +2725,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -2799,7 +2799,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -2906,10 +2906,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T17:17:12.079Z",
+  "lastUpdated": "2026-06-13T17:18:12.266Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-13",
