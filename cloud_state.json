@@ -2403,7 +2403,7 @@
       "apostada": true
     },
     "2026-06-14|MLS|Atlanta United II vs Chattanooga|Over 2.5": {
-      "apostada": true
+      "apostada": false
     },
     "2026-06-13|mls|Real Monarchs vs Portland Timbers II|Over 2.5": {
       "apostada": true
@@ -2412,7 +2412,7 @@
       "apostada": false
     },
     "2026-06-17|finlandia|Ilves vs FF Jaro|Over 2.5": {
-      "apostada": false
+      "apostada": true
     }
   },
   "manualBets": [
@@ -2850,10 +2850,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T14:57:23.709Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-13T14:57:38.870Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-13",
