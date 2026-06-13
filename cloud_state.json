@@ -2857,7 +2857,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": false,
       "botOpinion": null,
@@ -2893,7 +2893,7 @@
   "lastUpdated": "2026-06-13T17:37:04.575Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-13",
