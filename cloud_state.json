@@ -2916,6 +2916,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781446617559_i8dlcu",
+      "data": "2026-06-14",
+      "liga": "mls",
+      "jogo": "Philadelphia Union II vs New York City II",
+      "mercado": "Over 2.5",
+      "odd": "1.5",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781446621929_62u6yk",
+      "data": "2026-06-17",
+      "liga": "finlandia",
+      "jogo": "HJK Helsinki vs Inter Turku",
+      "mercado": "Over 2.5",
+      "odd": "1.75",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
