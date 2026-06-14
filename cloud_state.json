@@ -2952,6 +2952,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781446649563_3e6ya7",
+      "data": "2026-06-17",
+      "liga": "finlandia",
+      "jogo": "Ilves vs FF Jaro",
+      "mercado": "Over 2.5",
+      "odd": "1.59",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -2978,7 +2996,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-14T14:16:17.572Z",
+  "lastUpdated": "2026-06-14T14:17:16.724Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
