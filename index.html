@@ -1682,6 +1682,28 @@ button.dirty {
     grid-template-columns: 1fr 1fr;
   }
 }
+  #save-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--ok-border);
+    color: var(--ok);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  #save-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
   </style>
 </head>
 <body>
@@ -3170,6 +3192,7 @@ button.dirty {
       let initialLoadDone = false;
       let _autoSaveTimer = null;     // Phase 26.1  — debounce handle for auto cloud save
       let _dirtyGeneration = 0;      // Phase 26.1.1 — increments on every markDirty; detects mid-save changes
+      let _saveToastTimer = null;    // Phase 26.9.2 — debounce handle for save confirmation toast
 
       const state = {
         footballDaily: [],
@@ -7424,20 +7447,18 @@ button.dirty {
         document.querySelectorAll('.js-odd-real').forEach(el => {
           el.oninput = e => {
             const key = e.target.dataset.pickKey;
-
-            update(key, {
-              oddReal: e.target.value
-            });
+            update(key, { oddReal: e.target.value });
+            clearTimeout(_saveToastTimer);
+            _saveToastTimer = setTimeout(showSaveToast, 800);
           };
         });
 
         document.querySelectorAll('.js-stake-real').forEach(el => {
           el.oninput = e => {
             const key = e.target.dataset.pickKey;
-
-            update(key, {
-              stakeReal: e.target.value
-            });
+            update(key, { stakeReal: e.target.value });
+            clearTimeout(_saveToastTimer);
+            _saveToastTimer = setTimeout(showSaveToast, 800);
           };
         });
 
@@ -7925,6 +7946,19 @@ button.dirty {
             saveCloudState();
           }
         }, 4000);
+      }
+
+      function showSaveToast() {
+        let toast = document.getElementById('save-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'save-toast';
+          document.body.appendChild(toast);
+        }
+        toast.textContent = '✓ Alteração gravada';
+        toast.classList.add('visible');
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), 2000);
       }
 
       function updateLocalEdit(key, changes) {
