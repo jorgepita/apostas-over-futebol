@@ -2436,7 +2436,9 @@
       "stakeReal": "1"
     },
     "2026-06-14|mls|Carolina Core vs Crown Legacy|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "resultadoManual": "L",
+      "settledAt": "2026-06-14T14:23:09.290Z"
     }
   },
   "manualBets": [
@@ -2790,9 +2792,9 @@
       "mercado": "Over 2.5",
       "odd": "1.51",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -2817,7 +2819,8 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-13T13:04:02.654Z"
-      }
+      },
+      "settledAt": "2026-06-14T14:23:05.988Z"
     },
     {
       "id": "manual_1781371068576_quctau",
