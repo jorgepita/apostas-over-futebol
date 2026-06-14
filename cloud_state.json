@@ -2712,9 +2712,9 @@
       "mercado": "Over 2.5",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -2739,7 +2739,8 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-13T17:42:18.479Z"
-      }
+      },
+      "settledAt": "2026-06-14T14:22:24.675Z"
     },
     {
       "id": "manual_1781355823697_wn3x0z",
@@ -3118,10 +3119,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-14T14:19:50.782Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-14T14:21:51.712Z",
+  "activeTab": "tab-live",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-14",
