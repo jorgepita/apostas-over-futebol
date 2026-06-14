@@ -2422,8 +2422,8 @@
     },
     "2026-06-17|finlandia|HJK Helsinki vs Inter Turku|Over 2.5": {
       "apostada": true,
-      "oddReal": "1.75",
-      "stakeReal": "1"
+      "oddReal": "1.8",
+      "stakeReal": "1.5"
     },
     "2026-06-17|finlandia|Turku PS vs KuPS|Over 2.5": {
       "apostada": true,
@@ -3125,7 +3125,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-14T14:32:08.577Z",
+  "lastUpdated": "2026-06-14T14:32:42.921Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": false,
