@@ -2880,6 +2880,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781446609601_wgr5n3",
+      "data": "2026-06-17",
+      "liga": "finlandia",
+      "jogo": "Gnistan vs Lahti",
+      "mercado": "Over 2.5",
+      "odd": "1.86",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1781446612711_y696n1",
+      "data": "2026-06-17",
+      "liga": "finlandia",
+      "jogo": "Turku PS vs KuPS",
+      "mercado": "Over 2.5",
+      "odd": "1.8",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -2909,7 +2945,7 @@
   "lastUpdated": "2026-06-14T14:16:17.572Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-14",
