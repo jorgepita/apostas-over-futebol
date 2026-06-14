@@ -2862,6 +2862,24 @@
         "dataQuality": "NONE",
         "timestamp": "2026-06-13T17:41:07.086Z"
       }
+    },
+    {
+      "id": "manual_1781446601529_5qgemi",
+      "data": "2026-06-14",
+      "liga": "mls",
+      "jogo": "New England II vs New York RB II",
+      "mercado": "Over 2.5",
+      "odd": "1.5",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -2888,53 +2906,35 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-13T23:15:41.484Z",
-  "activeTab": "tab-live",
+  "lastUpdated": "2026-06-14T14:16:17.572Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": false,
   "fixtures": [
     {
-      "Date": "2026-06-13",
+      "Date": "2026-06-14",
       "League": "mls",
-      "HomeTeam": "Real Monarchs",
-      "AwayTeam": "Portland Timbers II",
-      "Odd_Over25": "1.60",
-      "Odd_BTTS_Yes": "1.50",
-      "KickoffUTC": "2026-06-13T22:30:00+01:00"
+      "HomeTeam": "New England II",
+      "AwayTeam": "New York RB II",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.46",
+      "KickoffUTC": "2026-06-14T20:00:00+01:00"
     },
     {
       "Date": "2026-06-14",
       "League": "mls",
-      "HomeTeam": "Atlanta United II",
-      "AwayTeam": "Chattanooga",
-      "Odd_Over25": "1.60",
-      "Odd_BTTS_Yes": "1.54",
-      "KickoffUTC": "2026-06-14T00:00:00+01:00"
-    },
-    {
-      "Date": "2026-06-14",
-      "League": "mls",
-      "HomeTeam": "Carolina Core",
-      "AwayTeam": "Crown Legacy",
-      "Odd_Over25": "1.55",
-      "Odd_BTTS_Yes": "1.59",
-      "KickoffUTC": "2026-06-14T01:00:00+01:00"
-    },
-    {
-      "Date": "2026-06-14",
-      "League": "mls",
-      "HomeTeam": "Huntsville City",
-      "AwayTeam": "Orlando City II",
-      "Odd_Over25": "1.44",
-      "Odd_BTTS_Yes": "1.41",
-      "KickoffUTC": "2026-06-14T01:00:00+01:00"
+      "HomeTeam": "Philadelphia Union II",
+      "AwayTeam": "New York City II",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.44",
+      "KickoffUTC": "2026-06-14T20:00:00+01:00"
     },
     {
       "Date": "2026-06-14",
       "League": "mls",
       "HomeTeam": "Ventura County",
       "AwayTeam": "Colorado Rapids II",
-      "Odd_Over25": "1.50",
+      "Odd_Over25": "1.45",
       "Odd_BTTS_Yes": "1.51",
       "KickoffUTC": "2026-06-14T03:00:00+01:00"
     },
