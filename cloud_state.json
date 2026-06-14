@@ -2414,16 +2414,24 @@
       "stakeReal": "1"
     },
     "2026-06-17|finlandia|Ilves vs FF Jaro|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.59",
+      "stakeReal": "1"
     },
     "2026-06-17|finlandia|HJK Helsinki vs Inter Turku|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.75",
+      "stakeReal": "1"
     },
     "2026-06-17|finlandia|Turku PS vs KuPS|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.8",
+      "stakeReal": "1"
     },
     "2026-06-17|finlandia|Gnistan vs Lahti|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.86",
+      "stakeReal": "1"
     },
     "2026-06-14|mls|Carolina Core vs Crown Legacy|Over 2.5": {
       "apostada": true
@@ -3110,10 +3118,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-14T14:18:16.703Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-06-14T14:19:50.782Z",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-14",
