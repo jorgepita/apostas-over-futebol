@@ -1,1 +1,5 @@
-
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-06-20;mls;MLS;Minnesota United II;St. Louis City II;1.935;1.518;3.453;2026-06-20T21:00:00+01:00;O2.5;0.67;1.58;0.633;0.0375;0.1021;True;;0.0075;0.0075;0.03700000000000003;0.0069;0.0069;0.34;1.0;50.0
+2026-06-21;mls;MLS;Colorado Rapids II;Portland Timbers II;1.935;1.518;3.453;2026-06-21T01:00:00+01:00;O2.5;0.67;1.58;0.633;0.0375;0.1021;True;;0.0075;0.0075;0.03700000000000003;0.0069;0.0069;0.34;1.0;50.0
+2026-06-21;mls;MLS;New England II;Chicago Fire II;1.935;1.518;3.453;2026-06-21T16:00:00+01:00;O2.5;0.67;1.58;0.633;0.0375;0.1021;True;;0.0075;0.0075;0.03700000000000003;0.0069;0.0069;0.34;1.0;50.0
+2026-06-21;mls;MLS;Huntsville City;Crown Legacy;1.935;1.518;3.453;2026-06-21T01:00:00+01:00;O2.5;0.67;1.55;0.645;0.0252;0.0711;True;;0.0075;0.0075;0.025000000000000022;0.0032;0.0032;0.16;1.0;50.0
