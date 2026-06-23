@@ -3402,6 +3402,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782231502909_lkl5s6",
+      "data": "2026-06-23",
+      "liga": "finlandia",
+      "jogo": "Lahti vs Turku PS",
+      "mercado": "Over 2.5",
+      "odd": "1.97",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
