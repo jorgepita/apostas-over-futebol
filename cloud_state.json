@@ -3384,6 +3384,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782231493275_75pam4",
+      "data": "2026-06-23",
+      "liga": "finlandia",
+      "jogo": "KuPS vs Ilves",
+      "mercado": "Over 2.5",
+      "odd": "1.75",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -3410,7 +3428,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-23T16:17:08.596Z",
+  "lastUpdated": "2026-06-23T16:18:09.738Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
