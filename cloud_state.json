@@ -3407,6 +3407,24 @@
         "dataQuality": "HIGH",
         "timestamp": "2026-06-23T16:17:26.059Z"
       }
+    },
+    {
+      "id": "manual_1782231466013_qg0tll",
+      "data": "2026-06-23",
+      "liga": "finlandia",
+      "jogo": "Inter Turku vs SJK",
+      "mercado": "Over 2.5",
+      "odd": "1.68",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
