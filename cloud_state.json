@@ -2665,6 +2665,15 @@
     },
     "2026-06-23|finlandia|Inter Turku vs SJK|Over 2.5": {
       "apostada": true
+    },
+    "2026-06-27|finlandia|AC Oulu vs Lahti|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-27|finlandia|HJK Helsinki vs KuPS|Over 2.5": {
+      "apostada": true
+    },
+    "2026-06-27|finlandia|Turku PS vs FF Jaro|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -3465,8 +3474,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-23T16:18:09.738Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-23T16:20:09.734Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
