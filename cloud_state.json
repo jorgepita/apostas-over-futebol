@@ -3539,6 +3539,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432314517_mgoo1q",
+      "data": "2026-06-28",
+      "liga": "mls",
+      "jogo": "Atlanta United II vs Crown Legacy",
+      "mercado": "Over 2.5",
+      "odd": "1.4",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432318873_57tpt6",
+      "data": "2026-06-28",
+      "liga": "mls",
+      "jogo": "Chattanooga vs Chicago Fire II",
+      "mercado": "Over 2.5",
+      "odd": "1.53",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
