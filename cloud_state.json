@@ -2674,7 +2674,8 @@
       "apostada": true
     },
     "2026-06-27|finlandia|Turku PS vs FF Jaro|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1"
     }
   },
   "manualBets": [
@@ -3734,7 +3735,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-26T00:05:29.105Z",
+  "lastUpdated": "2026-06-26T00:06:29.203Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
