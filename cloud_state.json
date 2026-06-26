@@ -3503,6 +3503,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432305979_lbd0bn",
+      "data": "2026-06-27",
+      "liga": "finlandia",
+      "jogo": "Turku PS vs FF Jaro",
+      "mercado": "Over 2.5",
+      "odd": "1.86",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432309199_fbrl1e",
+      "data": "2026-06-27",
+      "liga": "mls",
+      "jogo": "Portland Timbers II vs The Town",
+      "mercado": "Over 2.5",
+      "odd": "1.58",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
