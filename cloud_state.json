@@ -2684,6 +2684,9 @@
     },
     "2026-06-27|mls|Portland Timbers II vs The Town|Over 2.5": {
       "apostada": true
+    },
+    "2026-06-27|finlandia|Ilves vs SJK|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -3744,7 +3747,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-06-26T17:16:17.335Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
