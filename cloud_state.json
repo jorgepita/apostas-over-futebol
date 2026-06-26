@@ -2671,11 +2671,14 @@
       "apostada": true
     },
     "2026-06-27|finlandia|HJK Helsinki vs KuPS|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1",
+      "stakeReal": "1.73"
     },
     "2026-06-27|finlandia|Turku PS vs FF Jaro|Over 2.5": {
       "apostada": true,
-      "oddReal": "1"
+      "oddReal": "1",
+      "stakeReal": "1.86"
     }
   },
   "manualBets": [
