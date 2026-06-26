@@ -3675,7 +3675,7 @@
         "usedFallback": true,
         "sampleSize": 0,
         "dataQuality": "NONE",
-        "timestamp": "2026-06-26T00:05:47.102Z"
+        "timestamp": "2026-06-26T17:15:33.235Z"
       }
     },
     {
@@ -3740,10 +3740,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-26T00:06:29.203Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-06-26T17:15:16.488Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-06-27",
