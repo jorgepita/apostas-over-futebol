@@ -2681,6 +2681,9 @@
       "apostada": true,
       "oddReal": "1",
       "stakeReal": "1.86"
+    },
+    "2026-06-27|mls|Portland Timbers II vs The Town|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -3740,10 +3743,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-26T17:15:16.488Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-06-26T17:16:17.335Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-27",
