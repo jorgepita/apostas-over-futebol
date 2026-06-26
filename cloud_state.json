@@ -3467,6 +3467,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432296725_cax7ub",
+      "data": "2026-06-27",
+      "liga": "finlandia",
+      "jogo": "HJK Helsinki vs KuPS",
+      "mercado": "Over 2.5",
+      "odd": "1.73",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782432299897_oqep9m",
+      "data": "2026-06-27",
+      "liga": "finlandia",
+      "jogo": "Ilves vs SJK",
+      "mercado": "Over 2.5",
+      "odd": "1.58",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -3496,7 +3532,7 @@
   "lastUpdated": "2026-06-26T00:04:28.216Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-27",
