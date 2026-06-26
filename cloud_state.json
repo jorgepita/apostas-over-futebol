@@ -2668,7 +2668,9 @@
       "apostada": true
     },
     "2026-06-27|finlandia|AC Oulu vs Lahti|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "oddReal": "1.01",
+      "stakeReal": "1.89"
     },
     "2026-06-27|finlandia|HJK Helsinki vs KuPS|Over 2.5": {
       "apostada": true,
