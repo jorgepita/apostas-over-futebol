@@ -181,6 +181,66 @@ app.get('/load', async (req, res) => {
 });
 
 /* =========================
+   RUN SETTLEMENT ENDPOINT
+========================= */
+app.post('/run-settlement', async (req, res) => {
+  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  const REPO         = process.env.GITHUB_REPO;    // expected: "jorgepita/apostas-over-futebol"
+
+  // Diagnose missing env vars before touching GitHub
+  const missing = [
+    ...(!GITHUB_TOKEN ? ['GITHUB_TOKEN'] : []),
+    ...(!REPO         ? ['GITHUB_REPO']  : []),
+  ];
+  if (missing.length) {
+    return res.status(500).json({ ok: false, step: 'environment', missing });
+  }
+
+  const dispatchUrl =
+    `https://api.github.com/repos/${REPO}/actions/workflows/bot.yml/dispatches`;
+
+  console.log('[settlement] dispatching to', dispatchUrl);
+
+  try {
+    const ghRes = await fetch(dispatchUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GITHUB_TOKEN}`,
+        Accept:        'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main', inputs: { job: 'settlement' } }),
+    });
+
+    // 204 No Content is the success response for workflow_dispatch
+    if (ghRes.status === 204 || ghRes.status === 200) {
+      console.log('[settlement] workflow dispatch accepted');
+      return res.json({ ok: true, triggered: true });
+    }
+
+    let github = {};
+    try { github = await ghRes.json(); } catch (_) {}
+
+    console.error('[settlement] GitHub error', ghRes.status, github);
+
+    return res.status(502).json({
+      ok:      false,
+      step:    'github_dispatch',
+      status:  ghRes.status,
+      message: github.message || 'GitHub API error',
+      github,
+    });
+  } catch (err) {
+    console.error('[settlement] network error', err);
+    return res.status(500).json({
+      ok:      false,
+      step:    'network',
+      message: err.message,
+    });
+  }
+});
+
+/* =========================
    GLOBAL ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {

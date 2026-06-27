@@ -11877,10 +11877,17 @@ button.dirty {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
           });
-          const data = res.headers.get('content-type')?.includes('json') ? await res.json() : {};
+          let data = {};
+          try {
+            if (res.headers.get('content-type')?.includes('json')) data = await res.json();
+          } catch (_) {}
 
           if (!res.ok || !data.ok) {
-            throw new Error(data.error || `HTTP ${res.status}`);
+            // Surface the server-side step + message so the cause is visible
+            const step = data.step ? `[${data.step}] ` : '';
+            const msg  = data.message || data.error || `HTTP ${res.status}`;
+            console.error('[Settlement] server error:', data);
+            throw new Error(`${step}${msg}`);
           }
 
           // Settlement workflow triggered — poll for CSV changes (max 3 min)
@@ -11899,16 +11906,20 @@ button.dirty {
           _settlementMessage = changed ? '✓ Settlement completed' : 'No matches to settle.';
         } catch (err) {
           console.error('[Settlement] error:', err);
-          _settlementMessage = 'Settlement failed.';
+          const truncated = err.message?.length > 90
+            ? err.message.slice(0, 87) + '...'
+            : (err.message || 'Unknown error');
+          _settlementMessage = `Settlement failed: ${truncated}`;
         }
 
         _settlementRunning = false;
         _updateSettlementButton();
 
+        const clearDelay = _settlementMessage.startsWith('Settlement failed') ? 8000 : 3000;
         setTimeout(() => {
           _settlementMessage = '';
           _updateSettlementButton();
-        }, 3000);
+        }, clearDelay);
       }
 
       // ── End Phase 26.11 ──────────────────────────────────────────────
