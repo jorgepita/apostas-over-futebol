@@ -3193,6 +3193,8 @@ button.dirty {
       let _autoSaveTimer = null;     // Phase 26.1  — debounce handle for auto cloud save
       let _dirtyGeneration = 0;      // Phase 26.1.1 — increments on every markDirty; detects mid-save changes
       let _saveToastTimer = null;    // Phase 26.9.2 — debounce handle for save confirmation toast
+      let _settlementRunning = false; // Phase 26.11 — manual settlement button state
+      let _settlementMessage = '';    // Phase 26.11 — current status text for settlement button
 
       const state = {
         footballDaily: [],
@@ -11822,6 +11824,95 @@ button.dirty {
 
       // ── PHASE 20: LIVE CENTER ─────────────────────────────────────────
 
+      // ── Phase 26.11: Manual Settlement Trigger ────────────────────────
+
+      function _updateSettlementButton() {
+        const btn    = document.getElementById('runSettlementBtn');
+        const status = document.getElementById('settlementStatus');
+
+        if (btn) {
+          btn.disabled = _settlementRunning;
+          btn.textContent = _settlementRunning ? 'Running settlement...' : 'Run Settlement';
+          btn.style.opacity = _settlementRunning ? '0.65' : '1';
+          btn.style.cursor  = _settlementRunning ? 'not-allowed' : 'pointer';
+        }
+
+        if (status) {
+          if (_settlementMessage) {
+            const isError   = _settlementMessage.includes('failed');
+            const isSuccess = _settlementMessage.startsWith('✓');
+            status.style.display = 'block';
+            status.textContent   = _settlementMessage;
+            if (isError) {
+              status.style.background = 'var(--bad-bg)';
+              status.style.color      = 'var(--bad)';
+              status.style.border     = '1px solid var(--bad-border, rgba(239,68,68,0.3))';
+            } else if (isSuccess) {
+              status.style.background = 'var(--ok-bg)';
+              status.style.color      = 'var(--ok)';
+              status.style.border     = '1px solid var(--ok-border)';
+            } else {
+              status.style.background = 'var(--warn-bg)';
+              status.style.color      = 'var(--warn)';
+              status.style.border     = '1px solid var(--warn-border)';
+            }
+          } else {
+            status.style.display = 'none';
+          }
+        }
+      }
+
+      async function runSettlement() {
+        if (_settlementRunning) return;
+
+        _settlementRunning = true;
+        _settlementMessage = '';
+        _updateSettlementButton();
+
+        const countSettled = (rows) =>
+          rows.filter(r => ['W','L','P'].includes(String(r['Resultado'] || '').toUpperCase())).length;
+
+        try {
+          const res  = await fetch(`${API_URL}/run-settlement`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const data = res.headers.get('content-type')?.includes('json') ? await res.json() : {};
+
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || `HTTP ${res.status}`);
+          }
+
+          // Settlement workflow triggered — poll for CSV changes (max 3 min)
+          const settledBefore = countSettled(state.footballHistory);
+          let changed = false;
+
+          for (let i = 0; i < 12; i++) {
+            await new Promise(r => setTimeout(r, 15000));
+            await loadData(true);
+            if (countSettled(state.footballHistory) > settledBefore) {
+              changed = true;
+              break;
+            }
+          }
+
+          _settlementMessage = changed ? '✓ Settlement completed' : 'No matches to settle.';
+        } catch (err) {
+          console.error('[Settlement] error:', err);
+          _settlementMessage = 'Settlement failed.';
+        }
+
+        _settlementRunning = false;
+        _updateSettlementButton();
+
+        setTimeout(() => {
+          _settlementMessage = '';
+          _updateSettlementButton();
+        }, 3000);
+      }
+
+      // ── End Phase 26.11 ──────────────────────────────────────────────
+
       function getLiveRows() {
         const today = todayIso();
 
@@ -11939,12 +12030,20 @@ button.dirty {
         const summaryCard = document.getElementById('liveSummaryCard');
         if (summaryCard) {
           summaryCard.innerHTML = `
-            <div class="label" style="margin-bottom:10px;">Live Summary</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+              <div class="label">Live Summary</div>
+              <button id="runSettlementBtn" type="button" onclick="runSettlement()"
+                style="padding:7px 16px;font-size:12px;font-weight:700;width:auto;background:var(--accent);color:white;border:1px solid var(--accent);border-radius:8px;cursor:pointer;transition:opacity 0.15s;">
+                Run Settlement
+              </button>
+            </div>
             <div style="display:flex;gap:24px;flex-wrap:wrap;">
               <div><span class="note">Bot Bets:</span>&nbsp;<strong>${botCount}</strong></div>
               <div><span class="note">Manual Bets:</span>&nbsp;<strong>${manCount}</strong></div>
               <div><span class="note">Live Stake:</span>&nbsp;<strong>€${fmt(stakeSum)}</strong></div>
-            </div>`;
+            </div>
+            <div id="settlementStatus" style="display:none;font-size:12px;font-weight:700;margin-top:8px;padding:5px 10px;border-radius:6px;"></div>`;
+          _updateSettlementButton();
         }
 
         if (isMobileDashboard()) {

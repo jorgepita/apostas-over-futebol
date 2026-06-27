@@ -257,7 +257,7 @@ def root():
     return jsonify({
         "ok": True,
         "service": "apostas-dashboard-sync",
-        "endpoints": ["/health", "/state"],
+        "endpoints": ["/health", "/state", "/run-settlement"],
         "repo": f"{GITHUB_OWNER}/{GITHUB_REPO}",
         "branch": GITHUB_BRANCH,
     })
@@ -295,6 +295,30 @@ def get_state():
 
     except Exception as e:
         print("GET /state error:", e, flush=True)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.post("/run-settlement")
+def run_settlement():
+    try:
+        url = (
+            f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
+            f"/actions/workflows/bot.yml/dispatches"
+        )
+        resp = github_request("POST", url, json={
+            "ref": GITHUB_BRANCH,
+            "inputs": {"job": "settlement"},
+        })
+        if resp.status_code not in (200, 204):
+            body = ""
+            try:
+                body = resp.json().get("message", "")
+            except Exception:
+                pass
+            return jsonify({"ok": False, "error": f"GitHub API {resp.status_code}: {body}"}), 502
+        return jsonify({"ok": True, "triggered": True})
+    except Exception as e:
+        print("POST /run-settlement error:", e, flush=True)
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
