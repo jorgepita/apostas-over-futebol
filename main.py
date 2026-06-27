@@ -14,6 +14,7 @@ from src.state import (
     pick_id,
 )
 from src.config import (
+    DEFAULT_BTTS_PROBABILITY_ADJUSTMENT,
     DEFAULT_CAP_FRAC,
     DEFAULT_DAILY_CAP_FRAC,
     DEFAULT_KELLY_FRACTION,
@@ -67,6 +68,109 @@ NON_EU_TOPUP_LEAGUES = frozenset({
     "mls", "brasil", "japao", "coreia",
     "noruega", "suecia", "finlandia", "australia", "islandia",
 })
+
+
+# =============================
+# BTTS Calibration Diagnostics
+# =============================
+
+def _write_btts_diagnostics(rows_btts: list, base_dir: Path) -> None:
+    """Write btts_diagnostics.csv after apply_market_rules() has enriched rows_btts in-place."""
+    if not rows_btts:
+        print("[BTTS DIAG] sem candidatos BTTS — diagnóstico não escrito")
+        return
+
+    import csv
+    out_path = base_dir / "btts_diagnostics.csv"
+    fieldnames = [
+        "Date", "League", "HomeTeam", "AwayTeam", "Odd",
+        "LambdaHome", "LambdaAway", "LamRatio", "LamGap", "LamProduct",
+        "RawPoisson", "BaseAdjFactor", "AfterBaseAdj",
+        "PenRatio", "PenGap", "PenSmaller", "PenProduct", "TotalPenalty",
+        "ProbUnclamped", "ProbClamped", "ProbClampDelta",
+        "MarketProb", "EdgeBeforeClamp", "EdgeFinal", "EdgeClampDelta",
+        "PassedQualityFilter", "QualityRejectReason",
+    ]
+    with open(out_path, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        for r in rows_btts:
+            writer.writerow({
+                "Date": r.get("Date", ""),
+                "League": r.get("League", ""),
+                "HomeTeam": r.get("HomeTeam", ""),
+                "AwayTeam": r.get("AwayTeam", ""),
+                "Odd": r.get("Odd", ""),
+                "LambdaHome": r.get("LambdaHome", ""),
+                "LambdaAway": r.get("LambdaAway", ""),
+                "LamRatio": r.get("_diag_raw_poisson", "") and r.get("LambdaHome", 0) and r.get("LambdaAway", 0) and (
+                    round(max(float(r.get("LambdaHome", 0)), float(r.get("LambdaAway", 0))) /
+                          min(float(r.get("LambdaHome", 1)), float(r.get("LambdaAway", 1))), 4)
+                    if min(float(r.get("LambdaHome", 1) or 1), float(r.get("LambdaAway", 1) or 1)) > 0 else 99.0
+                ),
+                "LamGap": round(abs(float(r.get("LambdaHome", 0) or 0) - float(r.get("LambdaAway", 0) or 0)), 4),
+                "LamProduct": round(float(r.get("LambdaHome", 0) or 0) * float(r.get("LambdaAway", 0) or 0), 4),
+                "RawPoisson": r.get("_diag_raw_poisson", ""),
+                "BaseAdjFactor": r.get("_diag_base_adj_factor", ""),
+                "AfterBaseAdj": r.get("_diag_after_base_adj", ""),
+                "PenRatio": r.get("_diag_pen_ratio", ""),
+                "PenGap": r.get("_diag_pen_gap", ""),
+                "PenSmaller": r.get("_diag_pen_smaller", ""),
+                "PenProduct": r.get("_diag_pen_product", ""),
+                "TotalPenalty": r.get("_diag_total_penalty", ""),
+                "ProbUnclamped": r.get("_diag_prob_unclamped", ""),
+                "ProbClamped": r.get("_diag_prob_clamped", ""),
+                "ProbClampDelta": r.get("_diag_prob_clamp_delta", ""),
+                "MarketProb": r.get("_diag_market_prob", ""),
+                "EdgeBeforeClamp": r.get("_diag_edge_before_clamp", ""),
+                "EdgeFinal": r.get("_diag_edge_final", ""),
+                "EdgeClampDelta": r.get("_diag_edge_clamp_delta", ""),
+                "PassedQualityFilter": r.get("PassedQualityFilter", ""),
+                "QualityRejectReason": r.get("QualityRejectReason", ""),
+            })
+    print(f"[BTTS DIAG] {len(rows_btts)} candidatos escritos em {out_path.name}")
+
+
+def _print_btts_summary(rows_btts: list) -> None:
+    """Print BTTS pipeline summary after apply_market_rules() has enriched rows_btts in-place."""
+    if not rows_btts:
+        print("[BTTS SUMMARY] nenhum candidato gerado")
+        return
+
+    from collections import Counter
+    total = len(rows_btts)
+    passed = sum(1 for r in rows_btts if r.get("PassedQualityFilter"))
+    reject_counts = Counter(
+        r.get("QualityRejectReason", "")
+        for r in rows_btts
+        if not r.get("PassedQualityFilter")
+    )
+
+    prob_clamped = sum(
+        1 for r in rows_btts
+        if abs(float(r.get("_diag_prob_clamp_delta", 0) or 0)) > 1e-8
+    )
+    edge_clamped = sum(
+        1 for r in rows_btts
+        if abs(float(r.get("_diag_edge_clamp_delta", 0) or 0)) > 1e-8
+    )
+
+    raw_edges = [float(r["_diag_edge_before_clamp"]) for r in rows_btts if "_diag_edge_before_clamp" in r]
+    final_edges = [float(r["_diag_edge_final"]) for r in rows_btts if "_diag_edge_final" in r]
+    avg_raw_edge = sum(raw_edges) / len(raw_edges) if raw_edges else 0.0
+    avg_final_edge = sum(final_edges) / len(final_edges) if final_edges else 0.0
+
+    print("[BTTS SUMMARY] ─────────────────────────────────────────")
+    print(f"[BTTS SUMMARY] candidates generated  : {total}")
+    print(f"[BTTS SUMMARY] passed quality        : {passed}")
+    for reason, count in sorted(reject_counts.items(), key=lambda x: -x[1]):
+        if reason:
+            print(f"[BTTS SUMMARY] rejected by {reason:<20}: {count}")
+    print(f"[BTTS SUMMARY] prob clamp fired      : {prob_clamped}")
+    print(f"[BTTS SUMMARY] edge clamp fired      : {edge_clamped}")
+    print(f"[BTTS SUMMARY] avg raw edge          : {avg_raw_edge:+.4f} ({avg_raw_edge*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg final edge        : {avg_final_edge:+.4f} ({avg_final_edge*100:+.2f}%)")
+    print("[BTTS SUMMARY] ─────────────────────────────────────────")
 
 
 # =============================
@@ -142,6 +246,13 @@ def main(topup_mode: bool = False):
     rows25 = []
     rows_btts = []
 
+    btts_adj = float(
+        cfg.get("calibration", {}).get(
+            "btts_probability_adjustment", DEFAULT_BTTS_PROBABILITY_ADJUSTMENT
+        )
+    )
+    print(f"[DBG] btts_probability_adjustment = {btts_adj}")
+
     history_settings = build_history_settings(cfg)
     history_cfg = history_settings["history_cfg"]
     window = history_settings["window"]
@@ -173,6 +284,7 @@ def main(topup_mode: bool = False):
             min_games_home=min_games_home,
             min_games_away=min_games_away,
             data_raw_dir=BASE / "data_raw",
+            btts_adj=btts_adj,
         )
         rows25.extend(rows_for_league25)
         rows_btts.extend(rows_for_league_btts)
@@ -190,6 +302,12 @@ def main(topup_mode: bool = False):
 
     out25 = apply_market_rules(rows25, bankroll25, rules25, "O2.5", mode=run_mode)
     out_btts = apply_market_rules(rows_btts, bankroll_btts, rules_btts, "BTTS", mode=run_mode)
+
+    # rows_btts dicts have been enriched in-place by apply_market_rules() with
+    # PassedQualityFilter, QualityRejectReason, PassedOddsFilter, PassedEdgeFilter.
+    # _diag_* fields added by generate_btts_pick() are still present.
+    _print_btts_summary(rows_btts)
+    _write_btts_diagnostics(rows_btts, BASE)
 
     # ── Stage-trace helper ───────────────────────────────────────────────────
     def _trace(label: str, df: pd.DataFrame) -> None:

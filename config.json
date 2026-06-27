@@ -113,6 +113,9 @@
       }
     }
   },
+  "calibration": {
+    "btts_probability_adjustment": 0.885
+  },
   "the_odds_api": {
     "regions": "eu",
     "markets": "totals",

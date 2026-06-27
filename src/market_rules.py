@@ -354,6 +354,13 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
 
     print(f"[DBG] {label}: após dedupe = {len(df)}")
 
+    # Strip internal calibration diagnostic columns — they are read from the
+    # original rows list in main.py after this call returns; they must not
+    # propagate into picks_hoje_github.csv or any other output file.
+    _diag_cols = [c for c in df.columns if c.startswith("_diag_")]
+    if _diag_cols:
+        df = df.drop(columns=_diag_cols)
+
     # After dedupe, mark FinalSelected for debug rows and write debug CSV
     try:
         selected_keys = set()

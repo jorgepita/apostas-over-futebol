@@ -5,6 +5,7 @@ from src.calculations import (
     compute_lambdas,
     prob_over25,
     prob_btts_yes_adjusted,
+    btts_prob_diagnostics,
     kelly_fraction,
     clamp_prob_o25,
     clamp_prob_btts,
@@ -51,17 +52,19 @@ def generate_over25_pick(base_row: dict, fx: pd.Series) -> dict | None:
     }
 
 
-def generate_btts_pick(base_row: dict, fx: pd.Series) -> dict | None:
+def generate_btts_pick(base_row: dict, fx: pd.Series, btts_adj: float = 0.885) -> dict | None:
     odd_btts = get_btts_odd(fx)
     if odd_btts <= 1.01:
         return None
 
     lam_h = float(base_row.get("LambdaHome", 0.0) or 0.0)
     lam_a = float(base_row.get("LambdaAway", 0.0) or 0.0)
-    pbtts_raw = prob_btts_yes_adjusted(lam_h, lam_a)
-    pbtts = clamp_prob_btts(pbtts_raw)
+    diag = btts_prob_diagnostics(lam_h, lam_a, adj=btts_adj)
+    pbtts_unclamped = diag["final_prob_unclamped"]
+    pbtts = clamp_prob_btts(pbtts_unclamped)
     pmbtts = 1.0 / odd_btts
-    edgebtts = clamp_edge_btts(pbtts - pmbtts)
+    edge_before_clamp = pbtts - pmbtts
+    edgebtts = clamp_edge_btts(edge_before_clamp)
     kbtts = kelly_fraction(pbtts, odd_btts)
 
     return {
@@ -72,6 +75,22 @@ def generate_btts_pick(base_row: dict, fx: pd.Series) -> dict | None:
         "ProbMarket": pmbtts,
         "Edge": edgebtts,
         "KellyTrue": kbtts,
+        # Calibration diagnostics — written to btts_diagnostics.csv, stripped before output CSVs
+        "_diag_raw_poisson": diag["raw_poisson"],
+        "_diag_base_adj_factor": diag["base_adj_factor"],
+        "_diag_after_base_adj": diag["after_base_adj"],
+        "_diag_pen_ratio": diag["pen_ratio"],
+        "_diag_pen_gap": diag["pen_gap"],
+        "_diag_pen_smaller": diag["pen_smaller"],
+        "_diag_pen_product": diag["pen_product"],
+        "_diag_total_penalty": diag["total_penalty"],
+        "_diag_prob_unclamped": pbtts_unclamped,
+        "_diag_prob_clamped": round(pbtts, 6),
+        "_diag_prob_clamp_delta": round(pbtts - pbtts_unclamped, 6),
+        "_diag_market_prob": round(pmbtts, 6),
+        "_diag_edge_before_clamp": round(edge_before_clamp, 6),
+        "_diag_edge_final": round(edgebtts, 6),
+        "_diag_edge_clamp_delta": round(edgebtts - edge_before_clamp, 6),
     }
 
 
@@ -85,6 +104,7 @@ def process_league_fixtures(
     min_games_home: int,
     min_games_away: int,
     data_raw_dir: Path,
+    btts_adj: float = 0.885,
 ) -> tuple[list[dict], list[dict], int]:
     rows25: list[dict] = []
     rows_btts: list[dict] = []
@@ -171,7 +191,7 @@ def process_league_fixtures(
             if p25_row is not None:
                 rows25.append(p25_row)
 
-            pbtts_row = generate_btts_pick(base_row, fx)
+            pbtts_row = generate_btts_pick(base_row, fx, btts_adj=btts_adj)
             if pbtts_row is not None:
                 rows_btts.append(pbtts_row)
 
@@ -183,7 +203,7 @@ def process_league_fixtures(
                 p25_raw  = prob_over25(lam_t)
                 p25      = clamp_prob_o25(p25_raw)
                 pm25     = (1.0 / odd_o25) if odd_o25 > 1.01 else 0.0
-                pbtts    = clamp_prob_btts(prob_btts_yes_adjusted(lam_h, lam_a))
+                pbtts    = clamp_prob_btts(prob_btts_yes_adjusted(lam_h, lam_a, adj=btts_adj))
                 pmbtts   = (1.0 / odd_btts) if odd_btts > 1.01 else 0.0
                 edge_o25  = p25   - pm25
                 edge_btts = pbtts - pmbtts

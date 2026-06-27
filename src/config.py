@@ -13,6 +13,8 @@ DEFAULT_DAILY_CAP_FRAC = 0.12
 DEFAULT_MAX_ODD_O25 = 2.20
 DEFAULT_MAX_ODD_BTTS = 2.30
 
+DEFAULT_BTTS_PROBABILITY_ADJUSTMENT = 0.885
+
 
 def load_config(base_path: Path) -> dict:
     cfg_path = Path(base_path) / "config.json"

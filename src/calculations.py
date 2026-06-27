@@ -38,19 +38,19 @@ def prob_over25(lam_total: float) -> float:
     return 1.0 - poisson_cdf(2, lam_total)
 
 
-def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
+def btts_prob_diagnostics(lam_home: float, lam_away: float, adj: float = 0.885) -> dict:
     """
-    BTTS ajustado para reduzir inflação do Poisson puro.
-    Versão intermédia: menos agressiva, sem matar demasiado volume.
+    Compute BTTS adjusted probability with all intermediate values exposed for calibration.
+    Returns a dict; the final probability is in key 'final_prob_unclamped'.
+    Default adj=0.885 preserves existing production behaviour exactly.
     """
     lam_home = max(0.0, float(lam_home))
     lam_away = max(0.0, float(lam_away))
 
     p_home0 = math.exp(-lam_home)
     p_away0 = math.exp(-lam_away)
-    raw = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
-
-    adj = raw * 0.885
+    raw_poisson = 1.0 - p_home0 - p_away0 + (p_home0 * p_away0)
+    after_base_adj = raw_poisson * adj
 
     bigger = max(lam_home, lam_away)
     smaller = min(lam_home, lam_away)
@@ -58,27 +58,37 @@ def prob_btts_yes_adjusted(lam_home: float, lam_away: float) -> float:
     gap = abs(lam_home - lam_away)
     product = lam_home * lam_away
 
-    if ratio >= 2.50:
-        adj *= 0.88
-    elif ratio >= 2.10:
-        adj *= 0.93
+    pen_ratio = 0.88 if ratio >= 2.50 else (0.93 if ratio >= 2.10 else 1.0)
+    pen_gap = 0.90 if gap >= 1.10 else (0.95 if gap >= 0.90 else 1.0)
+    pen_smaller = 0.91 if smaller < 0.55 else (0.96 if smaller < 0.70 else 1.0)
+    pen_product = 0.92 if product < 0.55 else (0.97 if product < 0.70 else 1.0)
+    total_penalty = pen_ratio * pen_gap * pen_smaller * pen_product
 
-    if gap >= 1.10:
-        adj *= 0.90
-    elif gap >= 0.90:
-        adj *= 0.95
+    final_unclamped = float(max(0.0, min(1.0, after_base_adj * total_penalty)))
 
-    if smaller < 0.55:
-        adj *= 0.91
-    elif smaller < 0.70:
-        adj *= 0.96
+    return {
+        "raw_poisson": round(raw_poisson, 6),
+        "base_adj_factor": round(adj, 4),
+        "after_base_adj": round(after_base_adj, 6),
+        "pen_ratio": pen_ratio,
+        "pen_gap": pen_gap,
+        "pen_smaller": pen_smaller,
+        "pen_product": pen_product,
+        "total_penalty": round(total_penalty, 6),
+        "final_prob_unclamped": round(final_unclamped, 6),
+        "lam_ratio": round(ratio, 4),
+        "lam_gap": round(gap, 4),
+        "lam_product": round(product, 4),
+    }
 
-    if product < 0.55:
-        adj *= 0.92
-    elif product < 0.70:
-        adj *= 0.97
 
-    return float(max(0.0, min(1.0, adj)))
+def prob_btts_yes_adjusted(lam_home: float, lam_away: float, adj: float = 0.885) -> float:
+    """
+    BTTS ajustado para reduzir inflação do Poisson puro.
+    adj is configurable (config.json calibration.btts_probability_adjustment).
+    Default 0.885 preserves existing production behaviour exactly.
+    """
+    return btts_prob_diagnostics(lam_home, lam_away, adj=adj)["final_prob_unclamped"]
 
 
 def kelly_fraction(p: float, odd: float) -> float:
