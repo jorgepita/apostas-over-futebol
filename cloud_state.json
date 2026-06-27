@@ -3679,6 +3679,47 @@
         "dataQuality": "NONE",
         "timestamp": "2026-06-27T22:10:38.293Z"
       }
+    },
+    {
+      "id": "manual_1782598257641_j3a2c6",
+      "data": "2026-06-28",
+      "liga": "mls",
+      "jogo": "Ventura County vs Real Monarchs",
+      "mercado": "Over 2.5",
+      "odd": "1.58",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "BUY",
+      "edgeAtAnalysis": 3.747563826776712,
+      "scoreAtAnalysis": 61,
+      "analysisSnapshot": {
+        "cacheKey": "2026-06-28_mls_ventura_county_real_monarchs|O2.5|1.58|1.00",
+        "market": "O2.5",
+        "odd": 1.58,
+        "stake": 1,
+        "ProbModel": 0.6703870306728303,
+        "ProbMarket": 0.6329113924050632,
+        "Edge": 0.03747563826776712,
+        "EdgePercent": 3.747563826776712,
+        "fairOdd": 1.4916756354853038,
+        "KellyTrue": 0.1020888076949517,
+        "EV": 0.05921150846307199,
+        "score": 61,
+        "scoreCls": "info",
+        "opinion": "BUY",
+        "opinionCls": "info",
+        "LambdaHome": 1.934822888283379,
+        "LambdaAway": 1.518256130790191,
+        "LambdaTotal": 3.45307901907357,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "timestamp": "2026-06-27T22:10:51.583Z"
+      }
     }
   ],
   "movements": [
@@ -3708,7 +3749,7 @@
   "lastUpdated": "2026-06-27T22:10:16.911Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-06-27",
