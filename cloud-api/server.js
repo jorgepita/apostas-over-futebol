@@ -254,6 +254,16 @@ app.use((err, req, res, next) => {
 /* =========================
    START SERVER
 ========================= */
+console.log('=== REGISTERED ROUTES ===');
+app._router.stack
+  .filter(r => r.route)
+  .forEach(r => {
+    console.log(
+      Object.keys(r.route.methods).join(',').toUpperCase(),
+      r.route.path
+    );
+  });
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
