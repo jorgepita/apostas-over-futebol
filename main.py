@@ -89,6 +89,8 @@ def _write_btts_diagnostics(rows_btts: list, base_dir: Path) -> None:
         "PenRatio", "PenGap", "PenSmaller", "PenProduct", "TotalPenalty",
         "ProbUnclamped", "ProbClamped", "ProbClampDelta",
         "MarketProb", "EdgeBeforeClamp", "EdgeFinal", "EdgeClampDelta",
+        "RawEdge", "EdgeAfterBaseAdj", "EdgeAfterPenalties",
+        "EdgeLostByBaseAdj", "EdgeLostByPenaltyChain", "EdgeLostByClamping",
         "PassedQualityFilter", "QualityRejectReason",
     ]
     with open(out_path, "w", newline="", encoding="utf-8") as fh:
@@ -125,6 +127,12 @@ def _write_btts_diagnostics(rows_btts: list, base_dir: Path) -> None:
                 "EdgeBeforeClamp": r.get("_diag_edge_before_clamp", ""),
                 "EdgeFinal": r.get("_diag_edge_final", ""),
                 "EdgeClampDelta": r.get("_diag_edge_clamp_delta", ""),
+                "RawEdge": r.get("_diag_raw_edge", ""),
+                "EdgeAfterBaseAdj": r.get("_diag_edge_after_base_adj", ""),
+                "EdgeAfterPenalties": r.get("_diag_edge_after_penalties", ""),
+                "EdgeLostByBaseAdj": r.get("_diag_edge_lost_base_adj", ""),
+                "EdgeLostByPenaltyChain": r.get("_diag_edge_lost_penalty_chain", ""),
+                "EdgeLostByClamping": r.get("_diag_edge_lost_clamping", ""),
                 "PassedQualityFilter": r.get("PassedQualityFilter", ""),
                 "QualityRejectReason": r.get("QualityRejectReason", ""),
             })
@@ -138,6 +146,10 @@ def _print_btts_summary(rows_btts: list) -> None:
         return
 
     from collections import Counter
+
+    def _avg(vals: list) -> float:
+        return sum(vals) / len(vals) if vals else 0.0
+
     total = len(rows_btts)
     passed = sum(1 for r in rows_btts if r.get("PassedQualityFilter"))
     reject_counts = Counter(
@@ -155,21 +167,44 @@ def _print_btts_summary(rows_btts: list) -> None:
         if abs(float(r.get("_diag_edge_clamp_delta", 0) or 0)) > 1e-8
     )
 
-    raw_edges = [float(r["_diag_edge_before_clamp"]) for r in rows_btts if "_diag_edge_before_clamp" in r]
-    final_edges = [float(r["_diag_edge_final"]) for r in rows_btts if "_diag_edge_final" in r]
-    avg_raw_edge = sum(raw_edges) / len(raw_edges) if raw_edges else 0.0
-    avg_final_edge = sum(final_edges) / len(final_edges) if final_edges else 0.0
+    raw_edges          = [float(r["_diag_raw_edge"]) for r in rows_btts if "_diag_raw_edge" in r]
+    edges_after_base   = [float(r["_diag_edge_after_base_adj"]) for r in rows_btts if "_diag_edge_after_base_adj" in r]
+    edges_after_pen    = [float(r["_diag_edge_after_penalties"]) for r in rows_btts if "_diag_edge_after_penalties" in r]
+    final_edges        = [float(r["_diag_edge_final"]) for r in rows_btts if "_diag_edge_final" in r]
+    lost_base_adj      = [float(r["_diag_edge_lost_base_adj"]) for r in rows_btts if "_diag_edge_lost_base_adj" in r]
+    lost_penalty_chain = [float(r["_diag_edge_lost_penalty_chain"]) for r in rows_btts if "_diag_edge_lost_penalty_chain" in r]
+    lost_clamping      = [float(r["_diag_edge_lost_clamping"]) for r in rows_btts if "_diag_edge_lost_clamping" in r]
+
+    n_raw_positive   = sum(1 for e in raw_edges if e > 0)
+    n_final_positive = sum(1 for e in final_edges if e > 0)
+
+    avg_raw     = _avg(raw_edges)
+    avg_base    = _avg(edges_after_base)
+    avg_pen     = _avg(edges_after_pen)
+    avg_final   = _avg(final_edges)
+    avg_lost_ba = _avg(lost_base_adj)
+    avg_lost_pc = _avg(lost_penalty_chain)
+    avg_lost_cl = _avg(lost_clamping)
 
     print("[BTTS SUMMARY] ─────────────────────────────────────────")
-    print(f"[BTTS SUMMARY] candidates generated  : {total}")
-    print(f"[BTTS SUMMARY] passed quality        : {passed}")
+    print(f"[BTTS SUMMARY] candidates generated          : {total}")
+    print(f"[BTTS SUMMARY] passed quality filter         : {passed}")
     for reason, count in sorted(reject_counts.items(), key=lambda x: -x[1]):
         if reason:
-            print(f"[BTTS SUMMARY] rejected by {reason:<20}: {count}")
-    print(f"[BTTS SUMMARY] prob clamp fired      : {prob_clamped}")
-    print(f"[BTTS SUMMARY] edge clamp fired      : {edge_clamped}")
-    print(f"[BTTS SUMMARY] avg raw edge          : {avg_raw_edge:+.4f} ({avg_raw_edge*100:+.2f}%)")
-    print(f"[BTTS SUMMARY] avg final edge        : {avg_final_edge:+.4f} ({avg_final_edge*100:+.2f}%)")
+            print(f"[BTTS SUMMARY] rejected by {reason:<20}   : {count}")
+    print(f"[BTTS SUMMARY] prob clamp fired              : {prob_clamped}")
+    print(f"[BTTS SUMMARY] edge clamp fired              : {edge_clamped}")
+    print(f"[BTTS SUMMARY] candidates raw edge > 0       : {n_raw_positive} / {len(raw_edges)}")
+    print(f"[BTTS SUMMARY] candidates final edge > 0     : {n_final_positive} / {len(final_edges)}")
+    print(f"[BTTS SUMMARY] ─── avg edge by stage ────────────────")
+    print(f"[BTTS SUMMARY] avg raw edge                  : {avg_raw:+.4f} ({avg_raw*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg edge after base adj        : {avg_base:+.4f} ({avg_base*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg edge after penalties       : {avg_pen:+.4f} ({avg_pen*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg final edge                 : {avg_final:+.4f} ({avg_final*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] ─── avg edge lost by stage ───────────")
+    print(f"[BTTS SUMMARY] avg lost by base adjustment    : {avg_lost_ba:+.4f} ({avg_lost_ba*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg lost by penalty chain      : {avg_lost_pc:+.4f} ({avg_lost_pc*100:+.2f}%)")
+    print(f"[BTTS SUMMARY] avg lost by clamping           : {avg_lost_cl:+.4f} ({avg_lost_cl*100:+.2f}%)")
     print("[BTTS SUMMARY] ─────────────────────────────────────────")
 
 

@@ -67,6 +67,13 @@ def generate_btts_pick(base_row: dict, fx: pd.Series, btts_adj: float = 0.885) -
     edgebtts = clamp_edge_btts(edge_before_clamp)
     kbtts = kelly_fraction(pbtts, odd_btts)
 
+    _raw_edge            = round(float(diag["raw_poisson"]) - pmbtts, 6)
+    _edge_after_base_adj = round(float(diag["after_base_adj"]) - pmbtts, 6)
+    _edge_after_penalties = round(pbtts_unclamped - pmbtts, 6)
+    _edge_lost_base_adj      = round(_raw_edge - _edge_after_base_adj, 6)
+    _edge_lost_penalty_chain = round(_edge_after_base_adj - _edge_after_penalties, 6)
+    _edge_lost_clamping      = round(_edge_after_penalties - round(edgebtts, 6), 6)
+
     return {
         **base_row,
         "Market": "BTTS",
@@ -91,6 +98,13 @@ def generate_btts_pick(base_row: dict, fx: pd.Series, btts_adj: float = 0.885) -
         "_diag_edge_before_clamp": round(edge_before_clamp, 6),
         "_diag_edge_final": round(edgebtts, 6),
         "_diag_edge_clamp_delta": round(edgebtts - edge_before_clamp, 6),
+        # Edge-loss breakdown (Phase 26.11)
+        "_diag_raw_edge": _raw_edge,
+        "_diag_edge_after_base_adj": _edge_after_base_adj,
+        "_diag_edge_after_penalties": _edge_after_penalties,
+        "_diag_edge_lost_base_adj": _edge_lost_base_adj,
+        "_diag_edge_lost_penalty_chain": _edge_lost_penalty_chain,
+        "_diag_edge_lost_clamping": _edge_lost_clamping,
     }
 
 
