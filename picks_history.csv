@@ -9,7 +9,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-05-23;LaLiga;Celta Vigo vs Sevilla;O2.5;1.99;0.42;6.08;;;;L;-0.42;;
 2026-05-23;LaLiga;Girona vs Elche;O2.5;1.73;0.03;1.5;;;;L;-0.03;;
 2026-05-23;Serie A;Lazio vs Pisa;O2.5;1.85;1.25;13.39;;;;W;1.06;;
-2026-05-24;Eredivisie;Ajax vs Utrecht;O2.5;1.55;0.02;1.24;;;;;;;
+2026-05-24;Eredivisie;Ajax vs Utrecht;O2.5;1.55;0.02;1.24;;;;L;-0.02;;2026-05-24T10:15:00+00:00
 2026-05-24;Jupiler Pro League;Union St. Gilloise vs Anderlecht;O2.5;1.8;0.06;2.16;;;;W;0.05;;
 2026-05-24;Premier League;Nottingham Forest vs Bournemouth;O2.5;1.68;0.08;2.83;;;;L;-0.08;;
 2026-05-24;Premier League;West Ham vs Leeds;BTTS;1.67;0.29;3.6;;;;L;-0.29;;
@@ -21,9 +21,9 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-05-24;Serie B;Catanzaro vs Monza;O2.5;1.98;0.29;5.02;;;;L;-0.29;;
 2026-05-25;Bundesliga;SC Paderborn 07 vs VfL Wolfsburg;BTTS;1.7;0.07;1.82;;;;W;0.05;;
 2026-05-26;2. Bundesliga;SpVgg Greuther Fürth vs Rot-Weiß Essen;O2.5;1.7;0.63;5.81;;;;L;-0.63;;
-2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.37;5.24;;;;;;;
+2026-05-26;Ligue 1;Saint Etienne vs Nice;O2.5;1.72;0.37;5.24;;;;L;-0.37;;2026-05-26T18:45:00+00:00
 2026-05-28;Primeira Liga;Casa Pia vs Torreense;BTTS;2.1;0.41;4.86;;;;L;-0.41;;
-2026-05-29;Ligue 1;Nice vs Saint Etienne;BTTS;2.0;0.82;6.75;;;;;;;
+2026-05-29;Ligue 1;Nice vs Saint Etienne;BTTS;2.0;0.82;6.75;;;;W;0.82;;2026-05-29T18:45:00+00:00
 2026-05-29;Serie B;Monza vs Catanzaro;O2.5;1.72;1.87;9.34;;;;L;-1.87;;
 2026-05-31;Jupiler Pro League;Gent vs Genk;O2.5;1.72;2.0;13.86;;;;L;-2.0;;
 2026-06-13;MLS;Real Monarchs vs Portland Timbers II;O2.5;1.58;0.34;3.75;;;;;;;
