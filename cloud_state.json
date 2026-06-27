@@ -3649,7 +3649,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3746,7 +3746,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-06-27T22:10:16.911Z",
+  "lastUpdated": "2026-06-27T22:11:17.601Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
