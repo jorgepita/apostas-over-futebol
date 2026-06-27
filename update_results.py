@@ -12,6 +12,11 @@ from difflib import SequenceMatcher
 import pandas as pd
 from dotenv import load_dotenv
 from src.league_stats import update_league_stats
+from src.league_registry import (
+    LEAGUE_CODE_MAP,
+    BLOCKED_FOOTBALL_DATA_CODES,
+    API_FOOTBALL_FALLBACK_COMPETITIONS,
+)
 
 load_dotenv()
 
@@ -32,24 +37,9 @@ REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
 REMOTE_MANUAL_NAME = "manual_bets.csv"
 
-LEAGUE_CODE_MAP = {
-    "Premier League": "PL",
-    "Primeira Liga": "PPL",
-    "Bundesliga": "BL1",
-    "La Liga": "PD",
-    "LaLiga": "PD",
-    "Ligue 1": "FL1",
-    "Serie A": "SA",
-    "Eredivisie": "DED",
-    "Championship": "ELC",
-    "2. Bundesliga": "BL2",
-    "Serie B": "SB",
-    "Ligue 2": "FL2",
-    "Belgian Pro League": "BJL",
-    "Jupiler Pro League": "BJL",
-    "Super Lig": "TSL",
-    "Süper Lig": "TSL",
-}
+# LEAGUE_CODE_MAP, BLOCKED_FOOTBALL_DATA_CODES and API_FOOTBALL_FALLBACK_COMPETITIONS
+# are imported from src.league_registry above.
+# To add or change a league mapping, edit src/league_registry.py — not this file.
 
 SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
 
@@ -83,52 +73,6 @@ AF_CALL_MIN_INTERVAL = 0.50
 AF_BASE_URL = "https://v3.football.api-sports.io"
 
 # Confirmado pelos teus testes
-BLOCKED_FOOTBALL_DATA_CODES = {"BL2", "TSL", "BJL", "SB", "FL2", "PPL", "BL1"}
-
-API_FOOTBALL_FALLBACK_COMPETITIONS = {
-    "BL2": {
-        "country": "Germany",
-        "name": "2. Bundesliga",
-    },
-    "TSL": {
-        "country": "Turkey",
-        "name": "Süper Lig",
-    },
-    "BJL": {
-        "country": "Belgium",
-        "name": "Jupiler Pro League",
-    },
-    "SB": {
-        "country": "Italy",
-        "name": "Serie B",
-    },
-    "FL2": {
-        "country": "France",
-        "name": "Ligue 2",
-    },
-    "PPL": {
-        "country": "Portugal",
-        "name": "Primeira Liga",
-    },
-    "BL1": {
-        "country": "Germany",
-        "name": "Bundesliga",
-    },
-    # Fallback-only: football-data.org is still tried first for these leagues.
-    # AF is only reached when FD returns an HTTP error or finds no fixture.
-    "ELC": {
-        "country": "England",
-        "name": "Championship",
-    },
-    "PD": {
-        "country": "Spain",
-        "name": "La Liga",
-    },
-    "SA": {
-        "country": "Italy",
-        "name": "Serie A",
-    },
-}
 
 FD_FINISHED_STATUS = {"FINISHED"}
 AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
@@ -1426,6 +1370,16 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
     league_id_cache = shared_state["af_league_id_cache"]
     if cache_key in league_id_cache:
         return league_id_cache[cache_key]
+
+    # Short-circuit: use the hardcoded AF league ID from the registry when available,
+    # saving an API call to /leagues.
+    hardcoded_id = conf.get("af_id")
+    if hardcoded_id:
+        league_id_cache[cache_key] = int(hardcoded_id)
+        print(
+            f"[DBG] API-Football league id (registry) | code={fd_league_code} | id={hardcoded_id}"
+        )
+        return int(hardcoded_id)
 
     country = conf["country"]
     target_name = conf["name"]
