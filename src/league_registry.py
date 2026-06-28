@@ -30,6 +30,10 @@ class LeagueEntry:
     af_country: str     # API-Football country string
     af_name: str        # API-Football competition name (fuzzy fallback)
     af_id: int | None   # API-Football integer ID; short-circuits /leagues API call
+    # How game dates map to API-Football season integers:
+    #   "european" — season starts in July/August; Jan–Jun -> year-1 (e.g. Feb 2026 -> 2025)
+    #   "calendar" — season equals the calendar year the game is played (MLS, Nordic, Asian, etc.)
+    season_model: str = "european"
 
 
 def _settlement_code(e: LeagueEntry) -> str:
@@ -59,15 +63,15 @@ REGISTRY: list[LeagueEntry] = [
     LeagueEntry("franca2",       "Ligue 2",                       "FRA", "FL2", True,  "France",      "Ligue 2",             62),
     LeagueEntry("belgica",       "Jupiler Pro League",            "BEL", "BJL", True,  "Belgium",     "Belgian Pro League",  144),
     LeagueEntry("turquia",       "Super Lig",                     "TUR", "TSL", True,  "Turkey",      "Süper Lig",           203),
-    # ── Non-EU: no FD coverage — API-Football direct ──────────────────────
-    LeagueEntry("noruega",       "Eliteserien",                   "NOR", None,  False, "Norway",      "Eliteserien",         103),
-    LeagueEntry("suecia",        "Allsvenskan",                   "SWE", None,  False, "Sweden",      "Allsvenskan",         113),
-    LeagueEntry("finlandia",     "Veikkausliiga",                 "FIN", None,  False, "Finland",     "Veikkausliiga",       244),
-    LeagueEntry("islandia",      "Besta deild",                   "ISL", None,  False, "Iceland",     "Úrvalsdeild",         188),
-    LeagueEntry("mls",           "MLS",                           "USA", None,  False, "USA",         "Major League Soccer", 253),
-    LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", None,  False, "Brazil",      "Série A",             71),
-    LeagueEntry("japao",         "J1 League",                     "JPN", None,  False, "Japan",       "J1 League",           98),
-    LeagueEntry("coreia",        "K League 1",                    "KOR", None,  False, "South Korea", "K League 1",          292),
+    # ── Non-EU: no FD coverage — API-Football direct — calendar-year seasons ─
+    LeagueEntry("noruega",       "Eliteserien",                   "NOR", None,  False, "Norway",      "Eliteserien",         103, "calendar"),
+    LeagueEntry("suecia",        "Allsvenskan",                   "SWE", None,  False, "Sweden",      "Allsvenskan",         113, "calendar"),
+    LeagueEntry("finlandia",     "Veikkausliiga",                 "FIN", None,  False, "Finland",     "Veikkausliiga",       244, "calendar"),
+    LeagueEntry("islandia",      "Besta deild",                   "ISL", None,  False, "Iceland",     "Úrvalsdeild",         188, "calendar"),
+    LeagueEntry("mls",           "MLS",                           "USA", None,  False, "USA",         "MLS Next Pro",        909, "calendar"),
+    LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", None,  False, "Brazil",      "Série A",             71,  "calendar"),
+    LeagueEntry("japao",         "J1 League",                     "JPN", None,  False, "Japan",       "J1 League",           98,  "calendar"),
+    LeagueEntry("coreia",        "K League 1",                    "KOR", None,  False, "South Korea", "K League 1",          292, "calendar"),
 ]
 
 # ── Fast lookups ──────────────────────────────────────────────────────────────
@@ -108,4 +112,12 @@ API_FOOTBALL_FALLBACK_COMPETITIONS: dict[str, dict] = {
         **({"af_id": e.af_id} if e.af_id is not None else {}),
     }
     for e in REGISTRY
+}
+
+# Maps API-Football integer league ID -> season model string.
+# Consumed by api_football_season_from_date() in update_results.py.
+AF_SEASON_MODELS: dict[int, str] = {
+    e.af_id: e.season_model
+    for e in REGISTRY
+    if e.af_id is not None
 }

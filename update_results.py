@@ -17,6 +17,7 @@ from src.league_registry import (
     LEAGUE_CODE_MAP,
     BLOCKED_FOOTBALL_DATA_CODES,
     API_FOOTBALL_FALLBACK_COMPETITIONS,
+    AF_SEASON_MODELS,
 )
 
 load_dotenv()
@@ -1158,15 +1159,29 @@ def make_row_key(row) -> str:
     )
 
 
-def api_football_season_from_date(date_str: str, shared_state: dict | None = None) -> int:
+def api_football_season_from_date(
+    date_str: str,
+    league_id: int | None = None,
+    shared_state: dict | None = None,
+) -> int:
+    """Return the API-Football season integer for a given game date and league.
+
+    Season model is looked up from AF_SEASON_MODELS via league_id:
+      "calendar"  — season equals the calendar year of the game date (MLS, Nordic leagues, etc.)
+      "european"  — season starts in July; Jan–Jun maps to year-1 (default for all EU leagues)
+    """
     d = _cached_date_obj(date_str, shared_state)
     if d is None:
         now = datetime.utcnow()
-        return now.year if now.month >= 7 else now.year - 1
+        year, month = now.year, now.month
+    else:
+        year, month = int(d.year), int(d.month)
 
-    if d.month >= 7:
-        return int(d.year)
-    return int(d.year) - 1
+    model = AF_SEASON_MODELS.get(league_id, "european") if league_id is not None else "european"
+    if model == "calendar":
+        return year
+    # european: July–December = current year, January–June = previous year
+    return year if month >= 7 else year - 1
 
 
 def should_use_api_football_fallback(league_code: str, reason: str = "") -> bool:
@@ -1365,7 +1380,9 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
     if not conf:
         return None
 
-    season = api_football_season_from_date(date_str, shared_state)
+    # Resolve hardcoded id first so the correct season model can be applied.
+    hardcoded_id = conf.get("af_id")
+    season = api_football_season_from_date(date_str, league_id=hardcoded_id, shared_state=shared_state)
     cache_key = (fd_league_code, season)
 
     league_id_cache = shared_state["af_league_id_cache"]
@@ -1374,7 +1391,6 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
 
     # Short-circuit: use the hardcoded AF league ID from the registry when available,
     # saving an API call to /leagues.
-    hardcoded_id = conf.get("af_id")
     if hardcoded_id:
         league_id_cache[cache_key] = int(hardcoded_id)
         print(
@@ -1431,7 +1447,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
     if not league_id:
         return None, "NO_LEAGUE_ID"
 
-    season = api_football_season_from_date(date_str, shared_state)
+    season = api_football_season_from_date(date_str, league_id=league_id, shared_state=shared_state)
     cache_key = (fd_league_code, date_str, league_id, season)
 
     fixtures_cache = shared_state["af_fixtures_cache"]
@@ -1663,6 +1679,23 @@ def try_update_row_via_api_football(
         min_side_score=MATCH_MIN_SIDE_SCORE,
     )
     if not matched:
+        # Late-kickoff fallback: US/Asian leagues with 23:00 UTC kickoffs are
+        # sometimes stored in picks with date+1 (next day) rather than the API's UTC date.
+        # Try fetching the previous calendar day to recover these games.
+        try:
+            prev_date = (datetime.strptime(data, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+            fixtures_prev, _ = fetch_api_football_fixtures_for_league_date(league_code, prev_date, shared_state)
+            if fixtures_prev:
+                matched, best_score, meta = find_best_fixture_match(
+                    home_csv, away_csv, fixtures_prev, shared_state,
+                    min_total_score=MATCH_MIN_TOTAL_SCORE, min_side_score=MATCH_MIN_SIDE_SCORE,
+                )
+                if matched:
+                    print(f"[DBG] {label}: date-1 fallback hit | {jogo} | {data} -> {prev_date}")
+                    fixtures = fixtures_prev
+        except Exception:
+            pass
+    if not matched:
         print(f"[WARN] {label}: API-Football sem match para: {jogo} | {league_code} | {data}")
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
         log_pick_diag(
@@ -1786,6 +1819,20 @@ def try_update_manual_row_via_api_football(
         min_total_score=MATCH_MIN_TOTAL_SCORE,
         min_side_score=MATCH_MIN_SIDE_SCORE,
     )
+    if not matched:
+        try:
+            prev_date = (datetime.strptime(data, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+            fixtures_prev, _ = fetch_api_football_fixtures_for_league_date(league_code, prev_date, shared_state)
+            if fixtures_prev:
+                matched, best_score, meta = find_best_fixture_match(
+                    home_csv, away_csv, fixtures_prev, shared_state,
+                    min_total_score=MATCH_MIN_TOTAL_SCORE, min_side_score=MATCH_MIN_SIDE_SCORE,
+                )
+                if matched:
+                    print(f"[DBG] {label}: date-1 fallback hit | {jogo} | {data} -> {prev_date}")
+                    fixtures = fixtures_prev
+        except Exception:
+            pass
     if not matched:
         print(f"[WARN] {label}: API-Football sem match para manual: {jogo} | {league_code} | {data}")
         log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
