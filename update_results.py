@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import re
+import tempfile
 import time
 import unicodedata
 from pathlib import Path
@@ -1553,6 +1554,16 @@ def upload_csv_to_github(local_path: Path, remote_name: str) -> None:
     print(f"GitHub: atualizado {remote_name}")
 
 
+def github_get_file_bytes(owner: str, repo: str, path: str, branch: str, token: str) -> bytes:
+    url = (
+        f"https://api.github.com/repos/{owner}/{repo}/contents/"
+        f"{parse.quote(path)}?ref={parse.quote(branch)}"
+    )
+    j = github_request(url, token, method="GET")
+    content_b64 = j.get("content", "").replace("\n", "")
+    return base64.b64decode(content_b64)
+
+
 # =============================
 # Sync history -> daily
 # =============================
@@ -2460,6 +2471,79 @@ def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     )
 
     return ensure_manual_columns(df), updated, already_done, ignored
+
+
+# =============================
+# Remote settlement (called by sync_server.py)
+# =============================
+def run_settlement_remote() -> dict:
+    """Download CSVs from GitHub, run settlement synchronously, upload results.
+
+    Returns {"ok": True, "updated": N, "ignored": M, "duration": S.s}
+    Raises RuntimeError if env vars are missing.
+    """
+    if not GITHUB_TOKEN:
+        raise RuntimeError("GITHUB_TOKEN not set")
+    if not API_TOKEN:
+        raise RuntimeError("FOOTBALL_DATA_API_KEY not set — settlement cannot proceed")
+
+    t0 = time.time()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+
+        tmp_history = tmp / "picks_history.csv"
+        tmp_daily   = tmp / "picks_hoje_simplificado.csv"
+        tmp_manual  = tmp / "manual_bets.csv"
+
+        for remote_name, local_path in [
+            (REMOTE_HISTORY_NAME, tmp_history),
+            (REMOTE_DAILY_NAME,   tmp_daily),
+            (REMOTE_MANUAL_NAME,  tmp_manual),
+        ]:
+            raw = github_get_file_bytes(
+                GITHUB_OWNER, GITHUB_REPO, remote_name, GITHUB_BRANCH, GITHUB_TOKEN
+            )
+            local_path.write_bytes(raw)
+            print(f"[settlement] downloaded {remote_name} ({len(raw)} bytes)")
+
+        shared_state = make_shared_runtime_state()
+
+        history_df = safe_read_csv(tmp_history)
+        daily_df   = safe_read_csv(tmp_daily)
+        manual_df  = safe_read_manual_csv(tmp_manual)
+
+        history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
+        history_df.to_csv(tmp_history, index=False, sep=";", encoding="utf-8")
+        print(f"[settlement] history: updated={h_updated} done={h_done} ignored={h_ignored}")
+
+        daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily", shared_state)
+        daily_df, _ = sync_daily_from_history(daily_df, history_df)
+        daily_df.to_csv(tmp_daily, index=False, sep=";", encoding="utf-8")
+        print(f"[settlement] daily: updated={d_updated} done={d_done} ignored={d_ignored}")
+
+        manual_df, m_updated, m_done, m_ignored = update_manual_dataframe(manual_df, "manual", shared_state)
+        manual_df.to_csv(tmp_manual, index=False, sep=";", encoding="utf-8")
+        print(f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored}")
+
+        save_team_alias_cache(shared_state)
+
+        upload_csv_to_github(tmp_history, REMOTE_HISTORY_NAME)
+        upload_csv_to_github(tmp_daily,   REMOTE_DAILY_NAME)
+        upload_csv_to_github(tmp_manual,  REMOTE_MANUAL_NAME)
+
+    duration = round(time.time() - t0, 1)
+    total_updated = h_updated + d_updated + m_updated
+    total_ignored = h_ignored + d_ignored + m_ignored
+
+    print(f"[settlement] done in {duration}s — updated={total_updated} ignored={total_ignored}")
+
+    return {
+        "ok":       True,
+        "updated":  total_updated,
+        "ignored":  total_ignored,
+        "duration": duration,
+    }
 
 
 # =============================

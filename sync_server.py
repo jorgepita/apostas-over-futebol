@@ -298,26 +298,49 @@ def get_state():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+CLOUD_STATE_PATH = "cloud_state.json"
+
+
+@app.get("/load")
+def load_cloud_state():
+    try:
+        content_text, _sha = get_file_from_github(CLOUD_STATE_PATH)
+        if content_text is None:
+            return jsonify({})
+        parsed = json.loads(content_text) if content_text.strip() else {}
+        return jsonify(parsed)
+    except Exception as e:
+        print("GET /load error:", e, flush=True)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.post("/save")
+def save_cloud_state():
+    try:
+        payload = request.get_json(force=True, silent=False)
+        content = payload.get("content")
+        message = payload.get("message", "update cloud state")
+        if content is None:
+            return jsonify({"error": "Missing content"}), 400
+        content_text = json.dumps(content, indent=2)
+        _old, sha = get_file_from_github(CLOUD_STATE_PATH)
+        result = put_file_to_github(CLOUD_STATE_PATH, content_text, message, sha=sha)
+        new_sha = result.get("content", {}).get("sha")
+        return jsonify({"success": True, "sha": new_sha})
+    except Exception as e:
+        print("POST /save error:", e, flush=True)
+        return jsonify({"error": str(e)}), 500
+
+
 @app.post("/run-settlement")
 def run_settlement():
     try:
-        url = (
-            f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
-            f"/actions/workflows/bot.yml/dispatches"
-        )
-        resp = github_request("POST", url, json={
-            "ref": GITHUB_BRANCH,
-            "inputs": {"job": "settlement"},
-        })
-        if resp.status_code not in (200, 204):
-            body = ""
-            try:
-                body = resp.json().get("message", "")
-            except Exception:
-                pass
-            return jsonify({"ok": False, "error": f"GitHub API {resp.status_code}: {body}"}), 502
-        return jsonify({"ok": True, "triggered": True})
+        from update_results import run_settlement_remote
+        result = run_settlement_remote()
+        return jsonify(result)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print("POST /run-settlement error:", e, flush=True)
         return jsonify({"ok": False, "error": str(e)}), 500
 

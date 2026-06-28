@@ -11867,9 +11867,6 @@ button.dirty {
         _settlementMessage = '';
         _updateSettlementButton();
 
-        const countSettled = (rows) =>
-          rows.filter(r => ['W','L','P'].includes(String(r['Resultado'] || '').toUpperCase())).length;
-
         try {
           const res  = await fetch(`${API_URL}/run-settlement`, {
             method: 'POST',
@@ -11881,27 +11878,14 @@ button.dirty {
           } catch (_) {}
 
           if (!res.ok || !data.ok) {
-            // Surface the server-side step + message so the cause is visible
             const step = data.step ? `[${data.step}] ` : '';
             const msg  = data.message || data.error || `HTTP ${res.status}`;
             console.error('[Settlement] server error:', data);
             throw new Error(`${step}${msg}`);
           }
 
-          // Settlement workflow triggered — poll for CSV changes (max 3 min)
-          const settledBefore = countSettled(state.footballHistory);
-          let changed = false;
-
-          for (let i = 0; i < 12; i++) {
-            await new Promise(r => setTimeout(r, 15000));
-            await loadData(true);
-            if (countSettled(state.footballHistory) > settledBefore) {
-              changed = true;
-              break;
-            }
-          }
-
-          _settlementMessage = changed ? '✓ Settlement completed' : 'No matches to settle.';
+          await loadData(true);
+          _settlementMessage = data.updated > 0 ? '✓ Settlement completed' : 'No matches to settle.';
         } catch (err) {
           console.error('[Settlement] error:', err);
           const truncated = err.message?.length > 90
