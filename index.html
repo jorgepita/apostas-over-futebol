@@ -3170,7 +3170,7 @@ button.dirty {
 
       const STORAGE_KEYS = {
         bankroll: 'apostas_bot_bankroll_inicial',
-        picks: 'apostas_bot_local_edits_v5',
+        picks: 'apostas_bot_local_edits_v6',
         manual: 'apostas_bot_manual_bets_v3',
         sessionStartDate: 'apostas_bot_session_start_date_v3',
         activeTab: 'apostas_bot_active_tab_v2',
@@ -3946,6 +3946,89 @@ button.dirty {
         return String(value ?? '').trim().replace(/^"+|"+$/g, '');
       }
 
+      // ── League normalisation ──────────────────────────────────────────────────
+      // Single source of truth: every alias (display name, FD code, uppercase
+      // variant, API-Football name) maps to the canonical registry key used
+      // internally by the system (lowercase, matches picks_hoje_github.csv League).
+      // makePickKey() calls normalizeLeagueCode() so that picks from any CSV source
+      // always generate identical composite keys.
+      const LEAGUE_NORMALIZE = (() => {
+        const entries = [
+          // ── canonical key → self (picks_hoje_github.csv League column) ──
+          ['premier',       'premier'],
+          ['espanha',       'espanha'],
+          ['franca',        'franca'],
+          ['italia',        'italia'],
+          ['paises_baixos', 'paises_baixos'],
+          ['championship',  'championship'],
+          ['portugal',      'portugal'],
+          ['alemanha',      'alemanha'],
+          ['alemanha2',     'alemanha2'],
+          ['italia2',       'italia2'],
+          ['franca2',       'franca2'],
+          ['belgica',       'belgica'],
+          ['turquia',       'turquia'],
+          ['noruega',       'noruega'],
+          ['suecia',        'suecia'],
+          ['finlandia',     'finlandia'],
+          ['islandia',      'islandia'],
+          ['mls',           'mls'],
+          ['brasil',        'brasil'],
+          ['japao',         'japao'],
+          ['coreia',        'coreia'],
+          // ── display names (picks_history.csv Liga column) ──
+          ['premier league',                  'premier'],
+          ['laliga',                           'espanha'],
+          ['la liga',                          'espanha'],
+          ['ligue 1',                          'franca'],
+          ['serie a',                          'italia'],
+          ['eredivisie',                       'paises_baixos'],
+          ['primeira liga',                    'portugal'],
+          ['bundesliga',                       'alemanha'],
+          ['2. bundesliga',                    'alemanha2'],
+          ['serie b',                          'italia2'],
+          ['ligue 2',                          'franca2'],
+          ['jupiler pro league',               'belgica'],
+          ['belgian pro league',               'belgica'],
+          ['super lig',                        'turquia'],
+          ['süper lig',                        'turquia'],
+          ['eliteserien',                      'noruega'],
+          ['allsvenskan',                      'suecia'],
+          ['veikkausliiga',                    'finlandia'],
+          ['besta deild',                      'islandia'],
+          ['úrvalsdeild',                      'islandia'],
+          ['major league soccer',              'mls'],
+          ['mls next pro',                     'mls'],
+          ['campeonato brasileiro serie a',    'brasil'],
+          ['série a',                          'brasil'],
+          ['j1 league',                        'japao'],
+          ['k league 1',                       'coreia'],
+          // ── football-data.org competition codes ──
+          ['pl',  'premier'],
+          ['pd',  'espanha'],
+          ['fl1', 'franca'],
+          ['sa',  'italia'],
+          ['ded', 'paises_baixos'],
+          ['elc', 'championship'],
+          ['ppl', 'portugal'],
+          ['bl1', 'alemanha'],
+          ['bl2', 'alemanha2'],
+          ['sb',  'italia2'],
+          ['fl2', 'franca2'],
+          ['bjl', 'belgica'],
+          ['tsl', 'turquia'],
+        ];
+        const m = new Map();
+        for (const [alias, canonical] of entries) m.set(alias, canonical);
+        return m;
+      })();
+
+      function normalizeLeagueCode(value) {
+        const s = cleanString(value).toLowerCase();
+        return LEAGUE_NORMALIZE.get(s) || s;
+      }
+      // ─────────────────────────────────────────────────────────────────────────
+
       function normalizeMarket(row) {
         if (!row) return '';
         let m = '';
@@ -4127,8 +4210,8 @@ button.dirty {
           row['Data'] || row['Date'] || row['data'] || row['date'] || ''
         );
 
-        // LIGA
-        normalized['Liga'] = cleanString(
+        // LIGA — normalised to canonical registry key (e.g. "MLS"/"mls"/"Major League Soccer" → "mls")
+        normalized['Liga'] = normalizeLeagueCode(
           row['Liga'] || row['League'] || row['liga'] || row['league'] || row['LeagueName'] || ''
         );
 
@@ -4302,29 +4385,61 @@ button.dirty {
 
       function getDailyRowsMerged() {
         // Build a settled-result lookup from history (W/L/P only).
-        // Used to propagate results that update_results.py wrote to picks_history.csv
-        // but that picks_hoje_github.csv never receives (it has no Resultado column).
+        // Uses normalizeLeagueCode-normalised keys so picks_hoje_github.csv
+        // ("mls") and picks_history.csv ("MLS" / "Veikkausliiga" / …) resolve
+        // to the same canonical registry key and always match.
         const historyResultMap = new Map();
+        const _diagHistKeys = [];
         dedupeBotRows(state.footballHistory).forEach(row => {
           const r = cleanString(row['Resultado'] || '').toUpperCase();
           if (r === 'W' || r === 'L' || r === 'P') {
-            historyResultMap.set(makePickKey(row), r);
+            const k = makePickKey(row);
+            historyResultMap.set(k, r);
+            if (_diagHistKeys.length < 5) _diagHistKeys.push(k);
           }
         });
 
-        return dedupeBotRows(state.footballDaily).map(row => {
+        let _mergedCount = 0;
+        let _pendingCount = 0;
+        let _diagDailyCount = 0;
+
+        const rows = dedupeBotRows(state.footballDaily).map(row => {
           const enriched = getRowWithLocalEdits(row);
+          const found = historyResultMap.has(enriched._pickKey);
+
+          // Diagnostic — log first 5 daily rows showing key alignment
+          if (_diagDailyCount < 5) {
+            console.log(
+              `[MERGE DIAG #${_diagDailyCount + 1}]`,
+              `\n  daily key : ${enriched._pickKey}`,
+              `\n  hist match: ${found ? historyResultMap.get(enriched._pickKey) : 'NO MATCH'}`
+            );
+            if (_diagDailyCount === 0 && _diagHistKeys.length) {
+              console.log('[MERGE DIAG] sample history keys:', _diagHistKeys);
+            }
+            _diagDailyCount++;
+          }
+
           // Only overwrite when still pending AND no localStorage manual override.
-          // getRowWithLocalEdits already applied the manual override, so _resultKey
-          // is non-pending if the user set one — the guard here handles that.
-          if (enriched._resultKey === 'pending' && historyResultMap.has(enriched._pickKey)) {
+          if (enriched._resultKey === 'pending' && found) {
+            _mergedCount++;
             const settled = historyResultMap.get(enriched._pickKey);
             enriched._resultadoFinal = settled;
             enriched._resultKey = settled;
             enriched._lucroModeloLocal = calcProfitByResult(settled, enriched._stakeModeloNum, enriched._oddModeloNum);
+          } else if (enriched._resultKey === 'pending') {
+            _pendingCount++;
           }
           return enriched;
         });
+
+        console.log(
+          `[MERGE DIAG] daily total=${rows.length}`,
+          `merged_from_history=${_mergedCount}`,
+          `still_pending=${_pendingCount}`
+        );
+
+        return rows;
       }
 
       function getHistoryRowsMerged() {
