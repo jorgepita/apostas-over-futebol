@@ -12054,6 +12054,7 @@ button.dirty {
           }
 
           await loadData(true);
+          await _reloadManualBetsFromCloud();
           _settlementMessage = data.updated > 0 ? '✓ Settlement completed' : 'No matches to settle.';
         } catch (err) {
           console.error('[Settlement] error:', err);
@@ -12071,6 +12072,20 @@ button.dirty {
           _settlementMessage = '';
           _updateSettlementButton();
         }, clearDelay);
+      }
+
+      async function _reloadManualBetsFromCloud() {
+        try {
+          const res = await fetch(`${API_URL}/load`);
+          if (!res.ok) return;
+          const content = await res.json();
+          if (!content || !Array.isArray(content.manualBets)) return;
+          state.manualBets = content.manualBets;
+          saveLocalState();
+          rerenderAll(false);
+        } catch (e) {
+          console.error('[Settlement] reload manual bets from cloud failed:', e);
+        }
       }
 
       // ── End Phase 26.11 ──────────────────────────────────────────────

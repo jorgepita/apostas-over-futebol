@@ -18,6 +18,7 @@ from src.league_registry import (
     BLOCKED_FOOTBALL_DATA_CODES,
     API_FOOTBALL_FALLBACK_COMPETITIONS,
     AF_SEASON_MODELS,
+    REGISTRY_BY_KEY,
 )
 
 load_dotenv()
@@ -25,7 +26,6 @@ load_dotenv()
 BASE = Path(__file__).resolve().parent
 DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
 HISTORY_FILE = BASE / "picks_history.csv"
-MANUAL_FILE = BASE / "manual_bets.csv"
 
 API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
@@ -37,7 +37,7 @@ GITHUB_BRANCH = "main"
 
 REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
-REMOTE_MANUAL_NAME = "manual_bets.csv"
+CLOUD_STATE_NAME = "cloud_state.json"
 
 # LEAGUE_CODE_MAP, BLOCKED_FOOTBALL_DATA_CODES and API_FOOTBALL_FALLBACK_COMPETITIONS
 # are imported from src.league_registry above.
@@ -54,11 +54,6 @@ CSV_COLUMNS = [
 SYNC_RESULT_COLUMNS = [
     "Apostada", "OddReal", "StakeReal€",
     "Resultado", "Lucro€", "LucroReal€"
-]
-
-MANUAL_COLUMNS = [
-    "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€",
-    "Resultado", "Lucro€", "Notas", "Origem", "KickoffUTC"
 ]
 
 HTTP_TIMEOUT = 30
@@ -1063,32 +1058,6 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df[CSV_COLUMNS].fillna("").copy()
 
 
-def ensure_manual_columns(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    for col in MANUAL_COLUMNS:
-        if col not in df.columns:
-            df[col] = ""
-    return df[MANUAL_COLUMNS].fillna("").copy()
-
-
-def safe_read_manual_csv(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        return pd.DataFrame(columns=MANUAL_COLUMNS)
-
-    try:
-        if path.stat().st_size == 0:
-            return pd.DataFrame(columns=MANUAL_COLUMNS)
-
-        df = pd.read_csv(path, sep=";", dtype=str).fillna("")
-        return ensure_manual_columns(df)
-
-    except pd.errors.EmptyDataError:
-        return pd.DataFrame(columns=MANUAL_COLUMNS)
-
-    except Exception as e:
-        print(f"[WARN] Erro a ler {path.name}: {e}")
-        return pd.DataFrame(columns=MANUAL_COLUMNS)
-
 
 def safe_read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
@@ -1783,97 +1752,6 @@ def try_update_row_via_api_football(
     return True, "UPDATED"
 
 
-def try_update_manual_row_via_api_football(
-    df: pd.DataFrame,
-    idx: int,
-    row,
-    league_code: str,
-    label: str,
-    shared_state: dict,
-):
-    data = str(row.get("Data", "")).strip()
-    jogo = str(row.get("Jogo", "")).strip()
-    mercado = str(row.get("Mercado", "")).strip().upper()
-    odd = parse_float(row.get("Odd", ""), 0.0)
-    stake = parse_float(row.get("Stake€", ""), 0.0)
-
-    home_csv, away_csv = split_game(jogo)
-    if not home_csv or not away_csv:
-        print(f"[WARN] {label}: Jogo manual mal formatado para fallback API-Football: {jogo}")
-        return False, "BAD_GAME"
-
-    fixtures, reason = fetch_api_football_fixtures_for_league_date(
-        league_code,
-        data,
-        shared_state,
-    )
-    if fixtures is None:
-        print(f"[WARN] {label}: API-Football sem fixtures para manual {jogo} | {league_code} | {data} | reason={reason}")
-        return False, reason or "NO_FIXTURES"
-
-    matched, best_score, meta = find_best_fixture_match(
-        home_csv,
-        away_csv,
-        fixtures,
-        shared_state,
-        min_total_score=MATCH_MIN_TOTAL_SCORE,
-        min_side_score=MATCH_MIN_SIDE_SCORE,
-    )
-    if not matched:
-        try:
-            prev_date = (datetime.strptime(data, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
-            fixtures_prev, _ = fetch_api_football_fixtures_for_league_date(league_code, prev_date, shared_state)
-            if fixtures_prev:
-                matched, best_score, meta = find_best_fixture_match(
-                    home_csv, away_csv, fixtures_prev, shared_state,
-                    min_total_score=MATCH_MIN_TOTAL_SCORE, min_side_score=MATCH_MIN_SIDE_SCORE,
-                )
-                if matched:
-                    print(f"[DBG] {label}: date-1 fallback hit | {jogo} | {data} -> {prev_date}")
-                    fixtures = fixtures_prev
-        except Exception:
-            pass
-    if not matched:
-        print(f"[WARN] {label}: API-Football sem match para manual: {jogo} | {league_code} | {data}")
-        log_no_match_candidates(f"{label} API-Football", home_csv, away_csv, fixtures, shared_state)
-        return False, "NO_MATCH"
-
-    can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
-    if not can_try_now:
-        kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
-        print(
-            f"[DBG] {label}: Manual API-Football ainda cedo para fechar: "
-            f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
-        )
-        return False, "TOO_EARLY"
-
-    kickoff_dt = get_fixture_kickoff_dt(matched)
-    if kickoff_dt:
-        df.at[idx, "KickoffUTC"] = kickoff_dt.isoformat()
-    
-    home_goals, away_goals = get_fixture_score(matched)
-    if home_goals is None or away_goals is None:
-        print(f"[WARN] {label}: API-Football sem goals finais para manual: {jogo}")
-        return False, "NO_SCORE"
-
-    resultado = market_result(mercado, int(home_goals), int(away_goals))
-    if resultado is None:
-        print(f"[WARN] {label}: Mercado manual não suportado no fallback API-Football: {mercado}")
-        return False, "UNSUPPORTED_MARKET"
-
-    lucro = calc_profit(resultado, stake, odd)
-    df.at[idx, "Resultado"] = resultado
-    df.at[idx, "Lucro€"] = str(lucro)
-
-    print(
-        f"[OK] {label}: manual API-Football | {jogo} | {mercado} | "
-        f"{home_goals}-{away_goals} => {resultado} | score_match={best_score} | "
-        f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
-        f"Lucro {lucro}"
-    )
-    return True, "UPDATED"
-
-
 # =============================
 # Shared state
 # =============================
@@ -2301,230 +2179,136 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     return ensure_columns(df), updated, already_done, ignored
 
 
-def update_manual_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
-    df = ensure_manual_columns(df)
-    shared_state = ensure_shared_state_defaults(shared_state)
+# =============================
+# Manual bets — cloud_state.json bridge
+# =============================
 
-    fd_matches_cache = shared_state["fd_matches_cache"]
-    blocked_fd_leagues_seen = shared_state["blocked_fd_leagues_seen"]
+def _normalize_market_code(raw: str) -> str:
+    """Map any market representation to its canonical SUPPORTED_MARKETS code."""
+    s = str(raw or '').strip().upper().replace(' ', '').replace('_', '').replace('.', '')
+    if s in {'O15', 'OVER15', 'OVER1,5'}:
+        return 'O1.5'
+    if s in {'O25', 'OVER25', 'OVER2,5'}:
+        return 'O2.5'
+    if s in {'O35', 'OVER35', 'OVER3,5'}:
+        return 'O3.5'
+    if s in {'BTTS', 'BTTSY', 'AMBASMARCAM', 'BOTHTEAMSTOSCORE', 'YES'}:
+        return 'BTTS'
+    return str(raw or '').strip().upper()
 
-    today_iso = get_today_lisbon_iso()
 
-    updated = 0
-    ignored = 0
-    already_done = 0
-    unsupported_market = 0
-    missing_mapping = 0
-    no_match_found = 0
-    not_finished = 0
-    future_skipped = 0
+def _resolve_liga_display_name(liga_raw: str) -> str:
+    """Convert any liga representation (canonical key, display name, alias)
+    to the display name that LEAGUE_CODE_MAP is keyed on.
 
-    af_used = 0
-    af_updated = 0
-    af_failed = 0
+    Manual bets from the Scout UI use canonical keys ('mls', 'finlandia').
+    The free-text form accepts display names ('MLS', 'Premier League').
+    LEAGUE_CODE_MAP keys are always display names.
+    """
+    if liga_raw in LEAGUE_CODE_MAP:
+        return liga_raw
+    entry = REGISTRY_BY_KEY.get(liga_raw.lower())
+    if entry:
+        return entry.name
+    lower = liga_raw.lower()
+    for name in LEAGUE_CODE_MAP:
+        if name.lower() == lower:
+            return name
+    return liga_raw
 
-    for i, row in df.iterrows():
-        resultado_atual = str(row.get("Resultado", "")).strip().upper()
 
-        if resultado_atual in {"W", "L", "P"}:
-            already_done += 1
+def manual_bets_to_settlement_df(manual_bets: list) -> pd.DataFrame:
+    """Convert cloud_state.json manualBets list to a DataFrame for update_dataframe().
+
+    Row order is preserved 1:1 so that apply_df_results_to_manual_bets() can write
+    results back by index without any additional key matching.
+    """
+    rows = []
+    for bet in manual_bets:
+        liga_raw = str(bet.get('liga') or '').strip()
+        rows.append({
+            'Data':       str(bet.get('data')        or '').strip(),
+            'Liga':       _resolve_liga_display_name(liga_raw),
+            'Jogo':       str(bet.get('jogo')        or '').strip(),
+            'Mercado':    _normalize_market_code(bet.get('mercado') or ''),
+            'Odd':        str(bet.get('odd')         or '').strip(),
+            'Stake€':     str(bet.get('stake')       or '').strip(),
+            'Resultado':  str(bet.get('resultado')   or '').strip().upper(),
+            'Lucro€':     str(bet.get('lucro')       or '').strip(),
+            'KickoffUTC': str(bet.get('kickoffUTC')  or '').strip(),
+            'Edge%':      '',
+            'Apostada':   'sim',   # manual bets are always placed
+            'OddReal':    '',
+            'StakeReal€': '',
+            'LucroReal€': '',
+        })
+    if not rows:
+        return pd.DataFrame(columns=CSV_COLUMNS)
+    return ensure_columns(pd.DataFrame(rows))
+
+
+def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
+    """Write settled results from the settlement DataFrame back into the bet dicts.
+
+    Only bets that transitioned from unsettled → W/L/P during this run are touched.
+    Returns the count of newly settled bets.
+    """
+    now_iso = datetime.now(timezone.utc).isoformat()
+    newly_settled = 0
+    for i, bet in enumerate(manual_bets):
+        if i >= len(df):
+            break
+        old_res = str(bet.get('resultado', '')).strip().upper()
+        if old_res in {'W', 'L', 'P'}:
             continue
-
-        data = str(row.get("Data", "")).strip()
-        liga = str(row.get("Liga", "")).strip()
-        jogo = str(row.get("Jogo", "")).strip()
-        mercado = str(row.get("Mercado", "")).strip().upper()
-        odd = parse_float(row.get("Odd", ""), 0.0)
-        stake = parse_float(row.get("Stake", row.get("Stake€", "")), 0.0)
-
-        if not data or not liga or not jogo or not mercado or odd <= 1.01 or stake <= 0:
-            ignored += 1
+        new_res = str(df.at[i, 'Resultado']).strip().upper()
+        if new_res not in {'W', 'L', 'P'}:
             continue
-
-        if mercado not in SUPPORTED_MARKETS:
-            print(f"[WARN] {label}: Mercado manual não suportado: {mercado}")
-            unsupported_market += 1
-            ignored += 1
-            continue
-
-        if is_future_date(data, today_iso, shared_state):
-            future_skipped += 1
-            ignored += 1
-            continue
-
-        league_code = LEAGUE_CODE_MAP.get(liga)
-        if not league_code:
-            print(f"[WARN] {label}: Liga manual sem mapping: {liga}")
-            missing_mapping += 1
-            ignored += 1
-            continue
-
-        home_csv, away_csv = split_game(jogo)
-        if not home_csv or not away_csv:
-            print(f"[WARN] {label}: Jogo manual mal formatado: {jogo}")
-            ignored += 1
-            continue
-
-        use_api_football_direct = should_use_api_football_fallback(league_code)
-
-        if use_api_football_direct:
-            blocked_fd_leagues_seen.add(league_code)
-            af_used += 1
-
-            ok, reason = try_update_manual_row_via_api_football(
-                df, i, row, league_code, label, shared_state
-            )
-            if ok:
-                updated += 1
-                af_updated += 1
-            else:
-                if reason == "TOO_EARLY":
-                    future_skipped += 1
-                elif reason == "NOT_FINISHED":
-                    not_finished += 1
-                elif reason == "NO_MATCH":
-                    no_match_found += 1
-                elif reason == "UNSUPPORTED_MARKET":
-                    unsupported_market += 1
-                af_failed += 1
-                ignored += 1
-            continue
-
-        cache_key = (league_code, data)
-
-        if cache_key not in fd_matches_cache:
-            try:
-                matches = fetch_matches_for_league_date(league_code, data)
-                fd_matches_cache[cache_key] = {
-                    "ok": True,
-                    "matches": matches,
-                    "reason": "",
-                }
-                print(f"[DBG] {label}: {liga} {data}: {len(matches)} jogos encontrados")
-            except error.HTTPError as e:
-                code = getattr(e, "code", None)
-                reason = f"HTTP {code}" if code is not None else "HTTP"
-                fd_matches_cache[cache_key] = {
-                    "ok": False,
-                    "matches": [],
-                    "reason": reason,
-                }
-                print(f"[ERR] {label}: football-data manual {liga} {data}: {reason}")
-            except Exception as e:
-                fd_matches_cache[cache_key] = {
-                    "ok": False,
-                    "matches": [],
-                    "reason": "OTHER",
-                }
-                print(f"[ERR] {label}: football-data manual {liga} {data}: {e}")
-
-        cache_entry = fd_matches_cache[cache_key]
-
-        if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
-            blocked_fd_leagues_seen.add(league_code)
-            af_used += 1
-
-            ok, reason = try_update_manual_row_via_api_football(
-                df, i, row, league_code, label, shared_state
-            )
-            if ok:
-                updated += 1
-                af_updated += 1
-            else:
-                if reason == "TOO_EARLY":
-                    future_skipped += 1
-                elif reason == "NOT_FINISHED":
-                    not_finished += 1
-                elif reason == "NO_MATCH":
-                    no_match_found += 1
-                elif reason == "UNSUPPORTED_MARKET":
-                    unsupported_market += 1
-                af_failed += 1
-                ignored += 1
-            continue
-
-        if not cache_entry["ok"]:
-            ignored += 1
-            continue
-
-        matches = cache_entry["matches"]
-        matched, best_score, meta = find_best_fixture_match(
-            home_csv,
-            away_csv,
-            matches,
-            shared_state,
-            min_total_score=MATCH_MIN_TOTAL_SCORE,
-            min_side_score=MATCH_MIN_SIDE_SCORE,
-        )
-
-        if not matched:
-            print(f"[WARN] {label}: Sem match API para manual: {jogo} | {liga} | {data}")
-            log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
-            no_match_found += 1
-            ignored += 1
-            continue
-
-        can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
-        if not can_try_now:
-            kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
-            print(
-                f"[DBG] {label}: Manual ainda cedo para fechar: "
-                f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
-            )
-            future_skipped += 1
-            ignored += 1
-            continue
-
-        status = str(get_fixture_status(matched)).upper()
-        if status not in FD_FINISHED_STATUS:
-            print(f"[DBG] {label}: Manual ainda não terminado: {jogo} | status={status}")
-            not_finished += 1
-            ignored += 1
-            continue
-
-        home_goals, away_goals = get_fixture_score(matched)
-        if home_goals is None or away_goals is None:
-            print(f"[WARN] {label}: Manual sem fullTime score para: {jogo}")
-            ignored += 1
-            continue
-
-        resultado = market_result(mercado, int(home_goals), int(away_goals))
-        if resultado is None:
-            print(f"[WARN] {label}: Mercado manual não suportado: {mercado}")
-            unsupported_market += 1
-            ignored += 1
-            continue
-
-        lucro = calc_profit(resultado, stake, odd)
-        df.at[i, "Resultado"] = resultado
-        df.at[i, "Lucro€"] = str(lucro)
-
-        updated += 1
-
+        lucro_str = str(df.at[i, 'Lucro€']).strip()
+        bet['resultado'] = new_res
+        try:
+            bet['lucro'] = round(float(lucro_str), 2) if lucro_str else None
+        except ValueError:
+            bet['lucro'] = None
+        bet['status'] = 'settled'
+        bet['settledAt'] = now_iso
+        newly_settled += 1
         print(
-            f"[OK] {label}: manual football-data | {jogo} | {mercado} | "
-            f"{home_goals}-{away_goals} => {resultado} | score_match={best_score} | "
-            f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
-            f"Lucro {lucro}"
+            f"[OK] manual settled | {bet.get('jogo', '?')} | {bet.get('mercado', '?')} | "
+            f"resultado={new_res} | lucro={bet.get('lucro')}"
         )
+    return newly_settled
 
-    print(
-        f"[DBG] {label} resumo -> "
-        f"updated={updated} | already_done={already_done} | ignored={ignored} | "
-        f"missing_mapping={missing_mapping} | unsupported_market={unsupported_market} | "
-        f"no_match_found={no_match_found} | not_finished={not_finished} | future_skipped={future_skipped} | "
-        f"af_used={af_used} | af_updated={af_updated} | af_failed={af_failed} | "
-        f"blocked_fd_leagues={sorted(blocked_fd_leagues_seen) if blocked_fd_leagues_seen else []}"
+
+def load_cloud_state_from_github() -> dict:
+    """Download and parse cloud_state.json from GitHub. Returns {} on 404 or error."""
+    try:
+        raw = github_get_file_bytes(GITHUB_OWNER, GITHUB_REPO, CLOUD_STATE_NAME, GITHUB_BRANCH, GITHUB_TOKEN)
+        text = raw.decode("utf-8") if raw else ""
+        return json.loads(text) if text.strip() else {}
+    except error.HTTPError as e:
+        if getattr(e, "code", None) == 404:
+            print(f"[WARN] {CLOUD_STATE_NAME} not found on GitHub — no manual bets to settle")
+            return {}
+        raise
+
+
+def save_cloud_state_to_github(content: dict, message: str) -> None:
+    """Upload cloud_state.json to GitHub via the existing github_put_file helper."""
+    text = json.dumps(content, ensure_ascii=False, indent=2)
+    github_put_file(
+        GITHUB_OWNER, GITHUB_REPO, CLOUD_STATE_NAME,
+        text.encode("utf-8"), GITHUB_BRANCH, GITHUB_TOKEN, message,
     )
-
-    return ensure_manual_columns(df), updated, already_done, ignored
+    print(f"[settlement] {CLOUD_STATE_NAME} saved to GitHub")
 
 
 # =============================
 # Remote settlement (called by sync_server.py)
 # =============================
 def run_settlement_remote() -> dict:
-    """Download CSVs from GitHub, run settlement synchronously, upload results.
+    """Download bot CSVs from GitHub, run settlement, upload results.
+    Manual bets are read from cloud_state.json and written back there.
 
     Returns {"ok": True, "updated": N, "ignored": M, "duration": S.s}
     Raises RuntimeError if env vars are missing.
@@ -2538,27 +2322,22 @@ def run_settlement_remote() -> dict:
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-
         tmp_history = tmp / "picks_history.csv"
         tmp_daily   = tmp / "picks_hoje_simplificado.csv"
-        tmp_manual  = tmp / "manual_bets.csv"
 
         for remote_name, local_path in [
             (REMOTE_HISTORY_NAME, tmp_history),
             (REMOTE_DAILY_NAME,   tmp_daily),
-            (REMOTE_MANUAL_NAME,  tmp_manual),
         ]:
-            raw = github_get_file_bytes(
-                GITHUB_OWNER, GITHUB_REPO, remote_name, GITHUB_BRANCH, GITHUB_TOKEN
-            )
+            raw = github_get_file_bytes(GITHUB_OWNER, GITHUB_REPO, remote_name, GITHUB_BRANCH, GITHUB_TOKEN)
             local_path.write_bytes(raw)
             print(f"[settlement] downloaded {remote_name} ({len(raw)} bytes)")
 
         shared_state = make_shared_runtime_state()
 
+        # ── Bot picks ─────────────────────────────────────────────────────────
         history_df = safe_read_csv(tmp_history)
         daily_df   = safe_read_csv(tmp_daily)
-        manual_df  = safe_read_manual_csv(tmp_manual)
 
         history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
         history_df.to_csv(tmp_history, index=False, sep=";", encoding="utf-8")
@@ -2569,15 +2348,39 @@ def run_settlement_remote() -> dict:
         daily_df.to_csv(tmp_daily, index=False, sep=";", encoding="utf-8")
         print(f"[settlement] daily: updated={d_updated} done={d_done} ignored={d_ignored}")
 
-        manual_df, m_updated, m_done, m_ignored = update_manual_dataframe(manual_df, "manual", shared_state)
-        manual_df.to_csv(tmp_manual, index=False, sep=";", encoding="utf-8")
-        print(f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored}")
+        upload_csv_to_github(tmp_history, REMOTE_HISTORY_NAME)
+        upload_csv_to_github(tmp_daily,   REMOTE_DAILY_NAME)
 
         save_team_alias_cache(shared_state)
 
-        upload_csv_to_github(tmp_history, REMOTE_HISTORY_NAME)
-        upload_csv_to_github(tmp_daily,   REMOTE_DAILY_NAME)
-        upload_csv_to_github(tmp_manual,  REMOTE_MANUAL_NAME)
+    # ── Manual bets (cloud_state.json is the single source of truth) ──────────
+    m_updated = 0
+    m_done    = 0
+    m_ignored = 0
+    try:
+        cloud_state  = load_cloud_state_from_github()
+        manual_bets  = cloud_state.get("manualBets", [])
+        print(f"[settlement] cloud_state: {len(manual_bets)} manual bet(s) found")
+
+        if manual_bets:
+            manual_df = manual_bets_to_settlement_df(manual_bets)
+            manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
+            newly_settled = apply_df_results_to_manual_bets(manual_bets, manual_df)
+            print(f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored} newly_settled={newly_settled}")
+
+            if newly_settled > 0:
+                cloud_state["manualBets"] = manual_bets
+                msg = (
+                    f"Settle {newly_settled} manual bet(s) "
+                    f"({datetime.now(timezone.utc).isoformat()}Z)"
+                )
+                save_cloud_state_to_github(cloud_state, msg)
+        else:
+            print("[settlement] manual: no pending manual bets")
+    except Exception as exc:
+        import traceback as _tb
+        print(f"[WARN] manual settlement failed: {exc}")
+        _tb.print_exc()
 
     duration = round(time.time() - t0, 1)
     total_updated = h_updated + d_updated + m_updated
@@ -2586,9 +2389,9 @@ def run_settlement_remote() -> dict:
     print(f"[settlement] done in {duration}s — updated={total_updated} ignored={total_ignored}")
 
     return {
-        "ok":       True,
-        "updated":  total_updated,
-        "ignored":  total_ignored,
+        "ok":      True,
+        "updated": total_updated,
+        "ignored": total_ignored,
         "duration": duration,
     }
 
@@ -2615,9 +2418,8 @@ def main():
 
     shared_state = make_shared_runtime_state()
 
-    daily_df = safe_read_csv(DAILY_FILE)
+    daily_df   = safe_read_csv(DAILY_FILE)
     history_df = safe_read_csv(HISTORY_FILE)
-    manual_df = safe_read_manual_csv(MANUAL_FILE)
 
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
@@ -2628,7 +2430,6 @@ def main():
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
 
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily", shared_state)
-
     daily_df, d_synced = sync_daily_from_history(daily_df, history_df)
     daily_df.to_csv(DAILY_FILE, index=False, sep=";", encoding="utf-8")
     print(
@@ -2636,19 +2437,37 @@ def main():
         f"sincronizados via history: {d_synced}"
     )
 
-    manual_df, m_updated, m_done, m_ignored = update_manual_dataframe(
-        manual_df, "manual", shared_state
-    )
-    manual_df.to_csv(MANUAL_FILE, index=False, sep=";", encoding="utf-8")
-    print(
-        f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | ignorados: {m_ignored}"
-    )
-
     save_team_alias_cache(shared_state)
 
     upload_csv_to_github(HISTORY_FILE, REMOTE_HISTORY_NAME)
-    upload_csv_to_github(DAILY_FILE, REMOTE_DAILY_NAME)
-    upload_csv_to_github(MANUAL_FILE, REMOTE_MANUAL_NAME)
+    upload_csv_to_github(DAILY_FILE,   REMOTE_DAILY_NAME)
+
+    # ── Manual bets — cloud_state.json is the single source of truth ──────────
+    if GITHUB_TOKEN:
+        try:
+            cloud_state = load_cloud_state_from_github()
+            manual_bets = cloud_state.get("manualBets", [])
+            print(f"Manual bets em cloud_state.json: {len(manual_bets)}")
+            if manual_bets:
+                manual_df = manual_bets_to_settlement_df(manual_bets)
+                manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
+                newly_settled = apply_df_results_to_manual_bets(manual_bets, manual_df)
+                print(
+                    f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | "
+                    f"ignorados: {m_ignored} | liquidados agora: {newly_settled}"
+                )
+                if newly_settled > 0:
+                    cloud_state["manualBets"] = manual_bets
+                    save_cloud_state_to_github(
+                        cloud_state,
+                        f"Settle {newly_settled} manual bet(s) — local run",
+                    )
+            else:
+                print("Manual: sem apostas pendentes")
+        except Exception as e:
+            print(f"[WARN] liquidação manual falhou: {e}")
+    else:
+        print("[WARN] GITHUB_TOKEN não definido — liquidação manual ignorada")
 
 
 if __name__ == "__main__":
