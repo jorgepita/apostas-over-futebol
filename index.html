@@ -12077,11 +12077,34 @@ button.dirty {
       async function _reloadManualBetsFromCloud() {
         try {
           const res = await fetch(`${API_URL}/load`);
-          if (!res.ok) return;
+          if (!res.ok) { console.warn('[STEP 6] GET /load failed:', res.status); return; }
           const content = await res.json();
-          if (!content || !Array.isArray(content.manualBets)) return;
+          if (!content || !Array.isArray(content.manualBets)) {
+            console.warn('[STEP 6] no manualBets array in /load response:', content);
+            return;
+          }
+
+          // [STEP 6] ──────────────────────────────────────────────────────────
+          const _allBets   = content.manualBets;
+          const _settled   = _allBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
+          const _pending   = _allBets.filter(b => !['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
+          const _live      = _pending.filter(b => b.status === 'approved');
+          console.log('[STEP 6] _reloadManualBetsFromCloud — received from /load:');
+          console.log(`[STEP 6]   total=${_allBets.length}  settled=${_settled.length}  pending=${_pending.length}  live(approved+pending)=${_live.length}`);
+          _allBets.slice(0, 5).forEach((b, i) => {
+            console.log(`[STEP 6]   bet[${i}]: data=${b.data}  liga=${b.liga}  mercado=${b.mercado}  resultado=${b.resultado}  status=${b.status}`);
+          });
+          // ────────────────────────────────────────────────────────────────────
+
           state.manualBets = content.manualBets;
           saveLocalState();
+
+          // [STEP 6] ──────────────────────────────────────────────────────────
+          const _liveAfter = state.manualBets.filter(b => b.status === 'approved' && !['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
+          const _histAfter = state.manualBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
+          console.log(`[STEP 6] Before rerenderAll — Live manual bets: ${_liveAfter.length}  |  History manual bets: ${_histAfter.length}`);
+          // ────────────────────────────────────────────────────────────────────
+
           rerenderAll(false);
         } catch (e) {
           console.error('[Settlement] reload manual bets from cloud failed:', e);

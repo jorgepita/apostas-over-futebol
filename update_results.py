@@ -2237,13 +2237,31 @@ def manual_bets_to_settlement_df(manual_bets: list) -> pd.DataFrame:
             'Lucro€':     str(bet.get('lucro')       or '').strip(),
             'KickoffUTC': str(bet.get('kickoffUTC')  or '').strip(),
             'Edge%':      '',
-            'Apostada':   'sim',   # manual bets are always placed
+            'Apostada':   'sim',
             'OddReal':    '',
             'StakeReal€': '',
             'LucroReal€': '',
         })
     if not rows:
         return pd.DataFrame(columns=CSV_COLUMNS)
+
+    # [STEP 2] ── manual settlement dataframe ─────────────────────────────────
+    print(f"[STEP 2] manual_bets_to_settlement_df: {len(rows)} rows produced")
+    print(f"[STEP 2] Columns: {CSV_COLUMNS}")
+    for i, r in enumerate(rows[:5]):
+        orig_liga = str(manual_bets[i].get('liga') or '').strip()
+        orig_merc = str(manual_bets[i].get('mercado') or '').strip()
+        print(
+            f"[STEP 2] row[{i}]: "
+            f"Data={r['Data']!r}  "
+            f"Liga={r['Liga']!r} (raw={orig_liga!r})  "
+            f"Jogo={r['Jogo']!r}  "
+            f"Mercado={r['Mercado']!r} (raw={orig_merc!r})  "
+            f"Odd={r['Odd']!r}  Stake={r['Stake€']!r}  "
+            f"KickoffUTC={r['KickoffUTC']!r}"
+        )
+    # ─────────────────────────────────────────────────────────────────────────
+
     return ensure_columns(pd.DataFrame(rows))
 
 
@@ -2253,6 +2271,22 @@ def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
     Only bets that transitioned from unsettled → W/L/P during this run are touched.
     Returns the count of newly settled bets.
     """
+    # [STEP 4] ─────────────────────────────────────────────────────────────────
+    print(f"[STEP 4] apply_df_results_to_manual_bets: {len(manual_bets)} bets, df has {len(df)} rows")
+    for i, bet in enumerate(manual_bets):
+        if i >= len(df):
+            print(f"[STEP 4] bet[{i}]: OUT OF RANGE — df has only {len(df)} rows")
+            break
+        old_res  = str(bet.get('resultado', '')).strip().upper()
+        df_res   = str(df.at[i, 'Resultado']).strip().upper()
+        df_lucro = str(df.at[i, 'Lucro€']).strip()
+        print(
+            f"[STEP 4] bet[{i}]: jogo={bet.get('jogo','?')!r}  "
+            f"mercado={bet.get('mercado','?')!r}  status={bet.get('status')!r}  "
+            f"old_resultado={old_res!r}  df_Resultado={df_res!r}  df_Lucro={df_lucro!r}"
+        )
+    # ──────────────────────────────────────────────────────────────────────────
+
     now_iso = datetime.now(timezone.utc).isoformat()
     newly_settled = 0
     for i, bet in enumerate(manual_bets):
@@ -2358,25 +2392,74 @@ def run_settlement_remote() -> dict:
     m_done    = 0
     m_ignored = 0
     try:
-        cloud_state  = load_cloud_state_from_github()
-        manual_bets  = cloud_state.get("manualBets", [])
-        print(f"[settlement] cloud_state: {len(manual_bets)} manual bet(s) found")
+        cloud_state = load_cloud_state_from_github()
+        manual_bets = cloud_state.get("manualBets", [])
+
+        # [STEP 1] ─────────────────────────────────────────────────────────────
+        _settled_res = {'W', 'L', 'P'}
+        _mb_pending  = [b for b in manual_bets if str(b.get('resultado', '')).strip().upper() not in _settled_res]
+        _mb_settled  = [b for b in manual_bets if str(b.get('resultado', '')).strip().upper() in _settled_res]
+        _mb_live     = [b for b in manual_bets if b.get('status') == 'approved' and str(b.get('resultado', '')).strip().upper() not in _settled_res]
+        print(f"[STEP 1] cloud_state.json loaded")
+        print(f"[STEP 1] manualBets total : {len(manual_bets)}")
+        print(f"[STEP 1] Pending (no result): {len(_mb_pending)}")
+        print(f"[STEP 1] Live (approved+no result): {len(_mb_live)}")
+        print(f"[STEP 1] Settled (W/L/P): {len(_mb_settled)}")
+        for i, b in enumerate(manual_bets[:5]):
+            print(
+                f"[STEP 1] bet[{i}]: "
+                f"data={b.get('data')!r}  liga={b.get('liga')!r}  "
+                f"jogo={b.get('jogo')!r}  mercado={b.get('mercado')!r}  "
+                f"odd={b.get('odd')!r}  stake={b.get('stake')!r}  "
+                f"resultado={b.get('resultado')!r}  status={b.get('status')!r}  "
+                f"kickoffUTC={b.get('kickoffUTC')!r}"
+            )
+        # ──────────────────────────────────────────────────────────────────────
 
         if manual_bets:
             manual_df = manual_bets_to_settlement_df(manual_bets)
+
+            # [STEP 3] ─────────────────────────────────────────────────────────
+            print(f"[STEP 3] update_dataframe('manual'): {len(manual_df)} rows entering")
+            # ──────────────────────────────────────────────────────────────────
+
             manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
+
+            # [STEP 3] ─────────────────────────────────────────────────────────
+            print(f"[STEP 3] update_dataframe done: updated={m_updated}  done={m_done}  ignored={m_ignored}")
+            if len(manual_df) > 0:
+                for i, row in manual_df.head(5).iterrows():
+                    print(
+                        f"[STEP 3] df[{i}]: "
+                        f"Data={str(row.get('Data',''))!r}  "
+                        f"Liga={str(row.get('Liga',''))!r}  "
+                        f"Jogo={str(row.get('Jogo',''))!r}  "
+                        f"Resultado={str(row.get('Resultado',''))!r}  "
+                        f"Lucro={str(row.get('Lucro€',''))!r}"
+                    )
+            # ──────────────────────────────────────────────────────────────────
+
             newly_settled = apply_df_results_to_manual_bets(manual_bets, manual_df)
             print(f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored} newly_settled={newly_settled}")
 
             if newly_settled > 0:
+                # [STEP 5] ─────────────────────────────────────────────────────
+                _ms_total   = len(manual_bets)
+                _ms_settled = sum(1 for b in manual_bets if str(b.get('resultado', '')).strip().upper() in _settled_res)
+                print(f"[STEP 5] Saving cloud_state.json")
+                print(f"[STEP 5] manualBets total={_ms_total}  settled={_ms_settled}  pending={_ms_total - _ms_settled}")
+                # ──────────────────────────────────────────────────────────────
+
                 cloud_state["manualBets"] = manual_bets
                 msg = (
                     f"Settle {newly_settled} manual bet(s) "
                     f"({datetime.now(timezone.utc).isoformat()}Z)"
                 )
                 save_cloud_state_to_github(cloud_state, msg)
+            else:
+                print("[STEP 5] newly_settled=0 — cloud_state.json NOT written")
         else:
-            print("[settlement] manual: no pending manual bets")
+            print("[settlement] manual: no manual bets in cloud_state.json")
     except Exception as exc:
         import traceback as _tb
         print(f"[WARN] manual settlement failed: {exc}")
