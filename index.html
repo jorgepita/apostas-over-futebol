@@ -4027,6 +4027,27 @@ button.dirty {
         const s = cleanString(value).toLowerCase();
         return LEAGUE_NORMALIZE.get(s) || s;
       }
+
+      // Re-key any localEdits object so every league component uses the canonical
+      // registry key (e.g. "MLS" / "mls" / "Major League Soccer" → "mls").
+      // When two old keys collapse to the same new key the entry with more fields
+      // wins; the other is merged in underneath so no data is lost.
+      function migrateLocalEditsKeys(edits) {
+        if (!edits || typeof edits !== 'object') return {};
+        const out = {};
+        for (const [k, v] of Object.entries(edits)) {
+          const parts = k.split('|');
+          const newKey = parts.length === 4
+            ? [parts[0], normalizeLeagueCode(parts[1]), parts[2], parts[3]].join('|')
+            : k;
+          if (Object.prototype.hasOwnProperty.call(out, newKey)) {
+            out[newKey] = Object.assign({}, v, out[newKey]);
+          } else {
+            out[newKey] = v;
+          }
+        }
+        return out;
+      }
       // ─────────────────────────────────────────────────────────────────────────
 
       function normalizeMarket(row) {
@@ -4168,7 +4189,7 @@ button.dirty {
       function makePickKey(row) {
         return [
           normalizeDateString(row['Data'] || ''),
-          cleanString(row['Liga'] || ''),
+          normalizeLeagueCode(row['Liga'] || ''),
           cleanString(row['Jogo'] || ''),
           normalizeMarket(row)
         ].join('|');
@@ -4296,7 +4317,13 @@ button.dirty {
         }
 
         try {
-          state.localEdits = savedEdits ? JSON.parse(savedEdits) : {};
+          let rawEdits = savedEdits ? JSON.parse(savedEdits) : null;
+          if (!rawEdits || Object.keys(rawEdits).length === 0) {
+            // v6 is empty — try to recover and migrate v5 entries.
+            const v5 = localStorage.getItem('apostas_bot_local_edits_v5');
+            if (v5) rawEdits = JSON.parse(v5);
+          }
+          state.localEdits = migrateLocalEditsKeys(rawEdits || {});
         } catch {
           state.localEdits = {};
         }
@@ -8006,7 +8033,7 @@ button.dirty {
       state.bankrollInicialSet = true;
     }
     state.manualBets = content.manualBets || [];
-    state.localEdits = content.localEdits || {};
+    state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
     state.sessionStartDate = content.sessionStartDate || '';
 
     rerenderAll(true);
