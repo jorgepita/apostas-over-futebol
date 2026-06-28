@@ -3015,9 +3015,9 @@
       "mercado": "Over 2.5",
       "odd": "1.44",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -3042,7 +3042,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-14T14:18:04.616Z"
-      }
+      },
+      "lucro": 0.44,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446601529_5qgemi",
@@ -3052,9 +3054,9 @@
       "mercado": "Over 2.5",
       "odd": "1.5",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3079,7 +3081,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-14T14:17:36.851Z"
-      }
+      },
+      "lucro": 0.5,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446609601_wgr5n3",
@@ -3089,9 +3093,9 @@
       "mercado": "Over 2.5",
       "odd": "1.86",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3116,7 +3120,9 @@
         "sampleSize": 3,
         "dataQuality": "LOW",
         "timestamp": "2026-06-14T14:17:44.764Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446612711_y696n1",
@@ -3126,9 +3132,9 @@
       "mercado": "Over 2.5",
       "odd": "1.8",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -3153,7 +3159,9 @@
         "sampleSize": 5,
         "dataQuality": "MEDIUM",
         "timestamp": "2026-06-14T14:17:50.475Z"
-      }
+      },
+      "lucro": 0.8,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446617559_i8dlcu",
@@ -3163,9 +3171,9 @@
       "mercado": "Over 2.5",
       "odd": "1.5",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3190,7 +3198,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-14T14:17:41.810Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446621929_62u6yk",
@@ -3200,9 +3210,9 @@
       "mercado": "Over 2.5",
       "odd": "1.75",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3227,7 +3237,9 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-14T14:17:47.466Z"
-      }
+      },
+      "lucro": 0.75,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1781446649563_3e6ya7",
@@ -3237,9 +3249,9 @@
       "mercado": "Over 2.5",
       "odd": "1.59",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3264,7 +3276,9 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-14T14:17:48.881Z"
-      }
+      },
+      "lucro": 0.59,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782231452047_frhzie",
@@ -3274,9 +3288,9 @@
       "mercado": "Over 2.5",
       "odd": "1.83",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3305,7 +3319,9 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-23T16:17:26.059Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782231466013_qg0tll",
@@ -3315,15 +3331,17 @@
       "mercado": "Over 2.5",
       "odd": "1.68",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": false,
       "botOpinion": null,
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
-      "analysisSnapshot": null
+      "analysisSnapshot": null,
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782231493275_75pam4",
@@ -3333,15 +3351,17 @@
       "mercado": "Over 2.5",
       "odd": "1.75",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": false,
       "botOpinion": null,
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
-      "analysisSnapshot": null
+      "analysisSnapshot": null,
+      "lucro": 0.75,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782231502909_lkl5s6",
@@ -3351,9 +3371,9 @@
       "mercado": "Over 2.5",
       "odd": "1.97",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3378,7 +3398,9 @@
         "sampleSize": 3,
         "dataQuality": "LOW",
         "timestamp": "2026-06-23T16:18:40.718Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432289632_sw57uv",
@@ -3388,9 +3410,9 @@
       "mercado": "Over 2.5",
       "odd": "1.89",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3415,7 +3437,9 @@
         "sampleSize": 3,
         "dataQuality": "LOW",
         "timestamp": "2026-06-26T00:05:25.075Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432296725_cax7ub",
@@ -3425,9 +3449,9 @@
       "mercado": "Over 2.5",
       "odd": "1.73",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -3452,7 +3476,9 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-26T00:05:29.874Z"
-      }
+      },
+      "lucro": 0.73,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432299897_oqep9m",
@@ -3462,9 +3488,9 @@
       "mercado": "Over 2.5",
       "odd": "1.58",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3489,7 +3515,9 @@
         "sampleSize": 12,
         "dataQuality": "HIGH",
         "timestamp": "2026-06-26T00:05:34.975Z"
-      }
+      },
+      "lucro": 0.58,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432305979_lbd0bn",
@@ -3499,9 +3527,9 @@
       "mercado": "Over 2.5",
       "odd": "1.86",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -3526,7 +3554,9 @@
         "sampleSize": 5,
         "dataQuality": "MEDIUM",
         "timestamp": "2026-06-26T00:05:43.131Z"
-      }
+      },
+      "lucro": 0.86,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432309199_fbrl1e",
@@ -3536,9 +3566,9 @@
       "mercado": "Over 2.5",
       "odd": "1.58",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -3563,7 +3593,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-26T00:05:39.488Z"
-      }
+      },
+      "lucro": 0.58,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432314517_mgoo1q",
@@ -3573,9 +3605,9 @@
       "mercado": "Over 2.5",
       "odd": "1.4",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "rejected",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -3600,7 +3632,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-26T17:15:33.235Z"
-      }
+      },
+      "lucro": 0.4,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782432318873_57tpt6",
@@ -3610,9 +3644,9 @@
       "mercado": "Over 2.5",
       "odd": "1.53",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3637,7 +3671,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-26T00:05:54.290Z"
-      }
+      },
+      "lucro": 0.53,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782598244648_9okspc",
@@ -3647,9 +3683,9 @@
       "mercado": "Over 2.5",
       "odd": "1.51",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -3678,7 +3714,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-27T22:10:38.293Z"
-      }
+      },
+      "lucro": -1.0,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     },
     {
       "id": "manual_1782598257641_j3a2c6",
@@ -3688,9 +3726,9 @@
       "mercado": "Over 2.5",
       "odd": "1.58",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -3719,7 +3757,9 @@
         "sampleSize": 0,
         "dataQuality": "NONE",
         "timestamp": "2026-06-27T22:10:51.583Z"
-      }
+      },
+      "lucro": 0.58,
+      "settledAt": "2026-06-28T22:35:45.109676+00:00"
     }
   ],
   "movements": [
