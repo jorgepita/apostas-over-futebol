@@ -4345,6 +4345,17 @@ button.dirty {
         state.mobileActionsOpen = savedMobileActions === '1';
       }
 
+      // Returns true when the user has a real local session worth preserving.
+      // Used by boot() to decide whether auto cloud-recovery is needed.
+      function hasMeaningfulLocalState() {
+        return (
+          state.bankrollInicialSet ||
+          Object.keys(state.localEdits  || {}).length > 0 ||
+          (state.manualBets  || []).length > 0 ||
+          (state.movements   || []).length > 0
+        );
+      }
+
       function saveLocalState() {
         if (state.bankrollInicial !== null) {
           localStorage.setItem(STORAGE_KEYS.bankroll, String(state.bankrollInicial));
@@ -7991,60 +8002,76 @@ button.dirty {
   }
 }
 
+      // Internal implementation of cloud state loading.
+      // fromUser=true  → interactive path: season guard active, shows alert on success/error.
+      // fromUser=false → auto-recovery path: guard skipped, shows toast, fails silently.
+      async function _doLoadCloudState({ fromUser = false } = {}) {
+        try {
+          const res = await fetch(`${API_URL}/load`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const content = await res.json();
+
+          // Empty cloud — nothing to restore.
+          if (!content || typeof content !== 'object' || !content.sessionStartDate) {
+            if (fromUser) alert('No cloud state found.');
+            return false;
+          }
+
+          // Season recency guard: refuse to overwrite a newer local season with an older cloud
+          // season. Only enforced on the manual Load Cloud button — auto-recovery already
+          // guarantees it only runs when hasMeaningfulLocalState() is false.
+          if (fromUser) {
+            const cloudSession = content.sessionStartDate || '';
+            const localSession = state.sessionStartDate   || '';
+            const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+            if (
+              cloudSession &&
+              localSession &&
+              localSessionStored &&
+              hasMeaningfulLocalState() &&
+              cloudSession < localSession
+            ) {
+              alert(
+                `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
+                `but your current season started on ${localSession}.\n\n` +
+                `Loading would overwrite your newer season with an older, archived one.\n\n` +
+                `If you intentionally want to restore an old season, that feature will be available in Phase 23.2.`
+              );
+              return false;
+            }
+          }
+
+          state.cloudAvailable = true;
+          updateCloudStatus();
+
+          state.bankrollInicial = content.bankrollInicial || 1000;
+          if (content.bankrollInicial != null) {
+            state.bankrollInicialSet = true;
+          }
+          state.manualBets = content.manualBets || [];
+          state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
+          state.sessionStartDate = content.sessionStartDate || '';
+
+          rerenderAll(true);
+
+          if (fromUser) {
+            alert('Carregado do GitHub com sucesso');
+          } else {
+            showSaveToast('Dashboard state restored from Cloud.', 3000);
+          }
+
+          return true;
+        } catch (e) {
+          console.error('loadCloudState error:', e);
+          if (fromUser) alert('Erro ao carregar do GitHub');
+          return false;
+        }
+      }
+
+      // Public entry point — keeps the Load Cloud button working exactly as before.
       async function loadCloudState() {
-  try {
-    const res = await fetch(`${API_URL}/load`);
-    const content = await res.json();
-
-    // Season recency guard: refuse to overwrite a newer local season with an older cloud season.
-    // This prevents a failed Step-12 cloud sync from resurrecting an archived season when the
-    // user clicks "Load Cloud" after a season close.
-    // hasRealLocalSeason prevents the guard from blocking fresh/empty bootstrap states that
-    // happen to have a stored sessionStartDate but contain no actual data.
-    const cloudSession = content.sessionStartDate || '';
-    const localSession = state.sessionStartDate   || '';
-    const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
-    const hasRealLocalSeason =
-      state.bankrollInicialSet ||
-      (Array.isArray(state.manualBets) && state.manualBets.length > 0) ||
-      (Array.isArray(state.movements)  && state.movements.length  > 0) ||
-      (state.localEdits && Object.keys(state.localEdits).length   > 0);
-    if (
-      cloudSession &&
-      localSession &&
-      localSessionStored &&
-      hasRealLocalSeason &&
-      cloudSession < localSession
-    ) {
-      alert(
-        `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
-        `but your current season started on ${localSession}.\n\n` +
-        `Loading would overwrite your newer season with an older, archived one.\n\n` +
-        `If you intentionally want to restore an old season, that feature will be available in Phase 23.2.`
-      );
-      return;
-    }
-
-    state.cloudAvailable = true;
-    updateCloudStatus();
-
-    state.bankrollInicial = content.bankrollInicial || 1000;
-    if (content.bankrollInicial != null) {
-      state.bankrollInicialSet = true;
-    }
-    state.manualBets = content.manualBets || [];
-    state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
-    state.sessionStartDate = content.sessionStartDate || '';
-
-    rerenderAll(true);
-
-    alert('Carregado do GitHub com sucesso');
-
-  } catch (e) {
-    console.error(e);
-    alert('Erro ao carregar do GitHub');
-  }
-}
+        return _doLoadCloudState({ fromUser: true });
+      }
       
       function updateCloudStatus() {
   const el = document.getElementById('cloudStatusLabel');
@@ -8090,17 +8117,17 @@ button.dirty {
         }, 4000);
       }
 
-      function showSaveToast() {
+      function showSaveToast(msg, durationMs) {
         let toast = document.getElementById('save-toast');
         if (!toast) {
           toast = document.createElement('div');
           toast.id = 'save-toast';
           document.body.appendChild(toast);
         }
-        toast.textContent = '✓ Alteração gravada';
+        toast.textContent = msg || '✓ Alteração gravada';
         toast.classList.add('visible');
         clearTimeout(toast._hideTimer);
-        toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), 2000);
+        toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), durationMs || 2000);
       }
 
       function updateLocalEdit(key, changes) {
@@ -13839,6 +13866,13 @@ button.dirty {
 
         await Promise.all([loadData(true), loadLeagueStats()]);
         checkPendingAlerts().catch(() => {});
+
+        // Auto cloud-recovery: restore state for new/anonymous/foreign-device browsers.
+        // Only runs when no meaningful local session exists; never overwrites real local data.
+        if (!hasMeaningfulLocalState()) {
+          const recovered = await _doLoadCloudState({ fromUser: false });
+          if (recovered) saveLocalState();
+        }
 
         initialLoadDone = true;
         setInterval(() => {
