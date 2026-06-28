@@ -2417,6 +2417,64 @@ def run_settlement_remote() -> dict:
         # ──────────────────────────────────────────────────────────────────────
 
         if manual_bets:
+            # [STEP 2A] ────────────────────────────────────────────────────────
+            _req_fields  = ('data', 'liga', 'jogo', 'mercado', 'odd', 'stake')
+            _miss_counts = {f: 0 for f in _req_fields}
+            print(f"[STEP 2A] Raw manual bet objects — {len(manual_bets)} total")
+            for _i, _b in enumerate(manual_bets):
+                _liga_raw    = str(_b.get('liga')    or '').strip()
+                _merc_raw    = str(_b.get('mercado') or '').strip()
+                _odd_str     = str(_b.get('odd')     or '').strip()
+                _stake_str   = str(_b.get('stake')   or '').strip()
+                _data_str    = str(_b.get('data')    or '').strip()
+                _jogo_str    = str(_b.get('jogo')    or '').strip()
+                _liga_res    = _resolve_liga_display_name(_liga_raw)
+                _merc_norm   = _normalize_market_code(_merc_raw)
+                _odd_val     = parse_float(_odd_str,   0.0)
+                _stake_val   = parse_float(_stake_str, 0.0)
+                _in_lcm      = _liga_res in LEAGUE_CODE_MAP
+                _in_sm       = _merc_norm in SUPPORTED_MARKETS
+                _already_done = str(_b.get('resultado', '')).strip().upper() in {'W', 'L', 'P'}
+                _invalid_row  = (
+                    not _data_str or not _liga_res or not _jogo_str
+                    or _odd_val <= 1.01 or _stake_val <= 0
+                )
+                for _f in _req_fields:
+                    if not str(_b.get(_f) or '').strip():
+                        _miss_counts[_f] += 1
+
+                print(f"[STEP 2A] bet[{_i}]:")
+                print(f"[STEP 2A]   id={_b.get('id')!r}")
+                print(f"[STEP 2A]   data={_data_str!r}")
+                print(f"[STEP 2A]   liga={_liga_raw!r}  →  df_Liga={_liga_res!r}  in_LEAGUE_CODE_MAP={_in_lcm}")
+                print(f"[STEP 2A]   jogo={_jogo_str!r}")
+                print(f"[STEP 2A]   mercado={_merc_raw!r}  →  df_Mercado={_merc_norm!r}  in_SUPPORTED_MARKETS={_in_sm}")
+                print(f"[STEP 2A]   odd={_odd_str!r}  (parsed={_odd_val})  passes_odd_check={_odd_val > 1.01}")
+                print(f"[STEP 2A]   stake={_stake_str!r}  (parsed={_stake_val})  passes_stake_check={_stake_val > 0}")
+                print(f"[STEP 2A]   kickoffUTC={_b.get('kickoffUTC')!r}")
+                print(f"[STEP 2A]   resultado={_b.get('resultado')!r}  status={_b.get('status')!r}")
+                if _already_done:
+                    print(f"[STEP 2A]   *** ALREADY_DONE — will be skipped by update_dataframe (resultado already settled)")
+                elif _invalid_row:
+                    _reasons = []
+                    if not _data_str:  _reasons.append("data empty")
+                    if not _liga_res:  _reasons.append("liga unresolved")
+                    if not _jogo_str:  _reasons.append("jogo empty")
+                    if _odd_val <= 1.01:   _reasons.append(f"odd={_odd_val} ≤ 1.01")
+                    if _stake_val <= 0:    _reasons.append(f"stake={_stake_val} ≤ 0")
+                    print(f"[STEP 2A]   *** INVALID_ROW — will be ignored by update_dataframe: {', '.join(_reasons)}")
+                elif not _in_lcm:
+                    print(f"[STEP 2A]   *** MISSING_LEAGUE_MAP — liga_res={_liga_res!r} not in LEAGUE_CODE_MAP")
+                elif not _in_sm:
+                    print(f"[STEP 2A]   *** UNSUPPORTED_MARKET — mercado_norm={_merc_norm!r} not in SUPPORTED_MARKETS")
+                else:
+                    print(f"[STEP 2A]   OK — passes all pre-checks; will attempt fixture lookup")
+
+            print(f"[STEP 2A] Missing required field counts (out of {len(manual_bets)} bets):")
+            for _f, _cnt in _miss_counts.items():
+                print(f"[STEP 2A]   missing '{_f}': {_cnt}")
+            # ──────────────────────────────────────────────────────────────────
+
             manual_df = manual_bets_to_settlement_df(manual_bets)
 
             # [STEP 3] ─────────────────────────────────────────────────────────
