@@ -880,11 +880,31 @@ def log_no_match_candidates(
 
     scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
 
-    for total, hs, aws, api_home, api_away, status in scored[:top_n]:
+    if not scored:
         debug_log(
-            f"{prefix}: candidato match | "
+            f"{prefix}: NO CANDIDATES — API returned 0 fixtures for this league+date | "
+            f"row='{row_home} vs {row_away}'"
+        )
+        return
+
+    for total, hs, aws, api_home, api_away, status in scored[:top_n]:
+        side_problems = []
+        if hs < MATCH_MIN_SIDE_SCORE:
+            side_problems.append(f"hs={hs}<{MATCH_MIN_SIDE_SCORE}")
+        if aws < MATCH_MIN_SIDE_SCORE:
+            side_problems.append(f"aws={aws}<{MATCH_MIN_SIDE_SCORE}")
+
+        if not side_problems and total >= MATCH_MIN_TOTAL_SCORE:
+            verdict = "WOULD_MATCH"
+        elif side_problems:
+            verdict = f"REJECTED(side_score: {', '.join(side_problems)})"
+        else:
+            verdict = f"REJECTED(total_score: {total}<{MATCH_MIN_TOTAL_SCORE})"
+
+        debug_log(
+            f"{prefix}: candidato | "
             f"row='{row_home} vs {row_away}' | api='{api_home} vs {api_away}' | "
-            f"score={total} | hs={hs} | as={aws} | status={status}"
+            f"total={total} | hs={hs} | aws={aws} | status={status} | {verdict}"
         )
 
 

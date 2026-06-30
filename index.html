@@ -4333,9 +4333,9 @@ button.dirty {
           // [F3] [F6] ────────────────────────────────────────────────────────
           const _lsSettled = Array.isArray(_lsParsed) ? _lsParsed.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length : 0;
           const _lsPending = Array.isArray(_lsParsed) ? _lsParsed.length - _lsSettled : 0;
-          console.log(`[F3][F6] loadLocalState: state.manualBets ← localStorage key="${STORAGE_KEYS.manual}"`);
-          console.log(`[F3][F6]   raw bytes in storage: ${savedManual ? savedManual.length : 0}`);
-          console.log(`[F3][F6]   total: ${Array.isArray(_lsParsed) ? _lsParsed.length : '(invalid)'}  settled(W/L/P): ${_lsSettled}  pending: ${_lsPending}`);
+          console.warn(`[F3][F6] loadLocalState: state.manualBets ← localStorage key="${STORAGE_KEYS.manual}"`);
+          console.warn(`[F3][F6]   raw bytes in storage: ${savedManual ? savedManual.length : 0}`);
+          console.warn(`[F3][F6]   total: ${Array.isArray(_lsParsed) ? _lsParsed.length : '(invalid)'}  settled(W/L/P): ${_lsSettled}  pending: ${_lsPending}`);
           if (Array.isArray(_lsParsed) && _lsParsed.length > 0) {
             const _b0 = _lsParsed[0];
             console.log(`[F3][F6]   sample bet[0]: id=${_b0.id}  resultado=${_b0.resultado!==undefined ? JSON.stringify(_b0.resultado) : '(missing)'}  status=${JSON.stringify(_b0.status)}`);
@@ -8028,6 +8028,7 @@ button.dirty {
       // fromUser=true  → interactive path: season guard active, shows alert on success/error.
       // fromUser=false → auto-recovery path: guard skipped, shows toast, fails silently.
       async function _doLoadCloudState({ fromUser = false } = {}) {
+        console.warn(`[F1] _doLoadCloudState: called — fromUser=${fromUser} — fetching GET /load`);
         try {
           const res = await fetch(`${API_URL}/load`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -8075,8 +8076,8 @@ button.dirty {
           const _dcs_settled = _dcs_bets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
           const _dcs_pending = _dcs_bets.length - _dcs_settled;
           const _dcs_live    = _dcs_bets.filter(b => b.status === 'approved' && !['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          console.log(`[F1] _doLoadCloudState: GET /load returned manualBets=${_dcs_bets.length}  settled=${_dcs_settled}  pending=${_dcs_pending}  live(approved+no-result)=${_dcs_live}`);
-          console.log(`[F3] state.manualBets overwritten @ _doLoadCloudState | old: ${(state.manualBets||[]).length}  new: ${_dcs_bets.length}`);
+          console.warn(`[F1] _doLoadCloudState: GET /load returned manualBets=${_dcs_bets.length}  settled=${_dcs_settled}  pending=${_dcs_pending}  live(approved+no-result)=${_dcs_live}`);
+          console.warn(`[F3] state.manualBets overwritten @ _doLoadCloudState | old: ${(state.manualBets||[]).length}  new: ${_dcs_bets.length}`);
           if (_dcs_bets.length > 0) {
             const _b0 = _dcs_bets[0];
             console.log(`[F1]   sample bet[0]: id=${_b0.id}  resultado=${JSON.stringify(_b0.resultado)}  status=${JSON.stringify(_b0.status)}`);
@@ -12109,6 +12110,7 @@ button.dirty {
       }
 
       async function _reloadManualBetsFromCloud() {
+        console.warn('[F1] _reloadManualBetsFromCloud: called — fetching GET /load');
         try {
           const res = await fetch(`${API_URL}/load`);
           if (!res.ok) { console.warn('[STEP 6] GET /load failed:', res.status); return; }
@@ -12123,15 +12125,15 @@ button.dirty {
           const _rmc_settled = _rmc_all.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
           const _rmc_pending = _rmc_all.filter(b => !['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
           const _rmc_live    = _rmc_pending.filter(b => b.status === 'approved');
-          console.log('[F1] _reloadManualBetsFromCloud: GET /load returned:');
-          console.log(`[F1]   manualBets=${_rmc_all.length}  settled=${_rmc_settled.length}  pending=${_rmc_pending.length}  live(approved+no-result)=${_rmc_live.length}`);
+          console.warn('[F1] _reloadManualBetsFromCloud: GET /load returned:');
+          console.warn(`[F1]   manualBets=${_rmc_all.length}  settled=${_rmc_settled.length}  pending=${_rmc_pending.length}  live(approved+no-result)=${_rmc_live.length}`);
           _rmc_all.slice(0, 3).forEach((b, i) => {
             console.log(`[F1]   bet[${i}]: id=${b.id}  data=${b.data}  liga=${b.liga}  mercado=${b.mercado}  resultado=${JSON.stringify(b.resultado)}  status=${JSON.stringify(b.status)}`);
           });
           // ───────────────────────────────────────────────────────────────────
 
           // [F3] ─────────────────────────────────────────────────────────────
-          console.log(`[F3] state.manualBets overwritten @ _reloadManualBetsFromCloud | old: ${(state.manualBets||[]).length}  new: ${_rmc_all.length}`);
+          console.warn(`[F3] state.manualBets overwritten @ _reloadManualBetsFromCloud | old: ${(state.manualBets||[]).length}  new: ${_rmc_all.length}`);
           // ───────────────────────────────────────────────────────────────────
 
           state.manualBets = content.manualBets;
@@ -12140,7 +12142,7 @@ button.dirty {
           const _f2_settled = state.manualBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
           const _f2_pending = state.manualBets.length - _f2_settled;
           const _f2_live    = state.manualBets.filter(b => b.status === 'approved' && !['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          console.log(`[F2] state.manualBets assigned — length=${state.manualBets.length}  settled=${_f2_settled}  pending=${_f2_pending}  live(approved+no-result)=${_f2_live}`);
+          console.warn(`[F2] state.manualBets assigned — length=${state.manualBets.length}  settled=${_f2_settled}  pending=${_f2_pending}  live(approved+no-result)=${_f2_live}`);
           // ───────────────────────────────────────────────────────────────────
 
           saveLocalState();
@@ -12166,13 +12168,13 @@ button.dirty {
         const _f4_approved = _f4_isLocal.filter(b => b.status === 'approved');
         const _f4_noResult = _f4_approved.filter(b => !['W','L','P'].includes(b._resultKey));
         const _f4_hasDate  = _f4_noResult.filter(b => !!b.data);
-        console.log('[F4] getLiveRows():');
-        console.log(`[F4]   state.manualBets.length = ${(state.manualBets||[]).length}`);
-        console.log(`[F4]   getManualRowsMerged() total = ${_f4_merged.length}`);
-        console.log(`[F4]   → isLocal=true:           ${_f4_isLocal.length}`);
-        console.log(`[F4]   → status='approved':       ${_f4_approved.length}`);
-        console.log(`[F4]   → _resultKey not W/L/P:   ${_f4_noResult.length}`);
-        console.log(`[F4]   → has date:                ${_f4_hasDate.length}  (these proceed to kickoff/date check)`);
+        console.warn('[F4] getLiveRows():');
+        console.warn(`[F4]   state.manualBets.length = ${(state.manualBets||[]).length}`);
+        console.warn(`[F4]   getManualRowsMerged() total = ${_f4_merged.length}`);
+        console.warn(`[F4]   → isLocal=true:           ${_f4_isLocal.length}`);
+        console.warn(`[F4]   → status='approved':       ${_f4_approved.length}`);
+        console.warn(`[F4]   → _resultKey not W/L/P:   ${_f4_noResult.length}`);
+        console.warn(`[F4]   → has date:                ${_f4_hasDate.length}  (these proceed to kickoff/date check)`);
         _f4_approved.slice(0, 5).forEach((b, i) => {
           console.log(`[F4]   approved[${i}]: id=${b.id}  status=${b.status}  resultado=${b.resultado}  _resultKey=${b._resultKey}  data=${b.data}`);
         });
