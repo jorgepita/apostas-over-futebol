@@ -3193,6 +3193,8 @@ button.dirty {
       let _saveToastTimer = null;    // Phase 26.9.2 — debounce handle for save confirmation toast
       let _settlementRunning = false; // Phase 26.11 — manual settlement button state
       let _settlementMessage = '';    // Phase 26.11 — current status text for settlement button
+      let _bootSyncComplete   = false; // LIVE-1: blocks saveCloudState() until first successful manualBets cloud sync
+      let _manualSyncInFlight = false; // LIVE-1: prevents concurrent manualBets cloud refresh requests
 
       const state = {
         footballDaily: [],
@@ -7972,6 +7974,10 @@ button.dirty {
 
 
       async function saveCloudState() {
+        if (!_bootSyncComplete) {
+          hasPendingCloudChanges = true;
+          return;
+        }
         if (autoSaveInFlight) return;
 
   try {
@@ -8024,6 +8030,16 @@ button.dirty {
   }
   }
 }
+
+      function _completeBootSync() {
+        _bootSyncComplete = true;
+        if (hasPendingCloudChanges && !autoSaveInFlight) {
+          clearTimeout(_autoSaveTimer);
+          _autoSaveTimer = setTimeout(() => {
+            if (hasPendingCloudChanges && !autoSaveInFlight) saveCloudState();
+          }, 0);
+        }
+      }
 
       // Internal implementation of cloud state loading.
       // fromUser=true  → interactive path: season guard active, shows alert on success/error.
@@ -8089,6 +8105,7 @@ button.dirty {
           state.sessionStartDate = content.sessionStartDate || '';
 
           rerenderAll(true);
+          _completeBootSync();
 
           if (fromUser) {
             alert('Carregado do GitHub com sucesso');
@@ -12111,6 +12128,8 @@ button.dirty {
       }
 
       async function _reloadManualBetsFromCloud() {
+        if (_manualSyncInFlight) return;
+        _manualSyncInFlight = true;
         debugger;
         console.warn('[F1] _reloadManualBetsFromCloud: called — fetching GET /load');
         try {
@@ -12154,8 +12173,11 @@ button.dirty {
           // ───────────────────────────────────────────────────────────────────
 
           rerenderAll(false);
+          _completeBootSync();
         } catch (e) {
           console.error('[Settlement] reload manual bets from cloud failed:', e);
+        } finally {
+          _manualSyncInFlight = false;
         }
       }
 
@@ -12281,6 +12303,13 @@ button.dirty {
       }
 
       function renderLiveCenter() {
+        if (!_bootSyncComplete) {
+          const _tbody = document.getElementById('liveRows');
+          if (_tbody) _tbody.innerHTML = '<tr><td colspan="10"><div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">A sincronizar apostas com a cloud…</div></td></tr>';
+          const _cards = document.getElementById('liveCards');
+          if (_cards) _cards.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">A sincronizar…</div>';
+          return;
+        }
         debugger;
         const rows     = getLiveRows();
         const botCount = rows.filter(r => r._type === 'bot').length;
@@ -13991,12 +14020,24 @@ button.dirty {
           if (recovered) saveLocalState();
         }
 
+        // LIVE-1 fix: sync manualBets from cloud for returning users.
+        // Skipped when _doLoadCloudState() already ran and set _bootSyncComplete = true.
+        if (!_bootSyncComplete) {
+          await _reloadManualBetsFromCloud();
+        }
+
         initialLoadDone = true;
         setInterval(() => {
           loadData(true);
           loadLeagueStats();
           checkPendingAlerts().catch(() => {});
         }, 60000);
+
+        // Event-driven manualBets refresh on tab return.
+        // Covers GitHub Actions settlement running while the tab is backgrounded.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') _reloadManualBetsFromCloud();
+        });
       }
 
       boot();
