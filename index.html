@@ -8048,11 +8048,26 @@ button.dirty {
         console.warn(`[F1] _doLoadCloudState: called — fromUser=${fromUser} — fetching GET /load`);
         try {
           const res = await fetch(`${API_URL}/load`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            console.warn(`[RECOVERY] response not ok — HTTP ${res.status}`);
+            if (fromUser) alert('No cloud state found.');
+            return false;
+          }
           const content = await res.json();
 
           // Empty cloud — nothing to restore.
-          if (!content || typeof content !== 'object' || !content.sessionStartDate) {
+          if (!content) {
+            console.warn('[RECOVERY] content missing — response body is falsy');
+            if (fromUser) alert('No cloud state found.');
+            return false;
+          }
+          if (typeof content !== 'object') {
+            console.warn('[RECOVERY] invalid payload — content is not an object: ' + typeof content);
+            if (fromUser) alert('No cloud state found.');
+            return false;
+          }
+          if (!content.sessionStartDate) {
+            console.warn('[RECOVERY] sessionStartDate missing — value: ' + JSON.stringify(content.sessionStartDate) + ' | keys in content: ' + Object.keys(content).slice(0, 10).join(', '));
             if (fromUser) alert('No cloud state found.');
             return false;
           }
@@ -8115,6 +8130,7 @@ button.dirty {
 
           return true;
         } catch (e) {
+          console.warn('[RECOVERY] exception: ' + (e && e.message ? e.message : String(e)));
           console.error('loadCloudState error:', e);
           if (fromUser) alert('Erro ao carregar do GitHub');
           return false;
