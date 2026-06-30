@@ -4299,6 +4299,7 @@ button.dirty {
       }
 
       function loadLocalState() {
+        debugger;
         const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
         const savedBankrollSet = localStorage.getItem(STORAGE_KEYS.bankrollSet);
         const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
@@ -12110,6 +12111,7 @@ button.dirty {
       }
 
       async function _reloadManualBetsFromCloud() {
+        debugger;
         console.warn('[F1] _reloadManualBetsFromCloud: called — fetching GET /load');
         try {
           const res = await fetch(`${API_URL}/load`);
@@ -12160,6 +12162,7 @@ button.dirty {
       // ── End Phase 26.11 ──────────────────────────────────────────────
 
       function getLiveRows() {
+        debugger;
         const today = todayIso();
 
         // [F4] ─────────────────────────────────────────────────────────────────
@@ -12278,6 +12281,7 @@ button.dirty {
       }
 
       function renderLiveCenter() {
+        debugger;
         const rows     = getLiveRows();
         const botCount = rows.filter(r => r._type === 'bot').length;
         const manCount = rows.filter(r => r._type === 'manual').length;
