@@ -14010,20 +14010,34 @@ button.dirty {
 
         rerenderAll(false);
 
+        // [BOOT-DIAG] Stage A: after loadLocalState + initial render
+        console.warn('[BOOT-DIAG] A (post-loadLocalState): manualBets=' + state.manualBets.length + ' localEdits=' + Object.keys(state.localEdits||{}).length + ' bankrollInicialSet=' + state.bankrollInicialSet + ' bankrollInicial=' + state.bankrollInicial + ' hasMeaningful=' + hasMeaningfulLocalState() + ' _bootSyncComplete=' + _bootSyncComplete);
+
         await Promise.all([loadData(true), loadLeagueStats()]);
         checkPendingAlerts().catch(() => {});
+
+        // [BOOT-DIAG] Stage B: after loadData + loadLeagueStats
+        console.warn('[BOOT-DIAG] B (post-loadData): manualBets=' + state.manualBets.length + ' footballHistory=' + state.footballHistory.length + ' footballDaily=' + state.footballDaily.length + ' hasMeaningful=' + hasMeaningfulLocalState() + ' _bootSyncComplete=' + _bootSyncComplete);
 
         // Auto cloud-recovery: restore state for new/anonymous/foreign-device browsers.
         // Only runs when no meaningful local session exists; never overwrites real local data.
         if (!hasMeaningfulLocalState()) {
           const recovered = await _doLoadCloudState({ fromUser: false });
+          // [BOOT-DIAG] Stage C: after _doLoadCloudState
+          console.warn('[BOOT-DIAG] C (post-_doLoadCloudState): recovered=' + recovered + ' manualBets=' + state.manualBets.length + ' localEdits=' + Object.keys(state.localEdits||{}).length + ' bankrollInicialSet=' + state.bankrollInicialSet + ' bankrollInicial=' + state.bankrollInicial + ' _bootSyncComplete=' + _bootSyncComplete);
           if (recovered) saveLocalState();
+        } else {
+          console.warn('[BOOT-DIAG] C (skipped-_doLoadCloudState): hasMeaningfulLocalState=true — cloud recovery bypassed');
         }
 
         // LIVE-1 fix: sync manualBets from cloud for returning users.
         // Skipped when _doLoadCloudState() already ran and set _bootSyncComplete = true.
         if (!_bootSyncComplete) {
           await _reloadManualBetsFromCloud();
+          // [BOOT-DIAG] Stage D: after _reloadManualBetsFromCloud
+          console.warn('[BOOT-DIAG] D (post-_reloadManualBetsFromCloud): manualBets=' + state.manualBets.length + ' _bootSyncComplete=' + _bootSyncComplete);
+        } else {
+          console.warn('[BOOT-DIAG] D (skipped-_reloadManualBetsFromCloud): _bootSyncComplete already true');
         }
 
         initialLoadDone = true;
