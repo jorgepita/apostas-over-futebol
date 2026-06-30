@@ -8055,6 +8055,15 @@ button.dirty {
           }
           const content = await res.json();
 
+          // [RECOVERY-SCHEMA] Print exact response structure before any validation
+          console.warn('[RECOVERY-SCHEMA] /load response — typeof content: ' + typeof content + ' | keys: ' + (content && typeof content === 'object' ? Object.keys(content).join(', ') : '(none)'));
+          if (content && typeof content === 'object') {
+            const scalarKeys = Object.keys(content).filter(k => !Array.isArray(content[k]) && typeof content[k] !== 'object');
+            scalarKeys.forEach(k => console.warn('[RECOVERY-SCHEMA]   ' + k + ' = ' + JSON.stringify(content[k])));
+            const arrayKeys = Object.keys(content).filter(k => Array.isArray(content[k]));
+            arrayKeys.forEach(k => console.warn('[RECOVERY-SCHEMA]   ' + k + ' = [' + content[k].length + ' items]'));
+          }
+
           // Empty cloud — nothing to restore.
           if (!content) {
             console.warn('[RECOVERY] content missing — response body is falsy');
