@@ -8045,6 +8045,8 @@ button.dirty {
       // fromUser=true  → interactive path: season guard active, shows alert on success/error.
       // fromUser=false → auto-recovery path: guard skipped, shows toast, fails silently.
       async function _doLoadCloudState({ fromUser = false } = {}) {
+        // [RECOVERY-SCHEMA] ENTRY — fires unconditionally before any fetch or guard
+        console.warn('[RECOVERY-SCHEMA] ENTERED _doLoadCloudState — fromUser=' + fromUser);
         console.warn(`[F1] _doLoadCloudState: called — fromUser=${fromUser} — fetching GET /load`);
         try {
           const res = await fetch(`${API_URL}/load`);
@@ -8055,7 +8057,7 @@ button.dirty {
           }
           const content = await res.json();
 
-          // [RECOVERY-SCHEMA] Print exact response structure before any validation
+          // [RECOVERY-SCHEMA] POST-FETCH — fires after successful JSON parse
           console.warn('[RECOVERY-SCHEMA] /load response — typeof content: ' + typeof content + ' | keys: ' + (content && typeof content === 'object' ? Object.keys(content).join(', ') : '(none)'));
           if (content && typeof content === 'object') {
             const scalarKeys = Object.keys(content).filter(k => !Array.isArray(content[k]) && typeof content[k] !== 'object');
