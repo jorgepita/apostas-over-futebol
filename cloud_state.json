@@ -4241,6 +4241,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782902303607_cwcgna",
+      "data": "2026-07-04",
+      "liga": "coreia",
+      "jogo": "Daejeon Citizen vs Bucheon FC 1995",
+      "mercado": "Over 2.5",
+      "odd": "2.18",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -4267,7 +4285,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-01T10:33:07.934Z",
+  "lastUpdated": "2026-07-01T10:38:07.931Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
