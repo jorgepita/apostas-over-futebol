@@ -4868,7 +4868,8 @@ button.dirty {
         const alerts = [];
 
         if (m.exposurePct > 20) alerts.push({ type: 'risk', text: `Exposição alta (${fmt(m.exposurePct)}%)`, cls: 'bad' });
-        if (m.openCount >= 6) alerts.push({ type: 'volume', text: `Muitas apostas abertas (${m.openCount})`, cls: 'warn' });
+        const pendingCount = getPendingRows().length;
+        if (pendingCount >= 6) alerts.push({ type: 'volume', text: `Muitas apostas abertas (${pendingCount})`, cls: 'warn' });
         if (m.roi < -10) alerts.push({ type: 'performance', text: 'ROI muito negativo', cls: 'bad' });
         if (m.picksHoje === 0) alerts.push({ type: 'empty', text: 'Sem picks hoje', cls: 'info' });
 
