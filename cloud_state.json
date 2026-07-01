@@ -4601,6 +4601,47 @@
       "scoreAtAnalysis": 83,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1782921243810_pwdurw",
+      "data": "2026-07-03",
+      "liga": "suecia",
+      "jogo": "Sirius vs Mjallby AIF",
+      "mercado": "Over 2.5",
+      "odd": "1.68",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "BUY",
+      "edgeAtAnalysis": 5.312600090509767,
+      "scoreAtAnalysis": 66,
+      "analysisSnapshot": {
+        "cacheKey": "2026-07-03_suecia_sirius_mjallby_aif|O2.5|1.68|1.00",
+        "market": "O2.5",
+        "odd": 1.68,
+        "stake": 1,
+        "ProbModel": 0.6483640961431929,
+        "ProbMarket": 0.5952380952380952,
+        "Edge": 0.05312600090509767,
+        "EdgePercent": 5.312600090509767,
+        "fairOdd": 1.5423432696975672,
+        "KellyTrue": 0.13125247282435876,
+        "EV": 0.08925168152056395,
+        "score": 66,
+        "scoreCls": "info",
+        "opinion": "BUY",
+        "opinionCls": "info",
+        "LambdaHome": 1.7704960000000003,
+        "LambdaAway": 1.5685973333333338,
+        "LambdaTotal": 3.3390933333333344,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-07-01T15:53:54.438Z"
+      }
     }
   ],
   "movements": [
@@ -4627,10 +4668,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-01T15:52:59.555Z",
+  "lastUpdated": "2026-07-01T15:53:59.466Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-03",
