@@ -4267,7 +4267,7 @@
       "resultado": "",
       "scoreAtAnalysis": 66,
       "stake": "1",
-      "status": "approved"
+      "status": "pending"
     },
     {
       "analysisSnapshot": {
@@ -4605,32 +4605,32 @@
   ],
   "movements": [
     {
-      "id": "mov_1780853300006_hr7j3",
-      "type": "deposit",
       "amount": "100",
       "date": "2026-06-07",
-      "note": ""
+      "id": "mov_1780853300006_hr7j3",
+      "note": "",
+      "type": "deposit"
     },
     {
-      "id": "mov_1780853319244_iwons",
-      "type": "deposit",
       "amount": "200",
       "date": "2026-06-07",
-      "note": ""
+      "id": "mov_1780853319244_iwons",
+      "note": "",
+      "type": "deposit"
     },
     {
-      "id": "mov_1780853334328_tnjmm",
-      "type": "withdrawal",
       "amount": "50",
       "date": "2026-06-07",
-      "note": ""
+      "id": "mov_1780853334328_tnjmm",
+      "note": "",
+      "type": "withdrawal"
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-01T10:52:22.553Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-07-01T15:52:59.555Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-07-03",
