@@ -1157,6 +1157,33 @@ button.dirty {
   color: var(--warn);
 }
 
+/* Bootstrap-compatible loading spinner — no Bootstrap dependency, same class names/markup (ADR-005) */
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: -0.125em;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
+.me-2 {
+  margin-right: 0.5rem;
+}
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* =========================
    KPI HERO CARDS (big metrics top row)
 ========================= */
@@ -7234,25 +7261,23 @@ button.dirty {
           return;
         }
 
-        // Loading state
-        if (analyzeBtn) { analyzeBtn.disabled = true; analyzeBtn.textContent = 'A calcular…'; }
-
         try {
-          if (!window._mbAnalysisCache) window._mbAnalysisCache = {};
-          const result = await analyzeFixture(league, homeTeam, awayTeam, curr.market, odd, stake);
-          const snapshot = {
-            cacheKey,
-            market: curr.market,
-            odd,
-            stake,
-            ...result
-          };
-          window._mbAnalysisCache[mk] = snapshot;
-          renderScoutAnalysisPanel(card, snapshot, false);
+          await runWithButtonLoading(analyzeBtn, 'A analisar...', async () => {
+            if (!window._mbAnalysisCache) window._mbAnalysisCache = {};
+            const result = await analyzeFixture(league, homeTeam, awayTeam, curr.market, odd, stake);
+            const snapshot = {
+              cacheKey,
+              market: curr.market,
+              odd,
+              stake,
+              ...result
+            };
+            window._mbAnalysisCache[mk] = snapshot;
+            renderScoutAnalysisPanel(card, snapshot, false);
+          });
         } catch (err) {
           console.error('mbHandleAnalyze error', err);
           if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Erro na análise. Verifica a consola.'; }
-          if (analyzeBtn) { analyzeBtn.disabled = false; analyzeBtn.textContent = 'Analisar'; }
         }
       }
 
@@ -7649,26 +7674,23 @@ button.dirty {
           return;
         }
 
-        btn.disabled    = true;
-        btn.textContent = 'A calcular…';
-
         try {
-          const result = await analyzeFixture(leagueKey, homeTeam, awayTeam, market, odd, stake);
-          state.manualBets[betIdx] = {
-            ...state.manualBets[betIdx],
-            hadAnalysis:      true,
-            analysisStale:    false,
-            botOpinion:       result.opinion,
-            edgeAtAnalysis:   result.EdgePercent,
-            scoreAtAnalysis:  result.score,
-            analysisSnapshot: result
-          };
-          markDirty();
-          rerenderManualOnly();
+          await runWithButtonLoading(btn, 'A analisar...', async () => {
+            const result = await analyzeFixture(leagueKey, homeTeam, awayTeam, market, odd, stake);
+            state.manualBets[betIdx] = {
+              ...state.manualBets[betIdx],
+              hadAnalysis:      true,
+              analysisStale:    false,
+              botOpinion:       result.opinion,
+              edgeAtAnalysis:   result.EdgePercent,
+              scoreAtAnalysis:  result.score,
+              analysisSnapshot: result
+            };
+            markDirty();
+            rerenderManualOnly();
+          });
         } catch (err) {
           console.error('mbHandleRowAnalyze', err);
-          btn.disabled    = false;
-          btn.textContent = b.hadAnalysis ? 'Reanalisar' : 'Analisar';
           alert('Erro na análise. Verifica a consola.');
         }
       }
@@ -12024,15 +12046,7 @@ button.dirty {
       // ── Phase 26.11: Manual Settlement Trigger ────────────────────────
 
       function _updateSettlementButton() {
-        const btn    = document.getElementById('runSettlementBtn');
         const status = document.getElementById('settlementStatus');
-
-        if (btn) {
-          btn.disabled = _settlementRunning;
-          btn.textContent = _settlementRunning ? 'Running settlement...' : 'Run Settlement';
-          btn.style.opacity = _settlementRunning ? '0.65' : '1';
-          btn.style.cursor  = _settlementRunning ? 'not-allowed' : 'pointer';
-        }
 
         if (status) {
           if (_settlementMessage) {
@@ -12066,33 +12080,35 @@ button.dirty {
         _settlementMessage = '';
         _updateSettlementButton();
 
-        try {
-          const res  = await fetch(`${API_URL}/run-settlement`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-          });
-          let data = {};
+        await runWithButtonLoading(document.getElementById('runSettlementBtn'), 'A resolver...', async () => {
           try {
-            if (res.headers.get('content-type')?.includes('json')) data = await res.json();
-          } catch (_) {}
+            const res  = await fetch(`${API_URL}/run-settlement`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            let data = {};
+            try {
+              if (res.headers.get('content-type')?.includes('json')) data = await res.json();
+            } catch (_) {}
 
-          if (!res.ok || !data.ok) {
-            const step = data.step ? `[${data.step}] ` : '';
-            const msg  = data.message || data.error || `HTTP ${res.status}`;
-            console.error('[Settlement] server error:', data);
-            throw new Error(`${step}${msg}`);
+            if (!res.ok || !data.ok) {
+              const step = data.step ? `[${data.step}] ` : '';
+              const msg  = data.message || data.error || `HTTP ${res.status}`;
+              console.error('[Settlement] server error:', data);
+              throw new Error(`${step}${msg}`);
+            }
+
+            await loadData(true);
+            await _reloadManualBetsFromCloud();
+            _settlementMessage = data.updated > 0 ? '✓ Settlement completed' : 'No matches to settle.';
+          } catch (err) {
+            console.error('[Settlement] error:', err);
+            const truncated = err.message?.length > 90
+              ? err.message.slice(0, 87) + '...'
+              : (err.message || 'Unknown error');
+            _settlementMessage = `Settlement failed: ${truncated}`;
           }
-
-          await loadData(true);
-          await _reloadManualBetsFromCloud();
-          _settlementMessage = data.updated > 0 ? '✓ Settlement completed' : 'No matches to settle.';
-        } catch (err) {
-          console.error('[Settlement] error:', err);
-          const truncated = err.message?.length > 90
-            ? err.message.slice(0, 87) + '...'
-            : (err.message || 'Unknown error');
-          _settlementMessage = `Settlement failed: ${truncated}`;
-        }
+        });
 
         _settlementRunning = false;
         _updateSettlementButton();
@@ -13787,6 +13803,35 @@ button.dirty {
 
       // ── end Season Archive ───────────────────────────────────────
 
+      // Runs an async operation while showing a spinner + label on `button` and
+      // disabling it (prevents double-clicks). Always restores the button's
+      // original HTML/disabled state afterwards, success or failure — the caller's
+      // own error handling (try/catch, alerts, etc.) is untouched.
+      async function runWithButtonLoading(button, loadingLabel, asyncFn) {
+        if (!button || button.disabled) return;
+
+        const originalHtml = button.innerHTML;
+        const originalWidth = button.getBoundingClientRect().width;
+        const loadingHtml = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${loadingLabel}`;
+
+        button.disabled = true;
+        if (originalWidth) button.style.minWidth = `${originalWidth}px`;
+        button.innerHTML = loadingHtml;
+
+        try {
+          return await asyncFn();
+        } finally {
+          // Only restore the pre-click label if nothing else updated the button while
+          // the operation was in flight (a few handlers relabel the button themselves
+          // based on the result, e.g. "Analisar" -> "Reanalisar" — that update wins).
+          if (button.innerHTML === loadingHtml) {
+            button.innerHTML = originalHtml;
+          }
+          button.disabled = false;
+          button.style.minWidth = '';
+        }
+      }
+
       function bindElementAction(elementId, handler) {
         const el = document.getElementById(elementId);
         if (!el || el.dataset.bound === '1') return;
@@ -13796,17 +13841,22 @@ button.dirty {
 
       function bindStaticButtons() {
         bindElementAction('refreshBtn', () => {
-          loadData(true);
-          loadLeagueStats();
+          runWithButtonLoading(document.getElementById('refreshBtn'), 'A atualizar...', () => {
+            return Promise.all([loadData(true), loadLeagueStats()]);
+          });
         });
-        bindElementAction('loadCloudBtn', () => loadCloudState());
+        bindElementAction('loadCloudBtn', () => {
+          runWithButtonLoading(document.getElementById('loadCloudBtn'), 'A carregar...', () => loadCloudState());
+        });
         bindElementAction('resetLocalBtn', resetLocalControls);
         bindElementAction('clearManualBtn', clearManualLocal);
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
         bindElementAction('closeSeasonBtn', openCloseSeasonModal);
         bindElementAction('viewArchivesBtn', openArchiveListModal);
         bindElementAction('saveTgConfigBtn', saveTelegramConfig);
-        bindElementAction('testTgConfigBtn', testTelegramConfig);
+        bindElementAction('testTgConfigBtn', () => {
+          runWithButtonLoading(document.getElementById('testTgConfigBtn'), 'A testar...', () => testTelegramConfig());
+        });
         bindElementAction('exportManualBtn', exportManualJson);
         bindElementAction('importManualBtn', () => document.getElementById('importManualFile').click());
         bindElementAction('exportRealCsvBtn', exportRealCsv);
@@ -13888,7 +13938,7 @@ button.dirty {
           importFile.addEventListener('change', async e => {
             const file = e.target.files?.[0];
             if (!file) return;
-            await importManualJsonFromFile(file);
+            await runWithButtonLoading(document.getElementById('importManualBtn'), 'A importar...', () => importManualJsonFromFile(file));
             e.target.value = '';
           });
         }
