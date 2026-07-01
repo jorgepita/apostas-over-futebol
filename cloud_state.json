@@ -4385,6 +4385,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782902357157_vc4v0c",
+      "data": "2026-07-04",
+      "liga": "suecia",
+      "jogo": "Halmstad vs Vasteras SK FK",
+      "mercado": "Over 2.5",
+      "odd": "1.85",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
