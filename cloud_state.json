@@ -3050,25 +3050,32 @@
       "apostada": true
     },
     "2026-07-04|finlandia|Lahti vs Gnistan|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-04|finlandia|SJK vs Turku PS|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-04|finlandia|FF Jaro vs Ilves|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-04|suecia|Degerfors IF vs Malmo FF|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-05|suecia|IF Elfsborg vs Hammarby FF|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-04|suecia|Halmstad vs Vasteras SK FK|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-05|suecia|Kalmar FF vs Orgryte IS|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -4620,10 +4627,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-01T10:51:19.376Z",
+  "lastUpdated": "2026-07-01T10:52:22.553Z",
   "activeTab": "tab-pending",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-03",
