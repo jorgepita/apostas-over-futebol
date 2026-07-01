@@ -4259,6 +4259,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782902310017_2bhxk6",
+      "data": "2026-07-04",
+      "liga": "coreia",
+      "jogo": "FC Anyang vs Pohang Steelers",
+      "mercado": "Over 2.5",
+      "odd": "2.52",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1782902315185_eyldj9",
+      "data": "2026-07-04",
+      "liga": "coreia",
+      "jogo": "Jeonbuk Motors vs Gangwon FC",
+      "mercado": "Over 2.5",
+      "odd": "2.42",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
