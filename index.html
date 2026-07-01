@@ -4301,7 +4301,6 @@ button.dirty {
       }
 
       function loadLocalState() {
-        debugger;
         const savedBankroll = localStorage.getItem(STORAGE_KEYS.bankroll);
         const savedBankrollSet = localStorage.getItem(STORAGE_KEYS.bankrollSet);
         const savedEdits = localStorage.getItem(STORAGE_KEYS.picks);
@@ -4332,21 +4331,8 @@ button.dirty {
         }
 
         try {
-          const _lsParsed = savedManual ? JSON.parse(savedManual) : [];
-          // [F3] [F6] ────────────────────────────────────────────────────────
-          const _lsSettled = Array.isArray(_lsParsed) ? _lsParsed.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length : 0;
-          const _lsPending = Array.isArray(_lsParsed) ? _lsParsed.length - _lsSettled : 0;
-          console.warn(`[F3][F6] loadLocalState: state.manualBets ← localStorage key="${STORAGE_KEYS.manual}"`);
-          console.warn(`[F3][F6]   raw bytes in storage: ${savedManual ? savedManual.length : 0}`);
-          console.warn(`[F3][F6]   total: ${Array.isArray(_lsParsed) ? _lsParsed.length : '(invalid)'}  settled(W/L/P): ${_lsSettled}  pending: ${_lsPending}`);
-          if (Array.isArray(_lsParsed) && _lsParsed.length > 0) {
-            const _b0 = _lsParsed[0];
-            console.log(`[F3][F6]   sample bet[0]: id=${_b0.id}  resultado=${_b0.resultado!==undefined ? JSON.stringify(_b0.resultado) : '(missing)'}  status=${JSON.stringify(_b0.status)}`);
-          }
-          // ──────────────────────────────────────────────────────────────────
-          state.manualBets = _lsParsed;
+          state.manualBets = savedManual ? JSON.parse(savedManual) : [];
         } catch {
-          console.warn('[F3][F6] loadLocalState: JSON.parse failed for localStorage.manual — defaulting to []');
           state.manualBets = [];
         }
 
@@ -4380,12 +4366,6 @@ button.dirty {
         }
         localStorage.setItem(STORAGE_KEYS.bankrollSet, state.bankrollInicialSet ? '1' : '0');
         localStorage.setItem(STORAGE_KEYS.picks, JSON.stringify(state.localEdits));
-        // [F6] ────────────────────────────────────────────────────────────────
-        const _saveBets = state.manualBets || [];
-        const _saveSettled = _saveBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-        console.log(`[F6] saveLocalState: writing localStorage.manual | total: ${_saveBets.length}  settled: ${_saveSettled}  pending: ${_saveBets.length - _saveSettled}`);
-        console.trace('[F6] saveLocalState caller');
-        // ─────────────────────────────────────────────────────────────────────
         localStorage.setItem(STORAGE_KEYS.manual, JSON.stringify(state.manualBets));
         localStorage.setItem(STORAGE_KEYS.movements, JSON.stringify(state.movements));
         localStorage.setItem(STORAGE_KEYS.sessionStartDate, state.sessionStartDate || todayIso());
@@ -7786,9 +7766,7 @@ button.dirty {
           } else if (deleteBtn) {
             const id = deleteBtn.dataset.id;
             if (!id) return;
-            const _delPrev = state.manualBets.length;
             state.manualBets = state.manualBets.filter(b => String(b.id) !== String(id));
-            console.log(`[F3] state.manualBets overwritten @ deleteHandler | old: ${_delPrev}  new: ${state.manualBets.length}`);
             markDirty();
             rerenderAll();
           } else if (editBtn) {
@@ -7935,7 +7913,6 @@ button.dirty {
           const text = await file.text();
           const parsed = JSON.parse(text);
           const validated = validateImportedManualBets(parsed);
-          console.log(`[F3] state.manualBets overwritten @ importJson | old: ${(state.manualBets||[]).length}  new: ${validated.length}`);
           state.manualBets = validated;
           rerenderAll();
           alert(`Importação concluída. ${validated.length} apostas manuais carregadas.`);
@@ -8046,40 +8023,24 @@ button.dirty {
       // fromUser=true  → interactive path: season guard active, shows alert on success/error.
       // fromUser=false → auto-recovery path: guard skipped, shows toast, fails silently.
       async function _doLoadCloudState({ fromUser = false } = {}) {
-        // [RECOVERY-SCHEMA] ENTRY — fires unconditionally before any fetch or guard
-        console.warn('[RECOVERY-SCHEMA] ENTERED _doLoadCloudState — fromUser=' + fromUser);
-        console.warn(`[F1] _doLoadCloudState: called — fromUser=${fromUser} — fetching GET /load`);
         try {
           const res = await fetch(`${API_URL}/load`);
           if (!res.ok) {
-            console.warn(`[RECOVERY] response not ok — HTTP ${res.status}`);
             if (fromUser) alert('No cloud state found.');
             return false;
           }
           const content = await res.json();
 
-          // [RECOVERY-SCHEMA] POST-FETCH — fires after successful JSON parse
-          console.warn('[RECOVERY-SCHEMA] /load response — typeof content: ' + typeof content + ' | keys: ' + (content && typeof content === 'object' ? Object.keys(content).join(', ') : '(none)'));
-          if (content && typeof content === 'object') {
-            const scalarKeys = Object.keys(content).filter(k => !Array.isArray(content[k]) && typeof content[k] !== 'object');
-            scalarKeys.forEach(k => console.warn('[RECOVERY-SCHEMA]   ' + k + ' = ' + JSON.stringify(content[k])));
-            const arrayKeys = Object.keys(content).filter(k => Array.isArray(content[k]));
-            arrayKeys.forEach(k => console.warn('[RECOVERY-SCHEMA]   ' + k + ' = [' + content[k].length + ' items]'));
-          }
-
           // Empty cloud — nothing to restore.
           if (!content) {
-            console.warn('[RECOVERY] content missing — response body is falsy');
             if (fromUser) alert('No cloud state found.');
             return false;
           }
           if (typeof content !== 'object') {
-            console.warn('[RECOVERY] invalid payload — content is not an object: ' + typeof content);
             if (fromUser) alert('No cloud state found.');
             return false;
           }
           if (!content.sessionStartDate) {
-            console.warn('[RECOVERY] sessionStartDate missing — value: ' + JSON.stringify(content.sessionStartDate) + ' | keys in content: ' + Object.keys(content).slice(0, 10).join(', '));
             if (fromUser) alert('No cloud state found.');
             return false;
           }
@@ -8115,19 +8076,7 @@ button.dirty {
           if (content.bankrollInicial != null) {
             state.bankrollInicialSet = true;
           }
-          // [F1] [F3] ────────────────────────────────────────────────────────
-          const _dcs_bets    = content.manualBets || [];
-          const _dcs_settled = _dcs_bets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          const _dcs_pending = _dcs_bets.length - _dcs_settled;
-          const _dcs_live    = _dcs_bets.filter(b => b.status === 'approved' && !['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          console.warn(`[F1] _doLoadCloudState: GET /load returned manualBets=${_dcs_bets.length}  settled=${_dcs_settled}  pending=${_dcs_pending}  live(approved+no-result)=${_dcs_live}`);
-          console.warn(`[F3] state.manualBets overwritten @ _doLoadCloudState | old: ${(state.manualBets||[]).length}  new: ${_dcs_bets.length}`);
-          if (_dcs_bets.length > 0) {
-            const _b0 = _dcs_bets[0];
-            console.log(`[F1]   sample bet[0]: id=${_b0.id}  resultado=${JSON.stringify(_b0.resultado)}  status=${JSON.stringify(_b0.status)}`);
-          }
-          // ──────────────────────────────────────────────────────────────────
-          state.manualBets = _dcs_bets;
+          state.manualBets = content.manualBets || [];
           state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
           state.sessionStartDate = content.sessionStartDate || '';
           state.movements = Array.isArray(content.movements) ? content.movements : [];
@@ -8143,7 +8092,6 @@ button.dirty {
 
           return true;
         } catch (e) {
-          console.warn('[RECOVERY] exception: ' + (e && e.message ? e.message : String(e)));
           console.error('loadCloudState error:', e);
           if (fromUser) alert('Erro ao carregar do GitHub');
           return false;
@@ -12159,48 +12107,18 @@ button.dirty {
       async function _reloadManualBetsFromCloud() {
         if (_manualSyncInFlight) return;
         _manualSyncInFlight = true;
-        debugger;
-        console.warn('[F1] _reloadManualBetsFromCloud: called — fetching GET /load');
         try {
           const res = await fetch(`${API_URL}/load`);
-          if (!res.ok) { console.warn('[STEP 6] GET /load failed:', res.status); return; }
+          if (!res.ok) return;
           const content = await res.json();
           if (!content || !Array.isArray(content.manualBets)) {
-            console.warn('[STEP 6] no manualBets array in /load response:', content);
             return;
           }
-
-          // [F1] ─────────────────────────────────────────────────────────────
-          const _rmc_all     = content.manualBets;
-          const _rmc_settled = _rmc_all.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
-          const _rmc_pending = _rmc_all.filter(b => !['W','L','P'].includes(String(b.resultado||'').toUpperCase()));
-          const _rmc_live    = _rmc_pending.filter(b => b.status === 'approved');
-          console.warn('[F1] _reloadManualBetsFromCloud: GET /load returned:');
-          console.warn(`[F1]   manualBets=${_rmc_all.length}  settled=${_rmc_settled.length}  pending=${_rmc_pending.length}  live(approved+no-result)=${_rmc_live.length}`);
-          _rmc_all.slice(0, 3).forEach((b, i) => {
-            console.log(`[F1]   bet[${i}]: id=${b.id}  data=${b.data}  liga=${b.liga}  mercado=${b.mercado}  resultado=${JSON.stringify(b.resultado)}  status=${JSON.stringify(b.status)}`);
-          });
-          // ───────────────────────────────────────────────────────────────────
-
-          // [F3] ─────────────────────────────────────────────────────────────
-          console.warn(`[F3] state.manualBets overwritten @ _reloadManualBetsFromCloud | old: ${(state.manualBets||[]).length}  new: ${_rmc_all.length}`);
-          // ───────────────────────────────────────────────────────────────────
 
           state.manualBets = content.manualBets;
           state.movements = Array.isArray(content.movements) ? content.movements : [];
 
-          // [F2] ─────────────────────────────────────────────────────────────
-          const _f2_settled = state.manualBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          const _f2_pending = state.manualBets.length - _f2_settled;
-          const _f2_live    = state.manualBets.filter(b => b.status === 'approved' && !['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
-          console.warn(`[F2] state.manualBets assigned — length=${state.manualBets.length}  settled=${_f2_settled}  pending=${_f2_pending}  live(approved+no-result)=${_f2_live}`);
-          // ───────────────────────────────────────────────────────────────────
-
           saveLocalState();
-
-          // [F2] ─────────────────────────────────────────────────────────────
-          console.log(`[F2] After saveLocalState — state.manualBets.length still=${state.manualBets.length} (verify no overwrite here)`);
-          // ───────────────────────────────────────────────────────────────────
 
           rerenderAll(false);
           _completeBootSync();
@@ -12214,28 +12132,10 @@ button.dirty {
       // ── End Phase 26.11 ──────────────────────────────────────────────
 
       function getLiveRows() {
-        debugger;
         const today = todayIso();
+        const manualPool = getManualRowsMerged();
 
-        // [F4] ─────────────────────────────────────────────────────────────────
-        const _f4_merged   = getManualRowsMerged();
-        const _f4_isLocal  = _f4_merged.filter(b => b.isLocal);
-        const _f4_approved = _f4_isLocal.filter(b => b.status === 'approved');
-        const _f4_noResult = _f4_approved.filter(b => !['W','L','P'].includes(b._resultKey));
-        const _f4_hasDate  = _f4_noResult.filter(b => !!b.data);
-        console.warn('[F4] getLiveRows():');
-        console.warn(`[F4]   state.manualBets.length = ${(state.manualBets||[]).length}`);
-        console.warn(`[F4]   getManualRowsMerged() total = ${_f4_merged.length}`);
-        console.warn(`[F4]   → isLocal=true:           ${_f4_isLocal.length}`);
-        console.warn(`[F4]   → status='approved':       ${_f4_approved.length}`);
-        console.warn(`[F4]   → _resultKey not W/L/P:   ${_f4_noResult.length}`);
-        console.warn(`[F4]   → has date:                ${_f4_hasDate.length}  (these proceed to kickoff/date check)`);
-        _f4_approved.slice(0, 5).forEach((b, i) => {
-          console.log(`[F4]   approved[${i}]: id=${b.id}  status=${b.status}  resultado=${b.resultado}  _resultKey=${b._resultKey}  data=${b.data}`);
-        });
-        // ───────────────────────────────────────────────────────────────────────
-
-        const manualRows = _f4_merged
+        const manualRows = manualPool
           .filter(b => {
             if (!b.isLocal || b.status !== 'approved') return false;
             if (['W', 'L', 'P'].includes(b._resultKey)) return false;
@@ -12340,19 +12240,9 @@ button.dirty {
           if (_cards) _cards.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">A sincronizar…</div>';
           return;
         }
-        debugger;
         const rows     = getLiveRows();
         const botCount = rows.filter(r => r._type === 'bot').length;
         const manCount = rows.filter(r => r._type === 'manual').length;
-        // [F5] ─────────────────────────────────────────────────────────────────
-        console.log(`[F5] renderLiveCenter: total=${rows.length}  manual=${manCount}  bot=${botCount}`);
-        rows.filter(r => r._type === 'manual').slice(0, 5).forEach((r, i) => {
-          console.log(`[F5]   manual row[${i}]: id=${r.id}  game=${r.game}  market=${r.market}  date=${r.date}`);
-        });
-        if (manCount > 0) {
-          console.warn(`[F5] WARNING: ${manCount} manual bet(s) rendered in Live Center — if backend shows all settled, this is the divergence point`);
-        }
-        // ───────────────────────────────────────────────────────────────────────
         const stakeSum = sum(rows.map(r => r.stakeNum).filter(v => v !== null));
 
         safeSetText('liveKpiCount',  String(rows.length));
@@ -12663,7 +12553,6 @@ button.dirty {
 
       function clearManualLocal() {
         if (!confirm('Queres apagar todas as apostas manuais locais deste browser?')) return;
-        console.log(`[F3] state.manualBets overwritten @ clearManualLocal | old: ${(state.manualBets||[]).length}  new: 0`);
         state.manualBets = [];
         rerenderAll();
       }
@@ -12961,7 +12850,6 @@ button.dirty {
 
         // STEP 10: Update in-memory state
         state.localEdits        = {};
-        console.log(`[F3] state.manualBets overwritten @ resetSession | old: ${(state.manualBets||[]).length}  new: 0`);
         state.manualBets        = [];
         state.movements         = [];
         state.bankrollInicial   = newBankroll;
@@ -14040,34 +13928,20 @@ button.dirty {
 
         rerenderAll(false);
 
-        // [BOOT-DIAG] Stage A: after loadLocalState + initial render
-        console.warn('[BOOT-DIAG] A (post-loadLocalState): manualBets=' + state.manualBets.length + ' localEdits=' + Object.keys(state.localEdits||{}).length + ' bankrollInicialSet=' + state.bankrollInicialSet + ' bankrollInicial=' + state.bankrollInicial + ' hasMeaningful=' + hasMeaningfulLocalState() + ' _bootSyncComplete=' + _bootSyncComplete);
-
         await Promise.all([loadData(true), loadLeagueStats()]);
         checkPendingAlerts().catch(() => {});
-
-        // [BOOT-DIAG] Stage B: after loadData + loadLeagueStats
-        console.warn('[BOOT-DIAG] B (post-loadData): manualBets=' + state.manualBets.length + ' footballHistory=' + state.footballHistory.length + ' footballDaily=' + state.footballDaily.length + ' hasMeaningful=' + hasMeaningfulLocalState() + ' _bootSyncComplete=' + _bootSyncComplete);
 
         // Auto cloud-recovery: restore state for new/anonymous/foreign-device browsers.
         // Only runs when no meaningful local session exists; never overwrites real local data.
         if (!hasMeaningfulLocalState()) {
           const recovered = await _doLoadCloudState({ fromUser: false });
-          // [BOOT-DIAG] Stage C: after _doLoadCloudState
-          console.warn('[BOOT-DIAG] C (post-_doLoadCloudState): recovered=' + recovered + ' manualBets=' + state.manualBets.length + ' localEdits=' + Object.keys(state.localEdits||{}).length + ' bankrollInicialSet=' + state.bankrollInicialSet + ' bankrollInicial=' + state.bankrollInicial + ' _bootSyncComplete=' + _bootSyncComplete);
           if (recovered) saveLocalState();
-        } else {
-          console.warn('[BOOT-DIAG] C (skipped-_doLoadCloudState): hasMeaningfulLocalState=true — cloud recovery bypassed');
         }
 
         // LIVE-1 fix: sync manualBets from cloud for returning users.
         // Skipped when _doLoadCloudState() already ran and set _bootSyncComplete = true.
         if (!_bootSyncComplete) {
           await _reloadManualBetsFromCloud();
-          // [BOOT-DIAG] Stage D: after _reloadManualBetsFromCloud
-          console.warn('[BOOT-DIAG] D (post-_reloadManualBetsFromCloud): manualBets=' + state.manualBets.length + ' _bootSyncComplete=' + _bootSyncComplete);
-        } else {
-          console.warn('[BOOT-DIAG] D (skipped-_reloadManualBetsFromCloud): _bootSyncComplete already true');
         }
 
         initialLoadDone = true;
