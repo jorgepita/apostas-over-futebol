@@ -5307,7 +5307,7 @@ button.dirty {
         safeSetText('summaryWinsStat', String(wins));
         safeSetText('summaryLossesStat', String(losses));
         safeSetText('summaryPushesStat', String(pushes));
-        safeSetText('summaryPendingOpenStat', String(risk.openCount));
+        safeSetText('summaryPendingOpenStat', String(getPendingRows().length));
 
         // Dynamic KPI hero coloring
         const roiEl = document.getElementById('summaryRoiStat')?.closest?.('.kpi-hero');
