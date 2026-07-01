@@ -4223,6 +4223,24 @@
       "settledAt": "2026-06-28T22:35:45.109676+00:00",
       "stake": "1",
       "status": "settled"
+    },
+    {
+      "id": "manual_1782902011155_s0dof1",
+      "data": "2026-07-03",
+      "liga": "suecia",
+      "jogo": "Sirius vs Mjallby AIF",
+      "mercado": "Over 2.5",
+      "odd": "1.68",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -4249,10 +4267,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-01T10:32:14.069Z",
-  "activeTab": "tab-live",
+  "lastUpdated": "2026-07-01T10:33:07.934Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-03",
