@@ -8130,6 +8130,7 @@ button.dirty {
           state.manualBets = _dcs_bets;
           state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
           state.sessionStartDate = content.sessionStartDate || '';
+          state.movements = Array.isArray(content.movements) ? content.movements : [];
 
           rerenderAll(true);
           _completeBootSync();
@@ -12186,6 +12187,7 @@ button.dirty {
           // ───────────────────────────────────────────────────────────────────
 
           state.manualBets = content.manualBets;
+          state.movements = Array.isArray(content.movements) ? content.movements : [];
 
           // [F2] ─────────────────────────────────────────────────────────────
           const _f2_settled = state.manualBets.filter(b => ['W','L','P'].includes(String(b.resultado||'').toUpperCase())).length;
