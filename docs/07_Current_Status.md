@@ -1,6 +1,6 @@
 # Current Status
 
-**Last Updated:** 2026-07-01 (Phase 26.17 — manual bet/bankroll cloud synchronization fixed)
+**Last Updated:** 2026-07-07 (Phase 26.18 — provider API error visibility; "No matches to settle" root cause resolved)
 
 ---
 
@@ -10,7 +10,9 @@
 
 The bot is running in production. Pick generation, settlement, and the dashboard are all functional. The Railway backend is stable. Manual bets, bankroll movements, and bot picks all settle and synchronize correctly via GitHub Actions, on-demand settlement from the dashboard, and cloud recovery on fresh browser sessions.
 
-The Live Center staleness investigation (LIVE-1) that was the active focus as of the previous update is now resolved, along with two related defects discovered during that investigation (bankroll movements lost on cloud recovery; a Railway environment misconfiguration). See `08_Change_Log.md` — Phase 26.17 for full detail.
+A recurrence of "No matches to settle." was root-caused to an expired API-Football subscription returning HTTP 200 with empty fixtures instead of a visible error — not a settlement or matching defect. The subscription was renewed (fixing the immediate symptom with no code change), and provider response validation, structured error logging, a distinct dashboard warning, and persistent per-provider health tracking were added so the same failure mode is visible immediately next time, for either provider. See `08_Change_Log.md` — Phase 26.18 for full detail.
+
+The Live Center staleness investigation (LIVE-1) resolved in the previous phase, along with two related defects discovered during that investigation (bankroll movements lost on cloud recovery; a Railway environment misconfiguration), remain stable. See `08_Change_Log.md` — Phase 26.17.
 
 ---
 
@@ -18,7 +20,7 @@ The Live Center staleness investigation (LIVE-1) that was the active focus as of
 
 **Pick generation.** GitHub Actions runs at 17:00 UTC (main) and 23:00 UTC (top-up for non-EU leagues). Poisson model generates O2.5 and BTTS picks across 21 leagues. Picks are committed to GitHub and sent via Telegram.
 
-**Settlement.** Runs at 07:00 and 22:30 UTC via GitHub Actions, and on demand via the dashboard. Bot picks and manual bets share the same `update_dataframe()` engine. football-data.org is the primary source for EU leagues; API-Football is used for blocked EU and all non-EU leagues.
+**Settlement.** Runs at 07:00 and 22:30 UTC via GitHub Actions, and on demand via the dashboard. Bot picks and manual bets share the same `update_dataframe()` engine. football-data.org is the primary source for EU leagues; API-Football is used for blocked EU and all non-EU leagues. Both providers' responses are now validated for embedded errors (plan/quota/auth/network/server) before being trusted, with the result surfaced in the settlement summary, dashboard, logs, and a persistent per-provider health record in `cloud_state.json` (Phase 26.18 — see `04_Backend.md` §7 and ADR-011).
 
 **Railway backend.** Five endpoints operational (`/`, `/health`, `/load`, `/save`, `/run-settlement`). Stateless, single worker, 300-second timeout. `cloud_state.json` is the persistence bridge between browser and GitHub. `GITHUB_OWNER`/`GITHUB_REPO` environment variables verified correct (see Phase 26.17 in the change log for the misconfiguration that was found and fixed).
 
@@ -44,7 +46,7 @@ No periodic polling of `cloud_state.json` exists or is planned; this is a delibe
 
 ## Current Development
 
-No active investigation. The codebase is clean of temporary diagnostic instrumentation — all `debugger` statements and `[F1]`–`[F6]` / `[BOOT-DIAG]` / `[RECOVERY]` / `[RECOVERY-SCHEMA]` / `[STEP 1]`–`[STEP 5]` logging added during the LIVE-1 investigation have been removed. Normal production logging (`[settlement] ...` in `update_results.py`, `console.error` in `index.html` catch blocks, the feature-flagged `diag_log()` helper) is unchanged.
+No active investigation. The temporary read-only audit harness used to root-cause SETTLEMENT-1 lived outside the repository (scratchpad only) and never touched production code or data — there was no in-repo diagnostic instrumentation to remove for this phase. The codebase otherwise remains clean of the LIVE-1-era temporary instrumentation (`debugger` statements, `[F1]`–`[F6]`, `[BOOT-DIAG]`, `[RECOVERY]`, `[RECOVERY-SCHEMA]`, `[STEP 1]`–`[STEP 5]`). Normal production logging (`[settlement] ...` in `update_results.py`, the new always-on `[API-FOOTBALL]`/`[FOOTBALL-DATA.ORG]` provider-error blocks, `console.error` in `index.html` catch blocks, the feature-flagged `diag_log()` helper) is unchanged or additive.
 
 ---
 
@@ -65,9 +67,10 @@ None.
 1. Implement ST-3: SHA conflict retry in `sync_server.py`.
 2. Implement ST-2: Telegram settlement notifications.
 3. Consider refreshing `01_Architecture.md` Section 3 ("Startup Flow") and the "60-second browser interval" architectural rule — both still describe the pre-Phase-26.17 design (no auto-recovery of movements, no event-driven manual-bet refresh) and should be brought in line with the current event-driven model described above.
+4. Monitor `cloud_state.json["providerHealth"]` after real settlement runs to confirm the "warning" threshold (2 consecutive failing runs) is well-tuned in practice — it has only been validated with synthetic scenarios and one real (successful) production run so far.
 
 ---
 
 ## Notes
 
-No diagnostic instrumentation remains in the codebase as of Phase 26.17.
+No diagnostic instrumentation remains in the codebase as of Phase 26.18. The provider-error handling added this phase (`ProviderError`, `classify_provider_error()`, `build_provider_error()`, `update_provider_health()`, etc.) is permanent production code, not temporary diagnostics — it is not expected to be removed in a future cleanup pass.

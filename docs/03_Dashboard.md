@@ -98,7 +98,8 @@ const state = {
   lastUpdated:       null,  // Date object of last loadData() call
   activeTab:         'tab-summary',
   mobileActionsOpen: false,
-  cloudAvailable:    false  // true once a cloud round-trip succeeds
+  cloudAvailable:    false, // true once a cloud round-trip succeeds
+  providerHealth:    {}     // per-provider settlement API health (see below)
 };
 ```
 
@@ -136,6 +137,10 @@ Used by: all profit/ROI calculations, bankroll page, Kelly stake display.
 **`state.movements`**  
 Array of bankroll deposit and withdrawal records `{id, date, type, amount, note}`.  
 Used by: Bankroll page (movements table, evolution chart).
+
+**`state.providerHealth`** (Phase 26.18)  
+Object keyed by provider (`"api-football"`, `"football-data.org"`) → `{status: "ok"|"warning", consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}`. Copied verbatim from `cloud_state.json`'s `providerHealth` field — the backend, not the browser, decides the status. Read by `updateProviderHealthBadge()` to render `#providerHealthLabel`.  
+Updated by: `_doLoadCloudState()`, `_reloadManualBetsFromCloud()` — same cloud-field-copy pattern as `state.movements` (see the SYNC-1 lesson in `05_Known_Issues.md` / `08_Change_Log.md`: any function that copies cloud fields into `state` must include every field, or the omitted one silently goes stale).
 
 **`state.sessionStartDate`**  
 ISO date string (YYYY-MM-DD) when the current betting session started. Used to scope analytics to the current session.
@@ -571,6 +576,19 @@ The Live Center filter is applied to the merged list. Only `isLocal: true` bets 
 For manual rows: a quick-settle control (W/L/P buttons) is shown. For bot rows: the row is read-only (settlement runs on the backend).
 
 The "Run Settlement" button is rendered in this panel. Its state is controlled by `_settlementRunning` and `_settlementMessage`.
+
+### Settlement result messages (Phase 26.18)
+
+`runSettlement()` distinguishes three outcomes from the `/run-settlement` response, in this order:
+1. `data.updated > 0` → `✓ Settlement completed` (success, green).
+2. `data.updated === 0` and `data.settlement_aborted` is true → `⚠ Settlement unavailable — {provider}: {category text}` (warning, amber). This means a provider (API-Football or football-data.org) rejected the request — plan/quota/auth/network/server error — so settlement could not run, and the empty count does not mean "no games today".
+3. Otherwise → `No matches to settle.` (warning, amber). This is a genuine empty result: the provider returned real fixture data, none of it matched anything eligible for settlement right now.
+
+`PROVIDER_HEALTH_LABELS` and `PROVIDER_HEALTH_CATEGORY_TEXT` (defined near `updateCloudStatus()`) map the backend's `provider`/`category` codes to the human-readable text shown in both this message and the health badge below. See `04_Backend.md` §7 for the backend side of this (provider error classification, `settlement_aborted`).
+
+### Provider health badge
+
+`#providerHealthLabel`, next to the Cloud Status badge on the Settings page ("Estado da Sessão" card), reflects `state.providerHealth` — copied from `cloud_state.json`'s `providerHealth` field on every cloud load (`_doLoadCloudState()`, `_reloadManualBetsFromCloud()`), following the same "any code that assigns cloud fields to `state` must include this field" rule established after the SYNC-1 incident. It stays hidden unless a provider's `status` is `"warning"` (persisted by the backend after `PROVIDER_HEALTH_WARNING_THRESHOLD` consecutive failing runs for that provider), in which case it shows `⚠ {provider}: {category text}` with the raw provider message as a tooltip.
 
 ### Expected lifecycle of a live bet
 

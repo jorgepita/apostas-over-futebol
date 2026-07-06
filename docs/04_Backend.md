@@ -253,7 +253,7 @@ The GET for SHA is required. The GitHub Contents API rejects PUT requests for ex
 
 **Request body:** None required.
 
-**Response:**
+**Response (normal — provider returned real data, whether or not anything matched):**
 ```json
 {
   "ok": true,
@@ -263,13 +263,39 @@ The GET for SHA is required. The GitHub Contents API rejects PUT requests for ex
 }
 ```
 
+**Response (provider failure — Phase 26.18):** if a provider (API-Football or football-data.org) rejected a request this run (bad plan/quota/auth/network/server error — see §7 "Provider error handling") and nothing settled as a result, two extra fields are added so the caller can tell a real provider outage apart from a genuinely empty result:
+```json
+{
+  "ok": true,
+  "updated": 0,
+  "ignored": 21,
+  "duration": 5.1,
+  "provider_errors": [
+    {
+      "provider": "api-football",
+      "endpoint": "https://v3.football.api-sports.io/fixtures?league=909&season=2026&date=2026-07-04",
+      "request": {"league": 909, "season": 2026, "date": "2026-07-04"},
+      "category": "PLAN_LIMIT",
+      "message": "plan: Free plans do not have access to this season, try from 2022 to 2024.",
+      "retryable": false,
+      "timestamp": "2026-07-06T12:00:00+00:00"
+    }
+  ],
+  "settlement_aborted": true,
+  "abort_provider": "api-football",
+  "abort_category": "PLAN_LIMIT",
+  "abort_reason": "plan: Free plans do not have access to this season, try from 2022 to 2024."
+}
+```
+`provider_errors` is present whenever at least one provider error occurred this run, even if other picks still settled successfully via a different league/provider (`updated > 0`) — in that case `settlement_aborted` is omitted since settlement did produce results. `settlement_aborted` (plus `abort_provider`/`abort_category`/`abort_reason`) only appears when `updated === 0` **and** a provider error occurred — this is what lets the dashboard show "⚠ Settlement unavailable" instead of the misleading "No matches to settle." (see `03_Dashboard.md` §8). When `provider_errors` is absent and `updated === 0`, that is a genuine empty result and "No matches to settle." is correct.
+
 **Side effects:**
 1. Downloads `picks_history.csv` and `picks_hoje_simplificado.csv` from GitHub to a temporary directory.
 2. Runs settlement on both files via `update_dataframe()`.
 3. Uploads updated CSVs to GitHub.
 4. Downloads `cloud_state.json` from GitHub.
 5. Runs settlement on `manualBets` via `update_dataframe()`.
-6. If any manual bets were newly settled: uploads updated `cloud_state.json` to GitHub.
+6. If any manual bets were newly settled, or if any provider was contacted this run (success or failure — see §7): uploads updated `cloud_state.json` to GitHub, the latter to persist `providerHealth`.
 7. Cleans up the temporary directory.
 
 **Caller:** Browser — "Run Settlement" button in the Live Center.
@@ -624,6 +650,23 @@ Fixture matching uses a multi-stage pipeline:
 3. **Team alias learning:** When a high-confidence match (`score ≥ 94`) is found, the raw name → canonical name mapping is saved to `team_alias_cache.json` for future runs.
 4. **Date-minus-1 fallback:** For late-kickoff US/Asian fixtures where the API uses UTC dates, the previous calendar day is also fetched if no match is found.
 
+### Provider error handling (Phase 26.18)
+
+**Background:** in July 2026, the API-Football subscription lapsed to the Free plan. API-Football responded to every `/fixtures` request with HTTP 200 and an empty `response: []`, but with a non-empty `errors.plan` field explaining the season wasn't covered. `update_dataframe()` had no way to tell that apart from "no games today" — every currently-open pick in a non-EU league (which routes through API-Football, either directly or as a football-data.org fallback) came back `NO_MATCH`, and the dashboard reported "No matches to settle." even though the provider never actually looked at a single fixture. This was root-caused via a temporary, read-only audit of the live pipeline (no code or data changed) that traced the failure to `fetch_api_football_fixtures_for_league_date()` returning `([], "")` for every request. Fixing the subscription made settlement work immediately with no code change — proving the settlement/matching logic itself was never broken.
+
+**What changed:** both API clients now validate a response *before* treating it as a real (possibly empty) result:
+
+- **API-Football:** `api_football_get()` inspects the `errors` field of every HTTP 200 response. If it contains anything meaningful (checked via `_extract_meaningful_errors_field()`), it raises `ProviderError` instead of returning the response — this is what catches the plan/quota/auth rejection that used to masquerade as zero fixtures.
+- **Both providers:** genuine HTTP failures (401/403/429/5xx) are classified via `classify_provider_error(status_code, message_text)`, which prefers the message body's content (`"plan"`/`"season"` → `PLAN_LIMIT`, `"quota"`/`"rate limit"` → `QUOTA_EXCEEDED`, `"token"`/`"auth"` → `AUTHENTICATION`, ...) and falls back to the HTTP status code when the body carries no usable text.
+- Every failure — the new `ProviderError` path and the pre-existing HTTP-error paths — is normalized into one record shape (`build_provider_error()`): `{provider, endpoint, request, category, message, retryable, timestamp}`, printed via `log_provider_error()` (a `[API-FOOTBALL]` / `[FOOTBALL-DATA.ORG]` block with endpoint/category/message — always on, not gated behind `UPDATE_RESULTS_DEBUG`), and appended to `shared_state["provider_errors"]`.
+- Successes are tracked too, via `record_provider_success(shared_state, provider)` — this is what lets `update_provider_health()` tell "this provider failed this run" apart from "this provider wasn't used this run".
+
+**Existing return-value contracts are unchanged.** `fetch_api_football_fixtures_for_league_date()` and `fetch_matches_for_league_date()` still return `(fixtures_or_None, reason_string)` / raise the same exception types as before for every pre-existing failure path (`"HTTP {code}"`, `"OTHER"`, `"NO_LEAGUE_ID"`); `update_dataframe()`'s precheck/matching/decision logic was not touched. The only new *behavioural* difference is the specific "HTTP 200 + meaningful `errors`" case, which previously produced `([], "")` (silently treated as a real empty result) and now produces `(None, "PROVIDER_ERROR")` (treated as a failed fetch, same code path as any other provider failure).
+
+**Settlement summary:** `build_settlement_result()` (called by both `run_settlement_remote()` and `main()`) adds `provider_errors` to the response whenever any were recorded this run, and additionally sets `settlement_aborted` / `abort_provider` / `abort_category` / `abort_reason` when `updated == 0` — see §4 `POST /run-settlement` for the exact response shape. `pick_primary_provider_error()` prefers a non-retryable error (PLAN_LIMIT/AUTHENTICATION/INVALID_REQUEST — a retry won't fix these) over a retryable one (QUOTA_EXCEEDED/NETWORK/SERVER_ERROR) when choosing which one to surface.
+
+**Provider health persistence:** `update_provider_health()` writes `cloud_state.json["providerHealth"]` — `{provider: {status, consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}}` — so the failure state survives across the stateless Railway server's requests (per ADR-003) without a second persistence file (per ADR-008's spirit; see ADR-011). A provider's `status` flips from `"ok"` to `"warning"` after `PROVIDER_HEALTH_WARNING_THRESHOLD` (2) consecutive runs where it failed at least once, and resets to `"ok"` on the next run where it succeeds at least once. Providers not contacted in a given run keep their previous entry untouched. `cloud_state.json` is saved whenever a provider was contacted this run (success or failure), even if zero bets were newly settled — this is the run where a provider health change is most important to persist.
+
 ---
 
 ## 8. League Registry
@@ -831,7 +874,7 @@ All secrets and deployment-specific settings are environment variables, not in `
 | `picks_hoje_github.csv` | GitHub Actions | `main.py` (via `save_all_outputs()`); `run_topup.py` (append) | Browser (daily picks) | Once per generation run | Every 60 seconds (dashboard) |
 | `picks_btts.csv` | GitHub Actions | `main.py` (via `save_all_outputs()`); `run_topup.py` (append) | Browser (daily BTTS picks) | Once per generation run | Every 60 seconds (dashboard) |
 | `picks_history.csv` | GitHub Actions | `update_results.py` (settlement); `main.py` (via `persist_history()`) | `update_results.py`, browser (history page) | Twice daily (settlement) + once daily (generation) | Twice daily (settlement) + every 60 seconds (dashboard) |
-| `cloud_state.json` | Railway (browser-initiated) | `sync_server.py POST /save`; `update_results.py` (manual settlement) | `sync_server.py GET /load`; `update_results.py` (manual settlement); browser (via Railway) | On every user state change (debounced 4s); after manual settlement | On dashboard startup; on "Load Cloud"; after settlement |
+| `cloud_state.json` | Railway (browser-initiated) | `sync_server.py POST /save`; `update_results.py` (manual settlement; provider health) | `sync_server.py GET /load`; `update_results.py` (manual settlement); browser (via Railway) | On every user state change (debounced 4s); after manual settlement; whenever a settlement run contacts any provider (`providerHealth`, even with 0 newly-settled bets — see §7) | On dashboard startup; on "Load Cloud"; after settlement |
 | `fixtures_today.csv` | GitHub Actions | `fetch_oddsapi_fixtures.py` | `main.py` (pick generation); browser (Scout kickoff lookup) | Once per generation run | Once per generation pipeline; on demand from browser |
 | `picks_history.csv` | GitHub Actions | `update_results.py` (settlement); `main.py` (via `persist_history()`) | `update_results.py`; browser; `src/league_stats.py` | Multiple times daily | Multiple times daily |
 | `league_stats.csv` | GitHub Actions | `src/league_stats.update_league_stats()` (called after settlement and generation) | Browser (analytics page) | After every settlement + generation run | On dashboard startup |
@@ -867,6 +910,8 @@ If Railway is down or slow, all browser operations that require Railway (`/load`
 
 **Other errors:** Marked as `"OTHER"` in the cache. If the league has an API-Football fallback, it is used. Otherwise the pick is skipped.
 
+**Every one of the above (Phase 26.18):** in addition to the existing skip/fallback behaviour (unchanged), the failure is classified (`classify_provider_error()`) and recorded as a normalized provider error — see §7 "Provider error handling".
+
 ### API-Football fails
 
 **HTTP 429:** Exponential backoff for up to 4 retries. After all retries exhausted, the pick is skipped with reason `"AF_429"`.
@@ -876,6 +921,8 @@ If Railway is down or slow, all browser operations that require Railway (`/load`
 **No match found:** Tried the previous calendar day (date-minus-1 fallback for late UTC kickoffs). If still no match: pick is skipped.
 
 **During generation (`fetch_oddsapi_fixtures.py`):** League is skipped with a `[FIXTURE SKIP]` log line. The remaining leagues continue.
+
+**HTTP 200 with a meaningful `errors` field (Phase 26.18):** previously indistinguishable from "no fixtures today" — API-Football returns 200 with an empty `response` and puts the real reason (wrong plan tier, exceeded quota, bad auth) in `errors`. This is what happened in July 2026 when the subscription lapsed to the Free plan: every non-EU-league pick silently got `NO_MATCH` and the dashboard reported "No matches to settle." with zero indication anything was wrong. `api_football_get()` now raises `ProviderError` for this case instead of returning the response, which `fetch_api_football_fixtures_for_league_date()` turns into `(None, "PROVIDER_ERROR")` — the same "failed fetch" code path as any other provider error, not a false empty result. See §7 for full detail and `09_Architecture_Decisions.md` ADR-011.
 
 ### Settlement fails
 

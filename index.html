@@ -2770,6 +2770,7 @@ button:disabled {
               <span class="decision-badge info" id="sessionLabel" style="font-size:10px; padding:2px 8px;">Sessão atual: —</span>
               <span class="decision-badge info" id="lastUpdateLabel" style="font-size:10px; padding:2px 8px;">Última atualização: —</span>
               <span class="decision-badge info" id="cloudStatusLabel" style="font-size:10px; padding:2px 8px;">Cloud: —</span>
+              <span class="decision-badge good" id="providerHealthLabel" style="font-size:10px; padding:2px 8px; display:none;">APIs: —</span>
             </div>
           </div>
 
@@ -8102,6 +8103,8 @@ button:disabled {
           state.localEdits = migrateLocalEditsKeys(content.localEdits || {});
           state.sessionStartDate = content.sessionStartDate || '';
           state.movements = Array.isArray(content.movements) ? content.movements : [];
+          state.providerHealth = (content.providerHealth && typeof content.providerHealth === 'object') ? content.providerHealth : {};
+          updateProviderHealthBadge();
 
           rerenderAll(true);
           _completeBootSync();
@@ -8154,7 +8157,46 @@ button:disabled {
   el.className = 'decision-badge good';
   el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
 }
-      
+
+      // Provider health (API-Football / football-data.org) — surfaces repeated
+      // fetch failures (plan/quota/auth/network) so they never masquerade as
+      // "no games today". Persisted in cloud_state.json under providerHealth,
+      // written by the backend whenever a settlement run touches a provider.
+      const PROVIDER_HEALTH_LABELS = {
+        'api-football':       'API-Football',
+        'football-data.org':  'football-data.org',
+      };
+      const PROVIDER_HEALTH_CATEGORY_TEXT = {
+        PLAN_LIMIT:       'subscription does not include the requested season',
+        QUOTA_EXCEEDED:   'quota exceeded',
+        AUTHENTICATION:   'authentication failed',
+        INVALID_REQUEST:  'invalid request',
+        NETWORK:          'network error',
+        SERVER_ERROR:     'server error',
+        UNKNOWN:          'unknown provider error',
+      };
+
+      function updateProviderHealthBadge() {
+        const el = document.getElementById('providerHealthLabel');
+        if (!el) return;
+
+        const health = state.providerHealth || {};
+        const warnings = Object.entries(health).filter(([, v]) => v && v.status === 'warning');
+
+        if (warnings.length === 0) {
+          el.style.display = 'none';
+          return;
+        }
+
+        const [provider, entry] = warnings[0];
+        const label = PROVIDER_HEALTH_LABELS[provider] || provider;
+        const categoryText = PROVIDER_HEALTH_CATEGORY_TEXT[entry.lastError?.category] || 'provider error';
+        el.style.display = '';
+        el.className = 'decision-badge bad';
+        el.innerHTML = `<span class="save-status-dot"></span> ⚠ ${escapeHtml(label)}: ${escapeHtml(categoryText)}`;
+        el.title = entry.lastError?.message || '';
+      }
+
       function markDirty() {
         _dirtyGeneration++;          // Phase 26.1.1 — stamp every change so mid-save arrivals are detectable
         hasPendingCloudChanges = true;
@@ -12100,7 +12142,16 @@ button:disabled {
 
             await loadData(true);
             await _reloadManualBetsFromCloud();
-            _settlementMessage = data.updated > 0 ? '✓ Settlement completed' : 'No matches to settle.';
+
+            if (data.updated > 0) {
+              _settlementMessage = '✓ Settlement completed';
+            } else if (data.settlement_aborted) {
+              const label = PROVIDER_HEALTH_LABELS[data.abort_provider] || data.abort_provider || 'API';
+              const categoryText = PROVIDER_HEALTH_CATEGORY_TEXT[data.abort_category] || data.abort_reason || 'provider error';
+              _settlementMessage = `⚠ Settlement unavailable — ${label}: ${categoryText}`;
+            } else {
+              _settlementMessage = 'No matches to settle.';
+            }
           } catch (err) {
             console.error('[Settlement] error:', err);
             const truncated = err.message?.length > 90
@@ -12133,6 +12184,8 @@ button:disabled {
 
           state.manualBets = content.manualBets;
           state.movements = Array.isArray(content.movements) ? content.movements : [];
+          state.providerHealth = (content.providerHealth && typeof content.providerHealth === 'object') ? content.providerHealth : {};
+          updateProviderHealthBadge();
 
           saveLocalState();
 

@@ -317,3 +317,36 @@ Environment variables separate secrets from code and allow Railway configuration
 **Do Not Revert Without Good Reason**
 
 Hardcoding a production value — particularly an API key, a rate limit, or a bankroll amount — creates a hidden coupling between the code and a specific deployment. The next time the value needs to change (and it will), the change requires finding all occurrences in code, updating them, committing, and deploying. A misconfigured but deployed value also becomes invisible: the code "looks correct" even when running with the wrong parameters.
+
+---
+
+## ADR-011 — Provider API Responses Are Validated for Embedded Errors Before Being Trusted; Provider Health Lives in `cloud_state.json`
+
+**Status:** Accepted
+
+**Date:** 2026-07-07 (Phase 26.18)
+
+**Decision**
+
+Every API-Football response is checked for a meaningful `errors` field before its `response`/`matches` payload is trusted, even on HTTP 200. Any provider failure — whether signalled by an HTTP error status or by a 200 response with a meaningful `errors` field — is normalized into one record shape (`build_provider_error()`: `provider, endpoint, request, category, message, retryable, timestamp`) and recorded, rather than being allowed to look like a genuine empty result. The resulting per-provider health state (`status`, `consecutiveFailures`, `lastError`, ...) is persisted as a new top-level field in `cloud_state.json` (`providerHealth`) — no new file, no new database.
+
+**Context**
+
+In July 2026, the API-Football subscription lapsed to the Free plan. API-Football's `/fixtures` endpoint responded with HTTP 200, an empty `response: []`, and a `errors.plan` field stating the requested season wasn't covered. `update_dataframe()` had no code path that inspected `errors` on a successful HTTP response — it read `response`, got an empty list, and treated that identically to "no games scheduled today". Every currently-open pick in a league routed through API-Football (all non-EU leagues, plus any EU league falling back to API-Football) came back `NO_MATCH`, and the dashboard's "No matches to settle." message gave no indication a provider was the actual cause. Root-caused via a temporary, read-only audit of the live pipeline (see `08_Change_Log.md` Phase 26.18); renewing the subscription fixed it with zero code changes, confirming the settlement/matching logic itself was sound — the gap was response validation, not decision logic.
+
+**Reasoning**
+
+An HTTP 200 status code means the request reached the server and the server chose to respond; it does not mean the request was honoured. Treating "response body I can decode" as synonymous with "request succeeded" throws away the one piece of information (the `errors` field) that would have made this failure visible from the very first affected settlement run instead of persisting silently for days. Classifying by message content first (`"plan"`, `"quota"`, `"token"`, ...) and falling back to HTTP status only when no message is available (`classify_provider_error()`) gives a specific, actionable category instead of a generic "something went wrong".
+
+Persisting the resulting health state in `cloud_state.json` rather than a new file or database follows directly from ADR-003 (Railway is stateless; GitHub is the persistence layer) and the spirit of ADR-008 (no second persistence model for state that belongs with the rest of the settlement/bet data) — `cloud_state.json` is already the single JSON blob the dashboard reads on every load, so adding one more key to it is consistent with how `movements` was added, not a new architectural surface.
+
+**Consequences**
+
+- `api_football_get()` can raise a new exception type, `ProviderError`, on a 200 response — callers that used to only catch `error.HTTPError`/`Exception` now also catch `ProviderError` explicitly (checked first, so it isn't silently absorbed by a broad `except Exception`).
+- The specific "HTTP 200 + meaningful `errors`" case changes behaviour: it used to return `([], "")` (a trusted empty result); it now returns `(None, "PROVIDER_ERROR")` (an untrusted failed fetch), which is the one deliberate behavioural change in Phase 26.18. Every other existing failure path (`"HTTP {code}"`, `"OTHER"`, `"NO_LEAGUE_ID"`, ...) keeps its exact prior reason string and control flow.
+- `cloud_state.json` is now written slightly more often — whenever a settlement run contacts any provider, not only when a manual bet newly settles — to keep `providerHealth` current even on a run that settles nothing.
+- The dashboard, settlement summary, and logs all read from the same normalized error record, so a provider failure cannot be described differently (or lost) at different layers.
+
+**Do Not Revert Without Good Reason**
+
+Reverting to "HTTP 200 means trust the body" would silently reintroduce the exact failure mode this ADR exists to close: a provider can reject every request for days and the only visible symptom is an ambiguous "No matches to settle." with no record of why. Moving provider health to a separate file or database would violate ADR-003/ADR-008's reasoning for the same cost/benefit reasons already established for manual bets and movements.

@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.18 | 2026-07-07 | "No matches to settle" root-caused to an expired API-Football subscription silently returning HTTP 200 + empty fixtures; provider responses now validated for embedded errors, normalized, logged, surfaced in the settlement summary and dashboard, and persisted as per-provider health in `cloud_state.json` |
 | 26.17 | 2026-07-01 | Manual bet/bankroll cloud synchronization fixed; boot sync guard and event-driven refresh replace periodic polling; Railway `GITHUB_REPO` misconfiguration resolved; dashboard KPI/alert consistency fixes; diagnostic instrumentation removed |
 | Doc System | 2026-06-29 | Complete documentation system established; `CLAUDE.md` added at repository root |
 | 26.16 | 2026-06-28 | Manual settlement unified into `cloud_state.json`; legacy CSV endpoints removed |
@@ -22,6 +23,34 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.18 — Provider API Error Visibility ("No Matches to Settle" Root Cause + Fix)
+
+**Implemented:** 2026-07-07
+
+**Root cause (diagnosed, no code changed to fix it).** The API-Football subscription had lapsed to the Free plan. Every `/fixtures` request for the 2025/2026 season returned HTTP 200 with an empty `response: []` and an `errors.plan` field explaining the season wasn't covered on that plan. `update_dataframe()` had no code path that inspected `errors` on a successful response — an empty `response` was always treated as "no games today". Every currently-open pick in a league routed through API-Football (all non-EU leagues, and any EU league falling back to it) came back `NO_MATCH`, and the dashboard reported "No matches to settle." with no indication a provider was actually rejecting the request. Diagnosed via a temporary, read-only audit harness that replayed real production data through the real pipeline with zero writes; renewing the subscription fixed settlement immediately with **no code change**, proving the settlement and matching logic itself was correct — the gap was response validation.
+
+**Provider response validation.** `api_football_get()` now checks the `errors` field of every HTTP 200 response (`_extract_meaningful_errors_field()`) and raises a new `ProviderError` exception when it's non-empty, instead of returning the response as if it were a trusted (if empty) result. Genuine HTTP failures (401/403/429/5xx, both providers) are classified by `classify_provider_error()`, which prefers the response body's message content (`"plan"`/`"season"` → `PLAN_LIMIT`, `"quota"`/`"rate limit"` → `QUOTA_EXCEEDED`, `"token"`/`"auth"` → `AUTHENTICATION`, ...) and falls back to the HTTP status code otherwise.
+
+**Normalized error record and structured logging.** Every provider failure — new or pre-existing — is normalized via `build_provider_error()` into `{provider, endpoint, request, category, message, retryable, timestamp}`, always printed as a `[API-FOOTBALL]` / `[FOOTBALL-DATA.ORG]` block (endpoint/category/message), and appended to `shared_state["provider_errors"]`. Successes are tracked via `record_provider_success()` so a provider that wasn't contacted this run can be told apart from one that failed.
+
+**Settlement summary.** `build_settlement_result()` adds `provider_errors` to the `/run-settlement` response whenever any occurred, and — only when `updated == 0` and a provider error occurred — adds `settlement_aborted`/`abort_provider`/`abort_category`/`abort_reason`, picked via `pick_primary_provider_error()` (prefers a non-retryable error over a retryable one). When neither field is present and `updated == 0`, that is a genuine empty result, and "No matches to settle." is the correct message — this is now the *only* situation where that message appears.
+
+**Provider health persistence.** `update_provider_health()` writes a new `cloud_state.json["providerHealth"]` field — `{provider: {status, consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}}` — so the failure state survives across Railway's stateless requests. Status flips `"ok"` → `"warning"` after `PROVIDER_HEALTH_WARNING_THRESHOLD` (2) consecutive failing runs for that provider, and resets on the next success. `cloud_state.json` is now saved whenever a settlement run contacts any provider, even if zero bets settled — previously it was only saved when a manual bet newly settled.
+
+**Dashboard.** `runSettlement()` now distinguishes three outcomes: `✓ Settlement completed` (updated > 0), `⚠ Settlement unavailable — {provider}: {category text}` (provider error, nothing settled), and `No matches to settle.` (genuine empty result — unchanged from before). A new `#providerHealthLabel` badge next to the Cloud Status badge (Settings page) reads `state.providerHealth` — copied from `cloud_state.json` in `_doLoadCloudState()` and `_reloadManualBetsFromCloud()`, following the same cloud-field-copy pattern established for `state.movements` after the Phase 26.17 SYNC-1 fix — and shows `⚠ {provider}: {category text}` whenever any provider's status is `"warning"`.
+
+**Backward compatibility.** All pre-existing failure reasons (`"HTTP {code}"`, `"OTHER"`, `"NO_LEAGUE_ID"`, `"NO_API_KEY"`) keep their exact strings and control flow; `update_dataframe()`'s precheck/matching/decision logic was not touched. The only behavioural change is the specific "HTTP 200 + meaningful `errors`" case, which previously returned `([], "")` (trusted empty result) and now returns `(None, "PROVIDER_ERROR")` (untrusted failed fetch) — the same code path every other provider failure already used. Validated against 7 required scenarios (valid fixtures; HTTP 200 + plan error; HTTP 200 + quota error; HTTP 401; HTTP 429; HTTP 500; genuinely empty HTTP 200) and against real production data (post-renewal, zero provider errors, settlement behaves exactly as before).
+
+### Impact
+
+A future provider outage — expired subscription, exhausted quota, revoked key, or a genuine API incident — will show up immediately as `⚠ Settlement unavailable` with a specific category, in the settlement summary, in structured logs, and in a persistent dashboard health badge, instead of silently accumulating unsettled picks behind an ambiguous "No matches to settle." message.
+
+### Root Cause
+
+- API-Football's Free plan rejects requests for the 2025/2026 season by returning HTTP 200 with an empty `response` and the real reason inside `errors.plan` — a response shape `update_dataframe()` had no code to distinguish from a genuine empty result.
 
 ---
 

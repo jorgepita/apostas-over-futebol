@@ -14,7 +14,17 @@ None currently open.
 
 ## Resolved Issues
 
-Full technical detail, root cause analysis, and validation for each of these is in `08_Change_Log.md` — Phase 26.17.
+### SETTLEMENT-1 — "No Matches to Settle" Caused by an Expired API-Football Subscription Masquerading as Empty Fixtures
+
+**Status:** Resolved — 2026-07-07 (Phase 26.18). Full technical detail in `08_Change_Log.md` — Phase 26.18.
+
+**Was:** The dashboard reported "No matches to settle." on every settlement run, even though bets in non-EU leagues (MLS, Allsvenskan, Veikkausliiga, K League 1) had clearly finished. `updated` was 0 and every eligible pick came back `NO_MATCH`.
+
+**Root cause:** The API-Football subscription had lapsed to the Free plan, which rejects the 2025/2026 season. API-Football responded with HTTP 200, an empty `response: []`, and the real reason in `errors.plan`. `update_dataframe()` never inspected `errors` on a 200 response — an empty `response` was indistinguishable from "no games today". Renewing the subscription fixed settlement immediately with no code change, confirming the settlement/matching logic itself was never broken.
+
+**Fix:** API provider responses (both API-Football and football-data.org) are now validated for embedded errors before being trusted, normalized into one error record shape, logged, surfaced in the `/run-settlement` summary (`settlement_aborted`/`provider_errors`) and the dashboard (`⚠ Settlement unavailable`, plus a persistent provider-health badge), and tracked across runs in `cloud_state.json["providerHealth"]`. See ADR-011.
+
+Full technical detail, root cause analysis, and validation for the rest of these is in `08_Change_Log.md` — Phase 26.17.
 
 ### LIVE-1 — Live Center Does Not Auto-Refresh Manual Bet Results
 

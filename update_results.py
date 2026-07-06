@@ -332,6 +332,160 @@ UPDATE_RESULTS_DEBUG = os.getenv("UPDATE_RESULTS_DEBUG", "").strip().lower() in 
 
 
 # =============================
+# Provider error handling
+#
+# API-Football (and, defensively, football-data.org) can return HTTP 200
+# with an empty `response`/`matches` list while carrying a non-empty
+# `errors` object describing *why* nothing was returned (wrong plan tier,
+# quota exceeded, bad auth, ...). Left unhandled, that is indistinguishable
+# from "no games today" and settlement silently reports "No matches to
+# settle." even though the provider never actually looked at the fixture.
+#
+# Everything below normalises both that case and outright HTTP failures
+# (401/403/429/5xx) into one record shape so the failure reason survives
+# from the API client up through the settlement summary to the dashboard.
+# =============================
+PROVIDER_ERROR_CATEGORIES = {
+    "PLAN_LIMIT", "QUOTA_EXCEEDED", "AUTHENTICATION",
+    "INVALID_REQUEST", "NETWORK", "SERVER_ERROR", "UNKNOWN",
+}
+RETRYABLE_PROVIDER_CATEGORIES = {"QUOTA_EXCEEDED", "NETWORK", "SERVER_ERROR"}
+PROVIDER_HEALTH_WARNING_THRESHOLD = 2  # consecutive failing settlement runs before status flips to "warning"
+
+
+class ProviderError(Exception):
+    """Raised when a provider responded, but the response itself signals the
+    request failed (bad plan/quota/auth/etc) rather than a genuine empty result.
+    Carries a normalized error record in `.record`."""
+
+    def __init__(self, record: dict):
+        self.record = record
+        super().__init__(record.get("message", "provider error"))
+
+
+def build_provider_error(provider: str, endpoint: str, request_params, category: str, message: str) -> dict:
+    return {
+        "provider": provider,
+        "endpoint": endpoint,
+        "request": request_params,
+        "category": category if category in PROVIDER_ERROR_CATEGORIES else "UNKNOWN",
+        "message": message,
+        "retryable": category in RETRYABLE_PROVIDER_CATEGORIES,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def _extract_meaningful_errors_field(errors_obj) -> str:
+    """API-Football's `errors` field is a dict of {field: message} (or, on
+    older responses, a list of such dicts). Returns a flattened human-readable
+    string, or '' if there is nothing meaningful in it."""
+    if not errors_obj:
+        return ""
+    parts = []
+    if isinstance(errors_obj, dict):
+        parts = [f"{k}: {v}" for k, v in errors_obj.items() if v]
+    elif isinstance(errors_obj, list):
+        for item in errors_obj:
+            if isinstance(item, dict):
+                parts.extend(f"{k}: {v}" for k, v in item.items() if v)
+            elif item:
+                parts.append(str(item))
+    else:
+        parts = [str(errors_obj)]
+    return " | ".join(parts)
+
+
+def _extract_message_from_http_error_body(body_text: str) -> str:
+    """Best-effort extraction of a human-readable message from an HTTP error
+    response body, understanding both API-Football's `errors` shape and
+    football-data.org's `{"message": "..."}` shape. Falls back to raw text."""
+    if not body_text:
+        return ""
+    try:
+        obj = json.loads(body_text)
+    except Exception:
+        return body_text[:300]
+
+    if isinstance(obj, dict):
+        parts = []
+        errors_msg = _extract_meaningful_errors_field(obj.get("errors"))
+        if errors_msg:
+            parts.append(errors_msg)
+        if obj.get("message"):
+            parts.append(str(obj["message"]))
+        if parts:
+            return " | ".join(parts)
+
+    return body_text[:300]
+
+
+def _read_http_error_body(e: "error.HTTPError") -> str:
+    try:
+        return e.read().decode("utf-8", errors="replace")
+    except Exception:
+        return ""
+
+
+def classify_provider_message(message: str) -> str:
+    m = (message or "").lower()
+    if any(term in m for term in ("plan", "season", "subscription")):
+        return "PLAN_LIMIT"
+    if any(term in m for term in ("quota", "rate limit", "too many requests")):
+        return "QUOTA_EXCEEDED"
+    if "requests" in m and ("limit" in m or "exceeded" in m):
+        return "QUOTA_EXCEEDED"
+    if any(term in m for term in ("token", "api key", "invalid key", "unauthorized", "authentication", "credentials")):
+        return "AUTHENTICATION"
+    if any(term in m for term in ("invalid", "not found", "unknown league", "bad request")):
+        return "INVALID_REQUEST"
+    return "UNKNOWN"
+
+
+def classify_provider_status(status_code) -> str:
+    if status_code in (401, 403):
+        return "AUTHENTICATION"
+    if status_code == 429:
+        return "QUOTA_EXCEEDED"
+    if isinstance(status_code, int) and 500 <= status_code < 600:
+        return "SERVER_ERROR"
+    if isinstance(status_code, int) and 400 <= status_code < 500:
+        return "INVALID_REQUEST"
+    return "UNKNOWN"
+
+
+def classify_provider_error(status_code, message_text: str) -> tuple[str, str]:
+    """Combines message-content classification (authoritative when present)
+    with an HTTP-status fallback. Returns (category, message)."""
+    message_text = message_text or ""
+    category = classify_provider_message(message_text) if message_text else "UNKNOWN"
+    if category == "UNKNOWN":
+        category = classify_provider_status(status_code)
+    if not message_text:
+        message_text = f"HTTP {status_code}" if status_code is not None else "Unknown provider error"
+    return category, message_text
+
+
+def log_provider_error(record: dict):
+    """Always-on structured log — this is the visibility the silent
+    'HTTP 200 + empty response' failure mode never had before."""
+    print(
+        f"\n[{record['provider'].upper()}]\n"
+        f"Endpoint:\n{record['endpoint']}\n"
+        f"Category:\n{record['category']}\n"
+        f"Message:\n{record['message']}\n"
+    )
+
+
+def record_provider_error(shared_state: dict, record: dict):
+    shared_state.setdefault("provider_errors", []).append(record)
+    log_provider_error(record)
+
+
+def record_provider_success(shared_state: dict, provider: str):
+    shared_state.setdefault("provider_success_seen", set()).add(provider)
+
+
+# =============================
 # Helpers
 # =============================
 def ensure_shared_state_defaults(shared_state: dict | None) -> dict:
@@ -1225,11 +1379,12 @@ def http_get_json_football_data(url: str, token: str):
         return json.loads(resp.read().decode("utf-8"))
 
 
-def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]:
+def fetch_matches_for_league_date(league_code: str, date_str: str, shared_state: dict) -> list[dict]:
     url = (
         f"https://api.football-data.org/v4/competitions/{league_code}/matches"
         f"?dateFrom={parse.quote(date_str)}&dateTo={parse.quote(date_str)}"
     )
+    request_params = {"league_code": league_code, "date": date_str}
 
     last_error = None
 
@@ -1242,6 +1397,7 @@ def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]
             if attempt > 1:
                 print(f"[DBG] football-data retry sucesso | league={league_code} | date={date_str} | tentativa={attempt}")
 
+            record_provider_success(shared_state, "football-data.org")
             return matches
 
         except error.HTTPError as e:
@@ -1257,6 +1413,12 @@ def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]
                 time.sleep(wait_s)
                 continue
 
+            message = _extract_message_from_http_error_body(_read_http_error_body(e))
+            category, message = classify_provider_error(code, message)
+            record_provider_error(shared_state, build_provider_error(
+                provider="football-data.org", endpoint=url, request_params=request_params,
+                category=category, message=message,
+            ))
             raise
 
         except Exception as e:
@@ -1271,6 +1433,13 @@ def fetch_matches_for_league_date(league_code: str, date_str: str) -> list[dict]
                 time.sleep(wait_s)
                 continue
 
+            category = classify_provider_message(str(e))
+            if category == "UNKNOWN":
+                category = "NETWORK"
+            record_provider_error(shared_state, build_provider_error(
+                provider="football-data.org", endpoint=url, request_params=request_params,
+                category=category, message=str(e),
+            ))
             raise
 
     if last_error:
@@ -1324,7 +1493,22 @@ def api_football_get(path: str, params: dict | None = None):
             if attempt > 1:
                 print(f"[DBG] API-Football retry sucesso | path={path} | tentativa={attempt}")
 
+            # HTTP 200 does not mean the request succeeded — API-Football puts
+            # plan/quota/auth rejections in `errors` while still returning 200
+            # with an empty `response`. Without this check that is silently
+            # indistinguishable from "no fixtures today".
+            meaningful = _extract_meaningful_errors_field(data.get("errors") if isinstance(data, dict) else None)
+            if meaningful:
+                category, message = classify_provider_error(200, meaningful)
+                raise ProviderError(build_provider_error(
+                    provider="api-football", endpoint=url, request_params=params,
+                    category=category, message=message,
+                ))
+
             return data
+
+        except ProviderError:
+            raise
 
         except error.HTTPError as e:
             last_error = e
@@ -1399,7 +1583,32 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
             },
         )
         response = data.get("response", []) or []
+    except ProviderError as pe:
+        record_provider_error(shared_state, pe.record)
+        print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro={pe}")
+        league_id_cache[cache_key] = None
+        return None
+    except error.HTTPError as e:
+        code = getattr(e, "code", None)
+        message = _extract_message_from_http_error_body(_read_http_error_body(e))
+        category, message = classify_provider_error(code, message)
+        record_provider_error(shared_state, build_provider_error(
+            provider="api-football", endpoint=f"{AF_BASE_URL}/leagues",
+            request_params={"country": country, "season": season},
+            category=category, message=message,
+        ))
+        print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro=HTTP {code}")
+        league_id_cache[cache_key] = None
+        return None
     except Exception as e:
+        category = classify_provider_message(str(e))
+        if category == "UNKNOWN":
+            category = "NETWORK"
+        record_provider_error(shared_state, build_provider_error(
+            provider="api-football", endpoint=f"{AF_BASE_URL}/leagues",
+            request_params={"country": country, "season": season},
+            category=category, message=str(e),
+        ))
         print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro={e}")
         league_id_cache[cache_key] = None
         return None
@@ -1443,26 +1652,38 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
     if cache_key in fixtures_cache:
         return fixtures_cache[cache_key]
 
+    request_params = {"league": league_id, "season": season, "date": date_str}
+    endpoint = f"{AF_BASE_URL}/fixtures"
+
     try:
-        data = api_football_get(
-            "/fixtures",
-            {
-                "league": league_id,
-                "season": season,
-                "date": date_str,
-            },
-        )
+        data = api_football_get("/fixtures", request_params)
         fixtures = data.get("response", []) or []
         fixtures_cache[cache_key] = (fixtures, "")
+        record_provider_success(shared_state, "api-football")
         print(
             f"[DBG] API-Football fixtures | fd_code={fd_league_code} | league_id={league_id} | "
             f"season={season} | date={date_str} | jogos={len(fixtures)}"
         )
         return fixtures, ""
 
+    except ProviderError as pe:
+        record_provider_error(shared_state, pe.record)
+        fixtures_cache[cache_key] = (None, "PROVIDER_ERROR")
+        print(
+            f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
+            f"season={season} | date={date_str} | erro=PROVIDER_ERROR ({pe.record['category']})"
+        )
+        return None, "PROVIDER_ERROR"
+
     except error.HTTPError as e:
         code = getattr(e, "code", None)
         reason = f"HTTP {code}" if code is not None else "HTTP"
+        message = _extract_message_from_http_error_body(_read_http_error_body(e))
+        category, message = classify_provider_error(code, message)
+        record_provider_error(shared_state, build_provider_error(
+            provider="api-football", endpoint=endpoint, request_params=request_params,
+            category=category, message=message,
+        ))
         fixtures_cache[cache_key] = (None, reason)
         print(
             f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
@@ -1471,6 +1692,13 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
         return None, reason
 
     except Exception as e:
+        category = classify_provider_message(str(e))
+        if category == "UNKNOWN":
+            category = "NETWORK"
+        record_provider_error(shared_state, build_provider_error(
+            provider="api-football", endpoint=endpoint, request_params=request_params,
+            category=category, message=str(e),
+        ))
         fixtures_cache[cache_key] = (None, "OTHER")
         print(
             f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
@@ -1956,7 +2184,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         if cache_key not in fd_matches_cache:
             try:
-                matches = fetch_matches_for_league_date(league_code, data)
+                matches = fetch_matches_for_league_date(league_code, data, shared_state)
                 fd_matches_cache[cache_key] = {
                     "ok": True,
                     "matches": matches,
@@ -2325,6 +2553,97 @@ def save_cloud_state_to_github(content: dict, message: str) -> None:
 
 
 # =============================
+# Provider health (persisted in cloud_state.json — see ADR-011)
+# =============================
+def update_provider_health(cloud_state: dict, shared_state: dict) -> dict:
+    """Update cloud_state['providerHealth'] from this run's provider
+    successes/errors. Only providers actually contacted this run are
+    touched; providers not used this run keep their previous entry as-is.
+
+    A provider's status flips to "warning" after
+    PROVIDER_HEALTH_WARNING_THRESHOLD consecutive failing runs, and resets
+    to "ok" on the next run where that provider succeeds at least once.
+    """
+    health = cloud_state.get("providerHealth")
+    if not isinstance(health, dict):
+        health = {}
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    errors_by_provider = {}
+    for rec in shared_state.get("provider_errors", []):
+        # last one wins — most recent error for that provider this run
+        errors_by_provider[rec["provider"]] = rec
+
+    success_seen = set(shared_state.get("provider_success_seen", set()))
+    touched = success_seen | set(errors_by_provider.keys())
+
+    for provider in touched:
+        entry = dict(health.get(provider, {}))
+        if provider in errors_by_provider:
+            entry["consecutiveFailures"] = int(entry.get("consecutiveFailures", 0)) + 1
+            entry["lastError"] = errors_by_provider[provider]
+            entry["lastCheckedAt"] = now_iso
+            entry["status"] = (
+                "warning" if entry["consecutiveFailures"] >= PROVIDER_HEALTH_WARNING_THRESHOLD
+                else entry.get("status", "ok")
+            )
+        else:
+            entry["consecutiveFailures"] = 0
+            entry["status"] = "ok"
+            entry["lastSuccessAt"] = now_iso
+            entry["lastCheckedAt"] = now_iso
+        health[provider] = entry
+
+    cloud_state["providerHealth"] = health
+    return health
+
+
+def pick_primary_provider_error(provider_errors: list) -> dict | None:
+    """Choose the error to surface as THE reason settlement found nothing.
+    Non-retryable errors (plan/auth/invalid-request — things a retry won't
+    fix) are more informative than a transient network/quota blip, so they
+    take priority; otherwise the first error recorded wins."""
+    if not provider_errors:
+        return None
+    for rec in provider_errors:
+        if not rec.get("retryable"):
+            return rec
+    return provider_errors[0]
+
+
+def build_settlement_result(total_updated: int, total_ignored: int, duration: float, shared_state: dict) -> dict:
+    """Assembles the /run-settlement response dict. When the provider layer
+    failed and nothing got settled, this replaces the ambiguous "0 updated"
+    result with an explicit, categorized abort reason instead of letting the
+    caller infer "no matches to settle" from an empty count."""
+    result = {
+        "ok": True,
+        "updated": total_updated,
+        "ignored": total_ignored,
+        "duration": duration,
+    }
+
+    provider_errors = shared_state.get("provider_errors", [])
+    if provider_errors:
+        result["provider_errors"] = provider_errors
+
+        if total_updated == 0:
+            worst = pick_primary_provider_error(provider_errors)
+            result["settlement_aborted"] = True
+            result["abort_provider"] = worst["provider"]
+            result["abort_category"] = worst["category"]
+            result["abort_reason"] = worst["message"]
+            print(
+                "\n[settlement] Settlement aborted.\n"
+                f"Reason: {worst['provider']} rejected the fixture request.\n"
+                f"Category: {worst['category']}\n"
+            )
+
+    return result
+
+
+# =============================
 # Remote settlement (called by sync_server.py)
 # =============================
 def run_settlement_remote() -> dict:
@@ -2381,6 +2700,7 @@ def run_settlement_remote() -> dict:
     try:
         cloud_state = load_cloud_state_from_github()
         manual_bets = cloud_state.get("manualBets", [])
+        newly_settled = 0
 
         if manual_bets:
             manual_df = manual_bets_to_settlement_df(manual_bets)
@@ -2390,13 +2710,20 @@ def run_settlement_remote() -> dict:
 
             if newly_settled > 0:
                 cloud_state["manualBets"] = manual_bets
-                msg = (
-                    f"Settle {newly_settled} manual bet(s) "
-                    f"({datetime.now(timezone.utc).isoformat()}Z)"
-                )
-                save_cloud_state_to_github(cloud_state, msg)
         else:
             print("[settlement] manual: no manual bets in cloud_state.json")
+
+        # Provider health must be persisted even when nothing settled — that is
+        # exactly the run where a provider outage most needs to be visible.
+        health_changed = bool(shared_state.get("provider_errors")) or bool(shared_state.get("provider_success_seen"))
+        if health_changed:
+            update_provider_health(cloud_state, shared_state)
+
+        if newly_settled > 0 or health_changed:
+            msg = (
+                f"Settle {newly_settled} manual bet(s)" if newly_settled > 0 else "Update provider health"
+            ) + f" ({datetime.now(timezone.utc).isoformat()}Z)"
+            save_cloud_state_to_github(cloud_state, msg)
     except Exception as exc:
         import traceback as _tb
         print(f"[WARN] manual settlement failed: {exc}")
@@ -2408,12 +2735,7 @@ def run_settlement_remote() -> dict:
 
     print(f"[settlement] done in {duration}s — updated={total_updated} ignored={total_ignored}")
 
-    return {
-        "ok":      True,
-        "updated": total_updated,
-        "ignored": total_ignored,
-        "duration": duration,
-    }
+    return build_settlement_result(total_updated, total_ignored, duration, shared_state)
 
 
 # =============================
@@ -2463,11 +2785,13 @@ def main():
     upload_csv_to_github(DAILY_FILE,   REMOTE_DAILY_NAME)
 
     # ── Manual bets — cloud_state.json is the single source of truth ──────────
+    m_updated = m_ignored = 0
     if GITHUB_TOKEN:
         try:
             cloud_state = load_cloud_state_from_github()
             manual_bets = cloud_state.get("manualBets", [])
             print(f"Manual bets em cloud_state.json: {len(manual_bets)}")
+            newly_settled = 0
             if manual_bets:
                 manual_df = manual_bets_to_settlement_df(manual_bets)
                 manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
@@ -2478,16 +2802,35 @@ def main():
                 )
                 if newly_settled > 0:
                     cloud_state["manualBets"] = manual_bets
-                    save_cloud_state_to_github(
-                        cloud_state,
-                        f"Settle {newly_settled} manual bet(s) — local run",
-                    )
             else:
                 print("Manual: sem apostas pendentes")
+
+            health_changed = bool(shared_state.get("provider_errors")) or bool(shared_state.get("provider_success_seen"))
+            if health_changed:
+                update_provider_health(cloud_state, shared_state)
+
+            if newly_settled > 0 or health_changed:
+                msg = (
+                    f"Settle {newly_settled} manual bet(s) — local run" if newly_settled > 0
+                    else "Update provider health — local run"
+                )
+                save_cloud_state_to_github(cloud_state, msg)
         except Exception as e:
             print(f"[WARN] liquidação manual falhou: {e}")
     else:
         print("[WARN] GITHUB_TOKEN não definido — liquidação manual ignorada")
+
+    summary = build_settlement_result(
+        h_updated + d_updated + m_updated,
+        h_ignored + d_ignored + m_ignored,
+        0.0,
+        shared_state,
+    )
+    if summary.get("settlement_aborted"):
+        print(
+            f"[SETTLEMENT] aborted — provider={summary['abort_provider']} "
+            f"category={summary['abort_category']} reason={summary['abort_reason']}"
+        )
 
 
 if __name__ == "__main__":
