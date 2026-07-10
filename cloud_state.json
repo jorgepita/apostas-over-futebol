@@ -3296,6 +3296,15 @@
     },
     "2026-07-11|noruega|Aalesund vs Molde|Over 2.5": {
       "apostada": true
+    },
+    "2026-07-12|suecia|Vasteras SK FK vs Degerfors IF|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-11|finlandia|Lahti vs HJK Helsinki|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-12|noruega|Rosenborg vs Kristiansund BK|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -4867,7 +4876,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:21:52.049Z",
+  "lastUpdated": "2026-07-10T18:22:58.905Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
