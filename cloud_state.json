@@ -5554,6 +5554,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783712809125_jea1x6",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Vasteras SK FK vs Degerfors IF",
+      "mercado": "Over 2.5",
+      "odd": "2",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783712817688_0kxgyd",
+      "data": "2026-07-13",
+      "liga": "suecia",
+      "jogo": "Djurgardens IF vs Halmstad",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -5580,7 +5616,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T19:45:47.839Z",
+  "lastUpdated": "2026-07-10T19:47:03.038Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
