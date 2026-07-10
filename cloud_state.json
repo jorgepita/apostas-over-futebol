@@ -5159,6 +5159,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783708037367_xqdgvx",
+      "data": "2026-07-12",
+      "liga": "noruega",
+      "jogo": "Rosenborg vs Kristiansund BK",
+      "mercado": "Over 2.5",
+      "odd": "1.69",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
