@@ -5518,6 +5518,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783712791845_diukte",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "IF Brommapojkarna vs Sirius",
+      "mercado": "Over 2.5",
+      "odd": "1.57",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783712800081_scwsg3",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Malmo FF vs IFK Goteborg",
+      "mercado": "Over 2.5",
+      "odd": "1.67",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
