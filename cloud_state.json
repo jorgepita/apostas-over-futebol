@@ -5678,7 +5678,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -5730,8 +5730,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T19:48:59.062Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-07-10T19:49:58.022Z",
+  "activeTab": "tab-history",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
