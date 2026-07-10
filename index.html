@@ -2950,6 +2950,12 @@ button:disabled {
         <div id="versusOpinionInsights"></div>
 
         <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Opinion Validation</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusOpinionValidation"></div>
+
+        <div class="section-header" style="margin-top:4px;">
           <span class="section-header-title">P — Edge Band Performance</span>
           <div class="section-header-line"></div>
         </div>
@@ -9506,7 +9512,8 @@ button:disabled {
         const opinionTableEl = document.getElementById('versusOpinionTable');
         const opinionCalibEl = document.getElementById('versusOpinionCalib');
         const opinionInsEl   = document.getElementById('versusOpinionInsights');
-        if (opinionTableEl || opinionCalibEl || opinionInsEl) {
+        const opinionValidationEl = document.getElementById('versusOpinionValidation');
+        if (opinionTableEl || opinionCalibEl || opinionInsEl || opinionValidationEl) {
 
           const opinionBets = getResolvedManualBets().filter(b =>
             b.hadAnalysis === true &&
@@ -9534,7 +9541,12 @@ button:disabled {
             const avgOdd = oddsArr.length ? sum(oddsArr) / oddsArr.length : null;
             const wr     = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
             const roi    = stk > 0 ? (prf / stk) * 100 : null;
-            return { count: s.length, wins, losses, pushes, stk, prf, wr, roi, avgOdd };
+            // `yield` = profit/stake as a plain ratio (roi is exactly yield*100,
+            // kept only for display). Additive field — M/N/O read named
+            // properties they already expect and are unaffected. See
+            // "Opinion Validation" below (Phase 26.21) for why this exists.
+            const yld    = stk > 0 ? prf / stk : null;
+            return { count: s.length, wins, losses, pushes, stk, prf, wr, roi, avgOdd, yield: yld };
           }
 
           const opnData = OPINIONS.map(o => ({ opinion: o, stats: opnStats(o) }));
@@ -9707,6 +9719,484 @@ button:disabled {
               }).join('');
               opinionInsEl.innerHTML = `<div class="card">${body}</div>`;
             }
+          }
+
+          // ── Opinion Validation (additive section; Phase 26.20, evolved Phase
+          // 26.21) — Purely derived from opnData/opinionBets already computed
+          // above for M/N/O — no new filtering criteria, no new data source.
+          // See 03_Dashboard.md for the calibration/confidence/insight/decision
+          // -cost algorithms.
+          if (opinionValidationEl) {
+            const byOpinion = o => opnData.find(d => d.opinion === o).stats;
+
+            // Objective 1 — configurable tolerance for "insignificant" ROI gaps.
+            // Expressed in percentage points (the unit ROI is displayed in).
+            // Objective 5 — internal comparisons use `.yield` (profit/stake,
+            // a plain ratio) instead of `.roi` (=yield*100, display-only); the
+            // tolerance is converted to the same yield scale so the two stay
+            // consistent. Because roi === yield*100 exactly, this is a no-op
+            // on today's numbers — every inequality/tie decision below yields
+            // the identical boolean whether compared in roi-% or yield-ratio
+            // terms. It only matters if a future change makes the two diverge.
+            const CALIBRATION_ROI_TOLERANCE = 2; // percentage points
+            const CALIBRATION_YIELD_TOLERANCE = CALIBRATION_ROI_TOLERANCE / 100;
+
+            // Part 1 — Expected vs Actual Ranking (ranked by yield; roi still shown)
+            const actualRanked = opnData.slice().sort((a, b) => {
+              const ay = a.stats.yield, by_ = b.stats.yield;
+              if (ay === null && by_ === null) return b.stats.count - a.stats.count;
+              if (ay === null) return 1;
+              if (by_ === null) return -1;
+              if (by_ !== ay) return by_ - ay;
+              const awr = a.stats.wr ?? -Infinity, bwr = b.stats.wr ?? -Infinity;
+              if (bwr !== awr) return bwr - awr;
+              return b.stats.count - a.stats.count;
+            });
+
+            // Part 2 — Calibration Score: weighted pairwise concordance against
+            // the expected order (STRONG BUY > BUY > NEUTRAL > AVOID). Each of
+            // the 6 possible pairs is weighted by its rank distance in the
+            // expected order (adjacent pairs = 1, e.g. STRONG BUY vs BUY;
+            // 2-apart = 2, e.g. BUY vs AVOID; the full 3-apart span = 3, i.e.
+            // STRONG BUY vs AVOID) so that violating a widely-separated pair
+            // costs more than an adjacent inversion. A pair only participates
+            // if both opinions have at least one settled bet. Ties — exact OR
+            // within CALIBRATION_ROI_TOLERANCE (Objective 1) — split the
+            // pair's weight instead of being scored as an inversion. At
+            // tolerance = 0 this reduces exactly to "only an exact tie counts",
+            // reproducing the pre-tolerance score byte-for-byte.
+            //
+            // evaluatePairs() is the SINGLE place pair statistics are computed.
+            // Both calibrationScore() and the Opinion Pair Analysis table
+            // (Objective 2) consume its output directly — no statistic is
+            // computed twice.
+            const ALL_PAIRS = [];
+            for (let i = 0; i < OPINIONS.length; i++) {
+              for (let j = i + 1; j < OPINIONS.length; j++) {
+                ALL_PAIRS.push({ left: OPINIONS[i], right: OPINIONS[j], weight: j - i });
+              }
+            }
+            function evaluatePairs(dataArr) {
+              const get = o => dataArr.find(d => d.opinion === o).stats;
+              return ALL_PAIRS.map(p => {
+                const l = get(p.left), r = get(p.right);
+                if (l.yield === null || r.yield === null) return { ...p, evaluable: false };
+                const yieldDiff = l.yield - r.yield;
+                const roiDiff    = l.roi - r.roi;
+                const isTie = yieldDiff === 0 || Math.abs(yieldDiff) < CALIBRATION_YIELD_TOLERANCE;
+                const status = isTie ? 'equivalent' : (yieldDiff > 0 ? 'correct' : 'inverted');
+                const credit = isTie ? p.weight / 2 : (yieldDiff > 0 ? p.weight : 0);
+                return { ...p, evaluable: true, leftRoi: l.roi, rightRoi: r.roi, roiDiff, status, credit };
+              });
+            }
+            function calibrationScore(dataArr) {
+              const evals = evaluatePairs(dataArr);
+              const evaluable = evals.filter(e => e.evaluable);
+              if (!evaluable.length) return { score: null, evaluable: 0, evals };
+              const totalWeight = evaluable.reduce((s, e) => s + e.weight, 0);
+              const credit      = evaluable.reduce((s, e) => s + e.credit, 0);
+              return { score: Math.round((credit / totalWeight) * 100), evaluable: evaluable.length, evals };
+            }
+            const calib = calibrationScore(opnData);
+            function calibLabel(score) {
+              if (score === null) return { label: 'Insufficient Data', color: 'var(--muted)' };
+              if (score >= 90) return { label: 'Excellent', color: 'var(--ok)' };
+              if (score >= 75) return { label: 'Good',      color: 'var(--ok)' };
+              if (score >= 60) return { label: 'Fair',      color: 'var(--warn)' };
+              if (score >= 40) return { label: 'Poor',      color: 'var(--warn)' };
+              return { label: 'Broken', color: 'var(--bad)' };
+            }
+            const calibMeta = calibLabel(calib.score);
+
+            // Part 3 / Objective 2 — Opinion Pair Analysis. `calib.evals` is
+            // already in the desired display order (ALL_PAIRS is generated as
+            // STRONG BUY>BUY, STRONG BUY>NEUTRAL, STRONG BUY>AVOID, BUY>NEUTRAL,
+            // BUY>AVOID, NEUTRAL>AVOID) — reused as-is, no re-derivation.
+            const pairResults     = calib.evals;
+            const evaluablePairs  = pairResults.filter(p => p.evaluable);
+            const correctPairs    = evaluablePairs.filter(p => p.status === 'correct');
+            const equivalentPairs = evaluablePairs.filter(p => p.status === 'equivalent');
+            const invertedPairs   = evaluablePairs.filter(p => p.status === 'inverted');
+
+            // Part 4 / Objective 6 — Confidence Indicator + explanation. Reuses
+            // the exact 10/20/50 breakpoints already established by the Opinion
+            // Quality Score's sampleFactor in section N, extended to a 5-tier
+            // scale with a "Very High" tier at 100+. The explanation lines
+            // reuse values already computed above (total bets, evaluable pairs)
+            // plus a simple "all four buckets present" check — nothing new is
+            // aggregated.
+            const totalOpn2 = opinionBets.length;
+            function confidenceTier(n) {
+              if (n >= 100) return { label: 'Very High', color: 'var(--ok)' };
+              if (n >= 50)  return { label: 'High',       color: 'var(--ok)' };
+              if (n >= 20)  return { label: 'Medium',     color: 'var(--warn)' };
+              if (n >= 10)  return { label: 'Low',        color: 'var(--warn)' };
+              return             { label: 'Very Low',  color: 'var(--bad)' };
+            }
+            const confidence = confidenceTier(totalOpn2);
+            const confidenceIsLow = confidence.label === 'Very Low' || confidence.label === 'Low';
+            const allFourRepresented = OPINIONS.every(o => byOpinion(o).count > 0);
+
+            // Trend Warning support values (also reused by Objective 3 below)
+            const sbV = byOpinion('STRONG BUY'), buV = byOpinion('BUY'), neV = byOpinion('NEUTRAL'), avV = byOpinion('AVOID');
+
+            // Part 6 — Trend Warning. Confidence must be Medium+ AND both
+            // compared opinions individually meet MIN_SAMPLE_COMPARE (5) AND
+            // the gap exceeds the calibration tolerance (Objective 1) — a
+            // trivial, statistically-insignificant lead no longer qualifies.
+            const avoidBeatsBuy = avV.yield !== null && buV.yield !== null &&
+              avV.count >= MIN_SAMPLE_COMPARE && buV.count >= MIN_SAMPLE_COMPARE &&
+              (avV.yield - buV.yield) >= CALIBRATION_YIELD_TOLERANCE;
+            const avoidBeatsSB = avV.yield !== null && sbV.yield !== null &&
+              avV.count >= MIN_SAMPLE_COMPARE && sbV.count >= MIN_SAMPLE_COMPARE &&
+              (avV.yield - sbV.yield) >= CALIBRATION_YIELD_TOLERANCE;
+            const trendWarning = (avoidBeatsBuy || avoidBeatsSB) && !confidenceIsLow;
+
+            // Objective 3 — Decision Cost. BUY/STRONG BUY were "followed"
+            // (the model recommended them and the user actually placed them);
+            // AVOID was not. avV.prf is the profit AVOID-tagged bets WOULD
+            // have made at their recorded stake — Decision Cost restates that
+            // same figure as the headline number: positive means profitable
+            // opportunities were skipped (a cost); negative means a loss was
+            // correctly avoided (a saving). Reuses opnData's existing prf sums
+            // (sum() already returns 0 for an empty group) — no new aggregation.
+            const followedProfit = sbV.prf + buV.prf;
+            const avoidProfit    = avV.prf;
+            const decisionCost   = avV.count > 0 ? avoidProfit : null;
+            let decisionCostText;
+            if (decisionCost === null) {
+              decisionCostText = 'No settled AVOID bets yet — nothing to evaluate.';
+            } else if (decisionCost > 0) {
+              decisionCostText = `The current opinion model avoided €${fmt(decisionCost)} of profitable opportunities.`;
+            } else if (decisionCost < 0) {
+              decisionCostText = `The current opinion model prevented €${fmt(Math.abs(decisionCost))} of losses.`;
+            } else {
+              decisionCostText = 'AVOID bets broke even — no measurable cost or saving.';
+            }
+
+            // Part 7 / Objective 4 — Historical Stability + Opinion Trend,
+            // computed together in a SINGLE chronological pass (one sort, one
+            // forEach) — no data is replayed twice. Bets are ordered by
+            // settledAt (falling back to fixture date for bets settled before
+            // that field existed).
+            const chronological = opinionBets.slice().sort((a, b) => {
+              const ad = a.settledAt ? new Date(a.settledAt).getTime() : (parseDateSafe(a.data)?.getTime() || 0);
+              const bd = b.settledAt ? new Date(b.settledAt).getTime() : (parseDateSafe(b.data)?.getTime() || 0);
+              return ad - bd;
+            });
+            function statsFromBets(bets) {
+              const wins   = bets.filter(b => b._resultKey === 'W').length;
+              const losses = bets.filter(b => b._resultKey === 'L').length;
+              const stk    = sum(bets.map(b => num(b.stake)));
+              const prf    = sum(bets.map(b => num(b._lucro)));
+              const wr     = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+              const roi    = stk > 0 ? (prf / stk) * 100 : null;
+              const yld    = stk > 0 ? prf / stk : null;
+              return { count: bets.length, roi, wr, yield: yld };
+            }
+            const runningBets = { 'STRONG BUY': [], 'BUY': [], 'NEUTRAL': [], 'AVOID': [] };
+            // Per-opinion running accumulators for Objective 4 — same ROI
+            // formula as statsFromBets() (profit/stake), updated incrementally
+            // (O(1) per bet) instead of re-slicing+re-summing on every step.
+            const trendAcc    = { 'STRONG BUY': { stk: 0, prf: 0 }, 'BUY': { stk: 0, prf: 0 }, 'NEUTRAL': { stk: 0, prf: 0 }, 'AVOID': { stk: 0, prf: 0 } };
+            const trendSeries = { 'STRONG BUY': [], 'BUY': [], 'NEUTRAL': [], 'AVOID': [] };
+            const historyPoints = [];
+            chronological.forEach((bet, idx) => {
+              if (!runningBets[bet.botOpinion]) return;
+
+              const acc = trendAcc[bet.botOpinion];
+              acc.stk += num(bet.stake) || 0;
+              acc.prf += num(bet._lucro) || 0;
+              const runningYield = acc.stk > 0 ? acc.prf / acc.stk : null;
+              trendSeries[bet.botOpinion].push(runningYield !== null ? runningYield * 100 : null);
+
+              runningBets[bet.botOpinion].push(bet);
+              const allFourHaveData = OPINIONS.every(o => runningBets[o].length > 0);
+              if (!allFourHaveData) return;
+              const snapshot = OPINIONS.map(o => ({ opinion: o, stats: statsFromBets(runningBets[o]) }));
+              const c = calibrationScore(snapshot);
+              if (c.score !== null) historyPoints.push({ index: idx + 1, score: c.score, date: bet.data || '' });
+            });
+
+            // Part 5 / Objective 7 — Insight Generator, priority-ranked (lower
+            // number = shown first). Every generator is gated on sample size /
+            // history length; if a gate isn't met, nothing is pushed — no
+            // insight is ever fabricated from insufficient data.
+            const insights = [];
+            if (trendWarning) {
+              insights.push({ priority: 1, type: 'bad', text: 'Opinion engine may require recalibration — rejected opportunities (AVOID) are consistently outperforming accepted opportunities.' });
+            }
+            if (calib.score !== null && (calibMeta.label === 'Broken' || calibMeta.label === 'Poor') && !confidenceIsLow) {
+              insights.push({ priority: 2, type: 'bad', text: `Calibration score is ${calibMeta.label} (${calib.score}/100) — the opinion hierarchy is not tracking realised ROI.` });
+            }
+            if (avoidBeatsBuy) {
+              insights.push({ priority: 3, type: 'warn', text: `AVOID is outperforming BUY (${avV.roi >= 0 ? '+' : ''}${pct(avV.roi, 1)} vs ${buV.roi >= 0 ? '+' : ''}${pct(buV.roi, 1)} ROI).` });
+            }
+            if (avoidBeatsSB) {
+              insights.push({ priority: 3, type: 'warn', text: `AVOID is outperforming STRONG BUY (${avV.roi >= 0 ? '+' : ''}${pct(avV.roi, 1)} vs ${sbV.roi >= 0 ? '+' : ''}${pct(sbV.roi, 1)} ROI).` });
+            }
+            // Generalised "largest correct gap" insight (Objective 7 example:
+            // "BUY currently outperforms NEUTRAL by 21.4 percentage points") —
+            // picks the single most notable correct pair rather than a fixed
+            // BUY-vs-STRONG-BUY special case, so it generalises to any pair.
+            const bestCorrect = correctPairs
+              .filter(p => byOpinion(p.left).count >= MIN_SAMPLE_COMPARE && byOpinion(p.right).count >= MIN_SAMPLE_COMPARE)
+              .sort((a, b) => b.roiDiff - a.roiDiff)[0];
+            if (bestCorrect) {
+              insights.push({ priority: 4, type: 'ok', text: `${bestCorrect.left} currently outperforms ${bestCorrect.right} by ${fmt(Math.abs(bestCorrect.roiDiff), 1)} percentage points.` });
+            }
+            // Equivalence insight (Objective 7 example: "AVOID is within the
+            // equivalence threshold of BUY") — prefers an adjacent pair
+            // (weight 1) since those are the most practically meaningful.
+            const bestEquivalent = equivalentPairs.slice().sort((a, b) => a.weight - b.weight)[0];
+            if (bestEquivalent) {
+              insights.push({ priority: 4, type: 'info', text: `${bestEquivalent.left} is within the equivalence threshold of ${bestEquivalent.right} (±${CALIBRATION_ROI_TOLERANCE}pp) — the difference is not statistically meaningful.` });
+            }
+            if (evaluablePairs.length >= 4 && correctPairs.length === evaluablePairs.length && !confidenceIsLow) {
+              insights.push({ priority: 5, type: 'ok', text: 'Opinion hierarchy matches the expected ordering across every evaluable comparison.' });
+            }
+            // Global calibration trend (Objective 7 example: "Calibration has
+            // improved by 18 points during the last 20 settled bets") — reuses
+            // historyPoints from the replay above; requires a real lookback
+            // window and a non-trivial delta before speaking.
+            if (historyPoints.length >= 6) {
+              const lookback = Math.min(20, historyPoints.length - 1);
+              const prevPoint = historyPoints[historyPoints.length - 1 - lookback];
+              const currPoint = historyPoints[historyPoints.length - 1];
+              const delta = currPoint.score - prevPoint.score;
+              if (Math.abs(delta) >= 10) {
+                insights.push({ priority: 6, type: delta > 0 ? 'ok' : 'warn', text: `Calibration has ${delta > 0 ? 'improved' : 'declined'} by ${Math.abs(delta)} points during the last ${lookback} settled bets.` });
+              }
+            }
+            // Per-opinion trend (Objective 7 example: "STRONG BUY has shown
+            // positive trend over the last 12 settled picks") — reuses
+            // trendSeries from the same replay pass; only the single most
+            // notable opinion trend is surfaced, to avoid four near-duplicate
+            // insights.
+            let bestTrend = null;
+            OPINIONS.forEach(op => {
+              const series = trendSeries[op];
+              if (series.length < 6) return;
+              const lookback = Math.min(12, series.length - 1);
+              const prevRoi = series[series.length - 1 - lookback];
+              const currRoi = series[series.length - 1];
+              if (prevRoi === null || currRoi === null) return;
+              const delta = currRoi - prevRoi;
+              if (Math.abs(delta) < 5) return;
+              if (!bestTrend || Math.abs(delta) > Math.abs(bestTrend.delta)) bestTrend = { op, delta, lookback };
+            });
+            if (bestTrend) {
+              insights.push({ priority: 6, type: bestTrend.delta > 0 ? 'ok' : 'warn', text: `${bestTrend.op} has shown a ${bestTrend.delta > 0 ? 'positive' : 'negative'} trend over the last ${bestTrend.lookback} settled picks.` });
+            }
+            if (confidenceIsLow) {
+              insights.push({ priority: 7, type: 'info', text: `Calibration is likely unreliable due to small sample — only ${totalOpn2} settled bet${totalOpn2 !== 1 ? 's' : ''} analysed.` });
+            }
+            if (!trendWarning && calib.score !== null && calib.score >= 75 && !confidenceIsLow) {
+              insights.push({ priority: 8, type: 'ok', text: 'Opinion engine appears stable.' });
+            }
+            insights.sort((a, b) => a.priority - b.priority);
+
+            // ── Rendering ────────────────────────────────────────────────
+            const expectedRankHtml = `<div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Expected Ranking</div>
+              ${OPINIONS.map((opinion, i) => `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+                <span style="font-size:12px;color:var(--muted);width:16px;">${i + 1}.</span>
+                <span style="font-size:13px;font-weight:700;color:${OPN_COLOR[opinion] || 'var(--text)'};">${opinion}</span>
+              </div>`).join('')}
+            </div>`;
+
+            const actualRankHtml = `<div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Actual Ranking</div>
+              ${actualRanked.map((d, i) => {
+                const roiTxt = d.stats.roi !== null ? `(${d.stats.roi >= 0 ? '+' : ''}${pct(d.stats.roi, 1)})` : '(—)';
+                const roiClr = d.stats.roi === null ? 'var(--muted)' : (d.stats.roi >= 0 ? 'var(--ok)' : 'var(--bad)');
+                return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+                  <span style="font-size:12px;color:var(--muted);width:16px;">${i + 1}.</span>
+                  <span style="font-size:13px;font-weight:700;color:${OPN_COLOR[d.opinion] || 'var(--text)'};">${d.opinion}</span>
+                  <span style="font-size:12px;color:${roiClr};">${roiTxt}</span>
+                </div>`;
+              }).join('')}
+            </div>`;
+
+            // Objective 2 — Opinion Pair Analysis table (Expected/Obtained/Difference/Status)
+            const PAIR_STATUS_META = {
+              correct:    { icon: '✓', text: 'Correct',    color: 'var(--ok)' },
+              equivalent: { icon: '≈', text: 'Equivalent', color: 'var(--warn)' },
+              inverted:   { icon: '✗', text: 'Inverted',   color: 'var(--bad)' }
+            };
+            const pairRows = pairResults.map(p => {
+              if (!p.evaluable) {
+                return `<tr>
+                  <td style="padding:8px 12px;font-weight:700;">${p.left} &gt; ${p.right}</td>
+                  <td colspan="3" style="padding:8px 12px;color:var(--muted);font-size:11px;">insufficient data</td>
+                </tr>`;
+              }
+              const st = PAIR_STATUS_META[p.status];
+              return `<tr>
+                <td style="padding:8px 12px;font-weight:700;">${p.left} &gt; ${p.right}</td>
+                <td style="padding:8px 12px;">
+                  <span style="color:${OPN_COLOR[p.left]};font-weight:700;">${p.left} ${p.leftRoi >= 0 ? '+' : ''}${pct(p.leftRoi, 1)}</span>
+                  <span style="color:var(--muted);"> / </span>
+                  <span style="color:${OPN_COLOR[p.right]};font-weight:700;">${p.right} ${p.rightRoi >= 0 ? '+' : ''}${pct(p.rightRoi, 1)}</span>
+                </td>
+                <td style="padding:8px 12px;text-align:right;font-weight:700;color:${p.roiDiff >= 0 ? 'var(--ok)' : 'var(--bad)'};">${p.roiDiff >= 0 ? '+' : ''}${fmt(p.roiDiff, 1)} pp</td>
+                <td style="padding:8px 12px;text-align:center;font-weight:700;color:${st.color};">${st.icon} ${st.text}</td>
+              </tr>`;
+            }).join('');
+
+            const insightsHtml = insights.length
+              ? insights.slice(0, 6).map(ins => {
+                  const dot = ins.type === 'ok' ? 'var(--ok)' : ins.type === 'bad' ? 'var(--bad)' : ins.type === 'warn' ? 'var(--warn)' : 'var(--muted)';
+                  return `<div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);">
+                    <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;margin-top:5px;"></div>
+                    <div style="font-size:13px;color:var(--text);">${escapeHtml(ins.text)}</div>
+                  </div>`;
+                }).join('')
+              : `<div class="note" style="text-align:center;padding:12px;color:var(--muted);">No validation insights available yet.</div>`;
+
+            let chartHtml;
+            if (historyPoints.length < 2) {
+              chartHtml = `<div class="note" style="text-align:center;padding:16px;color:var(--muted);">Not enough settled history yet to plot calibration over time — at least one settled bet is needed for each of the four opinions, followed by further settlements.</div>`;
+            } else {
+              const cw = 900, ch = 180, padX = 34, padTop = 14, padBottom = 24;
+              const usableW = cw - padX * 2, usableH = ch - padTop - padBottom;
+              const xPos = i => historyPoints.length === 1 ? cw / 2 : padX + (i / (historyPoints.length - 1)) * usableW;
+              const yPos = v => padTop + ((100 - v) / 100) * usableH;
+              const path = historyPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(p.score)}`).join(' ');
+              const gridHtml = [0, 25, 50, 75, 100].map(v => `
+                <line x1="${padX}" y1="${yPos(v)}" x2="${cw - padX}" y2="${yPos(v)}" stroke="rgba(148,163,184,0.1)" stroke-width="1" />
+                <text x="6" y="${yPos(v) + 4}" font-size="10" fill="#8892a4">${v}</text>
+              `).join('');
+              const lastScore  = historyPoints[historyPoints.length - 1].score;
+              const lineColor  = lastScore >= 75 ? '#22c55e' : lastScore >= 40 ? '#eab308' : '#ef4444';
+              const pointsHtml = historyPoints.map((p, i) => `
+                <circle cx="${xPos(i)}" cy="${yPos(p.score)}" r="2.5" fill="${lineColor}">
+                  <title>Bet #${p.index}${p.date ? ' · ' + escapeHtml(p.date) : ''} · score ${p.score}</title>
+                </circle>
+              `).join('');
+              chartHtml = `<svg viewBox="0 0 ${cw} ${ch}" style="width:100%;height:auto;" role="img" aria-label="Opinion calibration score over time">
+                ${gridHtml}
+                <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                ${pointsHtml}
+              </svg>
+              <div class="note" style="margin-top:6px;">${historyPoints.length} points reconstructed from settled history · current: ${lastScore}/100</div>`;
+            }
+
+            // Objective 4 — per-opinion cumulative-ROI sparklines. Each series
+            // is auto-scaled to its own min/max (standard sparkline practice)
+            // so the SHAPE of the trend is legible; the final value is shown
+            // as text alongside it for absolute context.
+            function renderSparkline(opinion, series) {
+              const color = OPN_COLOR[opinion] || 'var(--text)';
+              const values = series.filter(v => v !== null);
+              if (values.length < 2) {
+                return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+                  <span style="width:92px;font-size:12px;font-weight:700;color:${color};flex-shrink:0;">${opinion}</span>
+                  <span style="font-size:11px;color:var(--muted);">insufficient history</span>
+                </div>`;
+              }
+              const w = 160, h = 32, pad = 3;
+              const minV = Math.min(...values), maxV = Math.max(...values);
+              const range = (maxV - minV) || 1;
+              const xPos = i => pad + (i / (series.length - 1)) * (w - pad * 2);
+              const yPos = v => pad + ((maxV - v) / range) * (h - pad * 2);
+              const path = series.map((v, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(v ?? maxV)}`).join(' ');
+              const last = series[series.length - 1];
+              const lastTxt = last !== null ? `${last >= 0 ? '+' : ''}${fmt(last, 1)}%` : '—';
+              const lastClr = last === null ? 'var(--muted)' : (last >= 0 ? 'var(--ok)' : 'var(--bad)');
+              return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+                <span style="width:92px;font-size:12px;font-weight:700;color:${color};flex-shrink:0;">${opinion}</span>
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="flex-shrink:0;" role="img" aria-label="${opinion} cumulative ROI trend">
+                  <path d="${path}" fill="none" stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span style="font-size:12px;font-weight:700;color:${lastClr};">${lastTxt}</span>
+              </div>`;
+            }
+            const sparklinesHtml = OPINIONS.map(o => renderSparkline(o, trendSeries[o])).join('');
+
+            const trendWarningHtml = trendWarning
+              ? `<div style="padding:14px;background:rgba(239,68,68,0.1);border:1px solid var(--bad-border, rgba(239,68,68,0.3));border-radius:10px;margin-bottom:14px;">
+                  <div style="font-size:14px;font-weight:800;color:var(--bad);">⚠ Opinion engine may require recalibration</div>
+                  <div style="font-size:12px;color:var(--text);margin-top:4px;">Rejected opportunities (AVOID) are consistently outperforming accepted opportunities, based on ${totalOpn2} settled bets.</div>
+                </div>`
+              : '';
+
+            opinionValidationEl.innerHTML = `
+              ${trendWarningHtml}
+              <div class="card">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  ${expectedRankHtml}
+                  ${actualRankHtml}
+                </div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Opinion Calibration Score</div>
+                    <div style="font-size:26px;font-weight:900;color:${calibMeta.color};">${calib.score !== null ? calib.score : '—'}</div>
+                    <div style="font-size:13px;font-weight:700;color:${calibMeta.color};margin-top:2px;">${calibMeta.label}</div>
+                    <div style="font-size:10px;color:var(--muted);margin-top:6px;">tolerance ±${CALIBRATION_ROI_TOLERANCE}pp</div>
+                  </div>
+                  <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+                    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Opinion Confidence</div>
+                    <div style="font-size:26px;font-weight:900;color:${confidence.color};">${confidence.label}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:left;">
+                      <div>${totalOpn2} settled opinion bet${totalOpn2 !== 1 ? 's' : ''}</div>
+                      <div>${allFourRepresented ? 'All four opinion buckets represented' : 'Not all opinion buckets have data yet'}</div>
+                      <div>${calib.evaluable} evaluable comparison${calib.evaluable !== 1 ? 's' : ''} (of 6)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
+                  Opinion Pair Analysis — ${correctPairs.length} Correct · ${equivalentPairs.length} Equivalent · ${invertedPairs.length} Inverted (of ${evaluablePairs.length} evaluable)
+                </div>
+                <div class="table-wrap"><table class="data-table">
+                  <thead><tr>
+                    <th>Expected</th>
+                    <th>Obtained</th>
+                    <th style="text-align:right;">Difference</th>
+                    <th style="text-align:center;">Status</th>
+                  </tr></thead>
+                  <tbody>${pairRows}</tbody>
+                </table></div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Decision Cost</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+                  <div style="text-align:center;">
+                    <div style="font-size:10px;color:var(--muted);">Followed Profit (STRONG BUY + BUY)</div>
+                    <div style="font-size:15px;font-weight:700;color:${followedProfit >= 0 ? 'var(--ok)' : 'var(--bad)'};">${followedProfit >= 0 ? '+' : ''}€${fmt(followedProfit)}</div>
+                  </div>
+                  <div style="text-align:center;">
+                    <div style="font-size:10px;color:var(--muted);">Avoid Profit (theoretical)</div>
+                    <div style="font-size:15px;font-weight:700;color:${avoidProfit >= 0 ? 'var(--ok)' : 'var(--bad)'};">${avoidProfit >= 0 ? '+' : ''}€${fmt(avoidProfit)}</div>
+                  </div>
+                  <div style="text-align:center;">
+                    <div style="font-size:10px;color:var(--muted);">AVOID bets</div>
+                    <div style="font-size:15px;font-weight:700;color:var(--text);">${avV.count}</div>
+                  </div>
+                </div>
+                <div style="padding:14px;background:${decisionCost === null ? 'var(--card-alt)' : (decisionCost > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)')};border:1px solid ${decisionCost === null ? 'var(--line)' : (decisionCost > 0 ? 'var(--bad-border, rgba(239,68,68,0.3))' : 'var(--ok-border, rgba(34,197,94,0.3))')};border-radius:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Decision Cost</div>
+                  <div style="font-size:24px;font-weight:900;color:${decisionCost === null ? 'var(--muted)' : (decisionCost > 0 ? 'var(--bad)' : 'var(--ok)')};">${decisionCost === null ? '—' : `${decisionCost >= 0 ? '+' : ''}€${fmt(decisionCost)}`}</div>
+                  <div style="font-size:12px;color:var(--text);margin-top:6px;">${decisionCostText}</div>
+                </div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Opinion Trend (cumulative ROI)</div>
+                ${sparklinesHtml}
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Validation Insights</div>
+                ${insightsHtml}
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Calibration Score Over Time</div>
+                ${chartHtml}
+              </div>
+            `;
           }
         }
 
