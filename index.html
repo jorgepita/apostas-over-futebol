@@ -2962,6 +2962,31 @@ button:disabled {
         <div id="versusOpinionRecommendations"></div>
 
         <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Recommendation Simulator</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div class="note" style="margin-bottom:14px;">What-if analysis based on historical settled bets</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:14px;">
+            <div>
+              <label class="label" style="display:flex;justify-content:space-between;align-items:center;">STRONG BUY threshold <span id="simSbVal" style="font-weight:800;color:var(--text);">+0</span></label>
+              <input type="range" id="simSbSlider" min="-10" max="10" step="1" value="0" style="width:100%;">
+            </div>
+            <div>
+              <label class="label" style="display:flex;justify-content:space-between;align-items:center;">BUY threshold <span id="simBuyVal" style="font-weight:800;color:var(--text);">+0</span></label>
+              <input type="range" id="simBuySlider" min="-10" max="10" step="1" value="0" style="width:100%;">
+            </div>
+            <div>
+              <label class="label" style="display:flex;justify-content:space-between;align-items:center;">AVOID threshold <span id="simAvoidVal" style="font-weight:800;color:var(--text);">+0</span></label>
+              <input type="range" id="simAvoidSlider" min="-10" max="10" step="1" value="0" style="width:100%;">
+            </div>
+          </div>
+          <button id="simResetBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;margin-bottom:14px;">Reset Simulation</button>
+          <div id="simulatorBody"></div>
+          <div class="note" style="margin-top:14px;padding:10px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;text-align:center;font-weight:700;">⚠ Simulation only. No production settings have been modified.</div>
+        </div>
+
+        <div class="section-header" style="margin-top:4px;">
           <span class="section-header-title">P — Edge Band Performance</span>
           <div class="section-header-line"></div>
         </div>
@@ -3242,6 +3267,9 @@ button:disabled {
       let _settlementRunning = false; // Phase 26.11 — manual settlement button state
       let _settlementMessage = '';    // Phase 26.11 — current status text for settlement button
       let _historyViewMode = 'resolved'; // 'resolved' | 'rejected' — History page table toggle (view-only, not persisted)
+      // Recommendation Simulator (Phase 26.23) — ephemeral, in-memory only. Never
+      // saved to localStorage/cloud_state.json, never touches real thresholds.
+      let _opinionSimAdjust = { sb: 0, buy: 0, avoid: 0 };
       let _bootSyncComplete   = false; // LIVE-1: blocks saveCloudState() until first successful manualBets cloud sync
       let _manualSyncInFlight = false; // LIVE-1: prevents concurrent manualBets cloud refresh requests
 
@@ -10533,6 +10561,21 @@ button:disabled {
               </div>
             `;
           } // end if (opinionRecEl)
+
+          // ── Recommendation Simulator cache (Phase 26.23) ────────────────
+          // Stores references to values ALREADY computed above so the
+          // simulator (driven by slider input, potentially firing many times
+          // per second) never needs to re-run renderVersus() or re-derive any
+          // settlement statistic — it only reads this cache and replays
+          // opinionBets under a hypothetical threshold via the exact same
+          // statsFromBets()/calibrationScore() functions already defined here.
+          window._opnSimCache = {
+            opinionBets, OPINIONS, OPN_COLOR, MIN_SAMPLE_COMPARE, CALIBRATION_ROI_TOLERANCE,
+            statsFromBets, calibrationScore, confidenceTier,
+            calib, calibMeta, confidence, decisionCost,
+            correctPairs, evaluablePairs, byOpinion, totalOpn2
+          };
+          renderOpinionSimulator();
         } // end if (opinionValidationEl)
         }
 
@@ -11001,6 +11044,336 @@ button:disabled {
               </div>`;
             }
           }
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // Recommendation Simulator (Phase 26.23)
+      // ═══════════════════════════════════════════════════════════════════
+      // Pure decision-support "what-if" layer. NEVER writes to state, never
+      // calls markDirty()/saveLocalState()/saveCloudState(), never touches
+      // model thresholds/scoring/settlement/bankroll. Every number below is
+      // derived on-the-fly from `window._opnSimCache` (populated once per
+      // renderVersus() pass — see the end of the Opinion Validation block)
+      // by replaying the same settled opinionBets through a parameterized
+      // copy of the real classifier and the exact same statsFromBets()/
+      // calibrationScore()/confidenceTier() functions Opinion Validation
+      // already uses. Sliders are ephemeral (_opinionSimAdjust) — never
+      // persisted to localStorage or cloud_state.json, reset on page reload.
+
+      // Mirrors the real classification in analyzeFixture(): STRONG BUY if
+      // edge% >= 8 OR score >= 75; BUY if edge% >= 4 OR score >= 60; NEUTRAL
+      // if edge% >= 0 OR score >= 45; else AVOID. Only the Edge% cutoff of
+      // each tier is adjustable by its slider (score cutoffs stay at their
+      // production values) — edge is a single-digit percentage and score is
+      // 0-100, so applying one small "-10..+10 points" slider to both would
+      // conflate two different scales. The AVOID slider adjusts the NEUTRAL
+      // entry bar, since AVOID itself has no bar of its own in the real
+      // classifier — it is simply "failed the NEUTRAL bar". At
+      // adj={sb:0,buy:0,avoid:0} this reproduces the real classifier exactly
+      // (verified in testing: every historical bet reclassifies to its own
+      // recorded `botOpinion`).
+      function classifySimulatedOpinion(edgePercent, score, adj) {
+        const e = typeof edgePercent === 'number' && Number.isFinite(edgePercent) ? edgePercent : -Infinity;
+        const s = typeof score === 'number' && Number.isFinite(score) ? score : -Infinity;
+        if (e >= (8 + adj.sb) || s >= 75) return 'STRONG BUY';
+        if (e >= (4 + adj.buy) || s >= 60) return 'BUY';
+        if (e >= (0 + adj.avoid) || s >= 45) return 'NEUTRAL';
+        return 'AVOID';
+      }
+
+      // Historical Replay: reclassifies every already-settled, opinion-tagged
+      // bet using its OWN stored edge/score snapshot (edgeAtAnalysis /
+      // scoreAtAnalysis, captured at the time the Scout analysis actually ran
+      // and immutable since). No new data is invented and no real bet is
+      // touched — this only sorts the same fixed set of bets into different
+      // buckets for the purpose of the simulation.
+      function simulateOpinionBuckets(opinionBets, adj) {
+        const buckets = { 'STRONG BUY': [], 'BUY': [], 'NEUTRAL': [], 'AVOID': [] };
+        opinionBets.forEach(b => {
+          const opinion = classifySimulatedOpinion(b.edgeAtAnalysis, b.scoreAtAnalysis, adj);
+          buckets[opinion].push(b);
+        });
+        return buckets;
+      }
+
+      // Runs the full downstream analysis (bucket stats, calibration, decision
+      // cost, evaluable pairs) for one hypothetical adj combination, reusing
+      // the cached statsFromBets()/calibrationScore() — never a new formula.
+      function computeSimulatedSummary(cache, adj) {
+        const { opinionBets, OPINIONS, statsFromBets, calibrationScore, confidenceTier, totalOpn2 } = cache;
+        const buckets = simulateOpinionBuckets(opinionBets, adj);
+        const dataArr = OPINIONS.map(o => ({ opinion: o, stats: statsFromBets(buckets[o]) }));
+        const byOpinion = o => dataArr.find(d => d.opinion === o).stats;
+        const calib = calibrationScore(dataArr);
+        const sbV = byOpinion('STRONG BUY'), buV = byOpinion('BUY'), avV = byOpinion('AVOID');
+        const decisionCost = avV.count > 0 ? avV.prf : null;
+        const evaluablePairs = calib.evals.filter(p => p.evaluable);
+        const correctPairs = evaluablePairs.filter(p => p.status === 'correct');
+        // Confidence is defined purely by TOTAL settled opinion bets (see
+        // confidenceTier() in Opinion Validation) — relabeling redistributes
+        // bets among buckets but never changes the total, so simulated
+        // confidence is always identical to current. This is not a limitation
+        // being papered over: it is what the real metric's own definition
+        // implies, stated honestly rather than fabricating a fake per-bucket
+        // confidence that doesn't exist in production.
+        const confidence = confidenceTier(totalOpn2);
+        return { dataArr, byOpinion, calib, decisionCost, evaluablePairs, correctPairs, confidence, buckets };
+      }
+
+      // "Best Nearby Configuration" — searches only ±5 around the CURRENTLY
+      // selected slider position (not the full -10..+10 range), i.e. at most
+      // 11×11×11 = 1331 combinations, each an O(N) bucket replay where N is
+      // the settled opinion-bet count (realistically dozens to a few hundred)
+      // — never a combinatorial explosion. A configuration that empties any
+      // opinion bucket is discarded: an empty bucket makes its pairs
+      // non-evaluable, which would silently shrink the calibration
+      // denominator and could artificially inflate the score without
+      // genuinely improving the ordering — this guard prevents the search
+      // from "gaming" the metric. Ties broken by: higher score → smaller
+      // |Decision Cost| → smallest total slider movement from the current
+      // position (prefer the least disruptive change for an equal outcome).
+      function findBestNearbyConfig(cache) {
+        const { OPINIONS } = cache;
+        const base = _opinionSimAdjust;
+        const RANGE = 5;
+        let best = null;
+        for (let sb = Math.max(-10, base.sb - RANGE); sb <= Math.min(10, base.sb + RANGE); sb++) {
+          for (let buy = Math.max(-10, base.buy - RANGE); buy <= Math.min(10, base.buy + RANGE); buy++) {
+            for (let avoid = Math.max(-10, base.avoid - RANGE); avoid <= Math.min(10, base.avoid + RANGE); avoid++) {
+              const adj = { sb, buy, avoid };
+              const buckets = simulateOpinionBuckets(cache.opinionBets, adj);
+              if (OPINIONS.some(o => buckets[o].length === 0)) continue;
+              const summary = computeSimulatedSummary(cache, adj);
+              if (summary.calib.score === null) continue;
+              const movement = Math.abs(sb - base.sb) + Math.abs(buy - base.buy) + Math.abs(avoid - base.avoid);
+              const candidate = { adj, score: summary.calib.score, decisionCost: summary.decisionCost, confidence: summary.confidence, movement };
+              if (!best) { best = candidate; continue; }
+              if (candidate.score !== best.score) { if (candidate.score > best.score) best = candidate; continue; }
+              const candAbsDC = Math.abs(candidate.decisionCost ?? Infinity), bestAbsDC = Math.abs(best.decisionCost ?? Infinity);
+              if (candAbsDC !== bestAbsDC) { if (candAbsDC < bestAbsDC) best = candidate; continue; }
+              if (candidate.movement < best.movement) best = candidate;
+            }
+          }
+        }
+        return best;
+      }
+
+      // Green = improvement, Red = regression, Grey = no significant change.
+      // `epsilon` is the "noise band" below which a difference is not treated
+      // as meaningful — documented per-metric where used.
+      function simCompareArrow(current, simulated, higherIsBetter, epsilon) {
+        if (current === null || simulated === null) return { arrow: '—', color: 'var(--muted)' };
+        const delta = simulated - current;
+        if (Math.abs(delta) <= epsilon) return { arrow: '→', color: 'var(--muted)' };
+        const improved = higherIsBetter ? delta > 0 : delta < 0;
+        return { arrow: delta > 0 ? '↑' : '↓', color: improved ? 'var(--ok)' : 'var(--bad)' };
+      }
+
+      function renderOpinionSimulator() {
+        const bodyEl = document.getElementById('simulatorBody');
+        if (!bodyEl) return;
+
+        const sbValEl = document.getElementById('simSbVal');
+        const buyValEl = document.getElementById('simBuyVal');
+        const avoidValEl = document.getElementById('simAvoidVal');
+        const fmtAdj = v => `${v >= 0 ? '+' : ''}${v}`;
+        if (sbValEl) sbValEl.textContent = fmtAdj(_opinionSimAdjust.sb);
+        if (buyValEl) buyValEl.textContent = fmtAdj(_opinionSimAdjust.buy);
+        if (avoidValEl) avoidValEl.textContent = fmtAdj(_opinionSimAdjust.avoid);
+
+        const cache = window._opnSimCache;
+        if (!cache) {
+          bodyEl.innerHTML = `<div class="note" style="text-align:center;padding:16px;color:var(--muted);">Simulator data not available yet — open the Bot vs Manual tab with settled opinion bets to enable it.</div>`;
+          return;
+        }
+
+        const { OPINIONS, OPN_COLOR, calib: curCalib, confidence: curConfidence,
+                decisionCost: curDecisionCost, correctPairs: curCorrectPairs,
+                evaluablePairs: curEvaluablePairs, byOpinion } = cache;
+        const adj = _opinionSimAdjust;
+        const sim = computeSimulatedSummary(cache, adj);
+
+        // ── Estimated Opinion Distribution (neutral — no inherent "better" direction) ──
+        const distRows = OPINIONS.map(o => {
+          const curCount = byOpinion(o).count;
+          const simCount = sim.byOpinion(o).count;
+          const arrow = simCount > curCount ? '↑' : simCount < curCount ? '↓' : '→';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+            <span style="width:92px;font-size:12px;font-weight:700;color:${OPN_COLOR[o]};flex-shrink:0;">${o}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--text);">${curCount}</span>
+            <span style="font-size:13px;color:var(--muted);">${arrow}</span>
+            <span style="font-size:13px;font-weight:900;color:var(--text);">${simCount}</span>
+          </div>`;
+        }).join('');
+
+        // ── Estimated Calibration / Decision Cost / Pair Score / Confidence ──
+        const calibCmp = simCompareArrow(curCalib.score, sim.calib.score, true, 2);
+        const dcCmp = simCompareArrow(curDecisionCost, sim.decisionCost, false, Math.max(1, Math.abs(curDecisionCost ?? 0) * 0.05));
+        const curPairScore = curEvaluablePairs.length ? curCorrectPairs.length : 0;
+        const simPairScore = sim.evaluablePairs.length ? sim.correctPairs.length : 0;
+        const pairCmp = simCompareArrow(curPairScore, simPairScore, true, 0);
+        const confChanged = curConfidence.label !== sim.confidence.label;
+
+        function metricCard(label, curTxt, simTxt, cmp, sub) {
+          return `<div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${label}</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
+              <div><div style="font-size:9px;color:var(--muted);">Current</div><div style="font-size:16px;font-weight:800;color:var(--text);">${curTxt}</div></div>
+              <div style="font-size:18px;font-weight:900;color:${cmp.color};">${cmp.arrow}</div>
+              <div><div style="font-size:9px;color:var(--muted);">Simulated</div><div style="font-size:16px;font-weight:900;color:${cmp.color};">${simTxt}</div></div>
+            </div>
+            ${sub ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;">${sub}</div>` : ''}
+          </div>`;
+        }
+
+        const metricsHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:14px 0;">
+          ${metricCard('Estimated Calibration Score', curCalib.score !== null ? String(curCalib.score) : '—', sim.calib.score !== null ? String(sim.calib.score) : '—', calibCmp)}
+          ${metricCard('Estimated Decision Cost', curDecisionCost !== null ? `${curDecisionCost >= 0 ? '+' : ''}€${fmt(curDecisionCost)}` : '—', sim.decisionCost !== null ? `${sim.decisionCost >= 0 ? '+' : ''}€${fmt(sim.decisionCost)}` : '—', dcCmp)}
+          ${metricCard('Estimated Pair Score', `${curCorrectPairs.length} / ${curEvaluablePairs.length || 6}`, `${sim.correctPairs.length} / ${sim.evaluablePairs.length || 6}`, pairCmp)}
+          ${metricCard('Estimated Confidence', curConfidence.label, sim.confidence.label, confChanged ? { arrow: '↕', color: 'var(--warn)' } : { arrow: '→', color: 'var(--muted)' }, 'based on total sample size — unchanged by relabeling')}
+        </div>`;
+
+        // ── Recommendation Impact (deterministic bullets from real deltas) ──
+        const bullets = [];
+        const movedTiers = [];
+        if (adj.sb !== 0) movedTiers.push(['STRONG BUY', adj.sb]);
+        if (adj.buy !== 0) movedTiers.push(['BUY', adj.buy]);
+        if (adj.avoid !== 0) movedTiers.push(['AVOID', adj.avoid]);
+        movedTiers.forEach(([o, delta]) => {
+          const curCount = byOpinion(o).count, simCount = sim.byOpinion(o).count;
+          if (curCount === 0 && simCount === 0) return;
+          const pctChange = curCount > 0 ? Math.round(((simCount - curCount) / curCount) * 100) : (simCount > 0 ? 100 : 0);
+          if (pctChange !== 0) bullets.push(`${pctChange > 0 ? 'Increase' : 'Reduce'} ${o} selections by ${Math.abs(pctChange)}%`);
+        });
+        if (calibCmp.arrow !== '→') bullets.push(`${sim.calib.score > curCalib.score ? 'Increase' : 'Reduce'} calibration by ${Math.abs(sim.calib.score - curCalib.score)} points`);
+        if (dcCmp.arrow !== '→' && curDecisionCost !== null && sim.decisionCost !== null) bullets.push(`${sim.decisionCost < curDecisionCost ? 'Reduce' : 'Increase'} Decision Cost by €${fmt(Math.abs(sim.decisionCost - curDecisionCost))}`);
+        bullets.push(confChanged ? `Change confidence from ${curConfidence.label} to ${sim.confidence.label}` : 'Preserve confidence');
+
+        const movedLabel = movedTiers.length
+          ? movedTiers.map(([o, d]) => `${o} threshold by ${Math.abs(d)} point${Math.abs(d) !== 1 ? 's' : ''} (${d > 0 ? 'up' : 'down'})`).join(', ')
+          : null;
+        const impactHtml = movedLabel
+          ? `<div style="margin:14px 0;padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:12px;font-weight:800;color:var(--text);margin-bottom:8px;">Adjusting ${movedLabel} would likely:</div>
+              ${bullets.map(b => `<div style="font-size:12px;color:var(--text);padding:3px 0;">• ${escapeHtml(b)}</div>`).join('')}
+            </div>`
+          : `<div class="note" style="text-align:center;padding:10px;">Move a slider to see the estimated impact.</div>`;
+
+        // ── Explainability — WHY, derived from an actual pair-status comparison
+        // or an actual bucket-composition change, never a vague/assumed cause.
+        const explain = [];
+        if (calibCmp.arrow === '↑') {
+          const RANK = { inverted: 0, equivalent: 1, correct: 2 };
+          let bestImproved = null;
+          curCalib.evals.forEach((curEval, i) => {
+            const simEval = sim.calib.evals[i];
+            if (!curEval.evaluable || !simEval.evaluable) return;
+            if (RANK[simEval.status] > RANK[curEval.status]) {
+              if (!bestImproved || RANK[simEval.status] - RANK[curEval.status] > RANK[bestImproved.simEval.status] - RANK[bestImproved.curEval.status]) {
+                bestImproved = { curEval, simEval };
+              }
+            }
+          });
+          explain.push(bestImproved
+            ? `Calibration improves because ${bestImproved.simEval.left} and ${bestImproved.simEval.right} become better separated (${bestImproved.curEval.status} → ${bestImproved.simEval.status}).`
+            : 'Calibration improves because more opinion pairs become evaluable under the simulated distribution.');
+        } else if (calibCmp.arrow === '↓') {
+          const RANK = { inverted: 0, equivalent: 1, correct: 2 };
+          let worstDrop = null;
+          curCalib.evals.forEach((curEval, i) => {
+            const simEval = sim.calib.evals[i];
+            if (!curEval.evaluable || !simEval.evaluable) return;
+            if (RANK[simEval.status] < RANK[curEval.status]) {
+              if (!worstDrop || RANK[curEval.status] - RANK[simEval.status] > RANK[worstDrop.curEval.status] - RANK[worstDrop.simEval.status]) {
+                worstDrop = { curEval, simEval };
+              }
+            }
+          });
+          explain.push(worstDrop
+            ? `Calibration declines because ${worstDrop.simEval.left} vs ${worstDrop.simEval.right} becomes ${worstDrop.simEval.status}.`
+            : 'Calibration declines because fewer opinion pairs remain evaluable under the simulated distribution.');
+        }
+        if (dcCmp.arrow === '↓') {
+          explain.push(`Decision Cost decreases because AVOID now contains fewer/less-profitable bets (€${fmt(sim.decisionCost ?? 0)} vs €${fmt(curDecisionCost ?? 0)}).`);
+        } else if (dcCmp.arrow === '↑') {
+          explain.push(`Decision Cost increases because AVOID now contains more/more-profitable bets (€${fmt(sim.decisionCost ?? 0)} vs €${fmt(curDecisionCost ?? 0)}).`);
+        }
+        explain.push('Confidence is unchanged because it is based on total settled sample size, which relabeling does not change.');
+        const explainHtml = `<div style="margin:14px 0;">
+          ${explain.map(e => `<div style="font-size:12px;color:var(--muted);padding:4px 0;">${escapeHtml(e)}</div>`).join('')}
+        </div>`;
+
+        // ── Best Nearby Configuration ──
+        // This is the one expensive step (up to 1331 combinations × O(N) each).
+        // It is rendered into its own sub-container and debounced (see
+        // scheduleBestNearbyRender() below) so a fast slider drag — which can
+        // fire many 'input' events per second — keeps every other metric on
+        // this card instantly live without re-running the search on every tick.
+        bodyEl.innerHTML = `
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Estimated Opinion Distribution</div>
+          ${distRows}
+          ${metricsHtml}
+          ${impactHtml}
+          ${explainHtml}
+          <div id="simBestNearby"><div class="note" style="margin-top:14px;text-align:center;padding:10px;color:var(--muted);">Searching nearby configurations…</div></div>
+        `;
+
+        scheduleBestNearbyRender(cache);
+      }
+
+      let _bestNearbyTimer = null;
+      function scheduleBestNearbyRender(cache) {
+        clearTimeout(_bestNearbyTimer);
+        _bestNearbyTimer = setTimeout(() => renderBestNearby(cache), 150);
+      }
+
+      function renderBestNearby(cache) {
+        const el = document.getElementById('simBestNearby');
+        if (!el) return;
+        const fmtAdj = v => `${v >= 0 ? '+' : ''}${v}`;
+        const best = findBestNearbyConfig(cache);
+        el.innerHTML = best
+          ? `<div style="margin-top:14px;padding:14px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Best Nearby Configuration <span style="font-weight:400;text-transform:none;">(±5, suggestion only — never applied)</span></div>
+              <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px;">
+                <div><div style="font-size:9px;color:var(--muted);">STRONG BUY</div><div style="font-size:14px;font-weight:800;">${fmtAdj(best.adj.sb)}</div></div>
+                <div><div style="font-size:9px;color:var(--muted);">BUY</div><div style="font-size:14px;font-weight:800;">${fmtAdj(best.adj.buy)}</div></div>
+                <div><div style="font-size:9px;color:var(--muted);">AVOID</div><div style="font-size:14px;font-weight:800;">${fmtAdj(best.adj.avoid)}</div></div>
+                <div><div style="font-size:9px;color:var(--muted);">Estimated Calibration</div><div style="font-size:14px;font-weight:800;color:var(--ok);">${best.score}</div></div>
+                <div><div style="font-size:9px;color:var(--muted);">Estimated Decision Cost</div><div style="font-size:14px;font-weight:800;">${best.decisionCost !== null ? `${best.decisionCost >= 0 ? '+' : ''}€${fmt(best.decisionCost)}` : '—'}</div></div>
+                <div><div style="font-size:9px;color:var(--muted);">Confidence</div><div style="font-size:14px;font-weight:800;">${best.confidence.label}</div></div>
+              </div>
+            </div>`
+          : `<div class="note" style="margin-top:14px;text-align:center;padding:10px;">No nearby configuration keeps all four opinion buckets populated — no suggestion available.</div>`;
+      }
+
+      function bindOpinionSimulatorEvents() {
+        if (window._opnSimBound) return;
+        window._opnSimBound = true;
+
+        function onSlider(id, key) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('input', () => {
+            _opinionSimAdjust[key] = parseInt(el.value, 10) || 0;
+            renderOpinionSimulator();
+          });
+        }
+        onSlider('simSbSlider', 'sb');
+        onSlider('simBuySlider', 'buy');
+        onSlider('simAvoidSlider', 'avoid');
+
+        const resetBtn = document.getElementById('simResetBtn');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            _opinionSimAdjust = { sb: 0, buy: 0, avoid: 0 };
+            ['simSbSlider', 'simBuySlider', 'simAvoidSlider'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = '0';
+            });
+            renderOpinionSimulator();
+          });
         }
       }
 
@@ -14934,6 +15307,7 @@ button:disabled {
       }
 
       function bindStaticInputs() {
+        bindOpinionSimulatorEvents();
         safeBind('daySearch', 'input', rerenderDayOnly);
         safeBind('dayLeagueFilter', 'change', rerenderDayOnly);
         safeBind('dayMarketFilter', 'change', rerenderDayOnly);
