@@ -14,6 +14,20 @@ None currently open.
 
 ## Resolved Issues
 
+### MANUAL-1 — Scout Card Stayed Visible for Pending Manual Bets; Rejected Bets Lost Their Status When Settled
+
+**Status:** Resolved — 2026-07-10 (Phase 26.19). Full technical detail in `08_Change_Log.md` — Phase 26.19.
+
+**Was (two related defects found while implementing the Manual Bet lifecycle rework):**
+1. `renderManualScout()`'s hide-key only excluded fixtures with a manual bet in `status ∈ {approved, rejected, settled}` — a brand-new `pending` bet was not in that set, so its Scout card remained visible and clickable until the user approved or rejected it. A user who clicked "Criar" twice (or came back to the Manual Bets tab before approving) could create a second, duplicate bet for the same fixture.
+2. `apply_df_results_to_manual_bets()` unconditionally set `status = 'settled'` on any bet that received a result, including bets the user had already rejected. A rejected bet whose fixture finished silently lost its "rejected" status the moment settlement ran, and — because `getResolvedManualBets()` only checked `_lucro !== null`, not `status` — it then counted as a real result in bankroll, ROI, and every other financial calculation, even though the user had explicitly declined to place it.
+
+**Root cause:** Both were the same class of bug — a lifecycle check (`status === 'approved'`/`'rejected'`) that was written for the states that existed at the time and never revisited when a new state (`pending` staying visible; `rejected` meeting the settlement engine) started reaching that code path.
+
+**Fix:** `renderManualScout()`'s hide-key now covers every bet regardless of `status`. `apply_df_results_to_manual_bets()` only advances `status` to `'settled'` when it was not already `'rejected'`. `getResolvedManualBets()` additionally excludes `status === 'rejected'`. See ADR-012 for the underlying decision (lifecycle status and settlement result are independent) and `03_Dashboard.md` §7/§9 for the resulting behaviour.
+
+---
+
 ### SETTLEMENT-1 — "No Matches to Settle" Caused by an Expired API-Football Subscription Masquerading as Empty Fixtures
 
 **Status:** Resolved — 2026-07-07 (Phase 26.18). Full technical detail in `08_Change_Log.md` — Phase 26.18.

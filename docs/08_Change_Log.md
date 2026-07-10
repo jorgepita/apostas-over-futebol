@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.19 | 2026-07-10 | Manual Bet lifecycle reworked: Scout card hides for any pending bet (not just approved/rejected), fixing a duplicate-creation gap; three-layer duplicate protection (Scout hide, frontend creation guard, backend `/save` dedupe); Reject no longer deletes — it's a permanent, settleable, analytical lifecycle state, fully decoupled from settlement result; new `Placar` (final score) field; History page gains a Resolvidas/Rejeitadas toggle |
 | 26.18 | 2026-07-07 | "No matches to settle" root-caused to an expired API-Football subscription silently returning HTTP 200 + empty fixtures; provider responses now validated for embedded errors, normalized, logged, surfaced in the settlement summary and dashboard, and persisted as per-provider health in `cloud_state.json` |
 | 26.17 | 2026-07-01 | Manual bet/bankroll cloud synchronization fixed; boot sync guard and event-driven refresh replace periodic polling; Railway `GITHUB_REPO` misconfiguration resolved; dashboard KPI/alert consistency fixes; diagnostic instrumentation removed |
 | Doc System | 2026-06-29 | Complete documentation system established; `CLAUDE.md` added at repository root |
@@ -23,6 +24,56 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.19 — Manual Bet Lifecycle Rework: Duplicate Prevention, Rejected as a Permanent Analytical State
+
+**Implemented:** 2026-07-10
+
+**Goal.** Improve the Manual Bet lifecycle architecture, not just its UI: stop the Scout workspace from letting a user accidentally create a duplicate bet, make the backend independently refuse duplicates, stop treating "Reject" as deletion, and cleanly separate a bet's workflow state from its match outcome — all while reusing the existing shared settlement engine, the existing History page, and the existing `cloud_state.json` persistence model (no second CSV, no second JSON, no new endpoint, no duplicated settlement logic).
+
+**Two pre-existing defects found and fixed as part of this work (see `05_Known_Issues.md` MANUAL-1):**
+1. `renderManualScout()`'s hide-key excluded fixtures with a bet in `status ∈ {approved, rejected, settled}` — but not `pending`. A brand-new bet's Scout card stayed visible and clickable until approved/rejected, so a user could create a duplicate before ever approving the first one.
+2. `apply_df_results_to_manual_bets()` unconditionally set `status = 'settled'` on any bet that got a result — including bets the user had already rejected — silently erasing the rejection and letting the bet count in bankroll/ROI (`getResolvedManualBets()` only checked `_lucro !== null`, never `status`).
+
+**Scout duplicate prevention.** `renderManualScout()`'s `processedMatchKeys` set now includes every bet in `state.manualBets` regardless of `status` — a card hides the instant "Criar" succeeds and stays hidden through pending/approved/rejected/settled, reappearing only if the bet is removed ("Remover"). No polling or refresh is involved; it's derived from `state.manualBets` on every render, same as before.
+
+**Frontend + backend duplicate protection (ADR-013).** `manualBetOpportunityKey()`/`findManualBetByOpportunity()` (reusing the existing `normalizeLeagueCode()`/`normalizeMarket()` normalisers) identify a bet by fixture + market. Both bet-creation paths (`addManualBetFromFixture()` for Scout, `addManualBet()` for the manual entry form) check this synchronously before pushing — since the check and the push happen in the same, non-yielding function call, a double-click cannot create two records; the second call always observes the first bet already in the array. The backend applies the identical rule independently: `sync_server.py`'s new `_dedupe_manual_bets()` (reusing `update_results._resolve_liga_display_name()` / `_normalize_market_code()` — no second normalisation implementation) runs inside `POST /save` before every write, keeping the earliest bet per `(data, liga, jogo, mercado)` identity. When it drops something, the response carries `duplicatesRemoved`, and `saveCloudState()` calls `_reloadManualBetsFromCloud()` to resync `state.manualBets` to the canonical copy.
+
+**Rejected is now a permanent, terminal lifecycle state (ADR-012).** `mbHandleRowReject()` already only set `status: 'rejected'` (it never spliced the bet — the project's own documentation had drifted from the implementation here; corrected). What was missing was the backend guarantee: `apply_df_results_to_manual_bets()` now only advances `status` to `'settled'` when it was not already `'rejected'` — a rejected bet keeps `status: 'rejected'` forever, even after settlement populates its `resultado`/`lucro`/`placar`. `getResolvedManualBets()` (the single choke point for bankroll/ROI/analytics/versus/KPIs) additionally excludes `status === 'rejected'`, and `getFilteredRealClosedRows()`'s manual branch now builds on `getResolvedManualBets()` instead of a separately-duplicated `_lucro !== null` filter — one change point instead of two.
+
+**Rejected bets settle through the exact same engine (no duplicated settlement logic).** `manual_bets_to_settlement_df()`/`update_dataframe()` never filtered by lifecycle status — every manual bet, rejected or not, was already being fed through settlement. The only code path that needed a change was the one line described above. A new `Placar` column (`"{home_goals}-{away_goals}"`, e.g. `"2-1"`) was added to `CSV_COLUMNS` and written at both settlement write sites (`try_update_row_via_api_football()` and the football-data.org branch in `update_dataframe()`), round-tripped through `manual_bets_to_settlement_df()`/`apply_df_results_to_manual_bets()` — additive and backward-compatible (`ensure_columns()` fills `""` for older rows without it). It is populated identically for bot picks, since the settlement engine is shared (no bot-pick-specific branch was added).
+
+**Fixed during final verification:** `SYNC_RESULT_COLUMNS` (consumed by `sync_daily_from_history()`, the bot-pick catch-up path called from both `main()` and `run_settlement_remote()` — copies settlement results from `picks_history.csv` into `picks_hoje_simplificado.csv` when a pick settles in one file before the other) was not updated when `Placar` was added to `CSV_COLUMNS`. Without this, a bot pick's final score would settle correctly in `picks_history.csv` but never reach the corresponding row in the daily CSV via this catch-up path — and, because `update_dataframe()` skips rows whose `Resultado` is already `W`/`L`/`P` (`ALREADY_DONE`), it would never self-correct on a later run. `Placar` added to `SYNC_RESULT_COLUMNS`; verified with a dedicated round-trip test.
+
+**Rejected History view (reuses the existing History page and table).** The "Fechadas reais filtradas" card gained a Resolvidas/Rejeitadas toggle (`_historyViewMode`, a transient, unpersisted view flag). Resolvidas is the unchanged existing table. Rejeitadas (`renderRejectedHistoryTable()` / `getRejectedHistoryRows()` / `getRejectedManualBets()`) reuses the same card, filter bar, and `<table>` element with a different `<thead>` and row-renderer: Data, Liga, Jogo, Mercado, Odd, Stake, Análise, Opinião, Placar Final, Resultado, Lucro Teórico, Notas.
+
+**Analytics compatibility (no dashboard built, per the request's scope).** Every field needed for future rejected-bet metrics (rejected win rate, theoretical ROI, false-negative rate, by league/market/confidence/opinion) already exists on the bet object (`liga`, `mercado`, `botOpinion`, `scoreAtAnalysis`, `edgeAtAnalysis`, `resultado`, `lucro`, `placar`, permanent `status: 'rejected'`) — no schema change beyond `placar` was needed for this.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | Scout hide-key fix; `manualBetOpportunityKey()`/`findManualBetByOpportunity()`; duplicate guard in `addManualBetFromFixture()`/`addManualBet()`; `getResolvedManualBets()`/`getRejectedManualBets()`; `getFilteredRealClosedRows()` manual branch; History Resolvidas/Rejeitadas toggle + `renderRejectedHistoryTable()`/`getRejectedHistoryRows()`; `saveCloudState()` resync on `duplicatesRemoved` |
+| `update_results.py` | `Placar` added to `CSV_COLUMNS`; written at both settlement write sites; round-tripped in `manual_bets_to_settlement_df()`; `apply_df_results_to_manual_bets()` preserves `status: 'rejected'` |
+| `sync_server.py` | `_manual_bet_identity()`/`_dedupe_manual_bets()`; wired into `POST /save`; `duplicatesRemoved` added to the response |
+| `docs/03_Dashboard.md`, `docs/02_Data_Flow.md`, `docs/04_Backend.md` | Manual Bet lifecycle, Scout, settlement, and History sections updated to describe the new behaviour |
+| `docs/09_Architecture_Decisions.md` | ADR-012, ADR-013 added |
+| `docs/05_Known_Issues.md` | MANUAL-1 added to Resolved Issues |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+
+### Validation
+
+- Automated Chromium (Playwright) walkthrough of the live `index.html` (network calls blocked; deterministic seeded state) covering: Scout card hidden with no bet → visible again after Remove; Scout card disappears immediately after Create and stays hidden across a re-render; double-click/repeated create does not duplicate; a rejected-and-settled bet keeps `status: 'rejected'` while `resultado`/`placar` are populated; `getResolvedManualBets()` excludes it; `getRejectedManualBets()` includes it with its result; the Rejeitadas table renders game/opinion/final-score/notes; the Resolvidas table does not show the rejected bet. All checks passed.
+- Isolated Python checks (no real GitHub/network calls): `_dedupe_manual_bets()` keeps the earliest bet across alias forms (`"premier"` vs `"Premier League"`, `"Over 2.5"` vs `"O2.5"`) and correctly treats a different market or date as not-a-duplicate; `manual_bets_to_settlement_df()` → simulated settlement write → `apply_df_results_to_manual_bets()` round-trip confirmed a rejected bet keeps `status: 'rejected'` with `resultado`/`placar`/`lucro` populated, and confirmed an approved bet still transitions to `status: 'settled'` exactly as before (no regression).
+- `python -m py_compile update_results.py sync_server.py` passes. `node --check` on the extracted `<script>` block of `index.html` passes.
+- `pytest tests/` — 29 passed, no regressions.
+- Backward compatibility: an old CSV row without the `Placar` column loads correctly via `ensure_columns()`, defaulting to `""`.
+
+### Impact
+
+A user can no longer accidentally create a duplicate manual bet from the Scout workspace, and even if a race or a future frontend bug produced one, the backend refuses to persist it. Rejected bets are preserved forever as analytical records — settled by the same engine as any real bet, but structurally incapable of affecting bankroll, ROI, or any financial figure — laying the groundwork for future "rejected opportunity" analytics without any further schema change.
 
 ---
 

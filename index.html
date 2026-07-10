@@ -2200,15 +2200,23 @@ button:disabled {
         <div class="card">
           <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--text);">Fechadas reais filtradas</div>
-              <div class="note">Bot aprovado + manuais com resultado definido — clique numa linha para detalhes</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);" id="closedRealTableTitle">Fechadas reais filtradas</div>
+              <div class="note" id="closedRealTableSubtitle">Bot aprovado + manuais com resultado definido — clique numa linha para detalhes</div>
             </div>
-            <button id="exportHistoryBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Exportar CSV</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <div style="display:flex;gap:4px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;padding:3px;">
+                <button id="historyViewResolvedBtn" type="button"
+                  style="padding:5px 10px;width:auto;font-size:11px;border-radius:6px;">Resolvidas</button>
+                <button id="historyViewRejectedBtn" type="button"
+                  style="padding:5px 10px;width:auto;font-size:11px;border-radius:6px;">Rejeitadas</button>
+              </div>
+              <button id="exportHistoryBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Exportar CSV</button>
+            </div>
           </div>
 
           <div class="table-wrap">
             <table>
-              <thead>
+              <thead id="closedRealHead">
                 <tr>
                   <th>Origem</th>
                   <th>Data</th>
@@ -3221,6 +3229,7 @@ button:disabled {
       let _saveToastTimer = null;    // Phase 26.9.2 — debounce handle for save confirmation toast
       let _settlementRunning = false; // Phase 26.11 — manual settlement button state
       let _settlementMessage = '';    // Phase 26.11 — current status text for settlement button
+      let _historyViewMode = 'resolved'; // 'resolved' | 'rejected' — History page table toggle (view-only, not persisted)
       let _bootSyncComplete   = false; // LIVE-1: blocks saveCloudState() until first successful manualBets cloud sync
       let _manualSyncInFlight = false; // LIVE-1: prevents concurrent manualBets cloud refresh requests
 
@@ -4229,6 +4238,27 @@ button:disabled {
         return `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       }
 
+      // Identity of a manual bet "opportunity": same fixture + same market.
+      // Reuses the existing league/market normalisers so this matches however the
+      // bet was entered (Scout canonical key, free-text league name, "Over 2.5" vs
+      // "O2.5", etc.) — see ADR-012/ADR-013. This is the authority for whether a
+      // second manual bet would be a true duplicate; it is deliberately finer-grained
+      // than the Scout card's per-fixture hide key (a card covers both markets).
+      function manualBetOpportunityKey(data, liga, jogo, mercado) {
+        return [
+          normalizeDateString(data || ''),
+          normalizeLeagueCode(liga || ''),
+          cleanString(jogo || '').toLowerCase(),
+          normalizeMarket({ Mercado: mercado })
+        ].join('|');
+      }
+
+      function findManualBetByOpportunity(data, liga, jogo, mercado) {
+        const key = manualBetOpportunityKey(data, liga, jogo, mercado);
+        return (Array.isArray(state.manualBets) ? state.manualBets : [])
+          .find(b => manualBetOpportunityKey(b.data, b.liga, b.jogo, b.mercado) === key) || null;
+      }
+
       function calcProfitByResult(resultado, stake, odd) {
         const r = cleanString(resultado).toUpperCase();
         const stakeNum = num(stake);
@@ -4632,6 +4662,8 @@ button:disabled {
       edgeAtAnalysis:   b.edgeAtAnalysis   ?? null,
       scoreAtAnalysis:  b.scoreAtAnalysis  ?? null,
       analysisSnapshot: b.analysisSnapshot ?? null,
+      placar:           cleanString(b.placar || ''),
+      settledAt:        b.settledAt        ?? null,
       _lucro:           lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
       _resultKey:       resultKey(resultado),
       _searchText:      `${liga} ${jogo} ${mercado}`.toLowerCase()
@@ -4684,8 +4716,21 @@ button:disabled {
         );
       }
 
+      // Manual bets that count towards bankroll/ROI/profit/win-rate/financial reports.
+      // Rejected bets are excluded here — and only here — so that every consumer
+      // (bankroll, analytics, versus, KPIs) automatically stays correct with a single
+      // change. A rejected bet can still be settled (resultado/_lucro populated by the
+      // shared settlement engine — see ADR-012) purely as an analytical record; it
+      // must never affect money figures. Use getRejectedManualBets() for those rows.
       function getResolvedManualBets() {
-        return getManualRowsMerged().filter(b => b._lucro !== null);
+        return getManualRowsMerged().filter(b => b._lucro !== null && b.status !== 'rejected');
+      }
+
+      // Rejected manual bets — analytical-only records. Settled the same way as any
+      // other bet (same shared engine, same resultado/_lucro/placar fields) but never
+      // contribute to bankroll/ROI/financial reports. Feeds the Rejected History view.
+      function getRejectedManualBets() {
+        return getManualRowsMerged().filter(b => b.status === 'rejected');
       }
 
       function getExecutionStats() {
@@ -5063,6 +5108,18 @@ button:disabled {
         return rows;
       }
 
+      // Rejected manual bets for the History page's "Rejeitadas" view — reuses the
+      // same filter bar (search/league/market/result/date/odds) as the Resolved
+      // view. Includes rejected bets regardless of whether they've been settled yet
+      // (an unsettled rejected bet is still a real analytical record — a passed-on
+      // opportunity awaiting its outcome). See ADR-012 and Goal 5/7 in 03_Dashboard.md.
+      function getRejectedHistoryRows() {
+        const filters = getHistoryFilters();
+        return filterManualRows(getRejectedManualBets(), filters)
+          .slice()
+          .sort((a, b) => (parseDateSafe(b.data)?.getTime() || 0) - (parseDateSafe(a.data)?.getTime() || 0));
+      }
+
       function matchDateFilter(dateStr, dateFilterValue) {
         if (!dateFilterValue) return true;
         if (dateFilterValue === 'today') return isToday(dateStr);
@@ -5158,8 +5215,7 @@ button:disabled {
             kickoffUTC: r['KickoffUTC'] || ''
           }));
 
-        const manualClosed = filterManualRows(getManualRowsMerged(), activeFilters)
-          .filter(r => r._lucro !== null)
+        const manualClosed = filterManualRows(getResolvedManualBets(), activeFilters)
           .map(r => ({
             source: 'manual',
             sourceLabel: r.isRemote ? 'Manual CSV' : 'Manual Local',
@@ -5721,7 +5777,94 @@ button:disabled {
         }
       }
 
+      // Toggles the History page between the financial "Resolvidas" table (bot +
+      // approved manual bets — unchanged from before) and the analytical
+      // "Rejeitadas" table (Goal 5 — rejected manual bets, never touching bankroll/
+      // ROI). Both share the filter bar, the card, and the table element; only the
+      // header row and the row-renderer differ. See ADR-012 and 03_Dashboard.md.
       function renderClosedRealTable() {
+        const head = document.getElementById('closedRealHead');
+        const title = document.getElementById('closedRealTableTitle');
+        const subtitle = document.getElementById('closedRealTableSubtitle');
+        const resolvedBtn = document.getElementById('historyViewResolvedBtn');
+        const rejectedBtn = document.getElementById('historyViewRejectedBtn');
+        const activeStyle = 'background:var(--info);color:#fff;';
+        if (resolvedBtn) resolvedBtn.setAttribute('style', `padding:5px 10px;width:auto;font-size:11px;border-radius:6px;${_historyViewMode === 'resolved' ? activeStyle : ''}`);
+        if (rejectedBtn) rejectedBtn.setAttribute('style', `padding:5px 10px;width:auto;font-size:11px;border-radius:6px;${_historyViewMode === 'rejected' ? activeStyle : ''}`);
+
+        if (_historyViewMode === 'rejected') {
+          if (head) head.innerHTML = `
+            <tr>
+              <th>Data</th>
+              <th>Liga</th>
+              <th>Jogo</th>
+              <th>Mercado</th>
+              <th>Odd</th>
+              <th>Stake</th>
+              <th>Análise</th>
+              <th>Opinião</th>
+              <th>Placar Final</th>
+              <th>Resultado</th>
+              <th>Lucro Teórico</th>
+              <th>Notas</th>
+            </tr>`;
+          if (title) title.textContent = 'Apostas rejeitadas';
+          if (subtitle) subtitle.textContent = 'Registo analítico — nunca afeta banca, ROI ou estatísticas financeiras';
+          renderRejectedHistoryTable();
+          return;
+        }
+
+        if (head) head.innerHTML = `
+          <tr>
+            <th>Origem</th>
+            <th>Data</th>
+            <th>Liga</th>
+            <th>Jogo</th>
+            <th>Mercado</th>
+            <th>Resultado</th>
+            <th>Odd</th>
+            <th>Stake</th>
+            <th>Lucro</th>
+            <th style="width:28px;"></th>
+          </tr>`;
+        if (title) title.textContent = 'Fechadas reais filtradas';
+        if (subtitle) subtitle.textContent = 'Bot aprovado + manuais com resultado definido — clique numa linha para detalhes';
+        renderResolvedClosedRealTable();
+      }
+
+      function renderRejectedHistoryTable() {
+        const rows = getRejectedHistoryRows();
+        const tbody = document.getElementById('closedRealRows');
+        if (!tbody) return;
+
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="12"><div class="note">Sem apostas rejeitadas com os filtros atuais.</div></td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = rows.map(r => {
+          const analysisText = r.hadAnalysis && r.scoreAtAnalysis !== null && r.scoreAtAnalysis !== undefined
+            ? `Score ${escapeHtml(String(r.scoreAtAnalysis))}`
+            : '—';
+          return `
+            <tr>
+              <td>${escapeHtml(r.data || '—')}</td>
+              <td>${escapeHtml(r.liga || '—')}</td>
+              <td>${escapeHtml(r.jogo || '—')}</td>
+              <td>${escapeHtml(r.mercado || '—')}</td>
+              <td>${escapeHtml(r.odd || '—')}</td>
+              <td>${r.stake ? `€${escapeHtml(r.stake)}` : '—'}</td>
+              <td>${analysisText}</td>
+              <td>${r.botOpinion ? escapeHtml(r.botOpinion) : '—'}</td>
+              <td>${escapeHtml(r.placar || '—')}</td>
+              <td>${resultBadge(r.resultado)}</td>
+              <td ${profitClass(r._lucro)}>${r._lucro === null || r._lucro === undefined ? '—' : `€${fmt(r._lucro)}`}</td>
+              <td>${escapeHtml(r.notas || '—')}</td>
+            </tr>`;
+        }).join('');
+      }
+
+      function renderResolvedClosedRealTable() {
         const rows = getHistoryFilteredRows().slice().reverse();
         const tbody = document.getElementById('closedRealRows');
         if (!tbody) return;
@@ -7014,11 +7157,15 @@ button:disabled {
           return `${y}-${mo}-${da}`;
         })();
 
-        // Build set of match keys that already have a decided manual bet (approved or rejected).
+        // Build set of match keys that already have a manual bet, in ANY lifecycle
+        // state (pending/approved/rejected/settled). A Scout card must disappear the
+        // instant a bet is created for it — not just once it's been approved/rejected —
+        // otherwise the user can create a second, duplicate bet from the same card
+        // while the first is still pending. The card only reappears if the bet is
+        // actually removed (deleted) from state.manualBets. See ADR-012.
         // Uses the same key formula as the scout card: date_league_home_away (lowercase, spaces→_).
         const processedMatchKeys = new Set(
           (Array.isArray(state.manualBets) ? state.manualBets : [])
-            .filter(b => b.status === 'approved' || b.status === 'rejected' || b.status === 'settled')
             .map(b => {
               const p = String(b.jogo || '').split(' vs ');
               return `${b.data || ''}_${b.liga || ''}_${(p[0] || '').trim()}_${(p[1] || '').trim()}`
@@ -7309,12 +7456,18 @@ button:disabled {
         if (msgEl) msgEl.style.display = 'none';
 
         const snapshot = (window._mbAnalysisCache || {})[mk] || null;
+        const mercado = mbScoutMarketLabel(curr.market);
+
+        if (findManualBetByOpportunity(date, league, game, mercado)) {
+          if (msgEl) { msgEl.style.display = ''; msgEl.textContent = 'Já existe uma aposta manual para este jogo e mercado.'; }
+          return;
+        }
 
         addManualBetFromFixture({
           data: date,
           liga: league,
           jogo: game,
-          mercado: mbScoutMarketLabel(curr.market),
+          mercado,
           odd: String(odd),
           stake: String(stake),
           snapshot
@@ -7331,6 +7484,11 @@ button:disabled {
       }
 
       function addManualBetFromFixture({ data, liga, jogo, mercado, odd, stake, snapshot }) {
+        // Authoritative guard — even if a caller bypasses the mbHandleCreate check
+        // above (or two clicks race each other), this function never pushes a
+        // second bet for the same fixture+market. See ADR-012.
+        if (findManualBetByOpportunity(data, liga, jogo, mercado)) return;
+
         state.manualBets.push({
           id: makeManualId(),
           data: normalizeDateString(data),
@@ -8011,6 +8169,13 @@ button:disabled {
     updateCloudStatus();
 
     console.log('Guardado com sucesso:', result);
+
+    // Backend duplicate protection (ADR-013) may have dropped a duplicate manual
+    // bet from what we just sent. Resync from the now-canonical cloud copy so
+    // state.manualBets never diverges from what's actually persisted.
+    if (result?.duplicatesRemoved) {
+      await _reloadManualBetsFromCloud();
+    }
 
   } catch (e) {
     console.error(e);
@@ -12487,6 +12652,11 @@ button:disabled {
           return;
         }
 
+        if (findManualBetByOpportunity(data, liga, jogo, mercado)) {
+          alert('Já existe uma aposta manual para este jogo e mercado.');
+          return;
+        }
+
         state.manualBets.push({
           id: makeManualId(),
           data: normalizeDateString(data),
@@ -13951,6 +14121,9 @@ button:disabled {
         safeBind('historyResultFilter', 'change', rerenderHistoryOnly);
         safeBind('historyOddsFilter', 'change', rerenderHistoryOnly);
         safeBind('exportHistoryBtn', 'click', exportFilteredHistory);
+
+        safeBind('historyViewResolvedBtn', 'click', () => { _historyViewMode = 'resolved'; rerenderHistoryOnly(); });
+        safeBind('historyViewRejectedBtn', 'click', () => { _historyViewMode = 'rejected'; rerenderHistoryOnly(); });
 
         const bankrollInput = document.getElementById('bankrollInput');
         if (bankrollInput) {

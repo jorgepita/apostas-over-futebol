@@ -113,9 +113,10 @@ Runtime-only additions (not persisted to localStorage):
 ### Important state properties
 
 **`state.manualBets`**  
-Array of manual bet objects loaded from localStorage at startup. Each object has: `id`, `data`, `liga`, `jogo`, `mercado`, `odd`, `stake`, `resultado`, `status` (`"pending"` / `"approved"` / `"settled"`), `notas`, and optional analysis fields (`botOpinion`, `edgeAtAnalysis`, `analysisSnapshot`).  
+Array of manual bet objects loaded from localStorage at startup. Each object has: `id`, `data`, `liga`, `jogo`, `mercado`, `odd`, `stake`, `resultado`, `status` (`"pending"` / `"approved"` / `"rejected"` / `"settled"`), `notas`, `placar` (final score, e.g. `"2-1"`, populated by settlement — see `04_Backend.md` §7), `settledAt`, and optional analysis fields (`botOpinion`, `edgeAtAnalysis`, `analysisSnapshot`).  
+`status` and `resultado` are independent axes (see ADR-012): `status` is the lifecycle (who decided what), `resultado`/`placar` is the settlement result (what actually happened). A `rejected` bet is still settled by the shared engine like any other bet — `resultado`/`lucro`/`placar` get populated — but `status` never advances past `rejected` to `settled`. This is deliberate: it is what lets `getResolvedManualBets()` (financial) and `getRejectedManualBets()` (analytical) both derive from the same array without a second field or a combined status vocabulary.  
 Updated by: user actions (create, approve, reject), `_doLoadCloudState()`, `_reloadManualBetsFromCloud()`.  
-Persisted by: `saveLocalState()` to localStorage; `saveCloudState()` to `cloud_state.json` via Railway.
+Persisted by: `saveLocalState()` to localStorage; `saveCloudState()` to `cloud_state.json` via Railway. The backend may drop a duplicate bet from what was sent (see ADR-013); when it does, `saveCloudState()` detects `duplicatesRemoved` in the `/save` response and calls `_reloadManualBetsFromCloud()` to resync `state.manualBets` to the canonical, deduplicated copy.
 
 **`state.footballDaily`**  
 Array of today's bot pick rows. Populated by `loadData()` by merging `picks_hoje_github.csv` and `picks_btts.csv`. Each row is a normalised bot CSV row. Rows with missing `Data`, `Jogo`, or invalid `Odd` are filtered out.  
@@ -360,10 +361,15 @@ b.isLocal === true
 **User interactions:**
 - Type a team name or date → `renderManualScout()` queries API-Football.
 - Select a fixture → Poisson model runs in JavaScript → edge and Kelly stake are computed.
-- "Criar Aposta" (Create Bet) → `addManualBet()` — pushes to `state.manualBets`, calls `markDirty()`, navigates to `tab-manual`.
+- "Criar" (Create Bet) → `mbHandleCreate()` → `addManualBetFromFixture()` — pushes to `state.manualBets`, calls `markDirty()`, re-renders the Manual Bets panels. The Scout card for that fixture disappears immediately (see below) and does not require a page refresh to stay hidden.
 - "Aprovar" (Approve) → sets `status: 'approved'`, calls `markDirty()`. Bet moves to Pending/Live.
-- "Rejeitar" (Reject) → removes from `state.manualBets`, calls `markDirty()`.
-- Manual entry form — allows creating a bet without Scout by filling fields directly.
+- "Rejeitar" (Reject) → sets `status: 'rejected'`, calls `markDirty()`. **The bet is not removed** — it remains permanently in `state.manualBets` as an analytical record (see ADR-012). It disappears from Live Center/Pending (both require `status === 'approved'`) and from bankroll/ROI/analytics (`getResolvedManualBets()` excludes `status === 'rejected'`), but stays visible in the Manual Bets list (badge "Rejeitada") and in the History page's "Rejeitadas" view (see §9). Rejecting is reversible — clicking "Aprovar" on a rejected bet moves it back to `approved`, at which point it starts counting financially again.
+- "Remover" (Delete) → the only action that actually removes a bet from `state.manualBets`. This is also what makes its Scout card reappear (see below).
+- Manual entry form — allows creating a bet without Scout by filling fields directly; guarded by the same duplicate check as the Scout path (see below).
+
+**Duplicate protection.** Before pushing a new bet (from either the Scout "Criar" button or the manual entry form), `findManualBetByOpportunity(data, liga, jogo, mercado)` checks whether a bet already exists for the same fixture + market, in *any* lifecycle state, using the same league/market normalisers as the rest of the app (`normalizeLeagueCode()`, `normalizeMarket()`). If found, the create is refused (inline message on the Scout card; `alert()` on the manual form) instead of pushing a second record. Because this check and the push both happen synchronously inside the same function call, a double-click cannot create two records — the second call always sees the first bet already in `state.manualBets`. The backend applies the same rule independently as an authoritative backstop (see `04_Backend.md` §4, ADR-013).
+
+**Scout card visibility (Goal: no accidental duplicate creation).** `renderManualScout()` builds a set of fixture keys (`date_league_home_away`) from **every** bet in `state.manualBets`, regardless of `status` — pending, approved, rejected, or settled — and filters those fixtures out of the upcoming-fixtures list before rendering cards. A Scout card therefore disappears the instant "Criar" succeeds and stays hidden for as long as any bet exists for that fixture; no page refresh is needed, and no polling is involved (it is derived directly from `state.manualBets` on every render). The card only reappears once the bet is actually removed ("Remover") — approving, rejecting, or settling a bet does not bring its card back. This hide-key is deliberately per-fixture (not per-market): a Scout card covers both O2.5 and BTTS for one fixture, and creating either one hides the whole card. The finer-grained fixture+market identity used for duplicate *detection* (`findManualBetByOpportunity()`, above) is a separate, more precise check used at creation time and by the backend.
 
 **Update triggers:** Any `rerenderAll()` or `rerenderManualOnly()`.
 
@@ -485,7 +491,7 @@ The cloud auto-save fires within 4 seconds. The bet transitions:
 
 ### Step 5 — Rejection
 
-The user clicks "Rejeitar" (Reject). The bet is spliced from `state.manualBets`. `markDirty()` is called. The bet is gone from all views and from `cloud_state.json` on next save.
+The user clicks "Rejeitar" (Reject). `status` is set to `'rejected'`; the bet is **not** removed from `state.manualBets`. `markDirty()` is called. The bet disappears from Pending/Live Center (both require `status === 'approved'`) and from every financial calculation (`getResolvedManualBets()` excludes it — see ADR-012), but remains in the Manual Bets list and becomes visible in the History page's "Rejeitadas" view (§9). It still passes through settlement like any other bet (Step 8) — its fixture's real result, final score, and theoretical profit get populated exactly as if it had been approved — the only difference is that none of that ever reaches bankroll/ROI. Rejection is reversible: approving a rejected bet moves it back to `approved` and it starts counting financially again.
 
 ### Step 6 — Persistence
 
@@ -513,32 +519,45 @@ After settlement, `resultado` is W/L/P. `getManualRowsMerged()` returns the bet 
 
 ### State Transition Summary
 
+Lifecycle (`status`) and settlement result (`resultado`/`placar`) are independent axes (ADR-012). The diagram below shows both branches; settlement (the bottom half) runs identically regardless of which branch a bet is on — the only difference is what it's allowed to affect afterwards.
+
 ```
 [created]
    status: 'pending'
    resultado: ''
       │
-      │ user clicks Aprovar
-      ▼
-[approved, pre-kickoff]
-   status: 'approved'
-   resultado: ''
-   → appears in Pending
-      │
-      │ kickoff time passes
-      ▼
-[approved, post-kickoff]
-   status: 'approved'
-   resultado: ''
-   → appears in Live Center
-      │
-      │ settlement writes resultado
-      ▼
-[settled]
-   status: 'approved' (unchanged by settlement)
-   resultado: 'W' / 'L' / 'P'
-   → appears in History, Analytics, Bankroll
+      ├─ user clicks Aprovar ──────────────┐
+      │                                    ▼
+      │                         [approved, pre-kickoff]
+      │                            status: 'approved'
+      │                            → appears in Pending
+      │                                    │
+      │                            kickoff time passes
+      │                                    ▼
+      │                         [approved, post-kickoff]
+      │                            status: 'approved'
+      │                            → appears in Live Center
+      │                                    │
+      └─ user clicks Rejeitar              │ settlement writes
+         status: 'rejected'                │ resultado/lucro/placar
+         → hidden from Pending/Live/       │ (same engine, same run)
+           bankroll/ROI; visible in        │
+           Manual Bets list + History      │
+           → Rejeitadas                    ▼
+                │                  [settled]
+                │ settlement writes   status: 'approved' (unchanged by settlement)
+                │ resultado/lucro/     resultado: 'W' / 'L' / 'P'
+                │ placar (same         placar: final score, e.g. '2-1'
+                │ engine, same run)    → appears in History, Analytics, Bankroll
+                ▼
+   [rejected, settled]
+      status: 'rejected'  (never advances to 'settled' — see ADR-012)
+      resultado: 'W' / 'L' / 'P'
+      placar: final score
+      → appears in History → Rejeitadas ONLY; never in Analytics/Bankroll
 ```
+
+A rejected bet can be re-approved at any point (before or after settlement) by clicking "Aprovar" again; it then behaves exactly like any other approved bet, including counting financially if it already carries a settlement result.
 
 ---
 
@@ -618,6 +637,15 @@ Kickoff passes
 `getHistoryRowsMerged()` combines bot picks and manual bets into a single sorted list:
 - Bot picks: from `state.footballHistory` (all rows), merged with `state.localEdits` via `getRowWithLocalEdits()`.
 - Manual bets: from `state.manualBets` (those with `resultado` in `{W, L, P}`).
+
+### Resolvidas / Rejeitadas toggle (Phase 26.19)
+
+The "Fechadas reais filtradas" card has a two-button toggle (`#historyViewResolvedBtn` / `#historyViewRejectedBtn`) that switches `renderClosedRealTable()` between two views sharing the same filter bar (`getHistoryFilters()`), card, and `<table>` element — only the `<thead>` and the row-renderer differ:
+
+- **Resolvidas** (default) — unchanged from before this phase: bot + approved manual bets with a settlement result, via `renderResolvedClosedRealTable()` / `getHistoryFilteredRows()`. Rejected bets are never included here, settled or not (`getFilteredRealClosedRows()`'s manual branch is built on `getResolvedManualBets()`).
+- **Rejeitadas** — `renderRejectedHistoryTable()` / `getRejectedHistoryRows()`, built on `getRejectedManualBets()` (every bet with `status === 'rejected'`, settled or still awaiting its result). Columns: Data, Liga, Jogo, Mercado, Odd, Stake, Análise (score badge from Scout analysis), Opinião (`botOpinion`), Placar Final (`placar`), Resultado (`resultBadge(resultado)`), Lucro Teórico (`_lucro` — the same profit calculation as any other bet, labelled "theoretical" because it never touched the bankroll), Notas.
+
+The toggle is a transient view flag (`_historyViewMode`, module-level `let`, default `'resolved'`) — it is not persisted to localStorage or `cloud_state.json`; reloading the page always returns to Resolvidas. See ADR-012 for why rejected bets are settled but excluded from financial views, and `04_Backend.md` §7 for how `placar` is populated.
 
 **Filtering** is applied by `getFilteredRealClosedRows(getHistoryFilters())`:
 - Date range

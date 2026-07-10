@@ -64,6 +64,67 @@ def get_file_from_github(path: str):
         return None, None
 
 
+def _manual_bet_identity(bet: dict):
+    """Same-opportunity identity for a manual bet: fixture + market.
+
+    Reuses the exact normalisation the settlement engine already applies
+    (_resolve_liga_display_name / _normalize_market_code) instead of a second,
+    independent implementation — see ADR-004/ADR-009 on avoiding parallel
+    business logic for the same concept.
+    """
+    from update_results import _resolve_liga_display_name, _normalize_market_code
+
+    data = str(bet.get("data") or "").strip()
+    liga_raw = str(bet.get("liga") or "").strip()
+    liga = _resolve_liga_display_name(liga_raw).strip().lower() if liga_raw else ""
+    jogo = str(bet.get("jogo") or "").strip().lower()
+    mercado = _normalize_market_code(bet.get("mercado") or "")
+    return (data, liga, jogo, mercado)
+
+
+def _dedupe_manual_bets(manual_bets):
+    """Guard against two manual bets for the same fixture+market reaching
+    cloud_state.json — double-clicks, a race between two browser tabs, or a
+    stale local copy re-submitting a bet the cloud already has. The frontend
+    already hides/blocks this in normal use; this is the authoritative,
+    server-side backstop (see ADR-013).
+
+    Keeps the earliest occurrence per identity (the array is append-ordered,
+    so the first occurrence is the original bet); later duplicates are
+    dropped. Bets that fail to resolve an identity (missing fields) are kept
+    as-is rather than risk dropping a legitimate record.
+    """
+    if not isinstance(manual_bets, list):
+        return manual_bets, 0
+
+    seen = set()
+    deduped = []
+    dropped = 0
+    for bet in manual_bets:
+        if not isinstance(bet, dict):
+            deduped.append(bet)
+            continue
+        try:
+            identity = _manual_bet_identity(bet)
+        except Exception:
+            deduped.append(bet)
+            continue
+        if not all(identity):
+            deduped.append(bet)
+            continue
+        if identity in seen:
+            dropped += 1
+            print(
+                f"[save] dropped duplicate manual bet: {bet.get('jogo')} | "
+                f"{bet.get('mercado')} | id={bet.get('id')}",
+                flush=True,
+            )
+            continue
+        seen.add(identity)
+        deduped.append(bet)
+    return deduped, dropped
+
+
 def put_file_to_github(path: str, content_text: str, message: str, sha=None):
     url     = github_contents_url(path)
     payload = {
@@ -120,11 +181,21 @@ def save_cloud_state():
         message = payload.get("message", "update cloud state")
         if content is None:
             return jsonify({"error": "Missing content"}), 400
+
+        duplicates_removed = 0
+        if isinstance(content, dict) and isinstance(content.get("manualBets"), list):
+            deduped_bets, duplicates_removed = _dedupe_manual_bets(content["manualBets"])
+            if duplicates_removed:
+                content = {**content, "manualBets": deduped_bets}
+
         content_text = json.dumps(content, indent=2)
         _old, sha    = get_file_from_github(CLOUD_STATE_PATH)
         result       = put_file_to_github(CLOUD_STATE_PATH, content_text, message, sha=sha)
         new_sha      = result.get("content", {}).get("sha")
-        return jsonify({"success": True, "sha": new_sha})
+        response = {"success": True, "sha": new_sha}
+        if duplicates_removed:
+            response["duplicatesRemoved"] = duplicates_removed
+        return jsonify(response)
     except Exception as e:
         print("POST /save error:", e, flush=True)
         return jsonify({"error": str(e)}), 500

@@ -227,7 +227,7 @@ The statelessness is the reason `cloud_state.json` is re-fetched from GitHub on 
 }
 ```
 
-**Response:**
+**Response (normal):**
 ```json
 {
   "success": true,
@@ -235,13 +235,23 @@ The statelessness is the reason `cloud_state.json` is re-fetched from GitHub on 
 }
 ```
 
+**Response (a duplicate manual bet was dropped — Phase 26.19, ADR-013):**
+```json
+{
+  "success": true,
+  "sha": "abc123...",
+  "duplicatesRemoved": 1
+}
+```
+
 **Side effects:**
-1. One GitHub Contents API GET request to fetch the current SHA.
-2. One GitHub Contents API PUT request to write the new content.
+1. If `content.manualBets` is present, `_dedupe_manual_bets()` scans it for two-or-more bets sharing the same `(data, liga, jogo, mercado)` identity — normalised via the exact same `_resolve_liga_display_name()` / `_normalize_market_code()` helpers the settlement engine uses — and keeps only the earliest occurrence per identity. This is the authoritative, server-side duplicate guard; the frontend already prevents this in normal use (see `03_Dashboard.md` §7), but a race between two tabs or a stale local save could otherwise still produce a duplicate record in `cloud_state.json`.
+2. One GitHub Contents API GET request to fetch the current SHA.
+3. One GitHub Contents API PUT request to write the new (possibly deduplicated) content.
 
 The GET for SHA is required. The GitHub Contents API rejects PUT requests for existing files without a matching SHA. This is the mechanism that prevents overwriting concurrent changes.
 
-**Caller:** Browser — triggered by `saveCloudState()` after any state mutation, with a 4-second debounce.
+**Caller:** Browser — triggered by `saveCloudState()` after any state mutation, with a 4-second debounce. When the response carries `duplicatesRemoved > 0`, `saveCloudState()` calls `_reloadManualBetsFromCloud()` so `state.manualBets` matches what was actually persisted instead of silently keeping the dropped duplicate in memory.
 
 **Error:** Returns HTTP 500 with `{"error": "..."}` if either GitHub request fails (e.g. SHA conflict, network timeout).
 
@@ -534,11 +544,11 @@ Same logic, but runs entirely in a `tempfile.TemporaryDirectory`. Files are down
 
 ### Manual bet settlement
 
-Manual bets are settled using the same `update_dataframe()` as bot picks. The bridge is:
+Manual bets are settled using the same `update_dataframe()` as bot picks — **including rejected bets**: neither `manual_bets_to_settlement_df()` nor `update_dataframe()` filters by lifecycle `status`, so a rejected bet whose fixture has finished is settled in exactly the same run, by exactly the same code, as an approved one (see ADR-012). The bridge is:
 
-1. `manual_bets_to_settlement_df(manual_bets)` — converts the JSON bet objects from `cloud_state.json` to a DataFrame with the standard CSV column schema.
-2. `update_dataframe(manual_df, "manual", shared_state)` — settles the DataFrame rows using the same API queries and matching logic.
-3. `apply_df_results_to_manual_bets(manual_bets, manual_df)` — writes results back from the settled DataFrame into the original bet dicts.
+1. `manual_bets_to_settlement_df(manual_bets)` — converts the JSON bet objects from `cloud_state.json` to a DataFrame with the standard CSV column schema (including `Placar`, round-tripped from `bet['placar']` so an already-settled bet's final score survives across runs).
+2. `update_dataframe(manual_df, "manual", shared_state)` — settles the DataFrame rows using the same API queries and matching logic. Both write sites (`try_update_row_via_api_football()` and the football-data.org branch) write `Placar` (`"{home_goals}-{away_goals}"`) alongside `Resultado` and `Lucro€` — the same fact bot pick CSV rows now also carry.
+3. `apply_df_results_to_manual_bets(manual_bets, manual_df)` — writes `resultado`, `lucro`, and `placar` back from the settled DataFrame into the original bet dicts. **`status` is only advanced to `'settled'` if it was not already `'rejected'`** — a rejected bet keeps `status: 'rejected'` forever, even after this call populates its settlement result. This is the one deliberate behavioural asymmetry in an otherwise identical settlement path (ADR-012).
 4. If any bets were newly settled: `save_cloud_state_to_github(cloud_state, message)`.
 
 ### `update_dataframe()`
@@ -637,6 +647,8 @@ def calc_profit(resultado: str, stake: float, odd: float) -> float:
 
 `Lucro€` uses the model stake and model odd.
 `LucroReal€` uses the user-entered `StakeReal€` and `OddReal` (only computed if `Apostada` is truthy and both real fields are present).
+
+**Final score (`Placar`, Phase 26.19).** Alongside `Resultado` and `Lucro€`, both settlement write sites also write `Placar` — `f"{home_goals}-{away_goals}"` (e.g. `"2-1"`) — from the exact fixture data already used to compute `market_result()`. This is a plain additive column in `CSV_COLUMNS`: existing rows without it (from before this phase) read back as `""` via `ensure_columns()`, and it is written going forward for both bot picks and manual bets. It exists primarily to support the manual bet Rejected History view (`03_Dashboard.md` §9), which needs the actual final score as an analytical field, but is populated identically for bot picks since the settlement engine is shared (ADR-002/ADR-009) — no bot-pick-specific code was added.
 
 ### Team name matching
 

@@ -212,9 +212,11 @@ A new bet object is created in memory with:
 
 ### State 2 — Created (pending)
 
-The bet exists in `state.manualBets` in memory and is immediately written to `localStorage` via `saveLocalState()`. It is also immediately pushed to `cloud_state.json` via `POST /save`.
+The bet exists in `state.manualBets` in memory and is immediately written to `localStorage` via `saveLocalState()`. It is also immediately pushed to `cloud_state.json` via `POST /save` (subject to the backend's duplicate check — ADR-013).
 
 The bet appears on the **Pending** page. It does not appear in the Live Center.
+
+The Scout card for this fixture disappears from the Scout workspace the instant the bet is created — `renderManualScout()` hides any fixture already represented by a bet in `state.manualBets`, in any lifecycle state, not just once it's approved or rejected (Phase 26.19; see `03_Dashboard.md` §7). This is what prevents the user from accidentally creating a second bet for the same fixture while the first is still pending.
 
 ---
 
@@ -238,7 +240,17 @@ b.isLocal === true
 
 The bet is displayed in the Live Center alongside any bot picks that are also active. It remains here until settlement writes a result.
 
-No automated process changes `status` from `"approved"` to anything else. The only way to exit this state is through settlement (which writes `resultado`) or manual rejection.
+No automated process changes `status` from `"approved"` to anything else. The way to exit this state is through settlement (which writes `resultado`) or the user clicking "Rejeitar".
+
+---
+
+### State 4b — Rejected (a parallel branch, not an exit from the pipeline)
+
+The user can click "Rejeitar" from the Manual Bets list at any point before settlement (and can still un-reject afterwards). This sets `status: 'rejected'` — **the bet is not deleted** (this changed in Phase 26.19; see ADR-012). A rejected bet:
+- Disappears from Pending and Live Center immediately (both require `status === 'approved'`).
+- Is excluded from every financial calculation — bankroll, ROI, `getResolvedManualBets()` — regardless of whether it later gets a settlement result.
+- Still appears in the Manual Bets list (badge "Rejeitada") and, once its data is available, in the History page's "Rejeitadas" view (`getRejectedManualBets()`).
+- Still goes through settlement exactly like an approved bet (State 5) — the settlement engine does not filter by `status` at all. This is what lets rejected bets become genuine analytical records (win rate on rejected opportunities, etc. — see `03_Dashboard.md` §9) instead of just disappearing.
 
 ---
 
@@ -250,29 +262,30 @@ Settlement can be triggered in two ways:
 
 In both cases, the settlement engine:
 1. Downloads `cloud_state.json` from GitHub.
-2. Converts `manualBets` to a DataFrame.
+2. Converts `manualBets` to a DataFrame — **every** bet regardless of `status`, including rejected ones.
 3. Runs `update_dataframe()` — the same engine as bot picks.
-4. Copies W/L/P results back to the bet objects.
+4. Copies `resultado`/`lucro`/`placar` (final score, Phase 26.19) back to the bet objects. `status` advances to `'settled'` unless it was already `'rejected'`, in which case it stays `'rejected'` forever (ADR-012).
 5. If any bets were newly settled, uploads `cloud_state.json` back to GitHub.
 
-The bet's `resultado` field is now `"W"`, `"L"`, or `"P"`.
+The bet's `resultado` field is now `"W"`, `"L"`, or `"P"`, and `placar` holds the final score (e.g. `"2-1"`) — independently of whatever `status` the bet is on.
 
 ---
 
 ### State 6 — Settled (History)
 
-After settlement, the bet is excluded from the Live Center filter (`_resultKey` is now W/L/P). It appears in the **History** page and in the **Analytics** calculations.
+After settlement, an **approved** bet is excluded from the Live Center filter (`_resultKey` is now W/L/P) and appears in the **History** page's default "Resolvidas" view and in the **Analytics** calculations. A **rejected** bet that gets settled the same way never appears in Resolvidas, Analytics, or Bankroll — it appears only in History's "Rejeitadas" view (`03_Dashboard.md` §9).
 
 The browser only reflects the settlement result after `state.manualBets` is refreshed from the cloud. This happens when:
 - The user clicks "Load Cloud" — calls `_doLoadCloudState()`.
 - Settlement was triggered from this browser session — `_reloadManualBetsFromCloud()` is called automatically after the `/run-settlement` response.
 - A new page load occurs and `hasMeaningfulLocalState()` is false.
+- The backend dropped a duplicate bet on the last save (`duplicatesRemoved > 0` in the `/save` response — ADR-013).
 
 ---
 
 ### State 7 — Analytics and Bankroll
 
-Settled manual bets flow into the Analytics page through `getResolvedManualBets()`, which filters `getManualRowsMerged()` for bets with a non-null `_lucro`. The bankroll calculation incorporates manual bet profits alongside bot pick profits.
+Settled manual bets flow into the Analytics page through `getResolvedManualBets()`, which filters `getManualRowsMerged()` for bets with a non-null `_lucro` **and `status !== 'rejected'`** (Phase 26.19 — see ADR-012). The bankroll calculation incorporates manual bet profits alongside bot pick profits; rejected bets never contribute to it, settled or not. Rejected bets are available separately via `getRejectedManualBets()` for the History page's analytical "Rejeitadas" view.
 
 ---
 
@@ -350,10 +363,12 @@ manual_bets_to_settlement_df()
          │
          ▼
    Resultado: "W" / "L" / "P"
+   Placar: final score (e.g. "2-1")
    Lucro€: profit calculation
          │
 apply_df_results_to_manual_bets()
-   └─ copies results back to bet objects (1:1 index)
+   └─ copies resultado/lucro/placar back to bet objects (1:1 index)
+   └─ status → 'settled' UNLESS status was already 'rejected' (ADR-012)
          │
    if newly_settled > 0:
          │ GitHub Contents API PUT (upload)
@@ -365,8 +380,12 @@ cloud_state.json (GitHub) — manualBets array updated
    state.manualBets refreshed
          │
          ▼
-   Dashboard (Live Center clears, History populates)
+   Dashboard (Live Center clears; History → Resolvidas populates for
+   approved bets, History → Rejeitadas populates for rejected bets;
+   rejected bets never reach Analytics/Bankroll)
 ```
+
+**Rejected bets are not filtered out anywhere in this pipeline** — `manual_bets_to_settlement_df()` converts every bet regardless of `status`, so a rejected bet's fixture is looked up, matched, and settled by the exact same code path as an approved one. The only place lifecycle status is consulted is the single line in `apply_df_results_to_manual_bets()` that skips the `status → 'settled'` transition for already-`'rejected'` bets.
 
 ### Convergence Point
 

@@ -48,12 +48,12 @@ SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
 CSV_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Lucro€", "LucroReal€", "KickoffUTC"
+    "Resultado", "Placar", "Lucro€", "LucroReal€", "KickoffUTC"
 ]
 
 SYNC_RESULT_COLUMNS = [
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Lucro€", "LucroReal€"
+    "Resultado", "Placar", "Lucro€", "LucroReal€"
 ]
 
 HTTP_TIMEOUT = 30
@@ -1974,6 +1974,7 @@ def try_update_row_via_api_football(
 
     lucro = calc_profit(resultado, stake, odd)
     df.at[idx, "Resultado"] = resultado
+    df.at[idx, "Placar"] = f"{int(home_goals)}-{int(away_goals)}"
     df.at[idx, "Lucro€"] = str(lucro)
 
     lucro_real = calc_real_profit(
@@ -2385,6 +2386,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
         lucro = calc_profit(resultado, stake, odd)
 
         df.at[i, "Resultado"] = resultado
+        df.at[i, "Placar"] = f"{int(home_goals)}-{int(away_goals)}"
         df.at[i, "Lucro€"] = str(lucro)
 
         lucro_real = calc_real_profit(
@@ -2482,6 +2484,7 @@ def manual_bets_to_settlement_df(manual_bets: list) -> pd.DataFrame:
             'Odd':        str(bet.get('odd')         or '').strip(),
             'Stake€':     str(bet.get('stake')       or '').strip(),
             'Resultado':  str(bet.get('resultado')   or '').strip().upper(),
+            'Placar':     str(bet.get('placar')      or '').strip(),
             'Lucro€':     str(bet.get('lucro')       or '').strip(),
             'KickoffUTC': str(bet.get('kickoffUTC')  or '').strip(),
             'Edge%':      '',
@@ -2514,12 +2517,21 @@ def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
         if new_res not in {'W', 'L', 'P'}:
             continue
         lucro_str = str(df.at[i, 'Lucro€']).strip()
+        placar_str = str(df.at[i, 'Placar']).strip() if 'Placar' in df.columns else ''
         bet['resultado'] = new_res
         try:
             bet['lucro'] = round(float(lucro_str), 2) if lucro_str else None
         except ValueError:
             bet['lucro'] = None
-        bet['status'] = 'settled'
+        if placar_str:
+            bet['placar'] = placar_str
+        # Settlement result (resultado/lucro/placar) is independent from the bet's
+        # lifecycle status (see ADR-012). 'rejected' is a terminal lifecycle state —
+        # a rejected bet still gets settled analytically, but never becomes 'settled'.
+        # Every other lifecycle status ('pending', 'approved') transitions to 'settled'
+        # exactly as before.
+        if bet.get('status') != 'rejected':
+            bet['status'] = 'settled'
         bet['settledAt'] = now_iso
         newly_settled += 1
         print(

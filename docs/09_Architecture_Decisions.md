@@ -350,3 +350,65 @@ Persisting the resulting health state in `cloud_state.json` rather than a new fi
 **Do Not Revert Without Good Reason**
 
 Reverting to "HTTP 200 means trust the body" would silently reintroduce the exact failure mode this ADR exists to close: a provider can reject every request for days and the only visible symptom is an ambiguous "No matches to settle." with no record of why. Moving provider health to a separate file or database would violate ADR-003/ADR-008's reasoning for the same cost/benefit reasons already established for manual bets and movements.
+
+---
+
+## ADR-012 — A Manual Bet's Lifecycle Status Is Independent From Its Settlement Result; Rejected Is a Terminal, Analytical Lifecycle State
+
+**Status:** Accepted
+
+**Date:** 2026-07-10 (Phase 26.19)
+
+**Decision**
+
+A manual bet has two independent axes of state, not one: **lifecycle status** (`pending` → `approved` → `settled`, or `rejected`) and **settlement result** (`resultado`: `''`/`W`/`L`/`P`, plus the analytical `placar` final-score field). `status` and `resultado` are never combined into a single compound value (no `"rejectedWin"`, no `"approvedLoss"`). Once a bet's lifecycle status is `rejected`, it stays `rejected` forever — settlement is still allowed to populate `resultado`, `lucro`, and `placar` on it (see ADR-013's companion behaviour in `apply_df_results_to_manual_bets()`), but settlement completing never flips a rejected bet's status to `settled`. Every other lifecycle status continues to transition to `settled` on settlement exactly as before.
+
+**Context**
+
+Before this phase, `apply_df_results_to_manual_bets()` unconditionally set `bet['status'] = 'settled'` the moment a bet's `resultado` was written, regardless of what `status` had been beforehand. Because `manual_bets_to_settlement_df()` and `update_dataframe()` never filtered by lifecycle status — every non-`W`/`L`/`P` manual bet was already fed through the shared settlement engine — a rejected bet whose fixture finished would flow through settlement, get a real result, and have its `status` silently overwritten from `rejected` to `settled`. The fact that the user had passed on the opportunity was lost the moment the fixture ended, and the bet would then satisfy every "is this bet resolved/real" check in the frontend (`getResolvedManualBets()`, the main History table, bankroll/ROI aggregation), incorrectly affecting real money figures with a bet that was never actually placed.
+
+**Reasoning**
+
+Workflow state (did the user act on this opportunity, and how) and match outcome (what actually happened in the game) are different questions answered by different actors at different times — the user decides lifecycle, the result API decides settlement. Conflating them into one field forces a choice at settlement time between "know the result" and "remember the rejection," and the existing code had already made the wrong choice by accident. Keeping them as two fields means: querying "is this rejected" is always `status === 'rejected'`, independent of whether it has been settled; querying "is this resolved for financial purposes" is always `status !== 'rejected' && resultado in {W,L,P}`; and no third combined vocabulary (`RejectedWin`, `RejectedLoss`, ...) ever needs to be invented, because the two axes are already orthogonal. This is an extension of the existing partial separation — `status` and `resultado` were already two different fields — not a new field or a migration; existing `pending`/`approved`/`settled` bets are entirely unaffected.
+
+**Consequences**
+
+- `getResolvedManualBets()` (frontend) filters out `status === 'rejected'` in addition to its existing `_lucro !== null` check — the single change point for every bankroll/ROI/analytics/versus consumer.
+- A new `getRejectedManualBets()` accessor exists for analytical-only consumption (the Rejected History view — see ADR-013's sibling entry in `03_Dashboard.md`).
+- The "Aprovar"/"Rejeitar" buttons in the Manual Bets list remain bidirectional: a user can still un-reject a bet (moving it back to `approved`), at which point it starts counting financially like any other approved bet — this is an intentional consequence of keeping the two axes independent, not a special case.
+- `cloud_state.json`'s `manualBets` schema is unchanged (no migration): existing bets with `status: 'settled'` from before this phase are read exactly as before.
+
+**Do Not Revert Without Good Reason**
+
+Re-merging these into a single field reintroduces exactly the bug this ADR fixes: a rejected bet reaching a real match result silently loses the fact that it was rejected, and starts polluting real bankroll/ROI figures with a bet the user explicitly declined to place.
+
+---
+
+## ADR-013 — Duplicate Manual Bet Protection Lives in the Existing `/save` Endpoint, Not a New Create Endpoint
+
+**Status:** Accepted
+
+**Date:** 2026-07-10 (Phase 26.19)
+
+**Decision**
+
+The backend rejects duplicate manual bets — two bet records for the same fixture + market — inside the existing `POST /save` handler in `sync_server.py`, by silently dropping later duplicates (keeping the earliest) before writing to GitHub. No new "create manual bet" endpoint is introduced. The frontend independently guards against creating a duplicate at the moment of creation (`findManualBetByOpportunity()`, checked in both the Scout create path and the manual-entry-form path); the backend check is the authoritative backstop, not the primary mechanism.
+
+**Context**
+
+This project has no REST "create a manual bet" operation (see ADR-001/ADR-008): the browser holds the full `manualBets` array in memory and periodically `POST /save`s the entire `cloud_state.json` blob (debounced 4 seconds). A "prevent duplicate creation" rule therefore cannot live in a create handler that doesn't exist. The two realistic sources of a duplicate reaching the cloud are (a) a frontend bug or a race — two rapid clicks, two browser tabs — producing two bet objects with the same fixture+market before either save fires, and (b) the Scout UI's own state briefly allowing a second create before its next re-render hides the card. The frontend now guards against both at creation time; this ADR is about the server-side backstop for whatever gets past that guard regardless of cause.
+
+**Reasoning**
+
+Adding a dedicated endpoint (e.g. `POST /manual-bets`) purely to get a place to enforce this rule would introduce a second write path for the exact data `/save` already owns, immediately creating two ways to write the same field of `cloud_state.json` — the precise anti-pattern ADR-008 exists to prevent. Validating the *existing* full-state payload before it's persisted keeps `/save` as the one and only write path for `manualBets`, consistent with "every cloud write is a full replacement" (`02_Data_Flow.md` §10). Identity is computed by reusing `_resolve_liga_display_name()` and `_normalize_market_code()` — the exact same normalisation the settlement engine already applies — rather than a second, independent implementation of "what counts as the same league/market" (ADR-004/ADR-009).
+
+**Consequences**
+
+- `POST /save` gains a pre-write step: `_dedupe_manual_bets()` scans `content["manualBets"]`, and for any two entries whose `(data, liga, jogo, mercado)` identity matches (after the same normalisation settlement uses), keeps the first occurrence and drops the rest.
+- The response gains an optional `duplicatesRemoved` field, present only when at least one duplicate was dropped. The frontend's `saveCloudState()` calls `_reloadManualBetsFromCloud()` when this is non-zero, so `state.manualBets` is resynced to the authoritative (deduplicated) cloud copy instead of silently diverging from what was actually persisted.
+- A bet that fails to resolve an identity (missing date/league/game/market) is passed through untouched rather than risk dropping a legitimate record on incomplete data.
+- This is defense-in-depth: the primary UX guarantee (a user cannot casually create a duplicate) comes from the frontend hiding the Scout card immediately (see `03_Dashboard.md`) and from `findManualBetByOpportunity()` guarding both creation paths synchronously. The backend check exists for whatever gets past both — races between tabs, stale local state re-submitting a bet the cloud already has, or a future bug in the frontend guard.
+
+**Do Not Revert Without Good Reason**
+
+Removing this check re-opens the exact failure mode it exists to close, and re-adding it later as a new endpoint instead of inside `/save` would split `manualBets` writes across two paths that must then be kept consistent forever — the cost ADR-008 already explains for a different data type but applies identically here.
