@@ -5484,12 +5484,30 @@
       "status": "approved"
     },
     {
-      "id": "manual_1783712761055_92565f",
+      "analysisSnapshot": null,
+      "analysisStale": false,
+      "botOpinion": null,
       "data": "2026-07-12",
-      "liga": "noruega",
+      "edgeAtAnalysis": null,
+      "hadAnalysis": false,
+      "id": "manual_1783712761055_92565f",
       "jogo": "Sarpsborg 08 FF vs Viking",
+      "liga": "noruega",
       "mercado": "Over 2.5",
+      "notas": "",
       "odd": "1.52",
+      "resultado": "",
+      "scoreAtAnalysis": null,
+      "stake": "1",
+      "status": "pending"
+    },
+    {
+      "id": "manual_1783712783165_5cmep6",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Hammarby FF vs Kalmar FF",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
       "stake": "1",
       "resultado": "",
       "notas": "",
@@ -5529,7 +5547,7 @@
   "lastUpdated": "2026-07-10T19:45:47.839Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-11",
