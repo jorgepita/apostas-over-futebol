@@ -5444,7 +5444,7 @@
       "resultado": "",
       "scoreAtAnalysis": 33,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -5604,7 +5604,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
