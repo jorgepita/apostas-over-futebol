@@ -5519,6 +5519,24 @@
         "dataQuality": "HIGH",
         "timestamp": "2026-07-10T18:32:35.465Z"
       }
+    },
+    {
+      "id": "manual_1783708468891_78p7wl",
+      "data": "2026-07-12",
+      "liga": "noruega",
+      "jogo": "KFUM Oslo vs Bodo/Glimt",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -5545,7 +5563,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:33:00.107Z",
+  "lastUpdated": "2026-07-10T18:33:59.008Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
