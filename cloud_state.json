@@ -4925,6 +4925,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783707916359_zwrxnp",
+      "data": "2026-07-11",
+      "liga": "coreia",
+      "jogo": "Ulsan Hyundai FC vs Jeonbuk Motors",
+      "mercado": "Over 2.5",
+      "odd": "1.98",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783707924881_wqwwjt",
+      "data": "2026-07-11",
+      "liga": "finlandia",
+      "jogo": "Turku PS vs AC Oulu",
+      "mercado": "Over 2.5",
+      "odd": "1.91",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
