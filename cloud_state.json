@@ -5374,43 +5374,6 @@
     },
     {
       "analysisSnapshot": {
-        "EV": -0.048889881865955,
-        "Edge": -0.02284573918969862,
-        "EdgePercent": -2.284573918969862,
-        "KellyTrue": 0,
-        "LambdaAway": 1.6335551353173505,
-        "LambdaHome": 0.8208695652173914,
-        "LambdaTotal": 2.4544247005347417,
-        "ProbMarket": 0.4672897196261682,
-        "ProbModel": 0.4444439804364696,
-        "dataQuality": "HIGH",
-        "fairOdd": 2.250002349042825,
-        "opinion": "NEUTRAL",
-        "opinionCls": "warn",
-        "sampleSize": 12,
-        "score": 51,
-        "scoreCls": "warn",
-        "timestamp": "2026-07-10T18:32:18.709Z",
-        "usedFallback": false
-      },
-      "analysisStale": false,
-      "botOpinion": "NEUTRAL",
-      "data": "2026-07-12",
-      "edgeAtAnalysis": -2.284573918969862,
-      "hadAnalysis": true,
-      "id": "manual_1783708002760_c9tf84",
-      "jogo": "Jeju United FC vs Daejeon Citizen",
-      "liga": "coreia",
-      "mercado": "Over 2.5",
-      "notas": "",
-      "odd": "2.14",
-      "resultado": "",
-      "scoreAtAnalysis": 51,
-      "stake": "1",
-      "status": "approved"
-    },
-    {
-      "analysisSnapshot": {
         "EV": 0.004162735925598904,
         "Edge": 0.0028126594091885115,
         "EdgePercent": 0.28126594091885115,
@@ -5519,6 +5482,24 @@
       "scoreAtAnalysis": 69,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1783712761055_92565f",
+      "data": "2026-07-12",
+      "liga": "noruega",
+      "jogo": "Sarpsborg 08 FF vs Viking",
+      "mercado": "Over 2.5",
+      "odd": "1.52",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -5545,10 +5526,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:43:00.720Z",
+  "lastUpdated": "2026-07-10T19:45:47.839Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-07-11",
@@ -5758,5 +5739,6 @@
       "KickoffUTC": "2026-07-13T18:00:00+01:00"
     }
   ],
-  "manualBetsRemote": []
+  "manualBetsRemote": [],
+  "providerHealth": {}
 }
