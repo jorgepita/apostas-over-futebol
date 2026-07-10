@@ -5141,6 +5141,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783708029498_939p9x",
+      "data": "2026-07-12",
+      "liga": "noruega",
+      "jogo": "KFUM Oslo vs Bodo/Glimt",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
