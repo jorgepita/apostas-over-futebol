@@ -3281,6 +3281,18 @@
     },
     "2026-07-12|noruega|Brann vs Start|BTTS": {
       "apostada": true
+    },
+    "2026-07-11|noruega|Fredrikstad vs Lillestrom|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-11|finlandia|Turku PS vs AC Oulu|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-11|finlandia|Gnistan vs Mariehamn|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-11|noruega|Tromso vs Valerenga|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -4855,7 +4867,7 @@
   "lastUpdated": "2026-07-10T18:21:52.049Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-11",
