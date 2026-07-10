@@ -5015,6 +5015,42 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783707964434_kukxfg",
+      "data": "2026-07-11",
+      "liga": "suecia",
+      "jogo": "Mjallby AIF vs AIK Stockholm",
+      "mercado": "Over 2.5",
+      "odd": "1.8",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783707972431_0bj0tl",
+      "data": "2026-07-11",
+      "liga": "suecia",
+      "jogo": "Orgryte IS vs BK Hacken",
+      "mercado": "Over 2.5",
+      "odd": "1.5",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -5041,7 +5077,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:24:58.359Z",
+  "lastUpdated": "2026-07-10T18:25:58.356Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
