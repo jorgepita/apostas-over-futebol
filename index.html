@@ -1772,6 +1772,9 @@ button:disabled {
         <div class="nav-item" data-tab-target="tab-versus">
           <span class="nav-icon">⚔️</span> Bot vs Manual
         </div>
+        <div class="nav-item" data-tab-target="tab-strategylab">
+          <span class="nav-icon">🧪</span> Strategy Lab
+        </div>
         <div class="nav-section-label">Finance</div>
         <div class="nav-item" data-tab-target="tab-bankroll">
           <span class="nav-icon">💰</span> Bankroll
@@ -3080,6 +3083,83 @@ button:disabled {
         </div>
         <div id="versusDecision"></div>
 
+      </div>
+    </div>
+
+    <!-- ============================
+         STRATEGY LAB PAGE (Phase 26.24)
+    ============================= -->
+    <div id="tab-strategylab" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Strategy Lab</div>
+            <div class="note" style="margin-top:4px;">Given the historical settled bets already stored by the system, what would have happened if you had followed a different betting strategy? — a pure decision-support tool. Nothing here modifies pick generation, scoring, settlement, bankroll, persistence, or the Opinion engine.</div>
+          </div>
+        </div>
+
+        <!-- STRATEGY BUILDER -->
+        <div class="card">
+          <div class="section-header" style="margin-top:0;">
+            <span class="section-header-title">Strategy Builder</span>
+            <div class="section-header-line"></div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label class="label" style="display:block;margin-bottom:6px;">Opinion</label>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="stratOpSB" checked> STRONG BUY</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="stratOpBUY" checked> BUY</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="stratOpNEUTRAL"> NEUTRAL</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="stratOpAVOID"> AVOID</label>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:12px;">
+            <div>
+              <label class="label" style="display:flex;justify-content:space-between;">Minimum Analysis Score <span id="stratScoreVal" style="font-weight:800;color:var(--text);">0</span></label>
+              <input type="range" id="stratScoreSlider" min="0" max="100" step="1" value="0" style="width:100%;">
+            </div>
+            <div>
+              <label class="label" style="display:flex;justify-content:space-between;">Minimum Edge <span id="stratEdgeVal" style="font-weight:800;color:var(--text);">0%</span></label>
+              <input type="range" id="stratEdgeSlider" min="0" max="20" step="0.5" value="0" style="width:100%;">
+            </div>
+            <div>
+              <label class="label" style="display:block;margin-bottom:4px;">Odds — Min / Max</label>
+              <div style="display:flex;gap:8px;">
+                <input type="number" id="stratOddsMin" step="0.01" min="1.01" placeholder="Min" style="width:50%;font-size:12px;">
+                <input type="number" id="stratOddsMax" step="0.01" min="1.01" placeholder="Max" style="width:50%;font-size:12px;">
+              </div>
+            </div>
+            <div>
+              <label class="label" style="display:block;margin-bottom:4px;">Stake (optional — flat unit stake override)</label>
+              <input type="number" id="stratStakeOverride" step="0.5" min="0.5" placeholder="Use actual recorded stake" style="width:100%;font-size:12px;">
+            </div>
+            <div>
+              <label class="label" style="display:block;margin-bottom:4px;">Season</label>
+              <select id="stratSeasonSelect" style="width:100%;">
+                <option value="current">Current Season</option>
+                <option value="all">All Time (this browser)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label class="label" style="display:block;margin-bottom:6px;">Leagues <span class="note" style="font-weight:400;">(none selected = all)</span></label>
+            <div id="stratLeagueChips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+          <div>
+            <label class="label" style="display:block;margin-bottom:6px;">Markets <span class="note" style="font-weight:400;">(none selected = all)</span></label>
+            <div id="stratMarketChips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button id="stratResetBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Reset Strategy</button>
+            <button id="stratExportBtn" type="button" style="padding:7px 14px;font-size:12px;width:auto;">Export Strategy (JSON)</button>
+          </div>
+        </div>
+
+        <div id="stratLabResults"></div>
       </div>
     </div>
 
@@ -4441,7 +4521,7 @@ button:disabled {
         }
 
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
-        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-versus', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
+        state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-versus', 'tab-strategylab', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
         state.mobileActionsOpen = savedMobileActions === '1';
       }
 
@@ -8077,6 +8157,8 @@ button:disabled {
             renderPendingQueue();
           } else if (tabId === 'tab-live') {
             renderLiveCenter();
+          } else if (tabId === 'tab-strategylab') {
+            renderStrategyLab();
           }
         } catch (e) {
           console.error('setActiveTab render error:', e);
@@ -11375,6 +11457,630 @@ button:disabled {
             renderOpinionSimulator();
           });
         }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // Strategy Lab (Phase 26.24)
+      // ═══════════════════════════════════════════════════════════════════
+      // A pure, frontend-only backtesting tool: "what would have happened if
+      // I had followed a different betting strategy, given the settled bets
+      // already in the system?" Never writes to state, never persists, never
+      // touches pick generation/scoring/settlement/bankroll/the Opinion
+      // engine/the Recommendation engine. Reuses computeStreaks(),
+      // computeDrawdownAnalysis(), calcProfitByResult(), resultKey(),
+      // getManualRowsMerged(), getSeasonArchives(), isOnOrAfterSession(),
+      // downloadTextFile(), and window._opnSimCache (the same cache the
+      // Recommendation Simulator reads) — no settlement statistic is
+      // computed a second, independent way.
+
+      let _stratLabFilters = {
+        opinions: { 'STRONG BUY': true, 'BUY': true, 'NEUTRAL': false, 'AVOID': false },
+        minScore: 0,
+        minEdge: 0,
+        oddsMin: null,
+        oddsMax: null,
+        stakeOverride: null,
+        leagues: [],   // empty = all
+        markets: [],   // empty = all
+        season: 'current'
+      };
+      const avg = arr => arr.length ? sum(arr) / arr.length : null;
+      // Shared small-stat-cell renderer — used by both renderStrategyLab() and
+      // renderStrategyLabOptimizer() (two separate functions), so it must be
+      // top-level rather than defined inside either one.
+      function stat(label, value) {
+        return `<div style="text-align:center;padding:10px 6px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">${label}</div><div style="font-size:15px;font-weight:800;color:var(--text);margin-top:4px;">${value}</div></div>`;
+      }
+
+      // ── Data foundation ──────────────────────────────────────────────
+      // Adapter for archived-season raw JSON (see buildSeasonArchiveObject())
+      // into the exact enriched shape getManualRowsMerged() already produces
+      // for the current season — reuses the same primitive utilities
+      // (cleanString/normalizeDateString/normalizeMarket/calcProfitByResult/
+      // resultKey) rather than reimplementing any of them.
+      function mapRawManualBetsForStrategyLab(rawBets) {
+        return (Array.isArray(rawBets) ? rawBets : []).map(b => {
+          const resultado = cleanString(b['Resultado'] || b.resultado || '').toUpperCase();
+          const stake = cleanString(b['Stake'] || b.stake || '');
+          const odd = cleanString(b['Odd'] || b.odd || '');
+          return {
+            id: b.id,
+            data: normalizeDateString(b['Data'] || b.data || ''),
+            liga: cleanString(b['Liga'] || b.liga || ''),
+            jogo: cleanString(b['Jogo'] || b.jogo || ''),
+            mercado: normalizeMarket(b),
+            odd, stake, resultado,
+            status: b.status || 'pending',
+            hadAnalysis: b.hadAnalysis ?? false,
+            botOpinion: b.botOpinion ?? null,
+            edgeAtAnalysis: num(b.edgeAtAnalysis),
+            scoreAtAnalysis: num(b.scoreAtAnalysis),
+            notas: cleanString(b.notas || ''),
+            _lucro: num(b['Lucro€']) ?? calcProfitByResult(resultado, stake, odd),
+            _resultKey: resultKey(resultado)
+          };
+        });
+      }
+
+      // Season options: "Current Season" / "All Time" reuse state.sessionStartDate
+      // (the existing season concept); each archived season (Phase 23.1's
+      // "Season Archive") is also offered, since buildSeasonArchiveObject()
+      // already stores a full raw copy of that season's manual bets.
+      function getStrategyLabSeasonOptions() {
+        const archives = getSeasonArchives();
+        return [
+          { value: 'current', label: `Current Season (since ${state.sessionStartDate || todayIso()})` },
+          { value: 'all', label: 'All Time (this browser)' },
+          ...archives.map(a => ({ value: `archive:${a.id}`, label: `${a.seasonName || 'Season'} (${a.startDate} → ${a.endDate})` }))
+        ];
+      }
+
+      // Historical Replay universe: every settled, Scout-analysed manual bet
+      // for the chosen season — INCLUDING rejected bets, deliberately, since
+      // "what if I'd followed a different strategy" must be able to consider
+      // opportunities the real strategy actually passed on (a rejected bet
+      // that won is exactly the kind of data point a strategy backtest needs).
+      // Bot picks are not included: they carry no Opinion/analysis-score data
+      // in production, so they cannot be filtered by this page's criteria.
+      function getStrategyLabPool(seasonMode) {
+        let rows;
+        if (seasonMode && seasonMode.startsWith('archive:')) {
+          const id = seasonMode.slice('archive:'.length);
+          const archive = getSeasonArchives().find(a => a.id === id);
+          rows = archive ? mapRawManualBetsForStrategyLab(archive.data && archive.data.manualBets) : [];
+        } else {
+          rows = getManualRowsMerged().filter(b => b.isLocal);
+        }
+
+        let pool = rows.filter(b =>
+          b.hadAnalysis === true &&
+          b.botOpinion &&
+          ['W', 'L', 'P'].includes(b._resultKey)
+        );
+
+        if (seasonMode === 'current') {
+          pool = pool.filter(b => isOnOrAfterSession(b.data));
+        }
+        return pool;
+      }
+
+      function applyStrategyLabFilters(pool, filters) {
+        return pool.filter(b => {
+          if (!filters.opinions[b.botOpinion]) return false;
+          const score = num(b.scoreAtAnalysis);
+          if (filters.minScore > 0 && (score === null || score < filters.minScore)) return false;
+          const edge = num(b.edgeAtAnalysis);
+          if (filters.minEdge > 0 && (edge === null || edge < filters.minEdge)) return false;
+          const odd = num(b.odd);
+          if (filters.oddsMin !== null && (odd === null || odd < filters.oddsMin)) return false;
+          if (filters.oddsMax !== null && (odd === null || odd > filters.oddsMax)) return false;
+          if (filters.leagues.length && !filters.leagues.includes(b.liga)) return false;
+          if (filters.markets.length && !filters.markets.includes(b.mercado)) return false;
+          return true;
+        });
+      }
+
+      // ── Part 2 / Part 7 — Historical Replay + Risk Analysis ─────────────
+      // Reuses computeStreaks() and computeDrawdownAnalysis() verbatim (the
+      // same functions History Intelligence / Bankroll Audit already use) —
+      // only Profit Factor, Expectancy, and Volatility are genuinely new,
+      // simple, one-line formulas with no existing equivalent to reuse.
+      function computeStrategyReplay(bets, stakeOverride) {
+        const override = num(stakeOverride);
+        const enriched = bets.map(b => {
+          const stakeUsed = (override !== null && override > 0) ? override : num(b.stake);
+          const oddUsed = num(b.odd);
+          const lucroUsed = calcProfitByResult(b.resultado, stakeUsed, oddUsed);
+          return { ...b, _stakeUsed: stakeUsed, _oddUsed: oddUsed, _lucroUsed: lucroUsed };
+        }).filter(b => b._lucroUsed !== null);
+
+        const n = enriched.length;
+        if (n === 0) {
+          return { n: 0, wins: 0, losses: 0, pushes: 0, totalStake: 0, totalProfit: 0, wr: null, roi: null,
+                   yield: null, unitsWon: null, avgOdd: null, avgEdge: null, avgScore: null,
+                   streaks: { longestWin: 0, longestLoss: 0, currentWin: 0, currentLoss: 0 },
+                   drawdown: null, profitFactor: null, expectancy: null, volatility: null, chrono: [], enriched: [] };
+        }
+
+        const wins = enriched.filter(b => b._resultKey === 'W').length;
+        const losses = enriched.filter(b => b._resultKey === 'L').length;
+        const pushes = enriched.filter(b => b._resultKey === 'P').length;
+        const totalStake = sum(enriched.map(b => b._stakeUsed));
+        const totalProfit = sum(enriched.map(b => b._lucroUsed));
+        const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+        const roi = totalStake > 0 ? (totalProfit / totalStake) * 100 : null;
+        const yld = totalStake > 0 ? totalProfit / totalStake : null;
+        // "Units won" = profit expressed in the strategy's own average unit
+        // stake — if a flat Stake override is set, this is the classic
+        // level-staking "units" backtesting metric; otherwise it uses the
+        // strategy's own average real stake as the implicit "unit".
+        const avgUnitStake = totalStake / n;
+        const unitsWon = avgUnitStake > 0 ? totalProfit / avgUnitStake : null;
+        const avgOdd = avg(enriched.map(b => b._oddUsed).filter(v => v !== null));
+        const avgEdge = avg(enriched.map(b => num(b.edgeAtAnalysis)).filter(v => v !== null));
+        const avgScore = avg(enriched.map(b => num(b.scoreAtAnalysis)).filter(v => v !== null));
+
+        const chrono = enriched.slice().sort((a, b) =>
+          (parseDateSafe(a.data)?.getTime() || 0) - (parseDateSafe(b.data)?.getTime() || 0));
+
+        const streaks = computeStreaks(chrono.map(b => ({ result: b._resultKey })));
+        const drawdown = computeDrawdownAnalysis(chrono.map(b => ({ date: b.data, lucro: b._lucroUsed, stake: b._stakeUsed })));
+
+        const winProfits = enriched.filter(b => b._resultKey === 'W').map(b => b._lucroUsed);
+        const lossProfits = enriched.filter(b => b._resultKey === 'L').map(b => b._lucroUsed);
+        const grossWin = sum(winProfits);
+        const grossLoss = Math.abs(sum(lossProfits));
+        const profitFactor = grossLoss > 0 ? grossWin / grossLoss : (grossWin > 0 ? Infinity : null);
+        const expectancy = totalProfit / n;
+        const meanProfit = totalProfit / n;
+        const variance = n > 1 ? sum(enriched.map(b => Math.pow(b._lucroUsed - meanProfit, 2))) / n : 0;
+        const volatility = n > 1 ? Math.sqrt(variance) : null;
+
+        return {
+          n, wins, losses, pushes, totalStake, totalProfit, wr, roi, yield: yld, unitsWon,
+          avgOdd, avgEdge, avgScore, streaks, drawdown, profitFactor, expectancy, volatility,
+          chrono, enriched
+        };
+      }
+
+      // ── Part 6 — Stability (chronological thirds) ───────────────────────
+      function computeStabilityThirds(chrono) {
+        const n = chrono.length;
+        if (n < 6) return null; // need a meaningful sample per segment
+        const third = Math.floor(n / 3);
+        const segments = [chrono.slice(0, third), chrono.slice(third, third * 2), chrono.slice(third * 2)];
+        const labels = ['First Third', 'Middle Third', 'Final Third'];
+        const stats = segments.map((seg, i) => {
+          const stk = sum(seg.map(b => b._stakeUsed));
+          const prf = sum(seg.map(b => b._lucroUsed));
+          return { label: labels[i], n: seg.length, roi: stk > 0 ? (prf / stk) * 100 : null };
+        });
+        const first = stats[0].roi, last = stats[2].roi;
+        let trend = 'Stable';
+        if (first !== null && last !== null) {
+          if (last - first >= 10) trend = 'Improving';
+          else if (first - last >= 10) trend = 'Degrading';
+        }
+        return { segments: stats, trend };
+      }
+
+      // ── Confidence tier — reuses Opinion Validation's own confidenceTier()
+      // function via window._opnSimCache (identical breakpoints, same
+      // reference); the inline fallback exists only for the edge case where
+      // Strategy Lab renders before Opinion Validation ever has.
+      function strategyConfidenceTier(n) {
+        if (window._opnSimCache && typeof window._opnSimCache.confidenceTier === 'function') {
+          return window._opnSimCache.confidenceTier(n);
+        }
+        if (n >= 100) return { label: 'Very High', color: 'var(--ok)' };
+        if (n >= 50)  return { label: 'High',       color: 'var(--ok)' };
+        if (n >= 20)  return { label: 'Medium',     color: 'var(--warn)' };
+        if (n >= 10)  return { label: 'Low',        color: 'var(--warn)' };
+        return             { label: 'Very Low',  color: 'var(--bad)' };
+      }
+
+      // ── Part 5 — Robustness Score ────────────────────────────────────────
+      // Combines four independently-bounded components (sums to 0-100) so
+      // that sample size alone can gate the score low regardless of how high
+      // ROI is — this is what guarantees a 5-bet/80%-ROI strategy can never
+      // outrank a 350-bet/18%-ROI one. See the written explanation returned
+      // alongside the implementation for the exact reasoning per component.
+      function computeRobustnessScore(replay) {
+        if (!replay || replay.n === 0) return { score: 0, label: 'Broken', color: 'var(--bad)', components: {} };
+        const n = replay.n;
+
+        // Sample factor (0-30): same confidence-tier breakpoints (10/20/50/100)
+        // used everywhere else in this app, as a smooth curve.
+        let sampleFactor;
+        if (n >= 100) sampleFactor = 30;
+        else if (n >= 50) sampleFactor = 22 + (n - 50) / 50 * 8;
+        else if (n >= 20) sampleFactor = 15 + (n - 20) / 30 * 7;
+        else if (n >= 10) sampleFactor = 8 + (n - 10) / 10 * 7;
+        else sampleFactor = (n / 10) * 8;
+
+        // Profitability factor (0-30): ROI and Yield are the same information
+        // (yield = roi/100) — only ROI is scored here to avoid weighting the
+        // same signal twice. Clamped to [-20%, +40%] so a small-sample outlier
+        // ROI cannot dominate the score no matter how extreme it is.
+        const roi = replay.roi ?? 0;
+        const roiClamped = Math.max(-20, Math.min(40, roi));
+        const roiFactor = ((roiClamped + 20) / 60) * 30;
+
+        // Consistency factor (0-25): reuses computeDrawdownAnalysis()'s own
+        // riskScore (0-100), which already blends drawdown depth, recovery
+        // time, equity-curve smoothness, and sample size.
+        const riskScore = replay.drawdown ? replay.drawdown.riskScore : 0;
+        const consistencyFactor = (riskScore / 100) * 25;
+
+        // Confidence factor (0-15): a small extra nudge from the tiered
+        // confidence label (Very Low..Very High).
+        const confTier = strategyConfidenceTier(n);
+        const confMap = { 'Very Low': 0, 'Low': 3, 'Medium': 7, 'High': 11, 'Very High': 15 };
+        const confidenceFactor = confMap[confTier.label] ?? 0;
+
+        const score = Math.round(sampleFactor + roiFactor + consistencyFactor + confidenceFactor);
+        const label = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : score >= 20 ? 'Weak' : 'Broken';
+        const color = score >= 60 ? 'var(--ok)' : score >= 40 ? 'var(--warn)' : 'var(--bad)';
+        return { score, label, color, components: { sampleFactor, roiFactor, consistencyFactor, confidenceFactor } };
+      }
+
+      // ── Part 3 — Compare Against Production ─────────────────────────────
+      // "Production" = the bets actually followed for real (approved/settled,
+      // i.e. the same `opinionBets` Opinion Validation already computed and
+      // cached in window._opnSimCache) — not the user's hypothetical filters.
+      function computeStrategyLabProductionBaseline() {
+        const cache = window._opnSimCache;
+        if (!cache) return null;
+        const prodBets = cache.opinionBets.filter(b => b.status !== 'rejected');
+        const replay = computeStrategyReplay(prodBets, null);
+        return { replay, calib: cache.calib, decisionCost: cache.decisionCost, confidence: cache.confidence };
+      }
+
+      function computeSimulatedCalibration(filteredBets) {
+        const cache = window._opnSimCache;
+        if (!cache) return { score: null, decisionCost: null, confidence: { label: '—', color: 'var(--muted)' } };
+        const buckets = { 'STRONG BUY': [], 'BUY': [], 'NEUTRAL': [], 'AVOID': [] };
+        filteredBets.forEach(b => { if (buckets[b.botOpinion]) buckets[b.botOpinion].push(b); });
+        const dataArr = cache.OPINIONS.map(o => ({ opinion: o, stats: cache.statsFromBets(buckets[o]) }));
+        const calib = cache.calibrationScore(dataArr);
+        const avStats = dataArr.find(d => d.opinion === 'AVOID').stats;
+        const decisionCost = avStats.count > 0 ? avStats.prf : null;
+        const confidence = cache.confidenceTier(filteredBets.length);
+        return { score: calib.score, decisionCost, confidence };
+      }
+
+      // ── Part 4 — Strategy Optimizer ("Best Nearby Strategy") ────────────
+      // Sensible LOCAL exploration only: Opinion/League/Market/Odds stay
+      // fixed at the user's current selection; only the two continuous
+      // threshold dimensions (minScore, minEdge) are perturbed, each over a
+      // small fixed offset set (<=9 values), for at most 9x9=81 candidate
+      // evaluations — never a brute-force sweep of the full filter space.
+      // Candidates below 5 matching bets are discarded outright (in addition
+      // to the robustness formula's own sample penalty) so a degenerate
+      // tiny-sample "strategy" is never suggested.
+      function findBestNearbyStrategy(pool, filters) {
+        const scoreOffsets = [-20, -15, -10, -5, 0, 5, 10, 15, 20];
+        const edgeOffsets = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+        const uniqScores = [...new Set(scoreOffsets.map(d => Math.max(0, Math.min(100, filters.minScore + d))))];
+        const uniqEdges = [...new Set(edgeOffsets.map(d => Math.max(0, Math.min(20, filters.minEdge + d))))];
+
+        let best = null;
+        uniqScores.forEach(minScore => {
+          uniqEdges.forEach(minEdge => {
+            const candFilters = { ...filters, minScore, minEdge };
+            const filtered = applyStrategyLabFilters(pool, candFilters);
+            if (filtered.length < 5) return;
+            const replay = computeStrategyReplay(filtered, filters.stakeOverride);
+            if (replay.n < 5) return;
+            const robustness = computeRobustnessScore(replay);
+            const movement = Math.abs(minScore - filters.minScore) + Math.abs(minEdge - filters.minEdge);
+            const candidate = { minScore, minEdge, replay, robustness, movement };
+            if (!best || robustness.score > best.robustness.score ||
+                (robustness.score === best.robustness.score && movement < best.movement)) {
+              best = candidate;
+            }
+          });
+        });
+        return best;
+      }
+
+      // ── Part 9 — Explainability for the optimizer suggestion ───────────
+      function explainOptimizerSuggestion(filters, baseReplay, best) {
+        if (!best) return 'No nearby configuration with at least 5 bets was found.';
+        const parts = [];
+        if (best.minScore !== filters.minScore) {
+          parts.push(`${best.minScore > filters.minScore ? 'Increasing' : 'Decreasing'} minimum Score from ${filters.minScore} to ${best.minScore}`);
+        }
+        if (best.minEdge !== filters.minEdge) {
+          parts.push(`${parts.length ? 'and ' : ''}${best.minEdge > filters.minEdge ? 'increasing' : 'decreasing'} minimum Edge from ${filters.minEdge}% to ${best.minEdge}%`);
+        }
+        if (!parts.length) return 'The current strategy is already the most robust nearby configuration.';
+
+        const sampleChangePct = baseReplay.n > 0 ? Math.round(((best.replay.n - baseReplay.n) / baseReplay.n) * 100) : 0;
+        const yieldDeltaPP = (baseReplay.roi !== null && best.replay.roi !== null) ? (best.replay.roi - baseReplay.roi) : null;
+
+        const effects = [];
+        if (sampleChangePct !== 0) effects.push(`${sampleChangePct < 0 ? 'removes' : 'adds'} ${Math.abs(sampleChangePct)}% of bets`);
+        if (yieldDeltaPP !== null && Math.abs(yieldDeltaPP) >= 0.5) effects.push(`${yieldDeltaPP > 0 ? 'improves' : 'reduces'} Yield by ${fmt(Math.abs(yieldDeltaPP), 1)} percentage points`);
+        return `${parts.join(' ')} ${effects.length ? effects.join(' and ') : 'has a negligible measured effect'}.`;
+      }
+
+      // ── Part 8 — Export (pure download, no persistence) ────────────────
+      let _stratLabLastResult = null;
+      function exportStrategyLabJson() {
+        const r = _stratLabLastResult;
+        if (!r) { alert('Nothing to export yet — adjust the Strategy Builder first.'); return; }
+        const payload = {
+          generatedAt: new Date().toISOString(),
+          note: 'Strategy Lab export — a pure what-if simulation derived from historical settled bets. No production data was read from or written to this file was ever modified.',
+          filters: r.filters,
+          replay: {
+            sampleSize: r.replay.n, wins: r.replay.wins, losses: r.replay.losses, pushes: r.replay.pushes,
+            winRate: r.replay.wr, roi: r.replay.roi, yield: r.replay.yield, unitsWon: r.replay.unitsWon,
+            avgOdd: r.replay.avgOdd, avgEdge: r.replay.avgEdge, avgScore: r.replay.avgScore,
+            maxWinStreak: r.replay.streaks.longestWin, maxLossStreak: r.replay.streaks.longestLoss,
+            maxDrawdown: r.replay.drawdown ? r.replay.drawdown.maxDrawdown : null,
+            avgRecoveryDays: r.replay.drawdown ? r.replay.drawdown.avgRecDays : null,
+            longestRecoveryDays: r.replay.drawdown ? r.replay.drawdown.longestRec : null,
+            profitFactor: r.replay.profitFactor, expectancy: r.replay.expectancy, volatility: r.replay.volatility
+          },
+          robustness: r.robustness,
+          comparisonToProduction: r.comparison,
+          stability: r.stability,
+          bestNearbyStrategy: r.best ? { minScore: r.best.minScore, minEdge: r.best.minEdge, roi: r.best.replay.roi, yield: r.best.replay.yield, sample: r.best.replay.n, robustness: r.best.robustness } : null
+        };
+        downloadTextFile(`strategy_lab_${todayIso()}.json`, JSON.stringify(payload, null, 2), 'application/json;charset=utf-8');
+      }
+
+      // ── Rendering ────────────────────────────────────────────────────
+      function renderStrategyLab() {
+        const resultsEl = document.getElementById('stratLabResults');
+        if (!resultsEl) return;
+
+        // Season options (rebuilt every render — cheap; archives rarely change)
+        const seasonSelect = document.getElementById('stratSeasonSelect');
+        if (seasonSelect) {
+          const opts = getStrategyLabSeasonOptions();
+          const current = seasonSelect.value || _stratLabFilters.season;
+          seasonSelect.innerHTML = opts.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+          seasonSelect.value = opts.some(o => o.value === current) ? current : 'current';
+          _stratLabFilters.season = seasonSelect.value;
+        }
+
+        const fullPool = getStrategyLabPool(_stratLabFilters.season);
+
+        // League/Market chips — reflect what actually exists in this pool.
+        const leagueSet = [...new Set(fullPool.map(b => b.liga).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+        const marketSet = [...new Set(fullPool.map(b => b.mercado).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+        const chipStyle = (active) => `padding:4px 10px;font-size:11px;width:auto;border-radius:14px;border:1px solid var(--line);background:${active ? 'var(--accent)' : 'var(--card-alt)'};color:${active ? '#fff' : 'var(--text)'};`;
+        const leagueChipsEl = document.getElementById('stratLeagueChips');
+        const marketChipsEl = document.getElementById('stratMarketChips');
+        if (leagueChipsEl) {
+          leagueChipsEl.innerHTML = leagueSet.length
+            ? leagueSet.map(l => `<button type="button" class="js-strat-league-chip" data-value="${escapeHtml(l)}" style="${chipStyle(_stratLabFilters.leagues.includes(l))}">${escapeHtml(l)}</button>`).join('')
+            : '<span class="note">No leagues in this pool.</span>';
+        }
+        if (marketChipsEl) {
+          marketChipsEl.innerHTML = marketSet.length
+            ? marketSet.map(m => `<button type="button" class="js-strat-market-chip" data-value="${escapeHtml(m)}" style="${chipStyle(_stratLabFilters.markets.includes(m))}">${escapeHtml(m)}</button>`).join('')
+            : '<span class="note">No markets in this pool.</span>';
+        }
+
+        const filtered = applyStrategyLabFilters(fullPool, _stratLabFilters);
+        const replay = computeStrategyReplay(filtered, _stratLabFilters.stakeOverride);
+        const robustness = computeRobustnessScore(replay);
+        const stability = computeStabilityThirds(replay.chrono);
+        const simCalib = computeSimulatedCalibration(filtered);
+        const production = computeStrategyLabProductionBaseline();
+
+        // ── Part 2: Historical Replay ──
+        const replayHtml = `<div class="card">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Historical Replay</span><div class="section-header-line"></div></div>
+          ${replay.n === 0
+            ? `<div class="note" style="text-align:center;padding:16px;color:var(--muted);">No settled bets match this strategy.</div>`
+            : `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+                ${stat('Bets', replay.n)}
+                ${stat('Win Rate', replay.wr !== null ? pct(replay.wr) : '—')}
+                ${stat('Yield', replay.yield !== null ? pct(replay.yield * 100, 1) : '—')}
+                ${stat('ROI', replay.roi !== null ? (replay.roi >= 0 ? '+' : '') + pct(replay.roi, 1) : '—')}
+                ${stat('Units Won', replay.unitsWon !== null ? `${replay.unitsWon >= 0 ? '+' : ''}${fmt(replay.unitsWon, 2)}u` : '—')}
+                ${stat('Avg Odds', replay.avgOdd !== null ? fmt(replay.avgOdd) : '—')}
+                ${stat('Avg Edge', replay.avgEdge !== null ? `${fmt(replay.avgEdge, 1)}%` : '—')}
+                ${stat('Avg Score', replay.avgScore !== null ? fmt(replay.avgScore, 0) : '—')}
+                ${stat('Max Losing Streak', replay.streaks.longestLoss)}
+                ${stat('Max Winning Streak', replay.streaks.longestWin)}
+                ${stat('Longest Drawdown', replay.drawdown ? `€${fmt(replay.drawdown.maxDrawdown.eur)}` : '—')}
+                ${stat('Recovery Time', replay.drawdown && replay.drawdown.completedCnt > 0 ? `${replay.drawdown.longestRec}d` : '—')}
+              </div>`}
+        </div>`;
+
+        // ── Part 3: Compare Against Production ──
+        const prodReplay = production ? production.replay : null;
+        function cmpCard(label, curTxt, simTxt, cmp) {
+          return `<div style="padding:12px;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;text-align:center;">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">${label}</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+              <div><div style="font-size:8px;color:var(--muted);">Current</div><div style="font-size:13px;font-weight:800;color:var(--text);">${curTxt}</div></div>
+              <div style="font-size:15px;font-weight:900;color:${cmp.color};">${cmp.arrow}</div>
+              <div><div style="font-size:8px;color:var(--muted);">Simulated</div><div style="font-size:13px;font-weight:900;color:${cmp.color};">${simTxt}</div></div>
+            </div>
+          </div>`;
+        }
+        const comparisonHtml = !production ? `<div class="card"><div class="note" style="text-align:center;padding:16px;">Production data not available yet.</div></div>` : `<div class="card">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Compare Against Production</span><div class="section-header-line"></div></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+            ${cmpCard('Sample Size', String(prodReplay.n), String(replay.n), simCompareArrow(prodReplay.n, replay.n, true, 0))}
+            ${cmpCard('ROI', prodReplay.roi !== null ? pct(prodReplay.roi, 1) : '—', replay.roi !== null ? pct(replay.roi, 1) : '—', simCompareArrow(prodReplay.roi, replay.roi, true, 2))}
+            ${cmpCard('Yield', prodReplay.yield !== null ? pct(prodReplay.yield * 100, 1) : '—', replay.yield !== null ? pct(replay.yield * 100, 1) : '—', simCompareArrow(prodReplay.yield, replay.yield, true, 0.02))}
+            ${cmpCard('Units', prodReplay.unitsWon !== null ? fmt(prodReplay.unitsWon, 2) : '—', replay.unitsWon !== null ? fmt(replay.unitsWon, 2) : '—', simCompareArrow(prodReplay.unitsWon, replay.unitsWon, true, 0.2))}
+            ${cmpCard('WR', prodReplay.wr !== null ? pct(prodReplay.wr) : '—', replay.wr !== null ? pct(replay.wr) : '—', simCompareArrow(prodReplay.wr, replay.wr, true, 2))}
+            ${cmpCard('Calibration', production.calib.score !== null ? String(production.calib.score) : '—', simCalib.score !== null ? String(simCalib.score) : '—', simCompareArrow(production.calib.score, simCalib.score, true, 2))}
+            ${cmpCard('Decision Cost', production.decisionCost !== null ? `${production.decisionCost >= 0 ? '+' : ''}€${fmt(production.decisionCost)}` : '—', simCalib.decisionCost !== null ? `${simCalib.decisionCost >= 0 ? '+' : ''}€${fmt(simCalib.decisionCost)}` : '—', simCompareArrow(production.decisionCost, simCalib.decisionCost, false, 1))}
+            ${cmpCard('Confidence', production.confidence.label, simCalib.confidence.label, production.confidence.label === simCalib.confidence.label ? { arrow: '→', color: 'var(--muted)' } : { arrow: '↕', color: 'var(--warn)' })}
+          </div>
+        </div>`;
+
+        // ── Part 5: Robustness ──
+        const robustnessHtml = `<div class="card">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Robustness Score</span><div class="section-header-line"></div></div>
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="text-align:center;"><div style="font-size:30px;font-weight:900;color:${robustness.color};">${robustness.score}</div><div style="font-size:13px;font-weight:700;color:${robustness.color};">${robustness.label}</div></div>
+            <div style="flex:1;min-width:220px;font-size:11px;color:var(--muted);">Combines Sample Size, ROI (representing ROI/Yield), Consistency (drawdown/recovery/smoothness), and Confidence — each independently capped, so a tiny sample can never outrank a large one regardless of ROI. See docs/03_Dashboard.md for the exact formula.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:12px;">
+            ${stat('Sample (0-30)', fmt(robustness.components.sampleFactor ?? 0, 1))}
+            ${stat('ROI (0-30)', fmt(robustness.components.roiFactor ?? 0, 1))}
+            ${stat('Consistency (0-25)', fmt(robustness.components.consistencyFactor ?? 0, 1))}
+            ${stat('Confidence (0-15)', fmt(robustness.components.confidenceFactor ?? 0, 1))}
+          </div>
+        </div>`;
+
+        // ── Part 6: Stability ──
+        const stabilityHtml = `<div class="card">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Stability</span><div class="section-header-line"></div></div>
+          ${!stability
+            ? `<div class="note" style="text-align:center;padding:12px;">Not enough settled bets yet to split into three chronological segments (need at least 6).</div>`
+            : `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:10px;">
+                ${stability.segments.map(s => stat(s.label, s.roi !== null ? `${s.roi >= 0 ? '+' : ''}${fmt(s.roi, 1)}%` : '—')).join('')}
+              </div>
+              <div style="text-align:center;font-size:14px;font-weight:800;color:${stability.trend === 'Improving' ? 'var(--ok)' : stability.trend === 'Degrading' ? 'var(--bad)' : 'var(--muted)'};">${stability.trend}</div>`}
+        </div>`;
+
+        // ── Part 7: Risk Analysis (extra metrics beyond the replay stat row) ──
+        const riskHtml = `<div class="card">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Risk Analysis</span><div class="section-header-line"></div></div>
+          ${replay.n === 0 ? `<div class="note" style="text-align:center;padding:12px;">No data.</div>` : `
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
+            ${stat('Max Drawdown €', replay.drawdown ? `€${fmt(replay.drawdown.maxDrawdown.eur)}` : '—')}
+            ${stat('Max Drawdown %', replay.drawdown ? `${fmt(replay.drawdown.maxDrawdown.pct, 1)}%` : '—')}
+            ${stat('Longest Losing Streak', replay.streaks.longestLoss)}
+            ${stat('Longest Winning Streak', replay.streaks.longestWin)}
+            ${stat('Volatility (σ)', replay.volatility !== null ? `€${fmt(replay.volatility)}` : '—')}
+            ${stat('Recovery Time', replay.drawdown && replay.drawdown.completedCnt > 0 ? `${replay.drawdown.longestRec}d` : '—')}
+            ${stat('Profit Factor', replay.profitFactor !== null ? (Number.isFinite(replay.profitFactor) ? fmt(replay.profitFactor, 2) : '∞') : '—')}
+            ${stat('Expectancy / bet', replay.expectancy !== null ? `€${fmt(replay.expectancy)}` : '—')}
+          </div>`}
+        </div>`;
+
+        // ── Part 4 / 9: Optimizer (debounced — see scheduleStrategyLabOptimizer) ──
+        const optimizerPlaceholder = `<div class="card" id="stratOptimizerCard">
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Strategy Optimizer — Best Nearby Strategy</span><div class="section-header-line"></div></div>
+          <div class="note" style="text-align:center;padding:12px;color:var(--muted);">Searching nearby strategies…</div>
+        </div>`;
+
+        resultsEl.innerHTML = `${replayHtml}${comparisonHtml}${robustnessHtml}${stabilityHtml}${riskHtml}${optimizerPlaceholder}`;
+
+        _stratLabLastResult = { filters: JSON.parse(JSON.stringify(_stratLabFilters)), replay, robustness, stability, comparison: production ? { production: { roi: prodReplay.roi, yield: prodReplay.yield, n: prodReplay.n, calibration: production.calib.score, decisionCost: production.decisionCost, confidence: production.confidence.label }, simulated: { roi: replay.roi, yield: replay.yield, n: replay.n, calibration: simCalib.score, decisionCost: simCalib.decisionCost, confidence: simCalib.confidence.label } } : null, best: null };
+
+        scheduleStrategyLabOptimizer(fullPool, replay);
+      }
+
+      let _stratLabOptTimer = null;
+      function scheduleStrategyLabOptimizer(pool, baseReplay) {
+        clearTimeout(_stratLabOptTimer);
+        _stratLabOptTimer = setTimeout(() => renderStrategyLabOptimizer(pool, baseReplay), 150);
+      }
+
+      function renderStrategyLabOptimizer(pool, baseReplay) {
+        const card = document.getElementById('stratOptimizerCard');
+        if (!card) return;
+        const best = findBestNearbyStrategy(pool, _stratLabFilters);
+        if (_stratLabLastResult) _stratLabLastResult.best = best;
+
+        if (!best) {
+          card.innerHTML = `<div class="section-header" style="margin-top:0;"><span class="section-header-title">Strategy Optimizer — Best Nearby Strategy</span><div class="section-header-line"></div></div>
+            <div class="note" style="text-align:center;padding:12px;">No nearby configuration with at least 5 bets was found.</div>`;
+          return;
+        }
+        const explanation = explainOptimizerSuggestion(_stratLabFilters, baseReplay, best);
+        card.innerHTML = `
+          <div class="section-header" style="margin-top:0;"><span class="section-header-title">Strategy Optimizer — Best Nearby Strategy</span><div class="section-header-line"></div></div>
+          <div class="note" style="margin-bottom:10px;">Local search only (±20 Score, ±4% Edge around your current strategy) — a suggestion, never applied automatically.</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));margin-bottom:10px;">
+            ${stat('STRONG BUY', _stratLabFilters.opinions['STRONG BUY'] ? '✓' : '—')}
+            ${stat('BUY', _stratLabFilters.opinions['BUY'] ? '✓' : '—')}
+            ${stat('Minimum Score', best.minScore)}
+            ${stat('Minimum Edge', `${best.minEdge}%`)}
+            ${stat('Estimated ROI', best.replay.roi !== null ? `${best.replay.roi >= 0 ? '+' : ''}${pct(best.replay.roi, 1)}` : '—')}
+            ${stat('Estimated Yield', best.replay.yield !== null ? pct(best.replay.yield * 100, 1) : '—')}
+            ${stat('Sample', `${best.replay.n} bets`)}
+            ${stat('Confidence', strategyConfidenceTier(best.replay.n).label)}
+          </div>
+          <div style="padding:10px 14px;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;font-size:12px;color:var(--text);">${escapeHtml(explanation)}</div>
+        `;
+      }
+
+      function bindStrategyLabEvents() {
+        if (window._stratLabBound) return;
+        window._stratLabBound = true;
+
+        function onCheckbox(id, opinion) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('change', () => { _stratLabFilters.opinions[opinion] = el.checked; renderStrategyLab(); });
+        }
+        onCheckbox('stratOpSB', 'STRONG BUY');
+        onCheckbox('stratOpBUY', 'BUY');
+        onCheckbox('stratOpNEUTRAL', 'NEUTRAL');
+        onCheckbox('stratOpAVOID', 'AVOID');
+
+        const scoreSlider = document.getElementById('stratScoreSlider');
+        const scoreVal = document.getElementById('stratScoreVal');
+        if (scoreSlider) scoreSlider.addEventListener('input', () => {
+          _stratLabFilters.minScore = parseInt(scoreSlider.value, 10) || 0;
+          if (scoreVal) scoreVal.textContent = String(_stratLabFilters.minScore);
+          renderStrategyLab();
+        });
+
+        const edgeSlider = document.getElementById('stratEdgeSlider');
+        const edgeVal = document.getElementById('stratEdgeVal');
+        if (edgeSlider) edgeSlider.addEventListener('input', () => {
+          _stratLabFilters.minEdge = parseFloat(edgeSlider.value) || 0;
+          if (edgeVal) edgeVal.textContent = `${_stratLabFilters.minEdge}%`;
+          renderStrategyLab();
+        });
+
+        safeBind('stratOddsMin', 'input', () => { _stratLabFilters.oddsMin = num(document.getElementById('stratOddsMin').value); renderStrategyLab(); });
+        safeBind('stratOddsMax', 'input', () => { _stratLabFilters.oddsMax = num(document.getElementById('stratOddsMax').value); renderStrategyLab(); });
+        safeBind('stratStakeOverride', 'input', () => { _stratLabFilters.stakeOverride = num(document.getElementById('stratStakeOverride').value); renderStrategyLab(); });
+        safeBind('stratSeasonSelect', 'change', () => { _stratLabFilters.season = document.getElementById('stratSeasonSelect').value; _stratLabFilters.leagues = []; _stratLabFilters.markets = []; renderStrategyLab(); });
+
+        safeBind('stratLeagueChips', 'click', e => {
+          const chip = e.target.closest('.js-strat-league-chip');
+          if (!chip) return;
+          const v = chip.dataset.value;
+          const idx = _stratLabFilters.leagues.indexOf(v);
+          if (idx === -1) _stratLabFilters.leagues.push(v); else _stratLabFilters.leagues.splice(idx, 1);
+          renderStrategyLab();
+        });
+        safeBind('stratMarketChips', 'click', e => {
+          const chip = e.target.closest('.js-strat-market-chip');
+          if (!chip) return;
+          const v = chip.dataset.value;
+          const idx = _stratLabFilters.markets.indexOf(v);
+          if (idx === -1) _stratLabFilters.markets.push(v); else _stratLabFilters.markets.splice(idx, 1);
+          renderStrategyLab();
+        });
+
+        safeBind('stratResetBtn', 'click', () => {
+          _stratLabFilters = {
+            opinions: { 'STRONG BUY': true, 'BUY': true, 'NEUTRAL': false, 'AVOID': false },
+            minScore: 0, minEdge: 0, oddsMin: null, oddsMax: null, stakeOverride: null,
+            leagues: [], markets: [], season: 'current'
+          };
+          const sb = document.getElementById('stratOpSB'); if (sb) sb.checked = true;
+          const buy = document.getElementById('stratOpBUY'); if (buy) buy.checked = true;
+          const neu = document.getElementById('stratOpNEUTRAL'); if (neu) neu.checked = false;
+          const avo = document.getElementById('stratOpAVOID'); if (avo) avo.checked = false;
+          if (scoreSlider) scoreSlider.value = '0';
+          if (scoreVal) scoreVal.textContent = '0';
+          if (edgeSlider) edgeSlider.value = '0';
+          if (edgeVal) edgeVal.textContent = '0%';
+          ['stratOddsMin', 'stratOddsMax', 'stratStakeOverride'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+          renderStrategyLab();
+        });
+
+        safeBind('stratExportBtn', 'click', exportStrategyLabJson);
       }
 
       function renderMovementsTable() {
@@ -15308,6 +16014,7 @@ button:disabled {
 
       function bindStaticInputs() {
         bindOpinionSimulatorEvents();
+        bindStrategyLabEvents();
         safeBind('daySearch', 'input', rerenderDayOnly);
         safeBind('dayLeagueFilter', 'change', rerenderDayOnly);
         safeBind('dayMarketFilter', 'change', rerenderDayOnly);
