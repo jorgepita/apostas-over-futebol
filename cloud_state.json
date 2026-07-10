@@ -4889,7 +4889,7 @@
       "resultado": "",
       "scoreAtAnalysis": 34,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -4963,7 +4963,7 @@
       "resultado": "",
       "scoreAtAnalysis": 34,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -5037,7 +5037,7 @@
       "resultado": "",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -5259,7 +5259,7 @@
       "resultado": "",
       "scoreAtAnalysis": 37,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -5374,43 +5374,6 @@
     },
     {
       "analysisSnapshot": {
-        "EV": -0.048889881865955,
-        "Edge": -0.02284573918969862,
-        "EdgePercent": -2.284573918969862,
-        "KellyTrue": 0,
-        "LambdaAway": 1.6335551353173505,
-        "LambdaHome": 0.8208695652173914,
-        "LambdaTotal": 2.4544247005347417,
-        "ProbMarket": 0.4672897196261682,
-        "ProbModel": 0.4444439804364696,
-        "dataQuality": "HIGH",
-        "fairOdd": 2.250002349042825,
-        "opinion": "NEUTRAL",
-        "opinionCls": "warn",
-        "sampleSize": 12,
-        "score": 51,
-        "scoreCls": "warn",
-        "timestamp": "2026-07-10T18:32:18.709Z",
-        "usedFallback": false
-      },
-      "analysisStale": false,
-      "botOpinion": "NEUTRAL",
-      "data": "2026-07-12",
-      "edgeAtAnalysis": -2.284573918969862,
-      "hadAnalysis": true,
-      "id": "manual_1783708002760_c9tf84",
-      "jogo": "Jeju United FC vs Daejeon Citizen",
-      "liga": "coreia",
-      "mercado": "Over 2.5",
-      "notas": "",
-      "odd": "2.14",
-      "resultado": "",
-      "scoreAtAnalysis": 51,
-      "stake": "1",
-      "status": "approved"
-    },
-    {
-      "analysisSnapshot": {
         "EV": 0.004162735925598904,
         "Edge": 0.0028126594091885115,
         "EdgePercent": 0.28126594091885115,
@@ -5481,7 +5444,7 @@
       "resultado": "",
       "scoreAtAnalysis": 33,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -5519,6 +5482,228 @@
       "scoreAtAnalysis": 69,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "analysisSnapshot": {
+        "ProbModel": 0.6182480575548553,
+        "ProbMarket": 0.6578947368421053,
+        "Edge": -0.039646679287249964,
+        "EdgePercent": -3.9646679287249964,
+        "fairOdd": 1.6174737433950983,
+        "KellyTrue": 0,
+        "EV": -0.06026295251661984,
+        "score": 38,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.2911589743589749,
+        "LambdaAway": 1.9,
+        "LambdaTotal": 3.1911589743589746,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-07-10T19:47:46.684Z"
+      },
+      "analysisStale": false,
+      "botOpinion": "AVOID",
+      "data": "2026-07-12",
+      "edgeAtAnalysis": -3.9646679287249964,
+      "hadAnalysis": true,
+      "id": "manual_1783712761055_92565f",
+      "jogo": "Sarpsborg 08 FF vs Viking",
+      "liga": "noruega",
+      "mercado": "Over 2.5",
+      "notas": "",
+      "odd": "1.52",
+      "resultado": "",
+      "scoreAtAnalysis": 38,
+      "stake": "1",
+      "status": "rejected"
+    },
+    {
+      "id": "manual_1783712783165_5cmep6",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Hammarby FF vs Kalmar FF",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "rejected",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -5.335771151659197,
+      "scoreAtAnalysis": 34,
+      "analysisSnapshot": {
+        "ProbModel": 0.6223179641590837,
+        "ProbMarket": 0.6756756756756757,
+        "Edge": -0.053357711516591966,
+        "EdgePercent": -5.335771151659197,
+        "fairOdd": 1.6068956025578736,
+        "KellyTrue": 0,
+        "EV": -0.07896941304455618,
+        "score": 34,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.7024000000000001,
+        "LambdaAway": 1.5082666666666669,
+        "LambdaTotal": 3.210666666666667,
+        "usedFallback": true,
+        "sampleSize": 3,
+        "dataQuality": "LOW",
+        "timestamp": "2026-07-10T19:47:30.087Z"
+      }
+    },
+    {
+      "id": "manual_1783712791845_diukte",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "IF Brommapojkarna vs Sirius",
+      "mercado": "Over 2.5",
+      "odd": "1.57",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "STRONG BUY",
+      "edgeAtAnalysis": 8.305732484076433,
+      "scoreAtAnalysis": 75,
+      "analysisSnapshot": {
+        "ProbModel": 0.72,
+        "ProbMarket": 0.6369426751592356,
+        "Edge": 0.08305732484076433,
+        "EdgePercent": 8.305732484076433,
+        "fairOdd": 1.3888888888888888,
+        "KellyTrue": 0.22877192982456152,
+        "EV": 0.13040000000000007,
+        "score": 75,
+        "scoreCls": "good",
+        "opinion": "STRONG BUY",
+        "opinionCls": "good",
+        "LambdaHome": 2.2,
+        "LambdaAway": 1.9,
+        "LambdaTotal": 4.1,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-07-10T19:47:23.134Z"
+      }
+    },
+    {
+      "id": "manual_1783712800081_scwsg3",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Malmo FF vs IFK Goteborg",
+      "mercado": "Over 2.5",
+      "odd": "1.67",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "STRONG BUY",
+      "edgeAtAnalysis": 12.119760479041908,
+      "scoreAtAnalysis": 80,
+      "analysisSnapshot": {
+        "ProbModel": 0.72,
+        "ProbMarket": 0.5988023952095809,
+        "Edge": 0.12119760479041908,
+        "EdgePercent": 12.119760479041908,
+        "fairOdd": 1.3888888888888888,
+        "KellyTrue": 0.30208955223880585,
+        "EV": 0.2023999999999999,
+        "score": 80,
+        "scoreCls": "good",
+        "opinion": "STRONG BUY",
+        "opinionCls": "good",
+        "LambdaHome": 2.1678944731735297,
+        "LambdaAway": 1.5685973333333338,
+        "LambdaTotal": 3.7364918065068635,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-07-10T19:47:38.965Z"
+      }
+    },
+    {
+      "id": "manual_1783712809125_jea1x6",
+      "data": "2026-07-12",
+      "liga": "suecia",
+      "jogo": "Vasteras SK FK vs Degerfors IF",
+      "mercado": "Over 2.5",
+      "odd": "2",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "approved",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "STRONG BUY",
+      "edgeAtAnalysis": 12.23179641590837,
+      "scoreAtAnalysis": 88,
+      "analysisSnapshot": {
+        "ProbModel": 0.6223179641590837,
+        "ProbMarket": 0.5,
+        "Edge": 0.12231796415908369,
+        "EdgePercent": 12.23179641590837,
+        "fairOdd": 1.6068956025578736,
+        "KellyTrue": 0.24463592831816738,
+        "EV": 0.24463592831816738,
+        "score": 88,
+        "scoreCls": "good",
+        "opinion": "STRONG BUY",
+        "opinionCls": "good",
+        "LambdaHome": 1.7024000000000001,
+        "LambdaAway": 1.5082666666666669,
+        "LambdaTotal": 3.210666666666667,
+        "usedFallback": true,
+        "sampleSize": 3,
+        "dataQuality": "LOW",
+        "timestamp": "2026-07-10T19:47:53.883Z"
+      }
+    },
+    {
+      "id": "manual_1783712817688_0kxgyd",
+      "data": "2026-07-13",
+      "liga": "suecia",
+      "jogo": "Djurgardens IF vs Halmstad",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "rejected",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -8.625285789247418,
+      "scoreAtAnalysis": 30,
+      "analysisSnapshot": {
+        "ProbModel": 0.5894228177832015,
+        "ProbMarket": 0.6756756756756757,
+        "Edge": -0.08625285789247417,
+        "EdgePercent": -8.625285789247418,
+        "fairOdd": 1.6965749710215916,
+        "KellyTrue": 0,
+        "EV": -0.12765422968086182,
+        "score": 30,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 2.0915481086194676,
+        "LambdaAway": 0.9652906666666669,
+        "LambdaTotal": 3.0568387752861343,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "timestamp": "2026-07-10T19:48:06.716Z"
+      }
     }
   ],
   "movements": [
@@ -5545,8 +5730,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:43:00.720Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-07-10T19:49:58.022Z",
+  "activeTab": "tab-history",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
@@ -5758,5 +5943,6 @@
       "KickoffUTC": "2026-07-13T18:00:00+01:00"
     }
   ],
-  "manualBetsRemote": []
+  "manualBetsRemote": [],
+  "providerHealth": {}
 }
