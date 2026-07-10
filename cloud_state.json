@@ -5518,7 +5518,7 @@
       "resultado": "",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "id": "manual_1783712783165_5cmep6",
@@ -5641,7 +5641,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
