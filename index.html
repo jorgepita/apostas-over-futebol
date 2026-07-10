@@ -2956,6 +2956,12 @@ button:disabled {
         <div id="versusOpinionValidation"></div>
 
         <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">Opinion Engine Recommendations</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="versusOpinionRecommendations"></div>
+
+        <div class="section-header" style="margin-top:4px;">
           <span class="section-header-title">P — Edge Band Performance</span>
           <div class="section-header-line"></div>
         </div>
@@ -9513,7 +9519,8 @@ button:disabled {
         const opinionCalibEl = document.getElementById('versusOpinionCalib');
         const opinionInsEl   = document.getElementById('versusOpinionInsights');
         const opinionValidationEl = document.getElementById('versusOpinionValidation');
-        if (opinionTableEl || opinionCalibEl || opinionInsEl || opinionValidationEl) {
+        const opinionRecEl   = document.getElementById('versusOpinionRecommendations');
+        if (opinionTableEl || opinionCalibEl || opinionInsEl || opinionValidationEl || opinionRecEl) {
 
           const opinionBets = getResolvedManualBets().filter(b =>
             b.hadAnalysis === true &&
@@ -10197,7 +10204,336 @@ button:disabled {
                 ${chartHtml}
               </div>
             `;
-          }
+
+          // ── Opinion Engine Recommendations (Phase 26.22) ──────────────────
+          // A deterministic rule engine layered ON TOP of the analytics already
+          // computed above (calib, confidence, decisionCost, pairResults,
+          // avoidBeatsBuy/SB, historyPoints, trendSeries, byOpinion, ...).
+          // Nothing here recomputes a settlement statistic — every rule reads
+          // values that already exist in this scope. This is prescriptive
+          // (what to do about the numbers), not a second analytics layer.
+          if (opinionRecEl) {
+            const findPair = (left, right) => pairResults.find(p => p.left === left && p.right === right);
+            const SEV_ORDER = { Critical: 5, High: 4, Medium: 3, Low: 2, Info: 1 };
+            const recs = [];
+
+            // Rule: insufficient-data — gates almost everything else below (every
+            // other rule requires !confidenceIsLow), so when this fires it is
+            // usually the only, or dominant, recommendation. No single-metric
+            // reaction possible: it only reads the sample-size tier.
+            if (confidenceIsLow) {
+              recs.push({
+                type: 'insufficient-data',
+                severity: confidence.label === 'Very Low' ? 'Medium' : 'Low',
+                recommendation: confidence.label === 'Very Low' ? 'Sample size insufficient' : 'Collect more data',
+                reason: `Only ${totalOpn2} settled opinion bet${totalOpn2 !== 1 ? 's' : ''} analysed — every other recommendation below requires at least 20 settled bets (Medium confidence) before it will fire, to avoid reacting to noise.`,
+                evidence: [
+                  ['Settled opinion bets', String(totalOpn2)],
+                  ['Confidence', confidence.label],
+                  ['All four opinion buckets represented', allFourRepresented ? 'Yes' : 'No']
+                ]
+              });
+            }
+
+            // Rule: review-strong-buy — requires confidence gate PLUS a real,
+            // beyond-tolerance inversion (not a single ROI comparison in isolation).
+            if (!confidenceIsLow) {
+              const sbInversions = ['BUY', 'NEUTRAL', 'AVOID']
+                .map(o => findPair('STRONG BUY', o))
+                .filter(p => p && p.evaluable && p.status === 'inverted');
+              if (sbInversions.length) {
+                const worst = sbInversions.slice().sort((a, b) => a.roiDiff - b.roiDiff)[0]; // most negative diff
+                const highConf = confidence.label === 'High' || confidence.label === 'Very High';
+                const severity = (highConf && sbInversions.length >= 2) ? 'Critical'
+                  : (highConf || sbInversions.length >= 2) ? 'High' : 'Medium';
+                recs.push({
+                  type: 'review-strong-buy',
+                  severity,
+                  recommendation: 'Review STRONG BUY threshold',
+                  reason: `STRONG BUY has been outperformed by ${worst.right} across ${sbInversions.length} of its 3 tracked comparison${sbInversions.length !== 1 ? 's' : ''} (STRONG BUY ${worst.leftRoi >= 0 ? '+' : ''}${pct(worst.leftRoi, 1)} vs ${worst.right} ${worst.rightRoi >= 0 ? '+' : ''}${pct(worst.rightRoi, 1)}).`,
+                  evidence: [
+                    ['Calibration Score', calib.score !== null ? String(calib.score) : '—'],
+                    ['Pairs respected', `${correctPairs.length} / ${evaluablePairs.length}`],
+                    ['Confidence', confidence.label],
+                    [`STRONG BUY vs ${worst.right} ROI`, `${worst.leftRoi >= 0 ? '+' : ''}${pct(worst.leftRoi, 1)} vs ${worst.rightRoi >= 0 ? '+' : ''}${pct(worst.rightRoi, 1)}`]
+                  ]
+                });
+              } else {
+                // Softer, positive counterpart — only when BUY is statistically
+                // tied (not beating) STRONG BUY, so it can never coexist with
+                // review-strong-buy for the same underlying pair.
+                const sbBuy = findPair('STRONG BUY', 'BUY');
+                if (sbBuy && sbBuy.evaluable && sbBuy.status === 'equivalent' &&
+                    byOpinion('BUY').count >= MIN_SAMPLE_COMPARE && byOpinion('STRONG BUY').count >= MIN_SAMPLE_COMPARE) {
+                  recs.push({
+                    type: 'increase-confidence-buy',
+                    severity: (confidence.label === 'High' || confidence.label === 'Very High') ? 'Medium' : 'Low',
+                    recommendation: 'Increase confidence in BUY',
+                    reason: `BUY is statistically tied with STRONG BUY (within the ±${CALIBRATION_ROI_TOLERANCE}pp calibration tolerance) despite representing a lower-confidence signal (BUY ${sbBuy.rightRoi >= 0 ? '+' : ''}${pct(sbBuy.rightRoi, 1)} vs STRONG BUY ${sbBuy.leftRoi >= 0 ? '+' : ''}${pct(sbBuy.leftRoi, 1)}).`,
+                    evidence: [
+                      ['STRONG BUY ROI', `${sbBuy.leftRoi >= 0 ? '+' : ''}${pct(sbBuy.leftRoi, 1)}`],
+                      ['BUY ROI', `${sbBuy.rightRoi >= 0 ? '+' : ''}${pct(sbBuy.rightRoi, 1)}`],
+                      ['Difference', `${sbBuy.roiDiff >= 0 ? '+' : ''}${fmt(sbBuy.roiDiff, 1)} pp`],
+                      ['Confidence', confidence.label]
+                    ]
+                  });
+                }
+              }
+            }
+
+            // Rule: review-buy — BUY beaten by something that should rank below
+            // it (NEUTRAL or AVOID). Being beaten by STRONG BUY is handled above
+            // and is not a problem sign for BUY itself.
+            if (!confidenceIsLow) {
+              const buyInversions = ['NEUTRAL', 'AVOID']
+                .map(o => findPair('BUY', o))
+                .filter(p => p && p.evaluable && p.status === 'inverted');
+              if (buyInversions.length) {
+                const worst = buyInversions.slice().sort((a, b) => a.roiDiff - b.roiDiff)[0];
+                const highConf = confidence.label === 'High' || confidence.label === 'Very High';
+                const severity = (highConf && buyInversions.length >= 2) ? 'High'
+                  : (highConf || buyInversions.length >= 2) ? 'Medium' : 'Low';
+                recs.push({
+                  type: 'review-buy',
+                  severity,
+                  recommendation: 'Review BUY threshold',
+                  reason: `BUY has been outperformed by ${worst.right} (BUY ${worst.leftRoi >= 0 ? '+' : ''}${pct(worst.leftRoi, 1)} vs ${worst.right} ${worst.rightRoi >= 0 ? '+' : ''}${pct(worst.rightRoi, 1)}), which should rank below it.`,
+                  evidence: [
+                    ['Calibration Score', calib.score !== null ? String(calib.score) : '—'],
+                    ['Pairs respected', `${correctPairs.length} / ${evaluablePairs.length}`],
+                    ['Confidence', confidence.label],
+                    [`BUY vs ${worst.right} ROI`, `${worst.leftRoi >= 0 ? '+' : ''}${pct(worst.leftRoi, 1)} vs ${worst.rightRoi >= 0 ? '+' : ''}${pct(worst.rightRoi, 1)}`]
+                  ]
+                });
+              }
+            }
+
+            // Rule: review-avoid — the illustrative multi-signal example from the
+            // spec. ALL FOUR must hold: calibration below "Good", Decision Cost
+            // positive (AVOID would have been profitable), AVOID beating BUY
+            // and/or STRONG BUY (already tolerance- and sample-gated), and
+            // confidence at or above Medium. A single metric alone (e.g. AVOID
+            // having a higher ROI) never triggers this on its own — see
+            // reduce-confidence-avoid for the partial-signal case.
+            const reviewAvoidGate = calib.score !== null && calib.score < 75 &&
+              decisionCost !== null && decisionCost > 0 &&
+              (avoidBeatsBuy || avoidBeatsSB) && !confidenceIsLow;
+            if (reviewAvoidGate) {
+              const beatsBoth = avoidBeatsBuy && avoidBeatsSB;
+              const highConf = confidence.label === 'High' || confidence.label === 'Very High';
+              const severity = (calibMeta.label === 'Broken' && highConf && beatsBoth) ? 'Critical'
+                : (calibMeta.label === 'Broken' || (calibMeta.label === 'Poor' && (highConf || beatsBoth))) ? 'High'
+                : 'Medium';
+              recs.push({
+                type: 'review-avoid',
+                severity,
+                recommendation: 'Review AVOID threshold',
+                reason: `AVOID has outperformed ${beatsBoth ? 'both BUY and STRONG BUY' : avoidBeatsBuy ? 'BUY' : 'STRONG BUY'} across ${totalOpn2} settled opinion bets analysed, calibration is ${calibMeta.label} (${calib.score}/100), and Decision Cost is positive — the model appears to be avoiding profitable opportunities.`,
+                evidence: [
+                  ['Calibration Score', String(calib.score)],
+                  ['Decision Cost', `${decisionCost >= 0 ? '+' : ''}€${fmt(decisionCost)}`],
+                  ['Pairs respected', `${correctPairs.length} / ${evaluablePairs.length}`],
+                  ['Confidence', confidence.label],
+                  ['AVOID ROI', `${avV.roi >= 0 ? '+' : ''}${pct(avV.roi, 1)}`],
+                  [avoidBeatsBuy ? 'BUY ROI' : 'STRONG BUY ROI', avoidBeatsBuy ? `${buV.roi >= 0 ? '+' : ''}${pct(buV.roi, 1)}` : `${sbV.roi >= 0 ? '+' : ''}${pct(sbV.roi, 1)}`]
+                ]
+              });
+            } else if (!confidenceIsLow && (avoidBeatsBuy || avoidBeatsSB)) {
+              // Only one or two of the four review-avoid signals are present —
+              // a softer nudge instead of a full recalibration recommendation.
+              // Mutually exclusive with review-avoid by construction (the `else`).
+              const missing = [];
+              if (!(calib.score !== null && calib.score < 75)) missing.push('calibration is not yet below the "Good" threshold');
+              if (!(decisionCost !== null && decisionCost > 0)) missing.push('Decision Cost is not positive');
+              recs.push({
+                type: 'reduce-confidence-avoid',
+                severity: 'Low',
+                recommendation: 'Reduce confidence in AVOID',
+                reason: `AVOID's realised ROI exceeds ${avoidBeatsBuy ? 'BUY' : 'STRONG BUY'}'s, but ${missing.join(' and ')} — not yet enough corroborating signals for a full threshold review.`,
+                evidence: [
+                  ['Calibration Score', calib.score !== null ? String(calib.score) : '—'],
+                  ['Decision Cost', decisionCost !== null ? `${decisionCost >= 0 ? '+' : ''}€${fmt(decisionCost)}` : '—'],
+                  ['AVOID ROI', `${avV.roi >= 0 ? '+' : ''}${pct(avV.roi, 1)}`],
+                  ['Confidence', confidence.label]
+                ]
+              });
+            }
+
+            // Rule: hierarchy-healthy — zero inversions across a real sample.
+            // Mutually exclusive with every review-*/reduce-confidence-avoid
+            // rule above (all of those require at least one inverted pair).
+            if (!confidenceIsLow && evaluablePairs.length >= 4 && invertedPairs.length === 0) {
+              recs.push({
+                type: 'hierarchy-healthy',
+                severity: 'Info',
+                recommendation: 'Opinion hierarchy appears healthy',
+                reason: `All ${evaluablePairs.length} evaluable opinion comparisons follow the expected ordering — no inversions detected.`,
+                evidence: [
+                  ['Pairs respected', `${correctPairs.length + equivalentPairs.length} / ${evaluablePairs.length}`],
+                  ['Calibration Score', calib.score !== null ? String(calib.score) : '—'],
+                  ['Confidence', confidence.label]
+                ]
+              });
+            }
+
+            // Rule: calibration-improving / calibration-deteriorating — reuses
+            // `historyPoints` (already reconstructed above) with a wider,
+            // structural lookback window (50 bets) than the shorter-window
+            // insight already shown in Opinion Validation (20 bets) — a
+            // different derived observation from the same source array, not a
+            // recomputation of it.
+            function calibrationTrend(points, maxWindow) {
+              if (points.length < 6) return null;
+              const lookback = Math.min(maxWindow, points.length - 1);
+              return { delta: points[points.length - 1].score - points[points.length - 1 - lookback].score, lookback };
+            }
+            const calibTrend50 = calibrationTrend(historyPoints, 50);
+            if (calibTrend50 && Math.abs(calibTrend50.delta) >= 10) {
+              const improving = calibTrend50.delta > 0;
+              recs.push({
+                type: improving ? 'calibration-improving' : 'calibration-deteriorating',
+                severity: improving
+                  ? (calibMeta.label === 'Broken' || calibMeta.label === 'Poor' ? 'Low' : 'Info')
+                  : (Math.abs(calibTrend50.delta) >= 20 || calibMeta.label === 'Poor' || calibMeta.label === 'Broken' ? 'High' : 'Medium'),
+                recommendation: improving ? 'Opinion calibration improving' : 'Opinion calibration deteriorating',
+                reason: `Calibration has ${improving ? 'improved' : 'deteriorated'} by ${Math.abs(calibTrend50.delta)} points over the last ${calibTrend50.lookback} settled bets (currently ${calib.score}/100, ${calibMeta.label}).`,
+                evidence: [
+                  ['Calibration now', String(calib.score)],
+                  [`Calibration ${calibTrend50.lookback} bets ago`, String(calib.score - calibTrend50.delta)],
+                  ['Confidence', confidence.label]
+                ]
+              });
+            }
+
+            // Rule: opinion-more-stable / opinion-less-reliable — per-opinion
+            // volatility change, reusing `trendSeries` (already reconstructed
+            // above). Volatility = max-min of the cumulative-ROI curve over a
+            // window; "notable" requires a >=30% relative change and at least
+            // 16 settled bets for that opinion (two full 8-bet windows) so a
+            // handful of bets cannot trigger it.
+            function volatility(arr) {
+              const vals = arr.filter(v => v !== null);
+              return vals.length >= 2 ? Math.max(...vals) - Math.min(...vals) : null;
+            }
+            const STABILITY_WINDOW = 8;
+            const stabilityChanges = OPINIONS.map(op => {
+              const series = trendSeries[op];
+              if (series.length < STABILITY_WINDOW * 2) return null;
+              const volEarly = volatility(series.slice(0, STABILITY_WINDOW));
+              const volRecent = volatility(series.slice(-STABILITY_WINDOW));
+              if (!volEarly || volRecent === null) return null;
+              const changePct = ((volRecent - volEarly) / volEarly) * 100;
+              return { op, volEarly, volRecent, changePct };
+            }).filter(Boolean);
+            const moreStable = stabilityChanges.filter(s => s.changePct <= -30).sort((a, b) => a.changePct - b.changePct)[0];
+            const lessReliable = stabilityChanges.filter(s => s.changePct >= 30).sort((a, b) => b.changePct - a.changePct)[0];
+            if (moreStable) {
+              recs.push({
+                type: 'opinion-more-stable',
+                severity: 'Info',
+                recommendation: `${moreStable.op} has become more stable`,
+                reason: `${moreStable.op}'s recent ROI volatility (${fmt(moreStable.volRecent, 1)}pp over its last ${STABILITY_WINDOW} settled bets) is markedly lower than its earlier volatility (${fmt(moreStable.volEarly, 1)}pp).`,
+                evidence: [
+                  ['Earlier volatility', `${fmt(moreStable.volEarly, 1)}pp`],
+                  ['Recent volatility', `${fmt(moreStable.volRecent, 1)}pp`],
+                  ['Window', `${STABILITY_WINDOW} bets`]
+                ]
+              });
+            }
+            if (lessReliable) {
+              recs.push({
+                type: 'opinion-less-reliable',
+                severity: 'Low',
+                recommendation: `${lessReliable.op} has become less reliable`,
+                reason: `${lessReliable.op}'s recent ROI volatility (${fmt(lessReliable.volRecent, 1)}pp over its last ${STABILITY_WINDOW} settled bets) is markedly higher than its earlier volatility (${fmt(lessReliable.volEarly, 1)}pp).`,
+                evidence: [
+                  ['Earlier volatility', `${fmt(lessReliable.volEarly, 1)}pp`],
+                  ['Recent volatility', `${fmt(lessReliable.volRecent, 1)}pp`],
+                  ['Window', `${STABILITY_WINDOW} bets`]
+                ]
+              });
+            }
+
+            // Rule: engine-stable — the aggregate positive statement, computed
+            // LAST and only when nothing corrective fired above. Mutually
+            // exclusive with every alarm-type rule by construction (it checks
+            // that none of them are present in `recs`).
+            const alarmTypes = ['review-strong-buy', 'review-buy', 'review-avoid', 'reduce-confidence-avoid', 'calibration-deteriorating', 'opinion-less-reliable'];
+            const hasAlarm = recs.some(r => alarmTypes.includes(r.type));
+            if (!confidenceIsLow && !hasAlarm && calib.score !== null && calib.score >= 75) {
+              recs.push({
+                type: 'engine-stable',
+                severity: 'Info',
+                recommendation: 'Opinion engine stable',
+                reason: `No corrective signals detected — calibration is ${calibMeta.label} (${calib.score}/100) with ${confidence.label} confidence and ${invertedPairs.length} inverted pair${invertedPairs.length !== 1 ? 's' : ''}.`,
+                evidence: [
+                  ['Calibration Score', String(calib.score)],
+                  ['Confidence', confidence.label],
+                  ['Inverted pairs', String(invertedPairs.length)]
+                ]
+              });
+            }
+
+            // Fallback — guarantees the list is never silently empty (always
+            // explainable, even when the explanation is "nothing crossed a
+            // threshold").
+            if (!recs.length) {
+              recs.push({
+                type: 'no-action',
+                severity: 'Info',
+                recommendation: 'No action recommended',
+                reason: 'No rule condition was met with the current data — calibration and decision cost do not currently indicate a threshold review.',
+                evidence: [
+                  ['Calibration Score', calib.score !== null ? String(calib.score) : '—'],
+                  ['Confidence', confidence.label],
+                  ['Decision Cost', decisionCost !== null ? `${decisionCost >= 0 ? '+' : ''}€${fmt(decisionCost)}` : '—']
+                ]
+              });
+            }
+
+            // Sort by severity, highest first (stable sort preserves rule order for ties)
+            recs.sort((a, b) => SEV_ORDER[b.severity] - SEV_ORDER[a.severity]);
+
+            // Health summary — derived purely from the recommendation set built
+            // above (traceable to the same evidence), not recomputed independently.
+            function computeHealth() {
+              const worst = recs.reduce((m, r) => Math.max(m, SEV_ORDER[r.severity] || 0), 0);
+              const hasRecalibration = recs.some(r => SEV_ORDER[r.severity] >= 4 &&
+                (r.type === 'review-avoid' || r.type === 'review-buy' || r.type === 'review-strong-buy'));
+              if (worst >= 5) return { label: 'Critical', color: 'var(--bad)' };
+              if (hasRecalibration) return { label: 'Recalibration Recommended', color: 'var(--bad)' };
+              if (worst >= 3) return { label: 'Needs Attention', color: 'var(--warn)' };
+              if (confidenceIsLow) return { label: 'Needs Attention', color: 'var(--warn)' };
+              if (calib.score !== null && calib.score >= 90 && invertedPairs.length === 0) return { label: 'Excellent', color: 'var(--ok)' };
+              return { label: 'Healthy', color: 'var(--ok)' };
+            }
+            const health = computeHealth();
+
+            const SEV_COLOR = { Critical: 'var(--bad)', High: 'var(--bad)', Medium: 'var(--warn)', Low: 'var(--warn)', Info: 'var(--muted)' };
+            const recCardsHtml = recs.slice(0, 8).map(r => `
+              <div style="padding:14px;background:var(--card-alt);border:1px solid var(--line);border-left:3px solid ${SEV_COLOR[r.severity]};border-radius:8px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+                  <span style="font-size:10px;font-weight:900;color:${SEV_COLOR[r.severity]};text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border:1px solid ${SEV_COLOR[r.severity]};border-radius:10px;">${escapeHtml(r.severity)}</span>
+                  <span style="font-size:14px;font-weight:800;color:var(--text);">${escapeHtml(r.recommendation)}</span>
+                </div>
+                <div style="font-size:12px;color:var(--text);margin-bottom:8px;">${escapeHtml(r.reason)}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;padding-top:8px;border-top:1px solid var(--line);">
+                  ${r.evidence.map(([k, v]) => `<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(k)}</div><div style="font-size:12px;font-weight:700;color:var(--text);">${escapeHtml(v)}</div></div>`).join('')}
+                </div>
+              </div>`
+            ).join('');
+
+            opinionRecEl.innerHTML = `
+              <div class="card">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line);">
+                  <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Opinion Engine Health</div>
+                  <div style="font-size:20px;font-weight:900;color:${health.color};">${escapeHtml(health.label)}</div>
+                </div>
+                ${recCardsHtml}
+              </div>
+            `;
+          } // end if (opinionRecEl)
+        } // end if (opinionValidationEl)
         }
 
         // ── Sections P–T: Edge Realization Intelligence ─────────────────────
