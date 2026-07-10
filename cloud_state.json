@@ -4907,6 +4907,24 @@
       "edgeAtAnalysis": null,
       "scoreAtAnalysis": null,
       "analysisSnapshot": null
+    },
+    {
+      "id": "manual_1783707907131_t3z7wz",
+      "data": "2026-07-11",
+      "liga": "finlandia",
+      "jogo": "Lahti vs HJK Helsinki",
+      "mercado": "Over 2.5",
+      "odd": "1.71",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
