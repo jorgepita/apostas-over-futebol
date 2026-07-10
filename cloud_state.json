@@ -4972,7 +4972,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -5222,7 +5222,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:26:58.795Z",
+  "lastUpdated": "2026-07-10T18:28:01.617Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
