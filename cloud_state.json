@@ -4853,6 +4853,24 @@
       "settledAt": "2026-07-06T22:58:08.209845+00:00",
       "stake": "1",
       "status": "settled"
+    },
+    {
+      "id": "manual_1783707856780_abjxy5",
+      "data": "2026-07-11",
+      "liga": "coreia",
+      "jogo": "Gimcheon Sangmu FC vs Bucheon FC 1995",
+      "mercado": "Over 2.5",
+      "odd": "2.22",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null
     }
   ],
   "movements": [
@@ -4879,8 +4897,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-10T18:22:58.905Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-07-10T18:24:01.231Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
