@@ -7,8 +7,7 @@
   },
   "bankroll": {
     "over25": 50,
-    "btts": 50,
-    "nba_over": 500
+    "btts": 50
   },
   "leagues": {
     "premier": { "name": "Premier League", "country": "ENG" },
@@ -63,18 +62,7 @@
       "cap_frac": 0.04,
       "daily_cap_frac": 0.12,
       "min_picks": 1
-    },
-    "nba_over": {
-      "edge_min": -0.03,
-      "kelly_fraction": 0.25,
-      "cap_frac": 0.05,
-      "daily_cap_frac": 0.15,
-      "min_picks": 1
     }
-  },
-  "nba": {
-    "window": 10,
-    "sigma_total": 14.0
   },
   "api_football": {
     "league_ids": {

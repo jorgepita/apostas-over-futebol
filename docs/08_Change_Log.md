@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.27 | 2026-07-11 | Removed the legacy NBA subsystem entirely: 8 NBA-exclusive files deleted (5 scripts, 1 config file, 2 data/output CSVs) and 3 dead NBA keys removed from `config.json` (`bankroll.nba_over`, `rules.nba_over`, top-level `nba` block). Preceded by a full read-only audit (previous session) that verified zero shared code between the NBA and football pipelines, and by an archival git tag (`legacy-nba-final`) at the pre-removal commit. Full validation (syntax, test suite, config-equivalence, import checks) confirmed zero football behaviour changed. Repository is now exclusively football |
 | 26.26 | 2026-07-11 | Repository hygiene cleanup: removed obsolete `PROJECT_RULES.md` (superseded by `docs/`), replaced the content-free root `README.md` placeholder with a real landing page, committed `CLAUDE.md` and `.claude/settings.json` for the first time (closing a 3-session-old gap where docs already described them as committed), deleted stale diagnostic `audit_output*.txt` files, and added `.gitignore` rules for `.claude/settings.local.json` and `audit_output*.txt`. No code, business logic, or runtime behaviour changed |
 | 26.25 | 2026-07-11 | Full dashboard localization to European Portuguese (PT-PT): translated every remaining English UI string in `index.html` — the Season Archive/Close Season wizard, the four Opinion analytics features (26.20–26.23), Strategy Lab (26.24), and assorted pre-existing analytics tables/labels/alerts — to natural PT-PT. No business logic, calculation, threshold, or persistence changed. Internal English status/severity codes used in `===` comparisons across the calibration and recommendation rule engines were kept as-is and only translated at render time via a new shared `ptLabel()` lookup, so no comparison was touched. All 6 existing Playwright regression suites (130+ checks) re-run and passing |
 | 26.24 | 2026-07-10 | New "Strategy Lab" page (own tab/nav entry): a pure betting-strategy backtester over settled, Scout-analysed manual bets (including rejected ones). Strategy Builder (opinion/score/edge/odds/stake/league/market/season filters) feeds a Historical Replay (reusing computeStreaks()/computeDrawdownAnalysis()), a Compare-Against-Production panel (reusing window._opnSimCache's calibration/decision-cost/confidence functions), a Robustness Score explicitly designed so tiny samples can never outrank large ones, chronological-thirds Stability, Risk Analysis, a bounded (≤81-combination) Strategy Optimizer ranked by robustness, explainability, and a pure JSON export. Analytics-only, no persistence; every prior Opinion analytics/recommendations/simulator section confirmed unchanged and regression-tested (124 checks across 6 suites) |
@@ -31,6 +32,57 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.27 — Remove Legacy NBA Subsystem
+
+**Implemented:** 2026-07-11
+
+**Goal.** A prior session's read-only audit (documented in that session's conversation, not a separate file) established that the repository contained a fully self-contained, parallel NBA pick-generation pipeline that shared zero code with the football system — no `sport` abstraction exists anywhere in `src/`, and every NBA script had its own config, own state file, own Telegram sender, and own data file. The audit found the NBA automation had run near-hourly from 2026-03-01 to 2026-04-30 (driven by something outside this repository, since `.github/workflows/bot.yml` never contained NBA scheduling at any point in its history) and had been dormant for 10+ weeks. This phase executes the approved removal: delete every NBA-exclusive artifact and the three dead NBA keys sitting inertly inside the shared `config.json`, with zero change to football behaviour.
+
+**Archival safeguard.** Before any deletion, an annotated git tag `legacy-nba-final` was created at the pre-removal commit (`77dc981e`) as a permanent, unmodified snapshot — the NBA subsystem remains fully recoverable from that tag if ever needed again.
+
+**What was deleted.**
+- `fetch_fixtures_nba.py`, `run_job_nba.py`'s orchestrated fixture fetcher (100 lines)
+- `fetch_oddsapi_fixtures_nba.py` — an earlier, superseded duplicate fixture fetcher, dead since the day after `fetch_fixtures_nba.py` was created (131 lines)
+- `gerar_picks_nba.py` — the NBA pick-generation model, its own Telegram sender, its own dedup state (518 lines)
+- `run_job_nba.py` — the orchestrator that ran the two scripts above (15 lines)
+- `prepare_nba_small.py` — an orphaned, one-off local data-prep script hardcoded to a path that only ever existed on the original developer's machine (34 lines)
+- `config_nba.json` — NBA model parameters, read exclusively by `gerar_picks_nba.py` (29 lines)
+- `picks_nba_over.csv` — stale NBA pick output, last updated 2026-04-30 (5 rows)
+- `data_raw/nba.csv` — historical NBA box-score data, read exclusively by `gerar_picks_nba.py` (13,561 rows / 496 KB)
+
+**What was edited.** `config.json`: removed `bankroll.nba_over`, the `rules.nba_over` sub-block, and the top-level `nba` block (window/sigma_total). These three keys were verified dead in the prior audit by tracing every `config.json` accessor in `src/runtime.py` and `src/market_rules.py` — none ever look up an `nba`-prefixed key. Confirmed again this session by direct comparison (see Validation).
+
+**Scope discipline.** No football file was modified. `main.py`, `update_results.py`, `sync_server.py`, `run_main.py`, `run_topup.py`, and every `src/*.py` module are byte-for-byte identical to the `legacy-nba-final` tag (`git diff legacy-nba-final -- <file>` returns zero lines for each). Only `config.json` changed, and only by removing the three dead keys.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `fetch_fixtures_nba.py`, `fetch_oddsapi_fixtures_nba.py`, `gerar_picks_nba.py`, `run_job_nba.py`, `prepare_nba_small.py`, `config_nba.json`, `picks_nba_over.csv`, `data_raw/nba.csv` | Deleted |
+| `config.json` | Removed `bankroll.nba_over`, `rules.nba_over`, top-level `nba` block — nothing else changed |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-11-nba-removal.md` | New handover for this phase |
+| `README.md`, `CLAUDE.md`, `docs/PROJECT_MAP.md` | Verified — no change required (see Documentation Updated in the handover for why) |
+
+### Validation
+
+- **Search.** Full repository search (content + filenames, tracked and untracked, excluding `.venv/`) for `NBA`, `nba`, `basketball`, `basketball_nba`, `picks_nba`, `fixtures_today_nba`, `sent_state_nba`, `config_nba`, `prepare_nba`, `run_job_nba`, `fetch_fixtures_nba`, `generate_nba`, `hoops` — zero genuine matches. The only hits were case-insensitive substring false positives inside unrelated `index.html` identifiers (`actionBadge`, `decisionBadge`, `btnBase`), confirmed by inspecting every match directly.
+- **Syntax.** `python -m py_compile` on every tracked `.py` file — zero errors.
+- **Test suite.** `pytest tests/` — 29/29 passed (`test_season_model.py`), unaffected by this change.
+- **Imports.** `import main`, `run_main`, `run_topup`, `update_results`, `sync_server`, and every module in `src/` — all import cleanly with zero errors.
+- **Configuration equivalence.** Loaded `config.json` from both the working tree (post-edit) and the `legacy-nba-final` tag (pre-edit) and called `src.runtime.build_runtime_settings()` / `build_bankroll_settings()` on both. Every football-consumed derived field (`bankroll25`, `rules25`, `bankroll_btts`, `rules_btts`, and the full runtime-settings dict) is identical before and after — the only difference is the raw echoed config no longer contains the now-removed `nba_over` sub-keys, which is the intended effect.
+- **Settlement path.** `update_results.py` never reads `config.json` at all, and is byte-for-byte identical to the `legacy-nba-final` tag (`git diff` returns zero lines) — settlement is provably unaffected without needing to exercise it against live provider APIs.
+- **Pick generation.** `main.py` is likewise byte-for-byte identical to the tag. Combined with the config-equivalence check above, pick generation's inputs and code are both unchanged. The live pipeline was deliberately not executed as a validation step — it would consume metered API-Football/football-data.org quota and could trigger real Telegram notifications for a change that provably touches none of its logic.
+- **Dashboard.** `index.html` has zero diff against the `legacy-nba-final` tag. Both `<script>` blocks (main app, ~672 KB, and a small secondary block) pass `node --check` with no syntax errors.
+- **Documentation links.** No document in `docs/`, `CLAUDE.md`, or `README.md` ever referenced any of the deleted files (confirmed in the prior audit and re-confirmed this session), so no link can be broken by their removal.
+- **Incidental artifact cleanup.** Running the Python validation commands above regenerated several tracked `__pycache__/*.pyc` bytecode files as a side effect; these were restored (`git checkout --`) before committing so the commit contains only the intended NBA-removal changes.
+
+### Impact
+
+The repository is now exclusively a football betting system. No shared code existed between the two pipelines, so this removal carried none of the risk a genuine shared-infrastructure untangling would have — every deleted file's only callers were other NBA files, and the three removed config keys were provably unread by any football code path both before this session's audit and reconfirmed here.
 
 ---
 
