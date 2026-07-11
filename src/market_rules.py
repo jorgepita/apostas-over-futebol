@@ -9,6 +9,7 @@ from src.config import (
     DEFAULT_MAX_ODD_BTTS,
     DEFAULT_MAX_ODD_O25,
 )
+from src.calculations import confidence_factor as _confidence_factor
 
 
 def get_market_thresholds(mode: str, market: str) -> dict:
@@ -541,12 +542,12 @@ def apply_stakes(df: pd.DataFrame, bankroll: float, rules: dict, label: str) -> 
     # base Kelly
     kelly = pd.to_numeric(df["KellyTrue"], errors="coerce").fillna(0.0)
 
-    # confiança baseada no edge (0% → 0 | 10%+ → 1)
+    # confiança baseada no edge (0% → 0 | 10%+ → 1) — canonical implementation in src/calculations.py
     edge = pd.to_numeric(df["Edge"], errors="coerce").fillna(0.0)
-    confidence_factor = (edge / 0.10).clip(lower=0.0, upper=1.0)
+    confidence = _confidence_factor(edge)
 
     # stake ajustado
-    df["StakeFracRaw"] = kelly * kfrac * confidence_factor
+    df["StakeFracRaw"] = kelly * kfrac * confidence
     df["StakeFrac"] = df["StakeFracRaw"].clip(lower=0.0, upper=cap_frac)
 
     total_frac = float(df["StakeFrac"].sum())

@@ -11,6 +11,7 @@ from src.calculations import (
     clamp_prob_btts,
     clamp_edge_o25,
     clamp_edge_btts,
+    apply_lambda_boost,
 )
 from src.data_loader import normalize_columns, _to_float, get_btts_odd
 
@@ -194,10 +195,7 @@ def process_league_fixtures(
                 min_games_away=min_games_away,
             )
 
-            if lambda_boost and lambda_boost != 1.0:
-                lam_h = max(0.25, min(2.20, lam_h * lambda_boost))
-                lam_a = max(0.20, min(1.90, lam_a * lambda_boost))
-                lam_t = lam_h + lam_a
+            lam_h, lam_a, lam_t = apply_lambda_boost(lam_h, lam_a, lambda_boost)
 
             base_row = build_base_row(fx, league_key, league_name, lam_h, lam_a, lam_t)
 

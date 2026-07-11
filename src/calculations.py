@@ -176,3 +176,37 @@ def clamp_edge_o25(edge: float) -> float:
 
 def clamp_edge_btts(edge: float) -> float:
     return float(max(-0.20, min(0.14, edge)))
+
+
+def confidence_factor(edge, scale: float = 0.10):
+    """Confidence scalar derived from edge, clamped to [0, 1] (0% edge -> 0, scale+ -> 1).
+    Accepts either a scalar float or a pandas Series/ndarray (used by apply_stakes() for
+    vectorized staking); the Series branch preserves the exact pre-extraction behaviour.
+    """
+    raw = edge / scale
+    try:
+        return raw.clip(lower=0.0, upper=1.0)
+    except AttributeError:
+        return max(0.0, min(1.0, float(raw)))
+
+
+def fair_odds(prob_model: float) -> float | None:
+    """The break-even odds implied by prob_model. None when prob_model is not positive."""
+    return (1.0 / prob_model) if prob_model and prob_model > 0 else None
+
+
+def expected_value(prob_model: float, odd: float, stake: float) -> float:
+    """Expected monetary value of staking `stake` at `odd`, given `prob_model`."""
+    return float(stake) * (float(prob_model) * float(odd) - 1.0)
+
+
+def apply_lambda_boost(lam_home: float, lam_away: float, boost: float) -> tuple[float, float, float]:
+    """Applies a per-league lambda_boost multiplier (config.json history.lambda_boost /
+    league_lambda_boost) to already-computed lambdas, clamped to the same bounds
+    compute_lambdas() itself uses. A falsy or 1.0 boost is a no-op. Returns
+    (lam_home, lam_away, lam_total).
+    """
+    if boost and boost != 1.0:
+        lam_home = max(0.25, min(2.20, lam_home * boost))
+        lam_away = max(0.20, min(1.90, lam_away * boost))
+    return lam_home, lam_away, lam_home + lam_away

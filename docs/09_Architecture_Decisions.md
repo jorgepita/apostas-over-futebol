@@ -412,3 +412,43 @@ Adding a dedicated endpoint (e.g. `POST /manual-bets`) purely to get a place to 
 **Do Not Revert Without Good Reason**
 
 Removing this check re-opens the exact failure mode it exists to close, and re-adding it later as a new endpoint instead of inside `/save` would split `manualBets` writes across two paths that must then be kept consistent forever — the cost ADR-008 already explains for a different data type but applies identically here.
+
+---
+
+## ADR-014 — Quantitative Formulas Are Canonical in Python; the JavaScript Mirror Is Verified by Golden-Vector Conformance Testing, Not Shared Source
+
+**Status:** Accepted
+
+**Date:** 2026-07-11 (Phase 26.29)
+
+**Decision**
+
+`src/calculations.py` is the single canonical implementation of every objective quantitative calculation the project uses: lambda projection (`compute_lambdas()`), the per-league lambda-boost multiplier (`apply_lambda_boost()`), model probability (`prob_over25()`, `prob_btts_yes_adjusted()`/`btts_prob_diagnostics()`), implied probability, edge, fair odds (`fair_odds()`), Kelly fraction (`kelly_fraction()`), confidence (`confidence_factor()`), and expected value (`expected_value()`). `index.html` contains a second, independent implementation of the same formulas — `QuantEngine`, an isolated JavaScript module with no DOM/state/network dependencies — consumed by the Manual Bet Scout. The two are **not** the same source file and cannot be, but they are held to identical numeric behaviour by a golden-vector conformance test suite (`tests/golden_vectors.json` + `tests/test_quant_engine_golden.py` + `tests/test_quant_engine_golden.js`) that must pass for both to be considered in sync. Score, Opinion, Recommendation Engine logic, Strategy Lab logic, and every other decision-layer concept are explicitly excluded from both implementations and remain with each consumer.
+
+**Context**
+
+Before this phase, `index.html` contained a hand-ported, independently-maintained copy of the Python model (`mbComputeLambdas()`, `mbProbOver25()`, `mbProbBttsAdjusted()`, `mbKellyFraction()`, four `mbClamp*()` functions, and a hardcoded `MB_HISTORY_CFG` mirroring `config.json`'s `history` block) — flagged in its own code comment as `// Ported from src/calculations.py — do NOT change formulas`, an acknowledgement that the duplication was known and manually policed rather than structurally prevented. A full inventory (this phase's investigation) found this port had already partially drifted: the JS `mbProbBttsAdjusted()` never exposed the diagnostic breakdown the Python `btts_prob_diagnostics()` computes, `confidence_factor` had no JS equivalent at all, and `fairOdd`/`EV` existed only in JS with no Python equivalent. `MB_HISTORY_CFG` required a human to notice and hand-update it every time `config.json`'s `history` block changed for the bot.
+
+The request that produced this ADR asked for "a single shared Quantitative Engine used by both" the Python bot and the JavaScript Scout. A literal reading — one implementation, one runtime, called by both — is not achievable here without violating one of three other hard constraints, all independently justified:
+- **ADR-005**: `index.html` has no build step, no framework, no npm, no transpiler.
+- **Avoiding unnecessary Railway round-trips**: Scout's analysis is currently instant and works with only a data-fetch dependency (GitHub raw content), not a live server call; routing every analysis through a new Railway endpoint would add latency, lose offline capability, and couple Scout's availability to the single-worker gunicorn process (ADR-006).
+- **No new runtime dependencies**: a WASM Python runtime (e.g. Pyodide) capable of running `src/calculations.py` literally in-browser is tens of megabytes and a large operational dependency for what is, in total, roughly 150 lines of arithmetic.
+
+**Reasoning**
+
+The actual harm "duplicated formulas" causes is not that two files exist — it is that they can **silently drift** with nothing to catch it, which is exactly what had already begun happening (see Context). Golden-vector conformance testing converts "one authoritative implementation" from a physical/textual property (impossible to guarantee across two runtimes without new heavyweight infrastructure) into a **verified behavioural property**: a fixed set of inputs computed once from the canonical Python engine, replayed against both implementations, with both test suites required to pass. This achieves everything the "no duplication" requirement is actually protecting against — silent divergence — without violating ADR-005, without adding latency, and without a new runtime dependency. It is the same pattern real-world multi-language SDKs use to keep equivalent logic in sync across runtimes that cannot literally share source.
+
+Python was chosen as canonical because it is the version already running in production, generating real-money picks; JavaScript's role is to catch up to and stay verified against that source of truth, not the reverse.
+
+**Consequences**
+
+- Any change to a formula must be made in `src/calculations.py` first, then `tests/golden_vectors.json` regenerated from the updated Python function, then `QuantEngine` updated to match, then both conformance suites re-run — see `04_Backend.md` §15 for the exact process and commands.
+- `QuantEngine` must remain a pure module: no `state` reference, no DOM access, no `fetch()` calls, no Score/Opinion/Recommendation logic. This is what makes it possible to extract and evaluate in an isolated Node context for testing (`tests/test_quant_engine_golden.js`) without a browser.
+- `src/calculations.py` gained three new named functions this phase (`confidence_factor()`, `fair_odds()`, `expected_value()`) that did not previously exist as explicit, callable functions — `confidence_factor()` was inline in `src/market_rules.py::apply_stakes()` before extraction (behaviourally identical after extraction, verified by comparing `apply_stakes()` output before and after on identical input); `fair_odds()`/`expected_value()` are new additions that were previously JS-only concepts (`fairOdd`, `EV` in `analyzeFixture()`), now also canonically defined in Python even though the bot's own pipeline does not currently consume them.
+- The Scout's `MB_HISTORY_CFG` hardcoded constant was replaced with a `loadModelConfig()` fetch of the real `config.json` (cached per session, falling back to a frozen copy of the prior defaults if the fetch fails) — closing the config-duplication gap without adding a Railway dependency, since `config.json` is fetched via the same GitHub raw-content mechanism already used for picks CSVs and `data_raw/*.csv`.
+- Two independent, low-maintenance test suites now exist (`tests/test_quant_engine_golden.py`, `tests/test_quant_engine_golden.js`) with zero new dependencies beyond what each language's standard library / already-installed packages provide.
+- **Post-implementation architecture audit follow-up (same phase):** a dedicated audit of the completed migration found one residual gap this ADR's own conformance guarantee had not yet closed — the per-league lambda-boost clamp-and-multiply step was inline, duplicated arithmetic in both `src/pick_generation.py` and `analyzeFixture()`, outside `src/calculations.py`/`QuantEngine` and outside the golden-vector suite. It was extracted into `apply_lambda_boost()` (Python) and mirrored as `QuantEngine.applyLambdaBoost()` (JavaScript), with golden-vector coverage added for both (8 vectors, verified identical to the pre-extraction inline formula). This closed the last quantitative-formula duplication inside the Bot + Scout architecture; the pre-existing, separately-scoped duplicate lambda logic in `fetch_oddsapi_fixtures.py` (Phase 1 fixture shortlisting — never part of this ADR's scope) remains untouched.
+
+**Do Not Revert Without Good Reason**
+
+Reverting to two unverified, independently-maintained implementations reopens the exact silent-drift failure mode this ADR exists to close — the partial drift found in this phase's investigation (missing BTTS diagnostics, missing confidence, a hand-maintained config mirror) is what happens by default without a conformance suite enforcing equivalence. Choosing a different sharing mechanism (Pyodide, a build step, a Railway round-trip) without a new fact changing the ADR-005/latency/dependency trade-offs analysed here would need to explain why those costs are now acceptable when they were rejected for the same reasons this phase rejected them.

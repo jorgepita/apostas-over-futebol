@@ -457,7 +457,8 @@ limit_picks_per_day():
 
 apply_stakes(rows, bankroll, rules, market):
     Kelly fraction: kelly_true = (edge / (odd - 1)) × kelly_fraction (0.18)
-    Stake€ = min(kelly_true × bankroll, cap_frac × bankroll)
+    Confidence: confidence_factor(edge) = clip(edge / 0.10, 0, 1) — src/calculations.py (Phase 26.29)
+    Stake€ = min(kelly_true × kelly_fraction × confidence_factor(edge) × bankroll, cap_frac × bankroll)
     Daily aggregate cap: daily_cap_frac × bankroll (0.12)
 
 add_rank_fields():
@@ -1024,3 +1025,35 @@ One gunicorn worker handles all requests serially. Concurrent requests queue and
 **Fail loudly at startup.** Both `sync_server.py` and `update_results.py` raise immediately if required environment variables are missing. A misconfigured deployment fails on startup rather than on the first request or the first settlement attempt.
 
 **Idempotent settlement.** Rows with `Resultado` already in `{W, L, P}` are skipped. Re-running settlement on the same data produces the same result. Settlement can be run multiple times without corrupting already-settled picks.
+
+---
+
+## 15. Shared Quantitative Engine (Phase 26.29)
+
+**Canonical implementation:** `src/calculations.py`. Contains every objective statistical calculation the project uses: `compute_lambdas()`, `apply_lambda_boost()`, `prob_over25()`, `prob_btts_yes_adjusted()`/`btts_prob_diagnostics()`, `kelly_fraction()`, `confidence_factor()`, `fair_odds()`, `expected_value()`, and the `clamp_*()` bounds. `src/pick_generation.py` and `src/market_rules.py::apply_stakes()` are its only Python callers.
+
+**JavaScript mirror:** `QuantEngine`, an isolated module in `index.html` between the `QUANT_ENGINE_START`/`QUANT_ENGINE_END` markers, consumed only by the Manual Bet Scout's `analyzeFixture()`. It is a pure module — no DOM, no `state`, no network I/O, no Score/Opinion/Recommendation logic — so it can be extracted and evaluated standalone by a test runner.
+
+**Why two implementations instead of one.** `index.html` has no build step and no framework (ADR-005); a literal single-runtime engine would require either compiling Python to run in the browser (a large WASM runtime for ~150 lines of arithmetic) or having the Scout call a Railway endpoint for every analysis (added latency, offline capability lost, coupling to the single-worker gunicorn process). Both were rejected — see ADR-014.
+
+**Conformance guarantee — golden-vector testing.** `tests/golden_vectors.json` is a frozen set of input → output pairs computed once directly from `src/calculations.py`. Two independent test suites replay the same vectors against each implementation:
+
+```
+python -m pytest tests/test_quant_engine_golden.py -v      # Python side (142+ vectors)
+node tests/test_quant_engine_golden.js                      # JS side — extracts QuantEngine
+                                                              # out of index.html via the
+                                                              # marker comments and evaluates
+                                                              # it in an isolated Node vm context
+```
+
+Both must pass for the two engines to be considered in sync. Neither test requires any dependency beyond what's already in `requirements.txt` (Python) or Node's own standard library (JavaScript — no `npm install`, consistent with ADR-005).
+
+**Updating a formula — required process:**
+1. Change the formula in `src/calculations.py` (the canonical implementation) first.
+2. Regenerate `tests/golden_vectors.json` by re-running the same input set through the updated Python function (see the vector-generation approach documented inline at the top of `tests/golden_vectors.json`'s sibling test file).
+3. Update `QuantEngine` in `index.html` to match.
+4. Re-run both conformance suites above — both must pass before the change is considered complete.
+
+**What must never be added to either engine:** Score, Opinion, Recommendation Engine logic, Strategy Lab logic, stake-sizing *decisions* (as opposed to the stake *calculation* `apply_stakes()` performs using the engine's `confidence_factor()`), or any UI/presentation concern. These stay in each consumer — see ADR-014.
+
+**Config as an engine input, not a hardcoded constant.** The JS `QuantEngine.computeLambdas()` takes `window`/`decay`/`minGamesHome`/`minGamesAway` as a parameter rather than reading a module-level default, exactly like the Python `compute_lambdas()` signature. The Scout loads these values (plus `lambda_boost`, `league_lambda_boost`, and `calibration.btts_probability_adjustment`) from `config.json` once per session (`loadModelConfig()`, cached, fetched from the same GitHub raw-content mechanism already used for picks CSVs — not a Railway round-trip), falling back to a frozen copy of the last-known defaults if the fetch fails.

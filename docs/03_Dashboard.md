@@ -360,7 +360,7 @@ b.isLocal === true
 
 **User interactions:**
 - Type a team name or date → `renderManualScout()` queries API-Football.
-- Select a fixture → Poisson model runs in JavaScript → edge and Kelly stake are computed.
+- Select a fixture → `analyzeFixture()` calls the shared `QuantEngine` module (Phase 26.29 — same formulas as the Python bot, see `01_Architecture.md` "Shared Quantitative Engine" and ADR-014) → edge and Kelly stake are computed.
 - "Criar" (Create Bet) → `mbHandleCreate()` → `addManualBetFromFixture()` — pushes to `state.manualBets`, calls `markDirty()`, re-renders the Manual Bets panels. The Scout card for that fixture disappears immediately (see below) and does not require a page refresh to stay hidden.
 - "Aprovar" (Approve) → sets `status: 'approved'`, calls `markDirty()`. Bet moves to Pending/Live.
 - "Rejeitar" (Reject) → sets `status: 'rejected'`, calls `markDirty()`. **The bet is not removed** — it remains permanently in `state.manualBets` as an analytical record (see ADR-012). It disappears from Live Center/Pending (both require `status === 'approved'`) and from bankroll/ROI/analytics (`getResolvedManualBets()` excludes `status === 'rejected'`), but stays visible in the Manual Bets list (badge "Rejeitada"). It also appears in the History page's "Rejeitadas" view (see §9) **only until settlement gives it a result** — once `resultado`/`placar` are populated, it drops out of "Rejeitadas" automatically (Phase 26.28) while remaining fully available to every module that reads `state.manualBets` directly (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual). Rejecting is reversible — clicking "Aprovar" on a rejected bet moves it back to `approved`, at which point it starts counting financially again.
@@ -446,12 +446,13 @@ The complete lifecycle of a manual bet in the dashboard:
 
 The user types a team name or date into the Scout search field. `renderManualScout()` calls the API-Football fixtures endpoint. Results are shown as fixture cards with team names, league, date, and kickoff.
 
-### Step 2 — Poisson Analysis
+### Step 2 — Quantitative Analysis (Phase 26.29)
 
-The user clicks a fixture card. The Poisson model runs in JavaScript:
-- Fetches `state.fixtures` (from `fixtures_today.csv`) to get `λ_home` and `λ_away`.
-- Computes goal probabilities for O1.5, O2.5, O3.5, BTTS.
-- Compares model probability to user-entered odd.
+The user clicks a fixture card. `analyzeFixture()` (in `index.html`) runs:
+- Loads `config.json` once per session (`loadModelConfig()`, cached, fetched from GitHub raw — falls back to a frozen default if the fetch fails) so the window/decay/min-games/lambda-boost/BTTS-adjustment values are the exact same ones the Python bot uses, not a hand-maintained copy.
+- Fetches the league's `data_raw/{league}.csv` history (`loadLeagueHistory()`, cached per league) to get `λ_home`/`λ_away` via `QuantEngine.computeLambdas()` — the same function (mirrored from `src/calculations.py::compute_lambdas()`) the bot's pick generation uses.
+- Calls `QuantEngine.probOver25()`/`probBttsDiagnostics()`, `.kellyFraction()`, `.confidenceFactor()`, `.fairOdds()`, `.expectedValue()` — every quantitative value (`ProbModel`, `ProbMarket`, `Edge`, `Confidence`, `KellyTrue`, `fairOdd`, `EV`) comes from this shared module, not from formulas maintained separately in the dashboard.
+- **Only after** the quantitative result is computed does the decision layer run: `computePickScore()` (heuristic 0–100 Score) and `classifyManualOpinion()` (STRONG BUY/BUY/NEUTRAL/AVOID) — both consume the QuantEngine output and remain outside it, per ADR-014.
 - Displays edge, Kelly fraction, recommended stake, and a verdict (value / no value).
 
 Analysis result is stored in the bet object as `botOpinion`, `edgeAtAnalysis`, `scoreAtAnalysis`, `analysisSnapshot`.

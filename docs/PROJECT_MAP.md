@@ -58,7 +58,7 @@ Python library modules used by the generation and settlement pipelines. No scrip
 |---|---|
 | `league_registry.py` | Single source of truth for all 21 league definitions |
 | `config.py` | Reads `config.json` with defaults; exposes typed constants |
-| `calculations.py` | Poisson probability calculations |
+| `calculations.py` | Shared Quantitative Engine (canonical) — Poisson probability, edge, Kelly, confidence, fair odds, EV. Mirrored (verified, not shared source) by `QuantEngine` in `index.html` — see `01_Architecture.md`/ADR-014 |
 | `pick_generation.py` | Kelly staking, edge filtering, pick selection |
 | `pipeline.py` | Output file writing (`save_all_outputs()`) |
 | `market_rules.py` | Market result calculation (O2.5, BTTS, etc.) |
@@ -81,7 +81,7 @@ Historical match result CSVs, one file per league. These are the training data f
 
 ### `tests/`
 
-Automated tests. Currently contains `test_season_model.py` which validates season year resolution for calendar-year leagues (MLS, Nordic). Add new tests here when covering new settlement logic.
+Automated tests. `test_season_model.py` validates season year resolution for calendar-year leagues (MLS, Nordic). `test_quant_engine.py` covers the three new Quantitative Engine functions (`confidence_factor`, `fair_odds`, `expected_value`). `golden_vectors.json` + `test_quant_engine_golden.py` (Python) + `test_quant_engine_golden.js` (Node, no dependencies) are the cross-language conformance suite for the Python/JS Quantitative Engine — see `04_Backend.md` §15 and ADR-014. Add new tests here when covering new settlement or quantitative logic.
 
 ### `tools/`
 

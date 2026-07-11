@@ -8,6 +8,8 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.30 | 2026-07-11 | Closed the one gap found by the post-migration QuantEngine architecture audit: the per-league lambda-boost clamp-and-multiply step was duplicated, unverified inline arithmetic in both `src/pick_generation.py` and `analyzeFixture()`. Extracted into `apply_lambda_boost()` (Python, canonical) and mirrored as `QuantEngine.applyLambdaBoost()` (JavaScript), with 8 new golden vectors (142/285 total Python/JS assertions). Verified byte-identical to the pre-extraction inline formula. No other quantitative duplication remains inside the Bot + Scout architecture — see ADR-014 |
+| 26.29 | 2026-07-11 | Introduced a shared Quantitative Engine: `src/calculations.py` is now the canonical implementation (extended with named `confidence_factor()`, `fair_odds()`, `expected_value()` functions), and `index.html` gained an isolated `QuantEngine` module that mirrors it exactly, replacing a previously hand-ported, partially-drifted JS copy (missing BTTS diagnostics, missing confidence, a hardcoded `config.json` mirror). A golden-vector conformance suite (`tests/golden_vectors.json` + Python/JS test siblings, 261+134 assertions) is the permanent safeguard against the two drifting again. Score/Opinion decision logic was extracted out of the Scout's `analyzeFixture()` into a separate `classifyManualOpinion()`, consuming — never duplicating — the engine's output. Zero change to bot pick generation, settlement, or CSV output (verified via before/after `apply_stakes()` comparison and the full existing 6-suite Playwright regression harness). See ADR-014 |
 | 26.28 | 2026-07-11 | Fixed `getRejectedManualBets()` so History → Rejeitadas only shows rejected bets that haven't been settled yet — previously it showed every rejected bet forever regardless of settlement, creating duplicate visibility with Strategy Lab/Opinion Validation/etc. once a rejected bet settled. Single-predicate fix (`&& b._lucro === null`, the existing project convention — confirmed no dedicated settlement helper exists to reuse instead of introducing one). No change to settlement, persistence, `cloud_state.json`, bankroll, ROI, or any analytical module; all verified via the existing 6-suite Playwright regression harness plus a new targeted 19-check script |
 | 26.27 | 2026-07-11 | Removed the legacy NBA subsystem entirely: 8 NBA-exclusive files deleted (5 scripts, 1 config file, 2 data/output CSVs) and 3 dead NBA keys removed from `config.json` (`bankroll.nba_over`, `rules.nba_over`, top-level `nba` block). Preceded by a full read-only audit (previous session) that verified zero shared code between the NBA and football pipelines, and by an archival git tag (`legacy-nba-final`) at the pre-removal commit. Full validation (syntax, test suite, config-equivalence, import checks) confirmed zero football behaviour changed. Repository is now exclusively football |
 | 26.26 | 2026-07-11 | Repository hygiene cleanup: removed obsolete `PROJECT_RULES.md` (superseded by `docs/`), replaced the content-free root `README.md` placeholder with a real landing page, committed `CLAUDE.md` and `.claude/settings.json` for the first time (closing a 3-session-old gap where docs already described them as committed), deleted stale diagnostic `audit_output*.txt` files, and added `.gitignore` rules for `.claude/settings.local.json` and `audit_output*.txt`. No code, business logic, or runtime behaviour changed |
@@ -33,6 +35,103 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.30 — Close the Lambda-Boost Duplication Gap (QuantEngine Audit Follow-Up)
+
+**Implemented:** 2026-07-11
+
+**Goal.** A dedicated post-migration architecture audit of Phase 26.29's QuantEngine work found exactly one genuine defect: the per-league lambda-boost application (`lam = clamp(lam * boost, lo, hi)`) existed as identical but independently-maintained inline arithmetic in both `src/pick_generation.py::process_league_fixtures()` and `analyzeFixture()` (`index.html`) — outside `src/calculations.py`, outside `QuantEngine`, and outside the golden-vector conformance suite. This was exactly the class of silent-drift risk ADR-014 exists to close, just not yet closed for this one small piece.
+
+**What was built.**
+- `src/calculations.py::apply_lambda_boost(lam_home, lam_away, boost) -> (lam_home, lam_away, lam_total)` — a pure function containing the complete previous inline behaviour (no-op for a falsy/1.0 boost; otherwise multiply-then-clamp each lambda to its existing bounds, recompute the total).
+- `src/pick_generation.py::process_league_fixtures()` now calls `apply_lambda_boost()` instead of inlining the clamp-and-multiply.
+- `QuantEngine.applyLambdaBoost()` mirrors it exactly in JavaScript, exported from the module.
+- `analyzeFixture()` now calls `QuantEngine.applyLambdaBoost(lamH, lamA, boost)` via destructuring assignment instead of inlining the same three lines.
+- 8 new golden vectors (typical boost, no-op boost, falsy boost, upper-clamp trigger, sub-1.0 dampening boost) generated directly from the real Python function, added to `tests/golden_vectors.json`. Both `tests/test_quant_engine_golden.py` and `tests/test_quant_engine_golden.js` extended to validate them.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `src/calculations.py` | Added `apply_lambda_boost()` |
+| `src/pick_generation.py` | Calls the named function instead of inlining |
+| `index.html` | Added `QuantEngine.applyLambdaBoost()`; `analyzeFixture()` calls it instead of inlining |
+| `tests/golden_vectors.json` | +8 vectors for `apply_lambda_boost` |
+| `tests/test_quant_engine_golden.py`, `tests/test_quant_engine_golden.js` | Extended to cover the new function |
+| `docs/09_Architecture_Decisions.md` | ADR-014 updated — Decision and Consequences note the closed gap |
+| `docs/01_Architecture.md` | Shared Quantitative Engine section and Pick Generation Flow trace updated |
+| `docs/04_Backend.md` | Canonical function list and vector count updated |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-11-quant-engine-boost-fix.md` | New handover |
+
+### Validation
+
+- **Python:** `python -m pytest tests/` — 186/186 passed (was 178; +8 new golden vectors).
+- **JavaScript:** `node tests/test_quant_engine_golden.js` — 285/285 assertions passed (was 261; +24, 8 vectors × 3 fields).
+- **Byte-identical proof:** the pre-extraction inline formula and the new `apply_lambda_boost()` function produce identical output across 8 representative cases including both clamp branches.
+- **Full existing 6-suite Playwright regression harness:** re-run in full — `test_opinion_validation.js`, `test_calibration_v2.js`, `test_recommendations.js`, `test_simulator.js`, `test_strategylab.js` all pass unchanged; `test.js` shows the same 5 pre-existing expected failures from Phase 26.28 (unrelated).
+- **Targeted Scout end-to-end re-test:** the 17-check scratchpad test from Phase 26.29 (network fully blocked, exercising the lambda-boost fallback path) re-run and passing, confirming `QuantEngine.applyLambdaBoost()` works correctly end-to-end in the real dashboard.
+- **Repeat targeted audit:** confirmed zero remaining inline `lam * boost` clamp arithmetic anywhere in `src/pick_generation.py` or `index.html` outside `src/calculations.py`/`QuantEngine`. The only remaining occurrence of this pattern anywhere in the repository is in `fetch_oddsapi_fixtures.py` — the pre-existing, already-flagged, explicitly out-of-scope Phase-1 fixture-shortlisting script (never part of "the Bot" or "the Scout" as this migration was scoped).
+
+### Impact
+
+**No further quantitative duplication remains inside the production Bot + Scout architecture.** Every formula either lives solely in `src/calculations.py`/`QuantEngine` or is verified identical between the two by the golden-vector conformance suite (now 16 functions, 142 Python / 285 JS assertions). Bot output, Scout output, and every dashboard analytical module are confirmed unchanged.
+
+---
+
+## Phase 26.29 — Shared Quantitative Engine (Python Canonical + Verified JS Mirror)
+
+**Implemented:** 2026-07-11
+
+**Goal.** Determine whether an existing, disconnected "Edge Engine" could be integrated into production (per a prior architectural audit's claim), and — after investigation found that claim did not match the codebase (the production pipeline's own edge computation was already fully integrated; see the standalone investigation earlier this session) — design and implement a genuinely shared Quantitative Engine consumed by both the Python bot and the JavaScript Manual Bet Scout, so both always compute probability/edge/confidence/Kelly/fair-odds from one verified source instead of two independently-maintained copies.
+
+**Current-state inventory (before any code change).** A complete inventory of every quantitative calculation in both languages found: `compute_lambdas`, `poisson_cdf`/`prob_over25`, `btts_prob_diagnostics`/`prob_btts_yes_adjusted`, `kelly_fraction`, and the four `clamp_*` bounds were **duplicated** — a JS `mb*`-prefixed set in `index.html`, explicitly flagged in its own comment as `// Ported from src/calculations.py — do NOT change formulas`. Confidence (`confidence_factor`, embedded inline in `apply_stakes()`) existed only in Python; `FairOdds`/`EV` existed only in JS (`analyzeFixture()`); `MB_HISTORY_CFG` was a hardcoded JS mirror of `config.json`'s `history` block, manually synced. Score and Opinion were confirmed JS-only, correctly outside any engine already.
+
+**Architecture decision.** A literal single-runtime shared engine is not achievable without violating ADR-005 (no build step/framework in `index.html`), adding unnecessary Railway round-trips, or introducing a large new runtime dependency (e.g. Pyodide). Presented three alternatives plus the requested approach to the user before implementing; approved: **Python remains canonical, JavaScript keeps a verified native mirror, and a golden-vector conformance test suite is the permanent guarantee of behavioural equivalence** — converting "one authoritative implementation" from an unenforceable textual property into a tested behavioural one. See ADR-014 for the full reasoning.
+
+**What was built.**
+- `src/calculations.py`: three new named, canonical functions — `confidence_factor(edge, scale=0.10)` (extracted from `apply_stakes()`'s inline formula, byte-identical, verified via before/after comparison), `fair_odds(prob_model)`, `expected_value(prob_model, odd, stake)`.
+- `src/market_rules.py::apply_stakes()`: now calls `confidence_factor()` instead of an inline pandas expression — same formula, now named and independently testable.
+- `index.html`: a new isolated `QuantEngine` module (delimited by `QUANT_ENGINE_START`/`QUANT_ENGINE_END` markers for test extraction) — pure functions only, no DOM/`state`/network reference — exposing `poissonCdf`, `probOver25`, `probBttsDiagnostics` (now returns the full diagnostic breakdown, matching Python — previously the JS version only returned the final probability), `probBttsAdjusted`, `kellyFraction`, the four `clamp*` functions, `confidenceFactor` (new), `fairOdds`, `expectedValue`, `weightedMean`, `computeLambdas` (now takes `cfg` as a parameter instead of reading a module-level default), and a convenience composite `analyzeMarket()`.
+- A **rounding fidelity fix** found only by running the conformance suite: Python's `btts_prob_diagnostics()` rounds several returned fields (`raw_poisson`, `after_base_adj`, `total_penalty`, `final_prob_unclamped` to 6dp; `lam_ratio`/`lam_gap`/`lam_product` to 4dp) — and the *rounded* `final_prob_unclamped` is what feeds the rest of Python's pipeline (clamp, edge, Kelly). The JS mirror initially returned unrounded values; added a `roundN()` helper to match Python's rounding exactly (JS's round-half-away-from-zero vs. Python's round-half-to-even differ only on an exact decimal tie, which transcendental function outputs essentially never produce).
+- `loadModelConfig()`: fetches `config.json` once per session (GitHub raw-content URL, same mechanism as picks CSVs — not a Railway round-trip), cached, with a frozen-defaults fallback if the fetch fails — replacing the hardcoded `MB_HISTORY_CFG` mirror.
+- `analyzeFixture()`: rewritten to call `QuantEngine.*` for every quantitative value, with a new `classifyManualOpinion()` helper cleanly separating the Score/Opinion decision layer from the quantitative section above it. Output shape is unchanged plus two new additive fields (`Confidence`, `diagnostics`) — every existing key any caller reads is preserved.
+- `tests/golden_vectors.json`: 134 input→output pairs computed once directly from the real `src/calculations.py` functions, covering every branch (BTTS penalty thresholds, lambda fallback vs. team-specific, Kelly boundary conditions, clamp edges).
+- `tests/test_quant_engine_golden.py` (Python, pytest) and `tests/test_quant_engine_golden.js` (Node, zero dependencies — extracts and evaluates `QuantEngine` directly out of `index.html`) replay the same vectors against each implementation.
+- `tests/test_quant_engine.py`: 15 unit tests for the three new Python functions, including a direct comparison against the pre-extraction inline formula.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `src/calculations.py` | Added `confidence_factor()`, `fair_odds()`, `expected_value()` |
+| `src/market_rules.py` | `apply_stakes()` now calls `confidence_factor()` instead of an inline expression |
+| `index.html` | New `QuantEngine` module; `analyzeFixture()` rewritten to consume it; new `classifyManualOpinion()`; new `loadModelConfig()`; `MB_HISTORY_CFG` replaced by `MB_HISTORY_CFG_FALLBACK` |
+| `tests/golden_vectors.json` | New — frozen conformance vectors |
+| `tests/test_quant_engine_golden.py`, `tests/test_quant_engine_golden.js` | New — cross-language conformance suites |
+| `tests/test_quant_engine.py` | New — unit tests for the three new Python functions |
+| `docs/01_Architecture.md` | New "Shared Quantitative Engine" component section; Pick Generation Flow updated; new architectural rule |
+| `docs/03_Dashboard.md` | Scout's analysis step (§7 Step 2) rewritten to describe QuantEngine consumption |
+| `docs/04_Backend.md` | New §15 "Shared Quantitative Engine"; `apply_stakes()` pseudocode updated to show `confidence_factor` |
+| `docs/09_Architecture_Decisions.md` | New ADR-014 |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/PROJECT_MAP.md` | `calculations.py`/`tests/` entries updated |
+| `docs/handovers/handover-2026-07-11-quant-engine.md` | New handover |
+
+### Validation
+
+- **Python:** `python -m pytest tests/` — 178/178 passed (29 season model + 15 new unit tests + 134 new golden vectors).
+- **JavaScript:** `node tests/test_quant_engine_golden.js` — 261/261 assertions passed across 15 functions.
+- **End-to-end bot behaviour:** `apply_stakes()` run on identical synthetic input before (git `HEAD`, dynamically loaded in isolation) and after the refactor — `Stake€`/`StakeFrac` outputs byte-identical.
+- **Full existing 6-suite Playwright regression harness:** `test_opinion_validation.js` (19/19), `test_calibration_v2.js` (11/11), `test_recommendations.js` (22/22), `test_simulator.js` (26/26), `test_strategylab.js` (32/32 — including explicit checks that the pool still includes rejected bets and the production baseline still excludes them) all pass unchanged. `test.js` shows the same 5 pre-existing expected failures from Phase 26.28 (unrelated, already documented there) — nothing new regressed.
+- **New end-to-end Scout tests (scratchpad, not committed):** 17 checks exercising `analyzeFixture()`'s full path with network fully blocked (proving the `config.json`/history fetch failures fall back gracefully, exactly as before) for both O2.5 and BTTS markets; 9 checks exercising the happy-path `config.json` fetch against the real file, confirming correct parsing, mapping, and caching.
+- **Syntax:** `node --check` clean on both extracted `<script>` blocks throughout.
+
+### Impact
+
+Bot pick generation, settlement, CSV output, and every dashboard analytical module (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator) are unchanged. The Scout now reads the exact same formulas and the exact same `config.json` values as the bot, with a permanent, low-maintenance automated guard (261+134 assertions, zero new runtime dependencies) against the two ever silently diverging again — closing the gap a prior session's own code comment had already flagged as a manually-policed risk.
 
 ---
 

@@ -1,0 +1,1357 @@
+{
+  "poisson_cdf": [
+    {
+      "k": 0,
+      "lam": 0.0,
+      "expected": 1.0
+    },
+    {
+      "k": 0,
+      "lam": 0.5,
+      "expected": 0.6065306597126334
+    },
+    {
+      "k": 0,
+      "lam": 1.2,
+      "expected": 0.30119421191220214
+    },
+    {
+      "k": 0,
+      "lam": 2.5,
+      "expected": 0.0820849986238988
+    },
+    {
+      "k": 0,
+      "lam": 3.8,
+      "expected": 0.0223707718561656
+    },
+    {
+      "k": 0,
+      "lam": 5.0,
+      "expected": 0.006737946999085467
+    },
+    {
+      "k": 1,
+      "lam": 0.0,
+      "expected": 1.0
+    },
+    {
+      "k": 1,
+      "lam": 0.5,
+      "expected": 0.9097959895689501
+    },
+    {
+      "k": 1,
+      "lam": 1.2,
+      "expected": 0.6626272662068446
+    },
+    {
+      "k": 1,
+      "lam": 2.5,
+      "expected": 0.2872974951836458
+    },
+    {
+      "k": 1,
+      "lam": 3.8,
+      "expected": 0.10737970490959489
+    },
+    {
+      "k": 1,
+      "lam": 5.0,
+      "expected": 0.040427681994512805
+    },
+    {
+      "k": 2,
+      "lam": 0.0,
+      "expected": 1.0
+    },
+    {
+      "k": 2,
+      "lam": 0.5,
+      "expected": 0.9856123220330293
+    },
+    {
+      "k": 2,
+      "lam": 1.2,
+      "expected": 0.8794870987836302
+    },
+    {
+      "k": 2,
+      "lam": 2.5,
+      "expected": 0.5438131158833295
+    },
+    {
+      "k": 2,
+      "lam": 3.8,
+      "expected": 0.26889667771111053
+    },
+    {
+      "k": 2,
+      "lam": 5.0,
+      "expected": 0.12465201948308113
+    },
+    {
+      "k": 3,
+      "lam": 0.0,
+      "expected": 1.0
+    },
+    {
+      "k": 3,
+      "lam": 0.5,
+      "expected": 0.9982483774437092
+    },
+    {
+      "k": 3,
+      "lam": 1.2,
+      "expected": 0.9662310318143443
+    },
+    {
+      "k": 3,
+      "lam": 2.5,
+      "expected": 0.7575761331330659
+    },
+    {
+      "k": 3,
+      "lam": 3.8,
+      "expected": 0.473484843259697
+    },
+    {
+      "k": 3,
+      "lam": 5.0,
+      "expected": 0.2650259152973617
+    },
+    {
+      "k": 5,
+      "lam": 0.0,
+      "expected": 1.0
+    },
+    {
+      "k": 5,
+      "lam": 0.5,
+      "expected": 0.9999858350626777
+    },
+    {
+      "k": 5,
+      "lam": 1.2,
+      "expected": 0.99849977490177
+    },
+    {
+      "k": 5,
+      "lam": 2.5,
+      "expected": 0.9579789618046939
+    },
+    {
+      "k": 5,
+      "lam": 3.8,
+      "expected": 0.8155562560569336
+    },
+    {
+      "k": 5,
+      "lam": 5.0,
+      "expected": 0.6159606548330632
+    }
+  ],
+  "prob_over25": [
+    {
+      "lam_total": 0.0,
+      "expected": 0.0
+    },
+    {
+      "lam_total": 1.0,
+      "expected": 0.08030139707139416
+    },
+    {
+      "lam_total": 1.9,
+      "expected": 0.29627964655750216
+    },
+    {
+      "lam_total": 2.2,
+      "expected": 0.37728625000368354
+    },
+    {
+      "lam_total": 2.5,
+      "expected": 0.4561868841166705
+    },
+    {
+      "lam_total": 2.8,
+      "expected": 0.5305463165333173
+    },
+    {
+      "lam_total": 3.5,
+      "expected": 0.6791528011378659
+    },
+    {
+      "lam_total": 4.2,
+      "expected": 0.7897620129769025
+    },
+    {
+      "lam_total": 5.0,
+      "expected": 0.8753479805169189
+    }
+  ],
+  "btts_prob_diagnostics": [
+    {
+      "lam_home": 1.3,
+      "lam_away": 1.2,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.508359,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.449898,
+        "pen_ratio": 1.0,
+        "pen_gap": 1.0,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 1.0,
+        "final_prob_unclamped": 0.449898,
+        "lam_ratio": 1.0833,
+        "lam_gap": 0.1,
+        "lam_product": 1.56
+      }
+    },
+    {
+      "lam_home": 2.0,
+      "lam_away": 0.7,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.435285,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.385227,
+        "pen_ratio": 0.88,
+        "pen_gap": 0.9,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 0.792,
+        "final_prob_unclamped": 0.3051,
+        "lam_ratio": 2.8571,
+        "lam_gap": 1.3,
+        "lam_product": 1.4
+      }
+    },
+    {
+      "lam_home": 3.0,
+      "lam_away": 1.0,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.600649,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.531574,
+        "pen_ratio": 0.88,
+        "pen_gap": 0.9,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 0.792,
+        "final_prob_unclamped": 0.421007,
+        "lam_ratio": 3.0,
+        "lam_gap": 2.0,
+        "lam_product": 3.0
+      }
+    },
+    {
+      "lam_home": 2.2,
+      "lam_away": 1.0,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.56208,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.49744,
+        "pen_ratio": 0.93,
+        "pen_gap": 0.9,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 0.837,
+        "final_prob_unclamped": 0.416358,
+        "lam_ratio": 2.2,
+        "lam_gap": 1.2,
+        "lam_product": 2.2
+      }
+    },
+    {
+      "lam_home": 2.0,
+      "lam_away": 1.05,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.562086,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.497446,
+        "pen_ratio": 1.0,
+        "pen_gap": 0.95,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 0.95,
+        "final_prob_unclamped": 0.472574,
+        "lam_ratio": 1.9048,
+        "lam_gap": 0.95,
+        "lam_product": 2.1
+      }
+    },
+    {
+      "lam_home": 1.5,
+      "lam_away": 0.5,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.305674,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.270522,
+        "pen_ratio": 0.88,
+        "pen_gap": 0.95,
+        "pen_smaller": 0.91,
+        "pen_product": 1.0,
+        "total_penalty": 0.76076,
+        "final_prob_unclamped": 0.205802,
+        "lam_ratio": 3.0,
+        "lam_gap": 1.0,
+        "lam_product": 0.75
+      }
+    },
+    {
+      "lam_home": 1.5,
+      "lam_away": 0.65,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.371308,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.328608,
+        "pen_ratio": 0.93,
+        "pen_gap": 1.0,
+        "pen_smaller": 0.96,
+        "pen_product": 1.0,
+        "total_penalty": 0.8928,
+        "final_prob_unclamped": 0.293381,
+        "lam_ratio": 2.3077,
+        "lam_gap": 0.85,
+        "lam_product": 0.975
+      }
+    },
+    {
+      "lam_home": 0.7,
+      "lam_away": 0.7,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.253426,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.224282,
+        "pen_ratio": 1.0,
+        "pen_gap": 1.0,
+        "pen_smaller": 1.0,
+        "pen_product": 0.92,
+        "total_penalty": 0.92,
+        "final_prob_unclamped": 0.20634,
+        "lam_ratio": 1.0,
+        "lam_gap": 0.0,
+        "lam_product": 0.49
+      }
+    },
+    {
+      "lam_home": 0.8,
+      "lam_away": 0.8,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.303239,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.268366,
+        "pen_ratio": 1.0,
+        "pen_gap": 1.0,
+        "pen_smaller": 1.0,
+        "pen_product": 0.97,
+        "total_penalty": 0.97,
+        "final_prob_unclamped": 0.260315,
+        "lam_ratio": 1.0,
+        "lam_gap": 0.0,
+        "lam_product": 0.64
+      }
+    },
+    {
+      "lam_home": 0.0,
+      "lam_away": 0.0,
+      "adj": 0.885,
+      "expected": {
+        "raw_poisson": 0.0,
+        "base_adj_factor": 0.885,
+        "after_base_adj": 0.0,
+        "pen_ratio": 0.88,
+        "pen_gap": 1.0,
+        "pen_smaller": 0.91,
+        "pen_product": 0.92,
+        "total_penalty": 0.736736,
+        "final_prob_unclamped": 0.0,
+        "lam_ratio": 99.0,
+        "lam_gap": 0.0,
+        "lam_product": 0.0
+      }
+    },
+    {
+      "lam_home": 1.4,
+      "lam_away": 1.3,
+      "adj": 0.8,
+      "expected": {
+        "raw_poisson": 0.548077,
+        "base_adj_factor": 0.8,
+        "after_base_adj": 0.438461,
+        "pen_ratio": 1.0,
+        "pen_gap": 1.0,
+        "pen_smaller": 1.0,
+        "pen_product": 1.0,
+        "total_penalty": 1.0,
+        "final_prob_unclamped": 0.438461,
+        "lam_ratio": 1.0769,
+        "lam_gap": 0.1,
+        "lam_product": 1.82
+      }
+    }
+  ],
+  "prob_btts_yes_adjusted": [
+    {
+      "lam_home": 1.3,
+      "lam_away": 1.2,
+      "adj": 0.885,
+      "expected": 0.449898
+    },
+    {
+      "lam_home": 2.0,
+      "lam_away": 0.7,
+      "adj": 0.885,
+      "expected": 0.3051
+    },
+    {
+      "lam_home": 3.0,
+      "lam_away": 1.0,
+      "adj": 0.885,
+      "expected": 0.421007
+    },
+    {
+      "lam_home": 2.2,
+      "lam_away": 1.0,
+      "adj": 0.885,
+      "expected": 0.416358
+    },
+    {
+      "lam_home": 2.0,
+      "lam_away": 1.05,
+      "adj": 0.885,
+      "expected": 0.472574
+    },
+    {
+      "lam_home": 1.5,
+      "lam_away": 0.5,
+      "adj": 0.885,
+      "expected": 0.205802
+    },
+    {
+      "lam_home": 1.5,
+      "lam_away": 0.65,
+      "adj": 0.885,
+      "expected": 0.293381
+    },
+    {
+      "lam_home": 0.7,
+      "lam_away": 0.7,
+      "adj": 0.885,
+      "expected": 0.20634
+    },
+    {
+      "lam_home": 0.8,
+      "lam_away": 0.8,
+      "adj": 0.885,
+      "expected": 0.260315
+    },
+    {
+      "lam_home": 0.0,
+      "lam_away": 0.0,
+      "adj": 0.885,
+      "expected": 0.0
+    },
+    {
+      "lam_home": 1.4,
+      "lam_away": 1.3,
+      "adj": 0.8,
+      "expected": 0.438461
+    }
+  ],
+  "kelly_fraction": [
+    {
+      "p": 0.55,
+      "odd": 2.0,
+      "expected": 0.10000000000000009
+    },
+    {
+      "p": 0.4,
+      "odd": 2.0,
+      "expected": 0.0
+    },
+    {
+      "p": 0.6,
+      "odd": 1.8,
+      "expected": 0.10000000000000009
+    },
+    {
+      "p": 0.5,
+      "odd": 1.01,
+      "expected": 0.0
+    },
+    {
+      "p": 0.5,
+      "odd": 1.0,
+      "expected": 0.0
+    },
+    {
+      "p": 0.5,
+      "odd": 0.0,
+      "expected": 0.0
+    },
+    {
+      "p": 0.72,
+      "odd": 2.5,
+      "expected": 0.5333333333333332
+    },
+    {
+      "p": 0.22,
+      "odd": 1.55,
+      "expected": 0.0
+    }
+  ],
+  "clamp_strength": [
+    {
+      "x": 0.0,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 0.8
+    },
+    {
+      "x": 0.5,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 0.8
+    },
+    {
+      "x": 0.79,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 0.8
+    },
+    {
+      "x": 0.8,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 0.8
+    },
+    {
+      "x": 1.0,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 1.0
+    },
+    {
+      "x": 1.3,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 1.3
+    },
+    {
+      "x": 1.31,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 1.3
+    },
+    {
+      "x": 2.0,
+      "lo": 0.8,
+      "hi": 1.3,
+      "expected": 1.3
+    }
+  ],
+  "clamp_prob_o25": [
+    {
+      "prob": 0.0,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.21,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.22,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.5,
+      "expected": 0.5
+    },
+    {
+      "prob": 0.72,
+      "expected": 0.72
+    },
+    {
+      "prob": 0.73,
+      "expected": 0.72
+    },
+    {
+      "prob": 1.0,
+      "expected": 0.72
+    }
+  ],
+  "clamp_prob_btts": [
+    {
+      "prob": 0.0,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.21,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.22,
+      "expected": 0.22
+    },
+    {
+      "prob": 0.5,
+      "expected": 0.5
+    },
+    {
+      "prob": 0.68,
+      "expected": 0.68
+    },
+    {
+      "prob": 0.69,
+      "expected": 0.68
+    },
+    {
+      "prob": 1.0,
+      "expected": 0.68
+    }
+  ],
+  "clamp_edge_o25": [
+    {
+      "edge": -0.3,
+      "expected": -0.2
+    },
+    {
+      "edge": -0.2,
+      "expected": -0.2
+    },
+    {
+      "edge": -0.19,
+      "expected": -0.19
+    },
+    {
+      "edge": 0.0,
+      "expected": 0.0
+    },
+    {
+      "edge": 0.15,
+      "expected": 0.15
+    },
+    {
+      "edge": 0.16,
+      "expected": 0.16
+    },
+    {
+      "edge": 0.17,
+      "expected": 0.16
+    }
+  ],
+  "clamp_edge_btts": [
+    {
+      "edge": -0.3,
+      "expected": -0.2
+    },
+    {
+      "edge": -0.2,
+      "expected": -0.2
+    },
+    {
+      "edge": -0.19,
+      "expected": -0.19
+    },
+    {
+      "edge": 0.0,
+      "expected": 0.0
+    },
+    {
+      "edge": 0.13,
+      "expected": 0.13
+    },
+    {
+      "edge": 0.14,
+      "expected": 0.14
+    },
+    {
+      "edge": 0.15,
+      "expected": 0.14
+    }
+  ],
+  "confidence_factor": [
+    {
+      "edge": -0.1,
+      "scale": 0.1,
+      "expected": 0.0
+    },
+    {
+      "edge": -0.01,
+      "scale": 0.1,
+      "expected": 0.0
+    },
+    {
+      "edge": 0.0,
+      "scale": 0.1,
+      "expected": 0.0
+    },
+    {
+      "edge": 0.02,
+      "scale": 0.1,
+      "expected": 0.19999999999999998
+    },
+    {
+      "edge": 0.05,
+      "scale": 0.1,
+      "expected": 0.5
+    },
+    {
+      "edge": 0.07,
+      "scale": 0.1,
+      "expected": 0.7000000000000001
+    },
+    {
+      "edge": 0.1,
+      "scale": 0.1,
+      "expected": 1.0
+    },
+    {
+      "edge": 0.15,
+      "scale": 0.1,
+      "expected": 1.0
+    },
+    {
+      "edge": 0.05,
+      "scale": 0.2,
+      "expected": 0.25
+    }
+  ],
+  "fair_odds": [
+    {
+      "prob_model": 0.0,
+      "expected": null
+    },
+    {
+      "prob_model": 0.22,
+      "expected": 4.545454545454546
+    },
+    {
+      "prob_model": 0.35,
+      "expected": 2.857142857142857
+    },
+    {
+      "prob_model": 0.5,
+      "expected": 2.0
+    },
+    {
+      "prob_model": 0.55,
+      "expected": 1.8181818181818181
+    },
+    {
+      "prob_model": 0.68,
+      "expected": 1.4705882352941175
+    },
+    {
+      "prob_model": 0.72,
+      "expected": 1.3888888888888888
+    }
+  ],
+  "expected_value": [
+    {
+      "prob_model": 0.55,
+      "odd": 2.0,
+      "stake": 10.0,
+      "expected": 1.0000000000000009
+    },
+    {
+      "prob_model": 0.4,
+      "odd": 2.0,
+      "stake": 10.0,
+      "expected": -1.9999999999999996
+    },
+    {
+      "prob_model": 0.6,
+      "odd": 1.8,
+      "stake": 5.0,
+      "expected": 0.40000000000000036
+    },
+    {
+      "prob_model": 0.5,
+      "odd": 2.0,
+      "stake": 0.0,
+      "expected": 0.0
+    },
+    {
+      "prob_model": 0.72,
+      "odd": 2.5,
+      "stake": 25.0,
+      "expected": 19.999999999999996
+    }
+  ],
+  "weighted_mean": [
+    {
+      "values": [
+        1,
+        2,
+        1,
+        3,
+        2,
+        1,
+        2,
+        3
+      ],
+      "decay": 0.88,
+      "expected": 1.9791783615811873
+    },
+    {
+      "values": [
+        0,
+        0,
+        0
+      ],
+      "decay": 0.9,
+      "expected": 0.0
+    },
+    {
+      "values": [
+        2
+      ],
+      "decay": 0.88,
+      "expected": 2.0
+    },
+    {
+      "values": [],
+      "decay": 0.88,
+      "expected": 0.0
+    },
+    {
+      "values": [
+        1,
+        3,
+        2,
+        2,
+        1,
+        4,
+        0,
+        2,
+        3,
+        1,
+        2,
+        2
+      ],
+      "decay": 0.88,
+      "expected": 1.9089913660022602
+    }
+  ],
+  "compute_lambdas": [
+    {
+      "label": "full_history",
+      "history": [
+        {
+          "Date": "2026-01-01",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-02",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-03",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-04",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-05",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-06",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-07",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-08",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-09",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-10",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-11",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-12",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-13",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-14",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-15",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-16",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-17",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-18",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-19",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-20",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-21",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-22",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-23",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-24",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 0
+        }
+      ],
+      "home": "Alpha FC",
+      "away": "Beta United",
+      "window": 12,
+      "decay": 0.88,
+      "min_games_home": 8,
+      "min_games_away": 8,
+      "expected": {
+        "lam_home": 1.5600000000000003,
+        "lam_away": 0.9634455302720936,
+        "lam_total": 2.523445530272094
+      }
+    },
+    {
+      "label": "sparse_history_triggers_fallback",
+      "history": [
+        {
+          "Date": "2026-01-01",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-02",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-03",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-04",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-05",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-06",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 0
+        }
+      ],
+      "home": "Alpha FC",
+      "away": "Beta United",
+      "window": 12,
+      "decay": 0.88,
+      "min_games_home": 8,
+      "min_games_away": 8,
+      "expected": {
+        "lam_home": 1.1666666666666667,
+        "lam_away": 1.0,
+        "lam_total": 2.166666666666667
+      }
+    },
+    {
+      "label": "full_history_diff_decay",
+      "history": [
+        {
+          "Date": "2026-01-01",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-02",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-03",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-04",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-05",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-06",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-07",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-08",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-09",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-10",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-11",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-12",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-13",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-14",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-15",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-16",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-17",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-18",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-01-19",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-02-20",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-03-21",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Delta Rovers",
+          "FTHG": 0,
+          "FTAG": 0
+        },
+        {
+          "Date": "2026-04-22",
+          "HomeTeam": "Delta Rovers",
+          "AwayTeam": "Beta United",
+          "FTHG": 1,
+          "FTAG": 1
+        },
+        {
+          "Date": "2026-05-23",
+          "HomeTeam": "Alpha FC",
+          "AwayTeam": "Zeta Athletic",
+          "FTHG": 2,
+          "FTAG": 2
+        },
+        {
+          "Date": "2026-06-24",
+          "HomeTeam": "Zeta Athletic",
+          "AwayTeam": "Beta United",
+          "FTHG": 3,
+          "FTAG": 0
+        }
+      ],
+      "home": "Alpha FC",
+      "away": "Beta United",
+      "window": 10,
+      "decay": 0.8,
+      "min_games_home": 6,
+      "min_games_away": 6,
+      "expected": {
+        "lam_home": 1.5600000000000003,
+        "lam_away": 1.04,
+        "lam_total": 2.6000000000000005
+      }
+    }
+  ],
+  "apply_lambda_boost": [
+    {
+      "lam_home": 1.2,
+      "lam_away": 1.0,
+      "boost": 1.12,
+      "expected": {
+        "lam_home": 1.344,
+        "lam_away": 1.12,
+        "lam_total": 2.4640000000000004
+      }
+    },
+    {
+      "lam_home": 1.2,
+      "lam_away": 1.0,
+      "boost": 1.0,
+      "expected": {
+        "lam_home": 1.2,
+        "lam_away": 1.0,
+        "lam_total": 2.2
+      }
+    },
+    {
+      "lam_home": 1.2,
+      "lam_away": 1.0,
+      "boost": 0,
+      "expected": {
+        "lam_home": 1.2,
+        "lam_away": 1.0,
+        "lam_total": 2.2
+      }
+    },
+    {
+      "lam_home": 1.5,
+      "lam_away": 1.3,
+      "boost": 1.12,
+      "expected": {
+        "lam_home": 1.6800000000000002,
+        "lam_away": 1.4560000000000002,
+        "lam_total": 3.136
+      }
+    },
+    {
+      "lam_home": 2.0,
+      "lam_away": 1.8,
+      "boost": 1.12,
+      "expected": {
+        "lam_home": 2.2,
+        "lam_away": 1.9,
+        "lam_total": 4.1
+      }
+    },
+    {
+      "lam_home": 0.3,
+      "lam_away": 0.25,
+      "boost": 1.12,
+      "expected": {
+        "lam_home": 0.336,
+        "lam_away": 0.28,
+        "lam_total": 0.6160000000000001
+      }
+    },
+    {
+      "lam_home": 1.9,
+      "lam_away": 1.7,
+      "boost": 1.0,
+      "expected": {
+        "lam_home": 1.9,
+        "lam_away": 1.7,
+        "lam_total": 3.5999999999999996
+      }
+    },
+    {
+      "lam_home": 1.0,
+      "lam_away": 0.9,
+      "boost": 0.95,
+      "expected": {
+        "lam_home": 0.95,
+        "lam_away": 0.855,
+        "lam_total": 1.805
+      }
+    }
+  ]
+}

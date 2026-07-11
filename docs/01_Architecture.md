@@ -104,6 +104,22 @@ Data flow directions:
 
 ---
 
+### Shared Quantitative Engine — `src/calculations.py` (Python) + `QuantEngine` (`index.html`, Phase 26.29)
+
+**Purpose:** The single, authoritative implementation of every objective statistical calculation the project uses: lambda (λ) projection from historical form, the per-league lambda-boost multiplier, Poisson model probability, implied/market probability, edge, fair odds, Kelly fraction, confidence, and BTTS penalty diagnostics.
+
+**Canonical implementation:** `src/calculations.py`. This is the version the production bot actually runs (`main.py` → `src/pick_generation.py` → `src/calculations.py`), and the one any formula change must be made in first.
+
+**JavaScript mirror:** `QuantEngine`, an isolated module inside `index.html` (delimited by `QUANT_ENGINE_START`/`QUANT_ENGINE_END` markers), consumed exclusively by the Manual Bet Scout (`analyzeFixture()`). It contains the same functions under the same numeric behaviour — no DOM access, no `state` reference, no network I/O, and no decision logic (Score/Opinion/Recommendation). See ADR-014 for why this is two verified implementations rather than one shared runtime.
+
+**What the engine does NOT contain:** Score, Opinion, Recommendation Engine logic, Strategy Lab logic, stake-sizing *decisions*, or any UI/presentation code. Those are consumers of the engine's output, not part of it — in Python there is no such consumer today (the bot has no decision layer beyond its own filter/rank/stake rules, which do call the engine's `confidence_factor()`); in JavaScript, `computePickScore()` and the Opinion classification in `analyzeFixture()` are the consumers.
+
+**Conformance guarantee:** `tests/golden_vectors.json` (inputs → outputs computed once from the Python engine) + `tests/test_quant_engine_golden.py` (Python) + `tests/test_quant_engine_golden.js` (Node, extracts and evaluates `QuantEngine` directly out of `index.html`) — both must pass for both implementations to be considered in sync. See `04_Backend.md` §8 for the exact run commands and the process for updating a formula.
+
+**Does not own:** Score, Opinion, any decision/recommendation logic, stake-sizing policy, or presentation.
+
+---
+
 ### Browser Dashboard — `index.html`
 
 **Purpose:** Operational interface. Renders picks, manages manual bets, displays analytics.
@@ -217,13 +233,19 @@ run_main.py
      ├─ load_fixtures(url)         // reads fixtures_today.csv
      │
      ├─ for each league:
-     │   └─ process_league_fixtures()
-     │       ├─ Poisson model: estimate λ_home, λ_away, λ_total
-     │       ├─ compute P(goals > N) for O1.5, O2.5, O3.5; P(BTTS)
-     │       ├─ compare model probability to 1/odd (implied probability)
-     │       ├─ edge = model_prob − implied_prob
+     │   └─ process_league_fixtures()               // src/pick_generation.py
+     │       ├─ src/calculations.py::compute_lambdas()      // λ_home, λ_away, λ_total
+     │       ├─ src/calculations.py::apply_lambda_boost()   // per-league boost, clamped (Phase 26.29 follow-up)
+     │       ├─ src/calculations.py::prob_over25() / prob_btts_yes_adjusted()  // model probability
+     │       ├─ implied probability = 1/odd (market/"fair-odds" side)
+     │       ├─ edge = model_prob − implied_prob (clamped)
      │       ├─ filter by minimum edge threshold (dynamic Kelly-based floor)
-     │       └─ compute Kelly fraction → stake€
+     │       └─ apply_stakes(): src/calculations.py::confidence_factor() scales
+     │           kelly_fraction() → StakeFrac → Stake€ (Phase 26.29)
+     │
+     │   (compute_lambdas/apply_lambda_boost/prob_over25/prob_btts_yes_adjusted/
+     │    kelly_fraction/confidence_factor/fair_odds/expected_value are the
+     │    shared Quantitative Engine — see "Shared Quantitative Engine" above)
      │
      ├─ deduplicate against sent_state.json
      │   └─ picks already sent today are excluded from output and Telegram
@@ -476,3 +498,5 @@ These rules must be preserved in future development.
 **The 60-second browser interval refreshes CSVs only.** It does not and must not call `GET /load`. Adding a cloud sync to the interval would issue one Railway→GitHub API request every 60 seconds per open browser tab. If more frequent cloud sync is needed, implement a backoff strategy or a targeted event-driven refresh — not a fixed-interval blanket call.
 
 **Settlement skips rather than fails.** A row that cannot be settled this run (game not yet finished, API unreachable, no fixture matched) is skipped with a diagnostic log. It will be retried on the next scheduled run. Settlement never deletes rows, never writes partial results, and never leaves a file in an inconsistent state.
+
+**`src/calculations.py` is the only canonical implementation of the quantitative formulas.** `QuantEngine` in `index.html` is a verified mirror, not a second authority — a formula change starts in `src/calculations.py`, regenerates `tests/golden_vectors.json`, then updates `QuantEngine` to match. Score, Opinion, Recommendation, and every other decision-layer concept must never be added to either engine; they belong to the consumer (see ADR-014).
