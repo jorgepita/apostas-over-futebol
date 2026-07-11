@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.31 | 2026-07-11 | Corrected rejected-bet lifecycle visibility: Phase 26.28's fix removed the duplicate from the wrong page. `getRejectedManualBets()` reverted to showing every rejected bet (settled or not) — "Rejeitadas" is the permanent archive, exactly as originally designed. The actual fix: `renderManualBets()` (operational "Apostas Manuais" list) now hides a rejected bet once it's settled, since a settled bet no longer needs attention there. No change to settlement, persistence, `cloud_state.json`, QuantEngine, or any analytical module — all verified via the full 6-suite Playwright regression harness (now 6/6 fully green) plus a new 24-check targeted script |
 | 26.30 | 2026-07-11 | Closed the one gap found by the post-migration QuantEngine architecture audit: the per-league lambda-boost clamp-and-multiply step was duplicated, unverified inline arithmetic in both `src/pick_generation.py` and `analyzeFixture()`. Extracted into `apply_lambda_boost()` (Python, canonical) and mirrored as `QuantEngine.applyLambdaBoost()` (JavaScript), with 8 new golden vectors (142/285 total Python/JS assertions). Verified byte-identical to the pre-extraction inline formula. No other quantitative duplication remains inside the Bot + Scout architecture — see ADR-014 |
 | 26.29 | 2026-07-11 | Introduced a shared Quantitative Engine: `src/calculations.py` is now the canonical implementation (extended with named `confidence_factor()`, `fair_odds()`, `expected_value()` functions), and `index.html` gained an isolated `QuantEngine` module that mirrors it exactly, replacing a previously hand-ported, partially-drifted JS copy (missing BTTS diagnostics, missing confidence, a hardcoded `config.json` mirror). A golden-vector conformance suite (`tests/golden_vectors.json` + Python/JS test siblings, 261+134 assertions) is the permanent safeguard against the two drifting again. Score/Opinion decision logic was extracted out of the Scout's `analyzeFixture()` into a separate `classifyManualOpinion()`, consuming — never duplicating — the engine's output. Zero change to bot pick generation, settlement, or CSV output (verified via before/after `apply_stakes()` comparison and the full existing 6-suite Playwright regression harness). See ADR-014 |
 | 26.28 | 2026-07-11 | Fixed `getRejectedManualBets()` so History → Rejeitadas only shows rejected bets that haven't been settled yet — previously it showed every rejected bet forever regardless of settlement, creating duplicate visibility with Strategy Lab/Opinion Validation/etc. once a rejected bet settled. Single-predicate fix (`&& b._lucro === null`, the existing project convention — confirmed no dedicated settlement helper exists to reuse instead of introducing one). No change to settlement, persistence, `cloud_state.json`, bankroll, ROI, or any analytical module; all verified via the existing 6-suite Playwright regression harness plus a new targeted 19-check script |
@@ -35,6 +36,55 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.31 — Correct Rejected Bet Lifecycle Visibility (Fix the Right Page)
+
+**Implemented:** 2026-07-11
+
+**Goal.** Phase 26.28 fixed a real bug (a settled rejected bet stayed visible in "Histórico → Rejeitadas" forever) by narrowing `getRejectedManualBets()` to unsettled-only bets. This phase's investigation established that fix targeted the wrong page: "Rejeitadas" was always intended as the permanent archive of rejected bets, settled or not. The actual duplicate-visibility complaint was that the *operational* "Apostas Manuais" list never stopped showing a rejected bet once it settled — since a rejected bet's `status` stays `'rejected'` forever (ADR-012) and that list's filter never checked settlement state at all.
+
+**Investigation — visibility matrix (before this phase).**
+
+| State | Apostas Manuais | Histórico Rejeitadas | Histórico Resolvidas | Strategy Lab | Opinion Val./Rec. Engine/Simulator |
+|---|---|---|---|---|---|
+| Rejected + Pending | YES | YES | NO | NO | NO |
+| Rejected + Settled | **YES (bug)** | **NO (Phase 26.28)** | NO | YES | NO |
+
+**Visibility matrix (after this phase).**
+
+| State | Apostas Manuais | Histórico Rejeitadas | Histórico Resolvidas | Strategy Lab | Opinion Val./Rec. Engine/Simulator |
+|---|---|---|---|---|---|
+| Rejected + Pending | YES | YES | NO | NO | NO |
+| Rejected + Settled | **NO (fixed)** | **YES (reverted)** | NO | YES | NO |
+
+**Fix.**
+- `getRejectedManualBets()` reverted to `status === 'rejected'` (no settlement check) — "Rejeitadas" is once again the permanent archive.
+- `renderManualBets()`'s row filter (the operational "Apostas Manuais" list) gained one additional exclusion: a `status === 'rejected'` bet with `_lucro !== null` (settled) is now hidden — it no longer needs attention on the page a user actively triages from.
+- Both `getRejectedManualBets()`'s and `getRejectedHistoryRows()`'s doc comments updated to describe the corrected, permanent-archive behaviour.
+
+**Scope discipline.** No change to the settlement engine, `cloud_state.json`, CSV schema, bankroll/ROI calculation, `status` values, `QuantEngine`, the Recommendation Engine, Strategy Lab, Opinion Validation, or the Simulator — confirmed by full regression re-run.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `getRejectedManualBets()` reverted (removed the settlement check); `renderManualBets()`'s filter gained the settled-rejected exclusion; both functions' doc comments updated |
+| `docs/03_Dashboard.md` | Manual Bets §7 (Rejection step, both wordings) and §9 (Resolvidas/Rejeitadas toggle) updated; ASCII lifecycle diagram corrected |
+| `docs/05_Known_Issues.md` | New `DASHBOARD-3` resolved entry documenting the correction; `DASHBOARD-2` annotated to point to it |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-11-rejected-bets-lifecycle-fix.md` | New handover |
+
+### Validation
+
+- **Targeted regression script (new, 24 checks, scratchpad-only, not committed):** seeded rejected+unsettled, rejected+settled, approved+settled, and plain-pending bets; verified `getRejectedManualBets()` now returns both rejected bets (unsettled and settled); `getResolvedManualBets()` and `getStrategyLabPool()` unchanged; the "Apostas Manuais" DOM list shows the unsettled rejected bet but not the settled one; the "Rejeitadas" DOM table shows both; "Resolvidas" shows neither; a settled rejected bet appears in exactly one operational/archive place (Rejeitadas only); all 4 requested lifecycle scenarios (Scout→Reject visible in both pages; Reject→settle disappears from Apostas Manuais but stays in Rejeitadas+analytics; Remove→Scout card reappears; Approved→Live→Settled unchanged) pass.
+- **Full existing 6-suite Playwright regression harness:** all 6 suites now pass completely, including `test.js` — its 5 previously-"failing" checks (flagged as expected in Phase 26.28's own handover) were written for the original pre-26.28 behaviour and now pass again, confirming this revert is correct. `test_opinion_validation.js`, `test_calibration_v2.js`, `test_recommendations.js`, `test_simulator.js`, `test_strategylab.js` all pass unchanged.
+- **Console/page errors:** zero new errors; only the pre-existing, harness-induced `Failed to fetch` noise from deliberately blocked network calls (confirmed baseline in prior sessions).
+
+### Impact
+
+"Apostas Manuais" is now a true operational list — it only shows bets that still need attention, dropping a rejected bet the moment it's settled. "Histórico → Rejeitadas" is now a true permanent archive — a rejected bet stays there forever regardless of settlement, matching how "Resolvidas" already behaves for non-rejected bets. No duplicate visibility exists anywhere: a settled rejected bet appears in exactly one operational/historical view (Rejeitadas) plus whichever analytical modules were already designed to include it.
 
 ---
 

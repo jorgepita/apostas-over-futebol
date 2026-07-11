@@ -4874,17 +4874,18 @@ button:disabled {
         return getManualRowsMerged().filter(b => b._lucro !== null && b.status !== 'rejected');
       }
 
-      // Rejected manual bets that have NOT yet been settled — feeds the History page's
-      // "Rejeitadas" view only. Once a rejected bet is settled (resultado/_lucro/placar
-      // populated by the shared engine — ADR-012), it's no longer "awaiting an outcome"
-      // from this page's perspective and disappears from here; the bet itself is never
-      // deleted and remains fully available to every module that reads state.manualBets
-      // directly rather than through this function (Strategy Lab's getStrategyLabPool(),
-      // Opinion Validation/Recommendation Engine/Simulator/Bot vs Manual's
-      // getResolvedManualBets() pool) — none of those call getRejectedManualBets(), so
-      // this filter change only affects Histórico → Rejeitadas.
+      // Every rejected manual bet, settled or not — feeds the History page's
+      // "Rejeitadas" view, the permanent archive of rejected bets (Phase 26.31).
+      // Unlike the operational "Apostas Manuais" list (which hides a rejected bet
+      // the moment it settles — see renderManualBets()), this view never drops a
+      // bet: settlement only adds resultado/_lucro/placar to the same row (ADR-012),
+      // it never removes the row from here. The bet itself is never deleted and
+      // remains fully available to every module that reads state.manualBets
+      // directly (Strategy Lab's getStrategyLabPool(), Opinion Validation/
+      // Recommendation Engine/Simulator/Bot vs Manual's getResolvedManualBets()
+      // pool) — none of those call getRejectedManualBets().
       function getRejectedManualBets() {
-        return getManualRowsMerged().filter(b => b.status === 'rejected' && b._lucro === null);
+        return getManualRowsMerged().filter(b => b.status === 'rejected');
       }
 
       function getExecutionStats() {
@@ -5264,12 +5265,11 @@ button:disabled {
 
       // Rejected manual bets for the History page's "Rejeitadas" view — reuses the
       // same filter bar (search/league/market/result/date/odds) as the Resolved
-      // view. Only rejected bets NOT YET settled are shown here (a rejected bet
-      // still awaiting its outcome); once settlement populates a result, the bet
-      // moves out of this view automatically (getRejectedManualBets() excludes it)
-      // but stays fully available everywhere else that reads manual bets directly
-      // (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs
-      // Manual). See ADR-012 and §9 in 03_Dashboard.md.
+      // view. This is the PERMANENT archive of rejected bets: both a rejected bet
+      // still awaiting its outcome AND one settlement has already given a result
+      // are shown here (Phase 26.31) — the operational "Apostas Manuais" list is
+      // where a rejected bet stops appearing once settled, not this page. See
+      // ADR-012 and §9 in 03_Dashboard.md.
       function getRejectedHistoryRows() {
         const filters = getHistoryFilters();
         return filterManualRows(getRejectedManualBets(), filters)
@@ -7855,7 +7855,15 @@ button:disabled {
         }
 
         const rows = sortManualRowsForDisplay(
-          getManualRowsMerged().filter(b => !b.isLocal || (b.status !== 'approved' && b.status !== 'settled'))
+          getManualRowsMerged().filter(b => {
+            if (!b.isLocal) return true;
+            if (b.status === 'approved' || b.status === 'settled') return false;
+            // A rejected bet that has already been settled no longer needs
+            // attention here — it moves permanently to Histórico → Rejeitadas
+            // (Phase 26.31; see getRejectedManualBets()), not this operational list.
+            if (b.status === 'rejected' && b._lucro !== null) return false;
+            return true;
+          })
         );
 
         const opinionClsMap = { 'STRONG BUY': 'good', 'BUY': 'info', 'NEUTRAL': 'warn', 'AVOID': 'bad' };

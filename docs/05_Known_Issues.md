@@ -14,15 +14,27 @@ None currently open.
 
 ## Resolved Issues
 
+### DASHBOARD-3 — DASHBOARD-2's Fix Targeted the Wrong Page; Duplicate Visibility Corrected in the Operational List Instead
+
+**Status:** Resolved — 2026-07-11 (Phase 26.31). Full technical detail in `08_Change_Log.md` — Phase 26.31. **Supersedes DASHBOARD-2 below — see that entry's note.**
+
+**Was:** DASHBOARD-2's fix made `getRejectedManualBets()` hide a rejected bet from "Rejeitadas" once it settled. This was the wrong page to fix: "Rejeitadas" is the intended permanent archive of rejected bets (settled or not), while the actual duplicate-visibility problem was that the *operational* "Apostas Manuais" list never stopped showing a rejected bet after it settled — that list's filter (`renderManualBets()`) only checked `status` (`!== 'approved' && !== 'settled'`), and a rejected bet's `status` stays `'rejected'` forever (ADR-012), so it never dropped out of the list a user works from day to day.
+
+**Root cause:** Two separate filters govern rejected-bet visibility, and DASHBOARD-2 corrected the one that didn't need it while leaving the real bug in place: `renderManualBets()`'s row filter had no check on settlement state at all, so a settled rejected bet stayed in the operational list indefinitely, needing no further action but still cluttering the page the user actually triages from.
+
+**Fix:** `getRejectedManualBets()` reverted to its pre-DASHBOARD-2 predicate (`status === 'rejected'`, settled or not) — "Rejeitadas" is now correctly the permanent archive. `renderManualBets()`'s filter gained one additional exclusion: a `status === 'rejected'` bet with `_lucro !== null` (settled) is now hidden from the operational list. Net effect: a rejected bet appears in both "Apostas Manuais" and "Rejeitadas" while unsettled; once settled, it drops out of "Apostas Manuais" only, remaining permanently in "Rejeitadas" and in every analytical module that reads `state.manualBets` directly (unaffected by either fix, since none of them call `getRejectedManualBets()`).
+
+---
+
 ### DASHBOARD-2 — Settled Rejected Bets Remained Visible in History → Rejeitadas, Creating Duplicate Visibility With Analytics
 
-**Status:** Resolved — 2026-07-11 (Phase 26.28). Full technical detail in `08_Change_Log.md` — Phase 26.28.
+**Status:** Resolved — 2026-07-11 (Phase 26.28). **Note (2026-07-11, Phase 26.31): this fix targeted the wrong page — see DASHBOARD-3 above for the correction.** Full technical detail in `08_Change_Log.md` — Phase 26.28 and Phase 26.31.
 
 **Was:** A rejected manual bet stayed visible in the History page's "Rejeitadas" view forever, even after settlement gave it a real result. At the same time, the same bet correctly began appearing in Strategy Lab, Opinion Validation, and other analytical modules once settled (by design — see ADR-012). This created the appearance of the same analytical record being shown twice at once.
 
-**Root cause:** `getRejectedManualBets()` (`index.html`) filtered only on `status === 'rejected'`, with no check on whether the bet had been settled. Since ADR-012 deliberately keeps a rejected bet's `status` at `'rejected'` forever — even after `resultado`/`lucro`/`placar` are populated by the shared settlement engine — this predicate returned every rejected bet regardless of settlement state. "Rejeitadas" is the only consumer of this function (2 call sites total: its own definition and `getRejectedHistoryRows()`); every analytical module (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual) sources its bet pool independently and never calls this function, so none of them were affected by the bug or by the fix.
+**Root cause (as understood at the time):** `getRejectedManualBets()` (`index.html`) filtered only on `status === 'rejected'`, with no check on whether the bet had been settled. Since ADR-012 deliberately keeps a rejected bet's `status` at `'rejected'` forever — even after `resultado`/`lucro`/`placar` are populated by the shared settlement engine — this predicate returned every rejected bet regardless of settlement state. "Rejeitadas" is the only consumer of this function (2 call sites total: its own definition and `getRejectedHistoryRows()`); every analytical module (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual) sources its bet pool independently and never calls this function, so none of them were affected by the bug or by the fix.
 
-**Fix:** `getRejectedManualBets()` now also requires `b._lucro === null` (not yet settled — the same convention `getResolvedManualBets()` already uses for the opposite check). A rejected bet disappears from "Rejeitadas" automatically once settled; it is never deleted and remains fully available everywhere else that reads `state.manualBets` directly. Confirmed via a repository-wide search that no dedicated "is settled" helper already existed to reuse — `_lucro === null` is the established inline convention used at 5+ other sites in the file, so no new abstraction was introduced.
+**Fix applied at the time (since reverted — see DASHBOARD-3):** `getRejectedManualBets()` was changed to also require `b._lucro === null` (not yet settled). This was later recognised as fixing the symptom on the wrong page — "Rejeitadas" is the intended permanent archive, and the operational "Apostas Manuais" list was the one that actually needed the settlement check. See DASHBOARD-3.
 
 ---
 
