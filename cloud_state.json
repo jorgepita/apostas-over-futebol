@@ -6168,8 +6168,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-11T22:29:01.500226+00:00",
-      "lastSuccessAt": "2026-07-11T22:29:01.500226+00:00",
+      "lastCheckedAt": "2026-07-11T23:15:19.090667+00:00",
+      "lastSuccessAt": "2026-07-11T23:15:19.090667+00:00",
       "status": "ok"
     }
   }
