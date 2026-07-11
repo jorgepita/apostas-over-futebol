@@ -7254,6 +7254,7 @@ button:disabled {
         lambdaBoost: 1.12,
         leagueLambdaBoost: { japao: 1.0, coreia: 1.0, finlandia: 1.0, islandia: 1.0, brasil: 1.0 },
         bttsAdj: 0.885,
+        apiFootballLeagueIds: {},
       };
 
       const MB_DATA_RAW_BASE = 'https://raw.githubusercontent.com/jorgepita/apostas-over-futebol/main/data_raw/';
@@ -7279,6 +7280,9 @@ button:disabled {
             lambdaBoost: hist.lambda_boost ?? MB_HISTORY_CFG_FALLBACK.lambdaBoost,
             leagueLambdaBoost: hist.league_lambda_boost || MB_HISTORY_CFG_FALLBACK.leagueLambdaBoost,
             bttsAdj: (raw.calibration && raw.calibration.btts_probability_adjustment) ?? MB_HISTORY_CFG_FALLBACK.bttsAdj,
+            // Reused as-is (no new fetch) to derive leagueId when persisting fixture
+            // metadata on manual bets (Phase 26.32) — see addManualBetFromFixture().
+            apiFootballLeagueIds: (raw.api_football && raw.api_football.league_ids) || MB_HISTORY_CFG_FALLBACK.apiFootballLeagueIds,
           };
         } catch {
           state._modelConfigCache = MB_HISTORY_CFG_FALLBACK;
@@ -7756,7 +7760,7 @@ button:disabled {
         }
       }
 
-      function mbHandleCreate(card) {
+      async function mbHandleCreate(card) {
         if (!card) return;
         const mk    = card.dataset.matchKey;
         const date  = card.dataset.date;
@@ -7790,6 +7794,17 @@ button:disabled {
           return;
         }
 
+        // Immutable fixture metadata, persisted once at creation time (Phase 26.32)
+        // rather than recovered from state.fixtures later — see ADR referenced in
+        // addManualBetFromFixture(). fixtureRecord is null for a fixture no longer
+        // in state.fixtures by the time "Criar" is clicked (rare); the bet is then
+        // created exactly as before this phase (kickoffUTC/homeTeam/awayTeam empty).
+        const fixtureRecord = findFixtureRecord(date, league, game);
+        const cfg = await loadModelConfig();
+        const leagueId = (cfg.apiFootballLeagueIds && cfg.apiFootballLeagueIds[league] != null)
+          ? cfg.apiFootballLeagueIds[league]
+          : null;
+
         addManualBetFromFixture({
           data: date,
           liga: league,
@@ -7797,7 +7812,11 @@ button:disabled {
           mercado,
           odd: String(odd),
           stake: String(stake),
-          snapshot
+          snapshot,
+          kickoffUTC: fixtureRecord ? (fixtureRecord.KickoffUTC || '') : '',
+          homeTeam:   fixtureRecord ? (fixtureRecord.HomeTeam   || '') : '',
+          awayTeam:   fixtureRecord ? (fixtureRecord.AwayTeam   || '') : '',
+          leagueId,
         });
 
         // Feedback
@@ -7810,7 +7829,10 @@ button:disabled {
         }
       }
 
-      function addManualBetFromFixture({ data, liga, jogo, mercado, odd, stake, snapshot }) {
+      function addManualBetFromFixture({
+        data, liga, jogo, mercado, odd, stake, snapshot,
+        kickoffUTC, homeTeam, awayTeam, leagueId,
+      }) {
         // Authoritative guard — even if a caller bypasses the mbHandleCreate check
         // above (or two clicks race each other), this function never pushes a
         // second bet for the same fixture+market. See ADR-012.
@@ -7832,7 +7854,22 @@ button:disabled {
           botOpinion:       snapshot?.opinion      ?? null,
           edgeAtAnalysis:   snapshot?.EdgePercent  ?? snapshot?.edge ?? null,
           scoreAtAnalysis:  snapshot?.score        ?? null,
-          analysisSnapshot: snapshot               ?? null
+          analysisSnapshot: snapshot               ?? null,
+          // Immutable fixture metadata (Phase 26.32) — persisted once here, at
+          // creation time, exactly as the caller supplies it. NEVER re-derived
+          // from state.fixtures later: that list is a rolling window and the
+          // fixture may no longer be in it by settlement time. kickoffUTC is
+          // what closes the settlement-eligibility gap documented in
+          // 05_Known_Issues.md (SETTLEMENT-2) — without it, a manual bet
+          // bypassed the same RESULT_READY_DELAY safety window bot picks
+          // already respect. Empty string / null when this bet has no
+          // matching fixture (the free-form "Apostas Manuais" entry form
+          // never supplies these params at all) — that is the expected,
+          // documented limitation for free-form bets, not a bug.
+          kickoffUTC: kickoffUTC || '',
+          homeTeam:   homeTeam   || '',
+          awayTeam:   awayTeam   || '',
+          leagueId:   leagueId   ?? null,
         });
         markDirty();
         rerenderManualOnly();
@@ -15394,20 +15431,30 @@ button:disabled {
         return isNaN(t) ? null : t;
       }
 
-      function findFixtureKickoff(date, liga, jogo) {
+      // Looks up the raw fixtures_today.csv record (state.fixtures) matching a
+      // manual bet's data/liga/jogo — the single shared match predicate used
+      // both for display-time kickoff lookup (findFixtureKickoff()) and for
+      // persisting immutable fixture metadata at creation time (Phase 26.32;
+      // see addManualBetFromFixture()). Returns null if no fixture matches
+      // (e.g. a free-form manual bet with no corresponding fixture).
+      function findFixtureRecord(date, liga, jogo) {
         const parts = String(jogo || '').split(' vs ');
         const home  = cleanString(parts[0] || '');
         const away  = cleanString(parts[1] || '');
-        if (!home || !away) return '';
+        if (!home || !away) return null;
         const leagueKey = cleanString(liga || '');
         const fixtures  = Array.isArray(state.fixtures) ? state.fixtures : [];
-        const match = fixtures.find(f =>
+        return fixtures.find(f =>
           normalizeDateString(f.Date || f.date || '') === date &&
           cleanString(f.League || f.Liga || '') === leagueKey &&
           cleanString(f.HomeTeam || '') === home &&
           cleanString(f.AwayTeam || '') === away
-        );
-        return match ? (match.KickoffUTC || '') : '';
+        ) || null;
+      }
+
+      function findFixtureKickoff(date, liga, jogo) {
+        const fixture = findFixtureRecord(date, liga, jogo);
+        return fixture ? (fixture.KickoffUTC || '') : '';
       }
 
       function fmtKickoffTime(utcStr) {

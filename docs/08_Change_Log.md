@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.32 | 2026-07-12 | Fixed manual bets settling out of sync with bot picks for the same fixture (a manual bet settled immediately while its equivalent bot pick stayed LIVE until a later run). Root cause: not a settlement-engine bug — `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate only applies `if kickoff_str:`, and manual bets never actually had `kickoffUTC` persisted (a documentation claim from Phase 26.7–26.9 to the contrary was inaccurate — corrected). Fix: `addManualBetFromFixture()` now persists `kickoffUTC`/`homeTeam`/`awayTeam`/`leagueId` at creation time for fixture-backed (Scout) bets, so settlement receives equivalent input to what bot picks already provide. Zero changes to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence. Free-form manual bets (no fixture) are unaffected — documented limitation, not a bug. See `05_Known_Issues.md` SETTLEMENT-2 |
 | 26.31 | 2026-07-11 | Corrected rejected-bet lifecycle visibility: Phase 26.28's fix removed the duplicate from the wrong page. `getRejectedManualBets()` reverted to showing every rejected bet (settled or not) — "Rejeitadas" is the permanent archive, exactly as originally designed. The actual fix: `renderManualBets()` (operational "Apostas Manuais" list) now hides a rejected bet once it's settled, since a settled bet no longer needs attention there. No change to settlement, persistence, `cloud_state.json`, QuantEngine, or any analytical module — all verified via the full 6-suite Playwright regression harness (now 6/6 fully green) plus a new 24-check targeted script |
 | 26.30 | 2026-07-11 | Closed the one gap found by the post-migration QuantEngine architecture audit: the per-league lambda-boost clamp-and-multiply step was duplicated, unverified inline arithmetic in both `src/pick_generation.py` and `analyzeFixture()`. Extracted into `apply_lambda_boost()` (Python, canonical) and mirrored as `QuantEngine.applyLambdaBoost()` (JavaScript), with 8 new golden vectors (142/285 total Python/JS assertions). Verified byte-identical to the pre-extraction inline formula. No other quantitative duplication remains inside the Bot + Scout architecture — see ADR-014 |
 | 26.29 | 2026-07-11 | Introduced a shared Quantitative Engine: `src/calculations.py` is now the canonical implementation (extended with named `confidence_factor()`, `fair_odds()`, `expected_value()` functions), and `index.html` gained an isolated `QuantEngine` module that mirrors it exactly, replacing a previously hand-ported, partially-drifted JS copy (missing BTTS diagnostics, missing confidence, a hardcoded `config.json` mirror). A golden-vector conformance suite (`tests/golden_vectors.json` + Python/JS test siblings, 261+134 assertions) is the permanent safeguard against the two drifting again. Score/Opinion decision logic was extracted out of the Scout's `analyzeFixture()` into a separate `classifyManualOpinion()`, consuming — never duplicating — the engine's output. Zero change to bot pick generation, settlement, or CSV output (verified via before/after `apply_stakes()` comparison and the full existing 6-suite Playwright regression harness). See ADR-014 |
@@ -36,6 +37,45 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.32 — Persist Fixture Metadata on Manual Bets for Consistent Settlement Eligibility
+
+**Implemented:** 2026-07-12
+
+**Goal.** A reported inconsistency: for the same fixture, with both a bot pick and a manual bet on the same market, "Executar Resolução" settled the manual bet immediately but left the bot pick `LIVE`. The bot pick settled correctly on a later run, unattended. Investigate the root cause before changing anything.
+
+**Investigation.** Traced the complete settlement flow: `runSettlement()` → `POST /run-settlement` → `run_settlement_remote()`, which processes bot picks and manual bets **in the same synchronous request**, through the **identical** `update_dataframe()` function, sharing one provider-response cache (`shared_state`). This ruled out a race condition, a caching inconsistency between requests, or a duplicate settlement path — both bet types are already handled atomically by one shared engine (ADR-002/ADR-009).
+
+The actual divergence: `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate (`now < KickoffUTC + RESULT_READY_DELAY`, 2h15m) only executes `if kickoff_str:` — i.e. only when the row has a `KickoffUTC` value at all. Bot picks always do (propagated end-to-end since Phase 26.7–26.9, confirmed in `src/pick_generation.py::build_base_row()`). Manual bets never did: `addManualBetFromFixture()` never set a `kickoffUTC` field on the bet object — confirmed by tracing every manual-bet creation path and the full git history of `kickoffUTC:` assignments in `index.html`. **A documentation claim (Phase 26.7–26.9's own Change Log entry) that this field was "propagated through... manual bet objects" was inaccurate** — only a transient, render-time-only placeholder existed for display formatting, never a persisted, settlement-relevant field (corrected in that phase's entry above).
+
+A further scoping check (before implementing) found that the originally-proposed field list — `fixtureId`, `kickoffUTC`, `league`, `leagueId`, `season` — included three fields (`fixtureId`, `leagueId` as a settlement input, `season`) that bot picks themselves don't persist either: `HISTORY_COLUMNS` has no `FixtureId`/`LeagueId`/`Season` columns, and `update_results.py` never reads any of the three from a row — `season` is derived fresh from `Data` + a league-registry lookup at settlement time, identically for both bet types already. `fixtureId` additionally isn't available anywhere in the client-side data model at all (`fixtures_today.csv`'s schema never included it). Scope was narrowed to what bot picks actually provide and what's genuinely available: `kickoffUTC`, `homeTeam`, `awayTeam`, plus `leagueId` as a cheap, harmless, forward-looking enrichment (derived from the already-fetched `config.json.api_football.league_ids`, no new network call) even though nothing currently consumes it.
+
+**Fix.** `mbHandleCreate()` (the Scout "Criar" flow) now looks up the matching fixture via a new shared `findFixtureRecord()` helper (extracted from the existing `findFixtureKickoff()`, which now delegates to it — no duplicated matching logic) and resolves `leagueId` from the already-cached `config.json`. These are passed into `addManualBetFromFixture()`, which persists `kickoffUTC`, `homeTeam`, `awayTeam`, and `leagueId` on the bet object at creation time — immutable metadata, never re-derived from `state.fixtures` later (that list is a rolling window and the fixture may no longer be in it by settlement time). `manual_bets_to_settlement_df()` already read `bet.get('kickoffUTC')`; it had simply never been given real data. **No change was made to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence architecture** (`sync_server.py`'s `/save` and `_dedupe_manual_bets()` are schema-agnostic — confirmed they never strip unrecognized fields).
+
+**Manual bets without a fixture.** The free-form "Apostas Manuais" text-entry form (`addManualBet()`) is untouched — it has no fixture to source metadata from, and per explicit instruction this was preserved as-is rather than worked around. This is a documented, accepted limitation: a free-form manual bet still has no kickoff-eligibility protection, exactly as before this phase.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | New `findFixtureRecord()` helper (`findFixtureKickoff()` refactored to use it); `loadModelConfig()` extended to expose `api_football.league_ids`; `mbHandleCreate()` made async, resolves fixture + `leagueId`; `addManualBetFromFixture()` accepts and persists `kickoffUTC`/`homeTeam`/`awayTeam`/`leagueId` |
+| `docs/04_Backend.md` | `KICKOFF_TOO_EARLY` step and manual-bet-settlement bridge notes updated |
+| `docs/05_Known_Issues.md` | New `SETTLEMENT-2` resolved entry |
+| `docs/08_Change_Log.md` | Phase 26.7–26.9 entry annotated (inaccurate claim corrected); this Phase 26.32 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-12-manual-bet-fixture-metadata.md` | New handover |
+
+### Validation
+
+- **Python, direct proof:** ran the real, completely unmodified `update_dataframe()` against three synthetic manual-bet rows — one with a kickoff 30 minutes ago (within the 2h15m delay), one with a kickoff 3 hours ago (past it), one with no `kickoffUTC` at all (simulating a pre-fix bet). Result: the recent-kickoff row was correctly ignored with reason `KICKOFF_TOO_EARLY` (previously it would have proceeded to a live API check immediately); the old-kickoff and no-kickoff rows proceeded past the precheck exactly as before. This proves the fix closes the gap without any settlement-engine change.
+- **JavaScript, targeted script (15 checks, scratchpad, not committed):** `findFixtureRecord()`/`findFixtureKickoff()` both work correctly after the refactor; `loadModelConfig()` correctly exposes real `config.json` league IDs; a full Scout "Criar" click persists all four fields with correct values; `fixtureId`/`season` are confirmed absent (scope discipline); the free-form form still creates bets with no metadata fields at all; a pre-existing bet with none of the new fields still loads and renders without error (no migration needed); zero new console errors.
+- **Full existing 6-suite Playwright regression harness and `python -m pytest tests/`:** both re-run in full, all passing, unaffected by this change (no Python file was modified; the JS change is additive and isolated to manual bet creation).
+
+### Impact
+
+A bot pick and a manual bet for the same fixture now become eligible for settlement at exactly the same moment. No data migration was performed; existing manual bets (with or without the new fields) continue to work exactly as they did before this phase.
 
 ---
 
@@ -578,6 +618,8 @@ Settlement became on-demand and browser-triggered, no longer requiring a GitHub 
 ## Phase 26.7–26.9 — KickoffUTC End-to-End
 
 **Implemented:** 2026-05
+
+**Note (2026-07-12, Phase 26.32):** the claim below that `KickoffUTC` was propagated to "manual bet objects" was inaccurate — only a transient, render-time-only placeholder (`kickoffUTC: ''`, used solely so the Kickoff column could format safely) existed; the field was never actually persisted on a manual bet, and was never read by the settlement engine before Phase 26.32. See `05_Known_Issues.md` SETTLEMENT-2 for the resulting bug and its fix.
 
 `KickoffUTC` field propagated through fixtures, picks CSVs, Scout bet creation, manual bet objects, and Live/Pending display. Pending and Live filter logic made kickoff-aware. Odd Real / Stake Real field persistence on page refresh fixed.
 

@@ -14,6 +14,18 @@ None currently open.
 
 ## Resolved Issues
 
+### SETTLEMENT-2 — Manual Bets Bypassed `RESULT_READY_DELAY`, Settling Before the Equivalent Bot Pick for the Same Fixture
+
+**Status:** Resolved — 2026-07-12 (Phase 26.32). Full technical detail in `08_Change_Log.md` — Phase 26.32.
+
+**Was:** For a fixture with both a bot pick and a manual bet on the same market, clicking "Executar Resolução" would settle the manual bet immediately while the bot pick stayed `LIVE`. Some time later, without any manual intervention, the bot pick settled correctly on a subsequent run. Both eventually settled correctly, but never during the same execution.
+
+**Root cause:** This was not a settlement-engine bug — `update_dataframe()` is the single shared engine for both bot picks and manual bets (ADR-002/ADR-009), processed atomically in the same `/run-settlement` request with a shared provider-response cache. The asymmetry was in the *input data*: `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate (`now < KickoffUTC + RESULT_READY_DELAY` — 2h15m) only runs `if kickoff_str:` — i.e. only when the row actually has a `KickoffUTC` value. Bot picks always have it (propagated end-to-end since Phase 26.7–26.9). Manual bets never did: `addManualBetFromFixture()` (`index.html`) never set a `kickoffUTC` field on the bet object, despite `docs/08_Change_Log.md`'s Phase 26.7–26.9 entry claiming this field was "propagated through... manual bet objects" — that claim was inaccurate; only a transient, render-time-only placeholder (`kickoffUTC: ''`, for display formatting) existed, never a persisted field read by settlement. So a manual bet became eligible for settlement as soon as its date matched, with no 2h15m safety margin — while the bot pick for the identical fixture correctly waited out the delay.
+
+**Fix:** Manual bets created from an existing fixture (the Scout workspace) now persist `kickoffUTC`, `homeTeam`, `awayTeam`, and `leagueId` (the last derived from the already-fetched `config.json.api_football.league_ids`, no new network call) at creation time — immutable fixture metadata, never re-derived from `state.fixtures` later. `manual_bets_to_settlement_df()` already read `bet.get('kickoffUTC')`; it simply had never been given real data. **No change was made to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence architecture** — this was purely a data-completeness fix at bet-creation time. Free-form manual bets (the text-entry form, not tied to any fixture) are unaffected and continue to have no kickoff metadata — this is a documented, accepted limitation, not a bug: there is no fixture to source it from. Pre-existing manual bets created before this phase also have no kickoff metadata and are unaffected; no persistence migration was performed or required.
+
+---
+
 ### DASHBOARD-3 — DASHBOARD-2's Fix Targeted the Wrong Page; Duplicate Visibility Corrected in the Operational List Instead
 
 **Status:** Resolved — 2026-07-11 (Phase 26.31). Full technical detail in `08_Change_Log.md` — Phase 26.31. **Supersedes DASHBOARD-2 below — see that entry's note.**

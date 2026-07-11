@@ -547,7 +547,7 @@ Same logic, but runs entirely in a `tempfile.TemporaryDirectory`. Files are down
 
 Manual bets are settled using the same `update_dataframe()` as bot picks — **including rejected bets**: neither `manual_bets_to_settlement_df()` nor `update_dataframe()` filters by lifecycle `status`, so a rejected bet whose fixture has finished is settled in exactly the same run, by exactly the same code, as an approved one (see ADR-012). The bridge is:
 
-1. `manual_bets_to_settlement_df(manual_bets)` — converts the JSON bet objects from `cloud_state.json` to a DataFrame with the standard CSV column schema (including `Placar`, round-tripped from `bet['placar']` so an already-settled bet's final score survives across runs).
+1. `manual_bets_to_settlement_df(manual_bets)` — converts the JSON bet objects from `cloud_state.json` to a DataFrame with the standard CSV column schema (including `Placar`, round-tripped from `bet['placar']` so an already-settled bet's final score survives across runs; and `KickoffUTC`, read from `bet['kickoffUTC']` — see the frontend note below and ADR referenced in `05_Known_Issues.md` SETTLEMENT-2).
 2. `update_dataframe(manual_df, "manual", shared_state)` — settles the DataFrame rows using the same API queries and matching logic. Both write sites (`try_update_row_via_api_football()` and the football-data.org branch) write `Placar` (`"{home_goals}-{away_goals}"`) alongside `Resultado` and `Lucro€` — the same fact bot pick CSV rows now also carry.
 3. `apply_df_results_to_manual_bets(manual_bets, manual_df)` — writes `resultado`, `lucro`, and `placar` back from the settled DataFrame into the original bet dicts. **`status` is only advanced to `'settled'` if it was not already `'rejected'`** — a rejected bet keeps `status: 'rejected'` forever, even after this call populates its settlement result. This is the one deliberate behavioural asymmetry in an otherwise identical settlement path (ADR-012).
 4. If any bets were newly settled: `save_cloud_state_to_github(cloud_state, message)`.
@@ -562,7 +562,10 @@ The core settlement function. Takes a DataFrame, iterates each row, and applies 
 For each row:
     1. ALREADY_DONE: Resultado in {W, L, P} → skip (recalculate LucroReal€ if possible)
     2. INVALID_ROW: missing Data/Liga/Jogo, or Odd ≤ 1.01, or Stake€ ≤ 0 → skip
-    3. KICKOFF_TOO_EARLY: now < kickoffUTC + 2h15m → skip
+    3. KICKOFF_TOO_EARLY: skipped entirely if KickoffUTC is empty; otherwise
+       now < kickoffUTC + 2h15m → skip (see Known Issues SETTLEMENT-2 — until
+       Phase 26.32, manual bets never had KickoffUTC populated at all, so this
+       gate silently never applied to them)
     4. UNSUPPORTED_MARKET: Mercado not in {O1.5, O2.5, O3.5, BTTS} → skip
     5. FUTURE_DATE: pick date > today (Lisbon timezone) → skip
     6. MISSING_LEAGUE_MAP: Liga not in LEAGUE_CODE_MAP → skip
