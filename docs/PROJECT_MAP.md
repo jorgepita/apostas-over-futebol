@@ -19,6 +19,7 @@ This document answers **"Where should I look?"** rather than "How does it work?"
 ├── requirements.txt             ← Python dependencies
 ├── runtime.txt                  ← Python version for Railway
 ├── Procfile                     ← Railway process definition
+├── README.md                    ← Repository landing page: overview + links to docs/ and CLAUDE.md
 ├── CLAUDE.md                    ← Workflow instructions for Claude sessions
 │
 ├── src/                         ← Python library modules
@@ -122,6 +123,7 @@ Contains `bot.yml`, the single workflow file that defines all scheduled and manu
 | `runtime.txt` | Python version declaration for Railway (`python-3.11.13`) | Python version upgrade |
 | `Procfile` | Railway process: gunicorn command, port, timeout, worker count | Changing server configuration |
 | `.github/workflows/bot.yml` | All scheduled and triggered GitHub Actions | Changing run times, adding a new workflow step |
+| `README.md` | Repository landing page: project overview, architecture summary, links to `docs/` and `CLAUDE.md` | Keep in sync only if the high-level overview changes — detailed changes belong in `docs/`, not here |
 | `CLAUDE.md` | Workflow instructions for Claude sessions | Updating the session workflow |
 
 ---

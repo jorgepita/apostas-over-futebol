@@ -8,3 +8,6 @@ sent_state.json
 debug_candidates.csv
 
 data_raw/*.csv
+
+.claude/settings.local.json
+audit_output*.txt

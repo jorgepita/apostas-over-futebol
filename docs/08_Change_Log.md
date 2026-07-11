@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.26 | 2026-07-11 | Repository hygiene cleanup: removed obsolete `PROJECT_RULES.md` (superseded by `docs/`), replaced the content-free root `README.md` placeholder with a real landing page, committed `CLAUDE.md` and `.claude/settings.json` for the first time (closing a 3-session-old gap where docs already described them as committed), deleted stale diagnostic `audit_output*.txt` files, and added `.gitignore` rules for `.claude/settings.local.json` and `audit_output*.txt`. No code, business logic, or runtime behaviour changed |
 | 26.25 | 2026-07-11 | Full dashboard localization to European Portuguese (PT-PT): translated every remaining English UI string in `index.html` — the Season Archive/Close Season wizard, the four Opinion analytics features (26.20–26.23), Strategy Lab (26.24), and assorted pre-existing analytics tables/labels/alerts — to natural PT-PT. No business logic, calculation, threshold, or persistence changed. Internal English status/severity codes used in `===` comparisons across the calibration and recommendation rule engines were kept as-is and only translated at render time via a new shared `ptLabel()` lookup, so no comparison was touched. All 6 existing Playwright regression suites (130+ checks) re-run and passing |
 | 26.24 | 2026-07-10 | New "Strategy Lab" page (own tab/nav entry): a pure betting-strategy backtester over settled, Scout-analysed manual bets (including rejected ones). Strategy Builder (opinion/score/edge/odds/stake/league/market/season filters) feeds a Historical Replay (reusing computeStreaks()/computeDrawdownAnalysis()), a Compare-Against-Production panel (reusing window._opnSimCache's calibration/decision-cost/confidence functions), a Robustness Score explicitly designed so tiny samples can never outrank large ones, chronological-thirds Stability, Risk Analysis, a bounded (≤81-combination) Strategy Optimizer ranked by robustness, explainability, and a pure JSON export. Analytics-only, no persistence; every prior Opinion analytics/recommendations/simulator section confirmed unchanged and regression-tested (124 checks across 6 suites) |
 | 26.23 | 2026-07-10 | New "Recommendation Simulator" card: a pure what-if layer below Opinion Engine Recommendations. Three sliders (STRONG BUY/BUY/AVOID threshold) replay settled opinion bets through a parameterized copy of the real classifier and the existing calibrationScore()/statsFromBets()/confidenceTier() functions — never writes to state, never persists, never touches production thresholds. Shows Current-vs-Simulated distribution/calibration/decision-cost/pair-score/confidence with explainability and a bounded (±5) "Best Nearby Configuration" search. Analytics-only; every prior Opinion analytics/recommendations section confirmed unchanged and regression-tested |
@@ -30,6 +31,54 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.26 — Repository Hygiene Cleanup
+
+**Implemented:** 2026-07-11
+
+**Goal.** Resolve a set of unexplained working-tree changes and untracked files that had been carried across three consecutive sessions without action (first flagged in the 2026-07-10 handover, repeated in 2026-07-11): two uncommitted root-file deletions, an untracked `.claude/` directory, an untracked `CLAUDE.md`, and four untracked diagnostic `audit_output*.txt` files. Every item was investigated via `git log`/`git show`/file content before any change was made — no assumption was made about intent, and one genuinely ambiguous decision (whether to restore a root `README.md`) was confirmed with the user before acting.
+
+**Findings.**
+- `PROJECT_RULES.md` (single commit, 2026-05-21) predates the `docs/` system (first committed 2026-07-01) by over a month. Its content — no-framework rule, page list, UI direction — is superseded by `00_Project_Context.md`, ADR-005, and `03_Dashboard.md`; its page list (`Home/Picks/...`) no longer matches the current dashboard (`Daily Picks/Live Center/Pending/...`), confirming it was stale, not just redundant.
+- Root `README.md` (single commit, 2026-05-01) had only ever contained the placeholder `"# force deploy"` — never real documentation. Confirmed with the user: replace with a real, concise landing-page README rather than restore the placeholder or leave the repository without one.
+- `.claude/settings.json` and `.claude/settings.local.json` had never been committed. `settings.local.json` is machine-specific by Claude Code's own naming convention and must not be shared; `settings.json` is a low-risk, shared project permission safe to commit.
+- `CLAUDE.md` had never been committed, despite `docs/PROJECT_MAP.md`, `08_Change_Log.md` ("Doc System" row), and `07_Current_Status.md` all describing it as an established, permanent part of the repository since 2026-06-29. This was the one confirmed documentation/repository inconsistency — the docs weren't wrong about what should exist, just ahead of what had actually been committed.
+- The four `audit_output*.txt` files matched, byte-for-byte in content and structure, the "temporary, read-only audit harness" described in ADR-011 / Phase 26.18 (the API-Football subscription-lapse investigation). That issue has been resolved and fully documented since 2026-07-07; the files were leftover diagnostic instrumentation with no ongoing reference value.
+
+**Actions taken (all approved by the user before execution).**
+1. Committed the deletion of `PROJECT_RULES.md`.
+2. Replaced the root `README.md` placeholder with a concise landing page: project description, architecture summary, repository structure, and pointers to `docs/README.md` and `CLAUDE.md`.
+3. Committed `CLAUDE.md` and `.claude/settings.json` for the first time.
+4. Deleted the four `audit_output*.txt` files.
+5. Added `.claude/settings.local.json` and `audit_output*.txt` to `.gitignore` to prevent both patterns from recurring uncommitted/unexplained.
+
+**No code, business logic, or runtime behaviour changed.** This phase touched only repository metadata, root-level documentation, and tooling configuration.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `PROJECT_RULES.md` | Deleted (superseded by `docs/`) |
+| `README.md` | Replaced placeholder content with a real landing page |
+| `CLAUDE.md` | Committed for the first time (content unchanged — already matched the documented workflow) |
+| `.claude/settings.json` | Committed for the first time |
+| `.gitignore` | Added `.claude/settings.local.json` and `audit_output*.txt` |
+| `audit_output.txt`, `audit_output_v3.txt`, `audit_output_v4.txt`, `audit_output_v5.txt` | Deleted (never committed; obsolete diagnostic output from the already-resolved Phase 26.18 investigation) |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-11-repo-cleanup.md` | New handover for this phase |
+
+### Validation
+
+- `git log --all`, `git show`, and full-content review performed on every item before any recommendation was made — no action taken on assumption.
+- Confirmed no remaining reference to `PROJECT_RULES.md` anywhere outside historical (point-in-time) handover records.
+- Confirmed `.claude/settings.local.json` and `audit_output*.txt` are excluded by `git status --ignored` after the `.gitignore` update.
+- Confirmed `git status` is clean except for the intentional staged changes described above.
+
+### Impact
+
+The repository working tree now matches what the documentation has described for up to three sessions. No further "unexplained leftover" carries forward into the next session.
 
 ---
 
