@@ -3475,6 +3475,9 @@
     },
     "2026-07-11|finlandia|Gnistan vs Mariehamn|BTTS": {
       "apostada": true
+    },
+    "2026-07-12|suecia|IF Brommapojkarna vs Sirius|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -5925,9 +5928,9 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-11T17:21:34.437Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-11",
