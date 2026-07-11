@@ -7,7 +7,7 @@
 ```
 Date:     2026-07-12
 Branch:   main
-Commit:   (pre-commit — see End-of-Session Checklist)
+Commit:   ccc42eb8 "fix(manual-bets): persist fixture metadata for consistent settlement eligibility" — pushed, merged as 6f6c44ea (zero file overlap with concurrent automated GitHub Actions data commits)
 ```
 
 ---
@@ -120,7 +120,7 @@ ST-3 (SHA conflict retry in `sync_server.py`) is next on the roadmap.
 
 ## End-of-Session Checklist
 
-- [x] Code committed and pushed — commit pending at time of writing, see below
+- [x] Code committed and pushed — `ccc42eb8`, merged as `6f6c44ea`
 - [x] `07_Current_Status.md` updated
 - [x] `05_Known_Issues.md` updated (`SETTLEMENT-2` added)
 - [x] `08_Change_Log.md` updated (Phase 26.32 entry added; Phase 26.7–26.9 annotated)
