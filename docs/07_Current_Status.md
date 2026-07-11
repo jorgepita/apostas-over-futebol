@@ -1,6 +1,6 @@
 # Current Status
 
-**Last Updated:** 2026-07-10 (Phase 26.19 — Manual Bet lifecycle rework: Scout duplicate prevention, rejected bets preserved as analytical records, lifecycle/settlement decoupling)
+**Last Updated:** 2026-07-11 (Phase 26.25 — Full dashboard localization to European Portuguese, PT-PT)
 
 ---
 
@@ -10,9 +10,11 @@
 
 The bot is running in production. Pick generation, settlement, and the dashboard are all functional. The Railway backend is stable. Manual bets, bankroll movements, and bot picks all settle and synchronize correctly via GitHub Actions, on-demand settlement from the dashboard, and cloud recovery on fresh browser sessions.
 
-This phase reworked the Manual Bet lifecycle end-to-end: the Scout workspace no longer lets a user accidentally create a duplicate bet while the first is still pending; the backend independently refuses duplicate fixture+market bets in `POST /save`; rejecting a bet no longer deletes it (it becomes a permanent, settleable, analytical record instead); a bet's lifecycle status (`pending`/`approved`/`rejected`/`settled`) is now fully independent from its settlement result (`resultado`/`placar`); and the History page gained a "Rejeitadas" view for reviewing rejected bets without them ever touching bankroll/ROI. See `08_Change_Log.md` — Phase 26.19 and ADR-012/ADR-013 for full detail.
+This phase translated every remaining piece of English UI text in `index.html` to natural PT-PT — the dashboard now actually matches the language rule already stated in `03_Dashboard.md` §1 and `DEVELOPMENT_GUIDELINES.md` ("Keep all UI text in European Portuguese. Do not mix languages in user-facing strings."), which had drifted out of compliance as features were added in English across several prior phases (most visibly the Opinion Validation/Recommendations/Simulator/Strategy Lab additions below, plus the older Season Archive/Close Season flow and assorted analytics tables). No business logic, calculation, threshold, or persistence changed — see Phase 26.25 in `08_Change_Log.md` for full detail, including the `ptLabel()` pattern used to translate display text without touching the English internal codes several rule engines compare against.
 
-The provider API error visibility work (Phase 26.18) and the Live Center/sync fixes (Phase 26.17) remain stable — no changes to that code path this phase.
+Phases 26.20–26.24 (below) shipped in a prior session but were never given their own `Current Development`/handover write-up at the time — only a one-line Change Log summary and the technical reference in `03_Dashboard.md` §10. This entry backfills that gap so this document reflects everything actually in production.
+
+The provider API error visibility work (Phase 26.18), the Manual Bet lifecycle rework (Phase 26.19), and the Live Center/sync fixes (Phase 26.17) remain stable — no changes to those code paths this phase.
 
 ---
 
@@ -38,13 +40,19 @@ The provider API error visibility work (Phase 26.18) and the Live Center/sync fi
 
 **League registry.** 21 leagues managed via `src/league_registry.py`. All settlement routing derived automatically.
 
+**Opinion analytics suite (Phases 26.20–26.23, Bot vs Manual tab).** Below the existing Opinion Performance/Calibration/Insights sections: **Opinion Validation** — expected-vs-actual ranking, a weighted-pairwise Calibration Score (0–100) with a configurable tolerance for insignificant inversions, an Opinion Pair Analysis table, a Decision Cost metric, per-opinion trend sparklines, a sample-size Confidence indicator, ranked insights, a trend warning, and a calibration-over-time chart. **Opinion Engine Recommendations** — a deterministic (non-AI) rule engine over that same analytics, producing severity-ranked, evidence-backed recommendations and one overall Opinion Engine Health label. **Recommendation Simulator** — a pure what-if layer (three sliders, ephemeral, never persisted) that replays settled opinion bets through a parameterized copy of the real classifier, with a bounded (≤1331-combination) "Best Nearby Configuration" search. All three are analytics-only and read-only; see `03_Dashboard.md` §10 for full technical detail and ADR references.
+
+**Strategy Lab (Phase 26.24, own tab).** A frontend-only betting-strategy backtester, distinct from the Opinion analytics above: a Strategy Builder (opinion/score/edge/odds/stake/league/market/season filters) feeds a Historical Replay, a Compare-Against-Production panel, a Robustness Score explicitly designed so tiny samples can never outrank large ones, chronological-thirds Stability, Risk Analysis, a bounded (≤81-combination) Strategy Optimizer, and a pure JSON export. No persistence, no writes to production state. See `03_Dashboard.md` §10.
+
+**Dashboard localization (Phase 26.25).** Every page's visible UI text is now natural PT-PT, including the four analytics features above and the Season Archive/Close Season flow. Internal English status/severity codes used in rule-engine comparisons (e.g. `'Broken'`, `'HIGH'`, `'PROMOTE'`) are unchanged — only translated at render time via a shared `ptLabel()` lookup — so no comparison logic, threshold, or persisted value changed. See Phase 26.25 in `08_Change_Log.md`.
+
 **Documentation.** Complete documentation system established under `docs/`. Includes: project context, architecture decisions (13 ADRs), architecture map, repository navigation guide (`PROJECT_MAP.md`), data flow, dashboard reference, backend reference, known issues, roadmap, change log, development guidelines, and session handover template. `CLAUDE.md` added at repository root as the workflow entry point for new Claude sessions.
 
 ---
 
 ## Current Development
 
-No active investigation. This phase's changes were validated with an automated Chromium (Playwright) walkthrough of the live dashboard plus isolated Python checks of the settlement bridge — both are scratchpad-only tooling, not committed to the repository, and left no diagnostic instrumentation behind in `index.html`, `update_results.py`, or `sync_server.py`. The codebase remains clean of prior-phase temporary instrumentation.
+No active investigation. This phase (26.25, PT-PT localization) touched only `index.html` visible text — `update_results.py` and `sync_server.py` were not modified. Validated with `node --check` after every batch of edits, a full-page `innerText` extraction across all 11 tabs iteratively grepped for stray English until clean, and the complete existing Playwright regression suite (6 suites, 130+ checks, covering the Manual Bet lifecycle and all four Opinion/Strategy Lab analytics features) re-run and passing — confirming the translation changed no calculation, threshold, or comparison. The suite's own text assertions were updated in the scratchpad copy to expect PT-PT strings going forward; none of that test tooling is committed to the repository. The codebase remains clean of diagnostic instrumentation from this or prior phases.
 
 ---
 
@@ -67,9 +75,10 @@ None.
 3. Consider refreshing `01_Architecture.md` Section 3 ("Startup Flow") and the "60-second browser interval" architectural rule — both still describe the pre-Phase-26.17 design and should be brought in line with the current event-driven model.
 4. Monitor `cloud_state.json["providerHealth"]` after real settlement runs to confirm the "warning" threshold (2 consecutive failing runs) is well-tuned in practice.
 5. No dashboard implementation exists yet for rejected-bet analytics (rejected win rate, theoretical ROI, false-negative rate, by league/market/confidence/opinion) — the data model supports it (Phase 26.19; see `03_Dashboard.md` §9 and ADR-012), but no chart or KPI was built, per the original request's scope ("no dashboard implementation is required now").
+6. Minor documentation debt, low priority: Phases 26.20–26.24 (Opinion Validation, Opinion Engine Recommendations, Recommendation Simulator, Strategy Lab) were never given a detailed `08_Change_Log.md` phase section or a session handover at the time they shipped — only a one-line summary-table row each and the technical reference already in `03_Dashboard.md` §10. This document and the Change Log summary table are now current; the detailed narrative write-up for those five phases specifically was not reconstructed retroactively this session (only Phase 26.25/localization has a full section, since that is the phase actually implemented this session). Worth doing in an idle session if the historical record matters, not blocking.
 
 ---
 
 ## Notes
 
-No diagnostic instrumentation remains in the codebase as of Phase 26.19. The Manual Bet lifecycle changes this phase (`findManualBetByOpportunity()`, `getRejectedManualBets()`, `_historyViewMode`, `_dedupe_manual_bets()`, the `Placar` CSV column, the `apply_df_results_to_manual_bets()` rejected-status guard) are permanent production code, not temporary diagnostics.
+No diagnostic instrumentation remains in the codebase as of Phase 26.25. Any future UI text added to `index.html` must be written directly in PT-PT (see `DEVELOPMENT_GUIDELINES.md`) — do not add English strings and plan to translate them later; Phase 26.25 exists precisely because that happened silently across several earlier phases.

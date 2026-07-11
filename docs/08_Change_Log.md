@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.25 | 2026-07-11 | Full dashboard localization to European Portuguese (PT-PT): translated every remaining English UI string in `index.html` — the Season Archive/Close Season wizard, the four Opinion analytics features (26.20–26.23), Strategy Lab (26.24), and assorted pre-existing analytics tables/labels/alerts — to natural PT-PT. No business logic, calculation, threshold, or persistence changed. Internal English status/severity codes used in `===` comparisons across the calibration and recommendation rule engines were kept as-is and only translated at render time via a new shared `ptLabel()` lookup, so no comparison was touched. All 6 existing Playwright regression suites (130+ checks) re-run and passing |
 | 26.24 | 2026-07-10 | New "Strategy Lab" page (own tab/nav entry): a pure betting-strategy backtester over settled, Scout-analysed manual bets (including rejected ones). Strategy Builder (opinion/score/edge/odds/stake/league/market/season filters) feeds a Historical Replay (reusing computeStreaks()/computeDrawdownAnalysis()), a Compare-Against-Production panel (reusing window._opnSimCache's calibration/decision-cost/confidence functions), a Robustness Score explicitly designed so tiny samples can never outrank large ones, chronological-thirds Stability, Risk Analysis, a bounded (≤81-combination) Strategy Optimizer ranked by robustness, explainability, and a pure JSON export. Analytics-only, no persistence; every prior Opinion analytics/recommendations/simulator section confirmed unchanged and regression-tested (124 checks across 6 suites) |
 | 26.23 | 2026-07-10 | New "Recommendation Simulator" card: a pure what-if layer below Opinion Engine Recommendations. Three sliders (STRONG BUY/BUY/AVOID threshold) replay settled opinion bets through a parameterized copy of the real classifier and the existing calibrationScore()/statsFromBets()/confidenceTier() functions — never writes to state, never persists, never touches production thresholds. Shows Current-vs-Simulated distribution/calibration/decision-cost/pair-score/confidence with explainability and a bounded (±5) "Best Nearby Configuration" search. Analytics-only; every prior Opinion analytics/recommendations section confirmed unchanged and regression-tested |
 | 26.22 | 2026-07-10 | New "Opinion Engine Recommendations" card: a deterministic, multi-signal rule engine layered on top of Opinion Validation (no new statistics — reads calib/confidence/decisionCost/pairResults/historyPoints/trendSeries already computed there). Produces severity-ranked, evidence-backed recommendations (review-threshold, confidence nudges, hierarchy-healthy, calibration/opinion trend, insufficient-data) and one overall Opinion Engine Health label. Analytics-only; M/N/O and Opinion Validation unchanged and regression-tested |
@@ -29,6 +30,43 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.25 — Full Dashboard Localization to European Portuguese (PT-PT)
+
+**Implemented:** 2026-07-11
+
+**Goal.** `03_Dashboard.md` §1 and `DEVELOPMENT_GUIDELINES.md` have long stated the rule "keep all UI text in PT-PT, do not mix languages" — but the rule had drifted from reality. The Season Archive/Close Season wizard was entirely in English, and the four Opinion analytics features added in Phases 26.20–26.24 (Opinion Validation, Opinion Engine Recommendations, Recommendation Simulator, Strategy Lab) had shipped with English copy throughout, alongside assorted older English labels scattered across the Bot vs Manual and Analytics tabs (table headers, KPI card titles, insight sentences, alerts). This phase closes that gap: every visible string in `index.html` was translated to natural PT-PT, and nothing else changed.
+
+**Scope discipline.** Pure text/localization pass. No calculation, threshold, condition, algorithm, data flow, persistence, API, or HTML structural change (beyond width/wrapping adjustments implied by longer Portuguese phrases in a handful of labels). No variable, function, or object-key was renamed.
+
+**The one structural addition — `ptLabel()`.** Several rule engines (Opinion Validation's calibration/confidence tiers, Opinion Engine Recommendations' severity levels, the League Analytics tier/action badges, the Analytics tab's confidence/knowledge-score badges) store and compare English constants directly — e.g. `calibMeta.label === 'Broken'`, `SEV_ORDER[r.severity]`, `confidence.label === 'Very Low'` — and also render that same string as the visible badge text. Renaming those constants to Portuguese would have meant finding and updating every comparison across four features without being able to verify each one exhaustively, for no functional benefit. Instead, a single shared lookup, `ptLabel(label)` (backed by `PT_LABEL_MAP`, `index.html` near `escapeHtml()`), maps the English constant to its PT-PT display form only at the point of rendering — every `===` comparison, object key, and `SEV_ORDER`/`confMap`/`LEAGUE_ACTION_CODE_LABEL`-style lookup continues to compare the original English string, untouched. `ptLabel()` is called 47 times across the file; anything not in `PT_LABEL_MAP` passes through unchanged (safe no-op for whitelisted terms like `STRONG BUY`/`AVOID`).
+
+**What was translated.** Sidebar navigation, page titles/subtitles, the Strategy Builder card, Settings page; the Season Archive viewer and 4-step Close Season wizard (`renderArchiveDetail()`, `csmRenderStep1()`–`csmGoStep4()`, `csmExecute()`, `validateArchive()`'s error reasons); the Opinion Validation, Opinion Engine Recommendations, Recommendation Simulator, and Strategy Lab sections in full (headers, table columns, insight/recommendation sentences, evidence labels, empty states); the pre-existing Bot vs Manual analytics (League Performance, Drawdown, Score Bands/Calibration/Insights, Edge Realization, Model Quality Score/Trust/Executive Summary, Action Engine) and Analytics tab (League/Market Validation, Knowledge Score, Findings/Lessons, Confidence Score/Alerts); assorted alert/confirm dialogs and empty-state messages throughout.
+
+**Whitelisted, intentionally untranslated:** `ROI`, `Edge`, `Scout`, `Bot`, `Strategy Lab`, `JSON`, `CSV`, `API`, `GitHub`, `Railway`, `Cloudflare`, `R2`, `BTTS`, `Over 2.5`, `STRONG BUY`/`BUY`/`NEUTRAL`/`AVOID`, and a handful of universally-understood table-header abbreviations (`W-L-P`, `WR`, `P/L €`, `Kickoff`, `Man n`/`Bot n`).
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | ~800 lines touched across the whole file — see above; new `PT_LABEL_MAP`/`ptLabel()` helper added near `escapeHtml()` |
+| `docs/03_Dashboard.md`, `docs/DEVELOPMENT_GUIDELINES.md` | No change — both already stated the PT-PT rule correctly; this phase brought the implementation into compliance with an existing, previously-unenforced statement |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase; `07_Current_Status.md` also backfilled missing "Completed Areas" entries for Phases 26.20–26.24, which had never been added |
+| `docs/handovers/handover-2026-07-11.md` | New handover for this phase |
+
+### Validation
+
+- `node --check` on the extracted `<script>` block after every batch of edits — zero syntax errors throughout.
+- Full-page `innerText` extraction (Playwright) across all 11 tabs with seeded manual-bet data, iteratively grepped for English words/phrases outside the whitelist until clean — several rounds surfaced genuine misses (duplicate English labels sitting inside already-PT section cards, a whole missed `U`–`Y`/`ACTION ENGINE` static-header cluster, `League`/`Market Validation` headers, streak/equity/confidence-score labels) that were fixed and re-verified.
+- All 6 existing Playwright regression suites re-run to completion and passing after every significant batch of changes, and once more at the end: `test.js` (Manual Bet lifecycle, 14 checks), `test_opinion_validation.js` (19 checks), `test_calibration_v2.js` (11 checks), `test_recommendations.js` (22 checks), `test_simulator.js` (26 checks), `test_strategylab.js` (34 checks) — 130+ checks total, zero failures, zero console/page errors. Test *assertions that checked literal English UI copy* were updated in the scratchpad copy of these suites to expect the new PT-PT strings (e.g. `'excellent'` → `'excelente'`); no test's underlying *logic/invariant* assertion changed.
+- Playwright screenshots captured for all 11 tabs for a final visual spot-check.
+- `git diff --stat` confirmed only `index.html` changed in the commit; `update_results.py`/`sync_server.py` untouched, so no Python validation was needed.
+
+### Impact
+
+The dashboard's UI language now actually matches what `03_Dashboard.md` and `DEVELOPMENT_GUIDELINES.md` already specified. Any future feature must be written in PT-PT from the start (per those documents) rather than shipped in English with translation deferred — this phase is the direct cost of that having happened silently across Phases 26.20–26.24 and earlier.
 
 ---
 
