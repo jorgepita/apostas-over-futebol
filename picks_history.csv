@@ -67,10 +67,11 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-07-05;Allsvenskan;Kalmar FF vs Orgryte IS;O2.5;1.67;0.12;2.35;;;;W;0.08;;2026-07-05T12:00:00+00:00
 2026-07-06;Allsvenskan;BK Hacken vs Djurgardens IF;O2.5;1.57;0.46;4.32;;;;W;0.26;;2026-07-06T17:00:00+00:00
 2026-07-06;Allsvenskan;IF Brommapojkarna vs Gais;BTTS;1.7;0.06;1.62;;;;W;0.04;;2026-07-06T17:00:00+00:00
-2026-07-10;Veikkausliiga;VPS vs SJK;O2.5;1.75;0.69;5.82;;;;;;;2026-07-10T17:00:00+01:00
+2026-07-10;Veikkausliiga;VPS vs SJK;O2.5;1.75;0.69;5.82;;;;L;-0.69;;2026-07-10T16:00:00+00:00
 2026-07-11;Eliteserien;Aalesund vs Molde;O2.5;1.55;0.27;3.33;;;;;;;2026-07-11T15:00:00+01:00
 2026-07-11;Eliteserien;Fredrikstad vs Lillestrom;O2.5;1.8;1.94;12.29;;;;;;;2026-07-11T13:00:00+01:00
 2026-07-11;Eliteserien;Tromso vs Valerenga;O2.5;1.76;0.33;4.06;;;;;;;2026-07-11T17:00:00+01:00
+2026-07-11;Veikkausliiga;Gnistan vs Mariehamn;BTTS;1.87;1.48;8.76;;;;;;;2026-07-11T15:00:00+01:00
 2026-07-11;Veikkausliiga;Gnistan vs Mariehamn;O2.5;1.57;1.65;8.31;;;;;;;2026-07-11T15:00:00+01:00
 2026-07-11;Veikkausliiga;Lahti vs HJK Helsinki;O2.5;1.7;0.03;1.24;;;;;;;2026-07-11T13:00:00+01:00
 2026-07-11;Veikkausliiga;Turku PS vs AC Oulu;O2.5;1.91;1.08;7.7;;;;;;;2026-07-11T15:00:00+01:00
