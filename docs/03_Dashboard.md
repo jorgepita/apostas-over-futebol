@@ -363,7 +363,7 @@ b.isLocal === true
 - Select a fixture → Poisson model runs in JavaScript → edge and Kelly stake are computed.
 - "Criar" (Create Bet) → `mbHandleCreate()` → `addManualBetFromFixture()` — pushes to `state.manualBets`, calls `markDirty()`, re-renders the Manual Bets panels. The Scout card for that fixture disappears immediately (see below) and does not require a page refresh to stay hidden.
 - "Aprovar" (Approve) → sets `status: 'approved'`, calls `markDirty()`. Bet moves to Pending/Live.
-- "Rejeitar" (Reject) → sets `status: 'rejected'`, calls `markDirty()`. **The bet is not removed** — it remains permanently in `state.manualBets` as an analytical record (see ADR-012). It disappears from Live Center/Pending (both require `status === 'approved'`) and from bankroll/ROI/analytics (`getResolvedManualBets()` excludes `status === 'rejected'`), but stays visible in the Manual Bets list (badge "Rejeitada") and in the History page's "Rejeitadas" view (see §9). Rejecting is reversible — clicking "Aprovar" on a rejected bet moves it back to `approved`, at which point it starts counting financially again.
+- "Rejeitar" (Reject) → sets `status: 'rejected'`, calls `markDirty()`. **The bet is not removed** — it remains permanently in `state.manualBets` as an analytical record (see ADR-012). It disappears from Live Center/Pending (both require `status === 'approved'`) and from bankroll/ROI/analytics (`getResolvedManualBets()` excludes `status === 'rejected'`), but stays visible in the Manual Bets list (badge "Rejeitada"). It also appears in the History page's "Rejeitadas" view (see §9) **only until settlement gives it a result** — once `resultado`/`placar` are populated, it drops out of "Rejeitadas" automatically (Phase 26.28) while remaining fully available to every module that reads `state.manualBets` directly (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual). Rejecting is reversible — clicking "Aprovar" on a rejected bet moves it back to `approved`, at which point it starts counting financially again.
 - "Remover" (Delete) → the only action that actually removes a bet from `state.manualBets`. This is also what makes its Scout card reappear (see below).
 - Manual entry form — allows creating a bet without Scout by filling fields directly; guarded by the same duplicate check as the Scout path (see below).
 
@@ -491,7 +491,7 @@ The cloud auto-save fires within 4 seconds. The bet transitions:
 
 ### Step 5 — Rejection
 
-The user clicks "Rejeitar" (Reject). `status` is set to `'rejected'`; the bet is **not** removed from `state.manualBets`. `markDirty()` is called. The bet disappears from Pending/Live Center (both require `status === 'approved'`) and from every financial calculation (`getResolvedManualBets()` excludes it — see ADR-012), but remains in the Manual Bets list and becomes visible in the History page's "Rejeitadas" view (§9). It still passes through settlement like any other bet (Step 8) — its fixture's real result, final score, and theoretical profit get populated exactly as if it had been approved — the only difference is that none of that ever reaches bankroll/ROI. Rejection is reversible: approving a rejected bet moves it back to `approved` and it starts counting financially again.
+The user clicks "Rejeitar" (Reject). `status` is set to `'rejected'`; the bet is **not** removed from `state.manualBets`. `markDirty()` is called. The bet disappears from Pending/Live Center (both require `status === 'approved'`) and from every financial calculation (`getResolvedManualBets()` excludes it — see ADR-012), but remains in the Manual Bets list and becomes visible in the History page's "Rejeitadas" view (§9) **while unsettled**. It still passes through settlement like any other bet (Step 8) — its fixture's real result, final score, and theoretical profit get populated exactly as if it had been approved — the only difference is that none of that ever reaches bankroll/ROI. Once settled, it drops out of "Rejeitadas" (Phase 26.28) but remains fully available to Strategy Lab, Opinion Validation, and every other analytical module that reads `state.manualBets` directly. Rejection is reversible: approving a rejected bet moves it back to `approved` and it starts counting financially again.
 
 ### Step 6 — Persistence
 
@@ -543,7 +543,7 @@ Lifecycle (`status`) and settlement result (`resultado`/`placar`) are independen
          → hidden from Pending/Live/       │ (same engine, same run)
            bankroll/ROI; visible in        │
            Manual Bets list + History      │
-           → Rejeitadas                    ▼
+           → Rejeitadas (unsettled only)   ▼
                 │                  [settled]
                 │ settlement writes   status: 'approved' (unchanged by settlement)
                 │ resultado/lucro/     resultado: 'W' / 'L' / 'P'
@@ -554,7 +554,10 @@ Lifecycle (`status`) and settlement result (`resultado`/`placar`) are independen
       status: 'rejected'  (never advances to 'settled' — see ADR-012)
       resultado: 'W' / 'L' / 'P'
       placar: final score
-      → appears in History → Rejeitadas ONLY; never in Analytics/Bankroll
+      → drops out of History → Rejeitadas automatically (Phase 26.28); never
+        appears in Analytics/Bankroll; remains fully available to Strategy
+        Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs
+        Manual, and any module that reads state.manualBets directly
 ```
 
 A rejected bet can be re-approved at any point (before or after settlement) by clicking "Aprovar" again; it then behaves exactly like any other approved bet, including counting financially if it already carries a settlement result.
@@ -643,7 +646,7 @@ Kickoff passes
 The "Fechadas reais filtradas" card has a two-button toggle (`#historyViewResolvedBtn` / `#historyViewRejectedBtn`) that switches `renderClosedRealTable()` between two views sharing the same filter bar (`getHistoryFilters()`), card, and `<table>` element — only the `<thead>` and the row-renderer differ:
 
 - **Resolvidas** (default) — unchanged from before this phase: bot + approved manual bets with a settlement result, via `renderResolvedClosedRealTable()` / `getHistoryFilteredRows()`. Rejected bets are never included here, settled or not (`getFilteredRealClosedRows()`'s manual branch is built on `getResolvedManualBets()`).
-- **Rejeitadas** — `renderRejectedHistoryTable()` / `getRejectedHistoryRows()`, built on `getRejectedManualBets()` (every bet with `status === 'rejected'`, settled or still awaiting its result). Columns: Data, Liga, Jogo, Mercado, Odd, Stake, Análise (score badge from Scout analysis), Opinião (`botOpinion`), Placar Final (`placar`), Resultado (`resultBadge(resultado)`), Lucro Teórico (`_lucro` — the same profit calculation as any other bet, labelled "theoretical" because it never touched the bankroll), Notas.
+- **Rejeitadas** — `renderRejectedHistoryTable()` / `getRejectedHistoryRows()`, built on `getRejectedManualBets()`: every bet with `status === 'rejected'` **that has not yet been settled** (`_lucro === null`, i.e. `resultado` not in `{W,L,P}` — Phase 26.28). A rejected bet awaiting its outcome shows here; once settlement populates a result, it disappears from this view automatically on the next render — it is never deleted, and remains fully queryable by any module that reads `state.manualBets` directly (Strategy Lab's `getStrategyLabPool()`, Opinion Validation/Recommendation Engine/Simulator/Bot vs Manual's `getResolvedManualBets()`-based pools) — none of those call `getRejectedManualBets()`, so this is a presentation-only change to a single view. Columns: Data, Liga, Jogo, Mercado, Odd, Stake, Análise (score badge from Scout analysis), Opinião (`botOpinion`), Placar Final (`placar`), Resultado (`resultBadge(resultado)`), Lucro Teórico (`_lucro` — the same profit calculation as any other bet, labelled "theoretical" because it never touched the bankroll), Notas — these last four columns are always blank for rows in this view, since a settled row no longer appears here.
 
 The toggle is a transient view flag (`_historyViewMode`, module-level `let`, default `'resolved'`) — it is not persisted to localStorage or `cloud_state.json`; reloading the page always returns to Resolvidas. See ADR-012 for why rejected bets are settled but excluded from financial views, and `04_Backend.md` §7 for how `placar` is populated.
 

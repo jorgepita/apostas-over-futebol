@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.28 | 2026-07-11 | Fixed `getRejectedManualBets()` so History → Rejeitadas only shows rejected bets that haven't been settled yet — previously it showed every rejected bet forever regardless of settlement, creating duplicate visibility with Strategy Lab/Opinion Validation/etc. once a rejected bet settled. Single-predicate fix (`&& b._lucro === null`, the existing project convention — confirmed no dedicated settlement helper exists to reuse instead of introducing one). No change to settlement, persistence, `cloud_state.json`, bankroll, ROI, or any analytical module; all verified via the existing 6-suite Playwright regression harness plus a new targeted 19-check script |
 | 26.27 | 2026-07-11 | Removed the legacy NBA subsystem entirely: 8 NBA-exclusive files deleted (5 scripts, 1 config file, 2 data/output CSVs) and 3 dead NBA keys removed from `config.json` (`bankroll.nba_over`, `rules.nba_over`, top-level `nba` block). Preceded by a full read-only audit (previous session) that verified zero shared code between the NBA and football pipelines, and by an archival git tag (`legacy-nba-final`) at the pre-removal commit. Full validation (syntax, test suite, config-equivalence, import checks) confirmed zero football behaviour changed. Repository is now exclusively football |
 | 26.26 | 2026-07-11 | Repository hygiene cleanup: removed obsolete `PROJECT_RULES.md` (superseded by `docs/`), replaced the content-free root `README.md` placeholder with a real landing page, committed `CLAUDE.md` and `.claude/settings.json` for the first time (closing a 3-session-old gap where docs already described them as committed), deleted stale diagnostic `audit_output*.txt` files, and added `.gitignore` rules for `.claude/settings.local.json` and `audit_output*.txt`. No code, business logic, or runtime behaviour changed |
 | 26.25 | 2026-07-11 | Full dashboard localization to European Portuguese (PT-PT): translated every remaining English UI string in `index.html` — the Season Archive/Close Season wizard, the four Opinion analytics features (26.20–26.23), Strategy Lab (26.24), and assorted pre-existing analytics tables/labels/alerts — to natural PT-PT. No business logic, calculation, threshold, or persistence changed. Internal English status/severity codes used in `===` comparisons across the calibration and recommendation rule engines were kept as-is and only translated at render time via a new shared `ptLabel()` lookup, so no comparison was touched. All 6 existing Playwright regression suites (130+ checks) re-run and passing |
@@ -32,6 +33,51 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.28 — Hide Settled Rejected Bets From History → Rejeitadas
+
+**Implemented:** 2026-07-11
+
+**Goal.** A rejected manual bet stayed visible in the History page's "Rejeitadas" view forever, even after settlement gave it a real result — at the same time, the same bet correctly began appearing in Strategy Lab, Opinion Validation, and other analytics once settled (by design, per ADR-012). This created the appearance of the same analytical record being visible in two places at once. The expected behaviour: a rejected bet has two phases — (1) rejected + unsettled → visible in Rejeitadas; (2) rejected + settled → automatically disappears from Rejeitadas, remains fully available everywhere analytical (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual). This is not a data-loss fix — the bet is never deleted, only a presentation filter changes.
+
+**Investigation (full trace before any change).**
+- **Storage:** `cloud_state.json` → `manualBets` array (ADR-001/ADR-008) — unaffected.
+- **Settlement writes:** the backend's `apply_df_results_to_manual_bets()` populates `resultado`, `placar`, `lucro`/`Lucro€`, `settledAt` on the bet object; `status` is left at `'rejected'` if it was already `'rejected'` (ADR-012) — confirmed via source inspection, not assumed.
+- **Every filter site traced:** `getResolvedManualBets()` (`b._lucro !== null && b.status !== 'rejected'`) — used by Manual Bets financials, History "Resolvidas", Bot vs Manual, Opinion Validation, Recommendation Engine, Simulator — already correctly excludes all rejected bets regardless of settlement, untouched by this phase. `getRejectedManualBets()` — the only broken one, and the only function History "Rejeitadas" consumes (via `getRejectedHistoryRows()`, its sole caller). `getStrategyLabPool()` — reads `state.manualBets` directly, filtered only by `hadAnalysis && botOpinion && resultado∈{W,L,P}` — deliberately includes rejected bets by design (a documented, pre-existing decision, unrelated to this bug), untouched.
+- **Root cause confirmed:** `getRejectedManualBets()` filtered only on `status === 'rejected'`, with zero check on settlement state, so a settled rejected bet never dropped out of the one view meant to show "awaiting outcome" rejected bets.
+- **Quality review (post-fix):** searched the codebase for an existing "is settled"/"is resolved"/"is open bet" helper before finalising the fix. None exists anywhere in `index.html` — the established convention is the raw inline check `_lucro === null`/`!== null` (already used 5+ times, including inside the sibling function `getResolvedManualBets()`) or `_resultKey === 'pending'` (used 6+ times). Per that convention, no new helper was introduced for this single call site.
+
+**Fix.** One predicate change:
+```js
+function getRejectedManualBets() {
+  return getManualRowsMerged().filter(b => b.status === 'rejected' && b._lucro === null);
+}
+```
+Plus updated doc comments on `getRejectedManualBets()` and `getRejectedHistoryRows()` that had explicitly documented the old ("shows settled or not") behaviour as intentional.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `getRejectedManualBets()` predicate narrowed to unsettled-only (`&& b._lucro === null`); two doc comments updated |
+| `docs/03_Dashboard.md` | 4 passages updated (Manual Bets §, Step 5 lifecycle narrative, ASCII lifecycle diagram, §9 Resolvidas/Rejeitadas toggle) that previously documented the old behaviour as intentional |
+| `docs/05_Known_Issues.md` | New resolved-issue entry, `DASHBOARD-2` |
+| `docs/07_Current_Status.md`, `docs/08_Change_Log.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-11-rejected-bets-fix.md` | New handover for this phase |
+
+### Validation
+
+- **Quality review search.** Grepped for `function is[A-Z]`, `function has[A-Z]`, `function.*settl`, `const isSettled/isResolved/isPending/isOpen` across `index.html` — no dedicated settlement-state helper exists anywhere; `_lucro === null`/`!== null` and `_resultKey === 'pending'` are the only established conventions, both used repeatedly already. Confirms the fix correctly follows existing convention rather than needing a new or reused abstraction.
+- **Syntax.** `node --check` on both extracted `<script>` blocks — zero errors.
+- **Targeted regression script (new, 19 checks, scratchpad-only, not committed):** seeded 4 manual bets (rejected+unsettled, rejected+settled, approved+settled, plain pending) and verified: `getRejectedManualBets()` returns exactly the unsettled rejected bet; `getResolvedManualBets()` unchanged (still excludes all rejected bets, settled or not); `getStrategyLabPool('all')` still includes the settled rejected bet; the Rejeitadas DOM table shows only the unsettled rejected bet; the Resolvidas DOM table shows neither rejected bet; zero duplicate visibility across History tables; the Pending→Rejected→(settled)→disappears-from-Rejeitadas-but-stays-in-state transition; the unrelated Remove transition still works. All 19 checks passed both before and after the "quality review" step (no code changed between the two runs, since no helper was reused).
+- **Full existing 6-suite Playwright harness re-run:** `test_opinion_validation.js` (19/19), `test_calibration_v2.js` (11/11), `test_recommendations.js` (22/22), `test_simulator.js` (26/26), `test_strategylab.js` (32/32 — including the explicit "Strategy Lab pool INCLUDES the rejected BUY bet" and "Production baseline excludes the rejected bet" checks) all pass unchanged. The pre-existing `test.js` shows 5 **expected** post-fix "failures" that assert the old (buggy) behaviour (e.g. "Rejected bet appears in `getRejectedManualBets()` with its settlement result") — the direct, intended consequence of this fix, not a regression; that scratchpad test file is not committed to the repository and was not edited.
+- **Console/page errors.** Zero real errors in any run; the only console output observed anywhere was the pre-existing `Failed to fetch` noise from the test harness's deliberate network-blocking (confirmed identical on the unmodified suite, i.e. baseline, not caused by this fix).
+
+### Impact
+
+History → Rejeitadas now shows exactly what its name implies: rejected bets still awaiting an outcome. Once settled, a rejected bet is no longer duplicated across "Rejeitadas" and the analytical modules that are supposed to include it — it appears exactly once, in the modules designed to use it (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual), and nowhere in the two History tables. No data was deleted or altered; this is a presentation-only fix.
 
 ---
 

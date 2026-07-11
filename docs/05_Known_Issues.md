@@ -14,6 +14,18 @@ None currently open.
 
 ## Resolved Issues
 
+### DASHBOARD-2 — Settled Rejected Bets Remained Visible in History → Rejeitadas, Creating Duplicate Visibility With Analytics
+
+**Status:** Resolved — 2026-07-11 (Phase 26.28). Full technical detail in `08_Change_Log.md` — Phase 26.28.
+
+**Was:** A rejected manual bet stayed visible in the History page's "Rejeitadas" view forever, even after settlement gave it a real result. At the same time, the same bet correctly began appearing in Strategy Lab, Opinion Validation, and other analytical modules once settled (by design — see ADR-012). This created the appearance of the same analytical record being shown twice at once.
+
+**Root cause:** `getRejectedManualBets()` (`index.html`) filtered only on `status === 'rejected'`, with no check on whether the bet had been settled. Since ADR-012 deliberately keeps a rejected bet's `status` at `'rejected'` forever — even after `resultado`/`lucro`/`placar` are populated by the shared settlement engine — this predicate returned every rejected bet regardless of settlement state. "Rejeitadas" is the only consumer of this function (2 call sites total: its own definition and `getRejectedHistoryRows()`); every analytical module (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs Manual) sources its bet pool independently and never calls this function, so none of them were affected by the bug or by the fix.
+
+**Fix:** `getRejectedManualBets()` now also requires `b._lucro === null` (not yet settled — the same convention `getResolvedManualBets()` already uses for the opposite check). A rejected bet disappears from "Rejeitadas" automatically once settled; it is never deleted and remains fully available everywhere else that reads `state.manualBets` directly. Confirmed via a repository-wide search that no dedicated "is settled" helper already existed to reuse — `_lucro === null` is the established inline convention used at 5+ other sites in the file, so no new abstraction was introduced.
+
+---
+
 ### MANUAL-1 — Scout Card Stayed Visible for Pending Manual Bets; Rejected Bets Lost Their Status When Settled
 
 **Status:** Resolved — 2026-07-10 (Phase 26.19). Full technical detail in `08_Change_Log.md` — Phase 26.19.

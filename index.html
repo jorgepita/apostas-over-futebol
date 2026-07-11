@@ -4874,11 +4874,17 @@ button:disabled {
         return getManualRowsMerged().filter(b => b._lucro !== null && b.status !== 'rejected');
       }
 
-      // Rejected manual bets — analytical-only records. Settled the same way as any
-      // other bet (same shared engine, same resultado/_lucro/placar fields) but never
-      // contribute to bankroll/ROI/financial reports. Feeds the Rejected History view.
+      // Rejected manual bets that have NOT yet been settled — feeds the History page's
+      // "Rejeitadas" view only. Once a rejected bet is settled (resultado/_lucro/placar
+      // populated by the shared engine — ADR-012), it's no longer "awaiting an outcome"
+      // from this page's perspective and disappears from here; the bet itself is never
+      // deleted and remains fully available to every module that reads state.manualBets
+      // directly rather than through this function (Strategy Lab's getStrategyLabPool(),
+      // Opinion Validation/Recommendation Engine/Simulator/Bot vs Manual's
+      // getResolvedManualBets() pool) — none of those call getRejectedManualBets(), so
+      // this filter change only affects Histórico → Rejeitadas.
       function getRejectedManualBets() {
-        return getManualRowsMerged().filter(b => b.status === 'rejected');
+        return getManualRowsMerged().filter(b => b.status === 'rejected' && b._lucro === null);
       }
 
       function getExecutionStats() {
@@ -5258,9 +5264,12 @@ button:disabled {
 
       // Rejected manual bets for the History page's "Rejeitadas" view — reuses the
       // same filter bar (search/league/market/result/date/odds) as the Resolved
-      // view. Includes rejected bets regardless of whether they've been settled yet
-      // (an unsettled rejected bet is still a real analytical record — a passed-on
-      // opportunity awaiting its outcome). See ADR-012 and Goal 5/7 in 03_Dashboard.md.
+      // view. Only rejected bets NOT YET settled are shown here (a rejected bet
+      // still awaiting its outcome); once settlement populates a result, the bet
+      // moves out of this view automatically (getRejectedManualBets() excludes it)
+      // but stays fully available everywhere else that reads manual bets directly
+      // (Strategy Lab, Opinion Validation, Recommendation Engine, Simulator, Bot vs
+      // Manual). See ADR-012 and §9 in 03_Dashboard.md.
       function getRejectedHistoryRows() {
         const filters = getHistoryFilters();
         return filterManualRows(getRejectedManualBets(), filters)
