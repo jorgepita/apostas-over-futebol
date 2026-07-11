@@ -3,13 +3,20 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-07-12;coreia;Incheon United;FC Anyang;2.34;2.00;2026-07-12T11:30:00+01:00
 2026-07-12;coreia;Jeju United FC;Daejeon Citizen;2.19;1.87;2026-07-12T11:30:00+01:00
 2026-07-12;noruega;Brann;Start;1.48;1.67;2026-07-12T16:00:00+01:00
-2026-07-12;noruega;KFUM Oslo;Bodo/Glimt;1.48;1.62;2026-07-12T13:30:00+01:00
-2026-07-12;noruega;Rosenborg;Kristiansund BK;1.66;1.73;2026-07-12T16:00:00+01:00
+2026-07-12;noruega;KFUM Oslo;Bodo/Glimt;1.48;1.58;2026-07-12T13:30:00+01:00
+2026-07-12;noruega;Rosenborg;Kristiansund BK;1.66;1.70;2026-07-12T16:00:00+01:00
 2026-07-12;noruega;Sarpsborg 08 FF;Viking;1.52;1.50;2026-07-12T18:15:00+01:00
-2026-07-12;suecia;Hammarby FF;Kalmar FF;1.50;1.71;2026-07-12T13:00:00+01:00
+2026-07-12;suecia;Hammarby FF;Kalmar FF;1.48;1.70;2026-07-12T13:00:00+01:00
 2026-07-12;suecia;IF Brommapojkarna;Sirius;1.55;1.57;2026-07-12T15:30:00+01:00
 2026-07-12;suecia;Malmo FF;IFK Goteborg;1.65;1.58;2026-07-12T13:00:00+01:00
 2026-07-12;suecia;Vasteras SK FK;Degerfors IF;2.00;1.80;2026-07-12T13:00:00+01:00
 2026-07-13;suecia;Djurgardens IF;Halmstad;1.48;1.95;2026-07-13T18:00:00+01:00
 2026-07-16;brasil;Botafogo;Santos;1.88;1.70;2026-07-16T23:30:00+01:00
 2026-07-16;brasil;Vitoria;Vasco DA Gama;2.16;1.83;2026-07-16T23:30:00+01:00
+2026-07-17;brasil;Bahia;Chapecoense-sc;1.64;1.91;2026-07-17T23:30:00+01:00
+2026-07-17;mls;CF Montreal;Toronto FC;1.66;1.58;2026-07-17T00:30:00+01:00
+2026-07-17;mls;Chicago Fire;Vancouver Whitecaps;1.54;1.44;2026-07-17T01:30:00+01:00
+2026-07-17;mls;Seattle Sounders;Portland Timbers;1.45;1.55;2026-07-17T03:30:00+01:00
+2026-07-17;mls;St. Louis City;Sporting Kansas City;1.44;1.60;2026-07-17T01:30:00+01:00
+2026-07-17;suecia;IFK Goteborg;IF Brommapojkarna;1.60;1.57;2026-07-17T18:00:00+01:00
+2026-07-17;suecia;Mjallby AIF;Vasteras SK FK;1.78;1.69;2026-07-17T18:00:00+01:00
