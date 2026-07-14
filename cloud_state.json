@@ -6192,6 +6192,28 @@
       "homeTeam": "Seattle Sounders",
       "awayTeam": "Portland Timbers",
       "leagueId": 253
+    },
+    {
+      "id": "manual_1784054060275_0uf17a",
+      "data": "2026-07-17",
+      "liga": "mls",
+      "jogo": "St. Louis City vs Sporting Kansas City",
+      "mercado": "Over 2.5",
+      "odd": "1.42",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T01:30:00+01:00",
+      "homeTeam": "St. Louis City",
+      "awayTeam": "Sporting Kansas City",
+      "leagueId": 253
     }
   ],
   "movements": [
