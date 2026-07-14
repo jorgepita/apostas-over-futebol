@@ -6829,6 +6829,28 @@
       "homeTeam": "Nashville SC",
       "awayTeam": "Atlanta United FC",
       "leagueId": 253
+    },
+    {
+      "id": "manual_1784072607549_w1x9ay",
+      "data": "2026-07-18",
+      "liga": "noruega",
+      "jogo": "Kristiansund BK vs Sarpsborg 08 FF",
+      "mercado": "Over 2.5",
+      "odd": "1.66",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-18T15:00:00+01:00",
+      "homeTeam": "Kristiansund BK",
+      "awayTeam": "Sarpsborg 08 FF",
+      "leagueId": 103
     }
   ],
   "movements": [
