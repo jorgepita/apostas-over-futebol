@@ -6214,6 +6214,28 @@
       "homeTeam": "St. Louis City",
       "awayTeam": "Sporting Kansas City",
       "leagueId": 253
+    },
+    {
+      "id": "manual_1784054069018_5v6ibg",
+      "data": "2026-07-17",
+      "liga": "noruega",
+      "jogo": "Bodo/Glimt vs Fredrikstad",
+      "mercado": "Over 2.5",
+      "odd": "1.3",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T18:15:00+01:00",
+      "homeTeam": "Bodo/Glimt",
+      "awayTeam": "Fredrikstad",
+      "leagueId": 103
     }
   ],
   "movements": [
@@ -6240,7 +6262,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T18:33:39.893Z",
+  "lastUpdated": "2026-07-14T18:34:35.836Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
