@@ -6716,6 +6716,28 @@
       "homeTeam": "AC Oulu",
       "awayTeam": "Gnistan",
       "leagueId": 244
+    },
+    {
+      "id": "manual_1784072552796_aqvy1l",
+      "data": "2026-07-18",
+      "liga": "finlandia",
+      "jogo": "HJK Helsinki vs VPS",
+      "mercado": "Over 2.5",
+      "odd": "1.63",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-18T13:00:00+01:00",
+      "homeTeam": "HJK Helsinki",
+      "awayTeam": "VPS",
+      "leagueId": 244
     }
   ],
   "movements": [
