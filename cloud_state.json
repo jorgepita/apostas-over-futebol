@@ -6104,6 +6104,28 @@
       "homeTeam": "Valerenga",
       "awayTeam": "Aalesund",
       "leagueId": 103
+    },
+    {
+      "id": "manual_1784053969575_cbj2wf",
+      "data": "2026-07-17",
+      "liga": "brasil",
+      "jogo": "Bahia vs Chapecoense-sc",
+      "mercado": "Over 2.5",
+      "odd": "1.63",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T23:30:00+01:00",
+      "homeTeam": "Bahia",
+      "awayTeam": "Chapecoense-sc",
+      "leagueId": 71
     }
   ],
   "movements": [
