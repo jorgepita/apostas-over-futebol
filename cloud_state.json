@@ -6082,6 +6082,28 @@
       "scoreAtAnalysis": 88,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1784053944175_i2bnxp",
+      "data": "2026-07-16",
+      "liga": "noruega",
+      "jogo": "Valerenga vs Aalesund",
+      "mercado": "Over 2.5",
+      "odd": "1.48",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-16T18:00:00+01:00",
+      "homeTeam": "Valerenga",
+      "awayTeam": "Aalesund",
+      "leagueId": 103
     }
   ],
   "movements": [
@@ -6108,7 +6130,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T18:31:30.650Z",
+  "lastUpdated": "2026-07-14T18:32:33.062Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
@@ -6418,6 +6440,44 @@
       "lastCheckedAt": "2026-07-14T09:06:01.662276+00:00",
       "lastSuccessAt": "2026-07-14T09:06:01.662276+00:00",
       "status": "ok"
+    }
+  },
+  "_modelConfigCache": {
+    "window": 12,
+    "decay": 0.88,
+    "minGamesHome": 8,
+    "minGamesAway": 8,
+    "lambdaBoost": 1.12,
+    "leagueLambdaBoost": {
+      "japao": 1,
+      "coreia": 1,
+      "finlandia": 1,
+      "islandia": 1,
+      "brasil": 1
+    },
+    "bttsAdj": 0.885,
+    "apiFootballLeagueIds": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188,
+      "brasil": 71
     }
   }
 }
