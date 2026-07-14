@@ -3522,6 +3522,12 @@
     },
     "2026-07-18|noruega|Molde vs Brann|Over 2.5": {
       "apostada": true
+    },
+    "2026-07-18|brasil|Fluminense vs RB Bragantino|Over 2.5": {
+      "apostada": true
+    },
+    "2026-07-18|noruega|Viking vs Sandefjord|BTTS": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -6099,7 +6105,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T18:30:30.607Z",
+  "lastUpdated": "2026-07-14T18:31:30.650Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
