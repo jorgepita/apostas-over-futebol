@@ -8152,7 +8152,18 @@ button:disabled {
         document.querySelectorAll('.js-bot-approve').forEach(el => {
           el.onclick = e => {
             const key = e.target.dataset.pickKey;
-            update(key, { apostada: true }, true);
+            const changes = { apostada: true };
+
+            // Default StakeReal to the displayed "Stake rec." the first time a pick
+            // is approved — only when the user hasn't already typed a value in themselves.
+            const existingStakeReal = cleanString(state.localEdits[key]?.stakeReal ?? '');
+            if (!existingStakeReal) {
+              const row = getDailyRowsMerged().find(r => r._pickKey === key);
+              const recommended = row ? computeRecommendedStake(row).value : null;
+              if (recommended !== null) changes.stakeReal = String(recommended);
+            }
+
+            update(key, changes, true);
           };
         });
 

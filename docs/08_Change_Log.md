@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.33 | 2026-07-15 | Bot pick approval now defaults `StakeReal` to the pick's displayed "Stake rec." (`computeRecommendedStake()`) value the first time it's approved, but only when the user hasn't already typed a `StakeReal` in first — a typed value always takes precedence and is never overwritten. Single change point: the `.js-bot-approve` click handler in `bindBotTableControls()`. No change to Kelly, `computeRecommendedStake()` itself, bankroll logic, settlement, persistence format, or CSV schema — purely a one-time default applied to the existing `localEdits[pickKey].stakeReal` field at the moment of approval. Manual bets and previously-approved picks are untouched |
 | 26.32 | 2026-07-12 | Fixed manual bets settling out of sync with bot picks for the same fixture (a manual bet settled immediately while its equivalent bot pick stayed LIVE until a later run). Root cause: not a settlement-engine bug — `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate only applies `if kickoff_str:`, and manual bets never actually had `kickoffUTC` persisted (a documentation claim from Phase 26.7–26.9 to the contrary was inaccurate — corrected). Fix: `addManualBetFromFixture()` now persists `kickoffUTC`/`homeTeam`/`awayTeam`/`leagueId` at creation time for fixture-backed (Scout) bets, so settlement receives equivalent input to what bot picks already provide. Zero changes to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence. Free-form manual bets (no fixture) are unaffected — documented limitation, not a bug. See `05_Known_Issues.md` SETTLEMENT-2 |
 | 26.31 | 2026-07-11 | Corrected rejected-bet lifecycle visibility: Phase 26.28's fix removed the duplicate from the wrong page. `getRejectedManualBets()` reverted to showing every rejected bet (settled or not) — "Rejeitadas" is the permanent archive, exactly as originally designed. The actual fix: `renderManualBets()` (operational "Apostas Manuais" list) now hides a rejected bet once it's settled, since a settled bet no longer needs attention there. No change to settlement, persistence, `cloud_state.json`, QuantEngine, or any analytical module — all verified via the full 6-suite Playwright regression harness (now 6/6 fully green) plus a new 24-check targeted script |
 | 26.30 | 2026-07-11 | Closed the one gap found by the post-migration QuantEngine architecture audit: the per-league lambda-boost clamp-and-multiply step was duplicated, unverified inline arithmetic in both `src/pick_generation.py` and `analyzeFixture()`. Extracted into `apply_lambda_boost()` (Python, canonical) and mirrored as `QuantEngine.applyLambdaBoost()` (JavaScript), with 8 new golden vectors (142/285 total Python/JS assertions). Verified byte-identical to the pre-extraction inline formula. No other quantitative duplication remains inside the Bot + Scout architecture — see ADR-014 |
@@ -37,6 +38,41 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.33 — Default StakeReal to "Stake rec." on Bot Pick Approval
+
+**Implemented:** 2026-07-15
+
+**Goal.** Requested behaviour change: when a bot pick is approved ("Aprovar" on the Daily Picks page), if the user hasn't entered a `StakeReal` yet, automatically default it to the recommended stake — so a user who always follows the model's recommendation doesn't have to re-type the same number by hand. A user who edits `StakeReal` before approving must always keep their own value.
+
+**Investigation.** Confirmed there is exactly one approval code path for bot picks: the `.js-bot-approve` button, rendered in both the desktop table (`buildBotRowHtml()`) and the mobile cards (`buildPicksCardHtml()`), both always sourced from `getDailyRowsMerged()` and bound by the single `bindBotTableControls()` handler — no duplicate or parallel approval path exists (the similarly-named `.js-approve-manual` button belongs to manual bets and is a separate, untouched code path).
+
+The pick table actually surfaces **two** distinct "recommended stake" figures side by side, and picking the wrong one would have been a real financial-behaviour mistake: **"Stake mod."** (`r._stakeModeloNum`, the raw `Stake€` column — the unmodified Kelly output from `src/calculations.py`) and **"Stake rec."** (`computeRecommendedStake(row).value` — a client-side-only layer on top of Stake mod. that applies a performance-based dynamic multiplier, edge/score/odds adjustments, and an exposure-based cap, then rounds to the nearest €0.50). Confirmed with the user before implementing: the intended source is **"Stake rec."**, the value the pick's own "Stake rec." column already displays — not the raw Kelly figure.
+
+**Fix.** The `.js-bot-approve` click handler in `bindBotTableControls()` now builds its `update()` payload as `{ apostada: true, ...maybe stakeReal }`: it reads the pick's *current* `localEdits[key].stakeReal` first, and only when that's empty does it look up the row via `getDailyRowsMerged().find(r => r._pickKey === key)`, compute `computeRecommendedStake(row).value`, and include it as `stakeReal` (as a string, matching the existing `stakeReal` storage format everywhere else). Both branches still go through the exact same `update()` → `markDirty()` → `saveLocalState()` → `rerenderAll()` pipeline every other local edit already uses — no new persistence path, no new storage key, no CSV column. `computeRecommendedStake()` itself, Kelly, bankroll logic, and settlement are untouched; this only ever writes into the pre-existing `localEdits[pickKey].stakeReal` field, exactly as if the user had typed that number in themselves.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `.js-bot-approve` click handler (`bindBotTableControls()`) now defaults `stakeReal` to `computeRecommendedStake(row).value` when empty at approval time |
+| `docs/03_Dashboard.md` | Daily Picks section and `state.localEdits` schema note updated to describe the new default-on-approval behaviour |
+| `docs/08_Change_Log.md` | This Phase 26.33 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-15-approve-stake-default.md` | New handover |
+
+### Validation
+
+- **Playwright, targeted script (9 checks, scratchpad, not committed, run against the real `index.html` in a real browser via `bindBotTableControls()`'s actual bound click handler — not a re-implementation):** approving a pick with no `StakeReal` sets it to exactly the displayed "Stake rec." value; approving a pick with an existing `StakeReal` ("7.5") preserves it byte-for-byte; a pick approved in a prior session (pre-existing `stakeReal`) is completely untouched by any of this; `state.manualBets` is byte-identical before/after both bot-pick approvals; `getRiskMetrics().stakeOpen` and the Home page's "Exposição aberta" KPI both immediately reflect the sum of all newly- and previously-approved real stakes plus the untouched manual bet.
+- **Full existing 6-suite Playwright regression harness:** all 6 suites (`test.js`, Opinion Validation, Recommendations, Simulator, Strategy Lab, Calibration) re-run in full, all passing, zero console/page errors.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged — no Python file was modified.
+- `git diff --stat` confirms only `index.html` changed (13 lines) for the code portion of this phase.
+
+### Impact
+
+A user who approves a bot pick without touching "Stake Real" now has it default to the same "Stake rec." figure already shown on that row, and Open Exposure/bankroll risk metrics reflect it immediately. A user who prefers a different stake can still type it in before approving, and that value is never overwritten. No migration was performed or required — previously-approved picks and manual bets are entirely unaffected.
 
 ---
 

@@ -128,7 +128,7 @@ Used by: History page, Analytics, bot vs manual comparison, bankroll calculation
 
 **`state.localEdits`**  
 Map from `pickKey` (string built from `Data||Liga||Jogo||Mercado`) to an edit object `{apostada: bool, oddReal: string, stakeReal: string, resultadoManual: string}`. Records user-entered execution data for bot picks.  
-Updated by: user editing "Apostada", "Odd Real", "Stake Real" fields in the History page.  
+Updated by: user editing "Apostada", "Odd Real", "Stake Real" fields in the History page, and by "Aprovar" on the Daily Picks page (which sets `apostada` and, since Phase 26.33, defaults an empty `stakeReal` to the pick's "Stake rec." value — see Daily Picks below).  
 Merged into bot pick rows by: `getRowWithLocalEdits(row)` before display and analytics.
 
 **`state.bankrollInicial`** and **`state.bankrollInicialSet`**  
@@ -295,7 +295,7 @@ After any state mutation:
 
 **User interactions:**
 - Filter by market (O2.5, BTTS), league, date.
-- Mark a pick as "Apostada" — sets `localEdits[pickKey].apostada = true`, calls `markDirty()`, `saveLocalState()`, `rerenderAll()`.
+- Mark a pick as "Apostada" (`.js-bot-approve`, bound in `bindBotTableControls()`) — sets `localEdits[pickKey].apostada = true`, calls `markDirty()`, `saveLocalState()`, `rerenderAll()`. **(Phase 26.33)** In the same click, if `localEdits[pickKey].stakeReal` is still empty at approval time, it is defaulted to the row's displayed "Stake rec." value (`computeRecommendedStake(row).value` — the same dynamic recommendation shown in that pick's own "Stake rec." column, not the raw "Stake mod." Kelly output). A `stakeReal` the user already typed in before clicking "Aprovar" is never overwritten, and the default is applied exactly once, at the moment of approval — editing "Stake Real" afterward on the History page works exactly as before.
 
 **Update triggers:** `loadData()` (page load, 60-second interval); any `rerenderAll()`.
 
