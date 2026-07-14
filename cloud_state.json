@@ -3598,7 +3598,7 @@
       "stakeReal": "1"
     },
     "2026-07-17|suecia|Mjallby AIF vs Vasteras SK FK|Over 2.5": {
-      "apostada": true,
+      "apostada": false,
       "stakeReal": "0"
     },
     "2026-07-18|noruega|Kristiansund BK vs Sarpsborg 08 FF|Over 2.5": {
@@ -6588,8 +6588,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T23:34:56.164Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-07-14T23:35:55.863Z",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
