@@ -6898,6 +6898,28 @@
       "homeTeam": "Lillestrom",
       "awayTeam": "KFUM Oslo",
       "leagueId": 103
+    },
+    {
+      "id": "manual_1784072633819_mhu8uh",
+      "data": "2026-07-18",
+      "liga": "noruega",
+      "jogo": "Molde vs Brann",
+      "mercado": "Over 2.5",
+      "odd": "1.57",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-18T17:00:00+01:00",
+      "homeTeam": "Molde",
+      "awayTeam": "Brann",
+      "leagueId": 103
     }
   ],
   "movements": [
@@ -6924,7 +6946,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T23:43:00.837Z",
+  "lastUpdated": "2026-07-14T23:44:00.143Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
