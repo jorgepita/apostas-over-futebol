@@ -6236,6 +6236,28 @@
       "homeTeam": "Bodo/Glimt",
       "awayTeam": "Fredrikstad",
       "leagueId": 103
+    },
+    {
+      "id": "manual_1784054097398_tyobll",
+      "data": "2026-07-17",
+      "liga": "suecia",
+      "jogo": "IFK Goteborg vs IF Brommapojkarna",
+      "mercado": "Over 2.5",
+      "odd": "1.68",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T18:00:00+01:00",
+      "homeTeam": "IFK Goteborg",
+      "awayTeam": "IF Brommapojkarna",
+      "leagueId": 113
     }
   ],
   "movements": [
