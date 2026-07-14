@@ -6126,6 +6126,28 @@
       "homeTeam": "Bahia",
       "awayTeam": "Chapecoense-sc",
       "leagueId": 71
+    },
+    {
+      "id": "manual_1784053985581_7hx9f9",
+      "data": "2026-07-17",
+      "liga": "mls",
+      "jogo": "CF Montreal vs Toronto FC",
+      "mercado": "Over 2.5",
+      "odd": "1.66",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T00:30:00+01:00",
+      "homeTeam": "CF Montreal",
+      "awayTeam": "Toronto FC",
+      "leagueId": 253
     }
   ],
   "movements": [
