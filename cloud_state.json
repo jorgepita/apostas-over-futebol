@@ -6170,6 +6170,28 @@
       "homeTeam": "Chicago Fire",
       "awayTeam": "Vancouver Whitecaps",
       "leagueId": 253
+    },
+    {
+      "id": "manual_1784054042256_s6hkjg",
+      "data": "2026-07-17",
+      "liga": "mls",
+      "jogo": "Seattle Sounders vs Portland Timbers",
+      "mercado": "Over 2.5",
+      "odd": "1.44",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T03:30:00+01:00",
+      "homeTeam": "Seattle Sounders",
+      "awayTeam": "Portland Timbers",
+      "leagueId": 253
     }
   ],
   "movements": [
