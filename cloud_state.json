@@ -3528,6 +3528,9 @@
     },
     "2026-07-18|noruega|Viking vs Sandefjord|BTTS": {
       "apostada": true
+    },
+    "2026-07-18|mls|Los Angeles Galaxy vs Los Angeles FC|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -6106,7 +6109,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-14T18:31:30.650Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
