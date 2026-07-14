@@ -3513,6 +3513,9 @@
     },
     "2026-07-18|noruega|Lillestrom vs KFUM Oslo|Over 2.5": {
       "apostada": true
+    },
+    "2026-07-18|suecia|AIK Stockholm vs Gais|Over 2.5": {
+      "apostada": true
     }
   },
   "manualBets": [
@@ -6090,10 +6093,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T18:29:30.569Z",
+  "lastUpdated": "2026-07-14T18:30:30.607Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-16",
