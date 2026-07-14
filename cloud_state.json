@@ -5850,8 +5850,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-13T23:23:50.059405+00:00",
-      "lastSuccessAt": "2026-07-13T23:23:50.059405+00:00",
+      "lastCheckedAt": "2026-07-14T09:06:01.662276+00:00",
+      "lastSuccessAt": "2026-07-14T09:06:01.662276+00:00",
       "status": "ok"
     }
   }
