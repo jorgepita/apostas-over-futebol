@@ -6562,6 +6562,28 @@
       "scoreAtAnalysis": 73,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1784072408021_4y2f8f",
+      "data": "2026-07-18",
+      "liga": "brasil",
+      "jogo": "Fluminense vs RB Bragantino",
+      "mercado": "Over 2.5",
+      "odd": "2.1",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-18T00:00:00+01:00",
+      "homeTeam": "Fluminense",
+      "awayTeam": "RB Bragantino",
+      "leagueId": 71
     }
   ],
   "movements": [
@@ -6588,8 +6610,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T23:37:55.763Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-07-14T23:39:57.144Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
@@ -6898,6 +6920,44 @@
       "lastCheckedAt": "2026-07-14T23:22:43.003053+00:00",
       "lastSuccessAt": "2026-07-14T23:22:43.003053+00:00",
       "status": "ok"
+    }
+  },
+  "_modelConfigCache": {
+    "window": 12,
+    "decay": 0.88,
+    "minGamesHome": 8,
+    "minGamesAway": 8,
+    "lambdaBoost": 1.12,
+    "leagueLambdaBoost": {
+      "japao": 1,
+      "coreia": 1,
+      "finlandia": 1,
+      "islandia": 1,
+      "brasil": 1
+    },
+    "bttsAdj": 0.885,
+    "apiFootballLeagueIds": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188,
+      "brasil": 71
     }
   }
 }
