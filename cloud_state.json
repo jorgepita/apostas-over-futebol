@@ -6148,6 +6148,28 @@
       "homeTeam": "CF Montreal",
       "awayTeam": "Toronto FC",
       "leagueId": 253
+    },
+    {
+      "id": "manual_1784054003949_pdzkmz",
+      "data": "2026-07-17",
+      "liga": "mls",
+      "jogo": "Chicago Fire vs Vancouver Whitecaps",
+      "mercado": "Over 2.5",
+      "odd": "1.53",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-17T01:30:00+01:00",
+      "homeTeam": "Chicago Fire",
+      "awayTeam": "Vancouver Whitecaps",
+      "leagueId": 253
     }
   ],
   "movements": [
@@ -6174,7 +6196,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-14T18:32:33.062Z",
+  "lastUpdated": "2026-07-14T18:33:39.893Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
