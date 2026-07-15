@@ -3369,6 +3369,57 @@ button:disabled {
         cloudAvailable: false
       };
 
+      // ── Data-layer cache (Phase 26.39 — Performance Audit H2) ──────────
+      //
+      // Single shared cache for the aggregate/merge functions that recompute
+      // state.footballHistory / footballDaily / manualBets / manualBetsRemote /
+      // localEdits / movements / bankrollInicial(Set) into derived arrays and
+      // metrics. These functions were previously called several times per
+      // render pass (see 08_Change_Log.md Phase 26.38/26.39), each call
+      // rebuilding the same result from scratch.
+      //
+      // Design: one monotonically-increasing generation counter
+      // (_dataGeneration), bumped by invalidateDataCache() at every point in
+      // the file that mutates one of the state containers above. Each cached
+      // function stores its last result tagged with the generation it was
+      // computed at; a call is served from cache only if the current
+      // generation still matches. This is intentionally one coarse
+      // invalidation for the whole cluster, not one cache per function —
+      // every function in this cluster transitively depends on the same
+      // handful of state containers (see the dependency graph in this
+      // phase's session report / handover), so a fine-grained "invalidate
+      // only the affected cache" scheme would still need to invalidate
+      // nearly everything on nearly every mutation, while adding real risk
+      // of missing one and showing stale data — the exact failure mode this
+      // project's Known Issues history (DASHBOARD-4, DASHBOARD-5, LIVE-1,
+      // SYNC-1) has already hit more than once for unrelated reasons.
+      //
+      // Only functions that are pure for a fixed application state are
+      // cached here. getPendingRows()/getPendingCount() are deliberately
+      // NOT cached — they additionally depend on Date.now()/todayIso()
+      // (kickoff-passed checks), so a result cached mid-render could still
+      // be correct-for-the-data but wrong-for-the-clock a few minutes later
+      // with no state mutation to invalidate it.
+      let _dataGeneration = 0;
+      const _dataCache = {};
+
+      function invalidateDataCache() {
+        _dataGeneration++;
+      }
+
+      // Wraps `fn` so repeated calls within the same _dataGeneration return
+      // the first call's result instead of recomputing. `fn` must take no
+      // arguments and be a pure function of `state` (see comment above).
+      function memoizeDataFn(name, fn) {
+        return function () {
+          const entry = _dataCache[name];
+          if (entry && entry.gen === _dataGeneration) return entry.value;
+          const value = fn();
+          _dataCache[name] = { gen: _dataGeneration, value };
+          return value;
+        };
+      }
+
       function parseDelimitedCsv(text, delimiter) {
         const input = String(text || '').replace(/^\uFEFF/, '');
         if (!input.trim()) return [];
@@ -4551,6 +4602,8 @@ button:disabled {
         state.sessionStartDate = normalizeDateString(savedSessionStartDate) || todayIso();
         state.activeTab = ['tab-summary', 'tab-day', 'tab-history', 'tab-manual', 'tab-pending', 'tab-live', 'tab-analytics', 'tab-versus', 'tab-strategylab', 'tab-bankroll', 'tab-settings'].includes(savedActiveTab) ? savedActiveTab : 'tab-summary';
         state.mobileActionsOpen = savedMobileActions === '1';
+
+        invalidateDataCache(); // Phase 26.39 — defensive: cache is empty at this point anyway
       }
 
       // Returns true when the user has a real local session worth preserving.
@@ -4634,7 +4687,7 @@ button:disabled {
         };
       }
 
-      function getDailyRowsMerged() {
+      const getDailyRowsMerged = memoizeDataFn('getDailyRowsMerged', function () {
         // Build a settled-result lookup from history (W/L/P only).
         // Uses normalizeLeagueCode-normalised keys so picks_hoje_github.csv
         // ("mls") and picks_history.csv ("MLS" / "Veikkausliiga" / …) resolve
@@ -4696,13 +4749,13 @@ button:disabled {
         );
 
         return rows;
-      }
+      });
 
-      function getHistoryRowsMerged() {
+      const getHistoryRowsMerged = memoizeDataFn('getHistoryRowsMerged', function () {
         return dedupeBotRows(state.footballHistory).map(getRowWithLocalEdits);
-      }
+      });
 
-      function getAllBotRowsMergedUnique() {
+      const getAllBotRowsMergedUnique = memoizeDataFn('getAllBotRowsMergedUnique', function () {
         const map = new Map();
 
       [...getHistoryRowsMerged(), ...getDailyRowsMerged()].forEach(row => {
@@ -4712,7 +4765,7 @@ button:disabled {
         });
 
         return [...map.values()];
-      }
+      });
 
       function marketMatches(row, marketCode) {
         const market = normalizeMarket(row).toUpperCase();
@@ -4751,7 +4804,7 @@ button:disabled {
         };
       }
       
-      function getManualRowsMerged() {
+      const getManualRowsMerged = memoizeDataFn('getManualRowsMerged', function () {
 
   const remote = Array.isArray(state.manualBetsRemote) ? state.manualBetsRemote : [];
   const local = Array.isArray(state.manualBets) ? state.manualBets : [];
@@ -4829,7 +4882,7 @@ button:disabled {
   });
 
   return [...remoteRows, ...localRows];
-}
+});
 
       function getSessionStartDate() {
         return state.sessionStartDate || todayIso();
@@ -4880,9 +4933,9 @@ button:disabled {
       // change. A rejected bet can still be settled (resultado/_lucro populated by the
       // shared settlement engine — see ADR-012) purely as an analytical record; it
       // must never affect money figures. Use getRejectedManualBets() for those rows.
-      function getResolvedManualBets() {
+      const getResolvedManualBets = memoizeDataFn('getResolvedManualBets', function () {
         return getManualRowsMerged().filter(b => b._lucro !== null && b.status !== 'rejected');
-      }
+      });
 
       // Every rejected manual bet, settled or not — feeds the History page's
       // "Rejeitadas" view, the permanent archive of rejected bets (Phase 26.31).
@@ -4967,7 +5020,7 @@ button:disabled {
         };
       }
 
-      function getMetrics() {
+      const getMetrics = memoizeDataFn('getMetrics', function () {
         const historyResolved = getResolvedHistory();
         const realResolvedBot = getRealResolvedBotHistory();
         const resolvedManual = getResolvedManualBets();
@@ -4981,7 +5034,7 @@ button:disabled {
           sessao: buildMetricsBundle(sessionHistoryResolved, sessionRealResolvedBot, sessionResolvedManual),
           execution: getExecutionStats()
         };
-      }
+      });
 
       // Single source of truth for all bankroll values.
       // Every page and widget must consume this — never compute bancaAtual inline.
@@ -5017,7 +5070,7 @@ button:disabled {
         };
       }
 
-      function getRiskMetrics() {
+      const getRiskMetrics = memoizeDataFn('getRiskMetrics', function () {
         const openBets = getHistoryRowsMerged().filter(r => r._apostadaBool && r._resultKey === 'pending');
         const botStakeOpen = sum(openBets.map(r => r._stakeRealNum).filter(v => v !== null));
         const potencialLucro = sum(openBets.map(r => {
@@ -5046,7 +5099,7 @@ button:disabled {
           bancaDisponivel,
           picksHoje: getDailyRowsMerged().length
         };
-      }
+      });
 
       function getAdvancedMetrics() {
         const m = getMetrics();
@@ -5109,7 +5162,7 @@ button:disabled {
         return { multiplier: 1.00, label: 'Normal', badge: 'info', note: 'Sem ajuste' };
       }
 
-      function getStakeContext() {
+      const getStakeContext = memoizeDataFn('getStakeContext', function () {
         const dynamicStake = computeDynamicStake();
         const risk = getRiskMetrics();
         const bankroll = risk.bancaAtual !== null && risk.bancaAtual > 0 ? risk.bancaAtual : (state.bankrollInicial ?? null);
@@ -5120,7 +5173,7 @@ button:disabled {
           dynamicLabel: dynamicStake.label,
           exposurePct: bankroll > 0 ? (risk.stakeOpen / bankroll) * 100 : 0
         };
-      }
+      });
 
       function computePickScore(row) {
         const edge = num(row['Edge%']) ?? 0;
@@ -8495,6 +8548,7 @@ button:disabled {
           const parsed = JSON.parse(text);
           const validated = validateImportedManualBets(parsed);
           state.manualBets = validated;
+          invalidateDataCache(); // Phase 26.39 — manualBets just replaced
           rerenderAll();
           alert(`Importação concluída. ${validated.length} apostas manuais carregadas.`);
         } catch (error) {
@@ -8671,6 +8725,7 @@ button:disabled {
           state.providerHealth = (content.providerHealth && typeof content.providerHealth === 'object') ? content.providerHealth : {};
           updateProviderHealthBadge();
 
+          invalidateDataCache(); // Phase 26.39 — bankrollInicial/manualBets/localEdits/movements just replaced
           rerenderAll(true);
           _completeBootSync();
 
@@ -8763,6 +8818,8 @@ button:disabled {
       }
 
       function markDirty() {
+        invalidateDataCache();       // Phase 26.39 — every markDirty() caller has just mutated
+                                      // one of the state containers the data-layer cache depends on
         _dirtyGeneration++;          // Phase 26.1.1 — stamp every change so mid-save arrivals are detectable
         hasPendingCloudChanges = true;
         updateCloudStatus();
@@ -12424,6 +12481,7 @@ button:disabled {
           btn.addEventListener('click', () => {
             const id = btn.dataset.deleteMovement;
             state.movements = state.movements.filter(m => m.id !== id);
+            invalidateDataCache(); // Phase 26.39 — movements just changed
             saveLocalState();
             renderBankrollPage();
           });
@@ -12555,6 +12613,7 @@ button:disabled {
           note
         });
 
+        invalidateDataCache(); // Phase 26.39 — movements just changed
         saveLocalState();
 
         if (amountEl) amountEl.value = '';
@@ -14583,6 +14642,7 @@ button:disabled {
 
           saveLocalState();
 
+          invalidateDataCache(); // Phase 26.39 — manualBets/movements just replaced
           rerenderAll(false);
           _completeBootSync();
         } catch (e) {
@@ -14979,6 +15039,7 @@ button:disabled {
           if (markUpdated) state.lastUpdated = new Date();
           _loadDataFailCount = 0;
           _setFetchBanner(0);
+          invalidateDataCache(); // Phase 26.39 — footballDaily/footballHistory/manualBetsRemote just replaced
           rerenderAll(false);
           return true;
         } catch (e) {
@@ -15000,6 +15061,7 @@ button:disabled {
         state.activeTab = 'tab-summary';
         state.mobileActionsOpen = false;
 
+        invalidateDataCache(); // Phase 26.39 — localEdits just cleared
         rerenderAll();
       }
 
@@ -15016,12 +15078,14 @@ button:disabled {
         const bci = document.getElementById('bankrollConfigInput');
         if (bci) bci.value = '';
         applyBankrollImmutability();
+        invalidateDataCache(); // Phase 26.39 — bankrollInicial(Set)/movements just cleared
         rerenderAll();
       }
 
       function clearManualLocal() {
         if (!confirm('Queres apagar todas as apostas manuais locais deste browser?')) return;
         state.manualBets = [];
+        invalidateDataCache(); // Phase 26.39 — manualBets just cleared
         rerenderAll();
       }
 
@@ -15329,6 +15393,8 @@ button:disabled {
         if (biEl)  biEl.value  = newBankroll;
         const bciEl = document.getElementById('bankrollConfigInput');
         if (bciEl) bciEl.value = newBankroll;
+
+        invalidateDataCache(); // Phase 26.39 — localEdits/manualBets/movements/bankroll just reset for the new season
 
         // STEP 11: Remove commit flag — process complete
         localStorage.removeItem(SEASON_CLOSE_PENDING_KEY);
@@ -16376,6 +16442,7 @@ button:disabled {
             state.bankrollInicialSet = true;
             const cfgInput = document.getElementById('bankrollConfigInput');
             if (cfgInput) cfgInput.value = state.bankrollInicial;
+            invalidateDataCache(); // Phase 26.39 — bankrollInicial(Set) just set
             saveLocalState();
             applyBankrollImmutability();
             rerenderAll();
@@ -16392,6 +16459,7 @@ button:disabled {
             state.bankrollInicialSet = true;
             const settingsInput = document.getElementById('bankrollInput');
             if (settingsInput) settingsInput.value = state.bankrollInicial;
+            invalidateDataCache(); // Phase 26.39 — bankrollInicial(Set) just set
             saveLocalState();
             applyBankrollImmutability();
             rerenderAll();
