@@ -136,7 +136,7 @@ Everything lives in `index.html`. There are no separate JS or CSS files.
 |---|---|
 | Global application state | `const state = { ... }` near the top of the `<script>` block |
 | Startup sequence | `boot()` function |
-| Full re-render | `rerenderAll()` — calls all page sub-renders |
+| Full re-render | `rerenderAll()` — renders the active tab only via the `PAGE_RENDERERS` dispatcher (Phase 26.40/26.41), not every page; see `03_Dashboard.md` §5 |
 | Page renders | `renderDailyPicks()`, `renderLiveCenter()`, `renderPending()`, `renderManualBets()`, `renderHistory()`, `renderAnalytics()`, `renderBankroll()` |
 | Cloud load / save | `_doLoadCloudState()`, `_reloadManualBetsFromCloud()`, `saveCloudState()` |
 | localStorage | `loadLocalState()`, `saveLocalState()`, `markDirty()` |
