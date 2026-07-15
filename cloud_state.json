@@ -7092,7 +7092,7 @@
       "resultado": "",
       "scoreAtAnalysis": 57,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -7393,7 +7393,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-15T09:28:36.787Z",
+  "lastUpdated": "2026-07-15T09:29:36.908Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
