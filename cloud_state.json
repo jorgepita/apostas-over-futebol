@@ -3636,7 +3636,7 @@
       "apostada": true
     },
     "2026-07-16|brasil|Botafogo vs Santos|BTTS": {
-      "apostada": true,
+      "apostada": false,
       "stakeReal": "1"
     },
     "2026-07-17|suecia|Mjallby AIF vs Vasteras SK FK|Over 2.5": {
@@ -7091,8 +7091,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-15T00:17:59.587Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-07-15T00:19:58.141Z",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
