@@ -6748,7 +6748,7 @@
       "resultado": "",
       "scoreAtAnalysis": 78,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": null,
@@ -6813,7 +6813,7 @@
       "resultado": "",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": null,
