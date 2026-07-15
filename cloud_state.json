@@ -7604,7 +7604,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -7663,7 +7663,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-15T23:04:27.784Z",
-  "activeTab": "tab-manual",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
