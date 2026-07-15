@@ -3671,6 +3671,10 @@
     "2026-07-19|suecia|IF Elfsborg vs Sirius|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-07-19|suecia|Hammarby FF vs Degerfors IF|BTTS": {
+      "apostada": true,
+      "stakeReal": "1.5"
     }
   },
   "manualBets": [
