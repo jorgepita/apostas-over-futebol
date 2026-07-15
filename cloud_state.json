@@ -3640,7 +3640,7 @@
       "stakeReal": "1"
     },
     "2026-07-17|suecia|Mjallby AIF vs Vasteras SK FK|Over 2.5": {
-      "apostada": false,
+      "apostada": true,
       "stakeReal": "0"
     },
     "2026-07-18|noruega|Kristiansund BK vs Sarpsborg 08 FF|Over 2.5": {
@@ -7083,10 +7083,10 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-15T00:09:55.953Z",
+  "lastUpdated": "2026-07-15T00:17:59.587Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-07-16",
@@ -7429,44 +7429,6 @@
       "lastCheckedAt": "2026-07-14T23:22:43.003053+00:00",
       "lastSuccessAt": "2026-07-14T23:22:43.003053+00:00",
       "status": "ok"
-    }
-  },
-  "_modelConfigCache": {
-    "window": 12,
-    "decay": 0.88,
-    "minGamesHome": 8,
-    "minGamesAway": 8,
-    "lambdaBoost": 1.12,
-    "leagueLambdaBoost": {
-      "japao": 1,
-      "coreia": 1,
-      "finlandia": 1,
-      "islandia": 1,
-      "brasil": 1
-    },
-    "bttsAdj": 0.885,
-    "apiFootballLeagueIds": {
-      "premier": 39,
-      "portugal": 94,
-      "alemanha": 78,
-      "espanha": 140,
-      "franca": 61,
-      "italia": 135,
-      "paises_baixos": 88,
-      "championship": 40,
-      "alemanha2": 79,
-      "italia2": 136,
-      "franca2": 62,
-      "belgica": 144,
-      "turquia": 203,
-      "noruega": 103,
-      "suecia": 113,
-      "mls": 253,
-      "japao": 98,
-      "coreia": 292,
-      "finlandia": 244,
-      "islandia": 188,
-      "brasil": 71
     }
   }
 }
