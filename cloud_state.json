@@ -6856,29 +6856,7 @@
       "resultado": "",
       "scoreAtAnalysis": 54,
       "stake": "1",
-      "status": "pending"
-    },
-    {
-      "analysisSnapshot": null,
-      "analysisStale": false,
-      "awayTeam": "Jeonbuk Motors",
-      "botOpinion": null,
-      "data": "2026-07-18",
-      "edgeAtAnalysis": null,
-      "hadAnalysis": false,
-      "homeTeam": "Incheon United",
-      "id": "manual_1784072481510_4m1g7w",
-      "jogo": "Incheon United vs Jeonbuk Motors",
-      "kickoffUTC": "2026-07-18T11:30:00+01:00",
-      "leagueId": 292,
-      "liga": "coreia",
-      "mercado": "Over 2.5",
-      "notas": "",
-      "odd": "2.27",
-      "resultado": "",
-      "scoreAtAnalysis": null,
-      "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": null,
