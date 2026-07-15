@@ -1,7 +1,7 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-07-16;brasil;Botafogo;Santos;1.88;1.75;2026-07-16T23:30:00+01:00
-2026-07-16;brasil;Vitoria;Vasco DA Gama;2.10;1.87;2026-07-16T23:30:00+01:00
-2026-07-16;noruega;Valerenga;Aalesund;1.48;1.50;2026-07-16T18:00:00+01:00
+2026-07-16;brasil;Botafogo;Santos;1.88;1.70;2026-07-16T23:30:00+01:00
+2026-07-16;brasil;Vitoria;Vasco DA Gama;2.10;1.80;2026-07-16T23:30:00+01:00
+2026-07-16;noruega;Valerenga;Aalesund;1.51;1.50;2026-07-16T18:00:00+01:00
 2026-07-17;brasil;Bahia;Chapecoense-sc;1.61;1.90;2026-07-17T23:30:00+01:00
 2026-07-17;mls;CF Montreal;Toronto FC;1.67;1.58;2026-07-17T00:30:00+01:00
 2026-07-17;mls;Chicago Fire;Vancouver Whitecaps;1.55;1.50;2026-07-17T01:30:00+01:00
@@ -21,10 +21,10 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-07-18;finlandia;SJK;KuPS;1.63;1.54;2026-07-18T15:00:00+01:00
 2026-07-18;mls;Los Angeles Galaxy;Los Angeles FC;1.60;1.50;2026-07-18T03:25:00+01:00
 2026-07-18;mls;Nashville SC;Atlanta United FC;1.72;1.95;2026-07-18T01:10:00+01:00
-2026-07-18;noruega;Kristiansund BK;Sarpsborg 08 FF;1.66;1.57;2026-07-18T15:00:00+01:00
-2026-07-18;noruega;Lillestrom;KFUM Oslo;1.72;1.70;2026-07-18T15:00:00+01:00
+2026-07-18;noruega;Kristiansund BK;Sarpsborg 08 FF;1.66;1.53;2026-07-18T15:00:00+01:00
+2026-07-18;noruega;Lillestrom;KFUM Oslo;1.73;1.70;2026-07-18T15:00:00+01:00
 2026-07-18;noruega;Molde;Brann;1.57;1.50;2026-07-18T17:00:00+01:00
-2026-07-18;noruega;Viking;Sandefjord;1.40;1.70;2026-07-18T17:00:00+01:00
+2026-07-18;noruega;Viking;Sandefjord;1.39;1.70;2026-07-18T17:00:00+01:00
 2026-07-18;suecia;AIK Stockholm;Gais;1.91;1.70;2026-07-18T14:00:00+01:00
 2026-07-19;coreia;Bucheon FC 1995;FC Seoul;2.19;2.00;2026-07-19T11:30:00+01:00
 2026-07-19;coreia;FC Anyang;Gwangju FC;2.19;2.12;2026-07-19T11:30:00+01:00
@@ -36,3 +36,4 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-07-20;finlandia;Turku PS;Ilves;1.70;1.57;2026-07-20T16:00:00+01:00
 2026-07-20;suecia;Kalmar FF;Malmo FF;1.67;1.57;2026-07-20T18:00:00+01:00
 2026-07-20;suecia;Orgryte IS;Djurgardens IF;1.53;1.70;2026-07-20T18:00:00+01:00
+2026-07-21;brasil;Atletico-MG;Bahia;2.04;1.78;2026-07-21T23:30:00+01:00
