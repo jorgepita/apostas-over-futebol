@@ -3694,29 +3694,36 @@
       "stakeReal": "1"
     },
     "2026-07-18|noruega|Kristiansund BK vs Sarpsborg 08 FF|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|noruega|Lillestrom vs KFUM Oslo|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|suecia|AIK Stockholm vs Gais|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
     "2026-07-18|mls|Nashville SC vs Atlanta United FC|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|noruega|Molde vs Brann|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|brasil|Fluminense vs RB Bragantino|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|noruega|Viking vs Sandefjord|BTTS": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|mls|Los Angeles Galaxy vs Los Angeles FC|Over 2.5": {
-      "apostada": true
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-19|suecia|IF Elfsborg vs Sirius|Over 2.5": {
       "apostada": true,
@@ -7354,8 +7361,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-15T23:02:26.552Z",
-  "activeTab": "tab-summary",
+  "lastUpdated": "2026-07-15T23:03:27.812Z",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
