@@ -1,13 +1,14 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC
-2026-07-16;Campeonato Brasileiro Serie A;Botafogo vs Santos;BTTS;1.75;0.87;7.43;;;;;;;;2026-07-16T23:30:00+01:00
-2026-07-17;Allsvenskan;Mjallby AIF vs Vasteras SK FK;O2.5;1.75;0.32;5.09;;;;;;;;2026-07-17T18:00:00+01:00
-2026-07-18;Eliteserien;Kristiansund BK vs Sarpsborg 08 FF;O2.5;1.66;1.19;11.76;;;;;;;;2026-07-18T15:00:00+01:00
-2026-07-18;Eliteserien;Lillestrom vs KFUM Oslo;O2.5;1.72;1.19;9.71;;;;;;;;2026-07-18T15:00:00+01:00
-2026-07-18;Allsvenskan;AIK Stockholm vs Gais;O2.5;1.91;0.85;8.71;;;;;;;;2026-07-18T14:00:00+01:00
-2026-07-18;MLS;Nashville SC vs Atlanta United FC;O2.5;1.72;0.91;8.47;;;;;;;;2026-07-18T01:10:00+01:00
-2026-07-18;Eliteserien;Molde vs Brann;O2.5;1.57;1.01;8.31;;;;;;;;2026-07-18T17:00:00+01:00
-2026-07-18;Campeonato Brasileiro Serie A;Fluminense vs RB Bragantino;O2.5;2.1;0.45;6.68;;;;;;;;2026-07-18T00:00:00+01:00
-2026-07-18;Eliteserien;Viking vs Sandefjord;BTTS;1.7;0.3;3.7;;;;;;;;2026-07-18T17:00:00+01:00
-2026-07-18;MLS;Los Angeles Galaxy vs Los Angeles FC;O2.5;1.6;0.08;2.31;;;;;;;;2026-07-18T03:25:00+01:00
-2026-07-19;Allsvenskan;IF Elfsborg vs Sirius;O2.5;1.67;0.99;12.12;;;;;;;;2026-07-19T15:30:00+01:00
-2026-07-19;Allsvenskan;Hammarby FF vs Degerfors IF;BTTS;1.95;1.24;8.2;;;;;;;;2026-07-19T15:30:00+01:00
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Lucro€;LucroReal€;KickoffUTC
+2026-07-16;Campeonato Brasileiro Serie A;Botafogo vs Santos;BTTS;1.75;0.87;7.43;;;;;;;2026-07-16T23:30:00+01:00
+2026-07-17;MLS;Chicago Fire vs Vancouver Whitecaps;O2.5;1.55;0.31;5.08;;;;;;;2026-07-17T01:30:00+01:00
+2026-07-17;Allsvenskan;Mjallby AIF vs Vasteras SK FK;O2.5;1.7;0.12;3.41;;;;;;;2026-07-17T18:00:00+01:00
+2026-07-18;Eliteserien;Kristiansund BK vs Sarpsborg 08 FF;O2.5;1.66;0.95;11.76;;;;;;;2026-07-18T15:00:00+01:00
+2026-07-18;Eliteserien;Lillestrom vs KFUM Oslo;O2.5;1.72;0.95;9.71;;;;;;;2026-07-18T15:00:00+01:00
+2026-07-18;Allsvenskan;AIK Stockholm vs Gais;O2.5;1.91;0.68;8.71;;;;;;;2026-07-18T14:00:00+01:00
+2026-07-18;MLS;Nashville SC vs Atlanta United FC;O2.5;1.72;0.74;8.47;;;;;;;2026-07-18T01:10:00+01:00
+2026-07-18;Eliteserien;Molde vs Brann;O2.5;1.57;0.82;8.31;;;;;;;2026-07-18T17:00:00+01:00
+2026-07-18;Campeonato Brasileiro Serie A;Fluminense vs RB Bragantino;O2.5;2.12;0.41;7.13;;;;;;;2026-07-18T00:00:00+01:00
+2026-07-18;Eliteserien;Viking vs Sandefjord;BTTS;1.7;0.3;3.7;;;;;;;2026-07-18T17:00:00+01:00
+2026-07-18;MLS;Los Angeles Galaxy vs Los Angeles FC;O2.5;1.6;0.06;2.31;;;;;;;2026-07-18T03:25:00+01:00
+2026-07-19;Allsvenskan;IF Elfsborg vs Sirius;O2.5;1.67;0.95;12.12;;;;;;;2026-07-19T15:30:00+01:00
+2026-07-19;Allsvenskan;Hammarby FF vs Degerfors IF;BTTS;1.95;1.24;8.2;;;;;;;2026-07-19T15:30:00+01:00
