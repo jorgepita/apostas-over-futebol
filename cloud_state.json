@@ -3667,6 +3667,10 @@
     },
     "2026-07-18|mls|Los Angeles Galaxy vs Los Angeles FC|Over 2.5": {
       "apostada": true
+    },
+    "2026-07-19|suecia|IF Elfsborg vs Sirius|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -7086,7 +7090,7 @@
   "lastUpdated": "2026-07-15T00:17:59.587Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-16",
