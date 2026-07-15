@@ -452,3 +452,36 @@ Python was chosen as canonical because it is the version already running in prod
 **Do Not Revert Without Good Reason**
 
 Reverting to two unverified, independently-maintained implementations reopens the exact silent-drift failure mode this ADR exists to close — the partial drift found in this phase's investigation (missing BTTS diagnostics, missing confidence, a hand-maintained config mirror) is what happens by default without a conformance suite enforcing equivalence. Choosing a different sharing mechanism (Pyodide, a build step, a Railway round-trip) without a new fact changing the ADR-005/latency/dependency trade-offs analysed here would need to explain why those costs are now acceptable when they were rejected for the same reasons this phase rejected them.
+
+---
+
+## ADR-015 — A Bot Pick's Manual Result Override (`resultadoManual`) Is a Temporary Bridge; Automated Settlement Always Wins Once It Exists
+
+**Status:** Accepted
+
+**Date:** 2026-07-15 (Phase 26.34)
+
+**Decision**
+
+`getRowWithLocalEdits()` resolves a bot pick's displayed result as: use the CSV's `Resultado` (from `picks_history.csv`/`picks_hoje_simplificado.csv`) whenever it is a valid `W`/`L`/`P`; only when the CSV cell is empty/invalid does it fall back to `localEdits[pickKey].resultadoManual` (set via the History page's result dropdown or "Live Settle"). `getDailyRowsMerged()`'s cross-file reconciliation (borrowing a result from `picks_history.csv` when the same row's own daily-CSV cell is empty) follows the identical rule — automated settlement wins even over a manual override that had filled the gap. A stale `resultadoManual` is never automatically deleted or mutated; it simply stops being read once a real CSV result exists, remaining in `cloud_state.json["localEdits"]` as an inert historical record.
+
+**Context**
+
+A read-only investigation (prompted by a reported inconsistency on the "Huntsville City vs Crown Legacy" fixture) found the precedence had been reversed: `resultadoFinal = ['W','L','P'].includes(resultadoManual) ? resultadoManual : resultadoBase` let a manual override permanently mask the CSV, even after automated settlement later produced a real, possibly different, result. A systematic scan of all 12 historical `resultadoManual` uses against the current `picks_history.csv` found this was not merely theoretical: **two real bets** (Saint Etienne vs Nice, 2026-05-26; Nice vs Saint Etienne, 2026-05-29) had a manual override that disagreed with the automated result that arrived afterward, and the dashboard was silently showing the stale, wrong value — a real, live misstatement of bankroll/ROI (a €1.70 swing and a €1.00 swing respectively). A third case (Huntsville City vs Crown Legacy) had no automated result at all, which is the mechanism's legitimate, intended use.
+
+**Reasoning**
+
+`resultadoManual` exists to close out a bot pick the automated settlement pipeline cannot resolve (team-name mismatch, provider coverage gap, etc.) — a bridge until the real answer arrives, not a competing source of truth. Once `picks_history.csv` (the documented single owner of bot pick results — see `00_Project_Context.md`'s Source of Truth table and `04_Backend.md` §5) has a real result, that result reflects what actually happened in the match; a human's earlier best guess has no reason to keep overriding it. Making the CSV win whenever it's available restores exactly one owner for "what happened in this match," consistent with the project's "single source of truth" principle — the manual field only fills the gap while that owner has nothing to say yet.
+
+Automatic deletion of `resultadoManual` once superseded was considered and rejected: `getRowWithLocalEdits()` is called on effectively every render, many times per interaction; mutating `state.localEdits` from inside it would make a pure "compute merged row" function silently stateful, risking unexpected `markDirty()`/cloud-save cascades triggered by rendering rather than user action. It also destroys the exact audit trail that made the two-conflict discovery above possible — being able to compare "what the user thought happened" against "what automated settlement determined" has diagnostic value even after the override stops driving the display. Simply ignoring the stale value achieves the same correctness outcome (CSV always wins) with none of that risk, matching the safer of the two options the investigation was asked to weigh.
+
+**Consequences**
+
+- `getRowWithLocalEdits()` and `getDailyRowsMerged()` are the only two places this precedence is implemented; every downstream consumer (History, Analytics, bankroll/ROI aggregation, `getRiskMetrics()`, Live/Pending classification) reads the already-resolved `_resultKey`/`_resultadoFinal` and needed no change.
+- Strategy Lab, Opinion Validation, the Recommendation Engine, and the Simulator are unaffected — they consume settled **manual bets** (`state.manualBets`, keyed by their own `resultado` field), an entirely separate data model from bot picks' `localEdits.resultadoManual`; confirmed by tracing their data-source functions, all gated on `b.hadAnalysis === true`, which bot-pick rows never have.
+- The two historical conflicting bets identified above now correctly display the automated result (L and W respectively) instead of the stale manual one; their `resultadoManual` values remain in `cloud_state.json["localEdits"]`, present but no longer read.
+- A fixture whose automated settlement never resolves (the Huntsville case) continues to display its manual result exactly as before — no regression for the bridge's intended use.
+
+**Do Not Revert Without Good Reason**
+
+Reverting to "manual override always wins" reopens the exact silent-misstatement failure mode this ADR exists to close: a human's earlier guess would again be able to permanently outrank the real, automated settlement result for as long as the pick exists. Introducing automatic deletion of `resultadoManual` instead of simply ignoring it would need to first solve the side-effecting-pure-function risk this ADR identifies, and would destroy the audit trail this decision deliberately preserves.

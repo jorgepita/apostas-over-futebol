@@ -131,6 +131,8 @@ Map from `pickKey` (string built from `Data||Liga||Jogo||Mercado`) to an edit ob
 Updated by: user editing "Apostada", "Odd Real", "Stake Real" fields in the History page, and by "Aprovar" on the Daily Picks page (which sets `apostada` and, since Phase 26.33, defaults an empty `stakeReal` to the pick's "Stake rec." value — see Daily Picks below).  
 Merged into bot pick rows by: `getRowWithLocalEdits(row)` before display and analytics.
 
+**`resultadoManual` precedence (Phase 26.34).** `resultadoManual` (set via the History page's result dropdown, `.js-bot-resultado`, or via "Live Settle" — `liveSettle()`/`settleBotBet()`) is a **temporary bridge only**, for a bot pick automated settlement hasn't resolved yet. `getRowWithLocalEdits()` always prefers a valid CSV `Resultado` (W/L/P) over `resultadoManual` once one exists; `resultadoManual` is only consulted when the CSV cell is still empty/invalid. `getDailyRowsMerged()`'s cross-file reconciliation (checking `picks_history.csv` for a result when the same row's own daily-CSV cell is empty) follows the same rule — it now wins over a stale manual override too, not only over a genuinely-pending row. A stale `resultadoManual` value is never deleted or mutated automatically (see ADR-015) — it simply stops being read once the CSV carries a real result, preserving it as an inert historical record.
+
 **`state.bankrollInicial`** and **`state.bankrollInicialSet`**  
 Initial bankroll amount. Once `bankrollInicialSet` is true, the bankroll input is locked and cannot be changed. This prevents accidental resets.  
 Used by: all profit/ROI calculations, bankroll page, Kelly stake display.

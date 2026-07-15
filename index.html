@@ -4600,7 +4600,12 @@ button:disabled {
         const stakeReal = cleanString(edit.stakeReal ?? '');
         const resultadoBase = cleanString(row['Resultado'] || '').toUpperCase();
         const resultadoManual = cleanString(edit.resultadoManual || '').toUpperCase();
-        const resultadoFinal = ['W', 'L', 'P'].includes(resultadoManual) ? resultadoManual : resultadoBase;
+        // Automated settlement (CSV) is always the source of truth once it exists.
+        // resultadoManual is only a bridge for fixtures automated settlement hasn't
+        // resolved yet — it is never allowed to override a real CSV result.
+        const resultadoFinal = ['W', 'L', 'P'].includes(resultadoBase)
+          ? resultadoBase
+          : (['W', 'L', 'P'].includes(resultadoManual) ? resultadoManual : resultadoBase);
 
         const oddModelo = num(row['Odd']);
         const stakeModelo = num(row['Stake€']);
@@ -4652,6 +4657,7 @@ button:disabled {
         const rows = dedupeBotRows(state.footballDaily).map(row => {
           const enriched = getRowWithLocalEdits(row);
           const found = historyResultMap.has(enriched._pickKey);
+          const ownCsvResult = ['W', 'L', 'P'].includes(cleanString(row['Resultado'] || '').toUpperCase());
 
           // Diagnostic — log first 5 daily rows showing key alignment
           if (_diagDailyCount < 5) {
@@ -4666,8 +4672,12 @@ button:disabled {
             _diagDailyCount++;
           }
 
-          // Only overwrite when still pending AND no localStorage manual override.
-          if (enriched._resultKey === 'pending' && found) {
+          // Automated settlement always wins once it exists anywhere (this row's own
+          // CSV cell, or history's copy of the same fixture) — even over a manual
+          // override that filled the gap while this row's own cell was still empty.
+          // Only skip when this row's own CSV cell already carries a real result
+          // (already correctly resolved by getRowWithLocalEdits above).
+          if (!ownCsvResult && found) {
             _mergedCount++;
             const settled = historyResultMap.get(enriched._pickKey);
             enriched._resultadoFinal = settled;

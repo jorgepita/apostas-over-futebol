@@ -14,6 +14,18 @@ None currently open.
 
 ## Resolved Issues
 
+### DASHBOARD-4 — Manual Result Override (`resultadoManual`) Could Permanently Mask a Later, Real Automated Settlement Result
+
+**Status:** Resolved — 2026-07-15 (Phase 26.34). Full technical detail in `08_Change_Log.md` — Phase 26.34. See ADR-015.
+
+**Was:** `getRowWithLocalEdits()` computed `resultadoFinal = ['W','L','P'].includes(resultadoManual) ? resultadoManual : resultadoBase` — a valid `resultadoManual` (set via the History page's result dropdown or "Live Settle") permanently took precedence over the CSV's own `Resultado`, even after automated settlement later wrote a real, possibly different, result into `picks_history.csv`. A read-only investigation prompted by a reported inconsistency on "Huntsville City vs Crown Legacy" (2026-06-21) found this had already caused two real, silent bankroll/ROI misstatements: "Saint Etienne vs Nice" (2026-05-26) displayed a stale manual `W` (+€0.70) when automated settlement had actually determined `L` (−€1.00); "Nice vs Saint Etienne" (2026-05-29) displayed a stale manual `P` (€0.00) when automated settlement had determined `W` (+€1.00).
+
+**Root cause:** The manual-override mechanism was designed as a bridge for bot picks automated settlement can't resolve, but its precedence logic had no expiry or reconciliation against the CSV once a real result eventually arrived — a human's earlier best guess could out-rank the actual, confirmed outcome indefinitely.
+
+**Fix:** `getRowWithLocalEdits()` now prefers a valid CSV `Resultado` whenever one exists, falling back to `resultadoManual` only while the CSV cell is still empty/invalid. `getDailyRowsMerged()`'s cross-file reconciliation (borrowing a result from `picks_history.csv` when a row's own daily-CSV cell is empty) was extended identically, so it also wins over a stale manual override, not only over a genuinely-unresolved row. `resultadoManual` is never deleted or mutated automatically — it simply stops being read once the CSV has a real result, preserving it as an inert historical record (see ADR-015 for the full reasoning, including why automatic cleanup was rejected). The two affected historical bets now display the correct automated result; the Huntsville fixture (whose automated settlement genuinely never resolved) is unaffected and continues to show its manual result exactly as before.
+
+---
+
 ### SETTLEMENT-2 — Manual Bets Bypassed `RESULT_READY_DELAY`, Settling Before the Equivalent Bot Pick for the Same Fixture
 
 **Status:** Resolved — 2026-07-12 (Phase 26.32). Full technical detail in `08_Change_Log.md` — Phase 26.32.

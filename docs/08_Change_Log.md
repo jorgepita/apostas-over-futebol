@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.34 | 2026-07-15 | Fixed a manual-result-override precedence flaw: `resultadoManual` (the History-page/"Live Settle" bridge for bot picks automated settlement can't resolve) used to permanently mask the CSV's real `Resultado` even after automated settlement later determined the actual result — found to have already caused two real, silent bankroll/ROI misstatements (Saint Etienne vs Nice, Nice vs Saint Etienne). `getRowWithLocalEdits()` and `getDailyRowsMerged()` now always prefer a valid CSV result once one exists; the manual override is consulted only while the CSV is still empty. No automatic deletion of stale overrides — they're simply ignored once superseded, preserving the audit trail. See ADR-015 and `05_Known_Issues.md` DASHBOARD-4 |
 | 26.33 | 2026-07-15 | Bot pick approval now defaults `StakeReal` to the pick's displayed "Stake rec." (`computeRecommendedStake()`) value the first time it's approved, but only when the user hasn't already typed a `StakeReal` in first — a typed value always takes precedence and is never overwritten. Single change point: the `.js-bot-approve` click handler in `bindBotTableControls()`. No change to Kelly, `computeRecommendedStake()` itself, bankroll logic, settlement, persistence format, or CSV schema — purely a one-time default applied to the existing `localEdits[pickKey].stakeReal` field at the moment of approval. Manual bets and previously-approved picks are untouched |
 | 26.32 | 2026-07-12 | Fixed manual bets settling out of sync with bot picks for the same fixture (a manual bet settled immediately while its equivalent bot pick stayed LIVE until a later run). Root cause: not a settlement-engine bug — `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate only applies `if kickoff_str:`, and manual bets never actually had `kickoffUTC` persisted (a documentation claim from Phase 26.7–26.9 to the contrary was inaccurate — corrected). Fix: `addManualBetFromFixture()` now persists `kickoffUTC`/`homeTeam`/`awayTeam`/`leagueId` at creation time for fixture-backed (Scout) bets, so settlement receives equivalent input to what bot picks already provide. Zero changes to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence. Free-form manual bets (no fixture) are unaffected — documented limitation, not a bug. See `05_Known_Issues.md` SETTLEMENT-2 |
 | 26.31 | 2026-07-11 | Corrected rejected-bet lifecycle visibility: Phase 26.28's fix removed the duplicate from the wrong page. `getRejectedManualBets()` reverted to showing every rejected bet (settled or not) — "Rejeitadas" is the permanent archive, exactly as originally designed. The actual fix: `renderManualBets()` (operational "Apostas Manuais" list) now hides a rejected bet once it's settled, since a settled bet no longer needs attention there. No change to settlement, persistence, `cloud_state.json`, QuantEngine, or any analytical module — all verified via the full 6-suite Playwright regression harness (now 6/6 fully green) plus a new 24-check targeted script |
@@ -38,6 +39,47 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.34 — Automated Settlement Always Wins Over a Manual Result Override
+
+**Implemented:** 2026-07-15
+
+**Goal.** A reported inconsistency on "Huntsville City vs Crown Legacy" (2026-06-21) — dashboard showed `Result = P`, `Profit = €0.00`, but `picks_history.csv` had `Resultado`/`Lucro€`/`LucroReal€`/`Apostada`/`OddReal`/`StakeReal€` all empty. Root-cause first (prior session, read-only), then fix the underlying design flaw once confirmed.
+
+**Root cause (from the prior read-only investigation).** `getRowWithLocalEdits()` computed `resultadoFinal = ['W','L','P'].includes(resultadoManual) ? resultadoManual : resultadoBase` — `localEdits[pickKey].resultadoManual` (set via the History page's result dropdown or "Live Settle" — `settleBotBet()`) **permanently** took precedence over the CSV's own `Resultado`, with no reconciliation once automated settlement later produced a real result. For the Huntsville fixture this was benign — the CSV never got a result at all, so the override was correctly bridging a genuine gap. But a systematic scan of all 12 historical `resultadoManual` uses against the current `picks_history.csv` found **two real conflicts**: "Saint Etienne vs Nice" (2026-05-26, real stake €1 @ 1.7) displayed a stale manual `W` (+€0.70) when automated settlement had since determined `L` (should be −€1.00); "Nice vs Saint Etienne" (2026-05-29, real stake €1 @ 2.0) displayed a stale manual `P` (€0.00) when automated settlement had since determined `W` (should be +€1.00). Both are silently distorting real bankroll/ROI figures right now.
+
+**Investigation before implementing.** Traced every consumer of `resultadoManual` (4 occurrences total: the default initializer, the read/precedence site, and two write sites — the History dropdown and `settleBotBet()`) and every place gating on the resulting `_resultKey`/`_resultadoFinal`. Confirmed the precedence logic exists in exactly one place (`getRowWithLocalEdits()`) plus one secondary consumer with an equivalent gap: `getDailyRowsMerged()`'s cross-file reconciliation (borrowing a result from `picks_history.csv` when a row's own daily-CSV cell is empty) was gated on `enriched._resultKey === 'pending'` — a condition a manual override would already have satisfied away from `'pending'`, silently skipping the reconciliation even when history had a real, possibly-conflicting automated result. Confirmed Strategy Lab, Opinion Validation, the Recommendation Engine, and the Simulator are entirely unaffected: all four consume settled **manual bets** (`state.manualBets`, own `resultado` field, gated on `b.hadAnalysis === true`), a completely disjoint data model from bot picks' `localEdits.resultadoManual` — verified by tracing each feature's data-source function.
+
+**Fix.**
+- `getRowWithLocalEdits()`: `resultadoFinal` now prefers a valid CSV `resultadoBase` whenever one exists; `resultadoManual` is consulted only when the CSV cell is empty/invalid.
+- `getDailyRowsMerged()`: the cross-file reconciliation condition changed from `enriched._resultKey === 'pending' && found` to `!ownCsvResult && found` (checking the row's own raw CSV cell directly, not the post-override `_resultKey`) — so history's real result now wins even when this row's own file cell is empty and a manual override had already filled the gap.
+- **No automatic deletion of stale `resultadoManual` values.** Evaluated and rejected: `getRowWithLocalEdits()` runs on effectively every render; mutating `state.localEdits` from inside it would make a pure "compute merged row" function silently stateful (risking unexpected `markDirty()`/cloud-save cascades from rendering), and would destroy the exact audit trail that made finding the two conflicts above possible. A stale override is simply never read once the CSV has a real result — present in `cloud_state.json["localEdits"]`, inert. See ADR-015.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `getRowWithLocalEdits()` precedence flipped (CSV wins); `getDailyRowsMerged()`'s cross-file reconciliation condition changed to check the row's own raw CSV cell instead of the post-override `_resultKey` |
+| `docs/03_Dashboard.md` | `state.localEdits` schema note extended with the new precedence rule |
+| `docs/09_Architecture_Decisions.md` | New ADR-015 |
+| `docs/05_Known_Issues.md` | New `DASHBOARD-4` resolved entry |
+| `docs/08_Change_Log.md` | This Phase 26.34 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-15-csv-wins-precedence.md` | New handover |
+
+### Validation
+
+- **Playwright, targeted script (10 checks, scratchpad, not committed) covering every scenario requested:** CSV empty + `resultadoManual=W` → dashboard shows W; CSV later becomes L → dashboard now shows L; bankroll/profit and the History/ROI aggregation row (`getFilteredRealClosedRows()`) both update to reflect L; Strategy Lab's manual-bet pool and the Recommendation Engine/Simulator's `window._opnSimCache` build normally and are demonstrably sourced only from manual bets (unaffected); a fixture with **only** a manual settlement (CSV never resolves, ever) still shows its manual result exactly as before — no regression to the bridge behaviour.
+- **Verified against real production data** (current `cloud_state.json` + `picks_history.csv` loaded into the real app): "Saint Etienne vs Nice" now resolves to `L`/−€1.00 (was `W`/+€0.70); "Nice vs Saint Etienne" now resolves to `W`/+€1.00 (was `P`/€0.00); "Huntsville City vs Crown Legacy" still correctly resolves to `P` (CSV genuinely still empty) — confirming the fix corrects exactly the two real historical misstatements while leaving the legitimate bridge case untouched.
+- **Full existing 7-suite Playwright regression harness** (the 6 standing suites plus Phase 26.33's approval-default test): all pass completely, zero console/page errors.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged — no Python file was modified.
+- `git diff --stat`: only `index.html` changed (16 lines).
+
+### Impact
+
+Automated settlement is now unconditionally the final source of truth for a bot pick's result once it exists, in both `picks_history.csv` and the daily-CSV cross-file reconciliation. The two previously-misstated historical bets now show their correct, real result and profit. `resultadoManual` continues to work exactly as before for any fixture whose automated settlement never resolves — no migration was performed or required.
 
 ---
 
