@@ -3650,7 +3650,8 @@
       "apostada": true
     },
     "2026-07-18|suecia|AIK Stockholm vs Gais|Over 2.5": {
-      "apostada": false
+      "apostada": true,
+      "stakeReal": "1"
     },
     "2026-07-18|mls|Nashville SC vs Atlanta United FC|Over 2.5": {
       "apostada": true
