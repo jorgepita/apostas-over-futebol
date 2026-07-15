@@ -3727,7 +3727,7 @@
       "stakeReal": "1.5"
     },
     "2026-07-17|mls|Chicago Fire vs Vancouver Whitecaps|Over 2.5": {
-      "apostada": true,
+      "apostada": false,
       "stakeReal": "1"
     }
   },
@@ -7355,7 +7355,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-15T23:02:26.552Z",
-  "activeTab": "tab-pending",
+  "activeTab": "tab-summary",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
