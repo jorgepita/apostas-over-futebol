@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.35 | 2026-07-15 | Fixed the Phase 26.33 StakeReal auto-fill guard: it used string truthiness (`!existingStakeReal`) to decide whether a pick "already had" a real stake, so a stored `"0"` (a non-empty string) was wrongly treated as a deliberate user value and permanently blocked the default — understating that pick's `StakeReal` and Open Exposure, and surviving indefinitely across Cancel→re-approve cycles since `pendingCancel()` never clears `stakeReal`. Guard now parses the value with the existing `num()` helper and auto-fills whenever it is `null` or `<= 0` (empty, undefined, NaN, invalid string, zero, or negative) — `computeRecommendedStake()` itself is unchanged and, by its own hard floor (`clamp(x, 1, maxCap)`), can never legitimately produce zero, so treating a stored zero as "not set" cannot ever suppress a real recommendation. No change to `computeRecommendedStake()`, exposure calculation, or bankroll calculation. See `05_Known_Issues.md` DASHBOARD-5 |
 | 26.34 | 2026-07-15 | Fixed a manual-result-override precedence flaw: `resultadoManual` (the History-page/"Live Settle" bridge for bot picks automated settlement can't resolve) used to permanently mask the CSV's real `Resultado` even after automated settlement later determined the actual result — found to have already caused two real, silent bankroll/ROI misstatements (Saint Etienne vs Nice, Nice vs Saint Etienne). `getRowWithLocalEdits()` and `getDailyRowsMerged()` now always prefer a valid CSV result once one exists; the manual override is consulted only while the CSV is still empty. No automatic deletion of stale overrides — they're simply ignored once superseded, preserving the audit trail. See ADR-015 and `05_Known_Issues.md` DASHBOARD-4 |
 | 26.33 | 2026-07-15 | Bot pick approval now defaults `StakeReal` to the pick's displayed "Stake rec." (`computeRecommendedStake()`) value the first time it's approved, but only when the user hasn't already typed a `StakeReal` in first — a typed value always takes precedence and is never overwritten. Single change point: the `.js-bot-approve` click handler in `bindBotTableControls()`. No change to Kelly, `computeRecommendedStake()` itself, bankroll logic, settlement, persistence format, or CSV schema — purely a one-time default applied to the existing `localEdits[pickKey].stakeReal` field at the moment of approval. Manual bets and previously-approved picks are untouched |
 | 26.32 | 2026-07-12 | Fixed manual bets settling out of sync with bot picks for the same fixture (a manual bet settled immediately while its equivalent bot pick stayed LIVE until a later run). Root cause: not a settlement-engine bug — `update_dataframe()`'s `KICKOFF_TOO_EARLY` gate only applies `if kickoff_str:`, and manual bets never actually had `kickoffUTC` persisted (a documentation claim from Phase 26.7–26.9 to the contrary was inaccurate — corrected). Fix: `addManualBetFromFixture()` now persists `kickoffUTC`/`homeTeam`/`awayTeam`/`leagueId` at creation time for fixture-backed (Scout) bets, so settlement receives equivalent input to what bot picks already provide. Zero changes to the settlement engine, `RESULT_READY_DELAY`, matching logic, or persistence. Free-form manual bets (no fixture) are unaffected — documented limitation, not a bug. See `05_Known_Issues.md` SETTLEMENT-2 |
@@ -39,6 +40,52 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.35 — Fixed StakeReal Auto-Fill Guard to Treat Zero/Invalid Values as "Not Set"
+
+**Implemented:** 2026-07-15
+
+**Goal.** A read-only investigation (this session, prior turn) traced why the Phase 26.33 StakeReal auto-fill worked for some bot picks but not others — e.g. a real approved pick ("Mjallby AIF vs Vasteras SK FK") showed `StakeReal = €0.00` and did not contribute to Open Exposure, while a comparable pick approved the same way worked correctly. Fix the root cause without touching `computeRecommendedStake()`, exposure calculation, or bankroll calculation.
+
+**Root cause.** The Phase 26.33 guard was `const existingStakeReal = cleanString(...stakeReal ?? ''); if (!existingStakeReal) { …auto-fill… }` — a JavaScript string-truthiness check. `"0"` is a non-empty string, so `!"0"` is `false`: a stored `stakeReal` of exactly `"0"` was treated identically to a real, deliberately-typed stake, and the guard silently skipped the default forever. Confirmed against the live `cloud_state.json`: the affected pick's `localEdits` entry was `{ apostada: true, stakeReal: "0" }`. `computeRecommendedStake()` cannot legitimately produce this value itself — its output is hard-floored by `clamp(x, 1, maxCap)` (`maxCap = Math.max(2, bankroll*0.04) ≥ 2`), so it always returns either `null` (non-finite input) or a number `≥ 1`. The only code path capable of writing a literal `"0"` is the free-form `.js-stake-real` number input on the Pending page (`min="0"`, no floor validation), and `pendingCancel()` (the "Cancelar" handler) deliberately preserves `stakeReal`/`oddReal` across a cancel — so a stray `"0"` typed once, then cancelled and re-approved, would silently re-trigger the same suppression indefinitely. `getRiskMetrics()`'s exposure sum (`sum(...).filter(v => v !== null)`) does not filter out `0`, so the affected pick was correctly counted as open but contributed exactly €0.00 — exposure was faithfully summing bad input data, not miscalculating.
+
+**Fix.** The guard now parses the existing value with the same `num()` helper used everywhere else in the file, and auto-fills whenever the parsed value is not a meaningful positive stake:
+```js
+const existingStakeRealNum = num(state.localEdits[key]?.stakeReal);
+if (existingStakeRealNum === null || existingStakeRealNum <= 0) {
+  // …unchanged: look up row, compute recommended, auto-fill…
+}
+```
+`num()` already returns `null` for empty string, `undefined`, and any non-numeric/invalid string (it parses via `Number()` and checks `Number.isFinite()`), and the `<= 0` check additionally catches zero and negative values. A genuine positive value the user typed (or a prior auto-fill) is left completely untouched, exactly as before. Single change point, same file/function/line range as Phase 26.33. `computeRecommendedStake()`, `getRiskMetrics()`, and every bankroll/ROI function are byte-identical to before this phase.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `.js-bot-approve` click handler (`bindBotTableControls()`) — guard changed from string-truthiness to a parsed-numeric `null`/`<=0` check (9 lines changed, one function, same location as Phase 26.33) |
+| `docs/08_Change_Log.md` | This Phase 26.35 entry added |
+| `docs/05_Known_Issues.md` | New `DASHBOARD-5` resolved entry |
+| `docs/07_Current_Status.md` | Updated for this phase |
+
+`03_Dashboard.md`, `09_Architecture_Decisions.md`, `06_Roadmap.md`, `01_Architecture.md`, `04_Backend.md`, `PROJECT_MAP.md` — **no change required.** `03_Dashboard.md`'s existing Phase 26.33 note ("defaults an empty `stakeReal`...") already describes the intended behaviour correctly; this phase only corrects which stored values count as "empty" for that purpose, which doesn't change the documented behaviour description itself. No architectural decision was introduced (see Architectural Decisions below), no roadmap priority shifted, and no backend/repository-structure file was touched.
+
+### Architectural Decisions
+
+None. This is a bug fix to the exact non-ADR mechanism Phase 26.33 introduced (a workflow default written through the pre-existing `localEdits[pickKey].stakeReal` field and edit pipeline) — it corrects which stored values are treated as "already set," it does not introduce a new persistence path, change `computeRecommendedStake()`/Kelly/bankroll logic, or touch settlement. Nothing here constrains future implementation choices the way an ADR would, consistent with Phase 26.33's own ADR assessment.
+
+### Validation
+
+- **Syntax:** `node --check` on both extracted `<script>` blocks of `index.html` — clean.
+- **Playwright, targeted script (23 checks, scratchpad, not committed — `pwtest/test_stakereal_zero_guard.js`), driving the real bound click handler in a real browser:** first approval (no prior edit) auto-fills to "Stake rec."; an existing positive stake ("7.5") is preserved exactly; a stale `stakeReal: "0"` is now replaced with "Stake rec." (the fix); an empty string, a non-numeric string (`"abc"`), and a negative value (`"-3"`) are all replaced identically; a full Cancel→re-approve cycle (approve → simulate a stray "0" edit → Cancelar, which correctly still preserves the "0" per `pendingCancel()`'s unrelated, unchanged behaviour → re-approve) now replaces the stale zero instead of perpetuating it; `getRiskMetrics().stakeOpen` sums every approved pick's corrected real stake plus an untouched manual bet exactly; bankroll `totalAccountValue` is unaffected (no settlement occurred); the Pending page (`getPendingRows()`) reflects the corrected value; the History page renders without error; `state.manualBets` is byte-identical before/after every bot-pick approval; `localStorage[STORAGE_KEYS.picks]` persists the corrected value and `hasPendingCloudChanges` is correctly flagged (cloud-save trigger path unchanged); the identical fix was verified again from the mobile card render path (`buildPicksCardHtml()`/`isMobileDashboard()`), confirming both approval surfaces share the one corrected code path.
+- **Full existing 8-suite Playwright regression harness** (`test.js`, Opinion Validation, Recommendations, Simulator, Strategy Lab, Calibration v2, Phase 26.33's approval-default test, Phase 26.34's CSV-wins-precedence test): all 8 suites pass completely, zero console/page errors.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged — no Python file was touched.
+- **`git diff --stat`:** confirms only `index.html` changed (9 lines) for the code portion of this phase.
+
+### Impact
+
+A bot pick whose `stakeReal` is empty, undefined, invalid, zero, or negative at the moment of approval now always receives the "Stake rec." default, matching the behaviour Phase 26.33 originally intended. A genuinely-entered positive stake is still never overwritten. This also fixes the case where a pick is approved, has its `StakeReal` accidentally cleared/zeroed on the Pending page, is cancelled, and is later re-approved — the stale zero no longer survives that cycle. No data migration was performed: any pick currently sitting at a stale `stakeReal: "0"` in `cloud_state.json` will self-correct the next time it goes through Cancelar → Aprovar (or any other action that re-runs the guard); it is not retroactively rewritten by this change alone.
 
 ---
 

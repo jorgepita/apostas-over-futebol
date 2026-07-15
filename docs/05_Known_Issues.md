@@ -14,6 +14,18 @@ None currently open.
 
 ## Resolved Issues
 
+### DASHBOARD-5 — StakeReal Auto-Fill Guard Treated a Stored "0" as an Already-Entered Value, Permanently Suppressing the Default
+
+**Status:** Resolved — 2026-07-15 (Phase 26.35). Full technical detail in `08_Change_Log.md` — Phase 26.35.
+
+**Was:** The Phase 26.33 auto-fill guard (`.js-bot-approve` handler in `bindBotTableControls()`) used string truthiness — `if (!cleanString(stakeReal))` — to decide whether a pick already had a real stake. `"0"` is a non-empty string, so the guard treated a stored `stakeReal: "0"` identically to a deliberately-typed value and never replaced it with the recommended stake. A real, approved bot pick ("Mjallby AIF vs Vasteras SK FK") was found with exactly this state in `cloud_state.json` — `StakeReal` showed `€0.00` on the Pending page and did not contribute to Open Exposure, while a comparable pick approved the same way worked correctly.
+
+**Root cause:** `computeRecommendedStake()` cannot itself produce zero — its output is hard-floored by `clamp(x, 1, maxCap)` with `maxCap ≥ 2` — so a stored `"0"` could only have entered `stakeReal` via the free-form `.js-stake-real` Pending-page input (no floor validation). `pendingCancel()` ("Cancelar") deliberately preserves `stakeReal` across a cancel, so a stray `"0"` could also survive an approve→cancel→re-approve cycle and keep suppressing the default indefinitely. `getRiskMetrics()`'s exposure sum does not filter out `0` (only `null`), so the pick was correctly counted as open but contributed nothing — exposure was faithfully summing a bad stored value, not miscalculating.
+
+**Fix:** The guard now parses the existing value with the project's existing `num()` helper and auto-fills whenever it is `null` or `<= 0` — covering empty, undefined, NaN, invalid strings, zero, and negative values uniformly, while a genuine positive value (user-typed or from a prior auto-fill) is never touched. No change to `computeRecommendedStake()`, exposure calculation, or bankroll calculation. No data migration: a pick already sitting at a stale `stakeReal: "0"` self-corrects the next time it goes through Cancelar → Aprovar, not automatically.
+
+---
+
 ### DASHBOARD-4 — Manual Result Override (`resultadoManual`) Could Permanently Mask a Later, Real Automated Settlement Result
 
 **Status:** Resolved — 2026-07-15 (Phase 26.34). Full technical detail in `08_Change_Log.md` — Phase 26.34. See ADR-015.

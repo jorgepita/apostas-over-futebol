@@ -8164,10 +8164,15 @@ button:disabled {
             const key = e.target.dataset.pickKey;
             const changes = { apostada: true };
 
-            // Default StakeReal to the displayed "Stake rec." the first time a pick
-            // is approved — only when the user hasn't already typed a value in themselves.
-            const existingStakeReal = cleanString(state.localEdits[key]?.stakeReal ?? '');
-            if (!existingStakeReal) {
+            // Default StakeReal to the displayed "Stake rec." whenever the existing
+            // value is not a meaningful positive stake — only a real, positive,
+            // user-entered value blocks the default. String truthiness is not used
+            // here on purpose: "0" is a non-empty string but not a valid stake, and
+            // computeRecommendedStake() can never legitimately return zero itself
+            // (see 05_Known_Issues.md — DASHBOARD-5), so a stored zero/negative/
+            // invalid value is treated the same as "not set".
+            const existingStakeRealNum = num(state.localEdits[key]?.stakeReal);
+            if (existingStakeRealNum === null || existingStakeRealNum <= 0) {
               const row = getDailyRowsMerged().find(r => r._pickKey === key);
               const recommended = row ? computeRecommendedStake(row).value : null;
               if (recommended !== null) changes.stakeReal = String(recommended);
