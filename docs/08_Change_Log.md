@@ -8,6 +8,8 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.37 | 2026-07-15 | Final wording refinement to the Phase 26.36 Pending page fix: reverted the desktop table's shared column header from "Stake rec." back to plain "Stake", since that single header also sits above manual rows, which have no recommendation concept — "Stake rec." was semantically wrong for them. The underlying **value** is unchanged: bot rows still display `computeRecommendedStake()`'s result, manual rows still display their own entered stake. The mobile card (already row-type-aware) is unaffected — bot cards still say "Stake rec.", manual cards still say "Stake". Desktop-header wording only; no value, calculation, exposure, bankroll, or persistence change |
+| 26.36 | 2026-07-15 | Pending page UX fix: bot rows' "Stake" column now shows `computeRecommendedStake()`'s value ("Stake rec.") instead of the raw model stake (`_stakeModeloNum`, "Stake mod."), and the column header/mobile-card label renamed to "Stake rec." — making it directly comparable to the adjacent "Stake Real" column. Reuses the existing recommendation function (no duplicated logic); manual bet rows are completely unchanged (still their own entered `stake`, no rec/real distinction to display). No change to `computeRecommendedStake()`, exposure, bankroll, settlement, persistence, or StakeReal behaviour — display-only |
 | 26.35 | 2026-07-15 | Fixed the Phase 26.33 StakeReal auto-fill guard: it used string truthiness (`!existingStakeReal`) to decide whether a pick "already had" a real stake, so a stored `"0"` (a non-empty string) was wrongly treated as a deliberate user value and permanently blocked the default — understating that pick's `StakeReal` and Open Exposure, and surviving indefinitely across Cancel→re-approve cycles since `pendingCancel()` never clears `stakeReal`. Guard now parses the value with the existing `num()` helper and auto-fills whenever it is `null` or `<= 0` (empty, undefined, NaN, invalid string, zero, or negative) — `computeRecommendedStake()` itself is unchanged and, by its own hard floor (`clamp(x, 1, maxCap)`), can never legitimately produce zero, so treating a stored zero as "not set" cannot ever suppress a real recommendation. No change to `computeRecommendedStake()`, exposure calculation, or bankroll calculation. See `05_Known_Issues.md` DASHBOARD-5 |
 | 26.34 | 2026-07-15 | Fixed a manual-result-override precedence flaw: `resultadoManual` (the History-page/"Live Settle" bridge for bot picks automated settlement can't resolve) used to permanently mask the CSV's real `Resultado` even after automated settlement later determined the actual result — found to have already caused two real, silent bankroll/ROI misstatements (Saint Etienne vs Nice, Nice vs Saint Etienne). `getRowWithLocalEdits()` and `getDailyRowsMerged()` now always prefer a valid CSV result once one exists; the manual override is consulted only while the CSV is still empty. No automatic deletion of stale overrides — they're simply ignored once superseded, preserving the audit trail. See ADR-015 and `05_Known_Issues.md` DASHBOARD-4 |
 | 26.33 | 2026-07-15 | Bot pick approval now defaults `StakeReal` to the pick's displayed "Stake rec." (`computeRecommendedStake()`) value the first time it's approved, but only when the user hasn't already typed a `StakeReal` in first — a typed value always takes precedence and is never overwritten. Single change point: the `.js-bot-approve` click handler in `bindBotTableControls()`. No change to Kelly, `computeRecommendedStake()` itself, bankroll logic, settlement, persistence format, or CSV schema — purely a one-time default applied to the existing `localEdits[pickKey].stakeReal` field at the moment of approval. Manual bets and previously-approved picks are untouched |
@@ -40,6 +42,84 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.37 — Pending Desktop Header Reverted to "Stake" (Value Unchanged)
+
+**Implemented:** 2026-07-15
+
+**Goal.** Pure UI-wording refinement, immediately following Phase 26.36 in the same investigation thread. Phase 26.36 correctly fixed *what value* the Pending page's bot rows display (`computeRecommendedStake()` instead of the raw model stake), but also renamed the desktop table's single shared column header to "Stake rec." That header sits above **both** row types in one table — bot rows, where "Stake rec." is accurate, and manual rows, where it is not: manual bets have no model/recommended/real distinction, so labelling their own plainly-entered stake as a "recommendation" is semantically wrong. This phase corrects the header wording only.
+
+**Fix.** The desktop `<th>` at `index.html`'s Pending table markup reverted from `<th>Stake rec.</th>` to `<th>Stake</th>`. Nothing else changed: `getPendingRows()`'s `botRows` mapping still sources `.stake` from `computeRecommendedStake(r).value` (the same function call, unchanged since Phase 26.36); `manualRows` still sources `.stake` from `b.stake`. The mobile card's per-row `stakeLabel` (`'Stake rec.'` for bot, `'Stake'` for manual — introduced in Phase 26.36) already had exactly the semantics this phase asks for and needed no change. The inline comment above `botRows`' mapping was extended to explain the desktop-header/mobile-label distinction for future readers.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | Pending table's desktop `<th>` reverted `"Stake rec."` → `"Stake"`; explanatory comment above `botRows` mapping extended. No value/logic change |
+| `docs/03_Dashboard.md` | Pending page section's desktop-header description corrected to match |
+| `docs/08_Change_Log.md` | This Phase 26.37 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-15-pending-stake-rec.md` | Superseded/updated — see Notes |
+
+`05_Known_Issues.md`, `09_Architecture_Decisions.md`, `06_Roadmap.md`, `01_Architecture.md`, `04_Backend.md`, `PROJECT_MAP.md` — **no change required.**
+
+### Architectural Decisions
+
+None — a column-header wording change through the same already-shared `<th>`/`getPendingRows()` mechanism Phase 26.36 used; no new logic, dependency, or persistence path.
+
+### Validation
+
+- **Syntax:** `node --check` on both extracted `<script>` blocks of `index.html` — clean.
+- **Playwright, targeted script (19 checks, scratchpad, not committed — `pwtest/test_pending_stake_rec.js`, updated in place to assert the new header text since it verifies current intended behaviour, not a frozen snapshot):** desktop header reads "Stake" and no longer "Stake rec."; bot rows' `.stake` is still exactly `computeRecommendedStake()`'s value (both the "followed recommendation" and "deliberate override" cases); manual row `.stake` is unchanged; unapproved picks still absent from Pending; mobile card still shows "Stake rec.:" for bot and plain "Stake:" for manual; Daily Picks' `_stakeModeloNum` source untouched; `getRiskMetrics().stakeOpen` and bankroll unaffected; `state.manualBets` byte-identical; History renders without error; sorting preserved.
+- **Full existing 9-suite Playwright regression harness:** all 9 suites pass completely, zero console/page errors.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged.
+- **`git diff --stat`:** confirms only `index.html` changed for the code portion of this phase.
+
+### Impact
+
+The Pending page's desktop "Stake" column is now semantically correct for both row types it displays — a single neutral label ("the operational stake associated with this pending bet") rather than a recommendation claim that didn't hold for manual rows. The actual values shown, sorting, filtering, exposure, bankroll, approval flow, and History are all unaffected — this phase changed one header string and one code comment.
+
+---
+
+## Phase 26.36 — Pending Page Shows "Stake rec." Instead of Raw Model Stake for Bot Picks
+
+**Implemented:** 2026-07-15
+
+**Goal.** Pure UX fix, explicitly scoped to display only — no bankroll, settlement, persistence, exposure, StakeReal, or recommendation-algorithm change. A prior session's design review (Task 2 of the StakeReal-zero-guard session) found that the Pending page's "Stake" column shows the raw model stake (`_stakeModeloNum`, the same underlying value as Daily Picks' "Stake mod." column), while "Stake Real" is auto-filled from a *different* figure — `computeRecommendedStake()`'s "Stake rec." (Phase 26.33/26.35). Once a pick is approved, the raw model stake is no longer the operationally relevant comparison; the user wants to see "what we recommended" next to "what was actually staked."
+
+**Investigation before changing anything (per instruction).** Traced every place the Pending table obtains its displayed Stake value: `getPendingRows()` (`index.html`) is the single source, consumed only by `renderPendingQueue()` (desktop table) and `buildPendingCardHtml()` (mobile card) — both purely presentational; no KPI, exposure, or bankroll calculation reads `.stake` from this function (every consumer that isn't one of those two render functions only reads `.length`, confirmed by grep). `getPendingRows()` builds two disjoint row shapes in one array: `manualRows` (`.stake = b.stake`, the manual bet's own entered stake — no model/rec/real split exists for manual bets) and `botRows` (`.stake` was `r._stakeModeloNum`). Only the `botRows` branch needed to change.
+
+**Fix.** `getPendingRows()`'s `botRows` mapping now computes `const recStake = computeRecommendedStake(r).value;` per row and uses `recStake` (formatted via the same `fmt()` helper, same null-safety pattern) as `.stake`, instead of `r._stakeModeloNum`. This is the exact same function call Daily Picks and the Phase 26.33/26.35 approval auto-fill already use — no second implementation, no duplicated formula. The `manualRows` branch is untouched. The desktop table header (`<th>Stake</th>` → `<th>Stake rec.</th>`) and the mobile card's per-row label (a new `stakeLabel` local: `'Stake rec.'` for `_type === 'bot'`, `'Stake'` unchanged for `_type === 'manual'`) were updated to match — the mobile card is actually more precise than the desktop table here, since its label is computed per-row-type rather than shared across one column.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `getPendingRows()`'s `botRows` mapping — `.stake` now sourced from `computeRecommendedStake(r).value` instead of `r._stakeModeloNum` (reused, not duplicated); desktop `<th>Stake</th>` → `<th>Stake rec.</th>`; `buildPendingCardHtml()` gained a per-row `stakeLabel` (`'Stake rec.'` for bot rows, `'Stake'` unchanged for manual rows) |
+| `docs/03_Dashboard.md` | Pending page section corrected/extended to describe both the bot-pick and manual-bet halves of `getPendingRows()` (the bot-pick half was previously undocumented — see Additional Observations) and the new Stake rec. source |
+| `docs/08_Change_Log.md` | This Phase 26.36 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase |
+| `docs/handovers/handover-2026-07-15-pending-stake-rec.md` | New handover |
+
+`05_Known_Issues.md`, `09_Architecture_Decisions.md`, `06_Roadmap.md`, `01_Architecture.md`, `04_Backend.md`, `PROJECT_MAP.md` — **no change required.** This phase fixed no open issue (the underlying UX gap was never filed as a Known Issue — it was a design-review finding, not a confirmed bug), introduced no architectural decision (a display-source swap through an already-shared function, not a new persistence path or structural change), and shifted no roadmap priority.
+
+### Architectural Decisions
+
+None. `getPendingRows()` already computed derived display fields from merged row data; this changes which already-existing function supplies one of those fields. `computeRecommendedStake()` itself is untouched, and no new call pattern or dependency was introduced — Daily Picks and the approval handler already called this same function per-row.
+
+### Validation
+
+- **Syntax:** `node --check` on both extracted `<script>` blocks of `index.html` — clean.
+- **Playwright, targeted script (19 checks, scratchpad, not committed — `pwtest/test_pending_stake_rec.js`):** desktop header renamed to "Stake rec." (old plain "Stake" header absent); a bot pick that followed the recommendation exactly shows Stake rec. === Stake Real; a bot pick whose real stake was deliberately overridden shows Stake rec. ≠ Stake Real, with Stake Real reflecting the user's real value untouched; an unapproved bot pick still does not appear on Pending; the manual bet row's `stake` is completely unchanged (still its own entered value, not run through `computeRecommendedStake()`); the desktop table's rendered cell text matches the underlying Stake rec. value; the mobile card shows "Stake rec.:" for bot rows and the unchanged plain "Stake:" for the manual row; Daily Picks' underlying `_stakeModeloNum` source is untouched; `getRiskMetrics().stakeOpen` and bankroll `totalAccountValue` are unaffected by the display change; `state.manualBets` is byte-identical; the History page renders without error; Pending rows remain sorted by date ascending.
+- **Full existing 9-suite Playwright regression harness** (`test.js`, Opinion Validation, Recommendations, Simulator, Strategy Lab, Calibration v2, Phase 26.33's approval-default test, Phase 26.34's CSV-wins-precedence test, Phase 26.35's StakeReal-zero-guard test): all 9 suites pass completely, zero console/page errors.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged — no Python file was touched.
+- **`git diff --stat`:** confirms only `index.html` changed for the code portion of this phase.
+
+### Impact
+
+The Pending page's "Stake rec." column for bot picks now shows exactly the same figure the approval auto-fill used (or would use), directly adjacent to "Stake Real." Equal values confirm the recommendation was followed; a difference is now an intentional, legible signal that the user adjusted the stake — rather than an always-present, confusing mismatch against a raw model figure that was never the operational target after approval. Manual bet rows, Daily Picks, exposure, bankroll, settlement, persistence, and StakeReal behaviour are all unaffected.
 
 ---
 

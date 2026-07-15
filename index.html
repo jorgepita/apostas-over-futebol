@@ -14269,21 +14269,34 @@ button:disabled {
             const d = normalizeDateString(r['Data'] || '');
             return d > today;
           })
-          .map(r => ({
-            id:            r._pickKey,
-            source:        'Bot',
-            date:          normalizeDateString(r['Data'] || '') || '',
-            league:        cleanString(r['Liga']    || ''),
-            game:          cleanString(r['Jogo']    || ''),
-            market:        normalizeMarket(r),
-            odd:           r._oddModeloNum   !== null ? fmt(r._oddModeloNum)   : '',
-            stake:         r._stakeModeloNum !== null ? fmt(r._stakeModeloNum) : '',
-            oddReal:       r._oddRealNum   !== null ? fmt(r._oddRealNum)   : '',
-            stakeReal:     r._stakeRealNum !== null ? fmt(r._stakeRealNum) : '',
-            kickoffUTC:    r['KickoffUTC'] || '',
-            scoreBadgeHtml: formatPickSignalHtml(r).score,
-            _type: 'bot'
-          }));
+          .map(r => {
+            // Pending is post-approval: the operational stake associated with a bot
+            // row is the recommendation (same computeRecommendedStake() used by
+            // Daily Picks and the approval auto-fill — see Phase 26.33/26.35/26.36),
+            // not the raw model stake, which is only actionable pre-approval, on
+            // Daily Picks. The desktop table's shared "Stake" header (Phase 26.37)
+            // does not claim this is a recommendation — it just states the
+            // operational stake — since the same column also holds manual rows'
+            // plain entered stake; the mobile card's per-row label ("Stake rec."
+            // for bot, "Stake" for manual — see buildPendingCardHtml()) is more
+            // precise and still communicates the distinction.
+            const recStake = computeRecommendedStake(r).value;
+            return {
+              id:            r._pickKey,
+              source:        'Bot',
+              date:          normalizeDateString(r['Data'] || '') || '',
+              league:        cleanString(r['Liga']    || ''),
+              game:          cleanString(r['Jogo']    || ''),
+              market:        normalizeMarket(r),
+              odd:           r._oddModeloNum !== null ? fmt(r._oddModeloNum) : '',
+              stake:         recStake !== null ? fmt(recStake) : '',
+              oddReal:       r._oddRealNum   !== null ? fmt(r._oddRealNum)   : '',
+              stakeReal:     r._stakeRealNum !== null ? fmt(r._stakeRealNum) : '',
+              kickoffUTC:    r['KickoffUTC'] || '',
+              scoreBadgeHtml: formatPickSignalHtml(r).score,
+              _type: 'bot'
+            };
+          });
 
         return [...manualRows, ...botRows].sort((a, b) => {
           const da = parseDateSafe(a.date)?.getTime() || 0;
@@ -14298,6 +14311,7 @@ button:disabled {
           const srcCls      = r.source === 'Bot' ? 'info' : 'warn';
           const oddStr      = r.odd   ? escapeHtml(r.odd)   : '—';
           const stakeStr    = r.stake ? `€${escapeHtml(r.stake)}` : '—';
+          const stakeLabel  = r._type === 'bot' ? 'Stake rec.' : 'Stake';
           const subLine     = (r.league && r.market) ? `${escapeHtml(r.league)} · ${escapeHtml(r.market)}`
                             : escapeHtml(r.league || r.market || '');
           const kickoffMs   = parseKickoffUTC(r.kickoffUTC || '');
@@ -14315,7 +14329,7 @@ button:disabled {
               </div>
               <div style="display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--muted);">
                 <span>Odd: <strong style="color:var(--text);">${oddStr}</strong></span>
-                <span>Stake: <strong style="color:var(--text);">${stakeStr}</strong></span>
+                <span>${stakeLabel}: <strong style="color:var(--text);">${stakeStr}</strong></span>
               </div>
               ${r._type === 'bot' ? `
               <div style="display:flex;gap:12px;margin-top:8px;align-items:center;font-size:12px;color:var(--muted);">

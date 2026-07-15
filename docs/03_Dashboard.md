@@ -332,19 +332,28 @@ b.isLocal === true
 
 ### Pending (`tab-pending`)
 
-**Purpose:** Shows approved manual bets whose kickoff has not yet arrived. These bets are ready to watch but not yet "live".
+**Purpose:** Shows approved bets (both bot picks and manual bets) whose kickoff has not yet arrived. These bets are ready to watch but not yet "live".
 
-**Data sources:** `getManualRowsMerged()` filtered for `isLocal === true`, `status === 'approved'`, and kickoff > now (or date > today if no kickoff data).
+**Data sources:** `getPendingRows()` merges two disjoint row shapes into one array — manual bets from `getManualRowsMerged()`, and bot picks from `getAllBotRowsMergedUnique()`:
 
-**`getPendingRows()` filter:**
 ```javascript
-b.isLocal === true
-&& b.status === 'approved'
-&& (kickoffMs !== null ? kickoffMs > Date.now() : b.data > today)
+// manual: b.isLocal === true && b.status === 'approved'
+//   && (kickoffMs !== null ? kickoffMs > Date.now() : b.data > today)
+// bot:    r._apostadaBool && !['W','L','P'].includes(r._resultKey)
+//   && (kickoffMs !== null ? kickoffMs > Date.now() : normalizeDateString(r['Data']) > today)
 ```
 
+Both branches sort together by date ascending. Only consumer of the full row list besides these two render functions is `.length`, used by KPI/alert counts (`getRiskMetrics()`-adjacent code, `checkPendingAlerts()`) — no calculation reads `.stake` from this function.
+
+**Displayed "Stake" column (`Phase 26.36`, header wording corrected `Phase 26.37`):** the two row types show different concepts under one shared desktop column, since manual bets have no model/recommended/real split:
+- **Manual rows** — `.stake = b.stake`, the bet's own single entered stake. Unchanged since this page's inception.
+- **Bot rows** — `.stake = computeRecommendedStake(r).value` (the same function and value Daily Picks' own "Stake rec." column and the Phase 26.33/26.35 approval auto-fill use) — **not** the raw model stake (`r._stakeModeloNum`, "Stake mod." on Daily Picks), which Pending showed prior to Phase 26.36. Once a pick is approved, the raw model stake is no longer the operationally relevant figure; this value is directly comparable to the adjacent "Stake Real" column — equal values mean the recommendation was followed, a difference means the user deliberately adjusted the stake.
+
+**Header/label wording (`Phase 26.37`):** the desktop table's `<th>` reads plain **"Stake"** — Phase 26.36 briefly renamed it to "Stake rec.", but that single header also sits above manual rows, for which "recommendation" is not an accurate description of their own entered stake; "Stake" is deliberately neutral ("the operational stake associated with this pending bet"), true for both row types. The mobile card is more precise, since its label is computed per row (`buildPendingCardHtml()`'s `stakeLabel`): `'Stake rec.'` for bot rows, `'Stake'` unchanged for manual rows — no shared-header caveat there. Only the desktop label changed between Phase 26.36 and 26.37; the underlying bot-row **value** (`computeRecommendedStake()`) has been the same since Phase 26.36.
+
 **User interactions:**
-- "Cancelar" button — rejects a pending bet; sets status back to a rejected state, calls `markDirty()`.
+- "Cancelar" button — for manual bets, rejects a pending bet (status back to a rejected state); for bot picks, sets `apostada = false` via `pendingCancel()` (the pick returns to Daily Picks as unapproved). In both cases calls `markDirty()`. `pendingCancel()` deliberately does not clear a bot pick's `stakeReal`/`oddReal` — see `05_Known_Issues.md` DASHBOARD-5 for why a stale value surviving a cancel mattered.
+- Bot rows also expose inline "Odd Real"/"Stake Real" number inputs (`.js-odd-real`/`.js-stake-real`, bound in `bindBotTableControls()`) — the same fields editable from the History page.
 
 **Update triggers:** Any `rerenderAll()` or `rerenderManualOnly()`.
 
