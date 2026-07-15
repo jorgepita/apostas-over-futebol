@@ -7,9 +7,8 @@
 ```
 Date:     2026-07-15
 Branch:   main
-Commit:   d25ef251 (HEAD at session start — fast-forwarded 23 automated data-only
-          commits before implementing; this session's code+docs changes are
-          uncommitted, pending explicit user request to commit/push)
+Commit:   9b1c007d "fix(picks): automated settlement always wins over stale manual
+          override" — committed and pushed, merged into origin/main as 4a685708
 ```
 
 ---
@@ -90,7 +89,7 @@ A secondary instance of the same class of bug was found in `getDailyRowsMerged()
 
 ## Current Project State
 
-**Stable.** Automated settlement (`picks_history.csv` / `picks_hoje_simplificado.csv`) is now unconditionally the final source of truth for a bot pick's result once it exists, in both the primary precedence check and the daily/history cross-file reconciliation. The two historical misstatements are corrected in the running dashboard logic (verified against the real, current `cloud_state.json`/`picks_history.csv` — see Validation below); no data migration was performed or needed. Changes are currently **uncommitted** — commit/push was not requested this session.
+**Stable.** Automated settlement (`picks_history.csv` / `picks_hoje_simplificado.csv`) is now unconditionally the final source of truth for a bot pick's result once it exists, in both the primary precedence check and the daily/history cross-file reconciliation. The two historical misstatements are corrected in the running dashboard logic (verified against the real, current `cloud_state.json`/`picks_history.csv` — see Validation below); no data migration was performed or needed. Committed as `9b1c007d` and pushed to `origin/main` (merged as `4a685708`) later in the same session.
 
 ---
 
@@ -120,7 +119,7 @@ None opened. `DASHBOARD-4` added to `05_Known_Issues.md` as resolved this sessio
 
 ## Remaining Work
 
-None for this task — complete as scoped. Commit/push not performed (see Notes).
+None for this task — complete as scoped. Committed and pushed (see Session Information above).
 
 ---
 
@@ -132,16 +131,19 @@ ST-3 (SHA conflict retry in `sync_server.py`) remains next on the roadmap — un
 
 ## Notes for the Next Session
 
-- **This session's changes are uncommitted.** Confirm with the user before committing/pushing if picking this up cold, per the standing git safety policy (never commit without an explicit request, even though `CLAUDE.md`'s own end-of-session workflow calls for it).
+- **This session's changes were committed and pushed** (`9b1c007d`, merged as `4a685708`) after the user explicitly requested it later in the same session — per the standing git safety policy, a commit is never made without an explicit request, which is exactly what happened here.
+- **A subsequent project-closure review** (same session, after this handover was first written) re-verified the full 8-suite Playwright regression harness and the Python suite against the actual pushed state (both fully green), confirmed no debug code/TODOs/dead functions were introduced, and corrected this handover's and the sibling Phase 26.33 handover's "uncommitted" language, which had gone stale the moment the user asked for commit+push. No code changed during that review — documentation-only correction.
 - The two historically-misstated bets (Saint Etienne vs Nice, Nice vs Saint Etienne) are corrected by this fix automatically the next time `index.html` loads with current data — no separate data-repair action is needed or was performed.
 - `resultadoManual` values for those two bets **remain** in `cloud_state.json["localEdits"]` — inert, by design (see ADR-015). If a future session ever wants to purge genuinely-dead overrides, that would be a new, separate decision requiring its own risk analysis; this session deliberately did not do that.
 - If a future change ever needs to distinguish "resolved by automated settlement" from "resolved by manual bridge" in the UI (e.g., a small badge), the raw signal already exists: compare the row's own CSV `Resultado` cell (or the history-reconciliation source) against `_resultadoFinal` — no new field would be needed.
+- **Follow-up verification (same session, post-commit):** the user asked for explicit confirmation that no other place in the repo reads `resultadoManual` directly and could bypass the new precedence. Repo-wide grep confirmed exactly 4 code sites total, all in `index.html` — the fixed precedence site, a default initializer, a write-only dropdown handler, and `settleBotBet()`'s read, which is only a manual-vs-manual idempotency guard (never compares against the CSV, has no bearing on what's displayed). No other file — Python, JS, or otherwise — references the field. Confirmed safe.
+- **Side-finding from that grep, not yet acted on:** `dashboard_state.json` (repo root) is a tracked file holding a `localEdits`-shaped structure, with 534 commits between 2026-03-15 and 2026-04-26 and none since — it predates the current `cloud_state.json` architecture (ADR-001, 2026-06-28) and is referenced by zero code in the current codebase (not `index.html`, not any Python file, not any GitHub workflow). It appears to be dead, orphaned data from a design that was superseded, analogous to the already-documented "`manual_bets.csv` is dead" precedent (ADR-001) — just never formally called out anywhere. It cannot affect this fix (nothing reads it), so no action was taken this session, but it's worth a deliberate cleanup/deletion decision in a future session if repository hygiene is revisited (similar in spirit to Phase 26.26).
 
 ---
 
 ## End-of-Session Checklist
 
-- [ ] Code committed and pushed — **not done; awaiting explicit user request per git safety policy**
+- [x] Code committed and pushed — `9b1c007d`, merged as `4a685708`
 - [x] `07_Current_Status.md` updated
 - [x] `05_Known_Issues.md` updated (`DASHBOARD-4` added)
 - [x] `08_Change_Log.md` updated (Phase 26.34 entry added)

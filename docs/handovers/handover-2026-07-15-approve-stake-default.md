@@ -7,8 +7,8 @@
 ```
 Date:     2026-07-15
 Branch:   main
-Commit:   ba3839bd (HEAD at session start — fast-forwarded from a 3-day-stale local checkout;
-          this session's code+docs changes are uncommitted, pending user confirmation to commit/push)
+Commit:   03ec0057 "feat(picks): default StakeReal to Stake rec. on bot pick approval" —
+          committed and pushed, merged into origin/main as 8d396af1
 ```
 
 ---
@@ -62,7 +62,7 @@ None. No ADR created or changed — this is a workflow/business-logic change tha
 
 ## Current Project State
 
-**Stable.** Approving a bot pick now defaults `StakeReal` to "Stake rec." only when empty; all other behaviour (Kelly, bankroll, settlement, manual bets, previously-approved picks) is verified unchanged. Changes are currently **uncommitted** in the working tree — commit/push was not requested this session (see Notes below).
+**Stable.** Approving a bot pick now defaults `StakeReal` to "Stake rec." only when empty; all other behaviour (Kelly, bankroll, settlement, manual bets, previously-approved picks) is verified unchanged. Committed as `03ec0057` and pushed to `origin/main` (merged as `8d396af1`) later in the same session.
 
 ---
 
@@ -102,7 +102,7 @@ ST-3 (SHA conflict retry in `sync_server.py`) remains the next item on the roadm
 
 ## Notes for the Next Session
 
-- **This session's changes are uncommitted.** The user did not explicitly ask for a commit/push during this session, and per the standing git safety instructions a commit is never made without an explicit request — confirm with the user before committing if picking this up cold.
+- **This session's changes were committed and pushed** (`03ec0057`, merged as `8d396af1`) after the user explicitly requested it later in the same session — per the standing git safety policy, a commit is never made without an explicit request, which is exactly what happened here.
 - The local checkout was found 86 commits behind `origin/main` at the start of this session (automated data-file commits only, fast-forwarded cleanly, no conflicts). Worth a quick `git fetch && git log HEAD..origin/main --oneline` check at the start of any future session, since automated GitHub Actions commits accumulate between sessions.
 - The pick table's two "recommended stake" columns ("Stake mod." vs "Stake rec.") were previously undocumented anywhere in `docs/` — this is now partially closed by the `03_Dashboard.md` note added this session, but the full `computeRecommendedStake()` mechanism (dynamic multiplier, edge/score/odds/exposure adjustments) itself still has no dedicated documentation section. Worth writing up properly in an idle session if it becomes a recurring point of confusion — not blocking.
 - The Playwright test harness used this session (`pwtest` in a prior session's scratchpad directory) is not committed to the repository, consistent with how every prior session's Playwright validation has been handled — this is intentional per established convention, not an oversight.
@@ -111,7 +111,7 @@ ST-3 (SHA conflict retry in `sync_server.py`) remains the next item on the roadm
 
 ## End-of-Session Checklist
 
-- [ ] Code committed and pushed — **not done; awaiting explicit user request per git safety policy**
+- [x] Code committed and pushed — `03ec0057`, merged as `8d396af1`
 - [x] `07_Current_Status.md` updated
 - [x] `05_Known_Issues.md` — no change required (no issue opened, resolved, or affected)
 - [x] `08_Change_Log.md` updated (Phase 26.33 entry added)
