@@ -7934,8 +7934,14 @@ button:disabled {
           awayTeam:   awayTeam   || '',
           leagueId:   leagueId   ?? null,
         });
+        // markDirty() alone is sufficient (Phase 26.41 — H3 migration): this
+        // button only exists on the already-rendered tab-manual page, so
+        // markDirty()'s own active-tab dispatch already re-renders
+        // renderManualScout()/renderManualBets(). tab-pending/tab-live pick
+        // up the new bet the moment they're actually opened (setActiveTab()
+        // always forces a fresh render on activation) — no need to render
+        // them now while invisible. See ADR-016.
         markDirty();
-        rerenderManualOnly();
       }
 
       // ── END PHASE 17 ────────────────────────────────────────────────
@@ -8196,14 +8202,22 @@ button:disabled {
       
       function bindBotTableControls() {
 
-        function update(key, changes, rerender = false) {
+        // skipActiveTabRender: for live-input edits (.js-odd-real/.js-stake-real)
+        // whose input lives on the currently-active tab (Pending) — re-rendering
+        // that tab on every keystroke would rebuild the very input being typed
+        // into, destroying focus and leaving the fresh element unbound until the
+        // next unrelated render. Approve (rerender=true) is unaffected either way:
+        // renderActiveTabIfStale()'s own generation guard already prevents that
+        // path's markDirty() render and its immediately-following rerenderAll()
+        // from doing the work twice.
+        function update(key, changes, rerender = false, skipActiveTabRender = false) {
           if (!state.localEdits[key]) {
             state.localEdits[key] = {};
           }
 
           Object.assign(state.localEdits[key], changes);
 
-          markDirty();
+          markDirty(skipActiveTabRender);
 
           saveLocalState();
 
@@ -8238,7 +8252,7 @@ button:disabled {
         document.querySelectorAll('.js-odd-real').forEach(el => {
           el.oninput = e => {
             const key = e.target.dataset.pickKey;
-            update(key, { oddReal: e.target.value });
+            update(key, { oddReal: e.target.value }, false, true);
             clearTimeout(_saveToastTimer);
             _saveToastTimer = setTimeout(showSaveToast, 800);
           };
@@ -8247,7 +8261,7 @@ button:disabled {
         document.querySelectorAll('.js-stake-real').forEach(el => {
           el.oninput = e => {
             const key = e.target.dataset.pickKey;
-            update(key, { stakeReal: e.target.value });
+            update(key, { stakeReal: e.target.value }, false, true);
             clearTimeout(_saveToastTimer);
             _saveToastTimer = setTimeout(showSaveToast, 800);
           };
@@ -8296,8 +8310,10 @@ button:disabled {
               scoreAtAnalysis:  result.score,
               analysisSnapshot: result
             };
+            // markDirty() alone (Phase 26.41 — H3 migration, same reasoning as
+            // addManualBetFromFixture() above): this button only exists on the
+            // already-rendered tab-manual page.
             markDirty();
-            rerenderManualOnly();
           });
         } catch (err) {
           console.error('mbHandleRowAnalyze', err);
@@ -8343,8 +8359,9 @@ button:disabled {
         };
 
         window._mbEditState = null;
+        // markDirty() alone (Phase 26.41 — H3 migration): tab-manual is
+        // guaranteed active for this button to be clickable.
         markDirty();
-        rerenderManualOnly();
       }
 
       function mbHandleRowCancel() {
@@ -8356,16 +8373,18 @@ button:disabled {
         const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
         if (betIdx === -1) return;
         state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'approved' };
+        // markDirty() alone (Phase 26.41 — H3 migration): tab-manual is
+        // guaranteed active for this button to be clickable.
         markDirty();
-        rerenderManualOnly();
       }
 
       function mbHandleRowReject(id) {
         const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
         if (betIdx === -1) return;
         state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'rejected' };
+        // markDirty() alone (Phase 26.41 — H3 migration): tab-manual is
+        // guaranteed active for this button to be clickable.
         markDirty();
-        rerenderManualOnly();
       }
 
       function bindManualControls() {
@@ -8477,23 +8496,27 @@ button:disabled {
 
         if (scrollToTop) window.scrollTo(0, 0);
 
-        // Re-render the activated tab with the current viewport width so mobile/desktop
-        // layout is always correct regardless of when the tab was last rendered.
+        // Re-render the activated tab (Phase 26.40: every tab, not just the five
+        // that used to be special-cased here) so it is always correct regardless
+        // of the current viewport width or how long it has been since this tab
+        // was last visible — rerenderAll() only renders the currently-active tab
+        // now, so a tab that was hidden while data changed elsewhere must refresh
+        // itself the moment it becomes active. renderActiveTabIfStale() is a
+        // cheap no-op if this exact tab was already rendered at the current data
+        // generation (e.g. this call immediately follows a rerenderAll() that
+        // just rendered the same tab).
         try {
-          if (tabId === 'tab-summary') {
-            renderMobileHomeDash();
-          } else if (tabId === 'tab-day') {
-            renderFootball();
-          } else if (tabId === 'tab-pending') {
-            renderPendingQueue();
-          } else if (tabId === 'tab-live') {
-            renderLiveCenter();
-          } else if (tabId === 'tab-strategylab') {
-            renderStrategyLab();
-          }
+          renderActiveTabIfStale(tabId);
         } catch (e) {
           console.error('setActiveTab render error:', e);
         }
+        // Whatever renderActiveTabIfStale() just (re)built needs its .onclick/
+        // .oninput handlers (re)attached — bindBotTableControls()/bindManualControls()
+        // are idempotent (they overwrite, never stack, and bindManualControls()'s
+        // own delegated listener only binds once) so calling them here even when
+        // renderActiveTabIfStale() was a no-op is always safe.
+        bindBotTableControls();
+        bindManualControls();
       }
 
       function bindMobileActionsButton() {
@@ -8817,13 +8840,21 @@ button:disabled {
         el.title = entry.lastError?.message || '';
       }
 
-      function markDirty() {
+      function markDirty(skipRender = false) {
         invalidateDataCache();       // Phase 26.39 — every markDirty() caller has just mutated
                                       // one of the state containers the data-layer cache depends on
         _dirtyGeneration++;          // Phase 26.1.1 — stamp every change so mid-save arrivals are detectable
         hasPendingCloudChanges = true;
         updateCloudStatus();
-        rerenderSummaryOnly();
+        // Phase 26.40 — refresh whichever tab is actually visible, not always
+        // "Summary" specifically; renderActiveTabIfStale() is a no-op if the
+        // caller is about to also call rerenderAll() for the same generation.
+        // skipRender=true is for live-input handlers (.js-odd-real/.js-stake-real
+        // on the Pending page) — that input lives on the active tab itself, so
+        // re-rendering it on every keystroke would destroy focus and the freshly
+        // rebuilt element's own handler (see 08_Change_Log.md Phase 26.40); the
+        // debounced auto-save below still runs normally either way.
+        if (!skipRender) renderActiveTabIfStale(state.activeTab);
         // Phase 26.1 — schedule auto cloud save; collapses multiple rapid edits into one
         clearTimeout(_autoSaveTimer);
         _autoSaveTimer = setTimeout(() => {
@@ -12481,9 +12512,15 @@ button:disabled {
           btn.addEventListener('click', () => {
             const id = btn.dataset.deleteMovement;
             state.movements = state.movements.filter(m => m.id !== id);
-            invalidateDataCache(); // Phase 26.39 — movements just changed
+            // markDirty() — see addMovement() for why this must not be a standalone
+            // invalidateDataCache(): deleting a movement must also schedule the
+            // debounced cloud save, not just update localStorage. The direct
+            // renderBankrollPage() call previously here was redundant (Phase
+            // 26.41 — H3 migration): this button only exists once tab-bankroll
+            // has rendered, so markDirty()'s own active-tab dispatch already
+            // re-renders it.
+            markDirty();
             saveLocalState();
-            renderBankrollPage();
           });
         });
       }
@@ -12613,13 +12650,21 @@ button:disabled {
           note
         });
 
-        invalidateDataCache(); // Phase 26.39 — movements just changed
+        // markDirty() (not a standalone invalidateDataCache()) — this mutation must
+        // also flag hasPendingCloudChanges and schedule the debounced cloud save,
+        // same as every other state mutation in the file; previously it only wrote
+        // to localStorage, so a deposit/withdrawal could silently never reach
+        // cloud_state.json until some unrelated later action happened to sync it.
+        markDirty();
         saveLocalState();
 
         if (amountEl) amountEl.value = '';
         if (noteEl) noteEl.value = '';
 
-        renderBankrollPage();
+        // The direct renderBankrollPage() call previously here was redundant
+        // (Phase 26.41 — H3 migration): addMovement() is only reachable from
+        // the already-rendered tab-bankroll page, so markDirty()'s own
+        // active-tab dispatch already re-renders it.
       }
 
       // ============================================================
@@ -14256,18 +14301,9 @@ button:disabled {
 
       // ===== END MOBILE HOME DASHBOARD =====
 
-      function rerenderSummaryOnly() {
-        try { renderTopDecisionBlock(); } catch (e) { console.error('renderTopDecisionBlock', e); }
-        try { renderSummaryHeadlineStats(); } catch (e) { console.error('renderSummaryHeadlineStats', e); }
-        try { renderAlertsCenter(); } catch (e) { console.error('renderAlertsCenter', e); }
-        try { renderOpenBets(); } catch (e) { console.error('renderOpenBets', e); }
-        try { renderAnalytics(); } catch (e) { console.error('renderAnalytics', e); }
-        try { renderSummary(); } catch (e) { console.error('renderSummary', e); }
-        try { renderBankrollChart(); } catch (e) { console.error('renderBankrollChart', e); }
-        try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
-        try { renderBankrollPage(); } catch (e) { console.error('renderBankrollPage', e); }
-        try { renderMobileHomeDash(); } catch (e) { console.error('renderMobileHomeDash', e); }
-      }
+      // rerenderSummaryOnly() removed (Phase 26.41 — H3 migration cleanup):
+      // confirmed zero live callers by the H1/H2/H3 architecture audit —
+      // superseded entirely by PAGE_RENDERERS['tab-summary'] + the dispatcher.
 
       function rerenderDayOnly() {
         console.log('TRACE: rerenderDayOnly');
@@ -14524,15 +14560,25 @@ button:disabled {
           const edit = ensureEditObject(id);
           edit.apostada = false;
         }
+        // .js-pending-cancel only exists on the Pending page (both bot and manual
+        // branches), so markDirty()'s active-tab dispatch (Phase 26.40) already
+        // re-renders tab-pending here — the old explicit rerenderPendingOnly()/
+        // rerenderManualOnly()/rerenderDayOnly() calls also unconditionally rebuilt
+        // tab-manual's and tab-day's DOM even though the user is on tab-pending;
+        // that DOM refreshes itself correctly the moment the user actually
+        // navigates there (setActiveTab() now re-renders every tab on activation).
         markDirty();
-        rerenderPendingOnly();
-        rerenderManualOnly();
-        rerenderDayOnly();
+        // markDirty()'s dispatch just rebuilt tab-pending's innerHTML (the Odd/Stake
+        // Real inputs for a bot pick), but those elements' .onclick/.oninput
+        // handlers are only attached here — without this, a pick cancelled and
+        // immediately re-approved in the same session would silently no-op.
+        bindBotTableControls();
       }
 
-      function rerenderPendingOnly() {
-        try { renderPendingQueue(); } catch (e) { console.error('renderPendingQueue', e); }
-      }
+      // rerenderPendingOnly() removed (Phase 26.41 — H3 migration cleanup):
+      // confirmed zero live callers by the H1/H2/H3 architecture audit — its
+      // last caller (pendingCancel()) was removed in Phase 26.40. Superseded
+      // by PAGE_RENDERERS['tab-pending'] + the dispatcher.
 
       // ── END PHASE 19 ─────────────────────────────────────────────────
 
@@ -14853,9 +14899,9 @@ button:disabled {
         }).join('');
       }
 
-      function rerenderLiveOnly() {
-        try { renderLiveCenter(); } catch (e) { console.error('renderLiveCenter', e); }
-      }
+      // rerenderLiveOnly() removed (Phase 26.41 — H3 migration cleanup):
+      // confirmed zero live callers by the H1/H2/H3 architecture audit —
+      // superseded by PAGE_RENDERERS['tab-live'] + the dispatcher.
 
       // ── END PHASE 20 ─────────────────────────────────────────────────
 
@@ -14898,21 +14944,70 @@ button:disabled {
 
       // ── END PHASE 21 ─────────────────────────────────────────────────
 
+      // ── Active-tab render dispatcher (Phase 26.40 — Performance Audit H3) ──
+      //
+      // Every render function below is either GLOBAL (runs on every rerenderAll()
+      // regardless of which tab is visible — nav bindings, filter dropdowns, KPI
+      // badges cheap enough to keep unconditional) or PAGE-SPECIFIC (rebuilds a
+      // tab-panel's own innerHTML, and is only useful while that tab is visible).
+      // PAGE_RENDERERS maps each tab id to its page-specific functions, derived by
+      // tracing each function's actual DOM target against the static HTML's
+      // tab-panel boundaries (not by which legacy rerenderXOnly() wrapper it used
+      // to be grouped under — several of those wrappers mixed multiple tabs'
+      // content together, e.g. the old rerenderSummaryOnly() also rendered all of
+      // tab-analytics and tab-bankroll, and rerenderManualOnly() also rendered
+      // tab-pending and tab-live).
+      const PAGE_RENDERERS = {
+        'tab-summary': [renderTopDecisionBlock, renderSummaryHeadlineStats, renderAlertsCenter, renderOpenBets, renderSummary, renderBankrollChart, renderMobileHomeDash],
+        'tab-day': [renderFootball, syncQuickMarketButtons, renderPicksKpiRow],
+        'tab-history': [renderClosedRealTable, renderHistoryKpiRow, renderHistoryIntelligence, renderHistoryTimeline, renderHistoryEquity],
+        'tab-manual': [renderManualScout, renderManualBets],
+        'tab-pending': [renderPendingQueue],
+        'tab-live': [renderLiveCenter],
+        'tab-analytics': [renderAnalytics, renderAnalyticsPerformers, renderLeagueAnalytics],
+        'tab-versus': [], // renderVersus() is GLOBAL — see rerenderAll(), not gated here
+        'tab-strategylab': [renderStrategyLab],
+        'tab-bankroll': [renderBankrollPage],
+        'tab-settings': []
+      };
+
+      // Last tab actually rendered by the dispatcher, and the _dataGeneration (see
+      // Phase 26.39) it was rendered at — lets renderActiveTabIfStale() skip a
+      // second, redundant render of the exact same tab against unchanged data
+      // (the H3.1 case: markDirty() dispatches, then the caller's own rerenderAll()
+      // would otherwise dispatch again immediately after) without ever risking a
+      // stale render — any real data change bumps _dataGeneration, and any real
+      // tab switch changes the tab id, so the guard only ever skips true no-ops.
+      let _lastRenderedTab = null;
+      let _lastRenderedAtDataGeneration = -1;
+
+      function renderActiveTabContent(tabId) {
+        (PAGE_RENDERERS[tabId] || []).forEach(fn => {
+          try { fn(); } catch (e) { console.error(fn.name || tabId, e); }
+        });
+        _lastRenderedTab = tabId;
+        _lastRenderedAtDataGeneration = _dataGeneration;
+      }
+
+      function renderActiveTabIfStale(tabId) {
+        if (_lastRenderedTab === tabId && _lastRenderedAtDataGeneration === _dataGeneration) return;
+        renderActiveTabContent(tabId);
+      }
+
       function rerenderAll() {
         fillFilters();
 
-        rerenderSummaryOnly();
-        rerenderDayOnly();
-        rerenderHistoryOnly();
-        rerenderManualOnly();
-        rerenderLiveOnly();
-        try { renderPicksKpiRow(); } catch (e) { console.error('renderPicksKpiRow', e); }
-        try { renderHistoryKpiRow(); } catch (e) { console.error('renderHistoryKpiRow', e); }
-        try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
-        try { renderBankrollPage(); } catch (e) { console.error('renderBankrollPage', e); }
-        try { renderVersus(); } catch (e) { console.error('renderVersus', e); }
+        renderActiveTabIfStale(state.activeTab);
 
-        try { renderLeagueAnalytics(); } catch (e) { console.error('renderLeagueAnalytics', e); }
+        // renderVersus() (tab-versus, Bot vs Manual) is kept GLOBAL rather than
+        // gated: besides rendering its own tab, it populates window._opnSimCache,
+        // a side effect Strategy Lab's "Compare Against Production" panel and the
+        // Recommendation Engine/Simulator read regardless of which tab is active —
+        // gating it would silently break those on any session that never happens
+        // to visit tab-versus first. It measured ~0.18–0.22s even at the original
+        // 87.7s-baseline data scale (see 08_Change_Log.md Phase 26.38 audit), so
+        // keeping it unconditional costs effectively nothing.
+        try { renderVersus(); } catch (e) { console.error('renderVersus', e); }
 
         bindTabButtons();
         bindQuickMarketButtons();

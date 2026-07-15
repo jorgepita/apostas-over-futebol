@@ -64,19 +64,23 @@ User action / interval tick
   state mutation
         │
         ▼
-  markDirty()          ← schedules cloud save (4s debounce)
+  markDirty()          ← schedules cloud save (4s debounce); invalidates the
+                          data-layer cache (Phase 26.39); re-renders the
+                          active tab only (Phase 26.40 — see §5)
   saveLocalState()     ← writes localStorage synchronously
         │
         ▼
-  rerenderAll()        ← re-renders every panel
+  rerenderAll()        ← re-renders the active tab's own panels, plus a small
+                          set of deliberately-global widgets (§5)
         │
         ▼
-  setActiveTab()       ← ensures the active tab is visible
+  setActiveTab()       ← ensures the active tab is visible; also guarantees
+                          a fresh render of whichever tab it switches to
 ```
 
 ### Event handling
 
-Event listeners are attached once in `bindStaticButtons()`, `bindStaticInputs()`, `bindTabButtons()`, and `bindManualControls()`. All use event delegation on stable parent elements to avoid rebinding after re-renders. `rerenderAll()` calls `bindTabButtons()` and `bindManualControls()` at the end to attach handlers to newly rendered table rows.
+Event listeners are attached once in `bindStaticButtons()`, `bindStaticInputs()`, `bindTabButtons()`, and `bindManualControls()`. All use event delegation on stable parent elements to avoid rebinding after re-renders. `rerenderAll()` and `setActiveTab()` both call `bindBotTableControls()` and `bindManualControls()` at the end to attach handlers to newly rendered table rows.
 
 ---
 
@@ -215,52 +219,104 @@ browser opens index.html
 
 ## 5. Rendering Architecture
 
-### `rerenderAll()`
+**Phase 26.40 replaced "re-render every panel on every mutation" with an active-tab-gated dispatcher.** Every tab panel is still fully present in the DOM at all times (ADR-005's single-file, all-tabs-mounted model is unchanged), and every page is still fully up to date the instant it's opened — **this is not lazy-loading**. The change is purely about not doing redundant work: a page's own render functions now only run while that page is the active tab, or at the moment it becomes the active tab (which always forces a fresh render regardless of how long it's been since that tab last ran). A small, deliberately-named set of global widgets still updates on every mutation regardless of which tab is visible.
 
-The primary render function. Called after any data change. Re-renders every panel regardless of which tab is active, then calls `setActiveTab()` to show the correct panel.
+This followed directly from Phase 26.38 (H1, `getPendingCount()`) and Phase 26.39 (H2, the data-layer cache): once the underlying *data* computation was cheap, the residual per-click cost was almost entirely DOM — `rerenderAll()` was still unconditionally rebuilding roughly 50 render functions' `innerHTML` regardless of which single tab the user could actually see, and a single logical action (e.g. Approve) could trigger two overlapping full render passes (`markDirty()`'s internal render, immediately followed by the click handler's own `rerenderAll()`).
+
+### Dependency map — `PAGE_RENDERERS`
+
+Every render function was traced against the actual DOM element(s) it targets — not the legacy grouping the old `rerenderXOnly()` wrappers used, several of which mixed multiple tabs' content together (e.g. the old `rerenderSummaryOnly()` also rendered all of `tab-analytics` and `tab-bankroll`; `rerenderManualOnly()` also rendered `tab-pending` and `tab-live`) — and classified as belonging to exactly one tab, or GLOBAL:
+
+```javascript
+const PAGE_RENDERERS = {
+  'tab-summary':     [renderTopDecisionBlock, renderSummaryHeadlineStats, renderAlertsCenter, renderOpenBets, renderSummary, renderBankrollChart, renderMobileHomeDash],
+  'tab-day':         [renderFootball, syncQuickMarketButtons, renderPicksKpiRow],
+  'tab-history':     [renderClosedRealTable, renderHistoryKpiRow, renderHistoryIntelligence, renderHistoryTimeline, renderHistoryEquity],
+  'tab-manual':      [renderManualScout, renderManualBets],
+  'tab-pending':     [renderPendingQueue],
+  'tab-live':        [renderLiveCenter],
+  'tab-analytics':   [renderAnalytics, renderAnalyticsPerformers, renderLeagueAnalytics],
+  'tab-versus':      [],   // renderVersus() is GLOBAL — see below, deliberately not gated here
+  'tab-strategylab': [renderStrategyLab],
+  'tab-bankroll':    [renderBankrollPage],
+  'tab-settings':    []
+};
+```
+
+**Deliberate GLOBAL exception — `renderVersus()`.** It populates `window._opnSimCache`, consumed by Strategy Lab, the Recommendation Engine, Opinion Validation, and the Simulator regardless of which tab is currently active. Gating it to only run while `tab-versus` is active broke all four of those pages (caught by a failing regression during this phase's own validation — `test_strategylab.js`'s "Compare Against Production" check). It now runs unconditionally inside `rerenderAll()` on every call; its measured cost is negligible (~0.18–0.22s even on the real, full-scale account), so it was kept as one explicit, documented exception rather than refactoring the cache to be lazily computed per-consumer.
+
+### Dispatcher functions
+
+```javascript
+function renderActiveTabContent(tabId) {
+  (PAGE_RENDERERS[tabId] || []).forEach(fn => {
+    try { fn(); } catch (e) { console.error(fn.name || tabId, e); }
+  });
+  _lastRenderedTab = tabId;
+  _lastRenderedAtDataGeneration = _dataGeneration;
+}
+
+function renderActiveTabIfStale(tabId) {
+  if (_lastRenderedTab === tabId && _lastRenderedAtDataGeneration === _dataGeneration) return;
+  renderActiveTabContent(tabId);
+}
+```
+
+`renderActiveTabIfStale()` is what eliminates duplicate render passes for one logical user action: it reuses the Phase 26.39 `_dataGeneration` counter (bumped by `invalidateDataCache()` on every real state mutation) as its "has anything actually changed" signal, rather than a fragile standalone boolean — so it can never skip a render that would leave stale data on screen. It is called from three places (`markDirty()`, `rerenderAll()`, `setActiveTab()`); when two of them fire back-to-back for the same click, the second call becomes a no-op.
+
+### `rerenderAll()`
 
 ```javascript
 function rerenderAll() {
   fillFilters();
-  rerenderSummaryOnly();     // Home / Summary tab
-  rerenderDayOnly();         // Daily Picks tab
-  rerenderHistoryOnly();     // History tab
-  rerenderManualOnly();      // Manual Bets + Pending + Live Center
-  rerenderLiveOnly();        // Live Center (again, for safety)
-  renderPicksKpiRow();       // KPI strip for Daily Picks
-  renderHistoryKpiRow();     // KPI strip for History
-  renderAnalyticsPerformers(); // Per-league analytics table
-  renderBankrollPage();      // Bankroll / Settings tab
-  renderVersus();            // Bot vs Manual tab
-  renderLeagueAnalytics();   // League statistics table
-  // bind UI controls, update buttons, set active tab
+  renderActiveTabIfStale(state.activeTab);          // active tab's own panels only
+  try { renderVersus(); } catch (e) { /* ... */ }    // GLOBAL — see above
+  bindTabButtons();
+  bindQuickMarketButtons();
+  updateApostasButton();
+  updateApostasTooltip();
+  applyBankrollImmutability();
+  setActiveTab(state.activeTab, { scrollToTop: false });
+  bindBotTableControls();
+  bindManualControls();
 }
 ```
 
-Every render call is wrapped in a try-catch. A failure in one panel does not prevent others from rendering.
+Still the function called after any data change that isn't a live-input edit. It no longer unconditionally rebuilds every tab's DOM — only the active tab's own panels (deduped against `_dataGeneration`), plus the deliberately-global `renderVersus()`. Every render call remains wrapped in a try-catch — a failure in one panel does not prevent others from rendering.
 
-### Partial renderers
+### `markDirty(skipRender = false)`
 
-Partial re-renders are used when only one area needs to update (e.g. after a Live Center settle action):
+```javascript
+function markDirty(skipRender = false) {
+  invalidateDataCache();
+  _dirtyGeneration++;
+  hasPendingCloudChanges = true;
+  updateCloudStatus();
+  if (!skipRender) renderActiveTabIfStale(state.activeTab);
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(() => { /* saveCloudState() after 4s */ }, 4000);
+}
+```
 
-| Function | Renders |
-|---|---|
-| `rerenderSummaryOnly()` | Home tab summary cards |
-| `rerenderDayOnly()` | Daily Picks table, KPI row |
-| `rerenderHistoryOnly()` | History table, KPI row, intelligence panels, timeline, equity curve |
-| `rerenderManualOnly()` | Manual Bets table, Scout, Pending queue, Live Center |
-| `rerenderLiveOnly()` | Live Center only (wrapped in try-catch; swallows errors silently) |
+`markDirty()` now also dispatches a render of the active tab (previously it had no rendering responsibility at all — callers relied on a separate `rerenderAll()`/`rerenderXOnly()` call for that). `skipRender = true` is used by the Pending page's two live-input handlers (`.js-odd-real`/`.js-stake-real`, edited via `bindBotTableControls()`'s inner `update(key, changes, rerender, skipActiveTabRender)`): those inputs render only while `tab-pending` is active, so without this flag a render on every keystroke would destroy and recreate the very input being typed into, losing focus and cursor position mid-edit — a regression this phase's own validation caught (`test_h2_cache_correctness.js`). Live edits still invalidate the cache and schedule the cloud save; they simply don't force an immediate DOM rebuild of their own page while the user is actively typing in it.
 
-### Tab activation
+### Tab activation — `setActiveTab(tabId, {scrollToTop=true}={})`
 
-`setActiveTab(tabId)` shows the tab panel matching `tabId` and hides all others. It also calls a targeted renderer for interactive tabs that need fresh state immediately:
+`setActiveTab()` shows the tab panel matching `tabId`, hides all others, and now always guarantees a fresh render of the destination tab:
 
-- `tab-summary` → `renderMobileHomeDash()`
-- `tab-day` → `renderFootball()`
-- `tab-pending` → `renderPendingQueue()`
-- `tab-live` → `renderLiveCenter()`
+```javascript
+try { renderActiveTabIfStale(tabId); } catch (e) { console.error(tabId, e); }
+bindBotTableControls();
+bindManualControls();
+```
 
-Tab switching does not trigger `loadData()` or any network call.
+A switch to a different `tabId` never matches `_lastRenderedTab`, so `renderActiveTabIfStale()` always renders on activation — this is what makes the model **not** lazy-loading: a page is fully current the instant it's opened, whether it was rendered a second ago or has been stale since the session started. `bindBotTableControls()`/`bindManualControls()` re-run after every activation, since a freshly-rendered tab's DOM needs its click/input handlers rebound (`.onclick =` / `.oninput =` property assignment — confirmed idempotent, rebinding overwrites rather than stacking listeners). Tab switching still does not trigger `loadData()` or any network call.
+
+### Superseded partial renderers
+
+An independent architecture audit (Phase 26.41) found that Phase 26.40 had left the entire Manual Bets mutation surface (`addManualBetFromFixture()`, `mbHandleRowAnalyze()`, `mbHandleRowSave()`, `mbHandleRowApprove()`, `mbHandleRowReject()`) and two Bankroll movement handlers (`addMovement()`, delete-movement) still calling a legacy wrapper or a redundant direct render alongside `markDirty()` — the exact "two overlapping render passes" / "rebuild invisible DOM" problem H3 was built to eliminate, just in a part of the file the original H3 migration hadn't reached. Phase 26.41 migrated all 7 of those mutation paths to `markDirty()` alone (identical to how `.js-bot-approve` has always worked), and deleted the three wrapper functions confirmed to have zero remaining callers.
+
+Current state: `rerenderDayOnly()` and `rerenderHistoryOnly()` remain defined and are still called directly from their own page's filter/search/sort/view-toggle controls (Daily Picks' search/league/market/result filters; History's search/source/date/league/market/result/odds filters and the Resolvidas/Rejeitadas toggle) — a deliberate, pre-existing, UI-only pattern (no `markDirty()` involved, since no state mutation occurs) that predates H1/H2/H3 and is unrelated to it; not migrated, per the audit's explicit instruction not to touch wrappers used for filtering/sorting. `rerenderManualOnly()` remains defined and is still called from exactly two places — `mbHandleRowEdit()` and `mbHandleRowCancel()` — both of which only toggle `window._mbEditState` (a UI-only edit-mode flag, not part of `state`) and never call `markDirty()`; same category as the two filter-only wrappers above, kept for the same reason. `rerenderSummaryOnly()`, `rerenderPendingOnly()`, and `rerenderLiveOnly()` were deleted in Phase 26.41 — each had zero live callers, confirmed by a full-file caller search before removal.
 
 ### Auto-save and dirty state
 

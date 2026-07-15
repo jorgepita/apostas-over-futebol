@@ -8,6 +8,8 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.41 | 2026-07-15 | Concluded the H1/H2/H3 Performance Optimisation Programme. An independent architecture audit found Phase 26.40's dispatcher migration incomplete: the Manual Bets action surface (5 handlers) still called `markDirty()` then the legacy `rerenderManualOnly()` wrapper (duplicate render + always rendering invisible `tab-pending`/`tab-live` DOM — measured ~67ms/27% waste per action), and `addMovement()`/delete-movement retained a redundant direct `renderBankrollPage()` call left over from Phase 26.40's own Issue B fix. All 7 mutation paths migrated to `markDirty()` alone; 3 confirmed-dead wrapper functions (`rerenderSummaryOnly()`, `rerenderPendingOnly()`, `rerenderLiveOnly()`) removed. `rerenderDayOnly()`/`rerenderHistoryOnly()`/`rerenderManualOnly()` deliberately retained for their remaining UI-only (non-mutating) filter/edit-mode-toggle callers. Manual Bet actions now measure ~202–212ms on the real account, matching Bot Pick actions (~199–263ms) — the explicit goal. New 15-check Playwright script; full 14-suite regression harness passing |
+| 26.40 | 2026-07-15 | Fixed two issues found during the Performance Audit's own validation (Issue A: `pendingCancel()` left "Aprovar" unbound for a same-session re-approval — fixed with a `bindBotTableControls()` call; Issue B: `addMovement()`/delete-movement never called `markDirty()` — fixed by reusing it instead of a standalone `invalidateDataCache()`), then implemented the audit's third and final optimisation (H3): an active-tab-gated render dispatcher. H3.1 (`renderActiveTabIfStale()`, a `_dataGeneration`-aware dedup guard) eliminates duplicate render passes for one logical action. H3.2 (`PAGE_RENDERERS`, a dependency map from tracing each render function's real DOM target) stops rebuilding invisible tabs' DOM, while every tab remains fully mounted and instantly current on activation — not lazy-loading. `renderVersus()` kept as one deliberate GLOBAL exception (cross-tab `window._opnSimCache` dependency). A live-input regression (Pending page's Odd Real/Stake Real inputs destroying themselves on every keystroke) was caught and fixed via new `markDirty(skipRender)`/`update(...,skipActiveTabRender)` parameters. Measured on the real account: `rerenderAll()` ~177ms, Approve ~224ms, Cancel ~201ms — down from Phase 26.39's ~1.1–2.7s and the original 87.7s baseline. See ADR-016 |
 | 26.39 | 2026-07-15 | Second Performance Audit fix: introduced a single, shared data-layer memoization cache (`_dataGeneration` counter + `memoizeDataFn()`) for the 8 aggregate functions the audit identified as pure-for-one-state (`getHistoryRowsMerged`, `getDailyRowsMerged`, `getAllBotRowsMergedUnique`, `getManualRowsMerged`, `getResolvedManualBets`, `getMetrics`, `getRiskMetrics`, `getStakeContext`). Every state mutation in the file (13 explicit call sites plus a hook inside `markDirty()`, covering the ~20 functions that mutate `footballHistory`/`footballDaily`/`manualBets`/`manualBetsRemote`/`localEdits`/`movements`/`bankrollInicial(Set)`) now calls `invalidateDataCache()`. `getPendingRows()`/`getPendingCount()` and `computeRecommendedStake()` itself are deliberately NOT cached (time-dependent / per-row respectively). Measured: `renderPendingQueue()` (H1's remaining largest cost) 18.8s → 0.11s (-99.4%); `rerenderAll()` 28.7s → 1.1–1.2s (-96%); Approve bot pick 35.9s → ~2.3–2.7s; Cancel 41.9s → ~0.7–0.8s. Combined with H1, total improvement from the original 87.7s audit baseline is >98%. Full 11-suite regression harness plus a new 10-check cache-invalidation-scenario suite (Approve/Cancel/Stake edit/Odd edit/manual create/delete/settlement/cloud reload) all pass. See "Next Priorities" in `07_Current_Status.md` for the residual DOM/duplicate-render cost this did not address |
 | 26.38 | 2026-07-15 | Performance fix from the completed Performance Audit: `getPendingRows()` was being called from `computeAlerts()`, `renderSummaryHeadlineStats()`, and `renderMobileHomeDash()` purely for `.length` — but since Phase 26.36 every bot row inside it calls `computeRecommendedStake()`, cascading into `getRiskMetrics()`/`getMetrics()` and ~9 full history/manual-bet rebuilds per pending row. Measured at 14.7–19.8s per call on the real account (271 approved picks). Added a new, minimal `getPendingCount()` helper that mirrors `getPendingRows()`'s two filter predicates but skips the `.map()`/`computeRecommendedStake()` step entirely, and repointed the three count-only call sites to it. `getPendingRows()` itself is byte-for-byte unchanged — the Pending page's behaviour, ordering, filtering, and Stake rec./Stake Real values are identical. Measured result: `rerenderAll()` 87.7s → 28.7s (-67.3%); `renderAlertsCenter()` 23.7s → 1.10s (-95.4%); `renderSummaryHeadlineStats()` 18.9s → 0.28s (-98.5%); `renderTopDecisionBlock()` 17.5s → 1.09s (-93.8%). `renderPendingQueue()`/`rerenderManualOnly()` are unchanged by design (~15–20s) and are now the single largest remaining cost — see "Next Priorities" in `07_Current_Status.md` |
 | 26.37 | 2026-07-15 | Final wording refinement to the Phase 26.36 Pending page fix: reverted the desktop table's shared column header from "Stake rec." back to plain "Stake", since that single header also sits above manual rows, which have no recommendation concept — "Stake rec." was semantically wrong for them. The underlying **value** is unchanged: bot rows still display `computeRecommendedStake()`'s result, manual rows still display their own entered stake. The mobile card (already row-type-aware) is unaffected — bot cards still say "Stake rec.", manual cards still say "Stake". Desktop-header wording only; no value, calculation, exposure, bankroll, or persistence change |
@@ -44,6 +46,172 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.41 — H1/H2/H3 Performance Optimisation Programme Concluded
+
+**Implemented:** 2026-07-15
+
+**Goal.** Close the remaining architecture gaps identified by an independent, read-only audit of the completed H1/H2/H3 programme (prior session). Not a new optimisation — a completion of the H3 dispatcher migration Phase 26.40 started but left incomplete in one functional area.
+
+**Audit findings (verified before any change was made).** The audit traced every render function's callers across the entire file and found:
+
+1. **Manual Bets action surface bypassed the dispatcher entirely.** `addManualBetFromFixture()`, `mbHandleRowAnalyze()`, `mbHandleRowSave()`, `mbHandleRowApprove()`, and `mbHandleRowReject()` each called `markDirty()` immediately followed by the legacy `rerenderManualOnly()` wrapper — which unconditionally renders `renderManualScout()`/`renderManualBets()` (tab-manual), `renderPendingQueue()` (tab-pending), and `renderLiveCenter()` (tab-live), regardless of which tab is actually active. Since `markDirty()` already renders the active tab via `renderActiveTabIfStale()`, this caused a genuine duplicate render whenever `tab-manual` was active, and always rendered two other tabs' DOM the user could not see. Measured cost: **~67ms of confirmed invisible-tab work per action — ≈27% of `mbHandleRowApprove()`'s ~252ms total** on the real production account.
+2. **Two smaller instances of the same pattern in Bankroll movement handlers**, left over from Phase 26.40's own Issue B fix: `addMovement()` and the delete-movement handler both called `markDirty()` (correctly added in Phase 26.40) followed by a direct, now-redundant `renderBankrollPage()` call that predated that fix and was never removed alongside it.
+3. **Three wrapper functions with zero live callers**, confirmed by a full-file caller search: `rerenderSummaryOnly()` (not previously flagged), `rerenderPendingOnly()` and `rerenderLiveOnly()` (both flagged as dead by Phase 26.40's own handover, retained pending confirmation this phase).
+
+**Part 1 — Manual Bets migration.** All 5 mutation handlers now call `markDirty()` alone — identical to the pattern `.js-bot-approve` has used since Phase 26.33, and to `settleManualBet()`/`settleBotBet()`. `markDirty()`'s own `renderActiveTabIfStale(state.activeTab)` correctly re-renders `tab-manual`'s own content when it's active, and does nothing extra when it isn't; `tab-pending`/`tab-live` pick up the change the moment they're actually opened (`setActiveTab()` always forces a fresh render on activation — no staleness). `mbHandleRowEdit()` and `mbHandleRowCancel()` were deliberately **not** changed: neither mutates `state` (both only toggle `window._mbEditState`, a UI-only edit-mode flag) or calls `markDirty()`, so they were never part of the duplicate-render problem — they continue to call `rerenderManualOnly()`, the same category as `rerenderDayOnly()`/`rerenderHistoryOnly()`'s existing filter-only usage.
+
+**Part 2 — Bankroll duplicate renders.** Verified both buttons are only reachable while `tab-bankroll` is already active (their DOM only exists inside that tab's rendered panel), so `markDirty()`'s active-tab dispatch already covers the redundant `renderBankrollPage()` call in both cases. Removed both.
+
+**Part 3 — Legacy wrapper classification.**
+
+| Wrapper | Classification | Disposition |
+|---|---|---|
+| `rerenderManualOnly()` | LEGACY (2 UI-only callers: `mbHandleRowEdit`, `mbHandleRowCancel`) | Retained |
+| `rerenderDayOnly()` | LEGACY (5 UI-only filter/search callers) | Retained, unchanged |
+| `rerenderHistoryOnly()` | LEGACY (9 UI-only filter/sort/view-toggle callers) | Retained, unchanged |
+| `rerenderSummaryOnly()` | DEAD (0 callers) | **Removed** |
+| `rerenderPendingOnly()` | DEAD (0 callers) | **Removed** |
+| `rerenderLiveOnly()` | DEAD (0 callers) | **Removed** |
+
+**Part 4 — Dispatcher re-verification.** Re-swept every direct mutation of the 7 tracked `state` containers across the whole file (unchanged from the original audit's sweep — no new gap found); confirmed every mutation site still correctly calls `markDirty()`/`invalidateDataCache()`. Loaded the modified file in a real browser and confirmed zero page errors and correct removal of the 3 deleted functions (`typeof window.rerenderSummaryOnly === 'undefined'`, etc.).
+
+**Part 5 — Performance validation.** Measured on the real production account (`cloud_state.json`: 93 history rows, 90 manual bets), all actions taken while `tab-day` is active (so Manual Bets/Bankroll/Pending/Live DOM is invisible throughout, matching the audit's worst-case scenario):
+
+| Action | Measured |
+|---|---|
+| Approve bot pick | 263.3ms |
+| Cancel bot pick | 199.0ms |
+| Approve manual bet | 211.9ms |
+| Reject manual bet | 202.0ms |
+| Save manual edit (on tab-manual, its own tab) | 36.0ms |
+| Bankroll movement add | 238.3ms |
+| Bankroll movement delete | 232.1ms |
+| `rerenderAll()` (fresh generation) | 254.5ms |
+
+Manual Bet actions (202–212ms) now fall in the same range as Bot Pick actions (199–263ms) — the explicit goal of this phase, and a ~16% reduction from the audit's ~252ms measurement of `mbHandleRowApprove()` under the same conditions, consistent with removing the confirmed ~67ms/27% invisible-tab overhead.
+
+**Validation.** New 15-check Playwright script (`test_h3_manual_migration.js`): (1) Approve manual bet while `tab-day` active — zero invisible-tab renders; (2) Reject manual bet while `tab-manual` active — `renderManualBets()` runs exactly once, not twice, and `tab-pending`/`tab-live` still don't render; (3) navigating to `tab-pending` afterward shows the fresh, non-stale state; (4) `addManualBetFromFixture()` — zero invisible-tab renders, bet correctly created; (5) `mbHandleRowEdit()`/`mbHandleRowCancel()` — edit mode still works via the intentionally-retained `rerenderManualOnly()`; (6) `addMovement()`/delete-movement — `renderBankrollPage()` runs exactly once, not twice, in both cases. Full existing regression harness (13 files) re-run and passing — 14 files total, zero failures. No user-visible value, calculation, exposure, bankroll, settlement, or persistence behaviour changed.
+
+**ADR-016 note.** Not amended — this phase completes ADR-016's rollout (closing a gap the original migration left in one functional area) rather than changing the architectural decision itself; ADR-016's Consequences section is updated to reflect the completed cleanup (see `09_Architecture_Decisions.md`).
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | 5 Manual Bets handlers migrated to `markDirty()` alone; 2 Bankroll handlers' redundant `renderBankrollPage()` calls removed; 3 dead wrapper functions deleted (`rerenderSummaryOnly()`, `rerenderPendingOnly()`, `rerenderLiveOnly()`) |
+| `docs/09_Architecture_Decisions.md` | ADR-016 Consequences section updated to reflect the completed migration |
+| `docs/03_Dashboard.md` | §5 "Superseded partial renderers" rewritten to reflect the current, accurate wrapper inventory |
+| `docs/08_Change_Log.md` | This Phase 26.41 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase; the H1/H2/H3 programme is now marked complete |
+
+---
+
+## Phase 26.40 — Two Post-Audit Fixes, Then the Rendering Dispatcher (Performance Audit H3)
+
+**Implemented:** 2026-07-15
+
+**Goal.** Two-part task. Part 1: fix two issues surfaced by the Performance Audit's own validation work. Part 2: implement the audit's third and final optimisation (H3), narrowly scoped to the rendering-architecture cost this document's own Phase 26.39 "Next Priorities" note had explicitly flagged as out of that phase's scope.
+
+### Part 1 — Issue A: `pendingCancel()` Left "Aprovar" Unbound for a Same-Session Re-Approval
+
+**Root cause.** `pendingCancel()` re-renders the Daily Picks table (so the cancelled pick reappears there) but never called `bindBotTableControls()` afterward — the freshly-rendered `.js-bot-approve` button had no click handler attached. A user who approved a pick, cancelled it, then tried to re-approve it in the same browser session (without an intervening full `rerenderAll()`, which does call `bindBotTableControls()`) found the button visually present but non-functional.
+
+**Fix.** Added a `bindBotTableControls()` call at the end of `pendingCancel()` — the smallest possible fix, matching the existing pattern every other mutation-then-partial-render path in the file already follows. Also removed `pendingCancel()`'s now-redundant explicit `rerenderPendingOnly()`/`rerenderManualOnly()`/`rerenderDayOnly()` calls, since `markDirty()`'s new active-tab-aware dispatch (Part 2, H3.2) already covers the one tab (`tab-pending`, confirmed the only tab `.js-pending-cancel` ever renders on) those calls existed to refresh.
+
+### Part 1 — Issue B: `addMovement()`/Delete-Movement Never Called `markDirty()`
+
+**Root cause.** Both `addMovement()` and the delete-movement click handler mutated `state.movements` (bankroll deposits/withdrawals) directly, calling only `invalidateDataCache()` and `saveLocalState()`. This was already noted, without being fixed, in Phase 26.39's own Step 3 write-up as "a pre-existing quirk, confirmed harmless here since the new cache invalidation was added independently." It was not actually harmless: without `markDirty()`, `hasPendingCloudChanges` was never set and `_dirtyGeneration` never bumped, so a bankroll movement never scheduled a cloud save and never registered as a real change for anything that depends on `_dirtyGeneration`.
+
+**Fix.** Investigated whether to call `markDirty()` directly or reuse an existing mutation path; reusing `markDirty()` was the safer option — it is already the single, well-tested mutation-notification hub every other state change in the file goes through (invalidates the cache, bumps `_dirtyGeneration`, sets `hasPendingCloudChanges`, updates the cloud status indicator, schedules the debounced cloud save, and — as of this phase's Part 2 — renders the active tab), so reusing it costs nothing and introduces no new code path to maintain. Both `addMovement()` and the delete-movement handler now call `markDirty()` in place of their standalone `invalidateDataCache()` call.
+
+**Validation (both fixes).** New 12-check targeted Playwright script (`test_part1_fixes.js`): Issue A — approve → cancel → re-approve in the same session now works, and the Pending page's Odd Real/Stake Real inputs remain bound after a Cancel/re-render cycle; Issue B — `addMovement()`/delete-movement now correctly set `hasPendingCloudChanges`, bump `_dirtyGeneration`, and are reflected in `getBankrollState()`. All 12 pass.
+
+### Part 2 — H3: The Rendering Dispatcher
+
+**Context.** Phase 26.38 (H1) and Phase 26.39 (H2) fixed the *data*-computation cost of `rerenderAll()` (87.7s → 28.7s → ~1.1–1.2s on the real account). Phase 26.39's own "Next Priorities" note named the remaining cost as purely rendering-architecture: (a) `markDirty()` and the caller's own `rerenderAll()` could both trigger a full render pass for one click, and (b) `rerenderAll()` still rebuilt ~50 render functions' DOM unconditionally regardless of which single tab (of ten) was actually visible.
+
+**H3.1 — Eliminate duplicated render passes.** Investigated every mutation path (`markDirty()`, `rerenderAll()`, `setActiveTab()`, and every direct caller of each). Introduced `renderActiveTabIfStale(tabId)`, a dedup guard built on top of a new `renderActiveTabContent(tabId)`:
+
+```javascript
+let _lastRenderedTab = null;
+let _lastRenderedAtDataGeneration = -1;
+
+function renderActiveTabContent(tabId) {
+  (PAGE_RENDERERS[tabId] || []).forEach(fn => {
+    try { fn(); } catch (e) { console.error(fn.name || tabId, e); }
+  });
+  _lastRenderedTab = tabId;
+  _lastRenderedAtDataGeneration = _dataGeneration;
+}
+
+function renderActiveTabIfStale(tabId) {
+  if (_lastRenderedTab === tabId && _lastRenderedAtDataGeneration === _dataGeneration) return;
+  renderActiveTabContent(tabId);
+}
+```
+
+Deliberately reuses Phase 26.39's `_dataGeneration` counter as the "has anything actually changed" signal rather than a new, fragile standalone boolean — any real mutation bumps it via `invalidateDataCache()`, and any real tab switch changes `tabId`, so the guard can only ever skip a true no-op, never a render that would show stale data. Called consistently from `markDirty()`, `rerenderAll()`, and `setActiveTab()`.
+
+**H3.2 — Render only what is needed.** Step 1: produced a dependency map by tracing every render function's actual DOM target against the static HTML's tab-panel boundaries (not the legacy `rerenderXOnly()` groupings, several of which mixed multiple tabs together — e.g. the old `rerenderSummaryOnly()` also rendered `tab-analytics`/`tab-bankroll`; `rerenderManualOnly()` also rendered `tab-pending`/`tab-live`). Step 2: implemented gating as one coherent dispatcher (`PAGE_RENDERERS`, a `const` tab-id → function-array map) rather than scattering `if (state.activeTab === ...)` checks across ~50 individual render functions:
+
+```javascript
+const PAGE_RENDERERS = {
+  'tab-summary':     [renderTopDecisionBlock, renderSummaryHeadlineStats, renderAlertsCenter, renderOpenBets, renderSummary, renderBankrollChart, renderMobileHomeDash],
+  'tab-day':         [renderFootball, syncQuickMarketButtons, renderPicksKpiRow],
+  'tab-history':     [renderClosedRealTable, renderHistoryKpiRow, renderHistoryIntelligence, renderHistoryTimeline, renderHistoryEquity],
+  'tab-manual':      [renderManualScout, renderManualBets],
+  'tab-pending':     [renderPendingQueue],
+  'tab-live':        [renderLiveCenter],
+  'tab-analytics':   [renderAnalytics, renderAnalyticsPerformers, renderLeagueAnalytics],
+  'tab-versus':      [],   // renderVersus() is GLOBAL — see below
+  'tab-strategylab': [renderStrategyLab],
+  'tab-bankroll':    [renderBankrollPage],
+  'tab-settings':    []
+};
+```
+
+`rerenderAll()` now calls `renderActiveTabIfStale(state.activeTab)` instead of unconditionally calling every `rerenderXOnly()`/KPI/analytics/bankroll renderer in sequence. `setActiveTab()` also calls `renderActiveTabIfStale(tabId)` on every activation — since a switch to a new `tabId` never matches `_lastRenderedTab`, this always renders on switch, guaranteeing every tab is fully current the instant it becomes active regardless of how long it has been since that tab last rendered. **This is explicitly not lazy-loading:** every tab panel remains fully mounted in the DOM at all times (ADR-005 unchanged); the only thing skipped is redundant re-computation of a page the user cannot currently see.
+
+**Cross-tab dependency found and preserved as a deliberate exception.** `renderVersus()` (tab-versus, "Bot vs Manual") populates `window._opnSimCache`, consumed by Strategy Lab, the Recommendation Engine, Opinion Validation, and the Simulator regardless of which tab is active. Initially gated to `PAGE_RENDERERS['tab-versus']` like every other page, this broke all four dependents (caught by `test_strategylab.js`'s "Compare Against Production" check failing with `Cannot read properties of null (reading 'replay')`). Fixed by emptying `PAGE_RENDERERS['tab-versus']` and instead calling `renderVersus()` unconditionally inside `rerenderAll()`, with a comment explaining why. Its own cost is negligible (~0.18–0.22s on the real account) — a full internal refactor to make the cache lazily computed per-consumer was considered and rejected as unnecessary complexity for a negligible-cost function, and out of this phase's scope.
+
+**Live-input regression found and fixed.** `markDirty()`'s new active-tab-aware render dispatch, when the active tab is `tab-pending` (where the Odd Real/Stake Real inputs live), rebuilt that page's DOM on every keystroke — destroying the input being typed into and leaving the fresh replacement unbound (caught by `test_h2_cache_correctness.js`'s "Odd edit" check). Fixed with two new parameters: `markDirty(skipRender = false)` and, inside `bindBotTableControls()`'s shared `update()` closure, a 4th parameter `skipActiveTabRender`. The `.js-odd-real`/`.js-stake-real` `oninput` handlers now call `update(key, changes, false, true)`, passing `true` through to `markDirty(true)` — the edit still invalidates the cache and schedules the cloud save, it simply doesn't force an immediate re-render of the page the user is actively typing in.
+
+**Step 3 — Timings.** Measured with Playwright against the real production account (`cloud_state.json`: 93 history rows, 90 manual bets, 280 localEdits) at each stage:
+
+| Action | Original (audit baseline) | After H1 (26.38) | After H2 (26.39) | After H3 (26.40) |
+|---|---|---|---|---|
+| `rerenderAll()` | 87.7s | 28.7s | ~1.1–1.2s | **~0.18s** |
+| Approve bot pick | *(part of the 87.7s baseline)* | 35.9s | ~2.3–2.7s | **~0.22s** |
+| Cancel bot pick | *(part of the 87.7s baseline)* | 41.9s | ~0.7–0.8s | **~0.20s** |
+| Navigate to another tab | *(cost was effectively 0 pre-H3 — a CSS `display` toggle only; only 4 of 10 tabs had a dedicated fresh-render call on activation at all, so navigating to the other 6 could silently show stale content)* | same as Original | same as Original | **10–350ms**, proportional to the destination page's own weight — see below; now *guaranteed* fresh, closing the pre-H3 staleness gap |
+| Opening Analytics | not separately measured; full `rerenderAll()` cost on any mutation | same | same | **~819ms** (heaviest single page — 3 functions, largest per-league aggregation) |
+| Opening Strategy Lab | not separately measured | same | same | **~10ms** |
+| Opening Pending | not separately measured | same | same | **~14ms** |
+| Opening History (first visit this generation) | not separately measured | same | same | **~343ms** |
+| Re-opening History (no mutation since, dedup path) | not separately measured | same | same | **~2ms** |
+
+**Percentage improvement.** `rerenderAll()`: 87.7s → ~0.18s, a **99.8% reduction** from the original audit baseline (H1: -67.3%; H2: additional -96% off H1; H3: additional ~84% off H2). Approve: 87.7s-class → ~0.22s. Cancel: 87.7s-class → ~0.20s. Combined H1+H2+H3, every one of the 8 named actions now completes in under 1 second on the real, full-scale production account; seven of the eight complete in under 350ms.
+
+**Remaining measurable bottleneck.** Opening Analytics (~819ms) is now the single heaviest action measured — proportional to that page's own three render functions (`renderAnalytics`, `renderAnalyticsPerformers`, `renderLeagueAnalytics`) running their own per-league/per-market aggregations over the full history, not to any cross-tab or duplicate-render cost. This is expected, page-proportional cost, not a regression or an oversight — no further action taken, per this task's explicit scope ("Recommendation for any future optimisation — do not implement it," see below).
+
+**Validation.** New 20-check targeted Playwright script (`test_h3_dispatcher.js`): (1) `renderActiveTabContent()` runs only the active tab's own group plus the deliberately-global `renderVersus()`; (2)–(3) navigating to `tab-manual`/`tab-history` after an external state mutation (no explicit render in between) shows fresh, not stale, content; (4) opening every other tab throws no error; (5) a single Approve click renders `tab-day`'s own content exactly once, not twice. Full existing regression harness re-run and green: 13 Playwright suites (`test_approve_stake_default.js`, `test_calibration_v2.js`, `test_csv_wins_precedence.js`, `test_h2_cache_correctness.js`, `test_h3_dispatcher.js`, `test_opinion_validation.js`, `test_part1_fixes.js`, `test_pending_stake_rec.js`, `test_recommendations.js`, `test_sim_perf.js`, `test_simulator.js`, `test_stakereal_zero_guard.js`, `test_strategylab.js`), all fully passing — covering the Manual Bet lifecycle, bot pick approval/cancel, bankroll, exposure, mobile card rendering, cloud load/save simulation, and every analytics module (Strategy Lab, Recommendation Engine, Opinion Validation, Simulator). No user-visible value, calculation, exposure, bankroll, settlement, or persistence behaviour changed anywhere in this phase — confirmed both by the regression suite and by direct comparison of every KPI/exposure/bankroll figure before and after.
+
+**Recommendation for future optimisation (not implemented, out of this phase's scope).** If Analytics' ~819ms ever becomes a user-facing concern (it did not meet this audit's threshold for action), the next investigation would be a data-layer profile specifically of `renderAnalyticsPerformers()`/`renderLeagueAnalytics()`'s per-league grouping — likely a candidate for the same memoization pattern Phase 26.39 already applied elsewhere, since a per-league breakdown is itself a pure function of already-cached `state` for one generation. No other rendering-architecture gap was found during this phase's dependency audit.
+
+**Observation (not a defect, not fixed — outside this phase's scope).** `rerenderPendingOnly()` and `rerenderLiveOnly()` (in `index.html`) lost their only caller when `pendingCancel()`'s redundant explicit render calls were removed in Part 1 (Issue A); both remain defined but are now unused dead code. Left in place rather than deleted, to keep this phase's change minimal — see `03_Dashboard.md` §5 "Superseded partial renderers" and `07_Current_Status.md` Next Priorities.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | `pendingCancel()`: added `bindBotTableControls()`, removed 3 redundant explicit render calls (Issue A). `addMovement()` and the delete-movement handler: `invalidateDataCache()` replaced with `markDirty()` (Issue B). New `PAGE_RENDERERS` map, `renderActiveTabContent()`, `renderActiveTabIfStale()`, `_lastRenderedTab`/`_lastRenderedAtDataGeneration`. `rerenderAll()` rewritten to dispatch via the active-tab guard plus the `renderVersus()` GLOBAL exception. `markDirty()` gained a `skipRender` parameter. `bindBotTableControls()`'s inner `update()` closure gained a `skipActiveTabRender` parameter, used by the `.js-odd-real`/`.js-stake-real` handlers. `setActiveTab()`'s old 5-tab if/else chain replaced with a single `renderActiveTabIfStale(tabId)` call plus `bindBotTableControls()`/`bindManualControls()` |
+| `docs/09_Architecture_Decisions.md` | New ADR-016 — the active-tab-gated rendering decision |
+| `docs/03_Dashboard.md` | §2 rendering pipeline diagram and §5 "Rendering Architecture" rewritten to describe the dispatcher, `PAGE_RENDERERS`, the `renderVersus()` exception, and the now-superseded partial renderers |
+| `docs/08_Change_Log.md` | This Phase 26.40 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase; "Next Priorities" performance item resolved and replaced with a dead-code cleanup note |
 
 ---
 
