@@ -5086,7 +5086,7 @@ button:disabled {
         const alerts = [];
 
         if (m.exposurePct > 20) alerts.push({ type: 'risk', text: `Exposição alta (${fmt(m.exposurePct)}%)`, cls: 'bad' });
-        const pendingCount = getPendingRows().length;
+        const pendingCount = getPendingCount();
         if (pendingCount >= 6) alerts.push({ type: 'volume', text: `Muitas apostas abertas (${pendingCount})`, cls: 'warn' });
         if (m.roi < -10) alerts.push({ type: 'performance', text: 'ROI muito negativo', cls: 'bad' });
         if (m.picksHoje === 0) alerts.push({ type: 'empty', text: 'Sem picks hoje', cls: 'info' });
@@ -5539,7 +5539,7 @@ button:disabled {
         safeSetText('summaryWinsStat', String(wins));
         safeSetText('summaryLossesStat', String(losses));
         safeSetText('summaryPushesStat', String(pushes));
-        safeSetText('summaryPendingOpenStat', String(getPendingRows().length));
+        safeSetText('summaryPendingOpenStat', String(getPendingCount()));
 
         // Dynamic KPI hero coloring
         const roiEl = document.getElementById('summaryRoiStat')?.closest?.('.kpi-hero');
@@ -14105,7 +14105,7 @@ button:disabled {
         const currentBankroll = bk.configured ? bk.totalAccountValue : null;
         const openExposure    = risk.stakeOpen;
         const picksToday      = getTodaysDailyRows().length;
-        const pendingCount    = getPendingRows().length;
+        const pendingCount    = getPendingCount();
         const liveCount       = getLiveRows().length;
 
         // Today's P/L: filter closed rows for today's date, sum lucro
@@ -14234,6 +14234,38 @@ button:disabled {
       }
 
       // ── PHASE 19: PENDING QUEUE ──────────────────────────────────────
+
+      // Lightweight pending-bet count for callers that only need the number, not
+      // the full row objects — e.g. an alert threshold or a KPI figure. Mirrors
+      // getPendingRows()'s two filter predicates exactly (manual: isLocal+approved
+      // +future kickoff/date; bot: apostada+unsettled+future kickoff/date) so the
+      // count is always identical to getPendingRows().length, but skips its .map()
+      // step entirely — in particular, it never calls computeRecommendedStake()
+      // (Phase 26.36), which is what made getPendingRows() expensive per bot row.
+      // If the eligibility rules below ever change, the same change must be made
+      // in getPendingRows() (kept as two small predicates rather than a shared
+      // helper, so this stays a minimal, isolated addition — see Phase 26.38 in
+      // 08_Change_Log.md).
+      function getPendingCount() {
+        const today = todayIso();
+
+        const manualCount = getManualRowsMerged().filter(b => {
+          if (!b.isLocal || b.status !== 'approved') return false;
+          const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+          if (kickoffMs !== null) return kickoffMs > Date.now();
+          return b.data > today;
+        }).length;
+
+        const botCount = getAllBotRowsMergedUnique().filter(r => {
+          if (!r._apostadaBool || ['W', 'L', 'P'].includes(r._resultKey)) return false;
+          const kickoffMs = parseKickoffUTC(r['KickoffUTC'] || '');
+          if (kickoffMs !== null) return kickoffMs > Date.now();
+          const d = normalizeDateString(r['Data'] || '');
+          return d > today;
+        }).length;
+
+        return manualCount + botCount;
+      }
 
       function getPendingRows() {
         const today = todayIso();

@@ -8,6 +8,7 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 
 | Phase | Date | Summary |
 |---|---|---|
+| 26.38 | 2026-07-15 | Performance fix from the completed Performance Audit: `getPendingRows()` was being called from `computeAlerts()`, `renderSummaryHeadlineStats()`, and `renderMobileHomeDash()` purely for `.length` — but since Phase 26.36 every bot row inside it calls `computeRecommendedStake()`, cascading into `getRiskMetrics()`/`getMetrics()` and ~9 full history/manual-bet rebuilds per pending row. Measured at 14.7–19.8s per call on the real account (271 approved picks). Added a new, minimal `getPendingCount()` helper that mirrors `getPendingRows()`'s two filter predicates but skips the `.map()`/`computeRecommendedStake()` step entirely, and repointed the three count-only call sites to it. `getPendingRows()` itself is byte-for-byte unchanged — the Pending page's behaviour, ordering, filtering, and Stake rec./Stake Real values are identical. Measured result: `rerenderAll()` 87.7s → 28.7s (-67.3%); `renderAlertsCenter()` 23.7s → 1.10s (-95.4%); `renderSummaryHeadlineStats()` 18.9s → 0.28s (-98.5%); `renderTopDecisionBlock()` 17.5s → 1.09s (-93.8%). `renderPendingQueue()`/`rerenderManualOnly()` are unchanged by design (~15–20s) and are now the single largest remaining cost — see "Next Priorities" in `07_Current_Status.md` |
 | 26.37 | 2026-07-15 | Final wording refinement to the Phase 26.36 Pending page fix: reverted the desktop table's shared column header from "Stake rec." back to plain "Stake", since that single header also sits above manual rows, which have no recommendation concept — "Stake rec." was semantically wrong for them. The underlying **value** is unchanged: bot rows still display `computeRecommendedStake()`'s result, manual rows still display their own entered stake. The mobile card (already row-type-aware) is unaffected — bot cards still say "Stake rec.", manual cards still say "Stake". Desktop-header wording only; no value, calculation, exposure, bankroll, or persistence change |
 | 26.36 | 2026-07-15 | Pending page UX fix: bot rows' "Stake" column now shows `computeRecommendedStake()`'s value ("Stake rec.") instead of the raw model stake (`_stakeModeloNum`, "Stake mod."), and the column header/mobile-card label renamed to "Stake rec." — making it directly comparable to the adjacent "Stake Real" column. Reuses the existing recommendation function (no duplicated logic); manual bet rows are completely unchanged (still their own entered `stake`, no rec/real distinction to display). No change to `computeRecommendedStake()`, exposure, bankroll, settlement, persistence, or StakeReal behaviour — display-only |
 | 26.35 | 2026-07-15 | Fixed the Phase 26.33 StakeReal auto-fill guard: it used string truthiness (`!existingStakeReal`) to decide whether a pick "already had" a real stake, so a stored `"0"` (a non-empty string) was wrongly treated as a deliberate user value and permanently blocked the default — understating that pick's `StakeReal` and Open Exposure, and surviving indefinitely across Cancel→re-approve cycles since `pendingCancel()` never clears `stakeReal`. Guard now parses the value with the existing `num()` helper and auto-fills whenever it is `null` or `<= 0` (empty, undefined, NaN, invalid string, zero, or negative) — `computeRecommendedStake()` itself is unchanged and, by its own hard floor (`clamp(x, 1, maxCap)`), can never legitimately produce zero, so treating a stored zero as "not set" cannot ever suppress a real recommendation. No change to `computeRecommendedStake()`, exposure calculation, or bankroll calculation. See `05_Known_Issues.md` DASHBOARD-5 |
@@ -42,6 +43,63 @@ Major architectural phases in reverse chronological order. Minor commits, CSV up
 | 17 | 2026-03 | Scout workspace with real-time Poisson analysis; manual bets in financials |
 | 14–16 | 2026-02 | History redesigned as an investigation tool; equity curve and drawdown added |
 | 8–13 | 2026-01 | Analytics intelligence engine built incrementally |
+
+---
+
+## Phase 26.38 — Removed Unnecessary `getPendingRows()` Calls From Count-Only Callers
+
+**Implemented:** 2026-07-15
+
+**Goal.** Implement only the first, highest-impact optimisation identified by the completed Performance Audit (prior session), narrowly scoped: remove every call to `getPendingRows()` where the caller only needs a count, without touching `getPendingRows()` itself, without introducing caching, without changing rendering architecture, and without any unrelated cleanup.
+
+**Root cause (confirmed).** The audit measured `rerenderAll()` at **87.7 seconds** on the real production account and traced 97% of that cost to four functions: `renderAlertsCenter()` (23.7s), `renderSummaryHeadlineStats()` (18.9s), `renderTopDecisionBlock()` (17.5s), and `renderPendingQueue()` (15.2s). The first three do not render the Pending page at all — they call `getPendingRows()` (via `computeAlerts()`, or directly) purely to read `.length`. Since Phase 26.36, `getPendingRows()`'s bot-row mapping calls `computeRecommendedStake()` for every pending bot pick, which cascades through `getStakeContext() → getRiskMetrics() → getMetrics()` — roughly **9 independent full rebuilds of the entire history and manual-bet arrays per pending row**. With 271 approved bot picks in the real account's `localEdits`, this made every count-only call as expensive as the legitimate, data-needing call in `renderPendingQueue()`.
+
+**Fix.** Added `getPendingCount()` (`index.html`, immediately before `getPendingRows()`): it mirrors `getPendingRows()`'s two filter predicates (manual: `isLocal && status==='approved'` + future kickoff/date; bot: `apostada && unsettled` + future kickoff/date) but stops at `.length` — it never calls `.map()`, never calls `computeRecommendedStake()`, and never builds a row object. `computeAlerts()`, `renderSummaryHeadlineStats()`, and `renderMobileHomeDash()` now call `getPendingCount()` instead of `getPendingRows().length`. **`getPendingRows()` itself was not modified in any way** (confirmed via `git diff` — the only changes are the three one-line call-site swaps and the new, self-contained function). `renderPendingQueue()` — the Pending page's own renderer — still calls `getPendingRows()` exactly as before.
+
+**Correctness verification (before measuring performance).** Confirmed `getPendingCount() === getPendingRows().length` on the real dataset (27 === 27), and re-confirmed after both an Approve and a Cancel mutation (both counts moved together, staying equal). Since the filter predicates are identical and the `.map()` step never changes which rows pass the filter, the two are mathematically guaranteed to agree for any state, not just the one tested.
+
+### Files Modified
+
+| File | Change |
+|---|---|
+| `index.html` | New `getPendingCount()` helper (~30 lines) added before `getPendingRows()`; `computeAlerts()`, `renderSummaryHeadlineStats()`, `renderMobileHomeDash()` — one-line call-site swap each. `getPendingRows()` and `renderPendingQueue()` unmodified |
+| `docs/08_Change_Log.md` | This Phase 26.38 entry added |
+| `docs/07_Current_Status.md` | Updated for this phase; "Next Priorities" gained an entry for the remaining `renderPendingQueue()` cost |
+| `docs/handovers/handover-2026-07-15-pending-count-perf.md` | New handover |
+
+`docs/03_Dashboard.md` — **no change required.** Grepped for `getPendingRows`/`getPendingCount`/`computeAlerts`/`renderSummaryHeadlineStats` — none of these internals are described in that document (it documents the Pending page's *behaviour*, which is unchanged). `05_Known_Issues.md`, `09_Architecture_Decisions.md`, `06_Roadmap.md`, `01_Architecture.md`, `04_Backend.md`, `PROJECT_MAP.md` — no change required (out of this task's explicit documentation scope; no architectural decision, no roadmap priority shift, no backend/repository-structure change).
+
+### Architectural Decisions
+
+None. A new, minimal, single-purpose counting function alongside an existing one; no new persistence path, no caching layer, no change to any render's data source for actual display.
+
+### Measurements — Before vs After (real production dataset: 93 history rows, 90 manual bets, 271 approved picks)
+
+| Operation | Before (audit) | After (this phase) | Δ | % |
+|---|---|---|---|---|
+| `rerenderAll()` | 87.7s | 28.7s | -59.0s | **-67.3%** |
+| `renderAlertsCenter()` | 23.7s | 1.10s | -22.6s | **-95.4%** |
+| `renderSummaryHeadlineStats()` | 18.9s | 0.28s | -18.6s | **-98.5%** |
+| `renderTopDecisionBlock()` | 17.5s | 1.09s | -16.4s | **-93.8%** |
+| `rerenderSummaryOnly()` (fans out to the three above + `renderAnalytics()`'s 8 sub-panels) | 55.8s | 6.10s | -49.7s | **-89.1%** |
+| `renderPendingQueue()` | 15.2s | 18.8s | ~unchanged (run-to-run noise) | *by design — out of scope* |
+| `rerenderManualOnly()` (dominated by `renderPendingQueue()`) | 19.8s | 19.7s | ~unchanged | *by design — out of scope* |
+| Approve bot pick (click, full pipeline) | *(not isolated in the audit; inferred from `rerenderAll()`)* | 35.9s | — | *see Notes* |
+| Cancel bot pick (`pendingCancel()`) | *(not isolated in the audit)* | 41.9s | — | *see Notes* |
+
+**Notes on the Approve/Cancel numbers:** these two actions still route through `renderPendingQueue()` (Cancel calls it twice — once via `rerenderPendingOnly()`, once via `rerenderManualOnly()`'s own call to it), so they remain dominated by the same, deliberately-untouched cost this task was scoped to leave alone. This is expected and consistent with `renderPendingQueue()` now being the largest remaining single cost — see "Next Priorities."
+
+### Validation
+
+- **Syntax:** `node --check` on both extracted `<script>` blocks — clean.
+- **Correctness (Playwright, ad hoc script, not committed):** `getPendingCount() === getPendingRows().length` on real data, and after an Approve and a Cancel mutation.
+- **Full existing 10-suite Playwright regression harness** (the 9 standing suites plus Phase 26.36/26.37's `test_pending_stake_rec.js`, which exercises Pending sorting/filtering/mobile/desktop/Stake rec./Stake Real extensively): all 10 pass completely, zero console/page errors — confirming Pending page behaviour, ordering, filtering, Stake recommendation, StakeReal, manual bets, Alerts, Decision block, Summary KPIs, Open Exposure, Bankroll, History, Strategy Lab, Recommendation Engine, Opinion Validation, and Simulator are all unaffected.
+- **`python -m pytest tests/`:** 186/186 passed, unchanged — no Python file touched.
+- **`git diff --stat`:** confirms only `index.html` changed for the code portion of this phase.
+
+### Impact
+
+Approving, cancelling, or editing a bot pick — the most common interactions — no longer pays for a hidden, redundant ~9x full-dataset rebuild inside three functions that never needed more than a number. The measured, real-account improvement (87.7s → 28.7s per `rerenderAll()`) is large but **smaller than the audit's own rough estimate** ("~10–15s" after this fix alone) — see the Comparison Against Audit Findings section returned in this session's report for why, and "Next Priorities" for the recommended next step.
 
 ---
 

@@ -343,7 +343,7 @@ b.isLocal === true
 //   && (kickoffMs !== null ? kickoffMs > Date.now() : normalizeDateString(r['Data']) > today)
 ```
 
-Both branches sort together by date ascending. Only consumer of the full row list besides these two render functions is `.length`, used by KPI/alert counts (`getRiskMetrics()`-adjacent code, `checkPendingAlerts()`) — no calculation reads `.stake` from this function.
+Both branches sort together by date ascending. `renderPendingQueue()` and `buildPendingCardHtml()` are the only consumers of the full row list. Callers that only need the count — `computeAlerts()`'s "Muitas apostas abertas" threshold and the Home/Summary KPI (`renderSummaryHeadlineStats()`, `renderMobileHomeDash()`) — use `getPendingCount()` instead (Phase 26.38): a lightweight helper mirroring the same two filter predicates without the `.map()` step, so it never triggers `computeRecommendedStake()`'s per-row cost. The two are mathematically guaranteed to agree (`getPendingCount() === getPendingRows().length`) since the filters are identical; see `08_Change_Log.md` Phase 26.38.
 
 **Displayed "Stake" column (`Phase 26.36`, header wording corrected `Phase 26.37`):** the two row types show different concepts under one shared desktop column, since manual bets have no model/recommended/real split:
 - **Manual rows** — `.stake = b.stake`, the bet's own single entered stake. Unchanged since this page's inception.
