@@ -6880,7 +6880,7 @@
       "resultado": "",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": null,
@@ -7208,7 +7208,7 @@
   "lastUpdated": "2026-07-15T09:21:21.888Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-16",
