@@ -7049,7 +7049,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -7139,7 +7139,7 @@
       "resultado": "",
       "scoreAtAnalysis": 83,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -7319,7 +7319,7 @@
       "resultado": "",
       "scoreAtAnalysis": 52,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -7393,7 +7393,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-15T09:30:37.115Z",
+  "lastUpdated": "2026-07-15T09:31:38.388Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
