@@ -3853,6 +3853,18 @@
     "2026-07-17|mls|Chicago Fire vs Vancouver Whitecaps|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-07-20|suecia|Kalmar FF vs Malmo FF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-20|finlandia|Mariehamn vs Lahti|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-20|finlandia|Turku PS vs Ilves|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -7779,8 +7791,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-16T18:15:50.339Z",
-  "activeTab": "tab-pending",
+  "lastUpdated": "2026-07-16T18:16:51.790Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
