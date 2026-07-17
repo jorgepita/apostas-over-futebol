@@ -1,37 +1,31 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-07-17;brasil;Bahia;Chapecoense-sc;1.61;1.80;2026-07-17T23:30:00+01:00
-2026-07-17;mls;Chicago Fire;Vancouver Whitecaps;1.50;1.44;2026-07-17T01:30:00+01:00
-2026-07-17;mls;Seattle Sounders;Portland Timbers;1.41;1.53;2026-07-17T03:30:00+01:00
-2026-07-17;mls;St. Louis City;Sporting Kansas City;1.42;1.57;2026-07-17T01:30:00+01:00
-2026-07-17;noruega;Bodo/Glimt;Fredrikstad;1.30;1.85;2026-07-17T18:15:00+01:00
-2026-07-17;suecia;IFK Goteborg;IF Brommapojkarna;1.68;1.62;2026-07-17T18:00:00+01:00
-2026-07-17;suecia;Mjallby AIF;Vasteras SK FK;1.68;1.65;2026-07-17T18:00:00+01:00
+2026-07-17;brasil;Bahia;Chapecoense-sc;1.65;1.82;2026-07-17T23:30:00+01:00
 2026-07-18;brasil;Fluminense;RB Bragantino;2.12;1.95;2026-07-18T00:00:00+01:00
-2026-07-18;brasil;Mirassol;Gremio;2.20;1.95;2026-07-18T00:00:00+01:00
-2026-07-18;coreia;Daejeon Citizen;Ulsan Hyundai FC;1.99;1.70;2026-07-18T11:30:00+01:00
+2026-07-18;brasil;Mirassol;Gremio;2.19;1.95;2026-07-18T00:00:00+01:00
+2026-07-18;coreia;Daejeon Citizen;Ulsan Hyundai FC;1.93;1.68;2026-07-18T11:30:00+01:00
 2026-07-18;coreia;Gangwon FC;Gimcheon Sangmu FC;2.01;1.90;2026-07-18T11:30:00+01:00
-2026-07-18;coreia;Incheon United;Jeonbuk Motors;2.28;1.91;2026-07-18T11:30:00+01:00
-2026-07-18;coreia;Jeju United FC;Pohang Steelers;2.52;2.05;2026-07-18T11:30:00+01:00
-2026-07-18;finlandia;AC Oulu;Gnistan;1.91;1.67;2026-07-18T15:00:00+01:00
+2026-07-18;coreia;Incheon United;Jeonbuk Motors;2.34;1.91;2026-07-18T11:30:00+01:00
+2026-07-18;coreia;Jeju United FC;Pohang Steelers;2.62;2.05;2026-07-18T11:30:00+01:00
+2026-07-18;finlandia;AC Oulu;Gnistan;1.87;1.67;2026-07-18T15:00:00+01:00
 2026-07-18;finlandia;HJK Helsinki;VPS;1.63;1.57;2026-07-18T13:00:00+01:00
 2026-07-18;finlandia;SJK;KuPS;1.63;1.54;2026-07-18T15:00:00+01:00
-2026-07-18;mls;Los Angeles Galaxy;Los Angeles FC;1.60;1.50;2026-07-18T03:25:00+01:00
-2026-07-18;mls;Nashville SC;Atlanta United FC;1.73;1.91;2026-07-18T01:10:00+01:00
-2026-07-18;noruega;Kristiansund BK;Sarpsborg 08 FF;1.63;1.53;2026-07-18T15:00:00+01:00
+2026-07-18;mls;Los Angeles Galaxy;Los Angeles FC;1.58;1.50;2026-07-18T03:25:00+01:00
+2026-07-18;mls;Nashville SC;Atlanta United FC;1.72;1.85;2026-07-18T01:10:00+01:00
+2026-07-18;noruega;Kristiansund BK;Sarpsborg 08 FF;1.65;1.53;2026-07-18T15:00:00+01:00
 2026-07-18;noruega;Lillestrom;KFUM Oslo;1.73;1.70;2026-07-18T15:00:00+01:00
 2026-07-18;noruega;Molde;Brann;1.57;1.50;2026-07-18T17:00:00+01:00
-2026-07-18;noruega;Viking;Sandefjord;1.38;1.70;2026-07-18T17:00:00+01:00
+2026-07-18;noruega;Viking;Sandefjord;1.40;1.70;2026-07-18T17:00:00+01:00
 2026-07-18;suecia;AIK Stockholm;Gais;1.91;1.70;2026-07-18T14:00:00+01:00
 2026-07-19;coreia;Bucheon FC 1995;FC Seoul;2.19;2.00;2026-07-19T11:30:00+01:00
-2026-07-19;coreia;FC Anyang;Gwangju FC;2.19;2.12;2026-07-19T11:30:00+01:00
-2026-07-19;finlandia;FF Jaro;Inter Turku;1.72;1.80;2026-07-19T16:30:00+01:00
-2026-07-19;suecia;Halmstad;BK Hacken;1.53;1.57;2026-07-19T15:30:00+01:00
+2026-07-19;coreia;FC Anyang;Gwangju FC;2.18;2.12;2026-07-19T11:30:00+01:00
+2026-07-19;finlandia;FF Jaro;Inter Turku;1.73;1.80;2026-07-19T16:30:00+01:00
+2026-07-19;suecia;Halmstad;BK Hacken;1.52;1.57;2026-07-19T15:30:00+01:00
 2026-07-19;suecia;Hammarby FF;Degerfors IF;1.53;1.95;2026-07-19T15:30:00+01:00
-2026-07-19;suecia;IF Elfsborg;Sirius;1.68;1.57;2026-07-19T15:30:00+01:00
+2026-07-19;suecia;IF Elfsborg;Sirius;1.67;1.57;2026-07-19T15:30:00+01:00
 2026-07-20;finlandia;Mariehamn;Lahti;1.72;1.75;2026-07-20T17:00:00+01:00
-2026-07-20;finlandia;Turku PS;Ilves;1.70;1.57;2026-07-20T16:00:00+01:00
+2026-07-20;finlandia;Turku PS;Ilves;1.69;1.57;2026-07-20T16:00:00+01:00
 2026-07-20;suecia;Kalmar FF;Malmo FF;1.68;1.57;2026-07-20T18:00:00+01:00
-2026-07-20;suecia;Orgryte IS;Djurgardens IF;1.53;1.70;2026-07-20T18:00:00+01:00
+2026-07-20;suecia;Orgryte IS;Djurgardens IF;1.48;1.67;2026-07-20T18:00:00+01:00
 2026-07-21;brasil;Atletico-MG;Bahia;2.02;1.78;2026-07-21T23:30:00+01:00
 2026-07-22;brasil;Coritiba;Palmeiras;2.29;1.95;2026-07-22T23:30:00+01:00
-2026-07-22;noruega;Bodo/Glimt;Ham-Kam;1.28;1.73;2026-07-22T18:00:00+01:00
+2026-07-22;noruega;Bodo/Glimt;Ham-Kam;1.28;1.74;2026-07-22T18:00:00+01:00
