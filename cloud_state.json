@@ -8340,8 +8340,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-18T23:15:15.318806+00:00",
-      "lastSuccessAt": "2026-07-18T23:15:15.318806+00:00",
+      "lastCheckedAt": "2026-07-19T09:06:47.068348+00:00",
+      "lastSuccessAt": "2026-07-19T09:06:47.068348+00:00",
       "status": "ok"
     }
   },
