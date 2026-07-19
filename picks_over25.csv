@@ -1,6 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-07-19;suecia;Allsvenskan;IF Elfsborg;Sirius;2.2;1.872;4.072;2026-07-19T15:30:00+01:00;O2.5;0.72;1.7;0.588;0.1318;0.32;True;;0.0075;0.0075;0.132;0.0576;0.04;2.0;1.0;50.0
+2026-07-20;finlandia;Veikkausliiga;Mariehamn;Lahti;1.604;1.505;3.108;2026-07-20T17:00:00+01:00;O2.5;0.601;1.75;0.571;0.0292;0.068;True;;0.0175;0.0175;0.029;0.0036;0.0036;0.18;1.0;50.0
 2026-07-20;suecia;Allsvenskan;Kalmar FF;Malmo FF;1.702;1.508;3.211;2026-07-20T18:00:00+01:00;O2.5;0.622;1.68;0.595;0.0271;0.0669;True;;0.0075;0.0075;0.027;0.0033;0.0033;0.16;1.0;50.0
-2026-07-20;finlandia;Veikkausliiga;Mariehamn;Lahti;1.604;1.505;3.108;2026-07-20T17:00:00+01:00;O2.5;0.601;1.72;0.581;0.0192;0.0459;True;;0.0075;0.0075;0.019;0.0016;0.0016;0.08;1.0;50.0
-2026-07-21;brasil;Campeonato Brasileiro Serie A;Atletico-MG;Bahia;2.2;0.899;3.099;2026-07-21T23:30:00+01:00;O2.5;0.599;2.02;0.495;0.1036;0.2051;True;;0.0225;0.0225;0.104;0.0369;0.0369;1.85;1.0;50.0
-2026-07-23;brasil;Campeonato Brasileiro Serie A;Botafogo;Vitoria;2.2;1.243;3.443;2026-07-23T23:30:00+01:00;O2.5;0.668;1.76;0.568;0.1002;0.2321;True;;0.0175;0.0175;0.10000000000000009;0.0418;0.0392;1.96;0.9807287155675942;50.0
+2026-07-21;brasil;Campeonato Brasileiro Serie A;Atletico-MG;Bahia;2.2;0.899;3.099;2026-07-21T23:30:00+01:00;O2.5;0.599;1.98;0.505;0.0936;0.1891;True;;0.0225;0.0225;0.094;0.0319;0.0319;1.59;1.0;50.0
+2026-07-23;brasil;Campeonato Brasileiro Serie A;Botafogo;Vitoria;2.2;1.243;3.443;2026-07-23T23:30:00+01:00;O2.5;0.668;1.76;0.568;0.1002;0.2321;True;;0.0175;0.0175;0.1;0.0418;0.04;2.0;1.0;50.0
