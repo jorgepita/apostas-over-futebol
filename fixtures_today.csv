@@ -1,31 +1,28 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-07-20;finlandia;Mariehamn;Lahti;1.73;1.80;2026-07-20T17:00:00+01:00
-2026-07-20;finlandia;Turku PS;Ilves;1.68;1.57;2026-07-20T16:00:00+01:00
-2026-07-20;suecia;Kalmar FF;Malmo FF;1.68;1.57;2026-07-20T18:00:00+01:00
-2026-07-20;suecia;Orgryte IS;Djurgardens IF;1.45;1.67;2026-07-20T18:00:00+01:00
-2026-07-21;brasil;Atletico-MG;Bahia;1.98;1.77;2026-07-21T23:30:00+01:00
-2026-07-21;coreia;Jeju United FC;Gangwon FC;2.48;2.10;2026-07-21T11:30:00+01:00
-2026-07-21;coreia;Jeonbuk Motors;Daejeon Citizen;2.01;1.82;2026-07-21T11:30:00+01:00
-2026-07-21;coreia;Ulsan Hyundai FC;Incheon United;2.19;1.87;2026-07-21T11:30:00+01:00
-2026-07-22;brasil;Coritiba;Palmeiras;2.29;1.95;2026-07-22T23:30:00+01:00
-2026-07-22;coreia;Bucheon FC 1995;FC Anyang;2.46;2.00;2026-07-22T11:30:00+01:00
-2026-07-22;coreia;FC Seoul;Pohang Steelers;2.27;2.02;2026-07-22T11:30:00+01:00
-2026-07-22;coreia;Gwangju FC;Gimcheon Sangmu FC;2.08;1.93;2026-07-22T11:30:00+01:00
+2026-07-21;brasil;Atletico-MG;Bahia;1.95;1.75;2026-07-21T23:30:00+01:00
+2026-07-21;coreia;Jeju United FC;Gangwon FC;2.49;2.10;2026-07-21T11:30:00+01:00
+2026-07-21;coreia;Jeonbuk Motors;Daejeon Citizen;2.01;1.80;2026-07-21T11:30:00+01:00
+2026-07-21;coreia;Ulsan Hyundai FC;Incheon United;2.12;1.87;2026-07-21T11:30:00+01:00
+2026-07-22;brasil;Coritiba;Palmeiras;2.28;1.95;2026-07-22T23:30:00+01:00
+2026-07-22;coreia;Bucheon FC 1995;FC Anyang;2.42;2.00;2026-07-22T11:30:00+01:00
+2026-07-22;coreia;FC Seoul;Pohang Steelers;2.27;2.10;2026-07-22T11:30:00+01:00
+2026-07-22;coreia;Gwangju FC;Gimcheon Sangmu FC;2.12;1.93;2026-07-22T11:30:00+01:00
 2026-07-22;noruega;Bodo/Glimt;Ham-Kam;1.28;1.95;2026-07-22T18:00:00+01:00
-2026-07-23;brasil;Botafogo;Vitoria;1.76;1.67;2026-07-23T23:30:00+01:00
-2026-07-23;brasil;Chapecoense-sc;Flamengo;1.88;2.00;2026-07-23T01:30:00+01:00
+2026-07-22;noruega;Lillestrom;Viking;1.57;1.50;2026-07-22T18:00:00+01:00
+2026-07-23;brasil;Botafogo;Vitoria;1.82;1.75;2026-07-23T23:30:00+01:00
+2026-07-23;brasil;Chapecoense-sc;Flamengo;1.88;2.02;2026-07-23T01:30:00+01:00
 2026-07-23;brasil;Corinthians;Remo;2.02;2.07;2026-07-23T23:30:00+01:00
-2026-07-23;brasil;Internacional;Cruzeiro;2.10;1.80;2026-07-23T01:30:00+01:00
+2026-07-23;brasil;Internacional;Cruzeiro;2.10;1.82;2026-07-23T01:30:00+01:00
 2026-07-23;mls;Colorado Rapids;San Diego;1.47;1.44;2026-07-23T02:30:00+01:00
-2026-07-23;mls;FC Cincinnati;Vancouver Whitecaps;1.43;1.44;2026-07-23T00:30:00+01:00
-2026-07-23;mls;Portland Timbers;FC Dallas;1.50;1.42;2026-07-23T03:30:00+01:00
+2026-07-23;mls;FC Cincinnati;Vancouver Whitecaps;1.42;1.43;2026-07-23T00:30:00+01:00
+2026-07-23;mls;Portland Timbers;FC Dallas;1.52;1.44;2026-07-23T03:30:00+01:00
 2026-07-24;finlandia;FF Jaro;SJK;1.65;1.55;2026-07-24T17:00:00+01:00
-2026-07-24;suecia;Vasteras SK FK;Orgryte IS;1.58;1.72;2026-07-24T18:00:00+01:00
+2026-07-24;suecia;Vasteras SK FK;Orgryte IS;1.57;1.72;2026-07-24T18:00:00+01:00
 2026-07-25;brasil;Atletico Paranaense;Internacional;2.40;2.05;2026-07-25T22:30:00+01:00
 2026-07-25;brasil;Santos;Chapecoense-sc;1.78;1.91;2026-07-25T22:30:00+01:00
 2026-07-25;finlandia;KuPS;VPS;1.80;1.75;2026-07-25T15:00:00+01:00
 2026-07-25;finlandia;Mariehamn;AC Oulu;1.72;1.70;2026-07-25T14:30:00+01:00
 2026-07-25;mls;New York Red Bulls;Charlotte;1.55;1.50;2026-07-25T23:30:00+01:00
-2026-07-25;noruega;Kristiansund BK;Start;1.70;1.55;2026-07-25T15:00:00+01:00
+2026-07-25;noruega;Kristiansund BK;Start;1.74;1.62;2026-07-25T15:00:00+01:00
 2026-07-25;suecia;Degerfors IF;Djurgardens IF;1.70;1.67;2026-07-25T14:00:00+01:00
 2026-07-25;suecia;Kalmar FF;Mjallby AIF;1.85;1.70;2026-07-25T16:30:00+01:00
