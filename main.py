@@ -65,7 +65,7 @@ BASE = Path(__file__).resolve().parent
 SENT_STATE_PATH = BASE / "sent_state.json"
 
 NON_EU_TOPUP_LEAGUES = frozenset({
-    "mls", "brasil", "japao", "coreia",
+    "mls", "mls_next_pro", "brasil", "japao", "coreia",
     "noruega", "suecia", "finlandia", "australia", "islandia",
 })
 

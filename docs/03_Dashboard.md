@@ -366,7 +366,7 @@ After any state mutation:
 **Purpose:** Shows all active bets — both bot picks and manual bets — that are in play right now (kickoff has passed, result not yet settled).
 
 **Data sources:**
-- Manual rows: `getManualRowsMerged()` filtered for `isLocal === true`, `status === 'approved'`, resultado not in `{W, L, P}`, and kickoff ≤ now (or date ≤ today if no kickoff data).
+- Manual rows: `getManualRowsMerged()` filtered for `isLocal === true`, `status === 'approved'`, resultado not in `{W, L, P}`, and kickoff ≤ now (or date ≤ today if no kickoff data). Kickoff is `resolveManualKickoff(b)` (Phase 26.42) — the bet's own persisted `kickoffUTC` (set at creation time, Phase 26.32) when present, falling back to a live `fixtures_today.csv` lookup only for older bets that predate that persistence.
 - Bot rows: `state.footballDaily` rows where `apostada === true` and result not settled, or history rows for today.
 
 **User interactions:**
@@ -390,7 +390,7 @@ b.isLocal === true
 
 **Purpose:** Shows approved bets (both bot picks and manual bets) whose kickoff has not yet arrived. These bets are ready to watch but not yet "live".
 
-**Data sources:** `getPendingRows()` merges two disjoint row shapes into one array — manual bets from `getManualRowsMerged()`, and bot picks from `getAllBotRowsMergedUnique()`:
+**Data sources:** `getPendingRows()` merges two disjoint row shapes into one array — manual bets from `getManualRowsMerged()`, and bot picks from `getAllBotRowsMergedUnique()`. Manual kickoff is `resolveManualKickoff(b)`, identical to Live Center above:
 
 ```javascript
 // manual: b.isLocal === true && b.status === 'approved'
@@ -648,6 +648,7 @@ A rejected bet can be re-approved at any point (before or after settlement) by c
    AND data field exists
    AND (kickoff timestamp ≤ now OR date ≤ today)
    ```
+   The kickoff timestamp is `resolveManualKickoff(b)` (Phase 26.42): the bet's own persisted `kickoffUTC` (immutable, set at creation time by Phase 26.32) when present, falling back to a live `state.fixtures` lookup (`findFixtureKickoff()`) only for bets that predate that persistence. Before Phase 26.42, `getManualRowsMerged()` did not propagate `kickoffUTC` onto its merged rows at all, and both `getPendingRows()`/`getLiveRows()` used the live lookup unconditionally — once a fixture aged out of the rolling `fixtures_today.csv` window, this displayed "Kickoff: —" even though the correct value was sitting in `cloud_state.json` unread. See `05_Known_Issues.md` DASHBOARD-6.
 
 2. **Bot rows:** from `getDailyRowsMerged()` and `state.footballHistory` for rows where `apostada === true` and result is not settled.
 
@@ -657,7 +658,7 @@ Both sets are combined and sorted by date.
 
 `getManualRowsMerged()` merges two sources:
 - `remoteRows` from `state.manualBetsRemote` (always empty in production; `manual_bets.csv` has no data): `isLocal: false`.
-- `localRows` from `state.manualBets` (cloud-sourced bets): `isLocal: true`.
+- `localRows` from `state.manualBets` (cloud-sourced bets): `isLocal: true`. Includes `kickoffUTC` (Phase 26.42), copied straight from the raw bet object — the field a fixture-backed bet persisted at creation time (Phase 26.32).
 
 The Live Center filter is applied to the merged list. Only `isLocal: true` bets pass (`status === 'approved'` is only meaningful on local bets).
 

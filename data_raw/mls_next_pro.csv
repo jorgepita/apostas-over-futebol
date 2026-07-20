@@ -1,0 +1,536 @@
+Date,HomeTeam,AwayTeam,FTHG,FTAG
+07/03/2025,Austin II,Colorado Rapids II,4,2
+08/03/2025,Atlanta United II,New York RB II,0,1
+08/03/2025,Inter Miami II,Chattanooga,1,2
+08/03/2025,Ventura County,Tacoma Defiance,3,2
+09/03/2025,Chicago Fire II,Huntsville City,1,4
+09/03/2025,FC Cincinnati II,Toronto II,0,1
+09/03/2025,Houston Dynamo FC II,Sporting KC II,3,1
+09/03/2025,Orlando City II,Columbus Crew II,2,1
+10/03/2025,North Texas,St. Louis City II,0,3
+13/03/2025,New England II,FC Cincinnati II,2,0
+14/03/2025,Austin II,Minnesota United II,0,1
+14/03/2025,Chicago Fire II,Toronto II,1,0
+14/03/2025,New York City II,Columbus Crew II,2,0
+14/03/2025,Sporting KC II,St. Louis City II,0,1
+15/03/2025,Chattanooga,Huntsville City,1,0
+15/03/2025,Los Angeles FC II,Ventura County,3,1
+15/03/2025,North Texas,Vancouver Whitecaps II,3,2
+15/03/2025,Tacoma Defiance,The Town,3,1
+16/03/2025,Portland Timbers II,Real Monarchs,2,3
+23/03/2025,Houston Dynamo FC II,North Texas,5,1
+23/03/2025,Inter Miami II,Columbus Crew II,4,2
+23/03/2025,St. Louis City II,Sporting KC II,2,0
+24/03/2025,New York City II,Carolina Core,2,1
+26/03/2025,Crown Legacy,Orlando City II,0,1
+27/03/2025,Ventura County,Houston Dynamo FC II,1,0
+28/03/2025,New England II,Toronto II,4,0
+30/03/2025,FC Cincinnati II,Chicago Fire II,1,2
+30/03/2025,New York RB II,New York City II,3,2
+31/03/2025,Houston Dynamo FC II,Minnesota United II,1,3
+05/04/2025,Carolina Core,New York City II,5,0
+05/04/2025,Chattanooga,Orlando City II,2,0
+05/04/2025,Portland Timbers II,North Texas,1,2
+06/04/2025,Houston Dynamo FC II,Los Angeles FC II,1,0
+06/04/2025,New York RB II,Chicago Fire II,3,2
+06/04/2025,St. Louis City II,Colorado Rapids II,0,1
+07/04/2025,Atlanta United II,Inter Miami II,3,2
+07/04/2025,Real Monarchs,Ventura County,1,2
+07/04/2025,Tacoma Defiance,Vancouver Whitecaps II,5,3
+09/04/2025,Orlando City II,New England II,1,0
+09/04/2025,Sporting KC II,Minnesota United II,2,4
+10/04/2025,Inter Miami II,Toronto II,0,1
+10/04/2025,Philadelphia Union II,Atlanta United II,5,1
+11/04/2025,Los Angeles FC II,Tacoma Defiance,3,2
+11/04/2025,Real Monarchs,The Town,2,1
+13/04/2025,Carolina Core,Chattanooga,1,4
+13/04/2025,Portland Timbers II,Colorado Rapids II,1,2
+14/04/2025,Ventura County,St. Louis City II,3,1
+15/04/2025,Inter Miami II,Orlando City II,3,2
+19/04/2025,Chattanooga,Crown Legacy,2,1
+19/04/2025,Vancouver Whitecaps II,Austin II,4,0
+20/04/2025,FC Cincinnati II,New York RB II,3,1
+20/04/2025,Huntsville City,Chicago Fire II,5,0
+21/04/2025,North Texas,Colorado Rapids II,2,3
+23/04/2025,New York City II,Philadelphia Union II,1,4
+23/04/2025,Sporting KC II,Tacoma Defiance,1,4
+24/04/2025,North Texas,The Town,2,0
+24/04/2025,Vancouver Whitecaps II,Houston Dynamo FC II,1,3
+24/04/2025,Ventura County,Portland Timbers II,2,3
+25/04/2025,Colorado Rapids II,Minnesota United II,0,2
+25/04/2025,Toronto II,Chicago Fire II,2,0
+26/04/2025,Carolina Core,Crown Legacy,1,2
+26/04/2025,New England II,New York City II,2,1
+27/04/2025,Colorado Rapids II,Sporting KC II,3,0
+27/04/2025,Columbus Crew II,Chattanooga,3,0
+27/04/2025,Houston Dynamo FC II,Austin II,2,1
+27/04/2025,Huntsville City,Inter Miami II,4,0
+27/04/2025,Orlando City II,New York RB II,2,4
+27/04/2025,Tacoma Defiance,St. Louis City II,4,1
+28/04/2025,The Town,Los Angeles FC II,5,1
+28/04/2025,Vancouver Whitecaps II,Ventura County,2,3
+02/05/2025,Minnesota United II,North Texas,0,1
+03/05/2025,Chicago Fire II,Orlando City II,5,1
+03/05/2025,Ventura County,Tacoma Defiance,1,2
+04/05/2025,Inter Miami II,New York City II,4,2
+04/05/2025,St. Louis City II,Houston Dynamo FC II,3,1
+05/05/2025,Los Angeles FC II,Colorado Rapids II,3,2
+05/05/2025,The Town,Portland Timbers II,5,0
+09/05/2025,Chicago Fire II,FC Cincinnati II,2,1
+09/05/2025,Crown Legacy,Inter Miami II,4,2
+09/05/2025,New York City II,New York RB II,5,2
+09/05/2025,Portland Timbers II,Vancouver Whitecaps II,1,0
+09/05/2025,Toronto II,Chattanooga,1,2
+10/05/2025,Ventura County,Los Angeles FC II,2,1
+11/05/2025,Philadelphia Union II,Columbus Crew II,3,0
+12/05/2025,The Town,St. Louis City II,4,0
+14/05/2025,Ventura County,Austin II,0,1
+15/05/2025,New York City II,Toronto II,3,0
+15/05/2025,Portland Timbers II,Los Angeles FC II,3,0
+15/05/2025,Vancouver Whitecaps II,Tacoma Defiance,5,0
+17/05/2025,Orlando City II,Inter Miami II,3,0
+18/05/2025,Columbus Crew II,FC Cincinnati II,1,0
+18/05/2025,Huntsville City,Chattanooga,1,2
+18/05/2025,Minnesota United II,St. Louis City II,2,3
+18/05/2025,New York RB II,New England II,4,1
+18/05/2025,Vancouver Whitecaps II,Ventura County,0,2
+19/05/2025,Colorado Rapids II,Real Monarchs,2,1
+19/05/2025,North Texas,Houston Dynamo FC II,2,1
+19/05/2025,Portland Timbers II,Tacoma Defiance,2,1
+23/05/2025,Sporting KC II,Los Angeles FC II,0,3
+23/05/2025,Toronto II,Huntsville City,1,2
+24/05/2025,Chattanooga,New England II,1,0
+24/05/2025,St. Louis City II,Portland Timbers II,6,3
+25/05/2025,Atlanta United II,Orlando City II,3,0
+25/05/2025,Columbus Crew II,New York RB II,0,1
+25/05/2025,Crown Legacy,FC Cincinnati II,2,0
+25/05/2025,Philadelphia Union II,Inter Miami II,0,1
+26/05/2025,Colorado Rapids II,The Town,0,3
+26/05/2025,Tacoma Defiance,North Texas,2,3
+29/05/2025,Minnesota United II,Vancouver Whitecaps II,2,3
+29/05/2025,Real Monarchs,Portland Timbers II,4,1
+30/05/2025,New York RB II,Atlanta United II,1,0
+30/05/2025,Toronto II,Crown Legacy,1,0
+31/05/2025,New York City II,New England II,0,1
+01/06/2025,Chicago Fire II,Columbus Crew II,5,0
+01/06/2025,Inter Miami II,Carolina Core,1,2
+01/06/2025,Orlando City II,Chattanooga,2,1
+01/06/2025,Sporting KC II,Colorado Rapids II,1,4
+02/06/2025,Los Angeles FC II,The Town,1,2
+03/06/2025,FC Cincinnati II,Philadelphia Union II,1,4
+04/06/2025,Crown Legacy,New York RB II,2,5
+05/06/2025,St. Louis City II,North Texas,2,0
+06/06/2025,Atlanta United II,New York City II,2,3
+07/06/2025,Huntsville City,Orlando City II,2,3
+09/06/2025,Colorado Rapids II,Austin II,1,0
+11/06/2025,Atlanta United II,Huntsville City,0,1
+11/06/2025,Carolina Core,Orlando City II,1,0
+12/06/2025,Portland Timbers II,Ventura County,2,3
+12/06/2025,Real Monarchs,Tacoma Defiance,2,1
+12/06/2025,Toronto II,Inter Miami II,2,0
+13/06/2025,Minnesota United II,Houston Dynamo FC II,4,1
+13/06/2025,Vancouver Whitecaps II,Los Angeles FC II,2,0
+15/06/2025,New England II,FC Cincinnati II,0,1
+15/06/2025,New York RB II,Chattanooga,5,2
+15/06/2025,North Texas,Austin II,1,2
+15/06/2025,Philadelphia Union II,Crown Legacy,3,0
+16/06/2025,Colorado Rapids II,St. Louis City II,2,3
+16/06/2025,Minnesota United II,Ventura County,0,2
+21/06/2025,Carolina Core,New York RB II,1,2
+21/06/2025,Columbus Crew II,Philadelphia Union II,1,3
+21/06/2025,Vancouver Whitecaps II,North Texas,4,3
+22/06/2025,St. Louis City II,The Town,3,1
+25/06/2025,Inter Miami II,Chicago Fire II,1,3
+25/06/2025,Orlando City II,Toronto II,1,2
+26/06/2025,Los Angeles FC II,Minnesota United II,1,0
+28/06/2025,Austin II,Sporting KC II,1,0
+28/06/2025,Columbus Crew II,Carolina Core,1,0
+28/06/2025,St. Louis City II,Houston Dynamo FC II,1,0
+29/06/2025,Los Angeles FC II,Tacoma Defiance,2,3
+29/06/2025,Minnesota United II,Colorado Rapids II,2,1
+29/06/2025,Vancouver Whitecaps II,Real Monarchs,2,3
+04/07/2025,Carolina Core,Inter Miami II,1,2
+04/07/2025,North Texas,Minnesota United II,3,1
+04/07/2025,Ventura County,Vancouver Whitecaps II,1,2
+05/07/2025,Austin II,Los Angeles FC II,4,1
+05/07/2025,Chattanooga,Chicago Fire II,0,1
+05/07/2025,Columbus Crew II,New England II,1,2
+05/07/2025,Sporting KC II,Portland Timbers II,0,4
+06/07/2025,New York RB II,Huntsville City,1,2
+06/07/2025,Philadelphia Union II,Toronto II,5,0
+07/07/2025,Colorado Rapids II,Houston Dynamo FC II,2,1
+07/07/2025,Real Monarchs,St. Louis City II,1,3
+12/07/2025,Austin II,St. Louis City II,2,4
+13/07/2025,Atlanta United II,Columbus Crew II,3,2
+13/07/2025,Chicago Fire II,New England II,3,4
+13/07/2025,FC Cincinnati II,Huntsville City,1,0
+13/07/2025,Inter Miami II,Crown Legacy,3,4
+13/07/2025,Minnesota United II,Real Monarchs,2,1
+13/07/2025,Orlando City II,Carolina Core,3,1
+14/07/2025,Houston Dynamo FC II,North Texas,3,0
+14/07/2025,Los Angeles FC II,Portland Timbers II,1,0
+14/07/2025,The Town,Sporting KC II,3,1
+16/07/2025,New York City II,Toronto II,1,0
+18/07/2025,Houston Dynamo FC II,Vancouver Whitecaps II,2,4
+19/07/2025,Crown Legacy,Philadelphia Union II,0,4
+19/07/2025,Huntsville City,Columbus Crew II,2,1
+19/07/2025,Sporting KC II,North Texas,1,4
+20/07/2025,New England II,Orlando City II,3,0
+20/07/2025,New York RB II,New York City II,4,2
+20/07/2025,Toronto II,Chicago Fire II,2,3
+21/07/2025,Colorado Rapids II,Tacoma Defiance,6,4
+23/07/2025,The Town,Minnesota United II,3,2
+26/07/2025,Austin II,Houston Dynamo FC II,2,0
+26/07/2025,Chattanooga,Crown Legacy,1,3
+26/07/2025,Huntsville City,Orlando City II,4,0
+26/07/2025,New York City II,Philadelphia Union II,0,2
+27/07/2025,Chicago Fire II,New York RB II,9,2
+27/07/2025,Columbus Crew II,Toronto II,1,2
+27/07/2025,Inter Miami II,FC Cincinnati II,0,3
+27/07/2025,St. Louis City II,Minnesota United II,4,0
+27/07/2025,The Town,Real Monarchs,4,0
+28/07/2025,Los Angeles FC II,Sporting KC II,1,3
+28/07/2025,Tacoma Defiance,Portland Timbers II,1,2
+30/07/2025,Carolina Core,Philadelphia Union II,3,2
+30/07/2025,New England II,Atlanta United II,3,0
+31/07/2025,Columbus Crew II,New York RB II,1,2
+01/08/2025,Vancouver Whitecaps II,Sporting KC II,2,3
+02/08/2025,Carolina Core,New England II,1,0
+02/08/2025,Chattanooga,Toronto II,1,2
+02/08/2025,Crown Legacy,Huntsville City,0,4
+02/08/2025,Tacoma Defiance,Ventura County,4,6
+03/08/2025,Chicago Fire II,Columbus Crew II,6,1
+03/08/2025,Inter Miami II,Atlanta United II,2,1
+03/08/2025,North Texas,Colorado Rapids II,1,4
+03/08/2025,Orlando City II,New York City II,1,4
+03/08/2025,Philadelphia Union II,FC Cincinnati II,1,0
+03/08/2025,Sporting KC II,Austin II,1,3
+04/08/2025,Los Angeles FC II,The Town,3,4
+04/08/2025,Portland Timbers II,Real Monarchs,1,2
+07/08/2025,Vancouver Whitecaps II,St. Louis City II,2,4
+08/08/2025,Toronto II,Atlanta United II,1,3
+09/08/2025,Minnesota United II,Sporting KC II,3,2
+10/08/2025,Houston Dynamo FC II,Real Monarchs,0,4
+10/08/2025,Huntsville City,Carolina Core,3,2
+10/08/2025,The Town,Vancouver Whitecaps II,2,1
+11/08/2025,FC Cincinnati II,Crown Legacy,4,3
+11/08/2025,New York RB II,Philadelphia Union II,2,0
+11/08/2025,Tacoma Defiance,Los Angeles FC II,4,2
+15/08/2025,New England II,New York RB II,4,2
+15/08/2025,Toronto II,FC Cincinnati II,1,0
+16/08/2025,Carolina Core,Chattanooga,0,1
+16/08/2025,Chicago Fire II,Philadelphia Union II,2,0
+16/08/2025,Colorado Rapids II,Austin II,4,1
+16/08/2025,The Town,Ventura County,4,1
+17/08/2025,Atlanta United II,Crown Legacy,1,0
+17/08/2025,Columbus Crew II,Orlando City II,2,1
+17/08/2025,Huntsville City,New York City II,2,1
+17/08/2025,North Texas,St. Louis City II,1,3
+17/08/2025,Sporting KC II,Houston Dynamo FC II,1,3
+18/08/2025,Real Monarchs,Los Angeles FC II,0,1
+21/08/2025,Colorado Rapids II,Portland Timbers II,1,0
+22/08/2025,Crown Legacy,Inter Miami II,6,0
+22/08/2025,Los Angeles FC II,Vancouver Whitecaps II,1,3
+22/08/2025,New York City II,Columbus Crew II,3,1
+23/08/2025,Austin II,Ventura County,2,1
+23/08/2025,Chattanooga,Huntsville City,1,0
+23/08/2025,Houston Dynamo FC II,The Town,0,1
+23/08/2025,Orlando City II,Atlanta United II,2,1
+24/08/2025,FC Cincinnati II,Carolina Core,2,3
+24/08/2025,New York RB II,Chicago Fire II,1,0
+24/08/2025,Philadelphia Union II,New England II,1,3
+24/08/2025,St. Louis City II,Sporting KC II,3,0
+25/08/2025,North Texas,Los Angeles FC II,0,4
+25/08/2025,Portland Timbers II,Tacoma Defiance,2,1
+25/08/2025,Real Monarchs,Minnesota United II,3,2
+27/08/2025,Atlanta United II,Inter Miami II,4,1
+30/08/2025,Atlanta United II,Huntsville City,2,0
+30/08/2025,Los Angeles FC II,Austin II,1,0
+31/08/2025,FC Cincinnati II,Philadelphia Union II,1,2
+31/08/2025,New York RB II,Columbus Crew II,7,4
+31/08/2025,Orlando City II,Crown Legacy,1,0
+31/08/2025,Sporting KC II,Colorado Rapids II,2,3
+31/08/2025,Toronto II,New York City II,3,0
+31/08/2025,Vancouver Whitecaps II,Portland Timbers II,4,1
+01/09/2025,Minnesota United II,The Town,1,0
+01/09/2025,Real Monarchs,Tacoma Defiance,3,0
+01/09/2025,Ventura County,North Texas,0,1
+04/09/2025,Crown Legacy,Carolina Core,3,4
+05/09/2025,Minnesota United II,Austin II,1,0
+05/09/2025,Tacoma Defiance,Vancouver Whitecaps II,1,3
+06/09/2025,Sporting KC II,Real Monarchs,2,1
+07/09/2025,Columbus Crew II,Inter Miami II,4,0
+08/09/2025,New England II,Huntsville City,1,0
+10/09/2025,Chicago Fire II,FC Cincinnati II,2,1
+12/09/2025,Crown Legacy,Chattanooga,2,4
+12/09/2025,New England II,Toronto II,2,1
+13/09/2025,Carolina Core,Atlanta United II,4,2
+13/09/2025,Tacoma Defiance,Austin II,1,2
+13/09/2025,Vancouver Whitecaps II,The Town,3,1
+14/09/2025,Colorado Rapids II,Houston Dynamo FC II,0,1
+14/09/2025,Columbus Crew II,Philadelphia Union II,1,3
+14/09/2025,Huntsville City,New York RB II,2,3
+14/09/2025,Portland Timbers II,Los Angeles FC II,5,3
+15/09/2025,Chicago Fire II,New York City II,4,5
+15/09/2025,Real Monarchs,Ventura County,2,1
+18/09/2025,Houston Dynamo FC II,Tacoma Defiance,1,2
+18/09/2025,New York City II,New England II,1,3
+20/09/2025,Austin II,St. Louis City II,1,2
+20/09/2025,Crown Legacy,Atlanta United II,0,1
+20/09/2025,Los Angeles FC II,Real Monarchs,1,3
+21/09/2025,FC Cincinnati II,New England II,3,1
+21/09/2025,Minnesota United II,North Texas,1,2
+21/09/2025,Orlando City II,Huntsville City,0,1
+21/09/2025,Philadelphia Union II,Chicago Fire II,5,2
+22/09/2025,Houston Dynamo FC II,Portland Timbers II,3,1
+22/09/2025,Tacoma Defiance,Colorado Rapids II,1,4
+22/09/2025,Ventura County,The Town,0,4
+25/09/2025,FC Cincinnati II,Columbus Crew II,4,3
+26/09/2025,New England II,Crown Legacy,0,1
+26/09/2025,Toronto II,Philadelphia Union II,1,2
+27/09/2025,Austin II,Portland Timbers II,1,2
+27/09/2025,Colorado Rapids II,Minnesota United II,1,2
+28/09/2025,Chicago Fire II,Atlanta United II,2,5
+28/09/2025,New York City II,Chattanooga,0,1
+28/09/2025,North Texas,Real Monarchs,2,4
+28/09/2025,Sporting KC II,Ventura County,1,2
+28/09/2025,The Town,Tacoma Defiance,0,1
+29/09/2025,Huntsville City,Inter Miami II,4,1
+01/10/2025,FC Cincinnati II,New York RB II,2,1
+02/10/2025,Atlanta United II,Chattanooga,0,1
+02/10/2025,The Town,Vancouver Whitecaps II,2,1
+05/10/2025,Huntsville City,Carolina Core,3,0
+05/10/2025,Inter Miami II,New England II,2,5
+05/10/2025,Los Angeles FC II,North Texas,2,4
+05/10/2025,Minnesota United II,Sporting KC II,3,1
+05/10/2025,New York RB II,Toronto II,2,1
+05/10/2025,Orlando City II,FC Cincinnati II,1,4
+05/10/2025,Philadelphia Union II,New York City II,4,3
+05/10/2025,Portland Timbers II,St. Louis City II,2,1
+05/10/2025,Real Monarchs,Vancouver Whitecaps II,4,1
+05/10/2025,Tacoma Defiance,Houston Dynamo FC II,5,1
+05/10/2025,The Town,Austin II,1,2
+05/10/2025,Ventura County,Colorado Rapids II,0,2
+19/10/2025,Chattanooga,Huntsville City,0,2
+19/10/2025,Colorado Rapids II,Vancouver Whitecaps II,3,2
+19/10/2025,New England II,Chicago Fire II,0,1
+19/10/2025,New York RB II,Carolina Core,5,1
+19/10/2025,Philadelphia Union II,FC Cincinnati II,2,1
+19/10/2025,St. Louis City II,Ventura County,3,0
+20/10/2025,Real Monarchs,Minnesota United II,1,2
+20/10/2025,The Town,North Texas,3,0
+25/10/2025,Philadelphia Union II,Huntsville City,1,0
+26/10/2025,St. Louis City II,Minnesota United II,0,2
+01/11/2025,New York RB II,Philadelphia Union II,2,1
+03/11/2025,Colorado Rapids II,Minnesota United II,2,1
+28/02/2026,Philadelphia Union II,Toronto II,1,0
+28/02/2026,St. Louis City II,Sporting KC II,4,0
+01/03/2026,Chattanooga,Crown Legacy,1,4
+01/03/2026,FC Cincinnati II,Connecticut FC,1,3
+01/03/2026,New York RB II,Columbus Crew II,4,2
+01/03/2026,Portland Timbers II,The Town,2,1
+02/03/2026,Austin II,Minnesota United II,2,4
+02/03/2026,Houston Dynamo FC II,Colorado Rapids II,2,0
+02/03/2026,Ventura County,Vancouver Whitecaps II,4,2
+03/03/2026,Orlando City II,Huntsville City,1,3
+07/03/2026,Crown Legacy,Huntsville City,7,2
+08/03/2026,Atlanta United II,Carolina Core,2,1
+08/03/2026,Chattanooga,Connecticut FC,4,2
+08/03/2026,Houston Dynamo FC II,Tacoma Defiance,4,0
+08/03/2026,North Texas,Colorado Rapids II,3,1
+08/03/2026,Orlando City II,Chicago Fire II,2,1
+08/03/2026,Philadelphia Union II,FC Cincinnati II,1,0
+08/03/2026,St. Louis City II,Minnesota United II,3,0
+09/03/2026,New York RB II,Inter Miami II,3,0
+09/03/2026,Sporting KC II,Real Monarchs,0,5
+09/03/2026,The Town,Los Angeles FC II,4,1
+14/03/2026,Carolina Core,Orlando City II,2,3
+15/03/2026,Atlanta United II,Huntsville City,4,1
+15/03/2026,Chicago Fire II,Chattanooga,2,1
+15/03/2026,Columbus Crew II,Toronto II,3,2
+15/03/2026,Crown Legacy,Inter Miami II,3,0
+15/03/2026,Houston Dynamo FC II,Portland Timbers II,5,0
+15/03/2026,New England II,FC Cincinnati II,2,1
+15/03/2026,Philadelphia Union II,Connecticut FC,1,2
+16/03/2026,Austin II,North Texas,1,0
+16/03/2026,Vancouver Whitecaps II,Minnesota United II,2,1
+16/03/2026,Ventura County,St. Louis City II,2,3
+19/03/2026,New York City II,Toronto II,0,5
+21/03/2026,Columbus Crew II,FC Cincinnati II,2,0
+21/03/2026,Houston Dynamo FC II,North Texas,2,0
+22/03/2026,Colorado Rapids II,The Town,1,4
+22/03/2026,Crown Legacy,Atlanta United II,3,0
+22/03/2026,New England II,Connecticut FC,2,0
+22/03/2026,Real Monarchs,Vancouver Whitecaps II,3,2
+23/03/2026,Sporting KC II,Minnesota United II,0,1
+23/03/2026,Tacoma Defiance,Austin II,0,1
+28/03/2026,Chattanooga,Columbus Crew II,2,0
+28/03/2026,Sporting KC II,St. Louis City II,0,2
+28/03/2026,Vancouver Whitecaps II,Los Angeles FC II,2,3
+30/03/2026,Tacoma Defiance,Ventura County,0,1
+03/04/2026,Crown Legacy,Atlanta United II,2,0
+05/04/2026,Sporting KC II,North Texas,1,4
+10/04/2026,Inter Miami II,Atlanta United II,0,2
+11/04/2026,Chattanooga,Orlando City II,3,1
+11/04/2026,Connecticut FC,Columbus Crew II,1,3
+12/04/2026,New England II,New York RB II,1,2
+12/04/2026,Philadelphia Union II,Carolina Core,4,1
+12/04/2026,Vancouver Whitecaps II,Tacoma Defiance,2,1
+13/04/2026,FC Cincinnati II,New York City II,1,0
+13/04/2026,The Town,Minnesota United II,1,0
+13/04/2026,Ventura County,Real Monarchs,2,0
+16/04/2026,Los Angeles FC II,Portland Timbers II,0,1
+17/04/2026,Toronto II,Philadelphia Union II,1,0
+18/04/2026,Chicago Fire II,Atlanta United II,0,3
+18/04/2026,Columbus Crew II,New England II,2,1
+18/04/2026,Crown Legacy,Chattanooga,1,0
+18/04/2026,Inter Miami II,Huntsville City,2,4
+18/04/2026,Tacoma Defiance,St. Louis City II,1,2
+19/04/2026,New York City II,Connecticut FC,2,1
+19/04/2026,New York RB II,FC Cincinnati II,3,1
+19/04/2026,Real Monarchs,Houston Dynamo FC II,0,1
+20/04/2026,Colorado Rapids II,Minnesota United II,1,2
+20/04/2026,Los Angeles FC II,The Town,2,1
+20/04/2026,Sporting KC II,Vancouver Whitecaps II,3,2
+24/04/2026,Toronto II,New York City II,2,1
+26/04/2026,Connecticut FC,Philadelphia Union II,1,2
+26/04/2026,Minnesota United II,North Texas,1,0
+26/04/2026,New York RB II,Columbus Crew II,4,1
+26/04/2026,Sporting KC II,Houston Dynamo FC II,1,2
+26/04/2026,St. Louis City II,Ventura County,2,1
+27/04/2026,Tacoma Defiance,Los Angeles FC II,4,1
+02/05/2026,Carolina Core,Atlanta United II,1,2
+02/05/2026,Chattanooga,Huntsville City,0,2
+02/05/2026,Ventura County,The Town,1,3
+03/05/2026,Columbus Crew II,Inter Miami II,3,1
+03/05/2026,FC Cincinnati II,Toronto II,5,0
+03/05/2026,North Texas,Austin II,0,2
+03/05/2026,Philadelphia Union II,New York RB II,1,2
+03/05/2026,Real Monarchs,Portland Timbers II,0,3
+04/05/2026,Colorado Rapids II,Houston Dynamo FC II,1,3
+04/05/2026,Los Angeles FC II,Vancouver Whitecaps II,2,1
+05/05/2026,New York City II,Chicago Fire II,2,1
+07/05/2026,Sporting KC II,Ventura County,0,2
+08/05/2026,Huntsville City,Carolina Core,3,0
+08/05/2026,Inter Miami II,Chattanooga,1,2
+08/05/2026,Toronto II,New York RB II,1,2
+09/05/2026,Chicago Fire II,Crown Legacy,3,2
+09/05/2026,St. Louis City II,Houston Dynamo FC II,1,4
+09/05/2026,The Town,Vancouver Whitecaps II,6,1
+10/05/2026,Atlanta United II,Orlando City II,0,2
+10/05/2026,FC Cincinnati II,Columbus Crew II,2,1
+10/05/2026,Los Angeles FC II,Real Monarchs,3,1
+10/05/2026,Minnesota United II,North Texas,0,2
+10/05/2026,New England II,New York City II,3,2
+11/05/2026,Austin II,Tacoma Defiance,3,0
+11/05/2026,Colorado Rapids II,Sporting KC II,1,3
+13/05/2026,Philadelphia Union II,New England II,0,1
+14/05/2026,Colorado Rapids II,Austin II,0,2
+14/05/2026,Huntsville City,FC Cincinnati II,4,0
+14/05/2026,Portland Timbers II,Minnesota United II,2,1
+16/05/2026,Carolina Core,Chicago Fire II,2,1
+16/05/2026,Connecticut FC,Toronto II,0,2
+17/05/2026,FC Cincinnati II,Chattanooga,1,3
+17/05/2026,Huntsville City,Atlanta United II,2,6
+17/05/2026,Los Angeles FC II,Ventura County,3,2
+17/05/2026,New England II,Orlando City II,1,0
+17/05/2026,New York RB II,New York City II,2,3
+17/05/2026,North Texas,Sporting KC II,5,1
+17/05/2026,Vancouver Whitecaps II,Tacoma Defiance,0,2
+18/05/2026,Austin II,St. Louis City II,4,1
+18/05/2026,Inter Miami II,Crown Legacy,1,5
+18/05/2026,The Town,Portland Timbers II,0,1
+21/05/2026,Real Monarchs,Colorado Rapids II,2,0
+23/05/2026,Chicago Fire II,Huntsville City,4,0
+23/05/2026,New York City II,FC Cincinnati II,2,0
+23/05/2026,Philadelphia Union II,Atlanta United II,2,1
+23/05/2026,Sporting KC II,Austin II,0,3
+23/05/2026,Tacoma Defiance,Ventura County,1,0
+24/05/2026,Chattanooga,Carolina Core,1,0
+24/05/2026,Minnesota United II,Colorado Rapids II,2,0
+24/05/2026,New York RB II,Connecticut FC,1,3
+24/05/2026,Orlando City II,Inter Miami II,4,1
+24/05/2026,Portland Timbers II,Houston Dynamo FC II,0,3
+24/05/2026,Vancouver Whitecaps II,Real Monarchs,1,3
+29/05/2026,Toronto II,Philadelphia Union II,2,1
+30/05/2026,New York City II,Columbus Crew II,2,3
+30/05/2026,Real Monarchs,Sporting KC II,1,3
+30/05/2026,St. Louis City II,North Texas,2,0
+31/05/2026,Orlando City II,Chattanooga,5,2
+31/05/2026,Portland Timbers II,Tacoma Defiance,1,0
+31/05/2026,Ventura County,Vancouver Whitecaps II,2,1
+05/06/2026,Crown Legacy,Philadelphia Union II,1,0
+05/06/2026,Toronto II,Huntsville City,2,1
+06/06/2026,Atlanta United II,Chicago Fire II,3,0
+06/06/2026,Chattanooga,New York RB II,4,0
+06/06/2026,Vancouver Whitecaps II,Portland Timbers II,0,1
+07/06/2026,FC Cincinnati II,New England II,0,1
+07/06/2026,Orlando City II,Carolina Core,3,2
+07/06/2026,Ventura County,Houston Dynamo FC II,3,1
+08/06/2026,Austin II,Los Angeles FC II,2,0
+08/06/2026,Columbus Crew II,Connecticut FC,2,1
+08/06/2026,The Town,Real Monarchs,3,0
+09/06/2026,Minnesota United II,Sporting KC II,4,3
+13/06/2026,Real Monarchs,Portland Timbers II,4,1
+14/06/2026,Carolina Core,Crown Legacy,2,0
+14/06/2026,Chicago Fire II,Inter Miami II,3,1
+14/06/2026,FC Cincinnati II,Columbus Crew II,0,1
+14/06/2026,Huntsville City,Orlando City II,1,2
+14/06/2026,Minnesota United II,Austin II,1,3
+14/06/2026,New England II,New York RB II,2,1
+14/06/2026,Philadelphia Union II,New York City II,0,1
+14/06/2026,Toronto II,Connecticut FC,2,4
+17/06/2026,New York City II,Carolina Core,3,2
+18/06/2026,Connecticut FC,FC Cincinnati II,4,0
+18/06/2026,Tacoma Defiance,Houston Dynamo FC II,2,1
+18/06/2026,Vancouver Whitecaps II,The Town,3,2
+20/06/2026,Minnesota United II,St. Louis City II,5,2
+21/06/2026,Colorado Rapids II,Portland Timbers II,0,2
+21/06/2026,Columbus Crew II,Atlanta United II,3,2
+21/06/2026,New England II,Chicago Fire II,1,2
+21/06/2026,New York RB II,Toronto II,5,0
+21/06/2026,Orlando City II,Philadelphia Union II,1,2
+22/06/2026,Austin II,Sporting KC II,2,1
+22/06/2026,Tacoma Defiance,Real Monarchs,1,0
+25/06/2026,Los Angeles FC II,Minnesota United II,1,0
+26/06/2026,Connecticut FC,New York City II,1,4
+27/06/2026,Portland Timbers II,The Town,2,3
+28/06/2026,Carolina Core,Huntsville City,1,0
+28/06/2026,Colorado Rapids II,Vancouver Whitecaps II,1,0
+28/06/2026,FC Cincinnati II,Inter Miami II,1,0
+28/06/2026,New York RB II,Philadelphia Union II,5,0
+28/06/2026,St. Louis City II,Austin II,0,2
+28/06/2026,Toronto II,New England II,1,3
+28/06/2026,Ventura County,Real Monarchs,3,1
+29/06/2026,Los Angeles FC II,Houston Dynamo FC II,3,1
+04/07/2026,Atlanta United II,Toronto II,1,0
+04/07/2026,Chattanooga,Inter Miami II,1,0
+05/07/2026,Connecticut FC,Carolina Core,3,1
+05/07/2026,Houston Dynamo FC II,Minnesota United II,4,0
+05/07/2026,New England II,Philadelphia Union II,0,4
+05/07/2026,North Texas,St. Louis City II,3,0
+06/07/2026,Austin II,Colorado Rapids II,3,2
+06/07/2026,Tacoma Defiance,Portland Timbers II,0,2
+08/07/2026,The Town,Sporting KC II,6,1
+08/07/2026,Vancouver Whitecaps II,Ventura County,3,2
+11/07/2026,Atlanta United II,Inter Miami II,4,1
+11/07/2026,Crown Legacy,New York City II,0,3
+11/07/2026,Houston Dynamo FC II,St. Louis City II,2,1
+12/07/2026,Chicago Fire II,New York RB II,3,0
+12/07/2026,Colorado Rapids II,North Texas,1,0
+12/07/2026,Connecticut FC,Toronto II,3,2
+12/07/2026,FC Cincinnati II,Orlando City II,1,2
+12/07/2026,Real Monarchs,Vancouver Whitecaps II,2,1
+13/07/2026,Austin II,Minnesota United II,2,3
+13/07/2026,The Town,Tacoma Defiance,0,1
+17/07/2026,Toronto II,FC Cincinnati II,3,1
+18/07/2026,Columbus Crew II,Philadelphia Union II,2,0
+18/07/2026,Crown Legacy,Chicago Fire II,3,2
+18/07/2026,Houston Dynamo FC II,Colorado Rapids II,2,1
+18/07/2026,St. Louis City II,Portland Timbers II,1,2
+19/07/2026,Connecticut FC,New York RB II,2,1
+19/07/2026,Huntsville City,Atlanta United II,2,0
+19/07/2026,The Town,North Texas,0,1
+19/07/2026,Ventura County,Los Angeles FC II,2,0
+20/07/2026,Real Monarchs,Tacoma Defiance,2,4
+20/07/2026,Sporting KC II,Minnesota United II,1,0

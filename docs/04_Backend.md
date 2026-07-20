@@ -85,7 +85,7 @@ Used exclusively for settlement of EU leagues with active support.
 
 Used for two distinct purposes: fixture shortlisting and odds fetching during generation, and result settlement for blocked/non-EU leagues.
 
-- **Purpose (generation):** Fetch upcoming fixtures for all 21 leagues; fetch O2.5 and BTTS odds for shortlisted fixtures.
+- **Purpose (generation):** Fetch upcoming fixtures for all 22 leagues; fetch O2.5 and BTTS odds for shortlisted fixtures.
 - **Purpose (settlement):** Settle results for leagues blocked on football-data.org (Bundesliga, Primeira Liga, Super Lig, etc.) and all non-EU leagues (MLS, J1 League, etc.).
 - **Paid plan:** 7500 requests/day, 300 requests/minute. Limits are Railway environment configuration, not hardcoded.
 - **Base URL:** `https://v3.football.api-sports.io`. Configurable via `API_FOOTBALL_BASE` environment variable.
@@ -719,7 +719,7 @@ class LeagueEntry:
 
 **`"european"` (default):** The season year is the calendar year the season starts (August). Games in January–June belong to the previous year's season. Example: a game on 2026-02-15 → season 2025.
 
-**`"calendar"`:** The season year is the calendar year the game is played. Used for: Eliteserien, Allsvenskan, Veikkausliiga, Besta deild, MLS, Campeonato Brasileiro, J1 League, K League 1.
+**`"calendar"`:** The season year is the calendar year the game is played. Used for: Eliteserien, Allsvenskan, Veikkausliiga, Besta deild, MLS, MLS Next Pro, Campeonato Brasileiro, J1 League, K League 1.
 
 ```python
 def api_football_season_from_date(date_str, league_id=None, shared_state=None) -> int:
@@ -743,6 +743,14 @@ When `af_id` is set in the registry entry, `get_api_football_league_id()` return
 That is all. `LEAGUE_CODE_MAP`, `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS`, `AF_SEASON_MODELS`, and `REGISTRY_BY_KEY` are all regenerated automatically on the next import.
 
 **Do not** add league mappings to `update_results.py`, `config.json` (beyond the two sections above), or any other file.
+
+### Registering two genuinely distinct competitions that share a colloquial name
+
+`fetch_oddsapi_fixtures.py` (Phase 1 fixture fetch) never imports `league_registry.py` — it decides which leagues to fetch fixtures for purely from `config.json`'s `leagues` / `api_football.league_ids` sections (steps 2–3 above). A `REGISTRY` entry therefore only gives a competition a settlement identity; both a registry entry *and* a `config.json` entry are required for it to actively generate picks. Senior MLS (`"mls"`, `af_id=253`) and MLS Next Pro (`"mls_next_pro"`, `af_id=909`) are genuinely distinct API-Football competitions that both happen to be branded "MLS" colloquially — both are fully registered in both places (Phase 26.42, see ADR-004 update), so each is independently and simultaneously eligible for fixture fetching, generation, and settlement. Keeping them as two registry entries with two `af_id`s is what prevents the settlement engine from ever querying one competition's fixtures for a bet placed on the other; it is not a mechanism for excluding either one from generation.
+
+### Fixture-generation league IDs must never be silently substituted
+
+Prior to Phase 26.42, `fetch_oddsapi_fixtures.py::fetch_fixtures_for_league_date()` retried a zero-fixture response by fuzzy-searching API-Football's `/leagues` for a name match against the configured league's short name — intended as an auto-discovery fallback, but capable of silently resolving to a *different* competition whenever the configured (correct) ID legitimately had no fixtures for that date. This produced a real production incident: MLS Next Pro fixtures were substituted for senior MLS and mislabelled `"MLS"` for weeks, undetected (see `05_Known_Issues.md` SETTLEMENT-3). This fallback has been removed: a configured canonical league ID (from `config.json` or `DEFAULT_LEAGUE_IDS`) is now authoritative, and a zero-fixture response for a date means no fixtures that day, never "try a different competition." `search_league_id_by_api()` remains defined as a general-purpose lookup but is not called from the per-date fetch path — do not reconnect it as an automatic fallback.
 
 ---
 
@@ -769,7 +777,7 @@ Returns all matches for the league on the given date. Settlement iterates rows f
 ### API-Football
 
 **Purpose:**
-1. **Fixture fetching (generation):** `fetch_oddsapi_fixtures.py` calls `/fixtures` for all 21 leagues to build the shortlist. Calls `/odds` for each shortlisted fixture to get O2.5 and BTTS odds.
+1. **Fixture fetching (generation):** `fetch_oddsapi_fixtures.py` calls `/fixtures` for all 22 leagues to build the shortlist. Calls `/odds` for each shortlisted fixture to get O2.5 and BTTS odds.
 2. **Settlement:** Used for all EU-blocked leagues and all non-EU leagues. Also used as a fallback when football-data.org fails or returns no match.
 
 **Authentication:** `x-apisports-key: {API_FOOTBALL_KEY}` header.
@@ -974,7 +982,7 @@ One gunicorn worker handles all requests serially. Concurrent requests queue and
 ### API usage
 
 **Generation per run (approximate):**
-- `fetch_oddsapi_fixtures.py`: 21 leagues × `days_ahead` (5) dates = up to ~105 `/fixtures` calls, plus up to 80 `/odds` calls. Total: up to ~185 API-Football requests per run.
+- `fetch_oddsapi_fixtures.py`: 22 leagues × `days_ahead` (5) dates = up to ~110 `/fixtures` calls, plus up to 80 `/odds` calls. Total: up to ~190 API-Football requests per run.
 - Two generation runs per day (17:00 main, 23:00 top-up). Top-up is subset of 8 leagues. Approximate total: ~150 + ~60 = ~210 requests/day for generation.
 
 **Settlement per run (approximate):**

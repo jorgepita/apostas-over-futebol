@@ -56,7 +56,7 @@ Python library modules used by the generation and settlement pipelines. No scrip
 
 | Module | Responsibility |
 |---|---|
-| `league_registry.py` | Single source of truth for all 21 league definitions |
+| `league_registry.py` | Single source of truth for all 22 league definitions (Phase 26.42 added `mls_next_pro` as a fully independent, actively-generating league) |
 | `config.py` | Reads `config.json` with defaults; exposes typed constants |
 | `calculations.py` | Shared Quantitative Engine (canonical) — Poisson probability, edge, Kelly, confidence, fair odds, EV. Mirrored (verified, not shared source) by `QuantEngine` in `index.html` — see `01_Architecture.md`/ADR-014 |
 | `pick_generation.py` | Kelly staking, edge filtering, pick selection |
@@ -117,7 +117,7 @@ Contains `bot.yml`, the single workflow file that defines all scheduled and manu
 | `run_main.py` | GitHub Actions orchestrator: runs Phase 1 then Phase 2, sends Telegram | Changing generation schedule or Telegram message format |
 | `run_topup.py` | Top-up run for non-EU leagues at 23:00 UTC | Non-EU league scheduling |
 | `config.json` | Model parameters: edge thresholds, Kelly fraction, bankroll, API limits | Tuning model behaviour, changing rate limits |
-| `src/league_registry.py` | 21 league definitions — names, codes, season models, API IDs | Adding or modifying a league |
+| `src/league_registry.py` | 22 league definitions — names, codes, season models, API IDs — all actively generating | Adding or modifying a league |
 | `src/config.py` | Typed constants loaded from `config.json` | Adding a new configurable parameter |
 | `requirements.txt` | Python dependencies | Adding or updating a dependency |
 | `runtime.txt` | Python version declaration for Railway (`python-3.11.13`) | Python version upgrade |
@@ -252,7 +252,7 @@ These files reflect stable decisions. Modify only when there is a structural rea
 
 | File | Why it is stable |
 |---|---|
-| `src/league_registry.py` | 21 leagues are defined and working. Change only to add a league or fix a metadata error. |
+| `src/league_registry.py` | 22 leagues are defined and working. Change only to add a league or fix a metadata error. |
 | `Procfile` | Gunicorn configuration is fixed. `--workers 1` is intentional (ADR-003). |
 | `runtime.txt` | Python version. Change only for a deliberate upgrade. |
 | `requirements.txt` | Dependencies are minimal and stable. Add only when a new library is genuinely needed. |

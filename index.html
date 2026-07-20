@@ -4211,6 +4211,7 @@ button:disabled {
           ['finlandia',     'finlandia'],
           ['islandia',      'islandia'],
           ['mls',           'mls'],
+          ['mls_next_pro',  'mls_next_pro'],
           ['brasil',        'brasil'],
           ['japao',         'japao'],
           ['coreia',        'coreia'],
@@ -4236,7 +4237,7 @@ button:disabled {
           ['besta deild',                      'islandia'],
           ['úrvalsdeild',                      'islandia'],
           ['major league soccer',              'mls'],
-          ['mls next pro',                     'mls'],
+          ['mls next pro',                     'mls_next_pro'],
           ['campeonato brasileiro serie a',    'brasil'],
           ['série a',                          'brasil'],
           ['j1 league',                        'japao'],
@@ -4875,6 +4876,7 @@ button:disabled {
       analysisSnapshot: b.analysisSnapshot ?? null,
       placar:           cleanString(b.placar || ''),
       settledAt:        b.settledAt        ?? null,
+      kickoffUTC:       cleanString(b.kickoffUTC || ''),
       _lucro:           lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
       _resultKey:       resultKey(resultado),
       _searchText:      `${liga} ${jogo} ${mercado}`.toLowerCase()
@@ -14346,7 +14348,7 @@ button:disabled {
 
         const manualCount = getManualRowsMerged().filter(b => {
           if (!b.isLocal || b.status !== 'approved') return false;
-          const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+          const kickoffMs = parseKickoffUTC(resolveManualKickoff(b));
           if (kickoffMs !== null) return kickoffMs > Date.now();
           return b.data > today;
         }).length;
@@ -14368,7 +14370,7 @@ button:disabled {
         const manualRows = getManualRowsMerged()
           .filter(b => {
             if (!b.isLocal || b.status !== 'approved') return false;
-            const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+            const kickoffMs = parseKickoffUTC(resolveManualKickoff(b));
             if (kickoffMs !== null) return kickoffMs > Date.now();
             return b.data > today;
           })
@@ -14381,7 +14383,7 @@ button:disabled {
             market:        b.mercado || '',
             odd:           b.odd    || '',
             stake:         b.stake  || '',
-            kickoffUTC:    findFixtureKickoff(b.data, b.liga, b.jogo),
+            kickoffUTC:    resolveManualKickoff(b),
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -14709,7 +14711,7 @@ button:disabled {
             if (!b.isLocal || b.status !== 'approved') return false;
             if (['W', 'L', 'P'].includes(b._resultKey)) return false;
             if (!b.data) return false;
-            const kickoffMs = parseKickoffUTC(findFixtureKickoff(b.data, b.liga, b.jogo));
+            const kickoffMs = parseKickoffUTC(resolveManualKickoff(b));
             if (kickoffMs !== null) return kickoffMs <= Date.now();
             return b.data <= today;
           })
@@ -14723,7 +14725,7 @@ button:disabled {
             odd:            b.odd    || '',
             stake:          b.stake  || '',
             stakeNum:       num(b.stake),
-            kickoffUTC:     findFixtureKickoff(b.data, b.liga, b.jogo),
+            kickoffUTC:     resolveManualKickoff(b),
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
@@ -15688,6 +15690,17 @@ button:disabled {
       function findFixtureKickoff(date, liga, jogo) {
         const fixture = findFixtureRecord(date, liga, jogo);
         return fixture ? (fixture.KickoffUTC || '') : '';
+      }
+
+      // Manual bets created from a fixture persist their own kickoffUTC at
+      // creation time (Phase 26.32) — that persisted value is immutable and
+      // always correct, unlike a live lookup against the current rolling
+      // fixtures_today.csv window, which naturally goes empty once a fixture's
+      // date ages out of it. Prefer the persisted field; fall back to the
+      // live-fixture lookup only for older manual bets that predate Phase
+      // 26.32 and genuinely have no persisted kickoff of their own.
+      function resolveManualKickoff(b) {
+        return b.kickoffUTC || findFixtureKickoff(b.data, b.liga, b.jogo);
       }
 
       function fmtKickoffTime(utcStr) {

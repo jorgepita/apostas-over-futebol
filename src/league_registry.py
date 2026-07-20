@@ -68,7 +68,15 @@ REGISTRY: list[LeagueEntry] = [
     LeagueEntry("suecia",        "Allsvenskan",                   "SWE", None,  False, "Sweden",      "Allsvenskan",         113, "calendar"),
     LeagueEntry("finlandia",     "Veikkausliiga",                 "FIN", None,  False, "Finland",     "Veikkausliiga",       244, "calendar"),
     LeagueEntry("islandia",      "Besta deild",                   "ISL", None,  False, "Iceland",     "Úrvalsdeild",         188, "calendar"),
-    LeagueEntry("mls",           "MLS",                           "USA", None,  False, "USA",         "MLS Next Pro",        909, "calendar"),
+    LeagueEntry("mls",           "MLS",                           "USA", None,  False, "USA",         "Major League Soccer", 253, "calendar"),
+    # Genuinely distinct competition, distinct API-Football ID, fully supported
+    # end-to-end (fixture fetch, generation, dashboard, settlement) exactly
+    # like every other league below — see ADR-004 update. Also registered in
+    # config.json's `leagues` / `api_football.league_ids` so
+    # fetch_oddsapi_fixtures.py generates picks for it independently of MLS.
+    # The two must never be substituted for one another (see
+    # docs/05_Known_Issues.md SETTLEMENT-3 for the incident this prevents).
+    LeagueEntry("mls_next_pro",  "MLS Next Pro",                  "USA", None,  False, "USA",         "MLS Next Pro",        909, "calendar"),
     LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", None,  False, "Brazil",      "Série A",             71,  "calendar"),
     LeagueEntry("japao",         "J1 League",                     "JPN", None,  False, "Japan",       "J1 League",           98,  "calendar"),
     LeagueEntry("coreia",        "K League 1",                    "KOR", None,  False, "South Korea", "K League 1",          292, "calendar"),

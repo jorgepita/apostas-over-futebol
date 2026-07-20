@@ -44,6 +44,7 @@ DEFAULT_LEAGUE_IDS = {
     "noruega": 103,
     "suecia": 113,
     "mls": 253,
+    "mls_next_pro": 909,
     "japao": 98,
     "coreia": 292,
     "finlandia": 244,
@@ -56,6 +57,11 @@ LEAGUE_INFO_EXT = {
     "noruega": {"name": "Eliteserien", "country": "Norway"},
     "suecia": {"name": "Allsvenskan", "country": "Sweden"},
     "mls": {"name": "MLS", "country": "USA"},
+    # Distinct competition, distinct API-Football ID from senior MLS — see
+    # ADR-004. Both are independently configured, first-class leagues; neither
+    # is ever substituted for the other (see season_for_date() below and
+    # docs/05_Known_Issues.md SETTLEMENT-3 for the incident this prevents).
+    "mls_next_pro": {"name": "MLS Next Pro", "country": "USA"},
     "japao": {"name": "J1 League", "country": "Japan"},
     "coreia": {"name": "K League 1", "country": "Korea Republic"},
     "finlandia": {"name": "Veikkausliiga", "country": "Finland"},
@@ -320,7 +326,7 @@ def build_league_map(cfg: dict) -> dict:
 
 def season_for_date(d: date, league_key: str = None) -> int:
     # Summer leagues (Calendar year)
-    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia", "brasil"}
+    summer_leagues = {"mls", "mls_next_pro", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia", "brasil"}
     if league_key in summer_leagues:
         return d.year
     # Winter leagues (Starting year)
@@ -352,6 +358,11 @@ def try_load_history_csv(league_key: str) -> Optional[pd.DataFrame]:
 # =============================
 # API-Football fixtures
 # =============================
+# No longer called from fetch_fixtures_for_league_date() (see the comment
+# there) — a zero-fixture response must not trigger competition substitution.
+# Left defined as a general-purpose lookup in case a future, deliberate,
+# one-time league-ID discovery is genuinely needed; it must not be wired
+# back into the per-date fetch path as an automatic fallback.
 def search_league_id_by_api(league_key: str, season: int) -> Optional[int]:
     info = LEAGUE_INFO_EXT.get(league_key)
     if not info:
@@ -414,13 +425,20 @@ def fetch_fixtures_for_league_date(
     data = http_get_json_api_football("/fixtures", params)
     response = data.get("response", []) if isinstance(data, dict) else []
 
+    # A configured canonical league ID (config.json / DEFAULT_LEAGUE_IDS) is
+    # authoritative and must never be silently swapped for a different
+    # competition just because a given date returned zero fixtures — a real,
+    # production MLS/MLS Next Pro identity collision was caused by exactly
+    # this substitution (see ADR-004 update). Zero fixtures for a date means
+    # no fixtures that day for the configured league, full stop. If a league
+    # genuinely has no configured ID, it is excluded from league_map()
+    # upstream and never reaches this function at all — so there is no
+    # legitimate "discovery" case left for this call site to serve.
     if not response and league_key:
-        resolved_id = search_league_id_by_api(league_key, season)
-        if resolved_id and resolved_id != league_id:
-            print(f"[DBG] Re-resolvendo league_id para {league_key}: {league_id} -> {resolved_id}")
-            params["league"] = resolved_id
-            data = http_get_json_api_football("/fixtures", params)
-            response = data.get("response", []) if isinstance(data, dict) else []
+        print(
+            f"[API-DBG] /fixtures league={league_id} season={season} date={date_iso} "
+            f"returned 0 fixtures for '{league_key}' — no competition substitution attempted"
+        )
 
     try:
         results = data.get("results", None)

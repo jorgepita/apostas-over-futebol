@@ -15,7 +15,13 @@ from update_results import api_football_season_from_date
 from src.league_registry import AF_SEASON_MODELS
 
 # ── League IDs referenced by tests ──────────────────────────────────────────
-MLS_ID            = 909   # calendar-year (MLS Next Pro — all "MLS" picks are this tier)
+# MLS_ID is senior Major League Soccer (af_id=253). It was briefly hardcoded to
+# 909 (MLS Next Pro) between Phase 26.12 and this fix — see ADR-004 update and
+# 05_Known_Issues.md — because at that time every "MLS"-labelled pick actually
+# was a reserve-league fixture. MLS_NEXT_PRO_ID is the distinct, separately
+# registered competition; both share the calendar-year season model.
+MLS_ID            = 253   # calendar-year (senior Major League Soccer)
+MLS_NEXT_PRO_ID   = 909   # calendar-year (MLS Next Pro — distinct, independently-generated competition)
 VEIKKAUSLIIGA_ID  = 244   # calendar-year (Finland)
 ELITESERIEN_ID    = 103   # calendar-year (Norway)
 ALLSVENSKAN_ID    = 113   # calendar-year (Sweden)
@@ -34,6 +40,9 @@ BUNDESLIGA_ID     = 78    # european
 
 def test_registry_mls_is_calendar():
     assert AF_SEASON_MODELS[MLS_ID] == "calendar"
+
+def test_registry_mls_next_pro_is_calendar():
+    assert AF_SEASON_MODELS[MLS_NEXT_PRO_ID] == "calendar"
 
 def test_registry_veikkausliiga_is_calendar():
     assert AF_SEASON_MODELS[VEIKKAUSLIIGA_ID] == "calendar"
@@ -83,6 +92,17 @@ def test_mls_january_2026():
 def test_mls_march_2025():
     """MLS season opener March 2025 -> 2025."""
     assert api_football_season_from_date("2025-03-01", league_id=MLS_ID) == 2025
+
+
+# ── MLS Next Pro (calendar, distinct competition) ─────────────────────────────
+
+def test_mls_next_pro_june_2026():
+    """MLS Next Pro game in June 2026 -> 2026, same calendar model as senior MLS."""
+    assert api_football_season_from_date("2026-06-13", league_id=MLS_NEXT_PRO_ID) == 2026
+
+def test_mls_next_pro_january_2026():
+    """MLS Next Pro pre-season in January 2026 -> 2026 (not 2025)."""
+    assert api_football_season_from_date("2026-01-10", league_id=MLS_NEXT_PRO_ID) == 2026
 
 
 # ── Veikkausliiga (calendar) ─────────────────────────────────────────────────
@@ -147,6 +167,10 @@ def test_unknown_league_id_august():
 def test_calendar_december():
     """December stays in the current year for calendar leagues."""
     assert api_football_season_from_date("2026-12-01", league_id=MLS_ID) == 2026
+
+def test_calendar_december_mls_next_pro():
+    """December stays in the current year for MLS Next Pro too."""
+    assert api_football_season_from_date("2026-12-01", league_id=MLS_NEXT_PRO_ID) == 2026
 
 def test_european_december():
     """December is still current season for european leagues."""

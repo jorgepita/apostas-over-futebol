@@ -29,6 +29,7 @@ LEAGUE_INFO = {
     "noruega": {"name": "Eliteserien", "country": "Norway", "id": 103},
     "suecia": {"name": "Allsvenskan", "country": "Sweden", "id": 113},
     "mls": {"name": "MLS", "country": "USA", "id": 253},
+    "mls_next_pro": {"name": "MLS Next Pro", "country": "USA", "id": 909},
     "japao": {"name": "J1 League", "country": "Japan", "id": 98},
     "coreia": {"name": "K League 1", "country": "Korea Republic", "id": 292},
     "finlandia": {"name": "Veikkausliiga", "country": "Finland", "id": 244},
@@ -250,7 +251,7 @@ def get_historical_seasons(cfg: dict, league_key: str, current_year: int, curren
         return sorted(set(seasons))
 
     # Fallback default logic
-    summer_leagues = {"mls", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia"}
+    summer_leagues = {"mls", "mls_next_pro", "noruega", "suecia", "japao", "coreia", "finlandia", "islandia"}
     if league_key in summer_leagues:
         # For summer leagues, we want current year if it has already started (Mar-May)
         if current_month >= 4:
