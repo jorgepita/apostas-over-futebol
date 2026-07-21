@@ -6545,7 +6545,8 @@
       "resultado": "",
       "scoreAtAnalysis": 63,
       "stake": "1",
-      "status": "approved"
+      "status": "approved",
+      "missingAttempts": 1
     },
     {
       "analysisSnapshot": {
@@ -8068,10 +8069,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.46",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 34,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-07-21T23:26:19.300262+00:00"
     },
     {
       "analysisSnapshot": {
@@ -8111,10 +8115,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.95",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 59,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-07-21T23:26:19.300262+00:00"
     },
     {
       "analysisSnapshot": {
@@ -8154,10 +8161,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.18",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 54,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 1.18,
+      "placar": "1-2",
+      "settledAt": "2026-07-21T23:26:19.300262+00:00"
     },
     {
       "analysisSnapshot": {
@@ -9265,8 +9275,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-21T09:52:37.331269+00:00",
-      "lastSuccessAt": "2026-07-21T09:52:37.331269+00:00",
+      "lastCheckedAt": "2026-07-21T23:26:19.302329+00:00",
+      "lastSuccessAt": "2026-07-21T23:26:19.302329+00:00",
       "status": "ok"
     }
   },
