@@ -156,7 +156,7 @@ In **top-up mode**, these files are appended rather than overwritten. `_append_c
 
 `persist_history()` calls `merge_into_history()` which reads the existing `picks_history.csv`, appends new picks, and deduplicates by `[Data, Liga, Jogo, Mercado]`. The merged file is written back to `picks_history.csv`.
 
-`update_league_stats()` then regenerates `league_stats.csv` from the updated history.
+`update_league_stats()` then regenerates `league_stats.csv` from the updated history. Since Phase 26.44, both this path (`main.py`) and the settlement path (`update_results.py`) explicitly upload the regenerated file in the same run — see Stage 8 and `04_Backend.md` §11.
 
 ---
 
@@ -465,10 +465,12 @@ Date-keyed. `load_sent_state(today_iso)` returns an empty set if the stored date
 
 | When | Who writes | Why |
 |---|---|---|
-| After every settlement run | `update_league_stats()` | Aggregates win rates and profits per league |
-| After every generation run | `update_league_stats()` | Updated with new picks even before results |
+| After every settlement run | `update_league_stats()` + upload | Aggregates win rates and profits per league |
+| After every generation run | `update_league_stats()` + upload | Updated with new picks even before results |
 
 The browser fetches this via `loadLeagueStats()` at startup and displays it in the Analytics page.
+
+**Persistence invariant (Phase 26.44):** regenerating this file locally has no effect on its own — GitHub Actions runners are ephemeral, so an unpushed write is discarded at job end. Prior to Phase 26.44, both call sites regenerated the file but neither uploaded it, leaving `league_stats.csv` frozen at its last manually-triggered date (2026-05-24) for ~2 months regardless of ongoing settlement/generation activity. Both call sites now upload the file in the same run it is regenerated. See `05_Known_Issues.md` ANALYTICS-1.
 
 ---
 

@@ -14,6 +14,22 @@ None currently open.
 
 ## Resolved Issues
 
+### ANALYTICS-1 — `league_stats.csv` Regenerated Locally on Every Settlement/Generation Run but Never Uploaded, Freezing "Desempenho por Liga" at a 2026-05-24 Snapshot for ~2 Months
+
+**Status:** Resolved — 2026-07-21 (Phase 26.44). Full technical detail in `08_Change_Log.md` — Phase 26.44. See `04_Backend.md` §11 "Derived-file persistence invariant".
+
+**Was:** Dashboard → Análises → "A — Desempenho por Liga" (and its 4 top insight cards, which read the identical dataset) showed only ~15 stale league/market rows, all carrying `LastUpdate: 2026-05-24T11:43:08Z`, regardless of how much real settlement/generation activity had happened since — including the entire MLS/MLS Next Pro routing fix (Phase 26.42) and every bet settled under it. A read-only investigation (prompted by MLS's absence from the table) confirmed MLS alone had 22 real, resolved-or-pending picks in `picks_history.csv` that were fully Analytics-eligible and simply never reached the derived file.
+
+**Root cause:** `src/league_stats.py::update_league_stats()` correctly recomputes `league_stats.csv` from `picks_history.csv` on both production paths that call it — `update_results.py::main()` (GitHub Actions settlement, 07:00/22:30 UTC) and `main.py` (via `src/pipeline.py::persist_history()`, called by GitHub Actions generation at 17:00 UTC and top-up at 23:00 UTC) — but the regenerated file was **never included in either path's GitHub upload list** (`update_results.py::main()`'s `upload_csv_to_github()` calls only covered `HISTORY_FILE`/`DAILY_FILE`; `main.py`'s `upload_outputs()` list only covered the picks output files). Since GitHub Actions runners are ephemeral, the correctly-computed local file was discarded at the end of every single run, with zero durable effect — while `picks_history.csv` itself (uploaded correctly) kept advancing normally. This affected every league equally; nothing about it was MLS-specific.
+
+A narrow, related audit found `sent_state.json` and `team_alias_cache.json` share the identical write-locally-never-upload pattern (both files' last commits predate or coincide with `league_stats.csv`'s), suggesting a repeated persistence mistake rather than an isolated one. **Not fixed in this phase** — deliberately out of scope; flagged for a future, separately-scoped investigation, since neither file is directly dashboard-visible the way `league_stats.csv` is, and the practical impact needs its own assessment.
+
+**Fix:** `update_results.py::main()` now calls a new `_persist_league_stats()` helper — `update_league_stats()` followed immediately by `upload_csv_to_github(LEAGUE_STATS_FILE, "league_stats.csv")`, in one `try/except` that preserves this derived file's pre-existing failure tolerance (a computation or upload problem is logged and skipped, never allowed to abort the history/daily settlement that already succeeded above it). `main.py`'s `upload_outputs()` call now additionally includes `HISTORY_PATH.parent / 'league_stats.csv'`, using the exact same path convention `update_league_stats()` itself defaults to. `update_results.py::run_settlement_remote()` (the Railway on-demand "Executar Resolução" path) does not call `update_league_stats()` at all and is unaffected — unchanged from before this fix. No Analytics calculation (`groupby`, `ROI%`, `WinRate%`, `Tier`, P handling, minimum-sample/"Unproven" behaviour) was touched.
+
+**Verification:** running the real `update_league_stats()` against current production `picks_history.csv` (scratch output only, not committed) produced 27 rows including `MLS/O2.5` (21 picks, 11W/7L/3 pending, ROI −18.05%, Tier Weak) and `MLS/BTTS` (1 pick, 100% win rate) — confirming MLS is fully Analytics-eligible and was purely blocked by the upload gap. MLS Next Pro correctly produced no row (zero currently-labelled records in production; a separate, deferred data-identity issue — not this bug) — this is expected, data-driven behaviour, not forced.
+
+---
+
 ### SETTLEMENT-4 — `HISTORY_COLUMNS` Schema Drift Silently Erased `Placar` From Every Settled Row on Each Daily Generation Cycle (Already Active in Production)
 
 **Status:** Resolved — 2026-07-21 (Phase 26.43's pre-commit safety audit, discovered while verifying the phase's own new `SettlementReason`/`MissingAttempts` columns). Full technical detail in `08_Change_Log.md` — Phase 26.43. See ADR-017's "Correction" section.

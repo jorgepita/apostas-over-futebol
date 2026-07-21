@@ -536,8 +536,16 @@ def main(topup_mode: bool = False):
     owner = "jorgepita"
     repo = "apostas-over-futebol"
     branch = "main"
+    # persist_history() already called update_league_stats(HISTORY_PATH) above
+    # (with out_path defaulting to HISTORY_PATH.parent / 'league_stats.csv' —
+    # see src/league_stats.py), regenerating this run's Analytics data. That
+    # local write is otherwise discarded when the ephemeral GitHub Actions
+    # runner exits — league_stats.csv must be uploaded exactly like every
+    # other generated output below, or the dashboard's "Desempenho por Liga"
+    # never reflects new picks/settlements.
+    league_stats_path = HISTORY_PATH.parent / 'league_stats.csv'
     upload_outputs(
-        [out25_path, out_btts_path, combo_path, combo_github_path, simple_path, HISTORY_PATH],
+        [out25_path, out_btts_path, combo_path, combo_github_path, simple_path, HISTORY_PATH, league_stats_path],
         owner,
         repo,
         branch,

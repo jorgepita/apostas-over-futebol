@@ -521,8 +521,14 @@ update_dataframe(history_df, "history", shared_state)
     → writes W/L/P + Lucro€ to history rows
 history_df.to_csv(HISTORY_FILE)
 
-update_league_stats(HISTORY_FILE, 'league_stats.csv')
-    → recomputes per-league aggregates
+_persist_league_stats(HISTORY_FILE, LEAGUE_STATS_FILE, "league_stats.csv")
+    → update_league_stats(HISTORY_FILE, LEAGUE_STATS_FILE): recomputes per-league aggregates
+    → upload_csv_to_github(LEAGUE_STATS_FILE, "league_stats.csv"): persists immediately
+      (Phase 26.44 fix — see ADR/Known Issues: previously computed locally only,
+      discarded on the ephemeral runner, never actually reaching GitHub)
+    → both steps share one try/except: a computation or upload failure here is
+      logged and skipped, never allowed to abort the history/daily settlement
+      that already succeeded above
 
 update_dataframe(daily_df, "daily", shared_state)
     → writes W/L/P + Lucro€ to daily rows
@@ -939,12 +945,16 @@ All secrets and deployment-specific settings are environment variables, not in `
 | `cloud_state.json` | Railway (browser-initiated) | `sync_server.py POST /save`; `update_results.py` (manual settlement; provider health) | `sync_server.py GET /load`; `update_results.py` (manual settlement); browser (via Railway) | On every user state change (debounced 4s); after manual settlement; whenever a settlement run contacts any provider (`providerHealth`, even with 0 newly-settled bets — see §7) | On dashboard startup; on "Load Cloud"; after settlement |
 | `fixtures_today.csv` | GitHub Actions | `fetch_oddsapi_fixtures.py` | `main.py` (pick generation); browser (Scout kickoff lookup) | Once per generation run | Once per generation pipeline; on demand from browser |
 | `picks_history.csv` | GitHub Actions | `update_results.py` (settlement); `main.py` (via `persist_history()`) | `update_results.py`; browser; `src/league_stats.py` | Multiple times daily | Multiple times daily |
-| `league_stats.csv` | GitHub Actions | `src/league_stats.update_league_stats()` (called after settlement and generation) | Browser (analytics page) | After every settlement + generation run | On dashboard startup |
+| `league_stats.csv` | GitHub Actions | `src/league_stats.update_league_stats()` (regenerates), uploaded via `_persist_league_stats()` (settlement, `update_results.py::main()`) or `upload_outputs()` (generation, `main.py`) — see Phase 26.44/ADR notes below | Browser (Analytics → "Desempenho por Liga") | After every settlement (`main()`, 07:00/22:30 UTC) + generation (`main.py`, 17:00 UTC + 23:00 UTC top-up) run | On dashboard startup |
 | `sent_state.json` | GitHub Actions | `src/state.save_sent_state()` | `src/state.load_sent_state()` | After each generation run | Before each generation run |
 | `team_alias_cache.json` | Railway / GitHub Actions | `save_team_alias_cache()` (after settlement) | `load_team_alias_cache()` (at settlement start) | After settlement when new aliases are learned | At settlement start |
 | `data_raw/{league_key}.csv` | Manual / external | External (football-data.org historical download, `fetch_historical.py`) | `fetch_oddsapi_fixtures.py`; `main.py` (via `src/pick_generation.py`) | Infrequent (manual refresh) | Every generation run, per league |
 | `picks_over25.csv` | GitHub Actions | `main.py` (via `save_all_outputs()`) | Not consumed by settlement or dashboard directly | Once per generation run | Rarely |
 | `picks_hoje.csv` | GitHub Actions | `main.py` (via `save_all_outputs()`) | Not consumed by settlement or dashboard directly | Once per generation run | Rarely |
+
+**Derived-file persistence invariant (Phase 26.44).** `league_stats.csv` is a *derived* production artifact — recomputed from `picks_history.csv` — not user input. Whenever a production path regenerates it via `update_league_stats()`, that regeneration must also be uploaded to GitHub in the same run; a local-only write on an ephemeral GitHub Actions runner has zero durable effect. Before this phase, both production call sites (`update_results.py::main()`'s settlement path and `main.py`'s generation path, via `src/pipeline.py::persist_history()`) recomputed the file locally but never uploaded it, leaving it frozen at a 2026-05-24 snapshot for ~2 months of continuous settlement/generation activity — see `05_Known_Issues.md` (resolved) and ADR update below. `update_results.py::run_settlement_remote()` (the Railway on-demand "Executar Resolução" path) does **not** call `update_league_stats()` at all and is unaffected by this fix — `league_stats.csv` is only ever refreshed by the two scheduled GitHub Actions paths above, consistent with how it worked (when it worked) before this phase.
+
+A narrow, read-only audit for the same pattern elsewhere found `sent_state.json` and `team_alias_cache.json` are *also* written locally-only with no GitHub upload call in either writer (`src/state.save_sent_state()`, `update_results.py::save_team_alias_cache()`) — both files' last commits (`b7b4f5c4` and `ce963111` respectively) predate or coincide with `league_stats.csv`'s own last commit, suggesting a repeated pattern rather than an isolated omission. **Not fixed in this phase** — explicitly out of scope; flagged here for a future, separately-scoped investigation. Unlike `league_stats.csv`, neither file is directly user-visible in the dashboard, so the practical impact (if any) is different and needs its own assessment before a fix is designed.
 
 ---
 

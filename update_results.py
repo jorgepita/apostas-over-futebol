@@ -27,6 +27,7 @@ load_dotenv()
 BASE = Path(__file__).resolve().parent
 DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
 HISTORY_FILE = BASE / "picks_history.csv"
+LEAGUE_STATS_FILE = BASE / "league_stats.csv"
 
 API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
@@ -38,6 +39,7 @@ GITHUB_BRANCH = "main"
 
 REMOTE_DAILY_NAME = "picks_hoje_simplificado.csv"
 REMOTE_HISTORY_NAME = "picks_history.csv"
+REMOTE_LEAGUE_STATS_NAME = "league_stats.csv"
 CLOUD_STATE_NAME = "cloud_state.json"
 
 # LEAGUE_CODE_MAP, BLOCKED_FOOTBALL_DATA_CODES and API_FOOTBALL_FALLBACK_COMPETITIONS
@@ -3142,6 +3144,30 @@ def run_settlement_remote() -> dict:
     return build_settlement_result(total_updated, total_ignored, duration, shared_state)
 
 
+def _persist_league_stats(history_file: Path, league_stats_file: Path, remote_name: str) -> None:
+    """Regenerates league_stats.csv from history_file and immediately uploads
+    it — regeneration without persistence has zero effect, since GitHub
+    Actions runners are ephemeral and a local-only write here is discarded
+    the moment this job ends (this is the exact gap that left the
+    dashboard's "Desempenho por Liga" frozen at a 2026-05-24 snapshot for
+    months while picks_history.csv kept advancing — see
+    docs/05_Known_Issues.md).
+
+    Deliberately a single try/except around both steps, not two: this
+    preserves the derived file's pre-existing failure tolerance exactly (a
+    computation or upload problem here is logged and skipped, never allowed
+    to abort settlement — history/daily settlement already succeeded above
+    and must not be lost over an Analytics-file hiccup) while guaranteeing
+    correct ordering by construction — upload can only ever run against
+    freshly-regenerated content, never a stale prior copy.
+    """
+    try:
+        update_league_stats(history_file, league_stats_file)
+        upload_csv_to_github(league_stats_file, remote_name)
+    except Exception as e:
+        print(f"[WARN] falha a atualizar/persistir league_stats.csv -> {e}")
+
+
 # =============================
 # Main
 # =============================
@@ -3169,10 +3195,7 @@ def main():
 
     history_df, h_updated, h_done, h_ignored = update_dataframe(history_df, "history", shared_state)
     history_df.to_csv(HISTORY_FILE, index=False, sep=";", encoding="utf-8")
-    try:
-        update_league_stats(HISTORY_FILE, BASE / 'league_stats.csv')
-    except Exception as e:
-        print(f"[WARN] falha a atualizar league_stats.csv -> {e}")
+    _persist_league_stats(HISTORY_FILE, LEAGUE_STATS_FILE, REMOTE_LEAGUE_STATS_NAME)
     print(f"History atualizado: {h_updated} | já resolvidos: {h_done} | ignorados: {h_ignored}")
 
     daily_df, d_updated, d_done, d_ignored = update_dataframe(daily_df, "daily", shared_state)
