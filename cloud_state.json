@@ -3784,6 +3784,30 @@
     "2026-07-23|brasil|Botafogo vs Vitoria|Over 2.5": {
       "apostada": true,
       "stakeReal": "1.5"
+    },
+    "2026-07-22|coreia|Gwangju FC vs Gimcheon Sangmu FC|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-22|noruega|Lillestrom vs Viking|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-24|finlandia|FF Jaro vs SJK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-25|noruega|Kristiansund BK vs Start|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-25|suecia|Kalmar FF vs Mjallby AIF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-25|mls|New York Red Bulls vs Charlotte|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -8818,7 +8842,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-21T09:50:45.515Z",
-  "activeTab": "tab-manual",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
