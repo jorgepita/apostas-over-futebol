@@ -1,9 +1,9 @@
-Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC
-2026-07-21;Campeonato Brasileiro Serie A;Atletico-MG vs Bahia;O2.5;1.95;1.17;8.58;;;;;;;;2026-07-21T23:30:00+01:00
-2026-07-22;K League 1;Gwangju FC vs Gimcheon Sangmu FC;O2.5;2.12;1.4;9.79;;;;;;;;2026-07-22T11:30:00+01:00
-2026-07-22;Eliteserien;Lillestrom vs Viking;O2.5;1.57;0.37;4.15;;;;;;;;2026-07-22T18:00:00+01:00
-2026-07-23;Campeonato Brasileiro Serie A;Botafogo vs Vitoria;O2.5;1.82;1.72;11.89;;;;;;;;2026-07-23T23:30:00+01:00
-2026-07-24;Veikkausliiga;FF Jaro vs SJK;O2.5;1.65;1.35;8.28;;;;;;;;2026-07-24T17:00:00+01:00
-2026-07-25;Eliteserien;Kristiansund BK vs Start;O2.5;1.74;1.02;10.38;;;;;;;;2026-07-25T15:00:00+01:00
-2026-07-25;Allsvenskan;Kalmar FF vs Mjallby AIF;O2.5;1.85;0.67;8.18;;;;;;;;2026-07-25T16:30:00+01:00
-2026-07-25;MLS;New York Red Bulls vs Charlotte;O2.5;1.55;0.73;7.48;;;;;;;;2026-07-25T23:30:00+01:00
+Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
+2026-07-21;Campeonato Brasileiro Serie A;Atletico-MG vs Bahia;O2.5;1.93;0.63;8.05;;;;;;;;2026-07-21T23:30:00+01:00;;
+2026-07-22;K League 1;Gwangju FC vs Gimcheon Sangmu FC;O2.5;2.14;0.89;10.23;;;;;;;;2026-07-22T11:30:00+01:00;;
+2026-07-22;Eliteserien;Lillestrom vs Viking;O2.5;1.56;0.18;3.75;;;;;;;;2026-07-22T18:00:00+01:00;;
+2026-07-23;Campeonato Brasileiro Serie A;Botafogo vs Vitoria;O2.5;1.83;1.04;12.19;;;;;;;;2026-07-23T23:30:00+01:00;;
+2026-07-24;Veikkausliiga;FF Jaro vs SJK;O2.5;1.65;0.81;8.28;;;;;;;;2026-07-24T17:00:00+01:00;;
+2026-07-25;Eliteserien;Kristiansund BK vs Start;O2.5;1.74;1.04;10.38;;;;;;;;2026-07-25T15:00:00+01:00;;
+2026-07-25;Allsvenskan;Kalmar FF vs Mjallby AIF;O2.5;1.85;0.68;8.18;;;;;;;;2026-07-25T16:30:00+01:00;;
+2026-07-25;MLS;New York Red Bulls vs Charlotte;O2.5;1.55;0.74;7.48;;;;;;;;2026-07-25T23:30:00+01:00;;
