@@ -14,6 +14,22 @@ None currently open.
 
 ## Resolved Issues
 
+### SETTLEMENT-4 — `HISTORY_COLUMNS` Schema Drift Silently Erased `Placar` From Every Settled Row on Each Daily Generation Cycle (Already Active in Production)
+
+**Status:** Resolved — 2026-07-21 (Phase 26.43's pre-commit safety audit, discovered while verifying the phase's own new `SettlementReason`/`MissingAttempts` columns). Full technical detail in `08_Change_Log.md` — Phase 26.43. See ADR-017's "Correction" section.
+
+**Was:** Every settled row's `Placar` (final score, added Phase 26.19) was silently stripped from `picks_history.csv` on each daily generation run. Confirmed already active against real production data at the time this was discovered: 90 of 93 settled rows in the live file had an empty `Placar`, only the 3 most recent (not yet through a generation cycle) still had it.
+
+**Root cause:** `src/history.py`'s `HISTORY_COLUMNS` — a separate, hardcoded 14-field schema list consumed by `load_history()`/`ensure_simple_columns()`/`merge_into_history()` (the daily-generation persistence path, `main.py` → `persist_history()` — distinct from `update_results.py`'s settlement engine and its own `CSV_COLUMNS`, which *did* get `Placar` added correctly in Phase 26.19) — was never updated to include it. `ensure_simple_columns()`'s reindex (`df[HISTORY_COLUMNS]`) is a hard "keep only these columns" operation, not a union — so `load_history()` dropped `Placar` from every row the moment it read `picks_history.csv`, and `merge_into_history()` wrote the stripped result back. Because `Resultado`/`Lucro€`/`LucroReal€` *are* in `HISTORY_COLUMNS`, a settled row still looked `already_done` to `update_dataframe()` on every subsequent settlement run — so the field, once stripped, was never re-populated. This was purely a display/analytics-field loss; no financial value (`Resultado`, `Lucro€`, `LucroReal€`) was ever affected.
+
+**Discovered via:** Phase 26.43 (the postponed/cancelled/missing-fixture void policy, see ADR-017) added two new settlement-written fields, `SettlementReason` and `MissingAttempts`, to `update_results.py`'s `CSV_COLUMNS` — a pre-commit safety audit tracing their persistence lifecycle found they would be exposed to the identical erasure path, which led to finding `Placar` already silently affected in production.
+
+**Fix:** `HISTORY_COLUMNS` extended to include `Placar`, `SettlementReason`, and `MissingAttempts`, restoring it as an exact mirror of `CSV_COLUMNS`. `src/pipeline.py`'s `save_all_outputs()` — a second, separate consumer that reindexes to `HISTORY_COLUMNS` directly without `ensure_simple_columns()`'s add-if-missing safety net — gained explicit blank-column assignments for the three fields (it would otherwise raise `KeyError` on every generation run once the schema grew). A new regression suite, `tests/test_history_schema.py`, asserts `HISTORY_COLUMNS` stays a set-equal mirror of `CSV_COLUMNS` going forward, specifically to catch the next drift immediately instead of after 11+ days of silent production loss.
+
+**This fix is preventative only.** It does not and must not attempt to reconstruct the already-lost historical `Placar` values for the ~90 affected rows — that would require querying providers for old fixture data and was explicitly out of scope for this correction. Historical `Placar` reconstruction, if ever desired, must be a separate, explicitly-approved data-repair task.
+
+---
+
 ### SETTLEMENT-3 — MLS Settlement Queried MLS Next Pro (API-Football ID Collision), Leaving Every Senior MLS Bet Unresolved
 
 **Status:** Resolved — 2026-07-20 (Phase 26.42). Full technical detail in `08_Change_Log.md` — Phase 26.42. See ADR-004 update.

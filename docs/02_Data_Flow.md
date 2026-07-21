@@ -365,12 +365,15 @@ manual_bets_to_settlement_df()
    Resultado: "W" / "L" / "P"
    Placar: final score (e.g. "2-1")
    Lucro€: profit calculation
+   SettlementReason: blank, or why a P was a void (Phase 26.43 — ADR-017)
+   MissingAttempts: persisted evidence counter for the missing-fixture safeguard
          │
 apply_df_results_to_manual_bets()
-   └─ copies resultado/lucro/placar back to bet objects (1:1 index)
+   └─ copies resultado/lucro/placar/settlementReason back to bet objects (1:1 index)
+   └─ always copies missingAttempts, even for a bet that stays unresolved
    └─ status → 'settled' UNLESS status was already 'rejected' (ADR-012)
          │
-   if newly_settled > 0:
+   if newly_settled > 0 OR evidence_changed > 0:
          │ GitHub Contents API PUT (upload)
          ▼
 cloud_state.json (GitHub) — manualBets array updated

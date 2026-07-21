@@ -20,6 +20,7 @@ from src.league_registry import (
     AF_SEASON_MODELS,
     REGISTRY_BY_KEY,
 )
+from src.config import load_config, get_void_policy
 
 load_dotenv()
 
@@ -48,12 +49,21 @@ SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
 CSV_COLUMNS = [
     "Data", "Liga", "Jogo", "Mercado", "Odd", "Stake€", "Edge%",
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Placar", "Lucro€", "LucroReal€", "KickoffUTC"
+    "Resultado", "Placar", "Lucro€", "LucroReal€", "KickoffUTC",
+    # Additive (Part 11/ADR-017): SettlementReason records *why* a P was
+    # written (postponed_timeout/cancelled_timeout/abandoned_timeout/
+    # interrupted_timeout/missing_fixture_timeout/manual_void), blank for
+    # every normal W/L/P. MissingAttempts is a working counter — consecutive
+    # genuine NO_MATCH observations since kickoff, the persisted evidence the
+    # missing-fixture safeguard requires before it will ever auto-void (see
+    # _evaluate_missing_fixture_void()). Existing rows read both back as ""
+    # via ensure_columns(), exactly like Placar did when it was added.
+    "SettlementReason", "MissingAttempts",
 ]
 
 SYNC_RESULT_COLUMNS = [
     "Apostada", "OddReal", "StakeReal€",
-    "Resultado", "Placar", "Lucro€", "LucroReal€"
+    "Resultado", "Placar", "Lucro€", "LucroReal€", "SettlementReason"
 ]
 
 HTTP_TIMEOUT = 30
@@ -76,6 +86,101 @@ AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
 
 RESULT_READY_DELAY = timedelta(hours=2, minutes=15)
 EARLY_STATUS_IGNORE = {"NS", "TBD", "SCHEDULED", "TIMED", "1H", "HT", "2H", "ET", "BT", "LIVE", "IN_PLAY"}
+
+# =============================
+# Fixture status classification (postponed/cancelled/missing-fixture voiding)
+#
+# A provider status is never enough on its own to decide whether a pick is
+# "done" — see docs/09_Architecture_Decisions.md ADR-017. Four buckets,
+# in addition to the pre-existing *_FINISHED_STATUS sets above:
+#
+#   IN_PROGRESS         — the match is currently being played (or between
+#                          periods). Never a void candidate at any age.
+#   NON_PLAYED           — the provider says, with reasonable finality, that
+#                          the match will not complete under this fixture:
+#                          postponed (not yet played, effectively
+#                          rescheduled), cancelled, or abandoned (API-Football
+#                          semantics: a final "will not continue under this
+#                          fixture ID" determination, not "may still resume").
+#                          Eligible for the 48h explicit-status auto-void.
+#   SUSPENDED_INTERRUPTED — a match that started and was temporarily halted
+#                          (weather, floodlights, crowd trouble, ...) and is
+#                          commonly expected to resume, same day or on a
+#                          later date, often continuing from the same score
+#                          under the SAME fixture ID. Voiding this merely
+#                          because 48h have elapsed since the ORIGINAL
+#                          kickoff would incorrectly void a wager whose match
+#                          is still going to finish and produce a real result
+#                          (e.g. interrupted Monday, resumes and finishes
+#                          Friday — 48h lands mid-week, before resumption).
+#                          A prior version of this policy grouped these with
+#                          NON_PLAYED; a dedicated safety re-audit (Phase
+#                          26.44) found that unsafe and corrected it. These
+#                          statuses are deliberately NOT given their own
+#                          separate timeout — they fall through to the same
+#                          treatment as SCHEDULED_UNKNOWN below (never an
+#                          automatic-void trigger). The 24h manual "Anular
+#                          aposta" fallback remains available if the user
+#                          knows the real bookmaker has already voided the
+#                          wager despite the fixture nominally being able to
+#                          resume.
+#   (anything else)     — SCHEDULED/UNKNOWN (NS, TBD, or an unrecognised
+#                          code — this bucket is also where
+#                          SUSPENDED_INTERRUPTED statuses actually land,
+#                          since no separate classify_*_status() return value
+#                          exists for them; see the *_SUSPENDED_INTERRUPTED_
+#                          STATUS sets below, kept only for documentation and
+#                          test clarity). Treated exactly like today: "not
+#                          finished yet", never itself a void trigger. AWD/WO
+#                          (technical loss/walkover) are deliberately left
+#                          unclassified — rare, and their goal data is not
+#                          reliable enough to either settle or void
+#                          automatically; they remain open (manual void
+#                          after 24h still applies to them).
+# =============================
+AF_IN_PROGRESS_STATUS = {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"}
+AF_NON_PLAYED_STATUS = {"PST", "CANC", "ABD"}
+# Documentation-only — NOT consulted by classify_af_status(); these statuses
+# are intentionally absent from AF_NON_PLAYED_STATUS above and therefore
+# already fall through to the safe SCHEDULED_UNKNOWN default. Listed here so
+# a future edit doesn't accidentally re-add them to AF_NON_PLAYED_STATUS
+# without re-reading why they were removed (see the comment block above).
+AF_SUSPENDED_INTERRUPTED_STATUS = {"SUSP", "INT"}
+
+FD_IN_PROGRESS_STATUS = {"IN_PLAY", "PAUSED"}
+FD_NON_PLAYED_STATUS = {"POSTPONED", "CANCELLED"}
+FD_SUSPENDED_INTERRUPTED_STATUS = {"SUSPENDED"}  # documentation-only, see above
+
+AF_VOID_REASON_BY_STATUS = {
+    "PST": "postponed_timeout",
+    "CANC": "cancelled_timeout",
+    "ABD": "abandoned_timeout",
+}
+FD_VOID_REASON_BY_STATUS = {
+    "POSTPONED": "postponed_timeout",
+    "CANCELLED": "cancelled_timeout",
+}
+
+MISSING_FIXTURE_VOID_REASON = "missing_fixture_timeout"
+MANUAL_VOID_REASON = "manual_void"
+
+# Void policy thresholds — canonical values live in config.json
+# ["settlement"]["void_policy"]; DEFAULT_* fallbacks live in src/config.py
+# (ADR-010's pattern for every other config-driven value). Loaded once at
+# import time, like every other module-level settlement constant.
+_VOID_POLICY = get_void_policy(load_config(BASE))
+POSTPONED_VOID_AFTER_HOURS = _VOID_POLICY["postponed_void_after_hours"]
+MISSING_FIXTURE_VOID_AFTER_HOURS = _VOID_POLICY["missing_fixture_void_after_hours"]
+MANUAL_VOID_AVAILABLE_AFTER_HOURS = _VOID_POLICY["manual_void_available_after_hours"]
+MISSING_FIXTURE_MIN_ATTEMPTS = _VOID_POLICY["missing_fixture_min_attempts"]
+
+POSTPONED_VOID_TIMEDELTA = timedelta(hours=POSTPONED_VOID_AFTER_HOURS)
+MISSING_FIXTURE_VOID_TIMEDELTA = timedelta(hours=MISSING_FIXTURE_VOID_AFTER_HOURS)
+
+# Bounded, forward-only rediscovery window for a mature missing-fixture void
+# candidate (Part 5 / ADR-017) — see attempt_rediscovery_af(). Deliberately
+# not configurable: it is a search-cost bound, not a policy decision.
+REDISCOVERY_MAX_FORWARD_DAYS = 14
 
 TEAM_ALIAS_CACHE_FILE = str(BASE / "team_alias_cache.json")
 
@@ -898,6 +1003,152 @@ def should_try_result_update_from_fixture(
         now_dt = now_dt.replace(tzinfo=timezone.utc)
 
     return now_dt >= (kickoff_dt + RESULT_READY_DELAY), kickoff_dt
+
+
+# =============================
+# Postponed/cancelled/missing-fixture voiding — see ADR-017
+# =============================
+
+def parse_kickoff_utc(value) -> datetime | None:
+    """Parses a row's own persisted KickoffUTC (the ORIGINAL scheduled
+    kickoff — see try_update_row_via_api_football(), which only ever
+    overwrites this field once a fixture is matched AND finished, so it
+    stays stable for the entire lifetime of an unresolved void candidate).
+    Returns None on empty/unparseable input — callers must treat that as
+    "cannot safely compute an age", never as "age is zero"."""
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        dt = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def hours_since(dt: datetime, now_dt: datetime | None = None) -> float:
+    now_dt = now_dt or datetime.now(timezone.utc)
+    if now_dt.tzinfo is None:
+        now_dt = now_dt.replace(tzinfo=timezone.utc)
+    return (now_dt - dt).total_seconds() / 3600.0
+
+
+def classify_af_status(status_upper: str) -> str:
+    if status_upper in AF_FINISHED_STATUS:
+        return "FINISHED"
+    if status_upper in AF_NON_PLAYED_STATUS:
+        return "NON_PLAYED"
+    if status_upper in AF_IN_PROGRESS_STATUS:
+        return "IN_PROGRESS"
+    return "SCHEDULED_UNKNOWN"
+
+
+def classify_fd_status(status_upper: str) -> str:
+    if status_upper in FD_FINISHED_STATUS:
+        return "FINISHED"
+    if status_upper in FD_NON_PLAYED_STATUS:
+        return "NON_PLAYED"
+    if status_upper in FD_IN_PROGRESS_STATUS:
+        return "IN_PROGRESS"
+    return "SCHEDULED_UNKNOWN"
+
+
+def _parse_int(value, default: int = 0) -> int:
+    try:
+        s = str(value).strip()
+        return int(s) if s else default
+    except (TypeError, ValueError):
+        return default
+
+
+def void_result_row(df: pd.DataFrame, idx, row, reason: str) -> float:
+    """Writes P (push/void) to a row using the exact same fields/formulas
+    normal settlement writes (calc_profit/calc_real_profit — Part 9: no
+    special-case arithmetic, reuse the existing, already-correct P handling)
+    plus the additive SettlementReason audit field (Part 11). Returns the
+    model profit written (always 0.0 for P)."""
+    stake = parse_float(row.get("Stake€", ""), 0.0)
+    odd = parse_float(row.get("Odd", ""), 0.0)
+
+    lucro = calc_profit("P", stake, odd)
+    df.at[idx, "Resultado"] = "P"
+    df.at[idx, "Placar"] = ""
+    df.at[idx, "Lucro€"] = str(lucro)
+    df.at[idx, "SettlementReason"] = reason
+
+    lucro_real = calc_real_profit(
+        row.get("Apostada", ""),
+        "P",
+        parse_float(row.get("StakeReal€", ""), 0.0),
+        parse_float(row.get("OddReal", ""), 0.0),
+    )
+    if lucro_real != "":
+        df.at[idx, "LucroReal€"] = lucro_real
+
+    return lucro
+
+
+def attempt_rediscovery_af(
+    league_code: str,
+    home_csv: str,
+    away_csv: str,
+    original_kickoff_dt: datetime,
+    shared_state: dict,
+    label: str,
+):
+    """One bounded, forward-only wide-date search for a fixture that may
+    have been rescheduled far enough from its original kickoff that the
+    normal same-date (+/- 1 day) lookup never finds it (Part 5 — the
+    Chicago Fire vs Vancouver Whitecaps case). Only ever called once a bet
+    has become a *mature* missing-fixture void candidate (see
+    _evaluate_missing_fixture_void()) — never on every settlement run for
+    every open pick, so the extra API cost is bounded to rare stragglers,
+    not multiplied across the whole board (Part 15).
+
+    Searches AF only: by the time a row reaches this function, AF is always
+    the provider that most recently said NO_MATCH (every league has an AF
+    fallback — see league_registry.py — so a genuine NO_MATCH this deep into
+    the pipeline was already an AF answer). Forward-only because postponed
+    fixtures are rescheduled later, not earlier. Reuses
+    fetch_api_football_fixtures_for_league_date()'s own per-run
+    (league, date) cache, so multiple mature candidates in the same league
+    share the same handful of extra requests.
+
+    Returns the matched fixture dict, or None if nothing was found in the
+    window. Team-name matching uses the exact same thresholds as every other
+    match in this file (MATCH_MIN_TOTAL_SCORE/MATCH_MIN_SIDE_SCORE) — no
+    loosening for this "last resort" search, per Part 5's explicit warning
+    against fuzzy-matching a different fixture.
+    """
+    if not league_code or not home_csv or not away_csv:
+        return None
+
+    base_date = original_kickoff_dt.date()
+    for offset in range(2, REDISCOVERY_MAX_FORWARD_DAYS + 1):
+        date_str = (base_date + timedelta(days=offset)).isoformat()
+        fixtures, _reason = fetch_api_football_fixtures_for_league_date(league_code, date_str, shared_state)
+        if not fixtures:
+            continue
+        matched, score, meta = find_best_fixture_match(
+            home_csv, away_csv, fixtures, shared_state,
+            min_total_score=MATCH_MIN_TOTAL_SCORE, min_side_score=MATCH_MIN_SIDE_SCORE,
+        )
+        if matched:
+            print(
+                f"[DBG] {label}: rediscovery hit | '{home_csv} vs {away_csv}' | "
+                f"league={league_code} | date={date_str} | score={score}"
+            )
+            return matched
+
+    print(
+        f"[DBG] {label}: rediscovery exhausted, nothing found | "
+        f"'{home_csv} vs {away_csv}' | league={league_code} | "
+        f"window=+2..+{REDISCOVERY_MAX_FORWARD_DAYS}d from {base_date.isoformat()}"
+    )
+    return None
+
 
 def score_fixture_match(
     row_home: str,
@@ -1945,6 +2196,21 @@ def try_update_row_via_api_football(
 
     status = str(get_fixture_status(matched)).upper()
     if status not in AF_FINISHED_STATUS:
+        classification = classify_af_status(status)
+        if classification == "NON_PLAYED":
+            original_kickoff_dt = parse_kickoff_utc(row.get("KickoffUTC", ""))
+            if original_kickoff_dt and hours_since(original_kickoff_dt) >= POSTPONED_VOID_AFTER_HOURS:
+                reason = AF_VOID_REASON_BY_STATUS.get(status, "postponed_timeout")
+                void_result_row(df, idx, row, reason)
+                log_pick_diag(
+                    label, idx, row, "api_football_status", "VOIDED_NON_PLAYED_TIMEOUT",
+                    status=status, void_reason=reason, match=format_fixture_diag(matched),
+                )
+                print(
+                    f"[VOID] {label}: {jogo} auto-voided as P (status={status}, reason={reason}, "
+                    f"kickoff+{POSTPONED_VOID_AFTER_HOURS:.0f}h elapsed)"
+                )
+                return True, "VOIDED_NON_PLAYED"
         print(f"[DBG] {label}: API-Football ainda não terminado: {jogo} | status={status}")
         log_pick_diag(
             label, idx, row, "api_football_status", "NOT_FINISHED",
@@ -2017,6 +2283,98 @@ def make_shared_runtime_state():
 # =============================
 # Core update
 # =============================
+def _evaluate_missing_fixture_void(df: pd.DataFrame, idx, row, label: str, shared_state: dict):
+    """Part 4/5 (ADR-017) — the persistent-missing-fixture safeguard.
+
+    Callers must only invoke this when THIS run's own provider lookup for
+    this row concluded with a genuine NO_MATCH (fixtures were fetched
+    successfully; none matched) — never on a provider error, which is a
+    different reason string entirely and is never routed here. That is what
+    satisfies Part 4's safety rule: a failed API request/provider outage is
+    never counted as evidence the fixture itself is missing.
+
+    Returns "voided" (wrote P), "settled" (the bounded rediscovery search
+    found the fixture already finished and wrote a real W/L), or None (still
+    unresolved — either not enough evidence yet, or rediscovery found a
+    genuinely rescheduled-but-not-finished fixture and the row should keep
+    waiting on it normally).
+    """
+    original_kickoff_dt = parse_kickoff_utc(row.get("KickoffUTC", ""))
+    if not original_kickoff_dt:
+        # No reliable original kickoff to measure age from — never auto-void.
+        return None
+
+    prev_attempts = _parse_int(row.get("MissingAttempts", ""), 0)
+    attempts = prev_attempts + 1
+    df.at[idx, "MissingAttempts"] = str(attempts)
+
+    age_hours = hours_since(original_kickoff_dt)
+    if age_hours < MISSING_FIXTURE_VOID_AFTER_HOURS:
+        return None
+    if attempts < MISSING_FIXTURE_MIN_ATTEMPTS:
+        return None
+
+    # Mature candidate: time threshold + repeated genuine-NO_MATCH evidence
+    # both satisfied. One bounded, final rediscovery attempt before voiding.
+    jogo = str(row.get("Jogo", "")).strip()
+    home_csv, away_csv = split_game(jogo)
+    league_code = LEAGUE_CODE_MAP.get(str(row.get("Liga", "")).strip())
+
+    rediscovered = attempt_rediscovery_af(
+        league_code, home_csv, away_csv, original_kickoff_dt, shared_state, label,
+    )
+
+    if rediscovered is not None:
+        status = str(get_fixture_status(rediscovered)).upper()
+        if status in AF_FINISHED_STATUS:
+            home_goals, away_goals = get_fixture_score(rediscovered)
+            if home_goals is not None and away_goals is not None:
+                mercado = str(row.get("Mercado", "")).strip()
+                resultado = market_result(mercado, int(home_goals), int(away_goals))
+                if resultado is not None:
+                    stake = parse_float(row.get("Stake€", ""), 0.0)
+                    odd = parse_float(row.get("Odd", ""), 0.0)
+                    lucro = calc_profit(resultado, stake, odd)
+                    df.at[idx, "Resultado"] = resultado
+                    df.at[idx, "Placar"] = f"{int(home_goals)}-{int(away_goals)}"
+                    df.at[idx, "Lucro€"] = str(lucro)
+                    lucro_real = calc_real_profit(
+                        row.get("Apostada", ""), resultado,
+                        parse_float(row.get("StakeReal€", ""), 0.0),
+                        parse_float(row.get("OddReal", ""), 0.0),
+                    )
+                    if lucro_real != "":
+                        df.at[idx, "LucroReal€"] = lucro_real
+                    df.at[idx, "MissingAttempts"] = "0"
+                    print(
+                        f"[OK] {label}: rediscovered rescheduled fixture (wide search) | "
+                        f"{jogo} | {mercado} | {home_goals}-{away_goals} => {resultado}"
+                    )
+                    return "settled"
+        # Found but not (yet) finished — genuinely rescheduled, not missing.
+        # Stop counting it as missing; keep waiting for it normally. Its
+        # KickoffUTC/Data are deliberately left untouched (see ADR-017) — the
+        # next mature-candidate check simply re-runs this same rediscovery
+        # rather than relying on the narrow date-based fetch to find a
+        # fixture that moved to a different date.
+        df.at[idx, "MissingAttempts"] = "0"
+        print(
+            f"[DBG] {label}: rediscovery found a not-yet-finished rescheduled fixture | "
+            f"{jogo} | status={status} — will keep waiting"
+        )
+        return None
+
+    # No rescheduled fixture found even in the bounded wide window —
+    # sufficient evidence (time + repeated attempts + one final rediscovery)
+    # to void.
+    void_result_row(df, idx, row, MISSING_FIXTURE_VOID_REASON)
+    print(
+        f"[VOID] {label}: {jogo} auto-voided as P ({MISSING_FIXTURE_VOID_REASON}, "
+        f"attempts={attempts}, age={age_hours:.1f}h)"
+    )
+    return "voided"
+
+
 def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     df = ensure_columns(df)
     shared_state = ensure_shared_state_defaults(shared_state)
@@ -2048,6 +2406,48 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     def _diag_count(reason: str):
         if diag_counts is not None:
             diag_counts[reason] = diag_counts.get(reason, 0) + 1
+
+    def _run_af_and_account(idx, row_obj, lg_code, provider_label):
+        """Shared body for all three try_update_row_via_api_football() call
+        sites below (direct, fallback-after-FD-error, fallback-after-FD-
+        no-match) — previously near-identical ~15-line blocks duplicated
+        three times. Also the single place that routes a genuine AF
+        NO_MATCH into the missing-fixture void safeguard (Part 4/5), so
+        that safeguard applies identically regardless of which of the three
+        paths produced the NO_MATCH."""
+        nonlocal updated, af_used, af_updated, af_failed, ignored
+        nonlocal future_skipped, not_finished, no_match_found, unsupported_market
+
+        af_used += 1
+        log_pick_diag(label, idx, row_obj, "provider", provider_label, league_code=lg_code)
+
+        ok, reason = try_update_row_via_api_football(df, idx, row_obj, lg_code, label, shared_state)
+        if ok:
+            updated += 1
+            af_updated += 1
+            _diag_count("UPDATED_API_FOOTBALL")
+            return
+
+        if reason == "NO_MATCH":
+            outcome = _evaluate_missing_fixture_void(df, idx, row_obj, label, shared_state)
+            if outcome:
+                updated += 1
+                af_updated += 1
+                _diag_count("RESETTLED_VIA_REDISCOVERY" if outcome == "settled" else "VOIDED_MISSING_FIXTURE")
+                return
+
+        if reason == "TOO_EARLY":
+            future_skipped += 1
+        elif reason == "NOT_FINISHED":
+            not_finished += 1
+        elif reason == "NO_MATCH":
+            no_match_found += 1
+        elif reason == "UNSUPPORTED_MARKET":
+            unsupported_market += 1
+        af_failed += 1
+        ignored += 1
+        _diag_count(f"AF_{reason}")
+        log_pick_diag(label, idx, row_obj, "provider_result", reason, provider="api_football")
 
     for i, row in df.iterrows():
         resultado_atual = str(row.get("Resultado", "")).strip().upper()
@@ -2153,32 +2553,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         if use_api_football_direct:
             blocked_fd_leagues_seen.add(league_code)
-            af_used += 1
-            log_pick_diag(
-                label, i, row, "provider", "API_FOOTBALL_DIRECT",
-                league_code=league_code,
-            )
-
-            ok, reason = try_update_row_via_api_football(
-                df, i, row, league_code, label, shared_state
-            )
-            if ok:
-                updated += 1
-                af_updated += 1
-                _diag_count("UPDATED_API_FOOTBALL")
-            else:
-                if reason == "TOO_EARLY":
-                    future_skipped += 1
-                elif reason == "NOT_FINISHED":
-                    not_finished += 1
-                elif reason == "NO_MATCH":
-                    no_match_found += 1
-                elif reason == "UNSUPPORTED_MARKET":
-                    unsupported_market += 1
-                af_failed += 1
-                ignored += 1
-                _diag_count(f"AF_{reason}")
-                log_pick_diag(label, i, row, "provider_result", reason, provider="api_football")
+            _run_af_and_account(i, row, league_code, "API_FOOTBALL_DIRECT")
             continue
 
         cache_key = (league_code, data)
@@ -2225,32 +2600,7 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
             blocked_fd_leagues_seen.add(league_code)
-            af_used += 1
-            log_pick_diag(
-                label, i, row, "provider", "API_FOOTBALL_FALLBACK",
-                league_code=league_code, fd_reason=cache_entry["reason"],
-            )
-
-            ok, reason = try_update_row_via_api_football(
-                df, i, row, league_code, label, shared_state
-            )
-            if ok:
-                updated += 1
-                af_updated += 1
-                _diag_count("UPDATED_API_FOOTBALL")
-            else:
-                if reason == "TOO_EARLY":
-                    future_skipped += 1
-                elif reason == "NOT_FINISHED":
-                    not_finished += 1
-                elif reason == "NO_MATCH":
-                    no_match_found += 1
-                elif reason == "UNSUPPORTED_MARKET":
-                    unsupported_market += 1
-                af_failed += 1
-                ignored += 1
-                _diag_count(f"AF_{reason}")
-                log_pick_diag(label, i, row, "provider_result", reason, provider="api_football")
+            _run_af_and_account(i, row, league_code, "API_FOOTBALL_FALLBACK")
             continue
 
         if not cache_entry["ok"]:
@@ -2288,37 +2638,23 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
                     f"liga={liga} | data={data} | n_fd_fixtures={len(matches or [])} | "
                     f"tentando API-Football fallback"
                 )
-                log_pick_diag(
-                    label, i, row, "provider", "API_FOOTBALL_FALLBACK_AFTER_NO_MATCH",
-                    league_code=league_code, fd_fixtures=len(matches or []),
-                    best_fd_score=best_score,
-                )
-                ok, reason = try_update_row_via_api_football(
-                    df, i, row, league_code, label, shared_state
-                )
-                if ok:
-                    updated += 1
-                    af_updated += 1
-                    _diag_count("UPDATED_API_FOOTBALL")
-                else:
-                    if reason == "TOO_EARLY":
-                        future_skipped += 1
-                    elif reason == "NOT_FINISHED":
-                        not_finished += 1
-                    elif reason == "NO_MATCH":
-                        no_match_found += 1
-                    elif reason == "UNSUPPORTED_MARKET":
-                        unsupported_market += 1
-                    af_failed += 1
-                    ignored += 1
-                    _diag_count(f"AF_{reason}")
-                    log_pick_diag(
-                        label, i, row, "provider_result", reason,
-                        provider="api_football_after_fd_no_match",
-                    )
+                _run_af_and_account(i, row, league_code, "API_FOOTBALL_FALLBACK_AFTER_NO_MATCH")
                 continue
             print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
             log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
+            # No AF fallback exists for this league (rare — see
+            # league_registry.py, every registered league currently has one)
+            # and FD itself found nothing. Still route through the same
+            # missing-fixture safeguard for consistency/defensiveness —
+            # attempt_rediscovery_af() only ever searches AF, so this is a
+            # no-op for a league with truly no AF coverage (returns None
+            # immediately) and falls straight through to the normal ignore
+            # path below.
+            outcome = _evaluate_missing_fixture_void(df, i, row, label, shared_state)
+            if outcome:
+                updated += 1
+                _diag_count("RESETTLED_VIA_REDISCOVERY" if outcome == "settled" else "VOIDED_MISSING_FIXTURE")
+                continue
             no_match_found += 1
             ignored += 1
             _diag_count("NO_MATCH")
@@ -2352,6 +2688,23 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
 
         status = str(get_fixture_status(matched)).upper()
         if status not in FD_FINISHED_STATUS:
+            classification = classify_fd_status(status)
+            if classification == "NON_PLAYED":
+                original_kickoff_dt = parse_kickoff_utc(row.get("KickoffUTC", ""))
+                if original_kickoff_dt and hours_since(original_kickoff_dt) >= POSTPONED_VOID_AFTER_HOURS:
+                    reason = FD_VOID_REASON_BY_STATUS.get(status, "postponed_timeout")
+                    void_result_row(df, i, row, reason)
+                    updated += 1
+                    _diag_count("VOIDED_NON_PLAYED_FD")
+                    log_pick_diag(
+                        label, i, row, "football_data_status", "VOIDED_NON_PLAYED_TIMEOUT",
+                        status=status, void_reason=reason, match=format_fixture_diag(matched),
+                    )
+                    print(
+                        f"[VOID] {label}: {jogo} auto-voided as P (status={status}, reason={reason}, "
+                        f"kickoff+{POSTPONED_VOID_AFTER_HOURS:.0f}h elapsed)"
+                    )
+                    continue
             print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
             not_finished += 1
             ignored += 1
@@ -2492,6 +2845,14 @@ def manual_bets_to_settlement_df(manual_bets: list) -> pd.DataFrame:
             'OddReal':    '',
             'StakeReal€': '',
             'LucroReal€': '',
+            # Round-tripped exactly like Placar/KickoffUTC above (Phase
+            # 26.19/26.32 precedent): MissingAttempts is the persisted
+            # evidence counter the missing-fixture void safeguard (Part 4,
+            # ADR-017) requires to survive across settlement runs — without
+            # this bridge it would silently reset to 0 every run and the
+            # safeguard would never mature for manual bets.
+            'MissingAttempts': str(bet.get('missingAttempts') or '').strip(),
+            'SettlementReason': str(bet.get('settlementReason') or '').strip(),
         })
     if not rows:
         return pd.DataFrame(columns=CSV_COLUMNS)
@@ -2499,17 +2860,36 @@ def manual_bets_to_settlement_df(manual_bets: list) -> pd.DataFrame:
     return ensure_columns(pd.DataFrame(rows))
 
 
-def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
+def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> tuple[int, int]:
     """Write settled results from the settlement DataFrame back into the bet dicts.
 
-    Only bets that transitioned from unsettled → W/L/P during this run are touched.
-    Returns the count of newly settled bets.
+    Returns (newly_settled, evidence_changed):
+      - newly_settled: bets that transitioned from unsettled -> W/L/P this run.
+      - evidence_changed: bets whose MissingAttempts counter changed this run
+        (incremented, or reset to 0 by a rediscovery — see
+        _evaluate_missing_fixture_void() in update_dataframe()), REGARDLESS
+        of whether they also got a final result. This must be tracked
+        separately from newly_settled: the missing-fixture safeguard's
+        "repeated attempts" evidence (Part 4/ADR-017) only works if the
+        counter survives across runs for a bet that is *still unresolved* —
+        callers must save cloud_state.json whenever this is > 0, not only
+        when newly_settled > 0.
     """
     now_iso = datetime.now(timezone.utc).isoformat()
     newly_settled = 0
+    evidence_changed = 0
     for i, bet in enumerate(manual_bets):
         if i >= len(df):
             break
+
+        if 'MissingAttempts' in df.columns:
+            new_attempts_str = str(df.at[i, 'MissingAttempts']).strip()
+            old_attempts = _parse_int(bet.get('missingAttempts'), 0)
+            new_attempts = _parse_int(new_attempts_str, old_attempts)
+            if new_attempts != old_attempts:
+                bet['missingAttempts'] = new_attempts
+                evidence_changed += 1
+
         old_res = str(bet.get('resultado', '')).strip().upper()
         if old_res in {'W', 'L', 'P'}:
             continue
@@ -2518,6 +2898,7 @@ def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
             continue
         lucro_str = str(df.at[i, 'Lucro€']).strip()
         placar_str = str(df.at[i, 'Placar']).strip() if 'Placar' in df.columns else ''
+        reason_str = str(df.at[i, 'SettlementReason']).strip() if 'SettlementReason' in df.columns else ''
         bet['resultado'] = new_res
         try:
             bet['lucro'] = round(float(lucro_str), 2) if lucro_str else None
@@ -2525,6 +2906,8 @@ def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
             bet['lucro'] = None
         if placar_str:
             bet['placar'] = placar_str
+        if reason_str:
+            bet['settlementReason'] = reason_str
         # Settlement result (resultado/lucro/placar) is independent from the bet's
         # lifecycle status (see ADR-012). 'rejected' is a terminal lifecycle state —
         # a rejected bet still gets settled analytically, but never becomes 'settled'.
@@ -2538,7 +2921,7 @@ def apply_df_results_to_manual_bets(manual_bets: list, df: pd.DataFrame) -> int:
             f"[OK] manual settled | {bet.get('jogo', '?')} | {bet.get('mercado', '?')} | "
             f"resultado={new_res} | lucro={bet.get('lucro')}"
         )
-    return newly_settled
+    return newly_settled, evidence_changed
 
 
 def load_cloud_state_from_github() -> dict:
@@ -2713,14 +3096,18 @@ def run_settlement_remote() -> dict:
         cloud_state = load_cloud_state_from_github()
         manual_bets = cloud_state.get("manualBets", [])
         newly_settled = 0
+        evidence_changed = 0
 
         if manual_bets:
             manual_df = manual_bets_to_settlement_df(manual_bets)
             manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
-            newly_settled = apply_df_results_to_manual_bets(manual_bets, manual_df)
-            print(f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored} newly_settled={newly_settled}")
+            newly_settled, evidence_changed = apply_df_results_to_manual_bets(manual_bets, manual_df)
+            print(
+                f"[settlement] manual: updated={m_updated} done={m_done} ignored={m_ignored} "
+                f"newly_settled={newly_settled} evidence_changed={evidence_changed}"
+            )
 
-            if newly_settled > 0:
+            if newly_settled > 0 or evidence_changed > 0:
                 cloud_state["manualBets"] = manual_bets
         else:
             print("[settlement] manual: no manual bets in cloud_state.json")
@@ -2731,9 +3118,14 @@ def run_settlement_remote() -> dict:
         if health_changed:
             update_provider_health(cloud_state, shared_state)
 
-        if newly_settled > 0 or health_changed:
+        # evidence_changed alone (no new result, no health change) still needs
+        # a save — it's the MissingAttempts counter accumulating for a manual
+        # bet still in flight, and it must survive to the next run for the
+        # missing-fixture safeguard (Part 4/ADR-017) to ever mature.
+        if newly_settled > 0 or evidence_changed > 0 or health_changed:
             msg = (
-                f"Settle {newly_settled} manual bet(s)" if newly_settled > 0 else "Update provider health"
+                f"Settle {newly_settled} manual bet(s)" if newly_settled > 0
+                else ("Update missing-fixture evidence" if evidence_changed > 0 else "Update provider health")
             ) + f" ({datetime.now(timezone.utc).isoformat()}Z)"
             save_cloud_state_to_github(cloud_state, msg)
     except Exception as exc:
@@ -2804,15 +3196,17 @@ def main():
             manual_bets = cloud_state.get("manualBets", [])
             print(f"Manual bets em cloud_state.json: {len(manual_bets)}")
             newly_settled = 0
+            evidence_changed = 0
             if manual_bets:
                 manual_df = manual_bets_to_settlement_df(manual_bets)
                 manual_df, m_updated, m_done, m_ignored = update_dataframe(manual_df, "manual", shared_state)
-                newly_settled = apply_df_results_to_manual_bets(manual_bets, manual_df)
+                newly_settled, evidence_changed = apply_df_results_to_manual_bets(manual_bets, manual_df)
                 print(
                     f"Manual atualizado: {m_updated} | já resolvidos: {m_done} | "
-                    f"ignorados: {m_ignored} | liquidados agora: {newly_settled}"
+                    f"ignorados: {m_ignored} | liquidados agora: {newly_settled} | "
+                    f"evidência atualizada: {evidence_changed}"
                 )
-                if newly_settled > 0:
+                if newly_settled > 0 or evidence_changed > 0:
                     cloud_state["manualBets"] = manual_bets
             else:
                 print("Manual: sem apostas pendentes")
@@ -2821,10 +3215,11 @@ def main():
             if health_changed:
                 update_provider_health(cloud_state, shared_state)
 
-            if newly_settled > 0 or health_changed:
+            if newly_settled > 0 or evidence_changed > 0 or health_changed:
                 msg = (
                     f"Settle {newly_settled} manual bet(s) — local run" if newly_settled > 0
-                    else "Update provider health — local run"
+                    else ("Update missing-fixture evidence — local run" if evidence_changed > 0
+                          else "Update provider health — local run")
                 )
                 save_cloud_state_to_github(cloud_state, msg)
         except Exception as e:

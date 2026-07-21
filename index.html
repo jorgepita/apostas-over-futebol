@@ -4410,6 +4410,23 @@ button:disabled {
         return '<span class="mini warn">Pend.</span>';
       }
 
+      // Part 11/ADR-017 — PT-PT audit-trail label for why a P was written.
+      // Blank/unrecognised reason (every ordinary market push, and every P
+      // settled before this policy existed) renders nothing — this is purely
+      // additive, never replaces the P result itself.
+      const SETTLEMENT_REASON_LABELS = {
+        postponed_timeout: 'Anulada — jogo adiado',
+        cancelled_timeout: 'Anulada — jogo cancelado',
+        abandoned_timeout: 'Anulada — jogo abandonado',
+        interrupted_timeout: 'Anulada — jogo interrompido',
+        missing_fixture_timeout: 'Anulada — jogo não encontrado',
+        manual_void: 'Anulada manualmente',
+      };
+
+      function settlementReasonLabel(reason) {
+        return SETTLEMENT_REASON_LABELS[cleanString(reason || '')] || '';
+      }
+
       function profitClass(v) {
         if (v > 0) return 'style="color:var(--ok);font-weight:800;"';
         if (v < 0) return 'style="color:var(--bad);font-weight:800;"';
@@ -4661,6 +4678,23 @@ button:disabled {
           ? resultadoBase
           : (['W', 'L', 'P'].includes(resultadoManual) ? resultadoManual : resultadoBase);
 
+        // Tracks resultadoFinal's own provenance, not an independent
+        // "non-empty wins" fallback (ADR-015/ADR-017): the reason must
+        // describe *whichever source resultadoFinal actually came from*.
+        // Once the CSV has a real result, its own SettlementReason is
+        // authoritative even when blank (a normal W/L has no reason to
+        // show) — falling back to a stale edit.settlementReason here would
+        // show e.g. "Anulada manualmente" next to a CSV-authoritative W,
+        // which is exactly the kind of stale-override bug ADR-015 exists to
+        // prevent. Only while resultadoBase is still empty/invalid (the
+        // bridge case) does the local manual-void reason apply — the
+        // audit-trail counterpart of resultadoManual. This is the single
+        // merge point every downstream consumer (History's "Motivo" line,
+        // getFilteredRealClosedRows(), etc.) reads from — see ADR-017.
+        const settlementReasonFinal = ['W', 'L', 'P'].includes(resultadoBase)
+          ? cleanString(row['SettlementReason'] || '')
+          : cleanString(edit.settlementReason || '');
+
         const oddModelo = num(row['Odd']);
         const stakeModelo = num(row['Stake€']);
         const oddRealNum = num(oddReal);
@@ -4678,6 +4712,12 @@ button:disabled {
           _stakeRealNum: stakeRealNum,
           _resultadoFinal: resultadoFinal,
           _resultKey: resultKey(resultadoFinal),
+          // Overrides the raw CSV value already present via the ...row spread
+          // above — same key name, so every existing consumer of
+          // row['SettlementReason']/r.SettlementReason automatically sees the
+          // resolved (CSV-wins, manual-bridge-fallback) value with no changes
+          // needed at the read site.
+          SettlementReason: settlementReasonFinal,
           _lucroModeloLocal: calcProfitByResult(resultadoFinal, stakeModelo, oddModelo),
           _lucroRealLocal: apostada ? calcProfitByResult(resultadoFinal, stakeRealNum, oddRealNum) : null,
           _league: cleanString(row['Liga'] || ''),
@@ -4877,6 +4917,12 @@ button:disabled {
       placar:           cleanString(b.placar || ''),
       settledAt:        b.settledAt        ?? null,
       kickoffUTC:       cleanString(b.kickoffUTC || ''),
+      // Audit trail (Part 11/ADR-017): why a P was written — blank for every
+      // ordinary W/L/P. missingAttempts is the persisted evidence counter
+      // for the missing-fixture safeguard (Part 4) — display-only here, the
+      // backend is the only writer.
+      settlementReason: cleanString(b.settlementReason || ''),
+      missingAttempts:  Number.isFinite(Number(b.missingAttempts)) ? Number(b.missingAttempts) : 0,
       _lucro:           lucroCsv !== null ? lucroCsv : calcProfitByResult(resultado, stake, odd),
       _resultKey:       resultKey(resultado),
       _searchText:      `${liga} ${jogo} ${mercado}`.toLowerCase()
@@ -5434,7 +5480,8 @@ button:disabled {
             odd: r._oddRealNum ?? r._oddModeloNum,
             stake: r._stakeRealNum ?? r._stakeModeloNum ?? 0,
             lucro: r._lucroRealLocal ?? r._lucroModeloLocal ?? 0,
-            kickoffUTC: r['KickoffUTC'] || ''
+            kickoffUTC: r['KickoffUTC'] || '',
+            settlementReason: cleanString(r['SettlementReason'] || '')
           }));
 
         const manualClosed = filterManualRows(getResolvedManualBets(), activeFilters)
@@ -5448,7 +5495,8 @@ button:disabled {
             result: r._resultKey,
             odd: num(r.odd),
             stake: num(r.stake) ?? 0,
-            lucro: r._lucro ?? 0
+            lucro: r._lucro ?? 0,
+            settlementReason: cleanString(r.settlementReason || '')
           }));
 
         return [...botClosed, ...manualClosed].sort((a, b) => {
@@ -6098,6 +6146,7 @@ button:disabled {
 
         tbody.innerHTML = rows.map((r, idx) => {
           const roiColor = r.lucro > 0 ? 'var(--ok)' : r.lucro < 0 ? 'var(--bad)' : 'var(--muted)';
+          const reasonLabel = settlementReasonLabel(r.settlementReason);
           const detail = `
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;padding:10px 12px;background:var(--card-alt);border-radius:8px;border:1px solid var(--line);">
               <div><div class="label" style="font-size:10px;">Origem</div><div style="font-size:13px;">${escapeHtml(r.sourceLabel || '—')}</div></div>
@@ -6110,6 +6159,7 @@ button:disabled {
               <div><div class="label" style="font-size:10px;">Odd</div><div style="font-size:16px;font-weight:700;">${r.odd === null ? '—' : fmt(r.odd)}</div></div>
               <div><div class="label" style="font-size:10px;">Stake</div><div style="font-size:14px;font-weight:700;">€${fmt(r.stake)}</div></div>
               <div><div class="label" style="font-size:10px;">Lucro</div><div style="font-size:16px;font-weight:900;color:${roiColor};">€${fmt(r.lucro)}</div></div>
+              ${reasonLabel ? `<div><div class="label" style="font-size:10px;">Motivo</div><div style="font-size:12px;color:var(--info);font-weight:600;">${escapeHtml(reasonLabel)}</div></div>` : ''}
             </div>`;
           return `
             <tr class="hist-sum-row" data-drill-idx="${idx}" style="cursor:pointer;" title="Clique para ver detalhes">
@@ -7355,6 +7405,36 @@ button:disabled {
         return state._modelConfigCache;
       }
 
+      // Manual-void eligibility threshold (Part 6/12, ADR-017) — mirrors the
+      // Python DEFAULT_MANUAL_VOID_AVAILABLE_AFTER_HOURS fallback in
+      // src/config.py until the real config.json value is fetched below.
+      // Never hardcode a different value elsewhere in this file — every
+      // consumer (getLiveRows()) reads this single variable.
+      let MANUAL_VOID_AVAILABLE_AFTER_HOURS = 24;
+
+      // Fetched once at boot (fire-and-forget — Live Center's gating simply
+      // uses the frozen default above until this resolves, exactly like
+      // loadModelConfig()'s own fallback pattern). Reuses MB_CONFIG_URL, the
+      // same GitHub raw-content fetch already used for Scout's model config —
+      // not a second config-loading mechanism, not a Railway round-trip.
+      async function loadVoidPolicyConfig() {
+        try {
+          const res = await fetch(MB_CONFIG_URL, { cache: 'default' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const raw = await res.json();
+          const policy = (raw.settlement && raw.settlement.void_policy) || {};
+          const hours = Number(policy.manual_void_available_after_hours);
+          if (Number.isFinite(hours) && hours > 0) {
+            MANUAL_VOID_AVAILABLE_AFTER_HOURS = hours;
+          }
+        } catch {
+          // Keep the frozen default — manual void still works, just gated
+          // against the fallback threshold instead of a possibly-tuned one.
+        } finally {
+          if (state.activeTab === 'tab-live') renderLiveCenter();
+        }
+      }
+
       async function loadLeagueHistory(leagueKey) {
         if (!window._leagueHistoryCache) window._leagueHistoryCache = {};
         if (Object.prototype.hasOwnProperty.call(window._leagueHistoryCache, leagueKey)) {
@@ -8407,6 +8487,7 @@ button:disabled {
           const liveWinBtn    = e.target.closest('.js-live-win');
           const liveLossBtn   = e.target.closest('.js-live-loss');
           const livePushBtn   = e.target.closest('.js-live-push');
+          const liveVoidBtn   = e.target.closest('.js-live-void');
 
           if (liveWinBtn) {
             liveSettle(liveWinBtn.dataset.id, liveWinBtn.dataset.type, 'W');
@@ -8414,6 +8495,8 @@ button:disabled {
             liveSettle(liveLossBtn.dataset.id, liveLossBtn.dataset.type, 'L');
           } else if (livePushBtn) {
             liveSettle(livePushBtn.dataset.id, livePushBtn.dataset.type, 'P');
+          } else if (liveVoidBtn) {
+            manualVoidBet(liveVoidBtn.dataset.id, liveVoidBtn.dataset.type);
           } else if (pendingCanBtn) {
             pendingCancel(pendingCanBtn.dataset.id, pendingCanBtn.dataset.type);
           } else if (deleteBtn) {
@@ -14729,6 +14812,15 @@ button:disabled {
             scoreBadgeHtml: b.hadAnalysis && b.scoreAtAnalysis !== null
               ? `<span class="mini ${b.analysisSnapshot?.scoreCls || 'info'}">Score ${b.scoreAtAnalysis}</span>`
               : `<span class="mini" style="opacity:0.4;">—</span>`,
+            // Part 6/ADR-017 — manual void ("Anular aposta") only becomes
+            // available MANUAL_VOID_AVAILABLE_AFTER_HOURS after the ORIGINAL
+            // kickoff. Unknown kickoff (kickoffMs === null) never qualifies —
+            // there is no reliable age to gate on, same rule the backend's
+            // automatic safeguards apply.
+            voidEligible: (() => {
+              const ms = parseKickoffUTC(resolveManualKickoff(b));
+              return ms !== null && (Date.now() - ms) >= MANUAL_VOID_AVAILABLE_AFTER_HOURS * 3600000;
+            })(),
             _type: 'manual'
           }));
 
@@ -14752,6 +14844,10 @@ button:disabled {
             stakeNum:       r._stakeRealNum ?? r._stakeModeloNum,
             kickoffUTC:     r['KickoffUTC'] || '',
             scoreBadgeHtml: formatPickSignalHtml(r).score,
+            voidEligible: (() => {
+              const ms = parseKickoffUTC(r['KickoffUTC'] || '');
+              return ms !== null && (Date.now() - ms) >= MANUAL_VOID_AVAILABLE_AFTER_HOURS * 3600000;
+            })(),
             _type: 'bot'
           }));
 
@@ -14799,6 +14895,14 @@ button:disabled {
                   data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
                   style="${btnBase}background:rgba(234,179,8,0.15);color:#eab308;border-color:rgba(234,179,8,0.3);">P</button>
               </div>
+              ${r.voidEligible ? `
+              <div style="margin-top:8px;">
+                <button class="js-live-void" type="button"
+                  data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                  style="width:100%;padding:8px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--card-alt);color:var(--muted);">
+                  Anular aposta
+                </button>
+              </div>` : ''}
             </div>`;
         }).join('');
       }
@@ -14896,6 +15000,11 @@ button:disabled {
               <button class="js-live-push" type="button"
                 data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
                 style="${btnBase}background:rgba(234,179,8,0.15);color:#eab308;border-color:rgba(234,179,8,0.3);">P</button>
+              ${r.voidEligible ? `
+              <button class="js-live-void" type="button"
+                data-id="${escapeHtml(r.id)}" data-type="${escapeHtml(r._type)}"
+                style="${btnBase}background:var(--card-alt);color:var(--muted);border-color:var(--line);margin-left:3px;"
+                title="Disponível ${MANUAL_VOID_AVAILABLE_AFTER_HOURS}h após o kickoff original">Anular</button>` : ''}
             </td>
           </tr>`;
         }).join('');
@@ -14909,7 +15018,7 @@ button:disabled {
 
       // ── PHASE 21: LIVE SETTLEMENT ENGINE ─────────────────────────────
 
-      function settleManualBet(id, result) {
+      function settleManualBet(id, result, reason) {
         const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
         if (betIdx === -1) return;
         const current = state.manualBets[betIdx];
@@ -14918,16 +15027,21 @@ button:disabled {
           ...current,
           resultado: result,
           status: 'settled',
-          settledAt: new Date().toISOString()
+          settledAt: new Date().toISOString(),
+          // Additive audit field (Part 11/ADR-017) — omitted (not set to '')
+          // for the pre-existing quick-settle path, so it stays absent
+          // exactly as before for every W/L/P set this way.
+          ...(reason ? { settlementReason: reason } : {})
         };
         markDirty();
         rerenderAll();
       }
 
-      function settleBotBet(pickKey, result) {
+      function settleBotBet(pickKey, result, reason) {
         const edit = ensureEditObject(pickKey);
         if (['W', 'L', 'P'].includes(String(edit.resultadoManual || '').toUpperCase())) return;
         edit.resultadoManual = result;
+        if (reason) edit.settlementReason = reason;
         if (!edit.settledAt) edit.settledAt = new Date().toISOString();
         markDirty();
         saveLocalState();
@@ -14941,6 +15055,27 @@ button:disabled {
           settleManualBet(id, result);
         } else {
           settleBotBet(id, result);
+        }
+      }
+
+      // Part 6/7 (ADR-017) — dedicated manual-void fallback, distinct from
+      // the generic quick-settle P button above (liveSettle(..., 'P')): this
+      // one is gated to only appear MANUAL_VOID_AVAILABLE_AFTER_HOURS after
+      // the original kickoff (see getLiveRows()' voidEligible), always
+      // writes result P, and stamps settlementReason: 'manual_void' for the
+      // History audit trail (Part 11) — the generic P button leaves that
+      // field absent. Both ultimately call the same settle*Bet() financial
+      // mutation, so bankroll/exposure semantics are identical either way
+      // (Part 9) — this function only adds the gating, wording, and reason.
+      function manualVoidBet(id, type) {
+        const confirmed = confirm(
+          'Anular esta aposta como Push (P)? A stake será devolvida e a aposta será encerrada sem lucro nem prejuízo.'
+        );
+        if (!confirmed) return;
+        if (type === 'manual') {
+          settleManualBet(id, 'P', 'manual_void');
+        } else {
+          settleBotBet(id, 'P', 'manual_void');
         }
       }
 
@@ -16620,6 +16755,8 @@ button:disabled {
         setActiveTab(state.activeTab);
 
         rerenderAll(false);
+
+        loadVoidPolicyConfig(); // fire-and-forget — see its own comment
 
         await Promise.all([loadData(true), loadLeagueStats()]);
         checkPendingAlerts().catch(() => {});

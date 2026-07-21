@@ -106,6 +106,14 @@
   "calibration": {
     "btts_probability_adjustment": 0.885
   },
+  "settlement": {
+    "void_policy": {
+      "postponed_void_after_hours": 48,
+      "missing_fixture_void_after_hours": 72,
+      "manual_void_available_after_hours": 24,
+      "missing_fixture_min_attempts": 3
+    }
+  },
   "the_odds_api": {
     "regions": "eu",
     "markets": "totals",

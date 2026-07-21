@@ -683,6 +683,39 @@ Fixture matching uses a multi-stage pipeline:
 
 **Provider health persistence:** `update_provider_health()` writes `cloud_state.json["providerHealth"]` — `{provider: {status, consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}}` — so the failure state survives across the stateless Railway server's requests (per ADR-003) without a second persistence file (per ADR-008's spirit; see ADR-011). A provider's `status` flips from `"ok"` to `"warning"` after `PROVIDER_HEALTH_WARNING_THRESHOLD` (2) consecutive runs where it failed at least once, and resets to `"ok"` on the next run where it succeeds at least once. Providers not contacted in a given run keep their previous entry untouched. `cloud_state.json` is saved whenever a provider was contacted this run (success or failure), even if zero bets were newly settled — this is the run where a provider health change is most important to persist.
 
+### Postponed/cancelled/missing-fixture voiding (Phase 26.43 — see ADR-017)
+
+**Problem this closes:** before this phase, a fixture that never reached `FT`/`AET`/`PEN` stayed unresolved forever, regardless of *why* — a postponed match, a cancelled one, or one the settlement lookup simply could never locate (the concrete case: Chicago Fire vs Vancouver Whitecaps, 2026-07-17, flagged by the Phase 26.42 investigation) all looked identical to "still to be played". Real-money exposure had no path to closure.
+
+**Status classification** (`classify_af_status()` / `classify_fd_status()` in `update_results.py`) extends the existing `AF_FINISHED_STATUS`/`FD_FINISHED_STATUS` sets with three more buckets, checked in this priority order:
+
+| Bucket | API-Football statuses | football-data.org statuses | Void-eligible? |
+|---|---|---|---|
+| `FINISHED` (pre-existing) | `FT`, `AET`, `PEN` | `FINISHED` | Settles normally — never a void candidate |
+| `IN_PROGRESS` | `1H`, `HT`, `2H`, `ET`, `BT`, `P`, `LIVE` | `IN_PLAY`, `PAUSED` | Never — the crucial safety rule (a status must not become `P` merely because it isn't `FT`) |
+| `NON_PLAYED` | `PST`, `CANC`, `ABD` | `POSTPONED`, `CANCELLED` | Yes — after `POSTPONED_VOID_AFTER_HOURS` since original kickoff |
+| `SCHEDULED_UNKNOWN` (default) | `NS`, `TBD`, `SUSP`, `INT`, anything unrecognised | `SCHEDULED`, `TIMED`, `SUSPENDED`, anything unrecognised | Never automatically — only the 24h manual fallback applies |
+
+**`SUSP`/`INT`/`SUSPENDED` are deliberately *not* void-eligible at any age**, and fall through to the same default `SCHEDULED_UNKNOWN` bucket as `NS`/`TBD` — a pre-commit safety audit corrected this from an earlier version of the classification that grouped them with `PST`/`CANC`/`ABD`, after finding it could void a wager whose match was suspended/interrupted but still going to legitimately resume and finish (e.g. interrupted Monday, resumes and finishes Friday — the 48h mark lands mid-week). Unlike `PST`/`CANC`/`ABD` (each a reasonably final "this fixture will not complete" determination per API-Football's own semantics), a suspended/interrupted match commonly resumes under the *same* fixture ID. `AF_SUSPENDED_INTERRUPTED_STATUS`/`FD_SUSPENDED_INTERRUPTED_STATUS` document this explicitly in `update_results.py` (not consulted by the classifiers — purely so a future edit doesn't silently re-add them to `*_NON_PLAYED_STATUS`). The 24h manual fallback remains available for a suspended/interrupted fixture the user knows the real bookmaker has already voided. See ADR-017's "Correction" section for the full reasoning. `AWD`/`WO` (technical loss/walkover) are deliberately left unclassified (too rare, unreliable goal data) — they remain open, reachable only via manual void.
+
+**Automatic void — explicit non-played status (Part 3):** inside `try_update_row_via_api_football()` and the football-data.org branch of `update_dataframe()`, once a fixture is matched but its status is `NON_PLAYED`, the row's own persisted `KickoffUTC` (the **original** scheduled kickoff — never overwritten while a pick remains unresolved) is compared against `POSTPONED_VOID_AFTER_HOURS` (default 48h). Below the threshold, behaviour is unchanged (skip, `NOT_FINISHED`). At/above it, `void_result_row()` writes `Resultado="P"`, `Placar=""`, `Lucro€="0.0"` (reusing the existing `calc_profit()`/`calc_real_profit()` — no new financial arithmetic) plus `SettlementReason` (`postponed_timeout`/`cancelled_timeout`/`abandoned_timeout`, mapped from the specific status).
+
+**Automatic void — persistent missing fixture (Part 4/5):** a genuine `NO_MATCH` (fixtures fetched successfully; team-name matching found nothing — never a provider error, which is a different reason string and never reaches this path) increments a persisted `MissingAttempts` counter on the row. `_evaluate_missing_fixture_void()` only proceeds to void once **all** of: `MISSING_FIXTURE_VOID_AFTER_HOURS` (default 72h) has elapsed since original kickoff; `MissingAttempts >= missing_fixture_min_attempts` (default 3); and a final, bounded rediscovery search (`attempt_rediscovery_af()` — AF only, forward-only, `+2..+14` days from original kickoff, reusing `fetch_api_football_fixtures_for_league_date()`'s own per-run `(league, date)` cache so multiple mature candidates in the same league share requests) also finds nothing. If rediscovery finds the fixture already finished, it settles normally (`W`/`L`, `SettlementReason` stays blank — this is a real result, not a void). If it finds the fixture not yet finished, the bet keeps waiting and `MissingAttempts` resets to 0. Only if rediscovery finds nothing does the row void as `P` with `SettlementReason="missing_fixture_timeout"`.
+
+`try_update_row_via_api_football()`'s three call sites inside `update_dataframe()` were consolidated into one nested helper, `_run_af_and_account()`, which is also the single place the missing-fixture safeguard is invoked — so it applies identically regardless of which fallback path produced the `NO_MATCH`.
+
+**Manual void (Part 6/7):** a Live Center-only fallback ("Anular aposta" — `manualVoidBet()` in `index.html`), available on any still-unresolved approved bet once `manual_void_available_after_hours` (default 24h) has passed since its own original kickoff — gated purely on elapsed time, independent of provider status. Requires an explicit PT-PT confirmation and writes the identical `P` result plus `SettlementReason="manual_void"`, through the same `settleManualBet()`/`settleBotBet()` mutation the pre-existing generic quick-settle `P` button already used (that button remains unrestricted and unchanged — it never stamps a reason, and is a different entry point for a different purpose: "I already know the result" vs. "the real bookmaker already voided this").
+
+**Manual bets — evidence must survive across runs.** `manual_bets_to_settlement_df()`/`apply_df_results_to_manual_bets()` bridge `SettlementReason`/`MissingAttempts` exactly like `Placar`/`KickoffUTC` (Phase 26.19/26.32). `apply_df_results_to_manual_bets()` now returns `(newly_settled, evidence_changed)` — both `run_settlement_remote()` and `main()` save `cloud_state.json` whenever `evidence_changed > 0`, even if nothing newly settled and provider health didn't change, because `MissingAttempts` must persist for the safeguard to ever mature for a manual bet.
+
+**Configuration (Part 12):** all three hour thresholds plus the missing-fixture attempt minimum live in `config.json["settlement"]["void_policy"]`, read via `src.config.get_void_policy()` (defensive per-key validation, falling back to a `DEFAULT_*` constant in `src/config.py` on anything missing/invalid/non-positive) — the same pattern every other config-driven value in this project already uses (ADR-010). The dashboard reads the one value it needs (`manual_void_available_after_hours`) via `loadVoidPolicyConfig()` in `index.html`, reusing the same GitHub raw-content `config.json` fetch Scout's `loadModelConfig()` already established — not a second config-loading mechanism, not a Railway round-trip.
+
+**Audit-trail merge for the manual-bot bridge case (pre-commit audit correction).** `getRowWithLocalEdits()` (`index.html`) resolves `SettlementReason` with the exact same branch condition it already uses for `resultadoFinal` — if the CSV has a real result (`W`/`L`/`P`), the CSV's own `SettlementReason` wins (even when blank, e.g. a normal win); only while the CSV cell is still empty does `edit.settlementReason` (the local manual-void bridge, set by `manualVoidBet()`) apply. This is deliberately *not* an independent "non-empty value wins" fallback — an initial fix attempt used that shape and was caught by its own regression test showing a stale "Anulada manualmente" reason persisting next to a CSV-authoritative `W`. Every downstream consumer (`getFilteredRealClosedRows()`, History's "Motivo" line) reads the already-merged `SettlementReason` off the row object — no special-casing needed at the read site.
+
+**`picks_history.csv` schema drift — a pre-existing bug this phase's audit found already active in production.** `src/history.py`'s `HISTORY_COLUMNS` — a separate, hardcoded schema list consumed by `load_history()`/`ensure_simple_columns()`/`merge_into_history()` (the path `main.py`'s daily generation calls via `persist_history()` — not `update_results.py`'s settlement engine) — was never updated when `Placar` was added (Phase 26.19). `ensure_simple_columns()`'s reindex (`df[HISTORY_COLUMNS]`) silently stripped `Placar` from every settled row on each daily generation cycle; confirmed against real production data (90 of 93 settled rows in the live file had an empty `Placar` at audit time). `SettlementReason`/`MissingAttempts` were exposed to the identical erasure path. Fixed by adding all three fields to `HISTORY_COLUMNS`, plus explicit blank-column assignments in `src/pipeline.py`'s `save_all_outputs()` — a second, separate consumer that reindexes to `HISTORY_COLUMNS` directly (no add-if-missing safety net) and would otherwise raise `KeyError` on every generation run once the schema grew. **Preventative only** — does not reconstruct already-lost historical `Placar` values (see `05_Known_Issues.md`).
+
+See ADR-017 for the full reasoning (including the "Correction" section covering all three points above), `tests/test_void_policy.py` for the void-policy regression suite, and `tests/test_history_schema.py` for the schema-drift regression suite.
+
 ---
 
 ## 8. League Registry
@@ -848,6 +881,7 @@ Returns all matches for the league on the given date. Settlement iterates rows f
 | `api_football` | `league_ids`, `shortlist_total`, `shortlist_per_league_per_day`, `sleep_seconds_between_fixture_requests`, `use_api_football_for_btts_odds` | API-Football behaviour |
 | `league_overrides` | Per-league rule overrides | Fine-tune edge thresholds for specific leagues |
 | `leagues` | Per-league `name` and `country` | Display names and country codes |
+| `settlement.void_policy` | `postponed_void_after_hours`, `missing_fixture_void_after_hours`, `manual_void_available_after_hours`, `missing_fixture_min_attempts` | Postponed/cancelled/missing-fixture void thresholds (Phase 26.43, ADR-017) — read via `src.config.get_void_policy()` |
 | `the_odds_api` | Sport keys, regions, markets | The Odds API config (legacy, kept for reference) |
 
 ### Default values (`src/config.py`)
@@ -864,6 +898,10 @@ Hardcoded defaults used when a config key is absent:
 | `DEFAULT_MAX_ODD_O25` | 2.20 |
 | `DEFAULT_MAX_ODD_BTTS` | 2.30 |
 | `DEFAULT_BTTS_PROBABILITY_ADJUSTMENT` | 0.885 |
+| `DEFAULT_POSTPONED_VOID_AFTER_HOURS` | 48 |
+| `DEFAULT_MISSING_FIXTURE_VOID_AFTER_HOURS` | 72 |
+| `DEFAULT_MANUAL_VOID_AVAILABLE_AFTER_HOURS` | 24 |
+| `DEFAULT_MISSING_FIXTURE_MIN_ATTEMPTS` | 3 |
 
 ### Environment variables
 

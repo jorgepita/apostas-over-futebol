@@ -88,8 +88,11 @@ def save_all_outputs(
         simple["OddReal"] = ""
         simple["StakeReal€"] = ""
         simple["Resultado"] = ""
+        simple["Placar"] = ""
         simple["Lucro€"] = ""
         simple["LucroReal€"] = ""
+        simple["SettlementReason"] = ""
+        simple["MissingAttempts"] = ""
 
         simple = simple[HISTORY_COLUMNS].copy()
         simple = simple[(simple["Odd"] > 1.01) & (simple["Stake€"] > 0) & (simple["Edge%"] > 0)].copy()
