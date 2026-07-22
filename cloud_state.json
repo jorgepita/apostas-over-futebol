@@ -9732,7 +9732,7 @@
       "resultado": "",
       "scoreAtAnalysis": 61,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -9967,7 +9967,7 @@
       "resultado": "",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -10014,7 +10014,7 @@
       "resultado": "",
       "scoreAtAnalysis": 55,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -10061,7 +10061,7 @@
       "resultado": "",
       "scoreAtAnalysis": 83,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     }
   ],
   "movements": [
@@ -10088,8 +10088,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-22T09:05:08.651Z",
-  "activeTab": "tab-live",
+  "lastUpdated": "2026-07-22T09:06:41.040Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
