@@ -1,2 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-07-26;brasil;Campeonato Brasileiro Serie A;RB Bragantino;Coritiba;2.2;1.475;3.675;2026-07-26T22:30:00+01:00;BTTS;0.607;1.91;0.524;0.0833;0.1748;True;;0.0225;0.0125;0.08299999999999996;0.0262;0.0262;0.98;1.0;50.0
+2026-07-26;brasil;Campeonato Brasileiro Serie A;RB Bragantino;Coritiba;2.2;1.475;3.675;2026-07-26T22:30:00+01:00;BTTS;0.607;1.91;0.524;0.0833;0.1748;True;;0.0225;0.0125;0.083;0.0262;0.0262;0.98;1.0;50.0
