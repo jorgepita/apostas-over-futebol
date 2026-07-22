@@ -9584,6 +9584,53 @@
       "scoreAtAnalysis": 46,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1784711044312_t3z490",
+      "data": "2026-07-25",
+      "liga": "brasil",
+      "jogo": "Atletico Paranaense vs Internacional",
+      "mercado": "Over 2.5",
+      "odd": "2.4",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "BUY",
+      "edgeAtAnalysis": 2.0814660931645355,
+      "scoreAtAnalysis": 60,
+      "analysisSnapshot": {
+        "cacheKey": "2026-07-25_brasil_atletico_paranaense_internacional|O2.5|2.40|1.00",
+        "market": "O2.5",
+        "odd": 2.4,
+        "stake": 1,
+        "ProbModel": 0.43748132759831204,
+        "ProbMarket": 0.4166666666666667,
+        "Edge": 0.020814660931645357,
+        "EdgePercent": 2.0814660931645355,
+        "fairOdd": 2.2858118436501207,
+        "KellyTrue": 0.035682275882820615,
+        "Confidence": 0.20814660931645357,
+        "EV": 0.049955186235948856,
+        "score": 60,
+        "scoreCls": "info",
+        "opinion": "BUY",
+        "opinionCls": "info",
+        "LambdaHome": 1.4977368421052633,
+        "LambdaAway": 0.9298476231538398,
+        "LambdaTotal": 2.427584465259103,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "diagnostics": null,
+        "timestamp": "2026-07-22T09:04:03.483Z"
+      },
+      "kickoffUTC": "2026-07-25T22:30:00+01:00",
+      "homeTeam": "Atletico Paranaense",
+      "awayTeam": "Internacional",
+      "leagueId": 71
     }
   ],
   "movements": [
@@ -9613,7 +9660,7 @@
   "lastUpdated": "2026-07-22T09:03:38.751Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-22",
@@ -10073,6 +10120,45 @@
       "lastCheckedAt": "2026-07-21T23:26:19.302329+00:00",
       "lastSuccessAt": "2026-07-21T23:26:19.302329+00:00",
       "status": "ok"
+    }
+  },
+  "_modelConfigCache": {
+    "window": 12,
+    "decay": 0.88,
+    "minGamesHome": 8,
+    "minGamesAway": 8,
+    "lambdaBoost": 1.12,
+    "leagueLambdaBoost": {
+      "japao": 1,
+      "coreia": 1,
+      "finlandia": 1,
+      "islandia": 1,
+      "brasil": 1
+    },
+    "bttsAdj": 0.885,
+    "apiFootballLeagueIds": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "mls_next_pro": 909,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188,
+      "brasil": 71
     }
   }
 }
