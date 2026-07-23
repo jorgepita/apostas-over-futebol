@@ -11145,6 +11145,28 @@
       "homeTeam": "Gwangju FC",
       "awayTeam": "Jeju United FC",
       "leagueId": 292
+    },
+    {
+      "id": "manual_1784806119644_c4oy9s",
+      "data": "2026-07-26",
+      "liga": "coreia",
+      "jogo": "Incheon United vs Bucheon FC 1995",
+      "mercado": "BTTS",
+      "odd": "2.2",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-26T11:30:00+01:00",
+      "homeTeam": "Incheon United",
+      "awayTeam": "Bucheon FC 1995",
+      "leagueId": 292
     }
   ],
   "movements": [
