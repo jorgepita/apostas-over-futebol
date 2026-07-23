@@ -100,9 +100,9 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-07-22;Eliteserien;Lillestrom vs Viking;O2.5;1.57;0.37;4.15;;;;W;1-2;0.21;;2026-07-22T17:00:00+00:00;;
 2026-07-22;K League 1;Gwangju FC vs Gimcheon Sangmu FC;O2.5;2.08;1.21;8.88;;;;L;1-1;-1.21;;2026-07-22T10:30:00+00:00;;
 2026-07-23;Campeonato Brasileiro Serie A;Botafogo vs Vitoria;O2.5;1.76;1.96;10.02;;;;;;;;2026-07-23T23:30:00+01:00;;
-2026-07-23;MLS;Nashville SC vs CF Montreal;O2.5;1.65;0.57;10.85;;;;;;;;2026-07-23T01:30:00+01:00;;
-2026-07-23;MLS;Sporting Kansas City vs Minnesota United FC;O2.5;1.59;0.43;7.9;;;;;;;;2026-07-23T01:30:00+01:00;;
-2026-07-23;MLS Next Pro;Vancouver Whitecaps II vs Austin II;O2.5;1.55;0.28;5.49;;;;;;;;2026-07-23T02:00:00+01:00;;
+2026-07-23;MLS;Nashville SC vs CF Montreal;O2.5;1.65;0.57;10.85;;;;L;1-0;-0.57;;2026-07-23T00:30:00+00:00;;
+2026-07-23;MLS;Sporting Kansas City vs Minnesota United FC;O2.5;1.59;0.43;7.9;;;;W;2-1;0.25;;2026-07-23T00:30:00+00:00;;
+2026-07-23;MLS Next Pro;Vancouver Whitecaps II vs Austin II;O2.5;1.55;0.28;5.49;;;;W;0-4;0.15;;2026-07-23T01:00:00+00:00;;
 2026-07-24;Veikkausliiga;FF Jaro vs SJK;O2.5;1.65;1.38;8.28;;;;;;;;2026-07-24T17:00:00+01:00;;
 2026-07-25;Allsvenskan;Kalmar FF vs Mjallby AIF;O2.5;1.85;0.67;8.18;;;;;;;;2026-07-25T16:30:00+01:00;;
 2026-07-25;Eliteserien;Kristiansund BK vs Start;O2.5;1.74;1.02;10.38;;;;;;;;2026-07-25T15:00:00+01:00;;
