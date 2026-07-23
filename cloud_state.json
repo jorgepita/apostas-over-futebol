@@ -11056,6 +11056,28 @@
       "homeTeam": "Malmo FF",
       "awayTeam": "IF Elfsborg",
       "leagueId": 113
+    },
+    {
+      "id": "manual_1784805871217_7a0b3c",
+      "data": "2026-07-26",
+      "liga": "suecia",
+      "jogo": "Sirius vs IFK Goteborg",
+      "mercado": "Over 2.5",
+      "odd": "1.5",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-26T13:00:00+01:00",
+      "homeTeam": "Sirius",
+      "awayTeam": "IFK Goteborg",
+      "leagueId": 113
     }
   ],
   "movements": [
