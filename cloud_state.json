@@ -11287,6 +11287,28 @@
       "homeTeam": "Inter Turku",
       "awayTeam": "Gnistan",
       "leagueId": 244
+    },
+    {
+      "id": "manual_1784806490912_8ow0bb",
+      "data": "2026-07-26",
+      "liga": "mls",
+      "jogo": "Columbus Crew vs FC Cincinnati",
+      "mercado": "BTTS",
+      "odd": "1.4",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-26T00:15:00+01:00",
+      "homeTeam": "Columbus Crew",
+      "awayTeam": "FC Cincinnati",
+      "leagueId": 253
     }
   ],
   "movements": [
@@ -11313,7 +11335,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-23T11:33:58.312Z",
+  "lastUpdated": "2026-07-23T11:34:57.846Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
