@@ -9449,10 +9449,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.82",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-07-24T09:22:37.575910+00:00"
     },
     {
       "analysisSnapshot": {
@@ -9538,10 +9541,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.02",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 43,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 1.02,
+      "placar": "3-0",
+      "settledAt": "2026-07-24T09:22:37.575910+00:00"
     },
     {
       "analysisSnapshot": {
@@ -12420,8 +12426,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-23T23:25:50.419988+00:00",
-      "lastSuccessAt": "2026-07-23T23:25:50.419988+00:00",
+      "lastCheckedAt": "2026-07-24T09:22:37.580229+00:00",
+      "lastSuccessAt": "2026-07-24T09:22:37.580229+00:00",
       "status": "ok"
     }
   },
