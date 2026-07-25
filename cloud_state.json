@@ -9707,7 +9707,7 @@
       "resultado": "",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
@@ -11692,7 +11692,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "approved",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
