@@ -1,23 +1,19 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-07-25;brasil;Atletico Paranaense;Internacional;2.45;2.07;2026-07-25T22:30:00+01:00
-2026-07-25;brasil;Santos;Chapecoense-sc;1.74;1.97;2026-07-25T22:30:00+01:00
-2026-07-25;mls;New York Red Bulls;Charlotte;1.49;1.44;2026-07-25T23:30:00+01:00
-2026-07-25;mls_next_pro;Inter Miami II;Toronto II;1.45;1.43;2026-07-25T22:00:00+01:00
-2026-07-26;brasil;Bahia;Corinthians;2.02;1.80;2026-07-26T20:00:00+01:00
+2026-07-26;brasil;Bahia;Corinthians;2.05;1.80;2026-07-26T20:00:00+01:00
 2026-07-26;brasil;Flamengo;Sao Paulo;1.93;2.07;2026-07-26T22:30:00+01:00
 2026-07-26;brasil;RB Bragantino;Coritiba;2.01;1.95;2026-07-26T22:30:00+01:00
-2026-07-26;brasil;Vasco DA Gama;Mirassol;2.10;1.83;2026-07-26T00:30:00+01:00
+2026-07-26;brasil;Remo;Vitoria;2.12;1.87;2026-07-26T23:30:00+01:00
 2026-07-26;coreia;FC Anyang;Gangwon FC;2.42;2.10;2026-07-26T11:30:00+01:00
 2026-07-26;coreia;FC Seoul;Ulsan Hyundai FC;1.92;1.75;2026-07-26T11:30:00+01:00
 2026-07-26;coreia;Gwangju FC;Jeju United FC;2.45;2.15;2026-07-26T11:30:00+01:00
 2026-07-26;coreia;Incheon United;Bucheon FC 1995;2.46;2.25;2026-07-26T11:30:00+01:00
-2026-07-26;finlandia;HJK Helsinki;Turku PS;1.55;1.65;2026-07-26T15:00:00+01:00
+2026-07-26;finlandia;HJK Helsinki;Turku PS;1.54;1.65;2026-07-26T15:00:00+01:00
 2026-07-26;finlandia;Ilves;Lahti;1.71;1.58;2026-07-26T13:00:00+01:00
-2026-07-26;finlandia;Inter Turku;Gnistan;1.86;1.75;2026-07-26T13:00:00+01:00
-2026-07-26;mls;Columbus Crew;FC Cincinnati;1.42;1.40;2026-07-26T00:15:00+01:00
-2026-07-26;mls;New York City FC;Chicago Fire;1.65;1.54;2026-07-26T00:30:00+01:00
-2026-07-26;mls;San Diego;FC Dallas;1.45;1.40;2026-07-26T02:30:00+01:00
-2026-07-26;mls;San Jose Earthquakes;Los Angeles Galaxy;1.47;1.43;2026-07-26T03:30:00+01:00
+2026-07-26;finlandia;Inter Turku;Gnistan;1.88;1.75;2026-07-26T13:00:00+01:00
+2026-07-26;mls;Portland Timbers;Real Salt Lake;1.44;1.39;2026-07-26T03:30:00+01:00
+2026-07-26;mls;San Diego;FC Dallas;1.44;1.39;2026-07-26T02:30:00+01:00
+2026-07-26;mls;San Jose Earthquakes;Los Angeles Galaxy;1.47;1.42;2026-07-26T03:30:00+01:00
+2026-07-26;mls;St. Louis City;Colorado Rapids;1.70;1.57;2026-07-26T01:30:00+01:00
 2026-07-26;mls_next_pro;Connecticut FC;Columbus Crew II;1.46;1.44;2026-07-26T23:00:00+01:00
 2026-07-26;mls_next_pro;North Texas;Los Angeles FC II;1.50;1.44;2026-07-26T01:45:00+01:00
 2026-07-26;mls_next_pro;Portland Timbers II;Real Monarchs;1.50;1.46;2026-07-26T21:00:00+01:00
@@ -28,16 +24,19 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-07-26;noruega;Sarpsborg 08 FF;Ham-Kam;1.60;1.57;2026-07-26T16:00:00+01:00
 2026-07-26;suecia;Gais;Halmstad;1.62;1.95;2026-07-26T15:30:00+01:00
 2026-07-26;suecia;IF Brommapojkarna;Hammarby FF;1.53;1.67;2026-07-26T13:00:00+01:00
-2026-07-26;suecia;Malmo FF;IF Elfsborg;1.68;1.62;2026-07-26T15:30:00+01:00
-2026-07-26;suecia;Sirius;IFK Goteborg;1.45;1.57;2026-07-26T13:00:00+01:00
+2026-07-26;suecia;Malmo FF;IF Elfsborg;1.70;1.62;2026-07-26T15:30:00+01:00
+2026-07-26;suecia;Sirius;IFK Goteborg;1.47;1.57;2026-07-26T13:00:00+01:00
 2026-07-27;mls_next_pro;FC Cincinnati II;New England II;1.72;1.62;2026-07-27T00:00:00+01:00
 2026-07-27;mls_next_pro;Houston Dynamo FC II;Austin II;1.82;1.67;2026-07-27T00:00:00+01:00
-2026-07-27;mls_next_pro;Orlando City II;Huntsville City;1.53;1.40;2026-07-27T00:00:00+01:00
-2026-07-27;noruega;Rosenborg;Fredrikstad;1.80;1.75;2026-07-27T18:00:00+01:00
+2026-07-27;mls_next_pro;Orlando City II;Huntsville City;1.44;1.39;2026-07-27T00:00:00+01:00
+2026-07-27;noruega;Rosenborg;Fredrikstad;1.80;1.73;2026-07-27T18:00:00+01:00
 2026-07-27;suecia;BK Hacken;AIK Stockholm;1.53;1.50;2026-07-27T18:00:00+01:00
 2026-07-29;brasil;Atletico-MG;RB Bragantino;2.15;1.95;2026-07-29T21:00:00+01:00
 2026-07-29;brasil;Botafogo;Gremio;2.02;1.95;2026-07-29T21:00:00+01:00
-2026-07-29;brasil;Internacional;Flamengo;1.98;1.75;2026-07-29T23:30:00+01:00
+2026-07-29;brasil;Internacional;Flamengo;1.98;1.77;2026-07-29T23:30:00+01:00
 2026-07-29;brasil;Sao Paulo;Santos;2.20;1.95;2026-07-29T21:00:00+01:00
+2026-07-30;brasil;Corinthians;Atletico Paranaense;2.47;2.10;2026-07-30T23:30:00+01:00
 2026-07-30;brasil;Fluminense;Bahia;1.98;1.91;2026-07-30T01:30:00+01:00
 2026-07-30;brasil;Vitoria;Palmeiras;2.12;1.91;2026-07-30T01:30:00+01:00
+2026-07-31;brasil;Coritiba;Cruzeiro;2.15;1.91;2026-07-31T01:30:00+01:00
+2026-07-31;noruega;Bodo/Glimt;Lillestrom;1.33;1.56;2026-07-31T20:00:00+01:00
