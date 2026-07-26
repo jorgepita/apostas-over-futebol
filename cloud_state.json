@@ -4769,6 +4769,34 @@
     "2026-07-27|noruega|Rosenborg vs Fredrikstad|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-07-27|mls_next_pro|FC Cincinnati II vs New England II|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-27|mls_next_pro|Houston Dynamo FC II vs Austin II|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-29|brasil|Atletico-MG vs RB Bragantino|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-29|brasil|Sao Paulo vs Santos|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-29|brasil|Botafogo vs Gremio|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-29|brasil|Internacional vs Flamengo|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-07-30|brasil|Fluminense vs Bahia|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -12746,7 +12774,7 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-26T21:06:49.284Z",
+  "lastUpdated": "2026-07-26T21:07:50.694Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
