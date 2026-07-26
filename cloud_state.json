@@ -12192,6 +12192,53 @@
       "scoreAtAnalysis": 66,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1785063257429_run1be",
+      "data": "2026-07-26",
+      "liga": "brasil",
+      "jogo": "Remo vs Vitoria",
+      "mercado": "Over 2.5",
+      "odd": "2.12",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "NEUTRAL",
+      "edgeAtAnalysis": -2.5846132961743926,
+      "scoreAtAnalysis": 50,
+      "analysisSnapshot": {
+        "cacheKey": "2026-07-26_brasil_remo_vitoria|O2.5|2.12|1.00",
+        "market": "O2.5",
+        "odd": 2.12,
+        "stake": 1,
+        "ProbModel": 0.4458519802458032,
+        "ProbMarket": 0.4716981132075471,
+        "Edge": -0.02584613296174393,
+        "EdgePercent": -2.5846132961743926,
+        "fairOdd": 2.2428968453805873,
+        "KellyTrue": 0,
+        "Confidence": 0,
+        "EV": -0.05479380187889715,
+        "score": 50,
+        "scoreCls": "warn",
+        "opinion": "NEUTRAL",
+        "opinionCls": "warn",
+        "LambdaHome": 1.4401315789473683,
+        "LambdaAway": 1.019736842105263,
+        "LambdaTotal": 2.459868421052631,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "diagnostics": null,
+        "timestamp": "2026-07-26T10:54:11.102Z"
+      },
+      "kickoffUTC": "2026-07-26T23:30:00+01:00",
+      "homeTeam": "Remo",
+      "awayTeam": "Vitoria",
+      "leagueId": 71
     }
   ],
   "movements": [
@@ -12219,9 +12266,9 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-26T10:53:33.351Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": false,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-07-26",
@@ -12600,6 +12647,45 @@
       "lastCheckedAt": "2026-07-26T09:14:30.583812+00:00",
       "lastSuccessAt": "2026-07-26T09:14:30.583812+00:00",
       "status": "ok"
+    }
+  },
+  "_modelConfigCache": {
+    "window": 12,
+    "decay": 0.88,
+    "minGamesHome": 8,
+    "minGamesAway": 8,
+    "lambdaBoost": 1.12,
+    "leagueLambdaBoost": {
+      "japao": 1,
+      "coreia": 1,
+      "finlandia": 1,
+      "islandia": 1,
+      "brasil": 1
+    },
+    "bttsAdj": 0.885,
+    "apiFootballLeagueIds": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "mls_next_pro": 909,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188,
+      "brasil": 71
     }
   }
 }
