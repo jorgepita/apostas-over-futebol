@@ -9568,10 +9568,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.4",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 60,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -9615,10 +9618,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.75",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.75,
+      "placar": "2-2",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -9862,10 +9868,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.55",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 72,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10384,10 +10393,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.07",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 75,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10470,10 +10482,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.65",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 80,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.65,
+      "placar": "3-1",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10513,10 +10528,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.47",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 62,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10556,10 +10574,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.57",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 75,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.57,
+      "placar": "2-2",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11059,10 +11080,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.4",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 31,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11119,10 +11143,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.36",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "3-0",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11659,10 +11686,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.4",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.4,
+      "placar": "2-1",
+      "settledAt": "2026-07-26T09:14:30.579962+00:00"
     },
     {
       "analysisSnapshot": {
@@ -12324,8 +12354,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-25T23:26:36.549377+00:00",
-      "lastSuccessAt": "2026-07-25T23:26:36.549377+00:00",
+      "lastCheckedAt": "2026-07-26T09:14:30.583812+00:00",
+      "lastSuccessAt": "2026-07-26T09:14:30.583812+00:00",
       "status": "ok"
     }
   }
