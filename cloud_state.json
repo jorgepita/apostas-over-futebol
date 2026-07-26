@@ -12495,6 +12495,28 @@
       "homeTeam": "Connecticut FC",
       "awayTeam": "Columbus Crew II",
       "leagueId": 909
+    },
+    {
+      "id": "manual_1785063524127_rj89w5",
+      "data": "2026-07-26",
+      "liga": "noruega",
+      "jogo": "Aalesund vs Viking",
+      "mercado": "Over 2.5",
+      "odd": "1.42",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-07-26T18:15:00+01:00",
+      "homeTeam": "Aalesund",
+      "awayTeam": "Viking",
+      "leagueId": 103
     }
   ],
   "movements": [
