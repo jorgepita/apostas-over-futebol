@@ -12144,7 +12144,7 @@
       "resultado": "",
       "scoreAtAnalysis": 58,
       "stake": "1",
-      "status": "approved"
+      "status": "pending"
     },
     {
       "analysisSnapshot": {
@@ -12203,7 +12203,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "approved",
+      "status": "pending",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -12688,8 +12688,8 @@
     }
   ],
   "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-07-26T10:55:34.998Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-07-26T10:56:35.164Z",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": false,
   "cloudAvailable": true,
   "fixtures": [
