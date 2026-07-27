@@ -118,7 +118,18 @@ Picks where `edge < edge_min_dynamic` are discarded. `edge_min_dynamic` is a Kel
 
 ---
 
-### Stage 4 — Kelly Staking
+### Stage 4 — Cross-Market Selection & Fixture Lock
+
+O2.5 and BTTS candidates are generated independently per fixture (Stage 2/3), so a fixture can have both a qualifying O2.5 row and a qualifying BTTS row at this point. Two mechanisms then narrow this down to at most one bot market per fixture, applied in this order — both run identically whether this is the main (17:00 UTC) or top-up (23:00 UTC) job, since both call the same `main()` function:
+
+1. **`apply_fixture_market_lock()`** (`src/pipeline.py`) — Policy A, the fixture-level market lock (see ADR-018). Builds a `fixture id → {markets already in picks_history.csv}` map from the existing history file, then discards any candidate whose market is *not* already among the markets recorded for that fixture. A fixture with no prior history is completely unaffected. This runs *before* cross-market selection below, so it never influences the Edge comparison for a fixture that has never been recommended before — it only ever removes a *competing* market's candidate for a fixture that already has a persisted recommendation.
+2. **`dedupe_correlated_picks()`** (`src/market_rules.py`) — the pre-existing same-run cross-market selection. Groups the remaining candidates by `[Date, League, HomeTeam, AwayTeam]` (fixture identity, no Market) and keeps one row per fixture: `Edge DESC → KellyTrue DESC → ProbModel DESC → Odd DESC`. For a fixture with no prior history, both O2.5 and BTTS candidates reach this step and the winner is chosen purely by that ranking, exactly as before Stage-4's lock existed. For an already-locked fixture, at most one candidate (the locked market) survives Step 1, so this step is a trivial single-row pass-through.
+
+The fixture id used for the lock (`fixture_id_from_parts()`/`fixture_id_from_simple()`/`fixture_id_from_candidate()` in `src/history.py`) is `Date + League(display name) + Game`, deliberately excluding Market — a distinct identity from every other market-specific key in the codebase (`history_pick_id_from_simple()`, `localEdits` keys, settlement matching), which are all unchanged.
+
+---
+
+### Stage 5 — Kelly Staking
 
 For qualifying picks:
 ```
@@ -130,13 +141,15 @@ The fractional Kelly multiplier and daily cap are read from `config.json`.
 
 ---
 
-### Stage 5 — Deduplication
+### Stage 6 — Deduplication
 
 `load_sent_state(today_iso)` reads `sent_state.json` from disk. This file records pick IDs already sent via Telegram today. Any pick whose `pick_id` (built from `Date|League|HomeTeam|AwayTeam|Market`) is already in `sent_state` is excluded from the Telegram notification — but still written to the output CSVs.
 
+A competing market rejected by Stage 4's fixture lock never reaches this stage at all — it is not merely excluded from the Telegram message, it is absent from `out25_final`/`out_btts_final` entirely, so it cannot be written to `sent_state.json` or any output CSV.
+
 ---
 
-### Stage 6 — CSV Generation
+### Stage 7 — CSV Generation
 
 `save_all_outputs()` writes multiple files from the generated picks:
 
@@ -152,15 +165,17 @@ In **top-up mode**, these files are appended rather than overwritten. `_append_c
 
 ---
 
-### Stage 7 — History Persistence
+### Stage 8 — History Persistence
 
 `persist_history()` calls `merge_into_history()` which reads the existing `picks_history.csv`, appends new picks, and deduplicates by `[Data, Liga, Jogo, Mercado]`. The merged file is written back to `picks_history.csv`.
 
-`update_league_stats()` then regenerates `league_stats.csv` from the updated history. Since Phase 26.44, both this path (`main.py`) and the settlement path (`update_results.py`) explicitly upload the regenerated file in the same run — see Stage 8 and `04_Backend.md` §11.
+Because Stage 4's fixture lock already removed any competing-market candidate before Kelly staking, a fixture can never reach this stage with two different markets in the same run — `merge_into_history()`'s own `[Data, Liga, Jogo, Mercado]` key was already sufficient to prevent a literal same-market duplicate, but it alone could not prevent the *competing*-market case across separate runs, which is what the Stage 4 lock closes (see ADR-018).
+
+`update_league_stats()` then regenerates `league_stats.csv` from the updated history. Since Phase 26.44, both this path (`main.py`) and the settlement path (`update_results.py`) explicitly upload the regenerated file in the same run — see Stage 9 and `04_Backend.md` §11.
 
 ---
 
-### Stage 8 — GitHub Upload
+### Stage 9 — GitHub Upload
 
 `upload_csvs_to_github()` calls the GitHub Contents API (PUT) for each output file. Each PUT includes the current SHA fetched in the same operation to avoid conflicts.
 
@@ -168,19 +183,19 @@ After this step, the picks are durable and available at GitHub raw URLs.
 
 ---
 
-### Stage 9 — Telegram Notification
+### Stage 10 — Telegram Notification
 
 `process_notifications()` sends picks that are new (not in `sent_state`) via the Telegram Bot API. After sending, the pick IDs are added to `sent_state` and `sent_state.json` is written to disk.
 
 ---
 
-### Stage 10 — Dashboard Display
+### Stage 11 — Dashboard Display
 
 The browser fetches `picks_hoje_simplificado.csv` from the GitHub raw URL in `loadData()`. This happens at page load and every 60 seconds. The picks appear on the **Daily Picks** page.
 
 ---
 
-### Stage 11 — Settlement
+### Stage 12 — Settlement
 
 `update_dataframe()` processes each row in `picks_history.csv` and `picks_hoje_simplificado.csv`. For each unsettled row it queries football-data.org (primary for EU leagues) or API-Football (direct for blocked/non-EU; fallback for all). When a match is confirmed FINISHED and at least 2h15m have elapsed since kickoff, the Resultado (W/L/P) and Lucro€ are written to the row.
 
@@ -188,7 +203,7 @@ The updated CSVs are committed back to GitHub.
 
 ---
 
-### Stage 12 — History and Analytics
+### Stage 13 — History and Analytics
 
 Settled rows in `picks_history.csv` feed the dashboard **History** and **Analytics** pages. `getHistoryRowsMerged()` combines rows from `picks_history.csv` (via `state.history` populated by `loadData`) with local edits from `state.localEdits` (OddReal, StakeReal, Apostada).
 
@@ -423,6 +438,8 @@ Both pipelines call `update_dataframe(df, label, shared_state)` with identical a
 | Main generation (17:00 UTC) | `persist_history()` via `merge_into_history()` | New picks appended to permanent history |
 | Top-up generation (23:00 UTC) | `_append_csv()` | Non-EU picks appended after late odds available |
 | Settlement (07:00, 22:30 UTC) | `update_dataframe()` + GitHub Contents API | Results written in-place to settled rows |
+
+Since ADR-018 (Policy A fixture-level market lock), a fixture already present in this file — in any state, unresolved or settled — can never receive a row for a *different* bot market; `apply_fixture_market_lock()` (`src/pipeline.py`) rejects the competing candidate before it reaches this stage. Same-market regeneration is unaffected and still relies on the pre-existing `[Data, Liga, Jogo, Mercado]` dedup key above.
 
 Contains all bot picks ever generated, including unsettled ones. Settlement finds and fills the Resultado and Lucro€ columns.
 

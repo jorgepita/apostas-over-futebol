@@ -37,6 +37,7 @@ from src.runtime import (
     build_runtime_settings,
 )
 from src.pipeline import (
+    apply_fixture_market_lock,
     persist_history,
     process_notifications,
     save_all_outputs,
@@ -401,6 +402,19 @@ def main(topup_mode: bool = False):
     _trace("after_apply_market_rules_BTTS", out_btts)
 
     combo_pre = pd.concat([out25, out_btts], ignore_index=True) if (len(out25) or len(out_btts)) else pd.DataFrame()
+
+    if not combo_pre.empty:
+        # Policy A — fixture-level market lock (ADR-018). Runs BEFORE the
+        # same-run cross-market dedupe below, on the shared code path both the
+        # main (17:00 UTC) and top-up (23:00 UTC) generation jobs execute — see
+        # src/pipeline.py::apply_fixture_market_lock() for the full rationale.
+        # A fixture with no prior history is unaffected; an already-locked
+        # fixture's competing market is discarded here, before it can ever
+        # reach dedupe, staking, daily files, picks_history.csv, or Telegram.
+        combo_pre_before_lock = combo_pre.copy()
+        combo_pre = apply_fixture_market_lock(combo_pre)
+        _trace_dropped("fixture_market_lock", combo_pre_before_lock, combo_pre)
+        _trace("after_fixture_market_lock", combo_pre)
 
     if not combo_pre.empty:
         combo_pre_before_dedupe = combo_pre.copy()

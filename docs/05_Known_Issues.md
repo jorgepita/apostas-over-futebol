@@ -2,7 +2,7 @@
 
 Unresolved issues only. Move entries to `08_Change_Log.md` when fixed; a brief historical record is kept in the Resolved Issues section below.
 
-Issue ID format: `LIVE-#`, `SETTLEMENT-#`, `SYNC-#`, `API-#`, `DASHBOARD-#`, `ANALYTICS-#`, `TELEGRAM-#`, `PERFORMANCE-#`
+Issue ID format: `LIVE-#`, `SETTLEMENT-#`, `SYNC-#`, `API-#`, `DASHBOARD-#`, `ANALYTICS-#`, `TELEGRAM-#`, `PERFORMANCE-#`, `GENERATION-#`
 
 ---
 
@@ -13,6 +13,20 @@ None currently open.
 ---
 
 ## Resolved Issues
+
+### GENERATION-1 — Cross-Run Correlated-Market Duplication: A Fixture Could Receive Both O2.5 and BTTS Bot Picks Across Separate Generation Runs
+
+**Status:** Resolved — 2026-07-27 (Phase 26.45). Full technical detail in `08_Change_Log.md` — Phase 26.45. See ADR-018.
+
+**Was:** `dedupe_correlated_picks()` correctly selected one market per fixture (highest Edge) *within a single generation run*, but had no visibility into a fixture already recommended in an *earlier* run. Because the same fixture is re-evaluated fresh every run (main 17:00 UTC, top-up 23:00 UTC, across a rolling multi-day window), a later run whose Edge ranking flipped could persist the competing market as a second, correlated bot recommendation for a fixture that already had one. Confirmed in production twice: West Ham vs Leeds (O2.5 persisted 2026-05-20, BTTS added ~24h later; both subsequently carried `apostada:true` with identical real stake/odd in `cloud_state.json["localEdits"]`) and Gnistan vs Mariehamn (O2.5 persisted 2026-07-07, BTTS added ~4 days later).
+
+**Root cause:** Every persisted identity downstream of `dedupe_correlated_picks()` — `picks_history.csv`'s merge key, `localEdits` keys, settlement matching, `sent_state.json` — is market-specific (`Date+League+Game+Market`). No fixture-only identity existed anywhere in the generation pipeline to answer "has this fixture already received a bot recommendation, under any market?", so nothing prevented a later run from treating a re-evaluated fixture as brand new.
+
+**Fix:** A read-only investigation first established that Policy A (the first persisted market is permanent) fit the existing architecture with far less risk and complexity than Policy B (pre-approval re-evaluation), given the current settled-history sample size. `apply_fixture_market_lock()` (`src/pipeline.py`) now runs on the concatenated O2.5+BTTS candidate set before `dedupe_correlated_picks()`, rejecting any candidate whose fixture already has a *different* market recorded in `picks_history.csv` — regardless of approval, settlement, or void state. Same-market regeneration is unaffected. One shared call site in `main.py` covers both the main and top-up generation jobs. See ADR-018 for full reasoning, including why the lock runs *before* (not after) the same-run cross-market selection.
+
+**Not fixed by this change (explicitly out of scope):** the two historical production duplicates (West Ham vs Leeds, Gnistan vs Mariehamn) are preventative-only — neither existing history row was migrated, deleted, or altered. Policy B (pre-approval re-evaluation) was evaluated and explicitly deferred, not implemented.
+
+---
 
 ### ANALYTICS-1 — `league_stats.csv` Regenerated Locally on Every Settlement/Generation Run but Never Uploaded, Freezing "Desempenho por Liga" at a 2026-05-24 Snapshot for ~2 Months
 

@@ -6,11 +6,16 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
-from src.history import HISTORY_COLUMNS, HISTORY_PATH
+from src.history import (
+    HISTORY_COLUMNS,
+    HISTORY_PATH,
+    fixture_id_from_candidate,
+    fixture_id_from_simple,
+)
 from src.integrations import _send_in_chunks, build_message, df_to_rows, upload_csvs_to_github
 from src.state import load_sent_state, save_sent_state, pick_id
 from src.league_stats import update_league_stats
-from src.output_utils import merge_into_history
+from src.output_utils import load_history, merge_into_history
 
 
 def _append_csv(new_df: pd.DataFrame, path: Path, sep: str, key_cols: List[str]) -> None:
@@ -45,6 +50,69 @@ def _append_csv(new_df: pd.DataFrame, path: Path, sep: str, key_cols: List[str])
     else:
         new_df.to_csv(path, index=False, encoding="utf-8", sep=sep)
         print(f"[TOPUP] {path.name}: ficheiro criado com {len(new_df)} picks novas")
+
+
+def build_locked_fixture_markets(history: pd.DataFrame) -> dict:
+    """Map fixture id -> set of markets already persisted for it in picks_history.csv.
+
+    Every row counts as a lock, regardless of Apostada/Resultado/SettlementReason
+    (unapproved, approved, cancelled, W, L, P, manual_void, postponed_timeout,
+    missing_fixture_timeout — Policy A locks from first PERSISTED recommendation,
+    not from approval or settlement state). See ADR-018.
+    """
+    locked: dict = {}
+    for _, row in history.iterrows():
+        fid = fixture_id_from_simple(row)
+        locked.setdefault(fid, set()).add(str(row.get("Mercado", "")).strip())
+    return locked
+
+
+def apply_fixture_market_lock(df: pd.DataFrame) -> pd.DataFrame:
+    """Policy A — fixture-level market lock (ADR-018).
+
+    Reject any bot candidate whose fixture already has a DIFFERENT market
+    persisted in picks_history.csv. Once a market is first persisted for a
+    fixture, the competing market must never be generated again — the lock is
+    keyed on fixture identity only (Date+League+Game, no Market), built once
+    from existing history, and checked in O(1) per candidate row.
+
+    This runs on the concatenated O2.5+BTTS candidate set BEFORE
+    dedupe_correlated_picks()'s same-run Edge/Kelly/Prob/Odd comparison, so:
+      - a fixture with no prior history is completely unaffected — dedupe never
+        even sees a rejected competing candidate, same-run selection is
+        untouched;
+      - an already-locked fixture's own market keeps flowing through its normal
+        per-run quality/edge qualification (apply_market_rules) unchanged — if
+        it still qualifies this run it is kept, if it doesn't nothing is
+        generated for that fixture (existing eligibility semantics, not a new
+        "always show the locked market" override);
+      - only a genuinely DIFFERENT market for an already-locked fixture is ever
+        discarded, and it is discarded before dedupe, before stake sizing,
+        before daily-file/history persistence, and before Telegram.
+
+    Shared by both the main (17:00 UTC) and top-up (23:00 UTC) generation
+    paths, since both call this exact code inside the same main() function —
+    there is no separate top-up implementation of this rule.
+    """
+    if df.empty:
+        return df
+
+    history = load_history()
+    if history.empty:
+        return df
+
+    locked = build_locked_fixture_markets(history)
+    if not locked:
+        return df
+
+    def _allowed(row) -> bool:
+        existing_markets = locked.get(fixture_id_from_candidate(row))
+        if existing_markets is None:
+            return True
+        return str(row.get("Market", "")).strip() in existing_markets
+
+    mask = df.apply(_allowed, axis=1)
+    return df[mask].copy()
 
 
 def save_all_outputs(

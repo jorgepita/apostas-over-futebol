@@ -448,8 +448,20 @@ apply_market_rules(rows25, bankroll, rules, "O2.5"):
     Filter by edge bounds (edge_min=0.0075, edge_max=0.15)
     Apply BTTS calibration penalties (for BTTS only)
 
+apply_fixture_market_lock():  (src/pipeline.py — ADR-018, Policy A fixture-level market lock)
+    Reject any candidate whose fixture already has a DIFFERENT market
+    persisted in picks_history.csv. Runs on the concatenated O2.5+BTTS
+    candidate set, BEFORE dedupe_correlated_picks() below, so a fixture with
+    no prior history is completely unaffected. Shared verbatim by both the
+    main and top-up runs (same main() function, same call site).
+
 dedupe_correlated_picks():
-    Remove duplicate picks for same fixture × same market
+    Cross-market selection: groups the SURVIVING candidates by fixture
+    (Date+League+HomeTeam+AwayTeam, no Market) and keeps exactly one row per
+    fixture — Edge DESC → KellyTrue DESC → ProbModel DESC → Odd DESC. For a
+    never-before-recommended fixture this picks between O2.5 and BTTS exactly
+    as it always has; for an already-locked fixture, apply_fixture_market_lock()
+    has already reduced the group to at most one candidate.
 
 limit_picks_per_day():
     max_picks_per_day = 12
