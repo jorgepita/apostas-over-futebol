@@ -1,8 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-07-26;brasil;Campeonato Brasileiro Serie A;Bahia;Corinthians;2.154;0.693;2.848;2026-07-26T20:00:00+01:00;O2.5;0.542;2.03;0.493;0.0492;0.097;True;;0.0225;0.0225;0.049;0.0086;0.0063;0.31;0.727897766212764;50.0
-2026-07-27;noruega;Eliteserien;Rosenborg;Fredrikstad;2.2;1.181;3.381;2026-07-27T18:00:00+01:00;O2.5;0.657;1.8;0.556;0.101;0.2274;True;;0.0175;0.0175;0.101;0.0409;0.0291;1.46;0.727897766212764;50.0
-2026-07-27;mls_next_pro;MLS Next Pro;FC Cincinnati II;New England II;1.432;1.84;3.272;2026-07-27T00:00:00+01:00;O2.5;0.635;1.72;0.581;0.0535;0.1279;True;;0.0075;0.0075;0.054;0.0123;0.009;0.45;0.727897766212764;50.0
-2026-07-29;brasil;Campeonato Brasileiro Serie A;Sao Paulo;Santos;2.052;1.063;3.115;2026-07-29T21:00:00+01:00;O2.5;0.602;2.2;0.455;0.1476;0.2706;True;;0.0325;0.0325;0.148;0.0487;0.0291;1.46;0.727897766212764;50.0
-2026-07-29;brasil;Campeonato Brasileiro Serie A;Atletico-MG;RB Bragantino;2.2;0.899;3.099;2026-07-29T21:00:00+01:00;O2.5;0.599;2.15;0.465;0.1335;0.2496;True;;0.0325;0.0325;0.134;0.0449;0.0291;1.46;0.727897766212764;50.0
-2026-07-29;brasil;Campeonato Brasileiro Serie A;Internacional;Flamengo;1.562;1.438;3.0;2026-07-29T23:30:00+01:00;O2.5;0.577;1.98;0.505;0.0717;0.1449;True;;0.0225;0.0225;0.072;0.0187;0.0136;0.68;0.727897766212764;50.0
-2026-07-30;brasil;Campeonato Brasileiro Serie A;Fluminense;Bahia;2.2;0.653;2.853;2026-07-30T01:30:00+01:00;O2.5;0.543;1.98;0.505;0.0379;0.0767;True;;0.0225;0.0225;0.038;0.0052;0.0038;0.19;0.727897766212764;50.0
+2026-07-29;brasil;Campeonato Brasileiro Serie A;Sao Paulo;Santos;2.052;1.063;3.115;2026-07-29T21:00:00+01:00;O2.5;0.602;2.2;0.455;0.1476;0.2706;True;;0.0325;0.0325;0.148;0.0487;0.04;2.0;1.0;50.0
+2026-07-29;brasil;Campeonato Brasileiro Serie A;Atletico-MG;RB Bragantino;2.2;0.899;3.099;2026-07-29T21:00:00+01:00;O2.5;0.599;2.15;0.465;0.1335;0.2496;True;;0.0325;0.0325;0.134;0.0449;0.04;2.0;1.0;50.0
+2026-07-29;brasil;Campeonato Brasileiro Serie A;Internacional;Flamengo;1.562;1.438;3.0;2026-07-29T23:30:00+01:00;O2.5;0.577;1.98;0.505;0.0717;0.1449;True;;0.0225;0.0225;0.072;0.0187;0.0187;0.94;1.0;50.0
+2026-07-30;brasil;Campeonato Brasileiro Serie A;Fluminense;Bahia;2.2;0.653;2.853;2026-07-30T01:30:00+01:00;O2.5;0.543;1.98;0.505;0.0379;0.0767;True;;0.0225;0.0225;0.038;0.0052;0.0052;0.26;1.0;50.0
