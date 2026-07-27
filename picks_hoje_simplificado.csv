@@ -1,11 +1,6 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-07-26;Campeonato Brasileiro Serie A;RB Bragantino vs Coritiba;BTTS;1.95;1.22;9.4;;;;L;0-0;-0.98;;2026-07-26T21:30:00+00:00;;
-2026-07-26;Campeonato Brasileiro Serie A;Bahia vs Corinthians;O2.5;2.03;0.31;4.92;;;;L;1-1;-0.2;;2026-07-26T19:00:00+00:00;;
-2026-07-27;Eliteserien;Rosenborg vs Fredrikstad;O2.5;1.8;1.46;10.1;;;;;;;;2026-07-27T18:00:00+01:00;;
-2026-07-27;MLS Next Pro;FC Cincinnati II vs New England II;O2.5;1.72;0.45;5.35;;;;W;2-2;0.21;;2026-07-26T23:00:00+00:00;;
-2026-07-27;MLS Next Pro;Houston Dynamo FC II vs Austin II;BTTS;1.56;0.03;1.0;;;;W;1-1;0.41;;2026-07-26T23:00:00+00:00;;
-2026-07-29;Campeonato Brasileiro Serie A;Sao Paulo vs Santos;O2.5;2.2;1.46;14.76;;;;;;;;2026-07-29T21:00:00+01:00;;
-2026-07-29;Campeonato Brasileiro Serie A;Atletico-MG vs RB Bragantino;O2.5;2.15;1.46;13.35;;;;;;;;2026-07-29T21:00:00+01:00;;
+2026-07-29;Campeonato Brasileiro Serie A;Sao Paulo vs Santos;O2.5;2.2;2.0;14.76;;;;;;;;2026-07-29T21:00:00+01:00;;
+2026-07-29;Campeonato Brasileiro Serie A;Atletico-MG vs RB Bragantino;O2.5;2.15;2.0;13.35;;;;;;;;2026-07-29T21:00:00+01:00;;
 2026-07-29;Campeonato Brasileiro Serie A;Botafogo vs Gremio;BTTS;1.95;1.5;13.2;;;;;;;;2026-07-29T21:00:00+01:00;;
-2026-07-29;Campeonato Brasileiro Serie A;Internacional vs Flamengo;O2.5;1.98;0.68;7.17;;;;;;;;2026-07-29T23:30:00+01:00;;
-2026-07-30;Campeonato Brasileiro Serie A;Fluminense vs Bahia;O2.5;1.98;0.19;3.79;;;;;;;;2026-07-30T01:30:00+01:00;;
+2026-07-29;Campeonato Brasileiro Serie A;Internacional vs Flamengo;O2.5;1.98;0.94;7.17;;;;;;;;2026-07-29T23:30:00+01:00;;
+2026-07-30;Campeonato Brasileiro Serie A;Fluminense vs Bahia;O2.5;1.98;0.26;3.79;;;;;;;;2026-07-30T01:30:00+01:00;;
