@@ -10649,10 +10649,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.93",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 65,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10692,10 +10695,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.92",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11598,10 +11604,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.72",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 74,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.72,
+      "placar": "2-2",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11645,10 +11654,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.82",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11880,10 +11892,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.46",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 61,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.46,
+      "placar": "2-1",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -11940,10 +11955,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.87",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "analysisSnapshot": {
@@ -12741,10 +12759,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.44",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 58,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     },
     {
       "id": "manual_1785100047733_a3vasa",
@@ -12754,7 +12775,7 @@
       "mercado": "BTTS",
       "odd": "1.53",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -12804,7 +12825,10 @@
       "kickoffUTC": "2026-07-27T01:00:00+01:00",
       "homeTeam": "St. Louis City II",
       "awayTeam": "Vancouver Whitecaps II",
-      "leagueId": 909
+      "leagueId": 909,
+      "lucro": 0.53,
+      "placar": "1-1",
+      "settledAt": "2026-07-27T10:44:57.253608+00:00"
     }
   ],
   "movements": [
@@ -13030,8 +13054,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-26T23:26:13.991048+00:00",
-      "lastSuccessAt": "2026-07-26T23:26:13.991048+00:00",
+      "lastCheckedAt": "2026-07-27T10:44:57.255703+00:00",
+      "lastSuccessAt": "2026-07-27T10:44:57.255703+00:00",
       "status": "ok"
     }
   },
