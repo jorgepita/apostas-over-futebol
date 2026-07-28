@@ -1,12 +1,12 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-07-29;brasil;Atletico-MG;RB Bragantino;2.15;1.95;2026-07-29T21:00:00+01:00
 2026-07-29;brasil;Botafogo;Gremio;2.02;1.95;2026-07-29T21:00:00+01:00
-2026-07-29;brasil;Internacional;Flamengo;1.98;1.78;2026-07-29T23:30:00+01:00
+2026-07-29;brasil;Internacional;Flamengo;1.95;1.75;2026-07-29T23:30:00+01:00
 2026-07-29;brasil;Sao Paulo;Santos;2.20;1.95;2026-07-29T21:00:00+01:00
 2026-07-30;brasil;Corinthians;Atletico Paranaense;2.55;2.15;2026-07-30T23:30:00+01:00
-2026-07-30;brasil;Fluminense;Bahia;1.86;1.75;2026-07-30T01:30:00+01:00
+2026-07-30;brasil;Fluminense;Bahia;1.87;1.75;2026-07-30T01:30:00+01:00
 2026-07-30;brasil;Vitoria;Palmeiras;2.12;1.91;2026-07-30T01:30:00+01:00
-2026-07-31;brasil;Coritiba;Cruzeiro;2.15;1.82;2026-07-31T01:30:00+01:00
+2026-07-31;brasil;Coritiba;Cruzeiro;2.15;1.91;2026-07-31T01:30:00+01:00
 2026-07-31;noruega;Bodo/Glimt;Lillestrom;1.36;1.67;2026-07-31T20:00:00+01:00
 2026-07-31;noruega;Valerenga;Ham-Kam;1.55;1.57;2026-07-31T18:00:00+01:00
 2026-08-01;coreia;Gangwon FC;Bucheon FC 1995;2.25;2.25;2026-08-01T11:30:00+01:00
@@ -35,3 +35,6 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-08-02;suecia;AIK Stockholm;Orgryte IS;1.54;1.67;2026-08-02T15:30:00+01:00
 2026-08-02;suecia;IF Brommapojkarna;Malmo FF;1.65;1.53;2026-08-02T13:00:00+01:00
 2026-08-02;suecia;IFK Goteborg;Degerfors IF;1.83;1.75;2026-08-02T13:00:00+01:00
+2026-08-03;finlandia;SJK;HJK Helsinki;1.53;1.44;2026-08-03T17:00:00+01:00
+2026-08-03;suecia;Djurgardens IF;Vasteras SK FK;1.48;1.62;2026-08-03T18:00:00+01:00
+2026-08-03;suecia;Halmstad;Sirius;1.48;1.62;2026-08-03T18:00:00+01:00
