@@ -1,3 +1,3 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-07-29;brasil;Campeonato Brasileiro Serie A;Botafogo;Gremio;2.18;1.723;3.903;2026-07-29T21:00:00+01:00;BTTS;0.645;1.95;0.513;0.132;0.271;True;;0.0225;0.0125;0.132;0.0488;0.04;1.5;1.0;50.0
-2026-08-01;mls;MLS;New York City FC;Toronto FC;2.2;1.555;3.755;2026-08-01T00:30:00+01:00;BTTS;0.621;1.75;0.571;0.0493;0.1151;True;;0.0175;0.0175;0.050000000000000044;0.0102;0.0102;0.51;1.0;50.0
+2026-08-01;mls;MLS;New York City FC;Toronto FC;2.2;1.555;3.755;2026-08-01T00:30:00+01:00;BTTS;0.621;1.75;0.571;0.0493;0.1151;True;;0.0175;0.0175;0.049;0.0102;0.0102;0.51;1.0;50.0
