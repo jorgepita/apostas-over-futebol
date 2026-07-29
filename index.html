@@ -4476,6 +4476,22 @@ button:disabled {
           .find(b => manualBetOpportunityKey(b.data, b.liga, b.jogo, b.mercado) === key) || null;
       }
 
+      // Identity of a fixture, deliberately excluding Market and Bot/Manual origin —
+      // used only for the fixture-level approval exposure warning (see
+      // getApprovedFixtureExposure() below). Reuses manualBetOpportunityKey()'s exact
+      // normalisers (same date/league canonicalisation, same lowercase/trim on the
+      // game string) minus the market component, rather than inventing a second,
+      // independently-drifting identity scheme. No fuzzy team-name matching — this is
+      // plain case-folding of an already-exact string, identical in spirit to what
+      // manualBetOpportunityKey() already does.
+      function fixtureExposureKey(data, liga, jogo) {
+        return [
+          normalizeDateString(data || ''),
+          normalizeLeagueCode(liga || ''),
+          cleanString(jogo || '').toLowerCase()
+        ].join('|');
+      }
+
       function calcProfitByResult(resultado, stake, odd) {
         const r = cleanString(resultado).toUpperCase();
         const stakeNum = num(stake);
@@ -5148,6 +5164,102 @@ button:disabled {
           picksHoje: getDailyRowsMerged().length
         };
       });
+
+      // Fixture-level approval exposure warning — a dashboard safety check,
+      // deliberately NOT related to ADR-018's generation-side market lock.
+      //
+      // Returns every OTHER currently-approved, unresolved bet (bot or manual) on the
+      // same fixture — same Date+League+Game, any market. Read-only, never mutates
+      // state. Reuses the exact same "approved and unresolved" predicates
+      // getRiskMetrics() already uses for open exposure above, over the same cached,
+      // memoized row arrays (getAllBotRowsMergedUnique()/getManualRowsMerged()) — no
+      // new dataset, no full-history recomputation. Because this is always called
+      // BEFORE the approval mutation it is gating, the candidate bet itself is never
+      // in an "approved" state yet and is therefore automatically excluded — no
+      // separate self-exclusion/id-matching logic is needed.
+      //
+      // One logical bet cannot be double-counted here (verified empirically, Phase
+      // 26.46's pre-commit audit — see ADR-019's Consequences). A bot pick legitimately
+      // exists in BOTH state.footballHistory and state.footballDaily at once (a pick
+      // approved today stays in today's raw daily CSV — approval never removes it,
+      // it only records apostada in localEdits) — getAllBotRowsMergedUnique() already
+      // collapses this to one entry via an exact _pickKey Map, which is safe because
+      // both arrays are normalised through the identical normalizeBotCsvRow() and are
+      // written from the same generation-time string, so the same real pick always
+      // produces the same _pickKey in both. A manual bet has no equivalent dual
+      // representation — state.manualBets holds one mutable record per id, and the
+      // only other array getManualRowsMerged() merges in (state.manualBetsRemote,
+      // manual_bets.csv — always empty, ADR-001) is filtered out entirely via
+      // isLocal === true, not merely deduped. Neither mechanism is new to this
+      // function; both pre-date it and are simply relied upon here.
+      function getApprovedFixtureExposure(fixtureKey) {
+        const botRows = getAllBotRowsMergedUnique().filter(r =>
+          r._apostadaBool === true &&
+          r._resultKey === 'pending' &&
+          fixtureExposureKey(r['Data'], r['Liga'], r['Jogo']) === fixtureKey
+        ).map(r => ({
+          source: 'bot',
+          game: cleanString(r['Jogo'] || ''),
+          market: normalizeMarket(r),
+          odd: r._oddRealNum,
+          stake: r._stakeRealNum
+        }));
+
+        const manualRows = getManualRowsMerged().filter(b =>
+          b.isLocal === true &&
+          b.status === 'approved' &&
+          !['W', 'L', 'P'].includes(b._resultKey) &&
+          fixtureExposureKey(b.data, b.liga, b.jogo) === fixtureKey
+        ).map(b => ({
+          source: 'manual',
+          game: b.jogo,
+          market: b.mercado,
+          odd: num(b.odd),
+          stake: num(b.stake)
+        }));
+
+        return [...botRows, ...manualRows];
+      }
+
+      function buildFixtureExposureConfirmMessage(existing, candidateStake) {
+        const currentExposure = sum(existing.map(e => e.stake).filter(v => v !== null));
+        const candStake = Number.isFinite(candidateStake) ? candidateStake : 0;
+
+        const lines = [
+          existing.length === 1
+            ? 'Já existe uma aposta aprovada neste jogo.'
+            : `Já existem ${existing.length} apostas aprovadas neste jogo.`,
+          ''
+        ];
+
+        existing.forEach(e => {
+          lines.push(`${e.source === 'bot' ? 'Bot' : 'Manual'} — ${e.game || '—'} — ${e.market || '—'}`);
+          lines.push(`Odd: ${fmt(e.odd)}   Stake: €${fmt(e.stake)}`);
+          lines.push('');
+        });
+
+        lines.push(`Exposição atual ao jogo: €${fmt(currentExposure)}`);
+        lines.push(`Nova stake: €${fmt(candStake)}`);
+        lines.push(`Exposição total após aprovação: €${fmt(currentExposure + candStake)}`);
+        lines.push('');
+        lines.push('Pretende aprovar esta aposta na mesma?');
+
+        return lines.join('\n');
+      }
+
+      // Gate to call synchronously immediately before an approval mutation (bot or
+      // manual). Returns true when it is safe to proceed — either no other approved
+      // bet exists on this fixture, or the user confirmed anyway. Returns false when
+      // the user cancelled, in which case the caller must not mutate any state at
+      // all. This is informational only: it never blocks approval outright and never
+      // changes stake sizing, Kelly, bankroll, or eligibility — see ADR-017/ADR-018,
+      // which this feature is deliberately independent from.
+      function confirmFixtureApprovalExposure(data, liga, jogo, candidateStake) {
+        const fixtureKey = fixtureExposureKey(data, liga, jogo);
+        const existing = getApprovedFixtureExposure(fixtureKey);
+        if (existing.length === 0) return true;
+        return confirm(buildFixtureExposureConfirmMessage(existing, candidateStake));
+      }
 
       function getAdvancedMetrics() {
         const m = getMetrics();
@@ -8311,6 +8423,7 @@ button:disabled {
         document.querySelectorAll('.js-bot-approve').forEach(el => {
           el.onclick = e => {
             const key = e.target.dataset.pickKey;
+            const row = getDailyRowsMerged().find(r => r._pickKey === key);
             const changes = { apostada: true };
 
             // Default StakeReal to the displayed "Stake rec." whenever the existing
@@ -8321,10 +8434,20 @@ button:disabled {
             // (see 05_Known_Issues.md — DASHBOARD-5), so a stored zero/negative/
             // invalid value is treated the same as "not set".
             const existingStakeRealNum = num(state.localEdits[key]?.stakeReal);
+            let candidateStake = existingStakeRealNum;
             if (existingStakeRealNum === null || existingStakeRealNum <= 0) {
-              const row = getDailyRowsMerged().find(r => r._pickKey === key);
               const recommended = row ? computeRecommendedStake(row).value : null;
-              if (recommended !== null) changes.stakeReal = String(recommended);
+              if (recommended !== null) {
+                changes.stakeReal = String(recommended);
+                candidateStake = recommended;
+              }
+            }
+
+            // Fixture-level exposure warning (dashboard safety check — not part of
+            // ADR-018's generation-side market lock). Runs before any mutation; a
+            // Cancel here leaves state completely untouched.
+            if (row && !confirmFixtureApprovalExposure(row['Data'], row['Liga'], row['Jogo'], candidateStake)) {
+              return;
             }
 
             update(key, changes, true);
@@ -8454,6 +8577,15 @@ button:disabled {
       function mbHandleRowApprove(id) {
         const betIdx = state.manualBets.findIndex(b => String(b.id) === String(id));
         if (betIdx === -1) return;
+        const bet = state.manualBets[betIdx];
+
+        // Fixture-level exposure warning (dashboard safety check — not part of
+        // ADR-018's generation-side market lock). Runs before any mutation; a
+        // Cancel here leaves state completely untouched.
+        if (!confirmFixtureApprovalExposure(bet.data, bet.liga, bet.jogo, num(bet.stake))) {
+          return;
+        }
+
         state.manualBets[betIdx] = { ...state.manualBets[betIdx], status: 'approved' };
         // markDirty() alone (Phase 26.41 — H3 migration): tab-manual is
         // guaranteed active for this button to be clickable.

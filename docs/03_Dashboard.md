@@ -353,7 +353,7 @@ After any state mutation:
 
 **User interactions:**
 - Filter by market (O2.5, BTTS), league, date.
-- Mark a pick as "Apostada" (`.js-bot-approve`, bound in `bindBotTableControls()`) — sets `localEdits[pickKey].apostada = true`, calls `markDirty()`, `saveLocalState()`, `rerenderAll()`. **(Phase 26.33, guard corrected Phase 26.35)** In the same click, if `localEdits[pickKey].stakeReal` does not parse to a meaningful positive stake at approval time (empty, undefined, invalid string, zero, or negative — checked via `num()`, not string truthiness), it is defaulted to the row's displayed "Stake rec." value (`computeRecommendedStake(row).value` — the same dynamic recommendation shown in that pick's own "Stake rec." column, not the raw "Stake mod." Kelly output; this function is hard-floored at 1, so it can never itself produce zero). A genuine positive `stakeReal` the user already typed in before clicking "Aprovar" is never overwritten, and the default is applied exactly once, at the moment of approval — editing "Stake Real" afterward on the History page works exactly as before. See `05_Known_Issues.md` DASHBOARD-5 for why the original empty-string check was insufficient.
+- Mark a pick as "Apostada" (`.js-bot-approve`, bound in `bindBotTableControls()`) — sets `localEdits[pickKey].apostada = true`, calls `markDirty()`, `saveLocalState()`, `rerenderAll()`. **(Phase 26.33, guard corrected Phase 26.35)** In the same click, if `localEdits[pickKey].stakeReal` does not parse to a meaningful positive stake at approval time (empty, undefined, invalid string, zero, or negative — checked via `num()`, not string truthiness), it is defaulted to the row's displayed "Stake rec." value (`computeRecommendedStake(row).value` — the same dynamic recommendation shown in that pick's own "Stake rec." column, not the raw "Stake mod." Kelly output; this function is hard-floored at 1, so it can never itself produce zero). A genuine positive `stakeReal` the user already typed in before clicking "Aprovar" is never overwritten, and the default is applied exactly once, at the moment of approval — editing "Stake Real" afterward on the History page works exactly as before. See `05_Known_Issues.md` DASHBOARD-5 for why the original empty-string check was insufficient. **(Phase 26.46)** Immediately before this mutation, `confirmFixtureApprovalExposure()` checks whether another approved bet already exists on the same fixture (any market, bot or manual) and, if so, shows a PT-PT confirmation before proceeding — see "Fixture-Level Approval Exposure Warning" below (ADR-019).
 
 **Update triggers:** `loadData()` (page load, 60-second interval); any `rerenderAll()`.
 
@@ -544,7 +544,7 @@ The bet is immediately visible in the Manual Bets list with status "pending".
 
 ### Step 4 — Approval
 
-The user clicks "Aprovar" (Approve) on the bet in the Manual Bets list.
+The user clicks "Aprovar" (Approve) on the bet in the Manual Bets list. **(Phase 26.46)** `mbHandleRowApprove()` first calls `confirmFixtureApprovalExposure()` — if another approved bet already exists on the same fixture (any market, bot or manual), a PT-PT confirmation appears before the mutation below runs; Cancel leaves the bet untouched. See "Fixture-Level Approval Exposure Warning" after this section (ADR-019).
 
 ```javascript
 state.manualBets[idx].status = 'approved';
@@ -631,6 +631,24 @@ Lifecycle (`status`) and settlement result (`resultado`/`placar`) are independen
 ```
 
 A rejected bet can be re-approved at any point (before or after settlement) by clicking "Aprovar" again; it then behaves exactly like any other approved bet, including counting financially if it already carries a settlement result.
+
+---
+
+### Fixture-Level Approval Exposure Warning (Phase 26.46, ADR-019)
+
+Both approval mutations — Daily Picks' `.js-bot-approve` handler and Manual Bets' `mbHandleRowApprove()` — run a synchronous gate, `confirmFixtureApprovalExposure(data, liga, jogo, candidateStake)`, before mutating anything. It is a **warning**, not a restriction: the dashboard has always allowed more than one approved bet on the same fixture (a user may deliberately want both an Over 2.5 and a BTTS position, bot and/or manual), and this remains fully possible — the gate only makes the resulting exposure visible before it happens.
+
+**Fixture identity.** `fixtureExposureKey(data, liga, jogo)` — `Date + League + Game`, deliberately excluding Market and Bot/Manual origin — reuses the exact same normalisers `manualBetOpportunityKey()` already established for duplicate-bet detection (`normalizeDateString()`, `normalizeLeagueCode()`, a lowercase-folded `Jogo`) minus the market component. This is a dashboard-local sibling of ADR-018's Python-side `fixture_id_from_*()` helpers, not a reuse of them — the dashboard has its own client-side row representations (PascalCase CSV fields for bot rows, lowercase `cloud_state.json` fields for manual rows) and no existing JS fixture-only identity to reuse. `normalizeLeagueCode()`'s exact-map lookup (no fuzzy matching) keeps MLS and MLS Next Pro distinct.
+
+**What counts as existing exposure.** `getApprovedFixtureExposure(fixtureKey)` returns every *other* bet, bot or manual, currently `approved AND unresolved` on that fixture — reusing the identical predicates `getRiskMetrics()`'s `stakeOpen` already uses (`r._apostadaBool && r._resultKey === 'pending'` for bot rows via `getAllBotRowsMergedUnique()`; `b.isLocal && b.status === 'approved' && !['W','L','P'].includes(b._resultKey)` for manual rows via `getManualRowsMerged()`), over the same Phase 26.39 memoized arrays — no new dataset. An unapproved recommendation, a rejected/cancelled bet, and a resolved W/L/P or voided-P bet never count. Because the gate always runs *before* the mutation it guards, the candidate bet itself is provably not yet "approved" at lookup time, so it is automatically excluded with no separate self-exclusion logic.
+
+**Logical-bet deduplication (verified, Phase 26.46's pre-commit audit).** A single logical bet cannot appear twice in the result. A bot pick legitimately exists in both `state.footballHistory` and `state.footballDaily` simultaneously (approval never removes a row from today's daily CSV), but `getAllBotRowsMergedUnique()` already collapses that to one entry by exact `_pickKey`, which holds because both arrays are normalised through the identical `normalizeBotCsvRow()`. A manual bet has no equivalent dual representation — one mutable record per `id` in `state.manualBets`; the only other merged array, `state.manualBetsRemote` (the dead `manual_bets.csv`, ADR-001), is excluded outright via `isLocal === true`. See ADR-019's Consequences for the full empirical trace.
+
+**Warning content (PT-PT).** When exposure exists, `buildFixtureExposureConfirmMessage()` lists each existing bet's origin (Bot/Manual), game, market, odd, and stake, then the current combined exposure, the candidate's own stake (the exact value about to be persisted — including a Phase 26.33/26.35 auto-filled "Stake rec." default, if applicable), and the resulting total. Presented via the browser-native `confirm()` — the dashboard has no reusable modal/dialog component (confirmed by audit; `manualVoidBet()`'s "Anular aposta" already uses the same pattern), so this is the smallest architecture-consistent choice rather than a new UI system.
+
+**Cancel / Confirm semantics.** Cancel returns from the click handler before either `update()` (bot) or the `state.manualBets[betIdx] = {...}` assignment (manual) runs — zero mutation, verified by regression. Confirm ("Aprovar na mesma") falls through to the exact same, unmodified approval code that already ran before this phase — no parallel approval implementation exists.
+
+**Explicitly independent from ADR-018.** ADR-018's fixture-level market lock constrains what the *bot generation pipeline* may recommend across runs (Python, `src/pipeline.py`). This gate constrains what the *dashboard warns about* at approval time (JavaScript, `index.html`). Neither reads the other's identity keys or code paths. See ADR-019 for the full architectural reasoning.
 
 ---
 
