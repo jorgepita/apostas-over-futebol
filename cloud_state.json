@@ -5059,6 +5059,26 @@
     "2026-08-01|finlandia|Lahti vs FF Jaro|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-02|mls|Sporting Kansas City vs Houston Dynamo|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-02|noruega|Aalesund vs Tromso|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-02|noruega|KFUM Oslo vs Kristiansund BK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-02|suecia|IF Brommapojkarna vs Malmo FF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-02|suecia|IFK Goteborg vs Degerfors IF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -13993,7 +14013,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-29T10:06:46.079Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
