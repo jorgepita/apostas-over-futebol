@@ -5053,6 +5053,14 @@
     "2026-08-02|suecia|IFK Goteborg vs Degerfors IF|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-07-31|noruega|Bodo/Glimt vs Lillestrom|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-03|suecia|Halmstad vs Sirius|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -15051,7 +15059,7 @@
   ],
   "sessionStartDate": "2026-04-19",
   "lastUpdated": "2026-07-31T10:40:44.299Z",
-  "activeTab": "tab-manual",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
