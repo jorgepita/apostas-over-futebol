@@ -1,3 +1,4 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-08-01;mls;MLS;New York City FC;Toronto FC;2.2;1.555;3.755;2026-08-01T00:30:00+01:00;BTTS;0.621;1.75;0.571;0.0493;0.1151;True;;0.0175;0.0175;0.049;0.0102;0.0102;0.51;1.0;50.0
 2026-08-03;suecia;Allsvenskan;Halmstad;Sirius;1.77;1.9;3.67;2026-08-03T18:00:00+01:00;BTTS;0.624;1.67;0.599;0.0257;0.064;True;;0.0075;0.0075;0.026;0.003;0.003;0.15;1.0;50.0
+2026-07-31;noruega;Eliteserien;Bodo/Glimt;Lillestrom;2.017;1.479;3.496;2026-07-31T20:00:00+01:00;BTTS;0.592;1.73;0.578;0.0144;0.0342;True;;0.0075;0.0075;0.014000000000000012;0.0009;0.0009;0.04;1.0;50.0
