@@ -13226,10 +13226,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "2.1",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-07-31T09:46:40.799865+00:00"
     },
     {
       "analysisSnapshot": {
@@ -13349,10 +13352,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.91",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-07-31T09:46:40.799865+00:00"
     },
     {
       "analysisSnapshot": {
@@ -14382,8 +14388,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-30T23:30:46.757307+00:00",
-      "lastSuccessAt": "2026-07-30T23:30:46.757307+00:00",
+      "lastCheckedAt": "2026-07-31T09:46:40.803459+00:00",
+      "lastSuccessAt": "2026-07-31T09:46:40.803459+00:00",
       "status": "ok"
     }
   },
