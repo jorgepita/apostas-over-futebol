@@ -14883,7 +14883,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
