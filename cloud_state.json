@@ -13827,10 +13827,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.75",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 73,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.75,
+      "placar": "1-1",
+      "settledAt": "2026-08-01T09:07:28.383263+00:00"
     },
     {
       "analysisSnapshot": {
@@ -15371,8 +15374,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-07-31T23:28:04.416762+00:00",
-      "lastSuccessAt": "2026-07-31T23:28:04.416762+00:00",
+      "lastCheckedAt": "2026-08-01T09:07:28.387415+00:00",
+      "lastSuccessAt": "2026-08-01T09:07:28.387415+00:00",
       "status": "ok"
     }
   },
