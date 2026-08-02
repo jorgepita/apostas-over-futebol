@@ -14193,10 +14193,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.34",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.34,
+      "placar": "4-2",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     },
     {
       "analysisSnapshot": {
@@ -14240,10 +14243,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.39",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 50,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.39,
+      "placar": "2-2",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     },
     {
       "analysisSnapshot": {
@@ -14300,10 +14306,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.33",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.33,
+      "placar": "3-2",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     },
     {
       "analysisSnapshot": {
@@ -14347,10 +14356,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.63",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 80,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     },
     {
       "analysisSnapshot": {
@@ -14908,7 +14920,7 @@
       "mercado": "BTTS",
       "odd": "1.44",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -14958,7 +14970,10 @@
       "kickoffUTC": "2026-08-02T00:00:00+01:00",
       "homeTeam": "Connecticut FC",
       "awayTeam": "Orlando City II",
-      "leagueId": 909
+      "leagueId": 909,
+      "lucro": 0.44,
+      "placar": "4-2",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     },
     {
       "id": "manual_1785607876244_c1p75r",
@@ -14968,9 +14983,9 @@
       "mercado": "Over 2.5",
       "odd": "1.45",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -15005,7 +15020,10 @@
       "kickoffUTC": "2026-08-02T01:00:00+01:00",
       "homeTeam": "Huntsville City",
       "awayTeam": "Crown Legacy",
-      "leagueId": 909
+      "leagueId": 909,
+      "lucro": 0.45,
+      "placar": "1-3",
+      "settledAt": "2026-08-02T09:10:17.279494+00:00"
     }
   ],
   "movements": [
@@ -15231,8 +15249,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-01T23:27:51.257044+00:00",
-      "lastSuccessAt": "2026-08-01T23:27:51.257044+00:00",
+      "lastCheckedAt": "2026-08-02T09:10:17.282701+00:00",
+      "lastSuccessAt": "2026-08-02T09:10:17.282701+00:00",
       "status": "ok"
     }
   },
