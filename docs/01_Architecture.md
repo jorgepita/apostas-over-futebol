@@ -28,9 +28,9 @@ This document describes the complete production architecture. It is a technical 
         │ HTTP                              ▼
         ▼                        ┌────────────────────────┐
 ┌───────────────────┐            │  Browser Dashboard     │
-│ football-data.org │            │  index.html            │
-│ API-Football v3   │◄───────────│                        │
-│ (result lookups)  │            │  localStorage (cache)  │
+│ API-Football v3   │            │  index.html            │
+│ (sole result      │◄───────────│                        │
+│  provider)        │            │  localStorage (cache)  │
 └───────────────────┘            │  60s CSV auto-refresh  │
         │                        │  explicit cloud sync   │
         ▼                        └────────────────────────┘
@@ -45,7 +45,7 @@ Data flow directions:
 - **Railway → GitHub**: reads/writes `cloud_state.json` via GitHub Contents API.
 - **Browser → Railway**: GET /load to read cloud state; POST /save to write; POST /run-settlement to trigger settlement.
 - **Browser → GitHub**: fetches picks CSVs via raw HTTPS URLs (read-only, no auth required).
-- **GitHub Actions → result APIs**: queries football-data.org and API-Football to settle picks.
+- **GitHub Actions → result APIs**: queries API-Football (the sole result provider as of Phase 27.4) to settle picks.
 - **GitHub Actions → Telegram**: sends pick notifications after generation.
 
 ---
@@ -94,7 +94,7 @@ Data flow directions:
 
 **Purpose:** Single settlement pipeline shared by bot picks and manual bets.
 
-**Core function:** `update_dataframe(df, label, shared_state)` — iterates every row; skips ALREADY_DONE (W/L/P result present), INVALID_ROW, FUTURE_DATE, MISSING_LEAGUE_MAP, UNSUPPORTED_MARKET; queries football-data.org or API-Football for finished matches; writes Resultado and Lucro€.
+**Core function:** `update_dataframe(df, label, shared_state)` — iterates every row; skips ALREADY_DONE (W/L/P result present), INVALID_ROW, FUTURE_DATE, MISSING_LEAGUE_MAP, UNSUPPORTED_MARKET; queries API-Football (the sole result provider as of Phase 27.4) for finished matches; writes Resultado and Lucro€.
 
 **Entry points:**
 - `main()` — called by GitHub Actions; reads/writes local CSV files from disk.
@@ -134,23 +134,11 @@ Data flow directions:
 
 ---
 
-### football-data.org
-
-**Purpose:** Primary result provider for EU leagues.
-
-**Used for:** Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship. Endpoint: `/v4/competitions/{code}/matches?dateFrom=&dateTo=`.
-
-**Rate limit:** 10 requests/minute (free tier). Enforced by `FD_CALL_MIN_INTERVAL = 0.65s`.
-
-**Does not serve:** Blocked EU leagues (returns HTTP 403) or non-EU leagues (no coverage). These route directly to API-Football.
-
----
-
 ### API-Football v3
 
-**Purpose:** Direct provider for non-EU leagues and blocked EU leagues; fallback for all leagues when football-data.org fails.
+**Purpose:** The sole result provider for settlement, for every registered league (football-data.org was removed entirely in Phase 27.4 — see `09_Architecture_Decisions.md` ADR-004 update). Also used for fixture download in pick generation.
 
-**Used for:** Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig (FD-blocked), and all non-EU leagues (MLS, Nordic, Asian, Brazilian). Also used for fixture download in pick generation.
+**Used for:** All 22 registered leagues — Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig, and all non-EU leagues (MLS, MLS Next Pro, Nordic, Asian, Brazilian).
 
 **Rate limit:** Paid subscription — 7500 requests/day, 300 requests/minute.
 
@@ -360,28 +348,20 @@ Runs in the same `update_results.py` execution, after bot picks, using the same 
 
 **Key property:** `update_dataframe()` is called identically for both bot and manual bets. The only differences are the input conversion (JSON → DataFrame) and output destination (CSVs vs `cloud_state.json`).
 
-### 5.3 Settlement Provider Decision Tree
+### 5.3 Settlement Provider Resolution
 
 ```
 For each unsettled row:
     league_code = LEAGUE_CODE_MAP[liga]
-
-    if league_code ∈ BLOCKED_FOOTBALL_DATA_CODES:
-        → API-Football direct (no FD attempt)
-        exit
-
-    try football-data.org:
-        fetch_matches_for_league_date(league_code, date)
-        ├─ HTTP 403 or 429:
-        │   if league has AF coverage → API-Football fallback
-        │   else → skip this run
-        ├─ No fixture matched:
-        │   if league has AF coverage → API-Football fallback
-        │   else → skip this run
-        └─ Fixture matched and FINISHED → settle from FD data
+    → fetch_api_football_fixtures_for_league_date(league_code, date)
+        ├─ No fixture matched → skip this run, retried next run
+        └─ Fixture matched and FINISHED → settle from API-Football data
 ```
 
-All 21 registered leagues have `af_id` set, so all have API-Football coverage. There is no league in the current registry that will be permanently skipped if FD fails.
+API-Football is the sole result provider (Phase 27.4 — football-data.org was
+removed entirely, see `09_Architecture_Decisions.md` ADR-004 update). Every
+registered league has `af_id` set, so every league resolves through this one
+path — there is no provider branching left to document.
 
 ---
 
@@ -473,18 +453,11 @@ The browser reads `cloud_state.json` through Railway `/load`. localStorage is a 
 - **Pick generation:** Fails. Fixture download from API-Football may succeed, but CSV upload to GitHub fails.
 - **Recovery:** No data is lost. Settlement is retried automatically at the next scheduled time (07:00 or 22:30 UTC).
 
-### football-data.org unavailable (HTTP 403, 429, or network error)
-
-- **Affected leagues:** EU primary leagues (Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship).
-- **Fallback:** `should_use_api_football_fallback(league_code, reason)` returns `True` for any HTTP error. All 21 registered leagues have `af_id` set and are in `API_FOOTBALL_FALLBACK_COMPETITIONS`, so every league can fall back to API-Football.
-- **Impact:** Slightly higher API-Football request count. All leagues still settle.
-- **Recovery:** Transparent. Rows unsettled this run are retried next run.
-
 ### API-Football unavailable
 
-- **Affected leagues:** Non-EU leagues (MLS, Nordic, Asian, Brazilian) and FD-blocked EU leagues (Primeira Liga, Bundesliga, etc.) cannot settle. FD-primary EU leagues lose their fallback.
-- **FD-primary EU leagues:** Continue to settle via football-data.org if FD is healthy.
+- **Affected leagues:** All of them — API-Football is the sole result provider as of Phase 27.4 (football-data.org was removed entirely, see `09_Architecture_Decisions.md` ADR-004 update). No league has a second provider to fall back to.
 - **Pick generation:** `fetch_oddsapi_fixtures.py` fails. No new picks are generated for that run.
+- **Settlement:** No league settles this run.
 - **Recovery:** Rows are skipped; retried on next settlement run.
 
 ### Concurrent write conflict (GitHub SHA mismatch)
@@ -510,7 +483,7 @@ These rules must be preserved in future development.
 
 **Settlement logic lives in `update_dataframe()` and nowhere else.** All result computation, profit calculation, and row-settling belongs in this function. A parallel settlement path — however convenient — will diverge from the main path over time and produce inconsistent results.
 
-**The League Registry is the only registration point for leagues.** `src/league_registry.py` is the single file to edit when adding or changing a league. All derived structures (`LEAGUE_CODE_MAP`, `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS`, `AF_SEASON_MODELS`) are computed from it automatically. Hard-coding league metadata in `update_results.py`, `config.json`, or any other file violates this rule.
+**The League Registry is the only registration point for leagues.** `src/league_registry.py` is the single file to edit when adding or changing a league. All derived structures (`LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS`) are computed from it automatically. Hard-coding league metadata in `update_results.py`, `config.json`, or any other file violates this rule.
 
 **The Railway server holds no state between requests.** It is a pure proxy. Any logic that requires the server to remember something across requests is out of scope and belongs elsewhere.
 

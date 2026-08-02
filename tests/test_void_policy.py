@@ -200,29 +200,6 @@ def test_suspended_interrupted_after_48h_remains_unresolved(monkeypatch):
         assert ignored == 1, status
 
 
-def test_fd_suspended_after_48h_remains_unresolved(monkeypatch):
-    # Same correction, football-data.org side (SUSPENDED is FD's only
-    # suspended/interrupted-equivalent status). Must use a football-data.org
-    # league (MLS has no FD coverage at all and would route straight to AF).
-    kickoff = datetime.now(timezone.utc) - timedelta(hours=49)
-    df, _ = make_row_df(liga="Premier League", kickoff_dt=kickoff)
-    date_str = kickoff.date().isoformat()
-    fx = {
-        "utcDate": _iso(kickoff),
-        "status": "SUSPENDED",
-        "homeTeam": {"name": "Home Team"},
-        "awayTeam": {"name": "Away Team"},
-        "score": {"fullTime": {"home": None, "away": None}},
-    }
-    monkeypatch.setattr(ur, "fetch_matches_for_league_date", lambda league_code, date, shared_state: [fx])
-    shared_state = ur.make_shared_runtime_state()
-    out, updated, _, ignored = ur.update_dataframe(df, "test", shared_state)
-    assert out.iloc[0]["Resultado"] == ""
-    assert out.iloc[0]["SettlementReason"] == ""
-    assert updated == 0
-    assert ignored == 1
-
-
 def test_suspended_interrupted_very_old_fixture_still_never_auto_voids(monkeypatch):
     # Age alone must never be sufficient — even a SUSP/INT fixture several
     # days old (well past every configured threshold) stays unresolved via
@@ -241,20 +218,19 @@ def test_suspended_interrupted_very_old_fixture_still_never_auto_voids(monkeypat
 def test_suspended_interrupted_classification_falls_through_to_scheduled_unknown():
     # Confirms the "reuse the existing safe bucket" implementation choice
     # (per the safety audit) rather than a new dedicated classification branch.
+    # football-data.org (and its own SUSPENDED-equivalent status) was removed
+    # entirely in Phase 27.4 — API-Football is now the sole provider, so only
+    # its SUSP/INT statuses remain relevant here.
     assert ur.classify_af_status("SUSP") == "SCHEDULED_UNKNOWN"
     assert ur.classify_af_status("INT") == "SCHEDULED_UNKNOWN"
-    assert ur.classify_fd_status("SUSPENDED") == "SCHEDULED_UNKNOWN"
     # And are documented, not silently absent.
     assert "SUSP" in ur.AF_SUSPENDED_INTERRUPTED_STATUS
     assert "INT" in ur.AF_SUSPENDED_INTERRUPTED_STATUS
-    assert "SUSPENDED" in ur.FD_SUSPENDED_INTERRUPTED_STATUS
     # And are no longer present in the auto-void-eligible sets or reason maps.
     assert "SUSP" not in ur.AF_NON_PLAYED_STATUS
     assert "INT" not in ur.AF_NON_PLAYED_STATUS
-    assert "SUSPENDED" not in ur.FD_NON_PLAYED_STATUS
     assert "SUSP" not in ur.AF_VOID_REASON_BY_STATUS
     assert "INT" not in ur.AF_VOID_REASON_BY_STATUS
-    assert "SUSPENDED" not in ur.FD_VOID_REASON_BY_STATUS
 
 
 def test_in_progress_never_voids_regardless_of_age(monkeypatch):

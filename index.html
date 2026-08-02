@@ -4279,20 +4279,11 @@ button:disabled {
           ['série a',                          'brasil'],
           ['j1 league',                        'japao'],
           ['k league 1',                       'coreia'],
-          // ── football-data.org competition codes ──
-          ['pl',  'premier'],
-          ['pd',  'espanha'],
-          ['fl1', 'franca'],
-          ['sa',  'italia'],
-          ['ded', 'paises_baixos'],
-          ['elc', 'championship'],
-          ['ppl', 'portugal'],
-          ['bl1', 'alemanha'],
-          ['bl2', 'alemanha2'],
-          ['sb',  'italia2'],
-          ['fl2', 'franca2'],
-          ['bjl', 'belgica'],
-          ['tsl', 'turquia'],
+          // football-data.org's short competition codes (PL/PD/FL1/...) were
+          // removed here in Phase 27.4 (football-data.org removal — see
+          // docs/09_Architecture_Decisions.md ADR-004 update). Every CSV
+          // "Liga"/"League" value and every canonical key above already
+          // covers everything the dashboard actually produces or reads.
         ];
         const m = new Map();
         for (const [alias, canonical] of entries) m.set(alias, canonical);
@@ -9055,13 +9046,21 @@ button:disabled {
   el.innerHTML = '<span class="save-status-dot"></span> Cloud: sincronizada';
 }
 
-      // Provider health (API-Football / football-data.org) — surfaces repeated
-      // fetch failures (plan/quota/auth/network) so they never masquerade as
-      // "no games today". Persisted in cloud_state.json under providerHealth,
-      // written by the backend whenever a settlement run touches a provider.
+      // Provider health (API-Football — the sole provider since Phase 27.4's
+      // football-data.org removal, see docs/09_Architecture_Decisions.md
+      // ADR-004 update) — surfaces repeated fetch failures (plan/quota/auth/
+      // network) so they never masquerade as "no games today". Persisted in
+      // cloud_state.json under providerHealth, written by the backend
+      // whenever a settlement run touches a provider. A historical
+      // "football-data.org" entry may still exist in production
+      // cloud_state.json from before this removal — deliberately left
+      // unlabelled here rather than re-added: the fallback below
+      // (`PROVIDER_HEALTH_LABELS[provider] || provider`) already renders it
+      // identically to how the old explicit entry did (the label and the
+      // raw key were always the same string), so no dashboard behaviour
+      // changes for that stale entry either way.
       const PROVIDER_HEALTH_LABELS = {
         'api-football':       'API-Football',
-        'football-data.org':  'football-data.org',
       };
       const PROVIDER_HEALTH_CATEGORY_TEXT = {
         PLAN_LIMIT:       'subscription does not include the requested season',

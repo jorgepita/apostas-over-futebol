@@ -4,12 +4,16 @@ League Registry — single source of truth for all league metadata.
 To add a new league:
   1. Add a LeagueEntry row to REGISTRY below.
   2. Add the league to config.json (leagues + api_football.league_ids).
-  That is all. LEAGUE_CODE_MAP, BLOCKED_FOOTBALL_DATA_CODES, and
-  API_FOOTBALL_FALLBACK_COMPETITIONS are all derived automatically.
+  That is all. LEAGUE_CODE_MAP and API_FOOTBALL_COMPETITIONS are both
+  derived automatically.
 
 Field notes
-  fd_code      : football-data.org competition code; None = no FD coverage at all.
-  fd_blocked   : True = FD code exists but is blocked (HTTP 403); skip FD entirely.
+  code         : internal settlement routing code (an opaque identifier —
+                 for several EU leagues this happens to match football-data.org's
+                 old competition code, purely for historical continuity; it
+                 carries no provider meaning since football-data.org was
+                 removed entirely in Phase 27.4, see
+                 docs/09_Architecture_Decisions.md ADR-004 update).
   af_id        : API-Football integer league ID. When set, skips the /leagues API
                  lookup in get_api_football_league_id() and uses this directly.
   af_country   : API-Football /leagues?country= value (fallback if af_id missing).
@@ -25,50 +29,37 @@ class LeagueEntry:
     key: str            # config.json internal key
     name: str           # display name in picks CSV "Liga" column
     country: str        # 3-char ISO code
-    fd_code: str | None # football-data.org competition code; None = not on FD
-    fd_blocked: bool    # True = FD code exists but returns errors; bypass FD
+    code: str            # internal settlement routing code — see module docstring
     af_country: str     # API-Football country string
     af_name: str        # API-Football competition name (fuzzy fallback)
-    af_id: int | None   # API-Football integer ID; short-circuits /leagues API call
+    af_id: int          # API-Football integer ID; short-circuits /leagues API call
     # How game dates map to API-Football season integers:
     #   "european" — season starts in July/August; Jan–Jun -> year-1 (e.g. Feb 2026 -> 2025)
     #   "calendar" — season equals the calendar year the game is played (MLS, Nordic, Asian, etc.)
     season_model: str = "european"
 
 
-def _settlement_code(e: LeagueEntry) -> str:
-    """Routing key for the settlement pipeline.
-
-    Uses the real FD code for leagues that have one, so existing FD plumbing
-    continues to work without changes. Uses the internal config.json key for
-    non-EU leagues (where no FD code exists) — the key is arbitrary for routing
-    because those leagues bypass FD entirely and go straight to API-Football.
-    """
-    return e.fd_code if e.fd_code else e.key
-
-
 REGISTRY: list[LeagueEntry] = [
-    # ── EU: served by football-data.org ───────────────────────────────────
-    LeagueEntry("premier",       "Premier League",                "ENG", "PL",  False, "England",     "Premier League",      39),
-    LeagueEntry("espanha",       "LaLiga",                        "ESP", "PD",  False, "Spain",       "La Liga",             140),
-    LeagueEntry("franca",        "Ligue 1",                       "FRA", "FL1", False, "France",      "Ligue 1",             61),
-    LeagueEntry("italia",        "Serie A",                       "ITA", "SA",  False, "Italy",       "Serie A",             135),
-    LeagueEntry("paises_baixos", "Eredivisie",                    "NLD", "DED", False, "Netherlands", "Eredivisie",          88),
-    LeagueEntry("championship",  "Championship",                  "ENG", "ELC", False, "England",     "Championship",        40),
-    # ── EU: blocked on football-data.org — API-Football direct ────────────
-    LeagueEntry("portugal",      "Primeira Liga",                 "PRT", "PPL", True,  "Portugal",    "Primeira Liga",       94),
-    LeagueEntry("alemanha",      "Bundesliga",                    "DEU", "BL1", True,  "Germany",     "Bundesliga",          78),
-    LeagueEntry("alemanha2",     "2. Bundesliga",                 "DEU", "BL2", True,  "Germany",     "2. Bundesliga",       79),
-    LeagueEntry("italia2",       "Serie B",                       "ITA", "SB",  True,  "Italy",       "Serie B",             136),
-    LeagueEntry("franca2",       "Ligue 2",                       "FRA", "FL2", True,  "France",      "Ligue 2",             62),
-    LeagueEntry("belgica",       "Jupiler Pro League",            "BEL", "BJL", True,  "Belgium",     "Belgian Pro League",  144),
-    LeagueEntry("turquia",       "Super Lig",                     "TUR", "TSL", True,  "Turkey",      "Süper Lig",           203),
-    # ── Non-EU: no FD coverage — API-Football direct — calendar-year seasons ─
-    LeagueEntry("noruega",       "Eliteserien",                   "NOR", None,  False, "Norway",      "Eliteserien",         103, "calendar"),
-    LeagueEntry("suecia",        "Allsvenskan",                   "SWE", None,  False, "Sweden",      "Allsvenskan",         113, "calendar"),
-    LeagueEntry("finlandia",     "Veikkausliiga",                 "FIN", None,  False, "Finland",     "Veikkausliiga",       244, "calendar"),
-    LeagueEntry("islandia",      "Besta deild",                   "ISL", None,  False, "Iceland",     "Úrvalsdeild",         188, "calendar"),
-    LeagueEntry("mls",           "MLS",                           "USA", None,  False, "USA",         "Major League Soccer", 253, "calendar"),
+    # ── EU leagues ──────────────────────────────────────────────────────────
+    LeagueEntry("premier",       "Premier League",                "ENG", "PL",  "England",     "Premier League",      39),
+    LeagueEntry("espanha",       "LaLiga",                        "ESP", "PD",  "Spain",       "La Liga",             140),
+    LeagueEntry("franca",        "Ligue 1",                       "FRA", "FL1", "France",      "Ligue 1",             61),
+    LeagueEntry("italia",        "Serie A",                       "ITA", "SA",  "Italy",       "Serie A",             135),
+    LeagueEntry("paises_baixos", "Eredivisie",                    "NLD", "DED", "Netherlands", "Eredivisie",          88),
+    LeagueEntry("championship",  "Championship",                  "ENG", "ELC", "England",     "Championship",        40),
+    LeagueEntry("portugal",      "Primeira Liga",                 "PRT", "PPL", "Portugal",    "Primeira Liga",       94),
+    LeagueEntry("alemanha",      "Bundesliga",                    "DEU", "BL1", "Germany",     "Bundesliga",          78),
+    LeagueEntry("alemanha2",     "2. Bundesliga",                 "DEU", "BL2", "Germany",     "2. Bundesliga",       79),
+    LeagueEntry("italia2",       "Serie B",                       "ITA", "SB",  "Italy",       "Serie B",             136),
+    LeagueEntry("franca2",       "Ligue 2",                       "FRA", "FL2", "France",      "Ligue 2",             62),
+    LeagueEntry("belgica",       "Jupiler Pro League",            "BEL", "BJL", "Belgium",     "Belgian Pro League",  144),
+    LeagueEntry("turquia",       "Super Lig",                     "TUR", "TSL", "Turkey",      "Süper Lig",           203),
+    # ── Non-EU — calendar-year seasons ─────────────────────────────────────
+    LeagueEntry("noruega",       "Eliteserien",                   "NOR", "noruega",      "Norway",      "Eliteserien",         103, "calendar"),
+    LeagueEntry("suecia",        "Allsvenskan",                   "SWE", "suecia",       "Sweden",      "Allsvenskan",         113, "calendar"),
+    LeagueEntry("finlandia",     "Veikkausliiga",                 "FIN", "finlandia",    "Finland",     "Veikkausliiga",       244, "calendar"),
+    LeagueEntry("islandia",      "Besta deild",                   "ISL", "islandia",     "Iceland",     "Úrvalsdeild",         188, "calendar"),
+    LeagueEntry("mls",           "MLS",                           "USA", "mls",          "USA",         "Major League Soccer", 253, "calendar"),
     # Genuinely distinct competition, distinct API-Football ID, fully supported
     # end-to-end (fixture fetch, generation, dashboard, settlement) exactly
     # like every other league below — see ADR-004 update. Also registered in
@@ -76,10 +67,10 @@ REGISTRY: list[LeagueEntry] = [
     # fetch_oddsapi_fixtures.py generates picks for it independently of MLS.
     # The two must never be substituted for one another (see
     # docs/05_Known_Issues.md SETTLEMENT-3 for the incident this prevents).
-    LeagueEntry("mls_next_pro",  "MLS Next Pro",                  "USA", None,  False, "USA",         "MLS Next Pro",        909, "calendar"),
-    LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", None,  False, "Brazil",      "Série A",             71,  "calendar"),
-    LeagueEntry("japao",         "J1 League",                     "JPN", None,  False, "Japan",       "J1 League",           98,  "calendar"),
-    LeagueEntry("coreia",        "K League 1",                    "KOR", None,  False, "South Korea", "K League 1",          292, "calendar"),
+    LeagueEntry("mls_next_pro",  "MLS Next Pro",                  "USA", "mls_next_pro", "USA",         "MLS Next Pro",        909, "calendar"),
+    LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", "brasil",       "Brazil",      "Série A",             71,  "calendar"),
+    LeagueEntry("japao",         "J1 League",                     "JPN", "japao",        "Japan",       "J1 League",           98,  "calendar"),
+    LeagueEntry("coreia",        "K League 1",                    "KOR", "coreia",       "South Korea", "K League 1",          292, "calendar"),
 ]
 
 # ── Fast lookups ──────────────────────────────────────────────────────────────
@@ -89,7 +80,7 @@ REGISTRY_BY_NAME: dict[str, LeagueEntry] = {e.name: e for e in REGISTRY}
 # ── Derived settlement structures — consumed by update_results.py ─────────────
 
 # Maps the "Liga" display name in picks CSVs to the internal settlement routing code.
-LEAGUE_CODE_MAP: dict[str, str] = {e.name: _settlement_code(e) for e in REGISTRY}
+LEAGUE_CODE_MAP: dict[str, str] = {e.name: e.code for e in REGISTRY}
 
 # Historical aliases: some older CSVs and external APIs use these name variants.
 _NAME_ALIASES: dict[str, str] = {
@@ -102,22 +93,14 @@ for _alias, _canonical in _NAME_ALIASES.items():
         LEAGUE_CODE_MAP.setdefault(_alias, LEAGUE_CODE_MAP[_canonical])
 
 
-# Settlement codes for which football-data.org is bypassed entirely.
-# This covers (a) codes whose FD support is known-broken, and
-# (b) non-EU leagues that have no FD coverage at all.
-BLOCKED_FOOTBALL_DATA_CODES: frozenset[str] = frozenset(
-    _settlement_code(e) for e in REGISTRY
-    if e.fd_blocked or e.fd_code is None
-)
-
-# All leagues with API-Football coverage — used for direct settlement (blocked/non-EU)
-# and as a fallback when football-data.org fails for any reason.
-# The optional "af_id" key lets get_api_football_league_id() skip the /leagues API call.
-API_FOOTBALL_FALLBACK_COMPETITIONS: dict[str, dict] = {
-    _settlement_code(e): {
+# Every league's API-Football routing info, keyed by its settlement code.
+# The sole provider mapping as of Phase 27.4 (football-data.org removed).
+# The "af_id" key lets get_api_football_league_id() skip the /leagues API call.
+API_FOOTBALL_COMPETITIONS: dict[str, dict] = {
+    e.code: {
         "country": e.af_country,
         "name":    e.af_name,
-        **({"af_id": e.af_id} if e.af_id is not None else {}),
+        "af_id":   e.af_id,
     }
     for e in REGISTRY
 }
@@ -127,5 +110,4 @@ API_FOOTBALL_FALLBACK_COMPETITIONS: dict[str, dict] = {
 AF_SEASON_MODELS: dict[int, str] = {
     e.af_id: e.season_model
     for e in REGISTRY
-    if e.af_id is not None
 }

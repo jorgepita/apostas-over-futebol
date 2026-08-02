@@ -64,7 +64,7 @@ GitHub-hosted runners execute the Python pipeline on a cron schedule. Each run i
 - **Purpose:** Scheduled execution of pick generation and settlement.
 - **Lifecycle:** Started by schedule or `workflow_dispatch`; exits after the script finishes.
 - **Permissions:** `contents: write` — required to commit updated CSVs.
-- **Secret injection:** `GITHUB_TOKEN`, `TELEGRAM_TOKEN`, `CHAT_ID`, `API_FOOTBALL_KEY`, `FOOTBALL_DATA_API_KEY` are injected as environment variables from GitHub repository secrets.
+- **Secret injection:** `GITHUB_TOKEN`, `TELEGRAM_TOKEN`, `CHAT_ID`, `API_FOOTBALL_KEY` are injected as environment variables from GitHub repository secrets.
 
 ### GitHub API (persistence layer)
 
@@ -73,20 +73,12 @@ All persistent files are stored in the `jorgepita/apostas-over-futebol` reposito
 - **Purpose:** Database substitute. Provides versioned, durable storage with no infrastructure cost.
 - **Interactions:** Both Railway and GitHub Actions use the Contents API. The browser reads CSVs via the raw URL (`https://raw.githubusercontent.com/...`), bypassing the API.
 
-### football-data.org (result API)
-
-Used exclusively for settlement of EU leagues with active support.
-
-- **Purpose:** Query match results for Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship.
-- **Lifecycle:** Called during settlement only. Not called during generation.
-- **Limitations:** Free plan, 10 requests/minute. Rate enforced by `FD_CALL_MIN_INTERVAL = 0.65s`.
-
 ### API-Football (fixtures and result API)
 
-Used for two distinct purposes: fixture shortlisting and odds fetching during generation, and result settlement for blocked/non-EU leagues.
+Used for two distinct purposes: fixture shortlisting and odds fetching during generation, and result settlement for every league — the sole result provider as of Phase 27.4 (football-data.org was removed entirely, see `09_Architecture_Decisions.md` ADR-004 update).
 
 - **Purpose (generation):** Fetch upcoming fixtures for all 22 leagues; fetch O2.5 and BTTS odds for shortlisted fixtures.
-- **Purpose (settlement):** Settle results for leagues blocked on football-data.org (Bundesliga, Primeira Liga, Super Lig, etc.) and all non-EU leagues (MLS, J1 League, etc.).
+- **Purpose (settlement):** Settle results for every registered league.
 - **Paid plan:** 7500 requests/day, 300 requests/minute. Limits are Railway environment configuration, not hardcoded.
 - **Base URL:** `https://v3.football.api-sports.io`. Configurable via `API_FOOTBALL_BASE` environment variable.
 
@@ -273,7 +265,7 @@ The GET for SHA is required. The GitHub Contents API rejects PUT requests for ex
 }
 ```
 
-**Response (provider failure — Phase 26.18):** if a provider (API-Football or football-data.org) rejected a request this run (bad plan/quota/auth/network/server error — see §7 "Provider error handling") and nothing settled as a result, two extra fields are added so the caller can tell a real provider outage apart from a genuinely empty result:
+**Response (provider failure — Phase 26.18):** if the provider (API-Football) rejected a request this run (bad plan/quota/auth/network/server error — see §7 "Provider error handling") and nothing settled as a result, two extra fields are added so the caller can tell a real provider outage apart from a genuinely empty result:
 ```json
 {
   "ok": true,
@@ -591,7 +583,6 @@ Settlement is implemented in `update_results.py`. The core function, `update_dat
 
 **Settlement constant:**
 - `RESULT_READY_DELAY = timedelta(hours=2, minutes=15)` — a pick is not attempted until 2h15m after its kickoff.
-- `FD_FINISHED_STATUS = {"FINISHED"}` — football-data.org status indicating a completed match.
 - `AF_FINISHED_STATUS = {"FT", "AET", "PEN"}` — API-Football status codes indicating a completed match.
 - `MATCH_MIN_TOTAL_SCORE = 140` — minimum combined team name similarity score for a fixture match to be accepted.
 - `MATCH_MIN_SIDE_SCORE = 62` — minimum per-side similarity score (each team must score at least this individually).
@@ -643,7 +634,7 @@ Same logic, but runs entirely in a `tempfile.TemporaryDirectory`. Files are down
 Manual bets are settled using the same `update_dataframe()` as bot picks — **including rejected bets**: neither `manual_bets_to_settlement_df()` nor `update_dataframe()` filters by lifecycle `status`, so a rejected bet whose fixture has finished is settled in exactly the same run, by exactly the same code, as an approved one (see ADR-012). The bridge is:
 
 1. `manual_bets_to_settlement_df(manual_bets)` — converts the JSON bet objects from `cloud_state.json` to a DataFrame with the standard CSV column schema (including `Placar`, round-tripped from `bet['placar']` so an already-settled bet's final score survives across runs; and `KickoffUTC`, read from `bet['kickoffUTC']` — see the frontend note below and ADR referenced in `05_Known_Issues.md` SETTLEMENT-2).
-2. `update_dataframe(manual_df, "manual", shared_state)` — settles the DataFrame rows using the same API queries and matching logic. Both write sites (`try_update_row_via_api_football()` and the football-data.org branch) write `Placar` (`"{home_goals}-{away_goals}"`) alongside `Resultado` and `Lucro€` — the same fact bot pick CSV rows now also carry.
+2. `update_dataframe(manual_df, "manual", shared_state)` — settles the DataFrame rows using the same API queries and matching logic. `try_update_row_via_api_football()` writes `Placar` (`"{home_goals}-{away_goals}"`) alongside `Resultado` and `Lucro€` — the same fact bot pick CSV rows now also carry.
 3. `apply_df_results_to_manual_bets(manual_bets, manual_df)` — writes `resultado`, `lucro`, and `placar` back from the settled DataFrame into the original bet dicts. **`status` is only advanced to `'settled'` if it was not already `'rejected'`** — a rejected bet keeps `status: 'rejected'` forever, even after this call populates its settlement result. This is the one deliberate behavioural asymmetry in an otherwise identical settlement path (ADR-012).
 4. If any bets were newly settled: `save_cloud_state_to_github(cloud_state, message)`.
 
@@ -666,22 +657,18 @@ For each row:
     6. MISSING_LEAGUE_MAP: Liga not in LEAGUE_CODE_MAP → skip
     7. BAD_GAME_FORMAT: Jogo does not contain " vs " → skip
 
-    8. Provider selection:
-       if league_code in BLOCKED_FOOTBALL_DATA_CODES:
-           → try_update_row_via_api_football() [direct]
-       else:
-           → fetch_matches_for_league_date() [football-data.org]
-           if FD fetch succeeds:
-               find_best_fixture_match()
-               if match found:
-                   check kickoff + RESULT_READY_DELAY
-                   check status in FD_FINISHED_STATUS
-                   compute resultado = market_result(market, home_goals, away_goals)
-                   write Resultado, Lucro€, LucroReal€
-               else if league has AF fallback:
-                   → try_update_row_via_api_football() [fallback]
-           else (FD error) if league has AF fallback:
-               → try_update_row_via_api_football() [fallback]
+    8. Provider resolution (Phase 27.4 — API-Football is the sole provider,
+       football-data.org was removed entirely; see
+       docs/09_Architecture_Decisions.md ADR-004 update):
+       → try_update_row_via_api_football()
+           find_best_fixture_match()
+           if match found:
+               check kickoff + RESULT_READY_DELAY
+               check status in AF_FINISHED_STATUS
+               compute resultado = market_result(market, home_goals, away_goals)
+               write Resultado, Lucro€, LucroReal€
+           else:
+               → routed through the missing-fixture void safeguard (ADR-017)
 ```
 
 ### Market normalisation (manual bets)
@@ -706,19 +693,11 @@ Manual bets store the league as the internal config key (`"mls"`, `"finlandia"`)
 
 ### API selection
 
-The settlement provider decision tree:
+API-Football is the sole result provider (Phase 27.4). Every eligible row
+resolves through exactly one path: `fetch_api_football_fixtures_for_league_date()`
+→ match → settle, or no match → the missing-fixture void safeguard (ADR-017).
+There is no provider branching left to document.
 
-```
-Is league_code in BLOCKED_FOOTBALL_DATA_CODES?
-    YES → API-Football direct (no FD attempt)
-    NO  → football-data.org first
-              → success + match found → settle via FD
-              → success + no match + league has AF fallback → API-Football fallback
-              → FD fetch error (403/429/other) + league has AF fallback → API-Football fallback
-              → no AF fallback → skip
-```
-
-**football-data.org retries:** `FD_MAX_RETRIES = 4`, base sleep `1.5s`, exponential backoff on 429.
 **API-Football retries:** `AF_MAX_RETRIES = 4`, base sleep `1.2s`, exponential backoff on 429.
 
 ### Result calculation
@@ -763,7 +742,7 @@ Fixture matching uses a multi-stage pipeline:
 
 ### Provider error handling (Phase 26.18)
 
-**Background:** in July 2026, the API-Football subscription lapsed to the Free plan. API-Football responded to every `/fixtures` request with HTTP 200 and an empty `response: []`, but with a non-empty `errors.plan` field explaining the season wasn't covered. `update_dataframe()` had no way to tell that apart from "no games today" — every currently-open pick in a non-EU league (which routes through API-Football, either directly or as a football-data.org fallback) came back `NO_MATCH`, and the dashboard reported "No matches to settle." even though the provider never actually looked at a single fixture. This was root-caused via a temporary, read-only audit of the live pipeline (no code or data changed) that traced the failure to `fetch_api_football_fixtures_for_league_date()` returning `([], "")` for every request. Fixing the subscription made settlement work immediately with no code change — proving the settlement/matching logic itself was never broken.
+**Background:** in July 2026, the API-Football subscription lapsed to the Free plan. API-Football responded to every `/fixtures` request with HTTP 200 and an empty `response: []`, but with a non-empty `errors.plan` field explaining the season wasn't covered. `update_dataframe()` had no way to tell that apart from "no games today" — every currently-open pick in a non-EU league (which routed through API-Football directly, even before Phase 27.4 made it the sole provider for every league) came back `NO_MATCH`, and the dashboard reported "No matches to settle." even though the provider never actually looked at a single fixture. This was root-caused via a temporary, read-only audit of the live pipeline (no code or data changed) that traced the failure to `fetch_api_football_fixtures_for_league_date()` returning `([], "")` for every request. Fixing the subscription made settlement work immediately with no code change — proving the settlement/matching logic itself was never broken.
 
 **What changed:** both API clients now validate a response *before* treating it as a real (possibly empty) result:
 
@@ -782,18 +761,18 @@ Fixture matching uses a multi-stage pipeline:
 
 **Problem this closes:** before this phase, a fixture that never reached `FT`/`AET`/`PEN` stayed unresolved forever, regardless of *why* — a postponed match, a cancelled one, or one the settlement lookup simply could never locate (the concrete case: Chicago Fire vs Vancouver Whitecaps, 2026-07-17, flagged by the Phase 26.42 investigation) all looked identical to "still to be played". Real-money exposure had no path to closure.
 
-**Status classification** (`classify_af_status()` / `classify_fd_status()` in `update_results.py`) extends the existing `AF_FINISHED_STATUS`/`FD_FINISHED_STATUS` sets with three more buckets, checked in this priority order:
+**Status classification** (`classify_af_status()` in `update_results.py`) extends the existing `AF_FINISHED_STATUS` set with three more buckets, checked in this priority order. API-Football statuses only, as of Phase 27.4 — this table originally also listed football-data.org's equivalent statuses (`FINISHED`/`POSTPONED`/`CANCELLED`/`SUSPENDED`/etc.), which no longer exist anywhere in the codebase; see `09_Architecture_Decisions.md` ADR-004 update:
 
-| Bucket | API-Football statuses | football-data.org statuses | Void-eligible? |
-|---|---|---|---|
-| `FINISHED` (pre-existing) | `FT`, `AET`, `PEN` | `FINISHED` | Settles normally — never a void candidate |
-| `IN_PROGRESS` | `1H`, `HT`, `2H`, `ET`, `BT`, `P`, `LIVE` | `IN_PLAY`, `PAUSED` | Never — the crucial safety rule (a status must not become `P` merely because it isn't `FT`) |
-| `NON_PLAYED` | `PST`, `CANC`, `ABD` | `POSTPONED`, `CANCELLED` | Yes — after `POSTPONED_VOID_AFTER_HOURS` since original kickoff |
-| `SCHEDULED_UNKNOWN` (default) | `NS`, `TBD`, `SUSP`, `INT`, anything unrecognised | `SCHEDULED`, `TIMED`, `SUSPENDED`, anything unrecognised | Never automatically — only the 24h manual fallback applies |
+| Bucket | API-Football statuses | Void-eligible? |
+|---|---|---|
+| `FINISHED` (pre-existing) | `FT`, `AET`, `PEN` | Settles normally — never a void candidate |
+| `IN_PROGRESS` | `1H`, `HT`, `2H`, `ET`, `BT`, `P`, `LIVE` | Never — the crucial safety rule (a status must not become `P` merely because it isn't `FT`) |
+| `NON_PLAYED` | `PST`, `CANC`, `ABD` | Yes — after `POSTPONED_VOID_AFTER_HOURS` since original kickoff |
+| `SCHEDULED_UNKNOWN` (default) | `NS`, `TBD`, `SUSP`, `INT`, anything unrecognised | Never automatically — only the 24h manual fallback applies |
 
-**`SUSP`/`INT`/`SUSPENDED` are deliberately *not* void-eligible at any age**, and fall through to the same default `SCHEDULED_UNKNOWN` bucket as `NS`/`TBD` — a pre-commit safety audit corrected this from an earlier version of the classification that grouped them with `PST`/`CANC`/`ABD`, after finding it could void a wager whose match was suspended/interrupted but still going to legitimately resume and finish (e.g. interrupted Monday, resumes and finishes Friday — the 48h mark lands mid-week). Unlike `PST`/`CANC`/`ABD` (each a reasonably final "this fixture will not complete" determination per API-Football's own semantics), a suspended/interrupted match commonly resumes under the *same* fixture ID. `AF_SUSPENDED_INTERRUPTED_STATUS`/`FD_SUSPENDED_INTERRUPTED_STATUS` document this explicitly in `update_results.py` (not consulted by the classifiers — purely so a future edit doesn't silently re-add them to `*_NON_PLAYED_STATUS`). The 24h manual fallback remains available for a suspended/interrupted fixture the user knows the real bookmaker has already voided. See ADR-017's "Correction" section for the full reasoning. `AWD`/`WO` (technical loss/walkover) are deliberately left unclassified (too rare, unreliable goal data) — they remain open, reachable only via manual void.
+**`SUSP`/`INT`/`SUSPENDED` are deliberately *not* void-eligible at any age**, and fall through to the same default `SCHEDULED_UNKNOWN` bucket as `NS`/`TBD` — a pre-commit safety audit corrected this from an earlier version of the classification that grouped them with `PST`/`CANC`/`ABD`, after finding it could void a wager whose match was suspended/interrupted but still going to legitimately resume and finish (e.g. interrupted Monday, resumes and finishes Friday — the 48h mark lands mid-week). Unlike `PST`/`CANC`/`ABD` (each a reasonably final "this fixture will not complete" determination per API-Football's own semantics), a suspended/interrupted match commonly resumes under the *same* fixture ID. `AF_SUSPENDED_INTERRUPTED_STATUS` documents this explicitly in `update_results.py` (not consulted by the classifier — purely so a future edit doesn't silently re-add them to `*_NON_PLAYED_STATUS`). The 24h manual fallback remains available for a suspended/interrupted fixture the user knows the real bookmaker has already voided. See ADR-017's "Correction" section for the full reasoning. `AWD`/`WO` (technical loss/walkover) are deliberately left unclassified (too rare, unreliable goal data) — they remain open, reachable only via manual void.
 
-**Automatic void — explicit non-played status (Part 3):** inside `try_update_row_via_api_football()` and the football-data.org branch of `update_dataframe()`, once a fixture is matched but its status is `NON_PLAYED`, the row's own persisted `KickoffUTC` (the **original** scheduled kickoff — never overwritten while a pick remains unresolved) is compared against `POSTPONED_VOID_AFTER_HOURS` (default 48h). Below the threshold, behaviour is unchanged (skip, `NOT_FINISHED`). At/above it, `void_result_row()` writes `Resultado="P"`, `Placar=""`, `Lucro€="0.0"` (reusing the existing `calc_profit()`/`calc_real_profit()` — no new financial arithmetic) plus `SettlementReason` (`postponed_timeout`/`cancelled_timeout`/`abandoned_timeout`, mapped from the specific status).
+**Automatic void — explicit non-played status (Part 3):** inside `try_update_row_via_api_football()`, once a fixture is matched but its status is `NON_PLAYED`, the row's own persisted `KickoffUTC` (the **original** scheduled kickoff — never overwritten while a pick remains unresolved) is compared against `POSTPONED_VOID_AFTER_HOURS` (default 48h). Below the threshold, behaviour is unchanged (skip, `NOT_FINISHED`). At/above it, `void_result_row()` writes `Resultado="P"`, `Placar=""`, `Lucro€="0.0"` (reusing the existing `calc_profit()`/`calc_real_profit()` — no new financial arithmetic) plus `SettlementReason` (`postponed_timeout`/`cancelled_timeout`/`abandoned_timeout`, mapped from the specific status).
 
 **Automatic void — persistent missing fixture (Part 4/5):** a genuine `NO_MATCH` (fixtures fetched successfully; team-name matching found nothing — never a provider error, which is a different reason string and never reaches this path) increments a persisted `MissingAttempts` counter on the row. `_evaluate_missing_fixture_void()` only proceeds to void once **all** of: `MISSING_FIXTURE_VOID_AFTER_HOURS` (default 72h) has elapsed since original kickoff; `MissingAttempts >= missing_fixture_min_attempts` (default 3); and a final, bounded rediscovery search (`attempt_rediscovery_af()` — AF only, forward-only, `+2..+14` days from original kickoff, reusing `fetch_api_football_fixtures_for_league_date()`'s own per-run `(league, date)` cache so multiple mature candidates in the same league share requests) also finds nothing. If rediscovery finds the fixture already finished, it settles normally (`W`/`L`, `SettlementReason` stays blank — this is a real result, not a void). If it finds the fixture not yet finished, the bet keeps waiting and `MissingAttempts` resets to 0. Only if rediscovery finds nothing does the row void as `P` with `SettlementReason="missing_fixture_timeout"`.
 
@@ -825,11 +804,13 @@ class LeagueEntry:
     key: str            # config.json internal key (e.g. "premier")
     name: str           # CSV display name (e.g. "Premier League")
     country: str        # 3-char ISO (e.g. "ENG")
-    fd_code: str | None # football-data.org code; None = no FD coverage
-    fd_blocked: bool    # True = FD exists but returns 403; bypass FD
+    code: str            # internal settlement routing code — an opaque identifier;
+                          # several EU leagues keep their old football-data.org-derived
+                          # short code (e.g. "PL") purely for historical continuity,
+                          # not because it means anything provider-specific (Phase 27.4)
     af_country: str     # API-Football /leagues?country= value
     af_name: str        # API-Football competition name for fuzzy match
-    af_id: int | None   # Hardcoded AF league ID; skips /leagues API call
+    af_id: int          # Hardcoded AF league ID; skips /leagues API call
     season_model: str   # "european" or "calendar"
 ```
 
@@ -837,10 +818,9 @@ class LeagueEntry:
 
 | Structure | Derived from | Consumed by |
 |---|---|---|
-| `LEAGUE_CODE_MAP` | All entries → `{name: settlement_code}` | `update_dataframe()` — maps CSV "Liga" column to settlement routing code |
-| `BLOCKED_FOOTBALL_DATA_CODES` | Entries where `fd_blocked=True` OR `fd_code=None` | `should_use_api_football_fallback()` — routes to API-Football directly |
-| `API_FOOTBALL_FALLBACK_COMPETITIONS` | All entries → `{code: {country, name, af_id}}` | `get_api_football_league_id()` and `fetch_api_football_fixtures_for_league_date()` |
-| `AF_SEASON_MODELS` | Entries with `af_id` → `{af_id: season_model}` | `api_football_season_from_date()` |
+| `LEAGUE_CODE_MAP` | All entries → `{name: code}` | `update_dataframe()` — maps CSV "Liga" column to settlement routing code |
+| `API_FOOTBALL_COMPETITIONS` | All entries → `{code: {country, name, af_id}}` | `get_api_football_league_id()` and `fetch_api_football_fixtures_for_league_date()` — the sole provider mapping (Phase 27.4) |
+| `AF_SEASON_MODELS` | All entries → `{af_id: season_model}` | `api_football_season_from_date()` |
 | `REGISTRY_BY_KEY` | All entries → `{key: LeagueEntry}` | `_resolve_liga_display_name()` in manual bet settlement |
 
 ### Season models
@@ -868,7 +848,7 @@ When `af_id` is set in the registry entry, `get_api_football_league_id()` return
 3. Add the league ID to the `api_football.league_ids` section of `config.json`.
 4. Place a history CSV for the league at `data_raw/{key}.csv`.
 
-That is all. `LEAGUE_CODE_MAP`, `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS`, `AF_SEASON_MODELS`, and `REGISTRY_BY_KEY` are all regenerated automatically on the next import.
+That is all. `LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS`, and `REGISTRY_BY_KEY` are all regenerated automatically on the next import.
 
 **Do not** add league mappings to `update_results.py`, `config.json` (beyond the two sections above), or any other file.
 
@@ -884,29 +864,13 @@ Prior to Phase 26.42, `fetch_oddsapi_fixtures.py::fetch_fixtures_for_league_date
 
 ## 9. External APIs
 
-### football-data.org
-
-**Purpose:** Primary settlement source for EU leagues: Premier League (`PL`), LaLiga (`PD`), Ligue 1 (`FL1`), Serie A (`SA`), Eredivisie (`DED`), Championship (`ELC`).
-
-**Authentication:** `X-Auth-Token: {FOOTBALL_DATA_API_KEY}` header.
-
-**Usage (settlement only):**
-```
-GET https://api.football-data.org/v4/competitions/{code}/matches?dateFrom={date}&dateTo={date}
-```
-Returns all matches for the league on the given date. Settlement iterates rows from the CSV and looks up the matching fixture by team name.
-
-**Fallback behaviour:** On HTTP 403 (access blocked), the league is routed to API-Football fallback. On HTTP 429 (rate limit), exponential backoff is applied for up to `FD_MAX_RETRIES = 4` attempts.
-
-**Limitations:** 10 requests/minute on the free plan. `FD_CALL_MIN_INTERVAL = 0.65s` enforced by `_respect_fd_api_spacing()`. Cache per `(league_code, date)` pair within a single settlement run to avoid redundant requests.
-
----
-
 ### API-Football
+
+football-data.org was removed entirely in Phase 27.4 (see `09_Architecture_Decisions.md` ADR-004 update) — API-Football is now the only external result provider.
 
 **Purpose:**
 1. **Fixture fetching (generation):** `fetch_oddsapi_fixtures.py` calls `/fixtures` for all 22 leagues to build the shortlist. Calls `/odds` for each shortlisted fixture to get O2.5 and BTTS odds.
-2. **Settlement:** Used for all EU-blocked leagues and all non-EU leagues. Also used as a fallback when football-data.org fails or returns no match.
+2. **Settlement:** Used for every registered league — the sole result provider.
 
 **Authentication:** `x-apisports-key: {API_FOOTBALL_KEY}` header.
 
@@ -1008,8 +972,7 @@ All secrets and deployment-specific settings are environment variables, not in `
 | `GITHUB_OWNER` | Railway env (default: `jorgepita`) | `sync_server.py` |
 | `GITHUB_REPO` | Railway env (default: `apostas-over-futebol`) | `sync_server.py` |
 | `GITHUB_BRANCH` | Railway env (default: `main`) | `sync_server.py` |
-| `FOOTBALL_DATA_API_KEY` | Railway env, GitHub Actions secrets | `update_results.py` |
-| `API_FOOTBALL_KEY` | Railway env, GitHub Actions secrets | `update_results.py`, `fetch_oddsapi_fixtures.py` |
+| `API_FOOTBALL_KEY` | Railway env, GitHub Actions secrets | `update_results.py`, `fetch_oddsapi_fixtures.py` (the sole result provider as of Phase 27.4) |
 | `API_FOOTBALL_BASE` | Railway env (default: `https://v3.football.api-sports.io`) | `fetch_oddsapi_fixtures.py` |
 | `TELEGRAM_TOKEN` | GitHub Actions secrets | `src/pipeline.py` |
 | `CHAT_ID` | GitHub Actions secrets | `src/pipeline.py` |
@@ -1065,16 +1028,6 @@ A narrow, read-only audit for the same pattern elsewhere found `sent_state.json`
 
 If Railway is down or slow, all browser operations that require Railway (`/load`, `/save`, `/run-settlement`) fail with network errors. The browser shows the cloud status as "unavailable". The 60-second CSV auto-refresh continues unaffected (it reads from GitHub raw URLs, not Railway).
 
-### football-data.org fails
-
-**HTTP 403:** The league is routed to API-Football fallback if it has one (`API_FOOTBALL_FALLBACK_COMPETITIONS`). If it does not, the pick is skipped.
-
-**HTTP 429:** Exponential backoff for up to 4 retries (1.5s, 3s, 4.5s, 6s). After 4 failures, propagates exception. The cache prevents re-fetching the same league+date.
-
-**Other errors:** Marked as `"OTHER"` in the cache. If the league has an API-Football fallback, it is used. Otherwise the pick is skipped.
-
-**Every one of the above (Phase 26.18):** in addition to the existing skip/fallback behaviour (unchanged), the failure is classified (`classify_provider_error()`) and recorded as a normalized provider error — see §7 "Provider error handling".
-
 ### API-Football fails
 
 **HTTP 429:** Exponential backoff for up to 4 retries. After all retries exhausted, the pick is skipped with reason `"AF_429"`.
@@ -1125,9 +1078,8 @@ One gunicorn worker handles all requests serially. Concurrent requests queue and
 - Two generation runs per day (17:00 main, 23:00 top-up). Top-up is subset of 8 leagues. Approximate total: ~150 + ~60 = ~210 requests/day for generation.
 
 **Settlement per run (approximate):**
-- football-data.org: up to 6 leagues × 1 date call = 6 FD requests per settlement run.
-- API-Football: up to 13 blocked/non-EU leagues × 1 date call = 13 AF requests per settlement run.
-- Two settlement runs per day: ~38 AF requests/day for settlement.
+- API-Football: up to 22 leagues × 1 date call = 22 AF requests per settlement run (all leagues, since Phase 27.4 made API-Football the sole provider — previously only the 13 blocked/non-EU leagues queried AF directly and 6 EU leagues queried football-data.org first).
+- Two settlement runs per day: ~44 AF requests/day for settlement.
 
 **Total daily API-Football usage:** ~250 requests/day, well within the 7500-request paid plan limit.
 
@@ -1164,7 +1116,7 @@ One gunicorn worker handles all requests serially. Concurrent requests queue and
 
 **Shared settlement engine.** `update_dataframe()` in `update_results.py` settles both bot picks and manual bets. A manual bet is converted to a DataFrame row, settled by the same function, and converted back. This guarantees that bot and manual results use identical logic and cannot diverge.
 
-**Single source of truth for leagues.** `src/league_registry.py` is the only file that knows about league metadata. All settlement routing structures (`LEAGUE_CODE_MAP`, `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS`, `AF_SEASON_MODELS`) are derived from it automatically. Adding a league requires editing exactly one file.
+**Single source of truth for leagues.** `src/league_registry.py` is the only file that knows about league metadata. All settlement routing structures (`LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS`) are derived from it automatically. Adding a league requires editing exactly one file.
 
 **Configuration over hardcoding.** Market parameters (edge thresholds, Kelly fraction, cap fractions), API quotas, shortlist sizes, and Poisson model parameters are in `config.json`. API credentials and deployment coordinates are in environment variables. The only values hardcoded in the application are constants unlikely to change without a code change (e.g. `RESULT_READY_DELAY`, `MATCH_MIN_TOTAL_SCORE`).
 

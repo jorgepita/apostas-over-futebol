@@ -13,14 +13,14 @@ Usage:
     python audit_settlement.py
 
 Required env vars (.env or environment):
-    FOOTBALL_DATA_API_KEY   -- for EU leagues via football-data.org
-    API_FOOTBALL_KEY        -- for non-EU leagues via API-Football
+    API_FOOTBALL_KEY        -- the sole result provider (Phase 27.4;
+                               football-data.org was removed entirely, see
+                               docs/09_Architecture_Decisions.md ADR-004 update)
 """
 
 import sys
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
-from urllib import error as urllib_error
 from collections import Counter
 
 from dotenv import load_dotenv
@@ -35,7 +35,6 @@ from update_results import (
     LEAGUE_CODE_MAP,
     SUPPORTED_MARKETS,
     RESULT_READY_DELAY,
-    FD_FINISHED_STATUS,
     AF_FINISHED_STATUS,
     MATCH_MIN_TOTAL_SCORE,
     MATCH_MIN_SIDE_SCORE,
@@ -43,9 +42,7 @@ from update_results import (
     split_game,
     is_future_date,
     get_today_lisbon_iso,
-    should_use_api_football_fallback,
     fetch_api_football_fixtures_for_league_date,
-    fetch_matches_for_league_date,
     find_best_fixture_match,
     score_fixture_match,
     get_fixture_status,
@@ -56,14 +53,12 @@ from update_results import (
     extract_fixture_team_names,
     get_fixture_id,
     api_football_season_from_date,
-    BLOCKED_FOOTBALL_DATA_CODES,
-    API_FOOTBALL_FALLBACK_COMPETITIONS,
+    API_FOOTBALL_COMPETITIONS,
     AF_SEASON_MODELS,
     DAILY_FILE,
     HISTORY_FILE,
     MANUAL_FILE,
     make_shared_runtime_state,
-    API_TOKEN,
     API_FOOTBALL_KEY,
 )
 
@@ -202,19 +197,16 @@ def audit_row(row_num, row, source_label, shared_state, today_iso):
     print(f"  [OK] Game format: home='{home_csv}'  away='{away_csv}'")
     print()
 
-    # -- Gate 7: provider routing ----------------------------------------------
-    use_af_direct = should_use_api_football_fallback(league_code)
-    is_blocked_fd = league_code in BLOCKED_FOOTBALL_DATA_CODES
-    af_conf = API_FOOTBALL_FALLBACK_COMPETITIONS.get(league_code, {})
+    # -- Gate 7: provider routing (Phase 27.4 — API-Football is the sole
+    # provider; every league resolves through the same single path) ----------
+    af_conf = API_FOOTBALL_COMPETITIONS.get(league_code, {})
     af_id_for_season = af_conf.get("af_id") if af_conf else None
     season_model = AF_SEASON_MODELS.get(af_id_for_season, "european") if af_id_for_season else "european"
     computed_season = api_football_season_from_date(data, league_id=af_id_for_season)
 
-    provider_label = "API-Football (direct)" if use_af_direct else "football-data.org"
     print(f"  [OK] Provider routing:")
-    print(f"      selected  : {provider_label}")
+    print(f"      selected  : API-Football (sole provider)")
     print(f"      league_code = '{league_code}'")
-    print(f"      blocked_on_FD = {is_blocked_fd}")
     if af_conf:
         print(f"      af_id     : {af_id_for_season or '(lookup needed)'}")
         print(
@@ -226,99 +218,35 @@ def audit_row(row_num, row, source_label, shared_state, today_iso):
     # -------------------------------------------------------------------------
     # Fixture search
     # -------------------------------------------------------------------------
-    fixtures = None
-    provider_used = provider_label
-    fd_matches_cache = shared_state["fd_matches_cache"]
+    provider_used = "API-Football"
 
     print(f"  [OK] Fixture search:")
-
-    if use_af_direct:
-        af_id = af_conf.get("af_id", "?")
-        print(f"      method    : API-Football  /fixtures")
-        print(f"                  league={af_id}  season={computed_season}  date={data}")
-        try:
-            fixtures, af_reason = fetch_api_football_fixtures_for_league_date(
-                league_code, data, shared_state
-            )
-        except Exception as exc:
-            print(f"      result    : EXCEPTION -- {type(exc).__name__}: {exc}")
-            print()
-            print("  Decision: IGNORED")
-            print(f"  Reason: Exception fetching from API-Football -- {type(exc).__name__}: {exc}")
-            return "EXCEPTION_FETCH_AF"
-
-        if fixtures is None:
-            print(f"      result    : FAILED -- {af_reason or 'no reason returned'}")
-            print()
-            print("  Decision: IGNORED")
-            print(
-                f"  Reason: API returned no fixtures -- reason={af_reason or 'unknown'}"
-                f"  (league_code={league_code}, season={computed_season}, date={data})"
-            )
-            return f"API_FOOTBALL_FAILED:{af_reason or 'unknown'}"
-
-        print(f"      result    : {len(fixtures)} fixture(s) returned")
+    af_id = af_conf.get("af_id", "?")
+    print(f"      method    : API-Football  /fixtures")
+    print(f"                  league={af_id}  season={computed_season}  date={data}")
+    try:
+        fixtures, af_reason = fetch_api_football_fixtures_for_league_date(
+            league_code, data, shared_state
+        )
+    except Exception as exc:
+        print(f"      result    : EXCEPTION -- {type(exc).__name__}: {exc}")
         print()
+        print("  Decision: IGNORED")
+        print(f"  Reason: Exception fetching from API-Football -- {type(exc).__name__}: {exc}")
+        return "EXCEPTION_FETCH_AF"
 
-    else:
-        # football-data.org path
-        cache_key = (league_code, data)
-        print(f"      method    : football-data.org")
-        print(f"                  /competitions/{league_code}/matches?dateFrom={data}&dateTo={data}")
-
-        if cache_key in fd_matches_cache:
-            entry = fd_matches_cache[cache_key]
-            if entry["ok"]:
-                fixtures = entry["matches"]
-                print(f"      result    : {len(fixtures)} match(es) found (cached)")
-            else:
-                print(f"      result    : CACHED FAILURE -- {entry['reason']}")
-        else:
-            try:
-                raw_matches = fetch_matches_for_league_date(league_code, data)
-                fd_matches_cache[cache_key] = {"ok": True, "matches": raw_matches, "reason": ""}
-                fixtures = raw_matches
-                print(f"      result    : {len(fixtures)} match(es) found")
-            except urllib_error.HTTPError as e:
-                code = getattr(e, "code", None)
-                fd_reason = f"HTTP {code}" if code is not None else "HTTP"
-                fd_matches_cache[cache_key] = {"ok": False, "matches": [], "reason": fd_reason}
-                print(f"      result    : FAILED -- {fd_reason}")
-
-            except Exception as e:
-                fd_matches_cache[cache_key] = {"ok": False, "matches": [], "reason": "OTHER"}
-                print(f"      result    : FAILED -- {type(e).__name__}: {e}")
-
-        # If FD failed, try AF fallback
-        entry = fd_matches_cache.get(cache_key, {})
-        if not entry.get("ok") and entry:
-            fd_fail_reason = entry.get("reason", "UNKNOWN")
-            if should_use_api_football_fallback(league_code, fd_fail_reason):
-                print(f"      -> FD failed ({fd_fail_reason}), trying API-Football fallback")
-                af_id = af_conf.get("af_id", "?")
-                print(f"        AF: league={af_id}  season={computed_season}  date={data}")
-                try:
-                    fixtures, af_reason = fetch_api_football_fixtures_for_league_date(
-                        league_code, data, shared_state
-                    )
-                    provider_used = "API-Football (fallback after FD fail)"
-                    if fixtures is None:
-                        print(f"        AF result: FAILED -- {af_reason}")
-                    else:
-                        print(f"        AF result: {len(fixtures)} fixture(s) returned")
-                except Exception as exc:
-                    print(f"        AF result: EXCEPTION -- {type(exc).__name__}: {exc}")
-                    fixtures = None
-            else:
-                print()
-                print("  Decision: IGNORED")
-                print(
-                    f"  Reason: football-data.org failed ({fd_fail_reason}) and "
-                    f"no API-Football fallback configured for '{league_code}'"
-                )
-                return f"FD_FAILED_NO_AF:{fd_fail_reason}"
-
+    if fixtures is None:
+        print(f"      result    : FAILED -- {af_reason or 'no reason returned'}")
         print()
+        print("  Decision: IGNORED")
+        print(
+            f"  Reason: API returned no fixtures -- reason={af_reason or 'unknown'}"
+            f"  (league_code={league_code}, season={computed_season}, date={data})"
+        )
+        return f"API_FOOTBALL_FAILED:{af_reason or 'unknown'}"
+
+    print(f"      result    : {len(fixtures)} fixture(s) returned")
+    print()
 
     # -- No fixtures at all ----------------------------------------------------
     if fixtures is None or len(fixtures) == 0:
@@ -419,7 +347,7 @@ def audit_row(row_num, row, source_label, shared_state, today_iso):
 
     # -- Gate 11: match status -------------------------------------------------
     status = str(get_fixture_status(matched)).upper()
-    finished_set = AF_FINISHED_STATUS if use_af_direct else FD_FINISHED_STATUS
+    finished_set = AF_FINISHED_STATUS
     is_finished = status in finished_set
 
     print(f"  [OK] Match status:")
@@ -529,12 +457,10 @@ def print_summary(label, total, already_settled, results):
 def main():
     today_iso = get_today_lisbon_iso()
     print(f"[AUDIT] date_lisbon={today_iso}  now_utc={datetime.now(timezone.utc).isoformat()}")
-    print(f"[AUDIT] FOOTBALL_DATA_API_KEY set: {bool(API_TOKEN)}")
     print(f"[AUDIT] API_FOOTBALL_KEY set:      {bool(API_FOOTBALL_KEY)}")
     print(f"[AUDIT] RESULT_READY_DELAY:        {RESULT_READY_DELAY}")
     print(f"[AUDIT] MATCH_MIN_TOTAL_SCORE:     {MATCH_MIN_TOTAL_SCORE}")
     print(f"[AUDIT] MATCH_MIN_SIDE_SCORE:      {MATCH_MIN_SIDE_SCORE}")
-    print(f"[AUDIT] FD_FINISHED:               {sorted(FD_FINISHED_STATUS)}")
     print(f"[AUDIT] AF_FINISHED:               {sorted(AF_FINISHED_STATUS)}")
     print()
 

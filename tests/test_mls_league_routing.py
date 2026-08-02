@@ -30,7 +30,7 @@ sys.path.insert(0, str(ROOT))
 from src.league_registry import (
     REGISTRY_BY_KEY,
     LEAGUE_CODE_MAP,
-    API_FOOTBALL_FALLBACK_COMPETITIONS,
+    API_FOOTBALL_COMPETITIONS,
     AF_SEASON_MODELS,
 )
 import update_results
@@ -65,10 +65,10 @@ def test_league_code_map_distinguishes_mls_and_mls_next_pro():
     assert LEAGUE_CODE_MAP["MLS"] != LEAGUE_CODE_MAP["MLS Next Pro"]
 
 def test_api_football_fallback_competitions_mls_is_senior():
-    assert API_FOOTBALL_FALLBACK_COMPETITIONS["mls"]["af_id"] == SENIOR_MLS_AF_ID
+    assert API_FOOTBALL_COMPETITIONS["mls"]["af_id"] == SENIOR_MLS_AF_ID
 
 def test_api_football_fallback_competitions_mls_next_pro():
-    assert API_FOOTBALL_FALLBACK_COMPETITIONS["mls_next_pro"]["af_id"] == MLS_NEXT_PRO_AF_ID
+    assert API_FOOTBALL_COMPETITIONS["mls_next_pro"]["af_id"] == MLS_NEXT_PRO_AF_ID
 
 def test_af_season_models_has_both_ids_as_calendar():
     assert AF_SEASON_MODELS[SENIOR_MLS_AF_ID] == "calendar"
@@ -107,7 +107,7 @@ def test_bot_pick_and_manual_bet_mls_row_share_same_routing_code():
     manual_liga_code = LEAGUE_CODE_MAP[manual_liga_display]
 
     assert bot_liga_code == manual_liga_code == "mls"
-    assert API_FOOTBALL_FALLBACK_COMPETITIONS[manual_liga_code]["af_id"] == SENIOR_MLS_AF_ID
+    assert API_FOOTBALL_COMPETITIONS[manual_liga_code]["af_id"] == SENIOR_MLS_AF_ID
 
 def test_manual_bet_leagueid_field_is_not_consumed_by_settlement_routing():
     # A manual bet's own persisted `leagueId` (e.g. 253, captured at creation
@@ -239,7 +239,7 @@ def test_manual_bet_mls_next_pro_routes_to_909():
     liga_display = manual_df.iloc[0]["Liga"]
     assert liga_display == "MLS Next Pro"
     assert LEAGUE_CODE_MAP[liga_display] == "mls_next_pro"
-    assert API_FOOTBALL_FALLBACK_COMPETITIONS["mls_next_pro"]["af_id"] == MLS_NEXT_PRO_AF_ID
+    assert API_FOOTBALL_COMPETITIONS["mls_next_pro"]["af_id"] == MLS_NEXT_PRO_AF_ID
 
 
 # ── Other leagues are unaffected by this fix ───────────────────────────────────

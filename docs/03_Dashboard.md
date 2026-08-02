@@ -146,7 +146,7 @@ Array of bankroll deposit and withdrawal records `{id, date, type, amount, note}
 Used by: Bankroll page (movements table, evolution chart).
 
 **`state.providerHealth`** (Phase 26.18)  
-Object keyed by provider (`"api-football"`, `"football-data.org"`) → `{status: "ok"|"warning", consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}`. Copied verbatim from `cloud_state.json`'s `providerHealth` field — the backend, not the browser, decides the status. Read by `updateProviderHealthBadge()` to render `#providerHealthLabel`.  
+Object keyed by provider — `"api-football"` only, going forward (API-Football has been the sole provider since Phase 27.4; a `"football-data.org"` key may still be present in historical `cloud_state.json` records written before that phase) → `{status: "ok"|"warning", consecutiveFailures, lastError, lastSuccessAt, lastCheckedAt}`. Copied verbatim from `cloud_state.json`'s `providerHealth` field — the backend, not the browser, decides the status. Read by `updateProviderHealthBadge()` to render `#providerHealthLabel`.  
 Updated by: `_doLoadCloudState()`, `_reloadManualBetsFromCloud()` — same cloud-field-copy pattern as `state.movements` (see the SYNC-1 lesson in `05_Known_Issues.md` / `08_Change_Log.md`: any function that copies cloud fields into `state` must include every field, or the omitted one silently goes stale).
 
 **`state.sessionStartDate`**  
@@ -727,7 +727,7 @@ When eligible, a button ("Anular" on desktop, "Anular aposta" on mobile) appears
 
 `runSettlement()` distinguishes three outcomes from the `/run-settlement` response, in this order:
 1. `data.updated > 0` → `✓ Settlement completed` (success, green).
-2. `data.updated === 0` and `data.settlement_aborted` is true → `⚠ Settlement unavailable — {provider}: {category text}` (warning, amber). This means a provider (API-Football or football-data.org) rejected the request — plan/quota/auth/network/server error — so settlement could not run, and the empty count does not mean "no games today".
+2. `data.updated === 0` and `data.settlement_aborted` is true → `⚠ Settlement unavailable — {provider}: {category text}` (warning, amber). This means the provider (API-Football — sole provider since Phase 27.4) rejected the request — plan/quota/auth/network/server error — so settlement could not run, and the empty count does not mean "no games today".
 3. Otherwise → `No matches to settle.` (warning, amber). This is a genuine empty result: the provider returned real fixture data, none of it matched anything eligible for settlement right now.
 
 `PROVIDER_HEALTH_LABELS` and `PROVIDER_HEALTH_CATEGORY_TEXT` (defined near `updateCloudStatus()`) map the backend's `provider`/`category` codes to the human-readable text shown in both this message and the health badge below. See `04_Backend.md` §7 for the backend side of this (provider error classification, `settlement_aborted`).

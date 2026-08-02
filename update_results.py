@@ -15,8 +15,7 @@ from dotenv import load_dotenv
 from src.league_stats import update_league_stats
 from src.league_registry import (
     LEAGUE_CODE_MAP,
-    BLOCKED_FOOTBALL_DATA_CODES,
-    API_FOOTBALL_FALLBACK_COMPETITIONS,
+    API_FOOTBALL_COMPETITIONS,
     AF_SEASON_MODELS,
     REGISTRY_BY_KEY,
 )
@@ -29,7 +28,6 @@ DAILY_FILE = BASE / "picks_hoje_simplificado.csv"
 HISTORY_FILE = BASE / "picks_history.csv"
 LEAGUE_STATS_FILE = BASE / "league_stats.csv"
 
-API_TOKEN = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "").strip()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
 
@@ -42,8 +40,8 @@ REMOTE_HISTORY_NAME = "picks_history.csv"
 REMOTE_LEAGUE_STATS_NAME = "league_stats.csv"
 CLOUD_STATE_NAME = "cloud_state.json"
 
-# LEAGUE_CODE_MAP, BLOCKED_FOOTBALL_DATA_CODES and API_FOOTBALL_FALLBACK_COMPETITIONS
-# are imported from src.league_registry above.
+# LEAGUE_CODE_MAP and API_FOOTBALL_COMPETITIONS are imported from
+# src.league_registry above.
 # To add or change a league mapping, edit src/league_registry.py — not this file.
 
 SUPPORTED_MARKETS = {"O1.5", "O2.5", "O3.5", "BTTS"}
@@ -70,12 +68,8 @@ SYNC_RESULT_COLUMNS = [
 
 HTTP_TIMEOUT = 30
 
-# football-data.org
-FD_MAX_RETRIES = 4
-FD_BASE_SLEEP = 1.5
-FD_CALL_MIN_INTERVAL = 0.65
-
-# API-Football
+# API-Football — the sole result provider (Phase 27.4; football-data.org
+# was removed entirely, see docs/09_Architecture_Decisions.md ADR-004 update).
 AF_MAX_RETRIES = 4
 AF_BASE_SLEEP = 1.2
 AF_CALL_MIN_INTERVAL = 0.50
@@ -83,7 +77,6 @@ AF_BASE_URL = "https://v3.football.api-sports.io"
 
 # Confirmado pelos teus testes
 
-FD_FINISHED_STATUS = {"FINISHED"}
 AF_FINISHED_STATUS = {"FT", "AET", "PEN"}
 
 RESULT_READY_DELAY = timedelta(hours=2, minutes=15)
@@ -149,18 +142,10 @@ AF_NON_PLAYED_STATUS = {"PST", "CANC", "ABD"}
 # without re-reading why they were removed (see the comment block above).
 AF_SUSPENDED_INTERRUPTED_STATUS = {"SUSP", "INT"}
 
-FD_IN_PROGRESS_STATUS = {"IN_PLAY", "PAUSED"}
-FD_NON_PLAYED_STATUS = {"POSTPONED", "CANCELLED"}
-FD_SUSPENDED_INTERRUPTED_STATUS = {"SUSPENDED"}  # documentation-only, see above
-
 AF_VOID_REASON_BY_STATUS = {
     "PST": "postponed_timeout",
     "CANC": "cancelled_timeout",
     "ABD": "abandoned_timeout",
-}
-FD_VOID_REASON_BY_STATUS = {
-    "POSTPONED": "postponed_timeout",
-    "CANCELLED": "cancelled_timeout",
 }
 
 MISSING_FIXTURE_VOID_REASON = "missing_fixture_timeout"
@@ -441,7 +426,7 @@ UPDATE_RESULTS_DEBUG = os.getenv("UPDATE_RESULTS_DEBUG", "").strip().lower() in 
 # =============================
 # Provider error handling
 #
-# API-Football (and, defensively, football-data.org) can return HTTP 200
+# API-Football can return HTTP 200
 # with an empty `response`/`matches` list while carrying a non-empty
 # `errors` object describing *why* nothing was returned (wrong plan tier,
 # quota exceeded, bad auth, ...). Left unhandled, that is indistinguishable
@@ -504,8 +489,8 @@ def _extract_meaningful_errors_field(errors_obj) -> str:
 
 def _extract_message_from_http_error_body(body_text: str) -> str:
     """Best-effort extraction of a human-readable message from an HTTP error
-    response body, understanding both API-Football's `errors` shape and
-    football-data.org's `{"message": "..."}` shape. Falls back to raw text."""
+    response body — understands both API-Football's `errors` shape and a
+    plain `{"message": "..."}` shape. Falls back to raw text."""
     if not body_text:
         return ""
     try:
@@ -976,7 +961,10 @@ def get_fixture_kickoff_dt(fixture: dict) -> datetime | None:
         except Exception:
             pass
 
-    # football-data.org
+    # Dormant fallback shape (no longer produced by any active provider as
+    # of Phase 27.4's football-data.org removal — left in place as a
+    # harmless, generic fallback rather than touched, per that phase's
+    # explicit "do not redesign the settlement engine" constraint).
     raw = fixture.get("utcDate")
     if raw:
         try:
@@ -1043,16 +1031,6 @@ def classify_af_status(status_upper: str) -> str:
     if status_upper in AF_NON_PLAYED_STATUS:
         return "NON_PLAYED"
     if status_upper in AF_IN_PROGRESS_STATUS:
-        return "IN_PROGRESS"
-    return "SCHEDULED_UNKNOWN"
-
-
-def classify_fd_status(status_upper: str) -> str:
-    if status_upper in FD_FINISHED_STATUS:
-        return "FINISHED"
-    if status_upper in FD_NON_PLAYED_STATUS:
-        return "NON_PLAYED"
-    if status_upper in FD_IN_PROGRESS_STATUS:
         return "IN_PROGRESS"
     return "SCHEDULED_UNKNOWN"
 
@@ -1580,127 +1558,6 @@ def api_football_season_from_date(
     return year if month >= 7 else year - 1
 
 
-def should_use_api_football_fallback(league_code: str, reason: str = "") -> bool:
-    if league_code not in API_FOOTBALL_FALLBACK_COMPETITIONS:
-        return False
-
-    if league_code in BLOCKED_FOOTBALL_DATA_CODES:
-        if league_code == "PPL":
-            debug_log("API-Football direct provider enabled for PPL")
-        if league_code == "BL1":
-            debug_log("API-Football direct provider enabled for BL1")
-        return True
-
-    reason = str(reason or "").upper().strip()
-    if not reason:
-        return False
-
-    if reason.startswith("HTTP"):
-        return True
-
-    if reason in {"OTHER", "NO_FIXTURES", "NO_LEAGUE_ID"}:
-        return True
-
-    return False
-
-
-# =============================
-# football-data.org
-# =============================
-_fd_last_api_call_ts = 0.0
-
-
-def _respect_fd_api_spacing():
-    global _fd_last_api_call_ts
-    now = time.monotonic()
-    elapsed = now - _fd_last_api_call_ts
-    if elapsed < FD_CALL_MIN_INTERVAL:
-        time.sleep(FD_CALL_MIN_INTERVAL - elapsed)
-    _fd_last_api_call_ts = time.monotonic()
-
-
-def http_get_json_football_data(url: str, token: str):
-    req = request.Request(
-        url,
-        headers={
-            "X-Auth-Token": token,
-            "Accept": "application/json",
-            "User-Agent": "apostas-over-futebol/1.0",
-        },
-    )
-    with request.urlopen(req, timeout=HTTP_TIMEOUT) as resp:
-        return json.loads(resp.read().decode("utf-8"))
-
-
-def fetch_matches_for_league_date(league_code: str, date_str: str, shared_state: dict) -> list[dict]:
-    url = (
-        f"https://api.football-data.org/v4/competitions/{league_code}/matches"
-        f"?dateFrom={parse.quote(date_str)}&dateTo={parse.quote(date_str)}"
-    )
-    request_params = {"league_code": league_code, "date": date_str}
-
-    last_error = None
-
-    for attempt in range(1, FD_MAX_RETRIES + 1):
-        try:
-            _respect_fd_api_spacing()
-            data = http_get_json_football_data(url, API_TOKEN)
-            matches = data.get("matches", []) or []
-
-            if attempt > 1:
-                print(f"[DBG] football-data retry sucesso | league={league_code} | date={date_str} | tentativa={attempt}")
-
-            record_provider_success(shared_state, "football-data.org")
-            return matches
-
-        except error.HTTPError as e:
-            last_error = e
-            code = getattr(e, "code", None)
-
-            if code == 429 and attempt < FD_MAX_RETRIES:
-                wait_s = FD_BASE_SLEEP * (2 ** (attempt - 1))
-                print(
-                    f"[WARN] football-data rate limit 429 | league={league_code} | date={date_str} | "
-                    f"tentativa={attempt}/{FD_MAX_RETRIES} | espera={wait_s:.1f}s"
-                )
-                time.sleep(wait_s)
-                continue
-
-            message = _extract_message_from_http_error_body(_read_http_error_body(e))
-            category, message = classify_provider_error(code, message)
-            record_provider_error(shared_state, build_provider_error(
-                provider="football-data.org", endpoint=url, request_params=request_params,
-                category=category, message=message,
-            ))
-            raise
-
-        except Exception as e:
-            last_error = e
-
-            if attempt < FD_MAX_RETRIES:
-                wait_s = FD_BASE_SLEEP * attempt
-                print(
-                    f"[WARN] football-data erro temporário | league={league_code} | date={date_str} | "
-                    f"tentativa={attempt}/{FD_MAX_RETRIES} | espera={wait_s:.1f}s | erro={e}"
-                )
-                time.sleep(wait_s)
-                continue
-
-            category = classify_provider_message(str(e))
-            if category == "UNKNOWN":
-                category = "NETWORK"
-            record_provider_error(shared_state, build_provider_error(
-                provider="football-data.org", endpoint=url, request_params=request_params,
-                category=category, message=str(e),
-            ))
-            raise
-
-    if last_error:
-        raise last_error
-
-    return []
-
-
 # =============================
 # API-Football
 # =============================
@@ -1798,18 +1655,18 @@ def api_football_get(path: str, params: dict | None = None):
     return {}
 
 
-def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state: dict) -> int | None:
+def get_api_football_league_id(league_code: str, date_str: str, shared_state: dict) -> int | None:
     if not API_FOOTBALL_KEY:
         return None
 
-    conf = API_FOOTBALL_FALLBACK_COMPETITIONS.get(fd_league_code)
+    conf = API_FOOTBALL_COMPETITIONS.get(league_code)
     if not conf:
         return None
 
     # Resolve hardcoded id first so the correct season model can be applied.
     hardcoded_id = conf.get("af_id")
     season = api_football_season_from_date(date_str, league_id=hardcoded_id, shared_state=shared_state)
-    cache_key = (fd_league_code, season)
+    cache_key = (league_code, season)
 
     league_id_cache = shared_state["af_league_id_cache"]
     if cache_key in league_id_cache:
@@ -1820,7 +1677,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
     if hardcoded_id:
         league_id_cache[cache_key] = int(hardcoded_id)
         print(
-            f"[DBG] API-Football league id (registry) | code={fd_league_code} | id={hardcoded_id}"
+            f"[DBG] API-Football league id (registry) | code={league_code} | id={hardcoded_id}"
         )
         return int(hardcoded_id)
 
@@ -1838,7 +1695,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
         response = data.get("response", []) or []
     except ProviderError as pe:
         record_provider_error(shared_state, pe.record)
-        print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro={pe}")
+        print(f"[ERR] API-Football leagues lookup falhou | league={league_code} | season={season} | erro={pe}")
         league_id_cache[cache_key] = None
         return None
     except error.HTTPError as e:
@@ -1850,7 +1707,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
             request_params={"country": country, "season": season},
             category=category, message=message,
         ))
-        print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro=HTTP {code}")
+        print(f"[ERR] API-Football leagues lookup falhou | league={league_code} | season={season} | erro=HTTP {code}")
         league_id_cache[cache_key] = None
         return None
     except Exception as e:
@@ -1862,7 +1719,7 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
             request_params={"country": country, "season": season},
             category=category, message=str(e),
         ))
-        print(f"[ERR] API-Football leagues lookup falhou | league={fd_league_code} | season={season} | erro={e}")
+        print(f"[ERR] API-Football leagues lookup falhou | league={league_code} | season={season} | erro={e}")
         league_id_cache[cache_key] = None
         return None
 
@@ -1884,22 +1741,22 @@ def get_api_football_league_id(fd_league_code: str, date_str: str, shared_state:
 
     league_id_cache[cache_key] = best_id
     print(
-        f"[DBG] API-Football league id lookup | fd_code={fd_league_code} | "
+        f"[DBG] API-Football league id lookup | code={league_code} | "
         f"season={season} | target='{target_name}' | id={best_id} | score={best_score}"
     )
     return best_id
 
 
-def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: str, shared_state: dict):
+def fetch_api_football_fixtures_for_league_date(league_code: str, date_str: str, shared_state: dict):
     if not API_FOOTBALL_KEY:
         return None, "NO_API_KEY"
 
-    league_id = get_api_football_league_id(fd_league_code, date_str, shared_state)
+    league_id = get_api_football_league_id(league_code, date_str, shared_state)
     if not league_id:
         return None, "NO_LEAGUE_ID"
 
     season = api_football_season_from_date(date_str, league_id=league_id, shared_state=shared_state)
-    cache_key = (fd_league_code, date_str, league_id, season)
+    cache_key = (league_code, date_str, league_id, season)
 
     fixtures_cache = shared_state["af_fixtures_cache"]
     if cache_key in fixtures_cache:
@@ -1914,7 +1771,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
         fixtures_cache[cache_key] = (fixtures, "")
         record_provider_success(shared_state, "api-football")
         print(
-            f"[DBG] API-Football fixtures | fd_code={fd_league_code} | league_id={league_id} | "
+            f"[DBG] API-Football fixtures | code={league_code} | league_id={league_id} | "
             f"season={season} | date={date_str} | jogos={len(fixtures)}"
         )
         return fixtures, ""
@@ -1923,7 +1780,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
         record_provider_error(shared_state, pe.record)
         fixtures_cache[cache_key] = (None, "PROVIDER_ERROR")
         print(
-            f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
+            f"[ERR] API-Football fixtures falhou | code={league_code} | league_id={league_id} | "
             f"season={season} | date={date_str} | erro=PROVIDER_ERROR ({pe.record['category']})"
         )
         return None, "PROVIDER_ERROR"
@@ -1939,7 +1796,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
         ))
         fixtures_cache[cache_key] = (None, reason)
         print(
-            f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
+            f"[ERR] API-Football fixtures falhou | code={league_code} | league_id={league_id} | "
             f"season={season} | date={date_str} | erro={reason}"
         )
         return None, reason
@@ -1954,7 +1811,7 @@ def fetch_api_football_fixtures_for_league_date(fd_league_code: str, date_str: s
         ))
         fixtures_cache[cache_key] = (None, "OTHER")
         print(
-            f"[ERR] API-Football fixtures falhou | fd_code={fd_league_code} | league_id={league_id} | "
+            f"[ERR] API-Football fixtures falhou | code={league_code} | league_id={league_id} | "
             f"season={season} | date={date_str} | erro={e}"
         )
         return None, "OTHER"
@@ -2274,10 +2131,8 @@ def try_update_row_via_api_football(
 # =============================
 def make_shared_runtime_state():
     shared_state = {
-        "fd_matches_cache": {},
         "af_fixtures_cache": {},
         "af_league_id_cache": {},
-        "blocked_fd_leagues_seen": set(),
     }
     return ensure_shared_state_defaults(shared_state)
 
@@ -2381,9 +2236,6 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     df = ensure_columns(df)
     shared_state = ensure_shared_state_defaults(shared_state)
 
-    fd_matches_cache = shared_state["fd_matches_cache"]
-    blocked_fd_leagues_seen = shared_state["blocked_fd_leagues_seen"]
-
     today_iso = get_today_lisbon_iso()
 
     updated = 0
@@ -2394,10 +2246,6 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
     no_match_found = 0
     not_finished = 0
     future_skipped = 0
-
-    api_403 = 0
-    api_429 = 0
-    api_other = 0
 
     af_used = 0
     af_updated = 0
@@ -2551,232 +2399,22 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             league_code=league_code, home=home_csv, away=away_csv,
         )
 
-        use_api_football_direct = should_use_api_football_fallback(league_code)
-
-        if use_api_football_direct:
-            blocked_fd_leagues_seen.add(league_code)
-            _run_af_and_account(i, row, league_code, "API_FOOTBALL_DIRECT")
-            continue
-
-        cache_key = (league_code, data)
-
-        if cache_key not in fd_matches_cache:
-            try:
-                matches = fetch_matches_for_league_date(league_code, data, shared_state)
-                fd_matches_cache[cache_key] = {
-                    "ok": True,
-                    "matches": matches,
-                    "reason": "",
-                }
-                print(f"[DBG] {label}: {liga} {data}: {len(matches)} jogos encontrados")
-
-            except error.HTTPError as e:
-                code = getattr(e, "code", None)
-                reason = f"HTTP {code}" if code is not None else "HTTP"
-                fd_matches_cache[cache_key] = {
-                    "ok": False,
-                    "matches": [],
-                    "reason": reason,
-                }
-
-                if code == 403:
-                    api_403 += 1
-                    print(f"[ERR] {label}: football-data {liga} {data}: HTTP Error 403")
-                elif code == 429:
-                    api_429 += 1
-                    print(f"[ERR] {label}: football-data {liga} {data}: HTTP Error 429")
-                else:
-                    api_other += 1
-                    print(f"[ERR] {label}: football-data {liga} {data}: HTTP Error {code}")
-
-            except Exception as e:
-                fd_matches_cache[cache_key] = {
-                    "ok": False,
-                    "matches": [],
-                    "reason": "OTHER",
-                }
-                api_other += 1
-                print(f"[ERR] {label}: football-data {liga} {data}: {e}")
-
-        cache_entry = fd_matches_cache[cache_key]
-
-        if not cache_entry["ok"] and should_use_api_football_fallback(league_code, cache_entry["reason"]):
-            blocked_fd_leagues_seen.add(league_code)
-            _run_af_and_account(i, row, league_code, "API_FOOTBALL_FALLBACK")
-            continue
-
-        if not cache_entry["ok"]:
-            ignored += 1
-            _diag_count(f"FD_CACHE_FAIL_{cache_entry.get('reason', 'UNKNOWN')}")
-            log_pick_diag(
-                label, i, row, "football_data", "CACHE_FAILED",
-                reason=cache_entry.get("reason", ""),
-            )
-            continue
-
-        matches = cache_entry["matches"]
-        log_pick_diag(
-            label, i, row, "football_data", "FETCH_OK",
-            matches=len(matches or []), league_code=league_code,
-        )
-
-        matched, best_score, meta = find_best_fixture_match(
-            home_csv,
-            away_csv,
-            matches,
-            shared_state,
-            min_total_score=MATCH_MIN_TOTAL_SCORE,
-            min_side_score=MATCH_MIN_SIDE_SCORE,
-        )
-
-        if not matched:
-            # FD returned data but no fixture matched. For leagues with an
-            # API-Football fallback, retry via AF before giving up.
-            if should_use_api_football_fallback(league_code, "NO_FIXTURES"):
-                blocked_fd_leagues_seen.add(league_code)
-                af_used += 1
-                print(
-                    f"[DBG] {label}: football-data sem match para '{jogo}' | "
-                    f"liga={liga} | data={data} | n_fd_fixtures={len(matches or [])} | "
-                    f"tentando API-Football fallback"
-                )
-                _run_af_and_account(i, row, league_code, "API_FOOTBALL_FALLBACK_AFTER_NO_MATCH")
-                continue
-            print(f"[WARN] {label}: Sem match API para: {jogo} | {liga} | {data}")
-            log_no_match_candidates(label, home_csv, away_csv, matches, shared_state)
-            # No AF fallback exists for this league (rare — see
-            # league_registry.py, every registered league currently has one)
-            # and FD itself found nothing. Still route through the same
-            # missing-fixture safeguard for consistency/defensiveness —
-            # attempt_rediscovery_af() only ever searches AF, so this is a
-            # no-op for a league with truly no AF coverage (returns None
-            # immediately) and falls straight through to the normal ignore
-            # path below.
-            outcome = _evaluate_missing_fixture_void(df, i, row, label, shared_state)
-            if outcome:
-                updated += 1
-                _diag_count("RESETTLED_VIA_REDISCOVERY" if outcome == "settled" else "VOIDED_MISSING_FIXTURE")
-                continue
-            no_match_found += 1
-            ignored += 1
-            _diag_count("NO_MATCH")
-            log_pick_diag(
-                label, i, row, "football_data_match", "NO_MATCH",
-                best_score=best_score, meta=meta, fixtures=len(matches or []),
-            )
-            continue
-
-        log_pick_diag(
-            label, i, row, "football_data_match", "MATCHED",
-            best_score=best_score, match_mode=(meta or {}).get("mode", ""),
-            match=format_fixture_diag(matched),
-        )
-
-        can_try_now, kickoff_dt = should_try_result_update_from_fixture(matched)
-        if not can_try_now:
-            kickoff_txt = kickoff_dt.isoformat() if kickoff_dt else "unknown"
-            print(
-                f"[DBG] {label}: Ainda cedo para fechar: "
-                f"{jogo} | kickoff_utc={kickoff_txt} | delay={RESULT_READY_DELAY}"
-            )
-            future_skipped += 1
-            ignored += 1
-            _diag_count("TOO_EARLY")
-            log_pick_diag(
-                label, i, row, "football_data_status", "TOO_EARLY",
-                kickoff_utc=kickoff_txt, match=format_fixture_diag(matched),
-            )
-            continue
-
-        status = str(get_fixture_status(matched)).upper()
-        if status not in FD_FINISHED_STATUS:
-            classification = classify_fd_status(status)
-            if classification == "NON_PLAYED":
-                original_kickoff_dt = parse_kickoff_utc(row.get("KickoffUTC", ""))
-                if original_kickoff_dt and hours_since(original_kickoff_dt) >= POSTPONED_VOID_AFTER_HOURS:
-                    reason = FD_VOID_REASON_BY_STATUS.get(status, "postponed_timeout")
-                    void_result_row(df, i, row, reason)
-                    updated += 1
-                    _diag_count("VOIDED_NON_PLAYED_FD")
-                    log_pick_diag(
-                        label, i, row, "football_data_status", "VOIDED_NON_PLAYED_TIMEOUT",
-                        status=status, void_reason=reason, match=format_fixture_diag(matched),
-                    )
-                    print(
-                        f"[VOID] {label}: {jogo} auto-voided as P (status={status}, reason={reason}, "
-                        f"kickoff+{POSTPONED_VOID_AFTER_HOURS:.0f}h elapsed)"
-                    )
-                    continue
-            print(f"[DBG] {label}: Ainda não terminado: {jogo} | status={status}")
-            not_finished += 1
-            ignored += 1
-            _diag_count("NOT_FINISHED")
-            log_pick_diag(
-                label, i, row, "football_data_status", "NOT_FINISHED",
-                status=status, allowed=sorted(FD_FINISHED_STATUS),
-                match=format_fixture_diag(matched),
-            )
-            continue
-
-        home_goals, away_goals = get_fixture_score(matched)
-        if home_goals is None or away_goals is None:
-            print(f"[WARN] {label}: Sem fullTime score para: {jogo}")
-            ignored += 1
-            _diag_count("NO_SCORE")
-            log_pick_diag(
-                label, i, row, "football_data_score", "NO_SCORE",
-                match=format_fixture_diag(matched),
-            )
-            continue
-
-        resultado = market_result(mercado, int(home_goals), int(away_goals))
-        if resultado is None:
-            print(f"[WARN] {label}: Mercado não suportado: {mercado}")
-            unsupported_market += 1
-            ignored += 1
-            _diag_count("UNSUPPORTED_MARKET")
-            log_pick_diag(label, i, row, "football_data_market", "UNSUPPORTED_MARKET")
-            continue
-
-        lucro = calc_profit(resultado, stake, odd)
-
-        df.at[i, "Resultado"] = resultado
-        df.at[i, "Placar"] = f"{int(home_goals)}-{int(away_goals)}"
-        df.at[i, "Lucro€"] = str(lucro)
-
-        lucro_real = calc_real_profit(
-            row.get("Apostada", ""),
-            resultado,
-            parse_float(row.get("StakeReal€", ""), 0.0),
-            parse_float(row.get("OddReal", ""), 0.0),
-        )
-        if lucro_real != "":
-            df.at[i, "LucroReal€"] = lucro_real
-
-        updated += 1
-        _diag_count("UPDATED_FOOTBALL_DATA")
-
-        log_pick_diag(
-            label, i, row, "football_data_write", "UPDATED",
-            resultado=resultado, score=f"{home_goals}-{away_goals}",
-            lucro=lucro, match=format_fixture_diag(matched),
-        )
-
-        print(
-            f"[OK] {label}: football-data | {jogo} | {mercado} | {home_goals}-{away_goals} "
-            f"=> {resultado} | score_match={best_score} | "
-            f"hs={meta['home_score']} | as={meta['away_score']} | mode={meta['mode']} | "
-            f"Lucro modelo {lucro} | Lucro real {lucro_real if lucro_real != '' else 'n/a'}"
-        )
+        # API-Football is the sole result provider (Phase 27.4 — see
+        # docs/09_Architecture_Decisions.md ADR-004 update). Every eligible
+        # row resolves through exactly one path: League -> API-Football ->
+        # Settlement. _run_af_and_account() already fully accounts for the
+        # NO_MATCH -> missing-fixture-void routing, TOO_EARLY/NOT_FINISHED/
+        # NO_MATCH/UNSUPPORTED_MARKET bookkeeping, and updated/ignored
+        # counters — nothing else is needed here.
+        _run_af_and_account(i, row, league_code, "API_FOOTBALL")
 
     print(
         f"[DBG] {label} resumo -> "
         f"updated={updated} | already_done={already_done} | ignored={ignored} | "
         f"missing_mapping={missing_mapping} | unsupported_market={unsupported_market} | "
         f"no_match_found={no_match_found} | not_finished={not_finished} | "
-        f"future_skipped={future_skipped} | api_403={api_403} | api_429={api_429} | api_other={api_other} | "
-        f"af_used={af_used} | af_updated={af_updated} | af_failed={af_failed} | "
-        f"blocked_fd_leagues={sorted(blocked_fd_leagues_seen) if blocked_fd_leagues_seen else []}"
+        f"future_skipped={future_skipped} | "
+        f"af_used={af_used} | af_updated={af_updated} | af_failed={af_failed}"
     )
     if diag_counts is not None:
         diag_log(f"{label} decision_counts={dict(sorted(diag_counts.items()))}")
@@ -3052,8 +2690,8 @@ def run_settlement_remote() -> dict:
     """
     if not GITHUB_TOKEN:
         raise RuntimeError("GITHUB_TOKEN not set")
-    if not API_TOKEN:
-        raise RuntimeError("FOOTBALL_DATA_API_KEY not set — settlement cannot proceed")
+    if not API_FOOTBALL_KEY:
+        raise RuntimeError("API_FOOTBALL_KEY not set — settlement cannot proceed")
 
     t0 = time.time()
 
@@ -3173,11 +2811,8 @@ def _persist_league_stats(history_file: Path, league_stats_file: Path, remote_na
 # =============================
 def main():
     print("[SETTLEMENT] Início — a actualizar resultados pendentes...")
-    if not API_TOKEN:
-        raise SystemExit("Falta FOOTBALL_DATA_API_KEY no Render")
-
     if not API_FOOTBALL_KEY:
-        print("[WARN] API_FOOTBALL_KEY não definida. O fallback para BL2/TSL/BJL/SB/FL2 não vai funcionar.")
+        raise SystemExit("Falta API_FOOTBALL_KEY no Render")
 
     if UPDATE_RESULTS_DEBUG:
         diag_log(
@@ -3185,7 +2820,7 @@ def main():
             f"today_lisbon={get_today_lisbon_iso()} | "
             f"result_delay={RESULT_READY_DELAY} | "
             f"match_thresholds total={MATCH_MIN_TOTAL_SCORE} side={MATCH_MIN_SIDE_SCORE} | "
-            f"fd_finished={sorted(FD_FINISHED_STATUS)} | af_finished={sorted(AF_FINISHED_STATUS)}"
+            f"af_finished={sorted(AF_FINISHED_STATUS)}"
         )
 
     shared_state = make_shared_runtime_state()

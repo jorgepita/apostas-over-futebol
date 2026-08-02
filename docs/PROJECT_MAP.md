@@ -64,7 +64,7 @@ Python library modules used by the generation and settlement pipelines. No scrip
 | `market_rules.py` | Market result calculation (O2.5, BTTS, etc.) |
 | `history.py` | Historical match data loading and processing |
 | `data_loader.py` | CSV loading helpers |
-| `integrations.py` | External API wrappers (football-data.org, API-Football) |
+| `integrations.py` | External API wrappers (API-Football — sole provider since Phase 27.4) |
 | `league_stats.py` | Per-league statistics aggregation |
 | `output_utils.py` | Output formatting helpers |
 | `state.py` | Shared runtime state across modules |
@@ -158,9 +158,8 @@ For the complete frontend reference, read `docs/03_Dashboard.md`.
 | Settlement trigger | `sync_server.py` | `POST /run-settlement` → calls `run_settlement_remote()` |
 | Settlement engine | `update_results.py` | `update_dataframe()`, `run_settlement_remote()` |
 | Manual bets conversion | `update_results.py` | `manual_bets_to_settlement_df()` |
-| API-Football result queries | `update_results.py` | `get_match_result_af()` |
-| football-data.org result queries | `update_results.py` | `get_match_result_fd()` |
-| League routing (which API to use) | `src/league_registry.py` | `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS` |
+| Result queries (sole provider, Phase 27.4) | `update_results.py` | `_run_af_and_account()`, `try_update_row_via_api_football()` |
+| League routing structures | `src/league_registry.py` | `LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS` |
 | Pick generation orchestration | `run_main.py` | Top-level script |
 | Phase 1 — fixture fetch | `fetch_oddsapi_fixtures.py` | `main()` |
 | Phase 2 — Poisson model | `main.py` | `main()` |
@@ -199,7 +198,7 @@ For the complete backend reference, read `docs/04_Backend.md`.
 | `src/config.py` | Typed Python constants that load from `config.json` with fallback defaults. Add a `DEFAULT_` constant here when adding a new `config.json` key. |
 | `runtime.txt` | Python version for Railway (`python-3.11.13`). |
 | `Procfile` | Railway process command (`gunicorn sync_server:app ...`). |
-| Railway environment variables | `GITHUB_TOKEN`, `TELEGRAM_TOKEN`, `CHAT_ID`, `API_FOOTBALL_KEY`, `FOOTBALL_DATA_API_KEY`. Never committed to the repository. |
+| Railway environment variables | `GITHUB_TOKEN`, `TELEGRAM_TOKEN`, `CHAT_ID`, `API_FOOTBALL_KEY`. Never committed to the repository. |
 | `.github/workflows/bot.yml` | GitHub Actions schedule crons, secrets references, workflow steps. |
 
 ---

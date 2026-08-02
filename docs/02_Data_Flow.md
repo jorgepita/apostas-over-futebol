@@ -197,7 +197,7 @@ The browser fetches `picks_hoje_simplificado.csv` from the GitHub raw URL in `lo
 
 ### Stage 12 — Settlement
 
-`update_dataframe()` processes each row in `picks_history.csv` and `picks_hoje_simplificado.csv`. For each unsettled row it queries football-data.org (primary for EU leagues) or API-Football (direct for blocked/non-EU; fallback for all). When a match is confirmed FINISHED and at least 2h15m have elapsed since kickoff, the Resultado (W/L/P) and Lucro€ are written to the row.
+`update_dataframe()` processes each row in `picks_history.csv` and `picks_hoje_simplificado.csv`. For each unsettled row it queries API-Football — the sole result provider as of Phase 27.4 (football-data.org was removed entirely, see `09_Architecture_Decisions.md` ADR-004 update). When a match is confirmed FINISHED and at least 2h15m have elapsed since kickoff, the Resultado (W/L/P) and Lucro€ are written to the row.
 
 The updated CSVs are committed back to GitHub.
 
@@ -337,12 +337,8 @@ picks_hoje_simplificado.csv (GitHub)
    update_dataframe()
          │
    for each unsettled row:
-         ├─ football-data.org → match result
-         │  (EU leagues: primary)
-         │
          └─ API-Football → match result
-            (blocked EU + non-EU: direct)
-            (any league: fallback on FD failure)
+            (sole provider, every league — Phase 27.4)
          │
          ▼
    Resultado: "W" / "L" / "P"
@@ -373,7 +369,6 @@ manual_bets_to_settlement_df()
    update_dataframe()                ← SAME FUNCTION as bot picks
          │
    for each unsettled row:
-         ├─ football-data.org → match result
          └─ API-Football → match result
          │
          ▼

@@ -84,7 +84,7 @@ The architectural principles are fixed: single-file frontend, GitHub as persiste
 
 **Why it matters:** The Poisson model quality depends on up-to-date history. Currently the history CSVs must be manually refreshed from external sources. Stale history reduces model accuracy, particularly for leagues where form changes rapidly.
 
-**Dependencies:** football-data.org API for EU leagues; API-Football for non-EU leagues. `fetch_historical.py` already exists as a starting point.
+**Dependencies:** API-Football (sole provider since Phase 27.4). `fetch_historical.py` already exists as a starting point.
 
 **Definition of Done:**
 - A new GitHub Actions job runs weekly (e.g. Monday 06:00 UTC, before the settlement job).
@@ -181,7 +181,7 @@ The architectural principles are fixed: single-file frontend, GitHub as persiste
 
 ### TD-1 — Split `update_results.py` into modules
 
-`update_results.py` is 2600+ lines containing team name normalisation, football-data.org client, API-Football client, GitHub write helpers, and the settlement engine. These are logically independent and should live in `src/`. The file's size makes it difficult to navigate.
+`update_results.py` is 2600+ lines containing team name normalisation, API-Football client (sole provider since Phase 27.4), GitHub write helpers, and the settlement engine. These are logically independent and should live in `src/`. The file's size makes it difficult to navigate.
 
 **Approach:** Extract into `src/settlement.py` (core `update_dataframe()`), `src/team_matching.py` (normalisation, similarity, alias learning), and keep API clients in `src/integrations.py`. `update_results.py` becomes a thin orchestrator.
 

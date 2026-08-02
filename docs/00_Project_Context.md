@@ -64,7 +64,7 @@ These are the structural decisions that should not be revisited without strong r
 `update_dataframe()` in `update_results.py` settles both. Manual bets are converted to a DataFrame, settled, and converted back. This prevents divergence in settlement logic.
 
 **The League Registry is the only place where leagues are registered.**  
-`src/league_registry.py` is the single source of truth for league metadata. `LEAGUE_CODE_MAP`, `BLOCKED_FOOTBALL_DATA_CODES`, `API_FOOTBALL_FALLBACK_COMPETITIONS`, and `AF_SEASON_MODELS` are all derived from it automatically. Never add league mappings directly to `update_results.py`, `config.json`, or any other file.
+`src/league_registry.py` is the single source of truth for league metadata. `LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, and `AF_SEASON_MODELS` are all derived from it automatically. Never add league mappings directly to `update_results.py`, `config.json`, or any other file.
 
 **The frontend is a single self-contained HTML file with no framework and no build step.**  
 `index.html` contains all JavaScript inline. There is no npm, no bundler, no transpiler. All changes are made directly in this file.
@@ -85,7 +85,7 @@ All persistent data lives in files committed to the GitHub repository. The Railw
 | Backend server | Flask + gunicorn, hosted on Railway |
 | Scheduled automation | GitHub Actions (`bot.yml`) |
 | Frontend | Single HTML file (`index.html`) — all JS inline, no build step |
-| Result APIs | football-data.org (EU leagues), API-Football v3 (blocked EU + non-EU) |
+| Result API | API-Football v3 (sole provider for all 22 leagues since Phase 27.4) |
 | Notifications | Telegram Bot API |
 | Persistence | GitHub repository (file storage via GitHub Contents API) |
 | Python dependencies | pandas, requests, flask, flask-cors, gunicorn, python-dotenv |
@@ -128,7 +128,7 @@ All jobs can also be triggered manually via `workflow_dispatch`.
 
 ### Pick Generation — `main.py` / `run_main.py` / `run_topup.py`
 
-1. Fetch fixtures for each configured league from football-data.org or API-Football.
+1. Fetch fixtures for each configured league from API-Football.
 2. Apply the Poisson model to estimate goal probabilities.
 3. Compare model probabilities against market odds; filter by edge threshold (dynamic Kelly).
 4. Deduplicate against `sent_state.json`.
@@ -142,7 +142,7 @@ Runs at 07:00 and 22:30 UTC via GitHub Actions, and on-demand via Railway `POST 
 
 **Bot pick settlement:**
 - Downloads `picks_history.csv` and `picks_hoje_simplificado.csv` from GitHub.
-- For each unsettled row: queries football-data.org first; falls back to API-Football if the league is blocked on FD or FD fails.
+- For each unsettled row: queries API-Football (sole provider since Phase 27.4 — see `09_Architecture_Decisions.md` ADR-004 update).
 - Writes W/L/P result and profit to each row.
 - Commits updated CSVs back to GitHub.
 
@@ -165,13 +165,11 @@ A minimal Flask API with four endpoints. Its only job is to proxy `cloud_state.j
 
 Single source of truth for all league metadata. To add a league, edit only this file.
 
-**21 registered leagues:**
+**22 registered leagues, all resolved through API-Football (sole provider since Phase 27.4):**
 
-EU (football-data.org): Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship.
+European (`"european"` season model): Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig.
 
-EU blocked on football-data.org (API-Football direct): Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig.
-
-Non-EU (API-Football, calendar-year seasons): Eliteserien, Allsvenskan, Veikkausliiga, Besta deild, MLS (MLS Next Pro, af_id=909), Campeonato Brasileiro Série A, J1 League, K League 1.
+Non-European (`"calendar"` season model): Eliteserien, Allsvenskan, Veikkausliiga, Besta deild, MLS, MLS Next Pro (af_id=909, fully independent from MLS), Campeonato Brasileiro Série A, J1 League, K League 1.
 
 **Season models:**
 - `"european"` — season year = calendar year the season starts (Aug). Jan–Jun of year Y → season Y-1.
@@ -211,7 +209,7 @@ The 60-second auto-refresh interval calls `loadData()`, which fetches picks CSVs
 ## Operational Constraints
 
 - **GitHub API as database.** Every file save requires a separate GET to fetch the current SHA before the PUT. There is no locking mechanism. Concurrent writes from GitHub Actions and Railway can produce conflicts.
-- **API rate limits.** football-data.org: 10 requests/minute on the free tier (`FD_CALL_MIN_INTERVAL = 0.65s` enforced). API-Football runs on a paid subscription: 7500 requests/day and 300 requests/minute. These are deployment-level limits configured in the Railway environment — they are not hardcoded in the application and can be adjusted without changing the code.
+- **API rate limits.** API-Football (sole provider since Phase 27.4) runs on a paid subscription: 7500 requests/day and 300 requests/minute. These are deployment-level limits configured in the Railway environment — they are not hardcoded in the application and can be adjusted without changing the code.
 - **Settlement is synchronous.** A single settlement run can take up to 90 seconds. The Railway gunicorn timeout is 300 seconds.
 - **No build system.** The entire frontend is one HTML file. All changes are made in-place. There is no compile step and no output artefact.
 - **localStorage is a cache, not a database.** Browser localStorage holds a copy of `cloud_state.json`. If it diverges from the server (e.g. settlement ran in a different browser session), the user must manually click "Load Cloud" to re-sync.
