@@ -712,3 +712,56 @@ There is no push mechanism. The browser is not notified when GitHub Actions upda
 **`localEdits` is merged, not replaced, on cloud load.** When `_doLoadCloudState()` loads `cloud_state.json`, it calls `migrateLocalEditsKeys(content.localEdits)` to normalise keys before assigning. Edits made in the current session that are not in the cloud snapshot are lost. The cloud copy takes precedence on explicit load.
 
 **`sent_state.json` is date-keyed.** If the stored date does not match today, `load_sent_state()` returns an empty set. This prevents yesterday's sent IDs from suppressing today's Telegram notifications without requiring a manual reset.
+
+---
+
+## 11. Backup & Disaster Recovery Flow (Phase 27.2)
+
+See `04_Backend.md` §16 and `09_Architecture_Decisions.md` ADR-020 for full detail. This flow is additive — none of the flows above (§1–§10) changed.
+
+**Backup creation (scheduled — GitHub Actions, every 6h):**
+```
+bot.yml `backup` job
+ │
+ ├─ actions/checkout already has every production file on disk
+ ├─ backup_job.py reads config.json["backup"]["files"] from disk
+ ├─ src/backup/backup_engine.create_backup('scheduled', ...)
+ │   ├─ builds one ZIP fully in memory (no disk write, ever)
+ │   ├─ uploads to R2, HEAD-verifies
+ │   ├─ records the entry in backups/index.json (R2, not Railway)
+ │   └─ runs retention (evicts oldest scheduled backups beyond the cap)
+ └─ exits 0 whether or not R2 is configured — never fails this workflow run
+```
+
+**Backup creation (manual / critical — Railway, on demand):**
+```
+Browser → POST /backup/create {type, reason, extraPayload}
+ │
+ └─ sync_server.py
+     ├─ src/backup/github_files.fetch_files() — fresh GitHub Contents API GET per file
+     │   (no local checkout on Railway, unlike the GitHub Actions path above)
+     ├─ create_backup(...) — identical engine, identical ZIP-in-memory/upload/verify/index/retention cycle
+     └─ returns the new backup's entry to the browser
+```
+`executeSeasonClose()`'s new Step 0 calls this with `type: 'critical'`, `reason: 'pre_season_close'`, and `extraPayload` set to the Season Archive object itself — the first time that object has ever had a durable copy outside the browser's `localStorage` (see `03_Dashboard.md`'s Season Archive section).
+
+**Restore:**
+```
+Browser → POST /backup/validate-restore {id}   (dry run, changes nothing)
+Browser → POST /backup/restore {id, confirmed: true}
+ │
+ └─ sync_server.py → src/backup/backup_restore.restore()
+     ├─ rebuild_index_from_r2() — the catalog is always re-derived from R2's own
+     │   listing first, never trusted from a prior read (Railway holds no state
+     │   between requests — unchanged existing rule, §6 above)
+     ├─ downloads + re-validates the target archive
+     ├─ takes a mandatory fresh 'critical' backup of GitHub's CURRENT state —
+     │   aborts the whole restore, writes nothing, if this snapshot fails
+     └─ writes every archived file back to GitHub via the Contents API
+         (github_files.write_file — the existing github_put_file() primitive,
+         same GET-SHA-then-PUT pattern every other GitHub write in this project uses)
+```
+
+**What does not change:** GitHub remains the only thing the browser, GitHub Actions, and Railway all read from — a restore is an ordinary, auditable git commit, not a new read path any existing consumer needs to learn.
+
+**Data ownership addition:** the R2 bucket owns backup archives and the backup catalog (`backups/index.json`) — a separate store from every row in §9's Data Ownership Matrix above, which remains entirely about GitHub-tracked production files. Nothing in that matrix changed.

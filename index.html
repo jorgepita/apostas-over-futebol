@@ -1780,6 +1780,9 @@ button:disabled {
           <span class="nav-icon">💰</span> Banca
         </div>
         <div class="nav-section-label">Sistema</div>
+        <div class="nav-item" data-tab-target="tab-backups">
+          <span class="nav-icon">🛡️</span> Backups
+        </div>
         <div class="nav-item" data-tab-target="tab-settings">
           <span class="nav-icon">⚙️</span> Definições
         </div>
@@ -2743,6 +2746,40 @@ button:disabled {
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <div id="tab-backups" class="tab-panel">
+      <div class="section-stack">
+        <div class="page-title">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:var(--text);">Backups &amp; Recuperação</div>
+            <div class="note" style="margin-top:4px;">Arquivo permanente em Cloudflare R2 — GitHub continua a ser a fonte de verdade em produção.</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="label">Estado</div>
+            <div id="backupsStatusWrap">
+              <div class="note" style="padding:8px;opacity:0.5;">A carregar...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Backup Manual</div>
+            <div class="note" style="margin-bottom:8px;">Cria um arquivo imediato dos ficheiros de produção actuais e envia para R2.</div>
+            <button id="createManualBackupBtn" type="button" style="width:100%;">Criar Backup Agora</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="label">Arquivos</div>
+          <div class="note" style="margin-bottom:8px;">Lista reconstruída directamente a partir do R2 a cada carregamento — a Railway não guarda nenhuma cópia local.</div>
+          <div id="backupsListWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A carregar...</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -15237,6 +15274,7 @@ button:disabled {
         'tab-versus': [], // renderVersus() is GLOBAL — see rerenderAll(), not gated here
         'tab-strategylab': [renderStrategyLab],
         'tab-bankroll': [renderBankrollPage],
+        'tab-backups': [renderBackupsPage],
         'tab-settings': []
       };
 
@@ -15667,6 +15705,17 @@ button:disabled {
       }
 
       async function executeSeasonClose(archive, newBankroll) {
+        // STEP 0 (Phase 27.2): mandatory pre-close critical backup. Runs
+        // before any local mutation — an R2 upload failure (as opposed to
+        // R2 simply not being configured yet, which is tolerated — see
+        // createBackupBeforeSeasonClose()'s own docstring) aborts the whole
+        // close with nothing touched, exactly like every step below. The
+        // season archive object itself is captured verbatim as this
+        // backup's extraPayload — closing the gap the Phase 27.1 audit
+        // found (Season Archives previously existed only in this browser's
+        // localStorage, never reaching any durable store independent of it).
+        await createBackupBeforeSeasonClose(archive);
+
         // STEP 1: Serialize
         let archiveJson;
         try {
@@ -16706,6 +16755,233 @@ button:disabled {
 
       // ── end Season Archive ───────────────────────────────────────
 
+      // ── Backups & Disaster Recovery (Phase 27.2) ─────────────────────
+      // See docs/09_Architecture_Decisions.md ADR-020. Cloudflare R2 is the
+      // permanent archive; GitHub remains the production source of truth
+      // (unchanged). This dashboard is a thin client over sync_server.py's
+      // /backup/* endpoints — no backup logic lives in the browser itself,
+      // only the season-archive payload that's captured alongside a
+      // pre-End-of-Season critical backup (see confirmFixtureApprovalExposure()
+      // and executeSeasonClose() for the two other places this file already
+      // gates a mutation behind a pre-flight check).
+
+      async function backupApiCreate(type, reason, extraPayload) {
+        const res = await fetch(`${API_URL}/backup/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, reason, extraPayload }),
+        });
+        const body = await res.json().catch(() => ({}));
+        return { ok: res.ok, status: res.status, body };
+      }
+
+      // Called from executeSeasonClose() as its new Step 0. Deliberately
+      // distinguishes "R2 isn't configured yet" (HTTP 503 — this
+      // repository's actual state as of Phase 27.2 shipping, see the phase's
+      // handover) from "R2 is configured but the backup genuinely failed"
+      // (any other failure): the first must NOT block End of Season — this
+      // project had zero backup coverage before this phase, so proceeding
+      // without one is unchanged behaviour, not a regression — while the
+      // second DOES block, since at that point a real safety net exists and
+      // its failure is exactly the situation Phase 27.1's design was meant
+      // to guard against. The moment R2 credentials are added to Railway,
+      // this same code starts enforcing the hard block automatically, with
+      // no further changes needed here.
+      async function createBackupBeforeSeasonClose(archive) {
+        let result;
+        try {
+          result = await backupApiCreate('critical', 'pre_season_close', archive);
+        } catch (e) {
+          throw new Error(
+            `Não foi possível contactar o serviço de backup antes de arquivar a época: ${e.message}. ` +
+            `A época NÃO foi arquivada — nada foi alterado.`
+          );
+        }
+        if (result.status === 503) {
+          console.warn('[Backups] R2 ainda não configurado — a prosseguir sem backup crítico pré-fecho:',
+                        result.body && result.body.error);
+          return { skipped: true };
+        }
+        if (!result.ok) {
+          throw new Error(
+            `O backup crítico pré-fecho de época falhou: ${result.body && result.body.error || 'erro desconhecido'}. ` +
+            `A época NÃO foi arquivada — nada foi alterado.`
+          );
+        }
+        return { skipped: false, backup: result.body.backup };
+      }
+
+      async function createManualBackupFromDashboard() {
+        try {
+          const result = await backupApiCreate('manual', 'manual_dashboard');
+          if (result.status === 503) {
+            alert('Cloudflare R2 ainda não está configurado neste ambiente — não é possível criar backups. ' +
+                  'Ver docs/09_Architecture_Decisions.md ADR-020 para os passos de configuração.');
+            return;
+          }
+          if (!result.ok) {
+            alert('Falha ao criar backup: ' + (result.body && result.body.error || 'erro desconhecido'));
+            return;
+          }
+          alert('Backup criado com sucesso: ' + result.body.backup.id);
+          renderBackupsPage();
+        } catch (e) {
+          alert('Falha ao criar backup: ' + e.message);
+        }
+      }
+
+      function backupTypeLabel(type) {
+        return { scheduled: 'Agendado', critical: 'Crítico', manual: 'Manual' }[type] || type;
+      }
+
+      function formatBackupBytes(n) {
+        if (!Number.isFinite(n)) return '—';
+        if (n < 1024) return `${n} B`;
+        if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+        return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      async function renderBackupsStatus(statusData) {
+        const wrap = document.getElementById('backupsStatusWrap');
+        if (!wrap) return;
+
+        if (!statusData || !statusData.r2Configured) {
+          safeSetHTML('backupsStatusWrap', `
+            <span class="decision-badge bad" style="font-size:10px;padding:2px 8px;">☁ R2 não configurado</span>
+            <div class="note" style="margin-top:8px;">
+              ${statusData && statusData.reason ? escapeHtml(statusData.reason) : 'Sem credenciais Cloudflare R2 neste ambiente.'}
+              Ver ADR-020 em <code>docs/09_Architecture_Decisions.md</code> para os passos de configuração.
+            </div>
+          `);
+          return;
+        }
+
+        const recovery = statusData.recovery || { recoverable: false, count: 0 };
+        const badge = recovery.recoverable
+          ? `<span class="decision-badge good" style="font-size:10px;padding:2px 8px;">☁ R2 configurado — ${recovery.count} arquivo(s)</span>`
+          : `<span class="decision-badge warn" style="font-size:10px;padding:2px 8px;">☁ R2 configurado — sem arquivos ainda</span>`;
+
+        const latest = recovery.latest
+          ? `<div class="note" style="margin-top:8px;">Mais recente: <strong>${escapeHtml(recovery.latest.id)}</strong> (${backupTypeLabel(recovery.latest.type)})</div>`
+          : '';
+
+        safeSetHTML('backupsStatusWrap', badge + latest);
+      }
+
+      async function renderBackupsListFromData(backups) {
+        if (!backups || !backups.length) {
+          safeSetHTML('backupsListWrap', `<div class="note" style="padding:8px;">Nenhum backup encontrado em R2.</div>`);
+          return;
+        }
+
+        const rows = backups.map(b => `
+          <tr>
+            <td style="font-family:monospace;font-size:11px;">${escapeHtml(b.id)}</td>
+            <td>${backupTypeLabel(b.type)}</td>
+            <td>${escapeHtml(b.createdAt || '—')}</td>
+            <td>${formatBackupBytes(b.sizeBytes)}</td>
+            <td><button type="button" class="js-backup-restore" data-backup-id="${escapeHtml(b.id)}" style="font-size:11px;padding:4px 10px;">Restaurar</button></td>
+          </tr>
+        `).join('');
+
+        safeSetHTML('backupsListWrap', `
+          <div style="overflow-x:auto;">
+            <table style="width:100%;font-size:12px;">
+              <thead><tr><th>ID</th><th>Tipo</th><th>Criado em</th><th>Tamanho</th><th></th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `);
+
+        document.querySelectorAll('.js-backup-restore').forEach(btn => {
+          btn.addEventListener('click', () => restoreBackupFlow(btn.getAttribute('data-backup-id')));
+        });
+      }
+
+      async function renderBackupsPage() {
+        try {
+          const res = await fetch(`${API_URL}/backup/status`);
+          const data = await res.json().catch(() => ({}));
+          await renderBackupsStatus(data);
+          await renderBackupsListFromData(data.backups);
+        } catch (e) {
+          console.error('renderBackupsPage', e);
+          safeSetHTML('backupsStatusWrap', `<div class="note" style="color:var(--bad);">Falha ao carregar estado dos backups: ${escapeHtml(e.message)}</div>`);
+          safeSetHTML('backupsListWrap', '');
+        }
+      }
+
+      // Restore flow: validate (dry-run, changes nothing) -> confirm() with
+      // the concrete details -> a second, explicit "type RESTORE to confirm"
+      // prompt() (mirroring the weight of the Close Season wizard's "type
+      // ARCHIVE" gate, without a dedicated modal — this project has no
+      // reusable modal component; see Phase 26.46's identical finding) ->
+      // POST /backup/restore {confirmed:true}. A restore overwrites GitHub's
+      // current cloud_state.json/CSVs — this is the single most destructive
+      // action this dashboard can trigger, so it is deliberately harder to
+      // reach than a normal Cancel/Approve action.
+      async function restoreBackupFlow(backupId) {
+        let preview;
+        try {
+          const res = await fetch(`${API_URL}/backup/validate-restore`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: backupId }),
+          });
+          preview = await res.json();
+        } catch (e) {
+          alert('Falha ao validar backup: ' + e.message);
+          return;
+        }
+
+        if (!preview.ok) {
+          alert('Este backup não pode ser restaurado: ' + (preview.reason || 'motivo desconhecido'));
+          return;
+        }
+
+        const entry = preview.entry || {};
+        const proceed = confirm(
+          `Restaurar o backup "${backupId}"?\n\n` +
+          `Tipo: ${backupTypeLabel(entry.type)}\n` +
+          `Criado em: ${entry.createdAt || '—'}\n` +
+          `Tamanho: ${formatBackupBytes(entry.sizeBytes)}\n\n` +
+          `Isto irá SOBRESCREVER cloud_state.json e os CSVs de produção no GitHub com o ` +
+          `conteúdo deste backup. Um backup crítico do estado actual será criado ` +
+          `automaticamente antes de qualquer escrita, como rede de segurança.\n\n` +
+          `Esta ação afecta produção. Continuar?`
+        );
+        if (!proceed) return;
+
+        const typed = prompt('Para confirmar, escreva RESTORE (maiúsculas):');
+        if (typed !== 'RESTORE') {
+          alert('Restauro cancelado — texto de confirmação não corresponde.');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_URL}/backup/restore`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: backupId, confirmed: true }),
+          });
+          const result = await res.json();
+          if (!res.ok) {
+            alert('Falha ao restaurar: ' + (result.error || 'erro desconhecido'));
+            return;
+          }
+          if (!result.success) {
+            alert('Restauro concluído com falhas parciais: ' + JSON.stringify(result.failed));
+          } else {
+            alert(`Restauro concluído. Ficheiros escritos: ${result.written.join(', ')}`);
+          }
+          renderBackupsPage();
+        } catch (e) {
+          alert('Falha ao restaurar: ' + e.message);
+        }
+      }
+
+      // ── end Backups & Disaster Recovery ──────────────────────────────
+
       // Runs an async operation while showing a spinner + label on `button` and
       // disabling it (prevents double-clicks). Always restores the button's
       // original HTML/disabled state afterwards, success or failure — the caller's
@@ -16756,6 +17032,9 @@ button:disabled {
         bindElementAction('resetFinancialBtn', resetFinancialConfig);
         bindElementAction('closeSeasonBtn', openCloseSeasonModal);
         bindElementAction('viewArchivesBtn', openArchiveListModal);
+        bindElementAction('createManualBackupBtn', () => {
+          runWithButtonLoading(document.getElementById('createManualBackupBtn'), 'A criar...', () => createManualBackupFromDashboard());
+        });
         bindElementAction('saveTgConfigBtn', saveTelegramConfig);
         bindElementAction('testTgConfigBtn', () => {
           runWithButtonLoading(document.getElementById('testTgConfigBtn'), 'A testar...', () => testTelegramConfig());

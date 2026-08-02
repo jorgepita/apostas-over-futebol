@@ -6,6 +6,8 @@ on:
     - cron: '0 17 * * *'   # 17:00 UTC — main generation
     - cron: '30 22 * * *'  # 22:30 UTC — settlement
     - cron: '0 23 * * *'   # 23:00 UTC — top-up (ligas não-EU)
+    - cron: '0 */6 * * *'  # 00/06/12/18 UTC — scheduled backup (Phase 27.2)
+    - cron: '0 4 * * 0'    # Sunday 04:00 UTC — weekly R2 integrity sweep (Phase 27.2)
   workflow_dispatch:
     inputs:
       job:
@@ -17,6 +19,8 @@ on:
           - main
           - settlement
           - topup
+          - backup
+          - backup-integrity
 
 permissions:
   contents: write
@@ -113,3 +117,73 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
         run: python run_topup.py
+
+  # ── 00/06/12/18 UTC — scheduled backup (Phase 27.2) ─────────────────────
+  # Reads the files already checked out by actions/checkout below and
+  # uploads one 'scheduled' backup to Cloudflare R2 — no GitHub API call is
+  # needed for backup CREATION (unlike Railway's on-demand backup
+  # endpoints), so GITHUB_TOKEN is deliberately not passed here. See
+  # backup_job.py and docs/09_Architecture_Decisions.md ADR-020.
+  # Exits 0 (never fails this workflow) if R2 secrets are not yet
+  # configured in this repository — see backup_job.py's own docstring.
+  backup:
+    if: >-
+      github.event.schedule == '0 */6 * * *' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'backup')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Backup — Criar arquivo agendado e enviar para Cloudflare R2
+        env:
+          R2_ENABLED: ${{ secrets.R2_ENABLED }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: python backup_job.py
+
+  # ── Sunday 04:00 UTC — weekly R2 integrity sweep (Phase 27.2) ────────────
+  # HEAD-only, never downloads an archive. Exits non-zero (workflow shows as
+  # failed) only when a backup the index believes exists is confirmed
+  # missing from R2 — see backup_integrity_job.py.
+  backup-integrity:
+    if: >-
+      github.event.schedule == '0 4 * * 0' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'backup-integrity')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Backup — Verificação semanal de integridade R2
+        env:
+          R2_ENABLED: ${{ secrets.R2_ENABLED }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: python backup_integrity_job.py

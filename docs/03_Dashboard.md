@@ -239,6 +239,7 @@ const PAGE_RENDERERS = {
   'tab-versus':      [],   // renderVersus() is GLOBAL — see below, deliberately not gated here
   'tab-strategylab': [renderStrategyLab],
   'tab-bankroll':    [renderBankrollPage],
+  'tab-backups':     [renderBackupsPage],   // Phase 27.2
   'tab-settings':    []
 };
 ```
@@ -502,6 +503,32 @@ Both branches sort together by date ascending. `renderPendingQueue()` and `build
 - Load Cloud / export buttons.
 
 **Update triggers:** Any `rerenderAll()`.
+
+---
+
+### Season Archive / Close Season (Settings page, Phase 23.1; backup integration Phase 27.2)
+
+**Purpose:** Archives the current season's data (`buildSeasonArchiveObject()`) and resets active state for a new season, via a 4-step confirmation wizard (`csmRenderStep1()`–`csmGoStep4()`, `csmExecute()`).
+
+**Persistence (unchanged from Phase 23.1):** The built archive is written to `localStorage` (`SEASON_ARCHIVES_KEY = 'apostas_season_archives_v1'`) by `executeSeasonClose()`, with a write-before-mutate crash guard (`SEASON_CLOSE_PENDING_KEY`, read-back verified, reconciled on next boot by `checkStartupRecovery()`). This is browser-local storage only — a read-only audit (2026-08-02, preceding Phase 27.1/27.2) found the archive was never included in the payload `saveCloudState()` sends to Railway, so a closed season's archive had zero durability beyond the one browser that created it.
+
+**Backup integration (Phase 27.2, ADR-020).** `executeSeasonClose()` now runs a new Step 0, before any of the steps above: `createBackupBeforeSeasonClose(archive)` calls `POST /backup/create {type: 'critical', reason: 'pre_season_close', extraPayload: archive}` — capturing the season archive object verbatim inside a Cloudflare R2 backup, independent of `localStorage`, for the first time. This does **not** replace the existing `localStorage` write (still Step 6 onward, unchanged) — it's an additional, independent durable copy. If R2 is configured and this backup genuinely fails, the entire Close Season operation aborts with nothing changed (matching the weight of every other step in `executeSeasonClose()`); if R2 is simply not configured yet (this repository's state as of Phase 27.2 shipping — see `04_Backend.md` §16), the close proceeds unblocked and only logs a console warning, preserving this feature's exact pre-27.2 behaviour. See ADR-020 for the full reasoning behind this "block only once a real safety net exists" design.
+
+---
+
+### Backups (`tab-backups`, Phase 27.2)
+
+**Purpose:** Operator-facing view of the Cloudflare R2 backup catalog — status, manual backup creation, and restore. See `04_Backend.md` §16 and ADR-020 for the backend design; this page is a thin client over `sync_server.py`'s `/backup/*` endpoints, with no backup logic of its own.
+
+**Data sources:** `GET /backup/status` (r2Configured, backup list, recovery summary) — always fetched fresh on tab activation (`renderBackupsPage()`), never cached client-side, matching the backend's own "always rebuilt from R2" design.
+
+**Sub-renderers:** `renderBackupsStatus()` (R2 configuration badge + latest-backup summary), `renderBackupsListFromData()` (table of all catalogued backups with a "Restaurar" button per row).
+
+**User interactions:**
+- **"Criar Backup Agora"** (`createManualBackupFromDashboard()`) — `POST /backup/create {type: 'manual'}`.
+- **"Restaurar"** per row (`restoreBackupFlow()`) — a three-step gate, deliberately the heaviest confirmation flow in this dashboard given a restore overwrites GitHub's production `cloud_state.json`/CSVs: (1) `POST /backup/validate-restore` (dry-run, changes nothing) — aborts here if the backup is not found or corrupted; (2) a `confirm()` dialog naming the backup's type/date/size and stating a fresh safety backup will be taken automatically; (3) a `prompt()` requiring the literal text `RESTORE` — only then does `POST /backup/restore {confirmed: true}` fire. This mirrors, but is intentionally stricter than, the Close Season wizard's "type ARCHIVE" gate — the dashboard has no reusable modal component (confirmed by the Phase 26.46 audit before that feature was built; unchanged since), so `confirm()`/`prompt()` remain the smallest architecture-consistent choice here too.
+
+**Update triggers:** Tab activation (`PAGE_RENDERERS['tab-backups']`); manually after a successful create/restore action.
 
 ---
 

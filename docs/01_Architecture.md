@@ -166,6 +166,20 @@ Data flow directions:
 
 ---
 
+### Cloudflare R2 (Phase 27.2)
+
+**Purpose:** Permanent backup archive — an independent copy of the project's critical runtime files, outside GitHub. See `09_Architecture_Decisions.md` ADR-020.
+
+**Used by:** `src/backup/*` (canonical implementation), `backup_job.py`/`backup_integrity_job.py` (GitHub Actions entry points), `sync_server.py`'s `/backup/*` endpoints (Railway entry points).
+
+**Owns:** Backup archives (`backups/<type>/<id>.zip`) and the backup catalog (`backups/index.json`). Does not own, replace, or compete with anything GitHub owns — GitHub remains the sole production source of truth; R2 holds only read-only snapshots of it.
+
+**Does not own:** Any production runtime file directly — `cloud_state.json`, the picks CSVs, `league_stats.csv`, and `sent_state.json` are all still owned by GitHub exactly as described elsewhere in this document. R2 is never read at runtime by generation, settlement, or the dashboard's normal operation — only by the backup/restore subsystem itself.
+
+**Not yet configured in production.** As of Phase 27.2, no `R2_*` environment variables exist in Railway or GitHub Actions — every backup entry point fails closed (logs and skips, or returns HTTP 503) until an operator adds real credentials. See `04_Backend.md` §16.
+
+---
+
 ## 3. Startup Flow
 
 When the user opens `index.html`, `boot()` runs in this sequence:
@@ -422,6 +436,8 @@ The browser reads `cloud_state.json` through Railway `/load`. localStorage is a 
 | `team_alias_cache.json` | JSON | `update_results.save_team_alias_cache()` | `update_results.load_team_alias_cache()` | Local to Railway/Actions runner; not committed |
 | `fixtures_today.csv` | CSV ; | `fetch_oddsapi_fixtures.py` | `main.py` (pick generation) | Ephemeral; not committed to GitHub |
 
+**Backup archives (Phase 27.2) are not in this table** — they are point-in-time ZIP snapshots of the files above, stored in Cloudflare R2, not GitHub. This table describes GitHub's own persistence only, which Phase 27.2 left entirely unchanged; see `04_Backend.md` §16 and ADR-020 for the backup subsystem's own catalog/storage design.
+
 ---
 
 ## 8. Runtime Ownership
@@ -477,6 +493,13 @@ The browser reads `cloud_state.json` through Railway `/load`. localStorage is a 
 - **Current handling:** Railway propagates the 409 as a 500 response. The browser shows an error. GitHub Actions settlement raises an exception.
 - **Mitigation:** Railway enforces `--workers 1`, preventing parallel /save requests. The settlement schedule (07:00, 22:30) is unlikely to coincide with a browser /save, but it is not impossible. If it occurs, the user retries the save manually; settlement is retried at the next scheduled run.
 
+### Cloudflare R2 unavailable (Phase 27.2)
+
+- **Backup creation:** Fails cleanly at the upload step; nothing partial is ever written (the archive is built fully in memory first — see ADR-020). The scheduled GitHub Actions job logs the failure and exits non-zero for that run only; the next scheduled run retries. A Railway-triggered manual/critical backup returns an error to the browser.
+- **Restore:** Unavailable for the duration of the outage. Since GitHub is unaffected, every other part of the system (generation, settlement, the dashboard) continues operating normally — R2 is never read outside the backup/restore subsystem itself.
+- **Pre-End-of-Season critical backup:** If R2 is configured but this specific backup attempt fails, `executeSeasonClose()` aborts entirely (nothing changed) — see ADR-020's distinction between "not configured" (does not block) and "configured but failed" (does block).
+- **Recovery:** Fully automatic once R2 is reachable again — no manual reconciliation needed, since nothing was ever left in a partial state.
+
 ---
 
 ## 10. Architectural Rules
@@ -500,3 +523,5 @@ These rules must be preserved in future development.
 **Settlement skips rather than fails.** A row that cannot be settled this run (game not yet finished, API unreachable, no fixture matched) is skipped with a diagnostic log. It will be retried on the next scheduled run. Settlement never deletes rows, never writes partial results, and never leaves a file in an inconsistent state.
 
 **`src/calculations.py` is the only canonical implementation of the quantitative formulas.** `QuantEngine` in `index.html` is a verified mirror, not a second authority — a formula change starts in `src/calculations.py`, regenerates `tests/golden_vectors.json`, then updates `QuantEngine` to match. Score, Opinion, Recommendation, and every other decision-layer concept must never be added to either engine; they belong to the consumer (see ADR-014).
+
+**Railway holds zero backup bytes at rest (Phase 27.2).** Every backup archive is built as a single in-memory buffer, uploaded to Cloudflare R2, and discarded — never written to Railway's (or a GitHub Actions runner's) disk, even transiently, even for a small dataset. The backup catalog is always re-derived from R2's own object listing rather than cached locally. Introducing a local cache "for speed" or a locally-persisted retry queue "to survive a restart" would reopen the exact failure mode (Railway disk exhaustion from treating local storage as a backup archive) that caused a real production incident in this project's sibling codebase — see ADR-020.

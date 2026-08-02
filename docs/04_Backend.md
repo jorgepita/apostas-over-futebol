@@ -316,6 +316,83 @@ The GET for SHA is required. The GitHub Contents API rejects PUT requests for ex
 
 ---
 
+### GET /backup/status
+
+**Purpose:** Backup catalog and R2 configuration state, for the dashboard's Backups tab. See §16 and `docs/09_Architecture_Decisions.md` ADR-020.
+
+**Request:** Optional query param `?verify=1` to also run a HEAD-only R2 integrity sweep (see §16).
+
+**Response (R2 not configured):**
+```json
+{"r2Configured": false, "reason": "R2_ENABLED is not set to true", "backups": [], "recovery": null}
+```
+
+**Response (R2 configured):**
+```json
+{
+  "r2Configured": true,
+  "backups": [{"id": "...", "type": "manual", "key": "backups/manual/....zip", "sizeBytes": 12345, "createdAt": "..."}],
+  "recovery": {"recoverable": true, "issues": [], "latest": {"...": "..."}, "count": 3},
+  "integrity": null
+}
+```
+
+**Side effects:** One R2 `ListObjectsV2` call (the catalog is always rebuilt fresh from the listing — Railway caches nothing between requests, see §16). With `?verify=1`, one additional R2 `HeadObject` call per catalogued backup.
+
+**Caller:** Browser — Backups tab, on tab activation.
+
+---
+
+### POST /backup/create
+
+**Purpose:** Create one `manual` or `critical` backup on demand.
+
+**Request:**
+```json
+{"type": "manual", "reason": "optional free-text", "extraPayload": {"...": "..."}}
+```
+`type` must be `"manual"` or `"critical"` — `"scheduled"` is rejected with HTTP 400 (scheduled backups are created only by the GitHub Actions cron job, `backup_job.py`, never through this endpoint).
+
+**Response:** `{"success": true, "backup": {...}}` — the new backup's index entry.
+
+**Side effects:** Fetches every file in `config.json["backup"]["files"]` fresh from GitHub (Contents API GET, one per file), builds one ZIP in memory, uploads to R2, HEAD-verifies, updates `backups/index.json`, runs retention. Nothing is written to Railway's disk.
+
+**Caller:** Browser — "Criar Backup Agora" button (Backups tab, `type: "manual"`); `executeSeasonClose()`'s new Step 0 (`type: "critical"`, `reason: "pre_season_close"`, `extraPayload`: the Season Archive object — see `03_Dashboard.md`).
+
+**Error:** HTTP 503 if R2 is not configured; HTTP 500 if the GitHub fetch or R2 upload/verification fails.
+
+---
+
+### POST /backup/validate-restore
+
+**Purpose:** Dry-run restore preview — downloads and validates a backup archive without writing anything.
+
+**Request:** `{"id": "<backup id>"}`
+
+**Response:** `{"ok": true|false, "id": "...", "entry": {...}, "validation": {"status": "healthy|warning|corrupted", "issues": [...]}, "reason": null|"BACKUP_NOT_FOUND"|"BACKUP_CORRUPTED"}`
+
+**Side effects:** One R2 listing (catalog rebuild) + one R2 GET (the archive itself). No write of any kind.
+
+**Caller:** Browser — Backups tab's restore flow, before the user is shown the confirmation dialog.
+
+---
+
+### POST /backup/restore
+
+**Purpose:** Executes a real restore — writes the backup's archived files back to GitHub.
+
+**Request:** `{"id": "<backup id>", "confirmed": true}` — `confirmed` must be exactly `true`, or HTTP 400.
+
+**Response:** `{"id": "...", "written": [...], "failed": [...], "success": true|false, "sourceKey": "..."}`
+
+**Side effects:** (1) Re-validates the archive (refuses a `corrupted` one, HTTP 400). (2) Takes a mandatory fresh `critical` backup of GitHub's *current* state first — the whole restore aborts, nothing written, if this safety snapshot itself fails. (3) Writes every archived file (except `extra_payload.json`, which isn't a GitHub-tracked file) back to GitHub via the Contents API, one commit per file, each message naming the source backup id.
+
+**Caller:** Browser — Backups tab's restore flow, only after the user passes both the `confirm()` dialog and a literal "type RESTORE" prompt.
+
+**Error:** HTTP 400 if `id`/`confirmed` are missing or the backup is corrupted/not found; HTTP 503 if R2 is not configured. A per-file GitHub write failure is reported in `failed` rather than aborting the other files' writes.
+
+---
+
 ## 5. GitHub Integration
 
 ### Why GitHub is the persistence layer
@@ -968,6 +1045,8 @@ All secrets and deployment-specific settings are environment variables, not in `
 
 A narrow, read-only audit for the same pattern elsewhere found `sent_state.json` and `team_alias_cache.json` are *also* written locally-only with no GitHub upload call in either writer (`src/state.save_sent_state()`, `update_results.py::save_team_alias_cache()`) — both files' last commits (`b7b4f5c4` and `ce963111` respectively) predate or coincide with `league_stats.csv`'s own last commit, suggesting a repeated pattern rather than an isolated omission. **Not fixed in this phase** — explicitly out of scope; flagged here for a future, separately-scoped investigation. Unlike `league_stats.csv`, neither file is directly user-visible in the dashboard, so the practical impact (if any) is different and needs its own assessment before a fix is designed.
 
+**Backups are not part of this table (Phase 27.2).** Every file above remains committed to GitHub exactly as described — nothing about how these files are produced, uploaded, or consumed changed in Phase 27.2. Point-in-time archives of them additionally exist in a Cloudflare R2 bucket, a separate store this table does not cover — see §16.
+
 ---
 
 ## 12. Error Handling
@@ -1128,3 +1207,40 @@ Both must pass for the two engines to be considered in sync. Neither test requir
 **What must never be added to either engine:** Score, Opinion, Recommendation Engine logic, Strategy Lab logic, stake-sizing *decisions* (as opposed to the stake *calculation* `apply_stakes()` performs using the engine's `confidence_factor()`), or any UI/presentation concern. These stay in each consumer — see ADR-014.
 
 **Config as an engine input, not a hardcoded constant.** The JS `QuantEngine.computeLambdas()` takes `window`/`decay`/`minGamesHome`/`minGamesAway` as a parameter rather than reading a module-level default, exactly like the Python `compute_lambdas()` signature. The Scout loads these values (plus `lambda_boost`, `league_lambda_boost`, and `calibration.btts_probability_adjustment`) from `config.json` once per session (`loadModelConfig()`, cached, fetched from the same GitHub raw-content mechanism already used for picks CSVs — not a Railway round-trip), falling back to a frozen copy of the last-known defaults if the fetch fails.
+
+---
+
+## 16. Backup & Disaster Recovery (Phase 27.2)
+
+See `docs/09_Architecture_Decisions.md` ADR-020 for the full design rationale, including why this is deliberately simpler than the equivalent subsystem in the sibling `basketball-over-bot` project.
+
+**Canonical implementation:** `src/backup/*` — `config.py` (files-to-protect + retention, from `config.json["backup"]`; R2 credentials, from environment variables only), `r2_client.py` (S3-compatible Cloudflare R2 client via `boto3`, plus `FakeR2Client` — an in-memory double used throughout the test suite), `backup_validator.py` (manifest construction, in-memory ZIP build, SHA-256 integrity verification), `backup_index.py` (the R2-hosted catalog, `backups/index.json`), `backup_engine.py` (`create_backup()` — the create → upload → verify → index → retention cycle), `backup_retention.py` (index-based, per-type eviction), `backup_restore.py` (`rebuild_index_from_r2()`, `validate_restore()`, `restore()`), `backup_integrity.py` (proactive R2 drift detection), `github_files.py` (a thin adapter over `update_results.py`'s existing GitHub Contents API primitives — `github_get_file_bytes`/`github_get_sha`/`github_put_file` — reused rather than duplicated).
+
+**Entry points:**
+- `backup_job.py` — GitHub Actions scheduled backup creation (`type: "scheduled"`), reads files already on disk via `actions/checkout`, no GitHub API call needed.
+- `backup_integrity_job.py` — GitHub Actions weekly R2 integrity sweep.
+- `sync_server.py`'s four `/backup/*` endpoints — see §4. `type: "manual"`/`"critical"` backups fetch files fresh from GitHub via `github_files.py`, since Railway has no local checkout.
+
+**Zero Railway disk usage, by construction, not by policy.** Every archive is built as a single `zipfile.ZipFile(io.BytesIO())` buffer and never touches disk on either Railway or a GitHub Actions runner — there is no temp file to clean up, because none is ever created. This holds regardless of how many backups exist (10, 100, or 10,000) — Railway's disk footprint for this subsystem is always zero bytes at rest.
+
+**The catalog is never cached — every call rebuilds it from R2.** `backup_restore.rebuild_index_from_r2()` lists every object under `backups/` and derives a lightweight catalog directly from that listing (id/type/size from the key and listing metadata, no per-object download). `list_backups()`, `get_backup_entry()`, and `get_recovery_status()` all call it fresh on every invocation — there is nothing durable on Railway to go stale, consistent with the pre-existing "Railway holds no state between requests" rule (§3). The *persisted* catalog (`backups/index.json`, written by `backup_index.py`) exists only so `backup_engine.create_backup()` and `backup_retention.run_retention()` have a small, cheap object to read/write per operation instead of a full listing each time — restore and status always fall back to the authoritative listing regardless of what that catalog claims.
+
+**Retention** (`config.json["backup"]["retention"]`, defaults: 60 scheduled / 90-day manual / unlimited critical) evicts oldest-first per type, always deleting the R2 object before the index entry — a failed R2 delete leaves the index entry in place rather than orphaning the object.
+
+**Integrity verification** (`backup_integrity.verify_remote_integrity()`) is HEAD-only and deliberately reads the *persisted* catalog (`backup_index.read_index()`), not a fresh listing — a listing-derived view can, by construction, never show a deleted object as missing (it simply isn't listed), so only the catalog's own claims can be checked against reality. Run weekly via `backup_integrity_job.py`, and on demand via `GET /backup/status?verify=1`.
+
+**Restore** always writes back to GitHub, never to Railway or the browser directly — GitHub remains the sole production source of truth (§10's principle, unchanged). A restore is always preceded by a mandatory fresh `critical` backup of the current state; the whole restore aborts if that safety snapshot itself fails.
+
+**Configuration required before this subsystem does anything beyond logging "R2 not configured, skipping":**
+
+| Variable | Where | Used by |
+|---|---|---|
+| `R2_ENABLED` | Railway env + GitHub Actions secrets | `src/backup/config.py::get_r2_settings()` |
+| `R2_ACCOUNT_ID` (or `R2_ENDPOINT_URL`) | Railway env + GitHub Actions secrets | same |
+| `R2_ACCESS_KEY_ID` | Railway env + GitHub Actions secrets | same |
+| `R2_SECRET_ACCESS_KEY` | Railway env + GitHub Actions secrets | same |
+| `R2_BUCKET_NAME` | Railway env + GitHub Actions secrets | same |
+
+**As of Phase 27.2, none of these exist yet** — this repository ships with the backup subsystem fully implemented, tested, and wired into both the scheduler and the dashboard, but dormant: every entry point fails closed (logs a warning, returns HTTP 503 from the Railway endpoints, exits 0 from the GitHub Actions jobs) until an operator adds real Cloudflare R2 credentials. See `07_Current_Status.md` for the exact activation steps.
+
+**Testing:** `tests/test_backup_*.py` (validator, r2_client, config, index, engine, retention, restore, integrity, github_files, jobs, endpoints) — 100 tests, all against `FakeR2Client` (an in-memory double, zero real network I/O) or monkeypatched GitHub primitives. No live Cloudflare R2 bucket exists in this environment; live upload/restore against a real bucket has not been exercised and needs a first real run once credentials are added.

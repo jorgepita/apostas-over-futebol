@@ -145,7 +145,10 @@ def root():
     return jsonify({
         "ok":       True,
         "service":  "apostas-dashboard-sync",
-        "endpoints": ["/health", "/load", "/save", "/run-settlement"],
+        "endpoints": [
+            "/health", "/load", "/save", "/run-settlement",
+            "/backup/status", "/backup/create", "/backup/validate-restore", "/backup/restore",
+        ],
         "repo":     f"{GITHUB_OWNER}/{GITHUB_REPO}",
         "branch":   GITHUB_BRANCH,
     })
@@ -212,6 +215,158 @@ def run_settlement():
         traceback.print_exc()
         print("POST /run-settlement error:", e, flush=True)
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# =============================================================================
+# Backup & Disaster Recovery (Phase 27.2) — see docs/09_Architecture_Decisions.md
+# ADR-020. Every handler below fetches R2 credentials fresh per-request and
+# holds nothing on Railway's disk at any point — matching this file's existing
+# "the Railway server holds no state between requests" rule (see
+# docs/01_Architecture.md §2/§10). 'scheduled' backups are created only by the
+# GitHub Actions cron job (backup_job.py), never through this endpoint — see
+# /backup/create's type validation below.
+# =============================================================================
+
+@app.get("/backup/status")
+def backup_status():
+    from src.backup.backup_restore import get_recovery_status, list_backups
+    from src.backup.config import get_r2_settings
+    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+
+    try:
+        r2_client = get_r2_client(get_r2_settings())
+    except R2NotConfiguredError as e:
+        return jsonify({"r2Configured": False, "reason": str(e), "backups": [], "recovery": None})
+
+    try:
+        backups = list_backups(r2_client)
+        recovery = get_recovery_status(r2_client)
+    except Exception as e:
+        print("GET /backup/status error:", e, flush=True)
+        return jsonify({"error": str(e)}), 500
+
+    integrity = None
+    if request.args.get("verify") == "1":
+        from src.backup.backup_integrity import verify_remote_integrity
+        try:
+            integrity = verify_remote_integrity(r2_client)
+        except Exception as e:
+            integrity = {"error": str(e)}
+
+    return jsonify({"r2Configured": True, "backups": backups, "recovery": recovery, "integrity": integrity})
+
+
+@app.post("/backup/create")
+def backup_create():
+    from src.backup import github_files
+    from src.backup.backup_engine import BackupError, create_backup
+    from src.backup.config import get_backup_config, get_r2_settings
+    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+
+    try:
+        payload = request.get_json(force=True, silent=True) or {}
+    except Exception:
+        payload = {}
+
+    backup_type = payload.get("type", "manual")
+    if backup_type not in ("manual", "critical"):
+        return jsonify({
+            "error": "type must be 'manual' or 'critical' — 'scheduled' backups are "
+                     "created only by the GitHub Actions cron job, not this endpoint",
+        }), 400
+
+    reason = payload.get("reason")
+    extra_payload = payload.get("extraPayload")
+
+    try:
+        r2_client = get_r2_client(get_r2_settings())
+    except R2NotConfiguredError as e:
+        return jsonify({"error": f"R2 not configured: {e}"}), 503
+
+    cfg = get_backup_config()
+    try:
+        files = github_files.fetch_files(cfg["files"])
+        github_commit_sha = github_files.fetch_commit_sha(CLOUD_STATE_PATH)
+    except Exception as e:
+        return jsonify({"error": f"failed to fetch files from GitHub: {e}"}), 500
+
+    if not files:
+        return jsonify({"error": "no production files found on GitHub — nothing to back up"}), 500
+
+    try:
+        result = create_backup(
+            backup_type, files=files, r2_client=r2_client, reason=reason,
+            github_commit_sha=github_commit_sha, extra_payload=extra_payload,
+            retention_cfg=cfg["retention"],
+        )
+    except BackupError as e:
+        print("POST /backup/create error:", e, flush=True)
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"success": True, "backup": result})
+
+
+@app.post("/backup/validate-restore")
+def backup_validate_restore():
+    from src.backup.backup_restore import validate_restore
+    from src.backup.config import get_r2_settings
+    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+
+    payload = request.get_json(force=True, silent=True) or {}
+    backup_id = payload.get("id")
+    if not backup_id:
+        return jsonify({"error": "Missing id"}), 400
+
+    try:
+        r2_client = get_r2_client(get_r2_settings())
+    except R2NotConfiguredError as e:
+        return jsonify({"error": f"R2 not configured: {e}"}), 503
+
+    return jsonify(validate_restore(r2_client, backup_id))
+
+
+@app.post("/backup/restore")
+def backup_restore_endpoint():
+    from src.backup import github_files
+    from src.backup.backup_engine import create_backup
+    from src.backup.backup_restore import RestoreError, restore
+    from src.backup.config import get_backup_config, get_r2_settings
+    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+
+    payload = request.get_json(force=True, silent=True) or {}
+    backup_id = payload.get("id")
+    confirmed = payload.get("confirmed") is True
+    if not backup_id:
+        return jsonify({"error": "Missing id"}), 400
+
+    try:
+        r2_client = get_r2_client(get_r2_settings())
+    except R2NotConfiguredError as e:
+        return jsonify({"error": f"R2 not configured: {e}"}), 503
+
+    cfg = get_backup_config()
+
+    def _pre_restore_snapshot():
+        # Mandatory — a restore is always itself one more restore away from
+        # being undone. Aborts the whole restore (nothing written to
+        # GitHub) if this snapshot itself fails. See ADR-020.
+        snapshot_files = github_files.fetch_files(cfg["files"])
+        create_backup(
+            "critical", files=snapshot_files, r2_client=r2_client,
+            reason="pre_restore_safety", retention_cfg=cfg["retention"],
+        )
+
+    try:
+        result = restore(
+            r2_client, backup_id, confirmed=confirmed,
+            write_file_fn=github_files.write_file,
+            pre_restore_snapshot_fn=_pre_restore_snapshot,
+        )
+    except RestoreError as e:
+        print("POST /backup/restore error:", e, flush=True)
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify(result)
 
 
 if __name__ == "__main__":

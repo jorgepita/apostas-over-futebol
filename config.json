@@ -114,6 +114,25 @@
       "missing_fixture_min_attempts": 3
     }
   },
+  "backup": {
+    "enabled": true,
+    "files": [
+      "cloud_state.json",
+      "picks_history.csv",
+      "picks_hoje.csv",
+      "picks_hoje_github.csv",
+      "picks_hoje_simplificado.csv",
+      "picks_over25.csv",
+      "picks_btts.csv",
+      "league_stats.csv",
+      "sent_state.json"
+    ],
+    "retention": {
+      "scheduled_max_count": 60,
+      "manual_max_age_days": 90,
+      "critical_max_count": null
+    }
+  },
   "the_odds_api": {
     "regions": "eu",
     "markets": "totals",
