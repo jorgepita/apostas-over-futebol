@@ -2258,13 +2258,11 @@ def update_dataframe(df: pd.DataFrame, label: str, shared_state: dict):
             diag_counts[reason] = diag_counts.get(reason, 0) + 1
 
     def _run_af_and_account(idx, row_obj, lg_code, provider_label):
-        """Shared body for all three try_update_row_via_api_football() call
-        sites below (direct, fallback-after-FD-error, fallback-after-FD-
-        no-match) — previously near-identical ~15-line blocks duplicated
-        three times. Also the single place that routes a genuine AF
-        NO_MATCH into the missing-fixture void safeguard (Part 4/5), so
-        that safeguard applies identically regardless of which of the three
-        paths produced the NO_MATCH."""
+        """Body of the single try_update_row_via_api_football() call site
+        below — API-Football is the sole result provider (Phase 27.4; see
+        docs/09_Architecture_Decisions.md ADR-004 update). Also the place
+        that routes a genuine AF NO_MATCH into the missing-fixture void
+        safeguard (Part 4/5)."""
         nonlocal updated, af_used, af_updated, af_failed, ignored
         nonlocal future_skipped, not_finished, no_match_found, unsupported_market
 
