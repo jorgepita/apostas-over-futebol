@@ -1,1 +1,2 @@
-
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-08-03;suecia;Allsvenskan;Halmstad;Sirius;1.77;1.9;3.67;2026-08-03T18:00:00+01:00;BTTS;0.624;1.67;0.599;0.0257;0.064;True;;0.0075;0.0075;0.025000000000000022;0.003;0.003;0.15;1.0;50.0
