@@ -218,14 +218,53 @@ def run_settlement():
 
 
 # =============================================================================
-# Backup & Disaster Recovery (Phase 27.2) — see docs/09_Architecture_Decisions.md
-# ADR-020. Every handler below fetches R2 credentials fresh per-request and
-# holds nothing on Railway's disk at any point — matching this file's existing
-# "the Railway server holds no state between requests" rule (see
-# docs/01_Architecture.md §2/§10). 'scheduled' backups are created only by the
-# GitHub Actions cron job (backup_job.py), never through this endpoint — see
-# /backup/create's type validation below.
+# Backup & Disaster Recovery (Phase 27.2, production-hardened Phase 27.3) —
+# see docs/09_Architecture_Decisions.md ADR-020 and its Phase 27.3
+# "Production Hardening" addendum. Every handler below fetches R2
+# credentials fresh per-request and holds nothing on Railway's disk at any
+# point — matching this file's existing "the Railway server holds no state
+# between requests" rule (see docs/01_Architecture.md §2/§10). 'scheduled'
+# backups are created only by the GitHub Actions cron job (backup_job.py),
+# never through this endpoint — see /backup/create's type validation below.
+#
+# Response shape convention across all four endpoints: every error response
+# is `{"error": "<message>"}` with a status code reflecting the failure's
+# nature — 400 for a bad/missing request parameter or an unrestorable
+# backup (client-correctable), 503 for R2 being unreachable/misconfigured
+# (retry later / an operator needs to act, not the caller), 500 for
+# anything else unexpected. No error message ever includes a credential
+# value — see r2_client.py's error-classification docstring and this
+# phase's security audit.
 # =============================================================================
+
+def _r2_client_or_error_response():
+    """Shared by every action endpoint (create/validate-restore/restore) —
+    one implementation of "how to fail when R2 isn't reachable or
+    configured," so all three respond identically instead of three
+    hand-copied try/except blocks that could drift apart. `GET
+    /backup/status` deliberately does NOT use this helper — a status check
+    reporting "not configured" is itself a successful (200) response, not
+    an error, a different semantic than the action endpoints below.
+
+    Returns (client, None) on success, or (None, (response, status)) on
+    failure — callers do:
+        r2_client, err = _r2_client_or_error_response()
+        if err:
+            return err
+    """
+    from src.backup.config import get_r2_settings
+    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+    try:
+        return get_r2_client(get_r2_settings()), None
+    except R2NotConfiguredError as e:
+        return None, (jsonify({"error": f"R2 not configured: {e}"}), 503)
+    except Exception as e:
+        # R2Client construction can itself fail (e.g. a malformed region or
+        # endpoint reaching botocore's own validation) — never let that
+        # escape as an unhandled 500 with no explanation.
+        print("R2 client construction error:", e, flush=True)
+        return None, (jsonify({"error": f"R2 client could not be constructed: {e}"}), 503)
+
 
 @app.get("/backup/status")
 def backup_status():
@@ -236,6 +275,9 @@ def backup_status():
     try:
         r2_client = get_r2_client(get_r2_settings())
     except R2NotConfiguredError as e:
+        return jsonify({"r2Configured": False, "reason": str(e), "backups": [], "recovery": None})
+    except Exception as e:
+        print("GET /backup/status R2 client error:", e, flush=True)
         return jsonify({"r2Configured": False, "reason": str(e), "backups": [], "recovery": None})
 
     try:
@@ -260,8 +302,7 @@ def backup_status():
 def backup_create():
     from src.backup import github_files
     from src.backup.backup_engine import BackupError, create_backup
-    from src.backup.config import get_backup_config, get_r2_settings
-    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+    from src.backup.config import get_backup_config
 
     try:
         payload = request.get_json(force=True, silent=True) or {}
@@ -278,16 +319,16 @@ def backup_create():
     reason = payload.get("reason")
     extra_payload = payload.get("extraPayload")
 
-    try:
-        r2_client = get_r2_client(get_r2_settings())
-    except R2NotConfiguredError as e:
-        return jsonify({"error": f"R2 not configured: {e}"}), 503
+    r2_client, err = _r2_client_or_error_response()
+    if err:
+        return err
 
     cfg = get_backup_config()
     try:
         files = github_files.fetch_files(cfg["files"])
         github_commit_sha = github_files.fetch_commit_sha(CLOUD_STATE_PATH)
     except Exception as e:
+        print("POST /backup/create GitHub fetch error:", e, flush=True)
         return jsonify({"error": f"failed to fetch files from GitHub: {e}"}), 500
 
     if not files:
@@ -302,6 +343,9 @@ def backup_create():
     except BackupError as e:
         print("POST /backup/create error:", e, flush=True)
         return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        print("POST /backup/create unexpected error:", e, flush=True)
+        return jsonify({"error": f"unexpected error creating backup: {e}"}), 500
 
     return jsonify({"success": True, "backup": result})
 
@@ -309,20 +353,21 @@ def backup_create():
 @app.post("/backup/validate-restore")
 def backup_validate_restore():
     from src.backup.backup_restore import validate_restore
-    from src.backup.config import get_r2_settings
-    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
 
     payload = request.get_json(force=True, silent=True) or {}
     backup_id = payload.get("id")
     if not backup_id:
         return jsonify({"error": "Missing id"}), 400
 
-    try:
-        r2_client = get_r2_client(get_r2_settings())
-    except R2NotConfiguredError as e:
-        return jsonify({"error": f"R2 not configured: {e}"}), 503
+    r2_client, err = _r2_client_or_error_response()
+    if err:
+        return err
 
-    return jsonify(validate_restore(r2_client, backup_id))
+    try:
+        return jsonify(validate_restore(r2_client, backup_id))
+    except Exception as e:
+        print("POST /backup/validate-restore error:", e, flush=True)
+        return jsonify({"error": str(e)}), 500
 
 
 @app.post("/backup/restore")
@@ -330,8 +375,7 @@ def backup_restore_endpoint():
     from src.backup import github_files
     from src.backup.backup_engine import create_backup
     from src.backup.backup_restore import RestoreError, restore
-    from src.backup.config import get_backup_config, get_r2_settings
-    from src.backup.r2_client import R2NotConfiguredError, get_r2_client
+    from src.backup.config import get_backup_config
 
     payload = request.get_json(force=True, silent=True) or {}
     backup_id = payload.get("id")
@@ -339,10 +383,9 @@ def backup_restore_endpoint():
     if not backup_id:
         return jsonify({"error": "Missing id"}), 400
 
-    try:
-        r2_client = get_r2_client(get_r2_settings())
-    except R2NotConfiguredError as e:
-        return jsonify({"error": f"R2 not configured: {e}"}), 503
+    r2_client, err = _r2_client_or_error_response()
+    if err:
+        return err
 
     cfg = get_backup_config()
 
@@ -365,6 +408,9 @@ def backup_restore_endpoint():
     except RestoreError as e:
         print("POST /backup/restore error:", e, flush=True)
         return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        print("POST /backup/restore unexpected error:", e, flush=True)
+        return jsonify({"error": f"unexpected error during restore: {e}"}), 500
 
     return jsonify(result)
 

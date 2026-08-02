@@ -1,6 +1,13 @@
 __pycache__/
 *.pyc
 
+# Never commit real credentials. .env was previously tracked (see Phase 27.3
+# handover for remediation notes) — untracked going forward via `git rm
+# --cached`; existing committed history still contains the old values and
+# was not rewritten. Any real R2/GitHub/API credential belongs only in
+# Railway/GitHub Actions environment variables or a local, gitignored .env.
+.env
+
 fixtures_today.csv
 picks_*.csv
 league_stats.csv

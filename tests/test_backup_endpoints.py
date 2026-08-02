@@ -194,3 +194,63 @@ def test_restore_returns_400_for_corrupted_backup(client, fake_r2, monkeypatch):
 
     resp = client.post("/backup/restore", json={"id": result["id"], "confirmed": True})
     assert resp.status_code == 400
+
+
+# ── Phase 27.3: production-hardening error paths ────────────────────────────
+
+def test_status_returns_not_configured_when_r2_client_construction_raises_unexpectedly(client, monkeypatch):
+    # Distinct from the R2NotConfiguredError case above — this simulates
+    # R2Client's own construction failing for some other reason (e.g. a
+    # malformed region reaching botocore's validation). Must still produce
+    # the same clean, non-crashing "not configured" shape, not an
+    # unhandled 500.
+    def _raise(settings=None):
+        raise RuntimeError("simulated unexpected construction failure")
+    monkeypatch.setattr(r2_client, "get_r2_client", _raise)
+
+    resp = client.get("/backup/status")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["r2Configured"] is False
+
+
+def test_create_returns_503_when_r2_client_construction_raises_unexpectedly(client, monkeypatch):
+    def _raise(settings=None):
+        raise RuntimeError("simulated unexpected construction failure")
+    monkeypatch.setattr(r2_client, "get_r2_client", _raise)
+
+    resp = client.post("/backup/create", json={"type": "manual"})
+    assert resp.status_code == 503
+    assert "error" in resp.get_json()
+
+
+def test_create_returns_clean_json_error_when_r2_operation_is_permission_denied(client, monkeypatch):
+    from src.backup.r2_client import R2PermissionError
+
+    class _DeniedClient:
+        def put_object(self, key, body):
+            raise R2PermissionError("R2 put_object backups/manual/x.zip: access denied by R2 (code='AccessDenied')")
+
+    monkeypatch.setattr(r2_client, "get_r2_client", lambda settings=None: _DeniedClient())
+    monkeypatch.setattr(github_files, "fetch_files", lambda paths: {"cloud_state.json": b"{}"})
+    monkeypatch.setattr(github_files, "fetch_commit_sha", lambda path: None)
+
+    resp = client.post("/backup/create", json={"type": "manual"})
+    assert resp.status_code == 500
+    body = resp.get_json()
+    assert "error" in body
+    assert "access denied" in body["error"].lower()
+
+
+def test_validate_restore_returns_clean_json_error_on_unexpected_r2_failure(client, monkeypatch):
+    from src.backup.r2_client import R2ConnectionError
+
+    class _UnreachableClient:
+        def list_objects(self, prefix):
+            raise R2ConnectionError("R2 list_objects backups/: could not reach the R2 endpoint")
+
+    monkeypatch.setattr(r2_client, "get_r2_client", lambda settings=None: _UnreachableClient())
+
+    resp = client.post("/backup/validate-restore", json={"id": "any-id"})
+    assert resp.status_code == 500
+    assert "error" in resp.get_json()

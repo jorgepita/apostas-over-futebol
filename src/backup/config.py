@@ -6,13 +6,35 @@ come from config.json["backup"] (operator-editable, same as every other
 tunable in this project); Cloudflare R2 connection settings come from
 environment variables only, never config.json — the same secret/config
 separation this project already applies to GITHUB_TOKEN/API_FOOTBALL_KEY
-etc. See docs/09_Architecture_Decisions.md ADR-020.
+etc. See docs/09_Architecture_Decisions.md ADR-020 and its Phase 27.3
+"Production Hardening" addendum.
+
+Configuration sources, in the order Python's `os.environ` naturally
+resolves them (this module does not implement its own precedence logic —
+whichever value is actually in the process environment when `get_r2_settings()`
+runs wins):
+
+- **Railway** — real environment variables set in the Railway dashboard.
+  No `.env` file exists on Railway; `load_dotenv()` below is a no-op there.
+- **GitHub Actions** — `${{ secrets.R2_* }}` injected as job-step `env:`
+  entries (see `.github/workflows/bot.yml`). Also no `.env` file; also a
+  no-op.
+- **Local development** — `load_dotenv()` (python-dotenv) reads a local,
+  gitignored `.env` file (see `.env.example` for the full variable list,
+  committed with placeholder-only values — never real credentials) and
+  fills in any variable not already present in the process environment.
+  `load_dotenv()` never overrides a variable that's already set, so this
+  is safe to call unconditionally on all three platforms.
 """
 from __future__ import annotations
 
 import json
 import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DEFAULT_BACKUP_FILES = [
     "cloud_state.json",
@@ -85,7 +107,42 @@ def get_backup_config(base_path: Path | None = None) -> dict:
     }
 
 
+DEFAULT_R2_REGION = "auto"  # Cloudflare R2's own documented value for its S3-compatible API
+DEFAULT_R2_CONNECT_TIMEOUT_SECONDS = 10
+DEFAULT_R2_READ_TIMEOUT_SECONDS = 60
+DEFAULT_R2_MAX_RETRY_ATTEMPTS = 3
+
+
+def _positive_number_env(name: str, default: float) -> float:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        v = float(raw)
+        return v if v > 0 else default
+    except ValueError:
+        return default
+
+
+def _positive_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        v = int(raw)
+        return v if v > 0 else default
+    except ValueError:
+        return default
+
+
 def get_r2_settings() -> dict:
+    """Every value here comes from an environment variable only — see this
+    module's docstring for the three supported sources (Railway, GitHub
+    Actions secrets, local `.env`). A missing or malformed numeric value
+    (timeouts, retry count) falls back to its documented default rather
+    than raising or silently becoming 0/negative — the same per-key
+    defensive style `get_backup_config()`/`src/config.py::get_void_policy()`
+    already use elsewhere in this project."""
     return {
         "enabled": os.getenv("R2_ENABLED", "").strip().lower() in ("1", "true", "yes"),
         "account_id": os.getenv("R2_ACCOUNT_ID", "").strip(),
@@ -93,4 +150,11 @@ def get_r2_settings() -> dict:
         "access_key_id": os.getenv("R2_ACCESS_KEY_ID", "").strip(),
         "secret_access_key": os.getenv("R2_SECRET_ACCESS_KEY", "").strip(),
         "bucket": os.getenv("R2_BUCKET_NAME", "").strip(),
+        "region": os.getenv("R2_REGION", "").strip() or DEFAULT_R2_REGION,
+        "connect_timeout_seconds": _positive_number_env(
+            "R2_CONNECT_TIMEOUT_SECONDS", DEFAULT_R2_CONNECT_TIMEOUT_SECONDS),
+        "read_timeout_seconds": _positive_number_env(
+            "R2_READ_TIMEOUT_SECONDS", DEFAULT_R2_READ_TIMEOUT_SECONDS),
+        "max_retry_attempts": _positive_int_env(
+            "R2_MAX_RETRY_ATTEMPTS", DEFAULT_R2_MAX_RETRY_ATTEMPTS),
     }

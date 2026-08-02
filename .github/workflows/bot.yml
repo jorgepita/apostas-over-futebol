@@ -153,6 +153,14 @@ jobs:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          # Optional (Phase 27.3) — all four fall back to sensible defaults
+          # (region "auto", 10s connect / 60s read timeout, 3 retries) if
+          # the referenced secret doesn't exist; only add these as real
+          # GitHub Actions secrets if a non-default value is ever needed.
+          R2_REGION: ${{ secrets.R2_REGION }}
+          R2_CONNECT_TIMEOUT_SECONDS: ${{ secrets.R2_CONNECT_TIMEOUT_SECONDS }}
+          R2_READ_TIMEOUT_SECONDS: ${{ secrets.R2_READ_TIMEOUT_SECONDS }}
+          R2_MAX_RETRY_ATTEMPTS: ${{ secrets.R2_MAX_RETRY_ATTEMPTS }}
         run: python backup_job.py
 
   # ── Sunday 04:00 UTC — weekly R2 integrity sweep (Phase 27.2) ────────────
@@ -186,4 +194,12 @@ jobs:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          # Optional (Phase 27.3) — all four fall back to sensible defaults
+          # (region "auto", 10s connect / 60s read timeout, 3 retries) if
+          # the referenced secret doesn't exist; only add these as real
+          # GitHub Actions secrets if a non-default value is ever needed.
+          R2_REGION: ${{ secrets.R2_REGION }}
+          R2_CONNECT_TIMEOUT_SECONDS: ${{ secrets.R2_CONNECT_TIMEOUT_SECONDS }}
+          R2_READ_TIMEOUT_SECONDS: ${{ secrets.R2_READ_TIMEOUT_SECONDS }}
+          R2_MAX_RETRY_ATTEMPTS: ${{ secrets.R2_MAX_RETRY_ATTEMPTS }}
         run: python backup_integrity_job.py

@@ -49,13 +49,21 @@ def test_rebuild_index_from_r2_finds_backups_even_with_no_index_object():
 
 
 def test_list_backups_sorted_newest_first():
+    # Uses explicit, distinct-millisecond ids rather than two real back-to-back
+    # create_backup() calls — id generation has millisecond resolution, and
+    # two calls in the same test can legitimately land in the same
+    # millisecond (observed intermittently), which would make this
+    # assertion's ordering premise (r2 strictly newer than r1) flaky rather
+    # than a real bug in list_backups()'s sort itself.
     client = FakeR2Client()
-    r1 = create_backup("manual", files=SAMPLE_FILES, r2_client=client)
-    r2 = create_backup("manual", files=SAMPLE_FILES, r2_client=client)
+    older_id = "2026-01-01T00-00-00-000-manual-11111111"
+    newer_id = "2026-01-01T00-00-00-500-manual-22222222"
+    client.put_object(f"backups/manual/{older_id}.zip", b"x")
+    client.put_object(f"backups/manual/{newer_id}.zip", b"y")
 
     backups = list_backups(client)
     ids = [b["id"] for b in backups]
-    assert ids.index(r2["id"]) < ids.index(r1["id"])
+    assert ids.index(newer_id) < ids.index(older_id)
 
 
 def test_get_backup_entry_returns_none_for_unknown_id():
@@ -178,3 +186,63 @@ def test_restore_takes_pre_restore_snapshot_before_writing_files():
 
     assert call_order[0] == "snapshot"
     assert all(c.startswith("write:") for c in call_order[1:])
+
+
+# ── Phase 27.3: restore must download the archive exactly once ─────────────
+# Regression coverage for the fix identified by the Phase 27.2A resource
+# audit — restore() previously called validate_restore() (which downloads
+# internally) for its own pre-check, then downloaded the identical object a
+# second time to actually extract it. See backup_restore.py's
+# _validate_restore_with_bytes() docstring.
+
+class _KeyCountingClient(FakeR2Client):
+    """Counts get_object() calls per-key — create_backup()/retention
+    legitimately read the small index object (a different key) as part of
+    their own unrelated bookkeeping, so a global call counter would be
+    contaminated by setup activity. What Task 3's fix actually guarantees
+    is that the ARCHIVE's own key is fetched exactly once per restore
+    operation — this counts precisely that."""
+
+    def __init__(self):
+        super().__init__()
+        self.get_object_calls_by_key: dict[str, int] = {}
+
+    def get_object(self, key):
+        self.get_object_calls_by_key[key] = self.get_object_calls_by_key.get(key, 0) + 1
+        return super().get_object(key)
+
+
+def test_restore_downloads_the_archive_exactly_once():
+    client = _KeyCountingClient()
+    result = create_backup("manual", files=SAMPLE_FILES, r2_client=client)
+    client.get_object_calls_by_key.clear()  # discard create_backup()'s own unrelated index reads
+
+    outcome = restore(client, result["id"], confirmed=True, write_file_fn=lambda *a: None)
+
+    assert outcome["success"] is True
+    assert client.get_object_calls_by_key.get(result["key"]) == 1
+
+
+def test_validate_restore_alone_still_downloads_exactly_once():
+    # A standalone dry-run (the dashboard's preview step, POST
+    # /backup/validate-restore) must remain a single download too — this
+    # was already true before the fix and must stay true after it.
+    client = _KeyCountingClient()
+    result = create_backup("manual", files=SAMPLE_FILES, r2_client=client)
+    client.get_object_calls_by_key.clear()
+
+    preview = validate_restore(client, result["id"])
+
+    assert preview["ok"] is True
+    assert client.get_object_calls_by_key.get(result["key"]) == 1
+
+
+def test_validate_restore_public_return_shape_never_includes_raw_archive_bytes():
+    # validate_restore() is the function POST /backup/validate-restore
+    # serializes directly into a JSON response — it must never leak the
+    # raw (potentially large) archive bytes into that response shape.
+    client, result = _make_client_with_one_backup()
+    preview = validate_restore(client, result["id"])
+    assert set(preview.keys()) == {"ok", "id", "entry", "validation", "reason"}
+    for value in preview.values():
+        assert not isinstance(value, (bytes, bytearray))

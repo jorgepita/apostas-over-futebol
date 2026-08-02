@@ -96,24 +96,46 @@ def _download_and_validate(r2_client, entry: dict) -> tuple[bytes, dict]:
     return zip_bytes, validation
 
 
-def validate_restore(r2_client, backup_id: str) -> dict:
-    """Dry-run: download + validate, change nothing. Used by both the
-    dashboard's preview step and as the first half of a real restore, via
-    the same code path, so the two can never disagree about whether a given
-    backup is restorable (mirrors the basketball-over-bot precedent's
-    restoreEngine._resolveArchive() design)."""
+def _validate_restore_with_bytes(r2_client, backup_id: str) -> tuple[dict, bytes | None]:
+    """The single implementation behind both validate_restore() (public
+    dry-run, never exposes the downloaded bytes to its caller) and
+    restore() (which needs the actual bytes it already validated, not a
+    second download of them).
+
+    Phase 27.3 fix (identified by the Phase 27.2A resource audit): restore()
+    used to call validate_restore() for its pre-check and then download the
+    archive a *second* time to actually extract it — one R2 GET wasted on
+    every single restore, doubling network time/egress cost at any archive
+    size. This helper downloads exactly once; both public functions below
+    share that one download.
+    """
     entry = get_backup_entry(r2_client, backup_id)
     if entry is None:
-        return {"ok": False, "id": backup_id, "reason": "BACKUP_NOT_FOUND", "entry": None, "validation": None}
+        return {"ok": False, "id": backup_id, "reason": "BACKUP_NOT_FOUND", "entry": None, "validation": None}, None
     zip_bytes, validation = _download_and_validate(r2_client, entry)
     ok = validation["status"] != "corrupted"
-    return {
+    preview = {
         "ok": ok,
         "id": backup_id,
         "entry": entry,
         "validation": validation,
         "reason": None if ok else "BACKUP_CORRUPTED",
     }
+    return preview, zip_bytes
+
+
+def validate_restore(r2_client, backup_id: str) -> dict:
+    """Dry-run: download + validate, change nothing. Used by both the
+    dashboard's preview step and internally by restore() (via
+    _validate_restore_with_bytes(), not this function directly — see its
+    docstring), so the two can never disagree about whether a given backup
+    is restorable (mirrors the basketball-over-bot precedent's
+    restoreEngine._resolveArchive() design). Deliberately never returns the
+    downloaded bytes — this is the public, HTTP-facing shape
+    (POST /backup/validate-restore's response), and raw archive bytes have
+    no business being serialized into a JSON API response."""
+    preview, _zip_bytes = _validate_restore_with_bytes(r2_client, backup_id)
+    return preview
 
 
 def restore(r2_client, backup_id: str, *, confirmed: bool, write_file_fn,
@@ -129,11 +151,16 @@ def restore(r2_client, backup_id: str, *, confirmed: bool, write_file_fn,
     write; the whole restore aborts if it raises, mirroring the
     basketball-over-bot precedent's mandatory pre-restore safety snapshot
     (a restore is always itself one more restore away from being undone).
+
+    Downloads the target archive exactly once (Phase 27.3 fix — see
+    _validate_restore_with_bytes()'s docstring) — integrity verification,
+    restore validation, and the actual extraction all operate on that same
+    single download, with no change to any of their individual checks.
     """
     if not confirmed:
         raise RestoreError("restore requires confirmed=True — call validate_restore() first")
 
-    preview = validate_restore(r2_client, backup_id)
+    preview, zip_bytes = _validate_restore_with_bytes(r2_client, backup_id)
     if not preview["ok"]:
         raise RestoreError(f"cannot restore backup {backup_id}: {preview['reason']}")
 
@@ -145,7 +172,6 @@ def restore(r2_client, backup_id: str, *, confirmed: bool, write_file_fn,
                 f"pre-restore safety snapshot failed — restore aborted, nothing written: {e}"
             ) from e
 
-    zip_bytes, _validation = _download_and_validate(r2_client, preview["entry"])
     files = extract_files(zip_bytes)
 
     written, failed = [], []

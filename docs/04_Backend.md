@@ -1210,11 +1210,11 @@ Both must pass for the two engines to be considered in sync. Neither test requir
 
 ---
 
-## 16. Backup & Disaster Recovery (Phase 27.2)
+## 16. Backup & Disaster Recovery (Phase 27.2, production-hardened Phase 27.3)
 
-See `docs/09_Architecture_Decisions.md` ADR-020 for the full design rationale, including why this is deliberately simpler than the equivalent subsystem in the sibling `basketball-over-bot` project.
+See `docs/09_Architecture_Decisions.md` ADR-020 for the full design rationale, including why this is deliberately simpler than the equivalent subsystem in the sibling `basketball-over-bot` project, and its Phase 27.3 "Production Hardening" addendum for everything below that post-dates the original design.
 
-**Canonical implementation:** `src/backup/*` — `config.py` (files-to-protect + retention, from `config.json["backup"]`; R2 credentials, from environment variables only), `r2_client.py` (S3-compatible Cloudflare R2 client via `boto3`, plus `FakeR2Client` — an in-memory double used throughout the test suite), `backup_validator.py` (manifest construction, in-memory ZIP build, SHA-256 integrity verification), `backup_index.py` (the R2-hosted catalog, `backups/index.json`), `backup_engine.py` (`create_backup()` — the create → upload → verify → index → retention cycle), `backup_retention.py` (index-based, per-type eviction), `backup_restore.py` (`rebuild_index_from_r2()`, `validate_restore()`, `restore()`), `backup_integrity.py` (proactive R2 drift detection), `github_files.py` (a thin adapter over `update_results.py`'s existing GitHub Contents API primitives — `github_get_file_bytes`/`github_get_sha`/`github_put_file` — reused rather than duplicated).
+**Canonical implementation:** `src/backup/*` — `config.py` (files-to-protect + retention, from `config.json["backup"]`; R2 credentials and connection tuning, from environment variables only, with `load_dotenv()` support for local development), `r2_client.py` (S3-compatible Cloudflare R2 client via `boto3`, with per-operation error classification, plus `FakeR2Client` — an in-memory double used throughout the test suite), `backup_validator.py` (manifest construction, in-memory ZIP build, SHA-256 integrity verification), `backup_index.py` (the R2-hosted catalog, `backups/index.json`), `backup_engine.py` (`create_backup()` — the create → upload → verify → index → retention cycle), `backup_retention.py` (index-based, per-type eviction), `backup_restore.py` (`rebuild_index_from_r2()`, `validate_restore()`, `restore()` — the latter two share a single download, see "Restore" below), `backup_integrity.py` (proactive R2 drift detection), `github_files.py` (a thin adapter over `update_results.py`'s existing GitHub Contents API primitives — `github_get_file_bytes`/`github_get_sha`/`github_put_file` — reused rather than duplicated).
 
 **Entry points:**
 - `backup_job.py` — GitHub Actions scheduled backup creation (`type: "scheduled"`), reads files already on disk via `actions/checkout`, no GitHub API call needed.
@@ -1229,18 +1229,28 @@ See `docs/09_Architecture_Decisions.md` ADR-020 for the full design rationale, i
 
 **Integrity verification** (`backup_integrity.verify_remote_integrity()`) is HEAD-only and deliberately reads the *persisted* catalog (`backup_index.read_index()`), not a fresh listing — a listing-derived view can, by construction, never show a deleted object as missing (it simply isn't listed), so only the catalog's own claims can be checked against reality. Run weekly via `backup_integrity_job.py`, and on demand via `GET /backup/status?verify=1`.
 
-**Restore** always writes back to GitHub, never to Railway or the browser directly — GitHub remains the sole production source of truth (§10's principle, unchanged). A restore is always preceded by a mandatory fresh `critical` backup of the current state; the whole restore aborts if that safety snapshot itself fails.
+**Restore** always writes back to GitHub, never to Railway or the browser directly — GitHub remains the sole production source of truth (§10's principle, unchanged). A restore is always preceded by a mandatory fresh `critical` backup of the current state; the whole restore aborts if that safety snapshot itself fails. **Downloads the target archive exactly once** (Phase 27.3 fix — `backup_restore._validate_restore_with_bytes()` is the single implementation shared by the public `validate_restore()` dry-run and `restore()`'s own pre-check, so the archive is never fetched from R2 twice for one restore operation).
 
-**Configuration required before this subsystem does anything beyond logging "R2 not configured, skipping":**
+**Error classification (Phase 27.3).** Every real R2 operation (`put`/`head`/`get`/`delete`/`list`) routes its botocore exception through one shared classifier, `r2_client._classify_and_raise()`, producing exactly one of: `R2ConnectionError` (endpoint unreachable — DNS/network/timeout), `R2PermissionError` (credentials rejected — wrong key, insufficient bucket permissions), or `R2OperationError` (reached R2, credentials accepted, operation still failed for another reason). `R2ObjectNotFoundError` (404) stays a separate, expected-control-flow case. No raised message ever includes a credential value — only R2's own error Code/Message and the object key involved.
 
-| Variable | Where | Used by |
-|---|---|---|
-| `R2_ENABLED` | Railway env + GitHub Actions secrets | `src/backup/config.py::get_r2_settings()` |
-| `R2_ACCOUNT_ID` (or `R2_ENDPOINT_URL`) | Railway env + GitHub Actions secrets | same |
-| `R2_ACCESS_KEY_ID` | Railway env + GitHub Actions secrets | same |
-| `R2_SECRET_ACCESS_KEY` | Railway env + GitHub Actions secrets | same |
-| `R2_BUCKET_NAME` | Railway env + GitHub Actions secrets | same |
+**Configuration** (every value from environment variables only — Railway env vars, GitHub Actions secrets, or a local, gitignored `.env` via `load_dotenv()`; see `.env.example` for the full template):
 
-**As of Phase 27.2, none of these exist yet** — this repository ships with the backup subsystem fully implemented, tested, and wired into both the scheduler and the dashboard, but dormant: every entry point fails closed (logs a warning, returns HTTP 503 from the Railway endpoints, exits 0 from the GitHub Actions jobs) until an operator adds real Cloudflare R2 credentials. See `07_Current_Status.md` for the exact activation steps.
+| Variable | Required? | Default | Used by |
+|---|---|---|---|
+| `R2_ENABLED` | Yes (must be `true`) | — | `src/backup/config.py::get_r2_settings()` |
+| `R2_ACCOUNT_ID` (or `R2_ENDPOINT_URL`) | Yes | — | same |
+| `R2_ACCESS_KEY_ID` | Yes | — | same |
+| `R2_SECRET_ACCESS_KEY` | Yes | — | same |
+| `R2_BUCKET_NAME` | Yes | — | same |
+| `R2_REGION` | No | `auto` (Cloudflare's documented value) | same |
+| `R2_CONNECT_TIMEOUT_SECONDS` | No | `10` | same |
+| `R2_READ_TIMEOUT_SECONDS` | No | `60` | same |
+| `R2_MAX_RETRY_ATTEMPTS` | No | `3` | same |
 
-**Testing:** `tests/test_backup_*.py` (validator, r2_client, config, index, engine, retention, restore, integrity, github_files, jobs, endpoints) — 100 tests, all against `FakeR2Client` (an in-memory double, zero real network I/O) or monkeypatched GitHub primitives. No live Cloudflare R2 bucket exists in this environment; live upload/restore against a real bucket has not been exercised and needs a first real run once credentials are added.
+Every optional numeric value falls back to its default on a missing or invalid entry (same per-key defensive style as `get_backup_config()`/`src/config.py::get_void_policy()`), never raising or silently becoming zero/negative.
+
+**As of Phase 27.3, none of the required credentials exist yet** — this repository ships with the backup subsystem fully implemented, tested, and wired into both the scheduler and the dashboard, but dormant: every entry point fails closed (logs a warning, returns HTTP 503 from the Railway endpoints, exits 0 from the GitHub Actions jobs) until an operator adds real Cloudflare R2 credentials. See `07_Current_Status.md` for the exact activation steps.
+
+**Pre-existing, unrelated finding fixed prospectively this phase:** `.env` (containing real `FOOTBALL_DATA_API_KEY`/`API_FOOTBALL_KEY` values) was tracked in git and present at HEAD in this public repository — untracked and gitignored this phase; the exposed values remain in git history and should be rotated. See ADR-020's Phase 27.3 addendum for the full note. `.env.example` (committed, placeholder-only) now documents every environment variable this project reads.
+
+**Testing:** `tests/test_backup_*.py` — 120 tests as of Phase 27.3 (the original 100 from Phase 27.2, plus 13 in a new `test_backup_r2_production.py` covering config parsing and error classification, plus 7 new restore/endpoint cases), all against `FakeR2Client` (an in-memory double, zero real network I/O) or monkeypatched GitHub/botocore primitives — including a dedicated security test that injects a distinctive fake secret value and asserts it never appears in any raised exception message across every failure path. No live Cloudflare R2 bucket exists in this environment; live upload/restore against a real bucket has not been exercised and needs a first real run once credentials are added.
