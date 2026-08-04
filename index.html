@@ -8961,8 +8961,11 @@ button:disabled {
           }
 
           // Season recency guard: refuse to overwrite a newer local season with an older cloud
-          // season. Only enforced on the manual Load Cloud button — auto-recovery already
-          // guarantees it only runs when hasMeaningfulLocalState() is false.
+          // season. Only enforced on the manual Load Cloud button — every fromUser=false
+          // caller (boot()'s two auto-recovery branches — see Phase 28.3A) has already
+          // independently confirmed, before calling this function, that it's not doing
+          // that: either no meaningful local season exists yet, or isCloudSeasonNewer()
+          // confirmed the cloud season is strictly newer than the local one.
           if (fromUser) {
             const cloudSession = content.sessionStartDate || '';
             const localSession = state.sessionStartDate   || '';
@@ -9020,7 +9023,30 @@ button:disabled {
       async function loadCloudState() {
         return _doLoadCloudState({ fromUser: true });
       }
-      
+
+      // Phase 28.3A — read-only comparison used by boot()'s auto-recovery gate below.
+      // Answers "does the cloud hold a season newer than the one already in
+      // localStorage?" without applying anything — state/localStorage mutation stays
+      // entirely inside _doLoadCloudState(), the single existing cloud-loading
+      // implementation, which the caller invokes itself when this returns true.
+      // Mirrors the exact string comparison _doLoadCloudState()'s own fromUser
+      // recency guard already uses (ISO 'YYYY-MM-DD' sessionStartDate values compare
+      // correctly as plain strings). Fails closed (returns false) on any network or
+      // parse error, leaving today's behaviour — local state wins — unchanged.
+      async function isCloudSeasonNewer() {
+        try {
+          const res = await fetch(`${API_URL}/load`);
+          if (!res.ok) return false;
+          const content = await res.json();
+          if (!content || typeof content !== 'object' || !content.sessionStartDate) return false;
+          const cloudSession = content.sessionStartDate;
+          const localSession = state.sessionStartDate || '';
+          return !!localSession && cloudSession > localSession;
+        } catch (e) {
+          return false;
+        }
+      }
+
       function updateCloudStatus() {
   const el = document.getElementById('cloudStatusLabel');
   if (!el) return;
@@ -17179,6 +17205,18 @@ button:disabled {
         // Auto cloud-recovery: restore state for new/anonymous/foreign-device browsers.
         // Only runs when no meaningful local session exists; never overwrites real local data.
         if (!hasMeaningfulLocalState()) {
+          const recovered = await _doLoadCloudState({ fromUser: false });
+          if (recovered) saveLocalState();
+
+        // Phase 28.3A — this browser already has a local season (e.g. it wasn't the
+        // device that ran Season Close), so the branch above never runs. Previously
+        // that meant this browser's stale bankroll/sessionStartDate/localEdits were
+        // kept forever, even once the cloud held a genuinely newer season. Now: if
+        // the cloud's sessionStartDate is strictly newer than this browser's own,
+        // run the exact same full recovery used for brand-new browsers above — same
+        // function, same effect. If the cloud season is the same or older, this is
+        // a no-op and today's behaviour (local wins) is unchanged.
+        } else if (await isCloudSeasonNewer()) {
           const recovered = await _doLoadCloudState({ fromUser: false });
           if (recovered) saveLocalState();
         }

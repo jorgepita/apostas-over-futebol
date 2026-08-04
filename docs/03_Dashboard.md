@@ -207,13 +207,16 @@ browser opens index.html
           │       ├─ state.bankrollInicial, localEdits, sessionStartDate ← cloud
           │       └─ saveLocalState() → localStorage
           │
+          ├─ else if (await isCloudSeasonNewer()):        — Phase 28.3A
+          │   └─ _doLoadCloudState({ fromUser: false })   — same function, reused
+          │
           └─ setInterval(60 000ms, () => {
                 loadData(true);
                 checkPendingAlerts();
               })
 ```
 
-**Auto-recovery guard:** `hasMeaningfulLocalState()` returns `true` if `bankrollInicialSet` is true, `localEdits` has entries, `manualBets` is non-empty, or `movements` is non-empty. When `true`, the cloud auto-recovery step is skipped. The user's existing localStorage session takes precedence.
+**Auto-recovery guard:** `hasMeaningfulLocalState()` returns `true` if `bankrollInicialSet` is true, `localEdits` has entries, `manualBets` is non-empty, or `movements` is non-empty. When `true`, the *unconditional* cloud auto-recovery step above is skipped — but since Phase 28.3A, `isCloudSeasonNewer()` then runs: a single read-only `GET /load` comparing the cloud's `sessionStartDate` to the local one, mutating nothing. Only if the cloud season is strictly newer does the identical `_doLoadCloudState({ fromUser: false })` run anyway. This closes a gap the Phase 28.3 audit found: a returning browser (any browser that has ever had a bankroll configured) previously never re-checked the cloud at all, so executing Season Close on one device left every *other* browser/tab showing its own stale season indefinitely, even though `cloud_state.json` was already correct. If the cloud season is the same age or older, `isCloudSeasonNewer()` returns `false` and the user's existing localStorage session takes precedence exactly as before — this is what protects a genuinely newer local season, and any local edit not yet synced to the cloud under the same season, from being overwritten.
 
 ---
 
@@ -971,7 +974,7 @@ User clicks "Load Cloud"
       └─ rerenderAll()
 ```
 
-Season recency guard: if the cloud `sessionStartDate` is older than the local one, the load is blocked with an alert.
+Season recency guard: if the cloud `sessionStartDate` is older than the local one, the load is blocked with an alert. This manual button's own guard and behaviour are unchanged by Phase 28.3A — that phase only added an *automatic* boot-time trigger (§3 above, `isCloudSeasonNewer()`) for the opposite case: cloud newer than local.
 
 ### Post-settlement cloud reload
 

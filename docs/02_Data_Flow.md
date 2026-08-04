@@ -293,7 +293,7 @@ After settlement, an **approved** bet is excluded from the Live Center filter (`
 The browser only reflects the settlement result after `state.manualBets` is refreshed from the cloud. This happens when:
 - The user clicks "Load Cloud" — calls `_doLoadCloudState()`.
 - Settlement was triggered from this browser session — `_reloadManualBetsFromCloud()` is called automatically after the `/run-settlement` response.
-- A new page load occurs and `hasMeaningfulLocalState()` is false.
+- A new page load occurs and `hasMeaningfulLocalState()` is false, **or** (Phase 28.3A) `hasMeaningfulLocalState()` is true but `isCloudSeasonNewer()` finds the cloud's `sessionStartDate` newer than the local one — see the "Cloud Recovery" section below.
 - The backend dropped a duplicate bet on the last save (`duplicatesRemoved > 0` in the `/save` response — ADR-013).
 
 ---
@@ -545,14 +545,18 @@ hasMeaningfulLocalState() returns true if:
   OR state.movements.length > 0
 ```
 
-If `false` (fresh browser session, no localStorage), `_doLoadCloudState()` runs automatically:
+If `false` (fresh browser session, no localStorage), `_doLoadCloudState({ fromUser: false })` runs automatically:
 - `GET /load` → Railway → GitHub → `cloud_state.json`
 - `state.manualBets` ← `content.manualBets`
 - `state.bankrollInicial` ← `content.bankrollInicial`
 - `state.localEdits` ← `content.localEdits`
+- `state.sessionStartDate` ← `content.sessionStartDate`
+- `state.movements` ← `content.movements`
 - `saveLocalState()` — writes cloud data into localStorage
 
-If `true`, auto-recovery is **skipped**. The localStorage snapshot is used as-is.
+**If `true` (Phase 28.3A — previously, auto-recovery was skipped unconditionally here):** `boot()` calls `isCloudSeasonNewer()` — a single read-only `GET /load` that compares `content.sessionStartDate` to `state.sessionStartDate` and returns a boolean, mutating nothing. If the cloud's season is strictly newer, `boot()` calls the **exact same** `_doLoadCloudState({ fromUser: false })` used above — no second implementation of the recovery logic exists. This is the fix for a defect the Phase 28.3 audit found: a browser that already has a bankroll/season configured (which is every returning browser, forever) never re-checked the cloud, so a Season Close executed on a *different* device left every other browser showing the old season indefinitely, even though `cloud_state.json` itself was already correct.
+
+If the cloud's season is the same as, or older than, the local one, `isCloudSeasonNewer()` returns `false` and auto-recovery is skipped exactly as before Phase 28.3A — this is what protects a genuinely newer local season, and any local edit not yet pushed to the cloud under the *same* season, from ever being silently overwritten. The localStorage snapshot is used as-is in that case.
 
 ---
 

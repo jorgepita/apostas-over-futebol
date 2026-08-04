@@ -200,7 +200,7 @@ The dashboard maintains two state stores:
 - **`state.manualBets`** — manual bets loaded from localStorage at startup, refreshed from `cloud_state.json` via Railway `/load`. Written to localStorage on every change and after settlement.
 - **`state.manualBetsRemote`** — bot picks from `manual_bets.csv` (always empty; legacy path no longer used).
 
-On startup, `boot()` calls `loadLocalState()` to hydrate from localStorage, then `rerenderAll()`, then fetches CSVs via `loadData()`. Auto-recovery from the cloud (`_doLoadCloudState()`) only runs at startup if `hasMeaningfulLocalState()` returns false.
+On startup, `boot()` calls `loadLocalState()` to hydrate from localStorage, then `rerenderAll()`, then fetches CSVs via `loadData()`. Auto-recovery from the cloud (`_doLoadCloudState()`) runs at startup either if `hasMeaningfulLocalState()` returns false (brand-new browser), or — since Phase 28.3A — if `isCloudSeasonNewer()` finds the cloud's `sessionStartDate` is strictly newer than the local one (a returning browser whose season is stale relative to the cloud, e.g. because Season Close was executed on a different device). Otherwise the existing localStorage session is used as-is, protecting both a genuinely newer local season and any local edit not yet synced to the cloud. See `05_Known_Issues.md` DASHBOARD-7.
 
 The 60-second auto-refresh interval calls `loadData()`, which fetches picks CSVs only. It does not call `/load` and does not refresh `state.manualBets`. Manual bets are only refreshed from the cloud by explicit user actions: clicking "Load Cloud" or triggering "Run Settlement" from the dashboard.
 

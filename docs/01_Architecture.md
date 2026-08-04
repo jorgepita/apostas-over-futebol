@@ -197,10 +197,16 @@ boot()
  │   └─ loadLeagueStats(): fetches league_stats.csv
  │
  ├─ if (!hasMeaningfulLocalState()):
- │   └─ _doLoadCloudState({ fromUser: false })
+ │   └─ _doLoadCloudState({ fromUser: false })          — brand-new/anonymous browser
  │       └─ GET Railway /load → cloud_state.json
  │       └─ state.manualBets ← cloud_state.json["manualBets"]
  │       └─ saveLocalState()
+ │
+ ├─ else if (await isCloudSeasonNewer()):                — Phase 28.3A
+ │   └─ _doLoadCloudState({ fromUser: false })          — SAME function as above, reused
+ │       (returning browser, but its local sessionStartDate is older than the
+ │       cloud's — e.g. Season Close ran on a different device — so the full
+ │       recovery path also runs here instead of being skipped forever)
  │
  └─ setInterval(60s, () => loadData(true))
      └─ fetches picks CSVs only; does NOT call /load; does NOT refresh state.manualBets
@@ -211,9 +217,9 @@ boot()
 - `state.localEdits` has entries
 - `state.manualBets.length > 0`
 
-When `true`, the auto-recovery step is skipped entirely and the localStorage snapshot is used as-is.
+When `true`, the *unconditional* auto-recovery step (the `if` branch above) is skipped — but since Phase 28.3A this is no longer the end of the story: `isCloudSeasonNewer()` (a one-shot, read-only `GET /load` that only compares `content.sessionStartDate` to `state.sessionStartDate`, mutating nothing) decides whether the *same* full recovery function should still run anyway. If the cloud's `sessionStartDate` is not strictly newer than the local one — the common case, and the only case before Phase 28.3A — the localStorage snapshot is used as-is, exactly as before. This preserves the original protection (a genuinely newer local session, or an unsynced local edit under the same season, is never overwritten) while closing the gap where a returning browser could otherwise show a stale season forever. See ADR-015 for the CSV-wins precedent this follows (prefer the provably newer/authoritative source once one exists, but never regress a genuinely newer local value) and `05_Known_Issues.md` DASHBOARD-7.
 
-**Manual bet refresh triggers:** Clicking "Load Cloud" (`_doLoadCloudState`) or clicking "Run Settlement" (`_reloadManualBetsFromCloud` after settlement). The 60-second interval does not trigger either.
+**Manual bet refresh triggers:** Clicking "Load Cloud" (`_doLoadCloudState`) or clicking "Run Settlement" (`_reloadManualBetsFromCloud` after settlement). The 60-second interval does not trigger either. As of Phase 28.3A, a returning browser whose local season is older than the cloud's also gets a full recovery automatically at boot, without needing a manual click.
 
 ---
 
@@ -395,7 +401,7 @@ These are unauthenticated GET requests. The browser never writes to CSVs.
 
 ### Browser ↔ `cloud_state.json`
 
-The browser reads `cloud_state.json` through Railway `/load`. localStorage is a write-through cache of the last successful load. On startup, localStorage is used immediately; the cloud is checked only when `!hasMeaningfulLocalState()`. All writes (POST /save) go through Railway immediately on state change.
+The browser reads `cloud_state.json` through Railway `/load`. localStorage is a write-through cache of the last successful load. On startup, localStorage is used immediately; a full cloud recovery (`_doLoadCloudState`) then runs automatically either when `!hasMeaningfulLocalState()` (brand-new browser) or, since Phase 28.3A, when `hasMeaningfulLocalState()` is true but `isCloudSeasonNewer()` finds the cloud's `sessionStartDate` is strictly newer than the local one (a returning browser whose season is stale relative to the cloud — e.g. Season Close ran elsewhere). Otherwise the local snapshot is kept, unchanged. All writes (POST /save) go through Railway immediately on state change.
 
 ---
 
