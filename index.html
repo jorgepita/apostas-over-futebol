@@ -2450,16 +2450,172 @@ button:disabled {
         <div class="page-title">
           <div>
             <div style="font-size:22px;font-weight:900;color:var(--text);">Análises</div>
-            <div class="note" style="margin-top:4px;">Análise de desempenho por liga, mercado e origem</div>
+            <div class="note" style="margin-top:4px;">Visão geral, época atual e desempenho histórico do modelo</div>
           </div>
+        </div>
+
+        <!-- OVERVIEW: Current Season vs All-Time -->
+        <div class="section-header">
+          <span class="section-header-title" style="font-size:14px;color:var(--text);">Visão Geral — Época Atual vs Histórico Completo</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div id="analyticsOverviewWrap">
+          <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+        </div>
+
+        <!-- ================= CURRENT SEASON ================= -->
+        <div class="section-header" style="margin-top:10px;">
+          <span class="section-header-title" style="font-size:14px;color:var(--accent);">Época Atual — Desempenho Operacional</span>
+          <div class="section-header-line"></div>
+        </div>
+
+        <!-- SECTION A: Market & Source Performance (Current Season) -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">A — Desempenho por Mercado e Origem (Época Atual)</span>
+          <div class="section-header-line"></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por mercado</div>
+              <div class="note">Onde a edge é mais consistente</div>
+            </div>
+            <div class="table-wrap" style="max-height:320px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mercado</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsMarketRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por origem</div>
+              <div class="note">Bot vs apostas manuais</div>
+            </div>
+            <div class="table-wrap" style="max-height:320px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Origem</th>
+                    <th>Apostas</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>P</th>
+                    <th>WR</th>
+                    <th>Stake</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                  </tr>
+                </thead>
+                <tbody id="analyticsSourceRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION B: Top + Worst Performers (Current Season) -->
+        <div class="grid grid-2">
+          <!-- Top Performers -->
+          <div>
+            <div class="section-header">
+              <span class="section-header-title">B — Melhores Desempenhos (Época Atual)</span>
+              <div class="section-header-line"></div>
+            </div>
+            <div class="card">
+              <div style="margin-bottom:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Melhores ligas por ROI</div>
+                <div class="note">Ligas com maior retorno real fechado</div>
+              </div>
+              <div id="analyticsTopPerformers" class="section-stack" style="gap:6px;">
+                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Performance por liga</div>
+                <div class="table-wrap" style="max-height:280px;">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Liga</th>
+                        <th>Apostas</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>P</th>
+                        <th>WR</th>
+                        <th>Stake</th>
+                        <th>Lucro</th>
+                        <th>ROI</th>
+                      </tr>
+                    </thead>
+                    <tbody id="analyticsLeagueRows"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Worst Performers -->
+          <div>
+            <div class="section-header">
+              <span class="section-header-title">B — Piores Desempenhos (Época Atual)</span>
+              <div class="section-header-line"></div>
+            </div>
+            <div class="card">
+              <div style="margin-bottom:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">Ligas com pior ROI</div>
+                <div class="note">Ligas a monitorizar ou reduzir stake</div>
+              </div>
+              <div id="analyticsWorstPerformers" class="section-stack" style="gap:6px;">
+                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Resumo de Sequências</div>
+                <div id="streakCardsAnalytics" class="streak-row"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION C: Performance Over Time -->
+        <div class="section-header" style="margin-top:4px;">
+          <span class="section-header-title">C — Desempenho ao Longo do Tempo</span>
+          <div class="section-header-line"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;">Evolução de performance por período</div>
+            <div class="note">Apostas reais fechadas (bot + manuais) — janelas móveis, independentes da época</div>
+          </div>
+          <div id="perfOverTimeWrap">
+            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
+          </div>
+        </div>
+
+        <!-- ================= ALL-TIME MODEL ANALYTICS ================= -->
+        <div class="section-header" style="margin-top:14px;">
+          <span class="section-header-title" style="font-size:14px;color:var(--ok);">Histórico Completo — Qualidade do Modelo (All-Time)</span>
+          <div class="section-header-line"></div>
         </div>
 
         <!-- LEAGUE ANALYTICS INSIGHTS -->
         <div class="grid grid-4 league-analytics-insights" style="margin-bottom:4px;"></div>
 
-        <!-- SECTION A: League Performance -->
+        <!-- SECTION D: League Performance (league_stats.csv, all-time by design) -->
         <div class="section-header">
-          <span class="section-header-title">A — Desempenho por Liga</span>
+          <span class="section-header-title">D — Desempenho por Liga (Histórico Completo)</span>
           <div class="section-header-line"></div>
         </div>
 
@@ -2517,18 +2673,18 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION B: League Classification -->
+        <!-- SECTION E: League Classification -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">B — Classificação de Ligas</span>
+          <span class="section-header-title">E — Classificação de Ligas</span>
           <div class="section-header-line"></div>
         </div>
         <div id="leagueClassificationWrap">
           <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
         </div>
 
-        <!-- SECTION C: Market Intelligence -->
+        <!-- SECTION F: Market Intelligence -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">C — Inteligência de Mercado</span>
+          <span class="section-header-title">F — Inteligência de Mercado</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2541,24 +2697,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION D: Performance Over Time -->
+        <!-- SECTION G: Edge Validation -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">D — Desempenho ao Longo do Tempo</span>
-          <div class="section-header-line"></div>
-        </div>
-        <div class="card">
-          <div style="margin-bottom:10px;">
-            <div style="font-size:13px;font-weight:700;">Evolução de performance por período</div>
-            <div class="note">Apostas reais fechadas (bot + manuais)</div>
-          </div>
-          <div id="perfOverTimeWrap">
-            <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
-          </div>
-        </div>
-
-        <!-- SECTION E: Edge Validation -->
-        <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">E — Validação de Edge</span>
+          <span class="section-header-title">G — Validação de Edge</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2568,126 +2709,6 @@ button:disabled {
           </div>
           <div id="edgeValidationWrap">
             <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
-          </div>
-        </div>
-
-        <!-- SECTION F: Market & Source Performance -->
-        <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">F — Desempenho por Mercado e Origem</span>
-          <div class="section-header-line"></div>
-        </div>
-
-        <div class="grid grid-2">
-          <div class="card">
-            <div style="margin-bottom:12px;">
-              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por mercado</div>
-              <div class="note">Onde a edge é mais consistente</div>
-            </div>
-            <div class="table-wrap" style="max-height:320px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Mercado</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsMarketRows"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="card">
-            <div style="margin-bottom:12px;">
-              <div style="font-size:13px;font-weight:700;color:var(--text);">Performance por origem</div>
-              <div class="note">Bot vs apostas manuais</div>
-            </div>
-            <div class="table-wrap" style="max-height:320px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Origem</th>
-                    <th>Apostas</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>P</th>
-                    <th>WR</th>
-                    <th>Stake</th>
-                    <th>Lucro</th>
-                    <th>ROI</th>
-                  </tr>
-                </thead>
-                <tbody id="analyticsSourceRows"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECTION G: Top + Worst Performers -->
-        <div class="grid grid-2">
-          <!-- Top Performers -->
-          <div>
-            <div class="section-header">
-              <span class="section-header-title">G — Melhores Desempenhos</span>
-              <div class="section-header-line"></div>
-            </div>
-            <div class="card">
-              <div style="margin-bottom:12px;">
-                <div style="font-size:13px;font-weight:700;color:var(--text);">Melhores ligas por ROI</div>
-                <div class="note">Ligas com maior retorno real fechado</div>
-              </div>
-              <div id="analyticsTopPerformers" class="section-stack" style="gap:6px;">
-                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
-              </div>
-              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
-                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Performance por liga</div>
-                <div class="table-wrap" style="max-height:280px;">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Liga</th>
-                        <th>Apostas</th>
-                        <th>W</th>
-                        <th>L</th>
-                        <th>P</th>
-                        <th>WR</th>
-                        <th>Stake</th>
-                        <th>Lucro</th>
-                        <th>ROI</th>
-                      </tr>
-                    </thead>
-                    <tbody id="analyticsLeagueRows"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Worst Performers -->
-          <div>
-            <div class="section-header">
-              <span class="section-header-title">G — Piores Desempenhos</span>
-              <div class="section-header-line"></div>
-            </div>
-            <div class="card">
-              <div style="margin-bottom:12px;">
-                <div style="font-size:13px;font-weight:700;color:var(--text);">Ligas com pior ROI</div>
-                <div class="note">Ligas a monitorizar ou reduzir stake</div>
-              </div>
-              <div id="analyticsWorstPerformers" class="section-stack" style="gap:6px;">
-                <div class="note" style="padding:12px;opacity:0.5;">A carregar dados...</div>
-              </div>
-              <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
-                <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;">Resumo de Sequências</div>
-                <div id="streakCardsAnalytics" class="streak-row"></div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -6218,9 +6239,16 @@ button:disabled {
           byWeekday: buildWeekdayBuckets(closedRows),
           byHour: buildHourBuckets(botRows),
           streaks: computeStreaks(closedRows),
+          // Phase 29.3 — avgOdds/maxDrawdown added for the new Analytics
+          // Overview comparison. Both reuse existing pure helpers (avg(),
+          // computeDrawdownAnalysis()) over the same closedRows this
+          // function already receives — no new dataset, no independent
+          // recomputation elsewhere.
           summary: {
             ...reduceBucketStats(closedRows),
-            totalSettledBot: botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length
+            totalSettledBot: botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length,
+            avgOdds: avg(closedRows.map(r => r.odd).filter(v => v !== null)),
+            maxDrawdown: computeDrawdownAnalysis(closedRows)?.maxDrawdown ?? null
           }
         };
       }
@@ -6269,11 +6297,77 @@ button:disabled {
         safeSetHTML('streakCards', html);
       }
 
+      // Phase 29.3 — Analytics Overview: Current Season vs All-Time side by
+      // side. Reads only from getAnalyticsAggregates(); every figure is
+      // already present in each dataset's summary (Settled Bets/Profit/
+      // ROI/Hit Rate/Average Odds/Max Drawdown) except Yield, which is a
+      // trivial roi/100 unit conversion (this project's own established
+      // convention — see Opinion Validation) computed here, not a new
+      // aggregation.
+      function renderAnalyticsOverview() {
+        const wrap = document.getElementById('analyticsOverviewWrap');
+        if (!wrap) return;
+
+        const { allTime, currentSeason } = getAnalyticsAggregates();
+
+        function profColor(v) {
+          return v > 0 ? 'var(--ok)' : v < 0 ? 'var(--bad)' : 'var(--text)';
+        }
+
+        function kpiCell(label, text, color) {
+          return `<div style="background:var(--card-alt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
+            <div class="kpi-label">${label}</div>
+            <div style="font-size:16px;font-weight:800;${color ? 'color:' + color + ';' : ''}">${text}</div>
+          </div>`;
+        }
+
+        function fmtDrawdown(dd) {
+          if (!dd || dd.eur <= 0.005) return { text: 'Sem drawdown', color: 'var(--ok)' };
+          return { text: `-${fmt(dd.pct, 1)}% (-€${fmt(dd.eur)})`, color: 'var(--bad)' };
+        }
+
+        function seasonCard(title, note, accent, s) {
+          const ddFmt = fmtDrawdown(s.maxDrawdown);
+          const yld = s.roi !== null ? s.roi / 100 : null;
+          return `<div class="card">
+            <div class="bankroll-split-header">
+              <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);">${note}</span>
+            </div>
+            <div class="kpi-grid kpi-grid-4" style="margin-bottom:0;">
+              ${kpiCell('Apostas Fechadas', String(s.picks), '')}
+              ${kpiCell('Lucro', (s.lucro >= 0 ? '+' : '') + '€' + fmt(s.lucro), profColor(s.lucro))}
+              ${kpiCell('ROI', s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—', s.roi !== null ? profColor(s.roi) : '')}
+              ${kpiCell('Yield', yld !== null ? (yld >= 0 ? '+' : '') + fmt(yld, 3) : '—', yld !== null ? profColor(yld) : '')}
+              ${kpiCell('Taxa de Acerto', s.wr !== null ? pct(s.wr) : '—', '')}
+              ${kpiCell('Odd Média', s.avgOdds !== null ? fmt(s.avgOdds) : '—', '')}
+              ${kpiCell('Drawdown Máximo', ddFmt.text, ddFmt.color)}
+            </div>
+          </div>`;
+        }
+
+        wrap.innerHTML = `<div class="bankroll-split-grid">
+          ${seasonCard('Época Atual', `desde ${escapeHtml(state.sessionStartDate || '—')}`, 'var(--accent)', currentSeason.summary)}
+          ${seasonCard('Histórico Completo', 'todas as épocas', 'var(--ok)', allTime.summary)}
+        </div>`;
+      }
+
       function renderAnalytics() {
-        const { allTime } = getAnalyticsAggregates();
-        renderAnalyticsTable('analyticsLeagueRows', allTime.byLeague, 'league');
-        renderAnalyticsTable('analyticsMarketRows', allTime.byMarket, 'market');
-        renderAnalyticsTable('analyticsSourceRows', allTime.bySource, 'sourceLabel');
+        const { allTime, currentSeason } = getAnalyticsAggregates();
+        try { renderAnalyticsOverview(); } catch (e) { console.error('renderAnalyticsOverview', e); }
+        // Phase 29.3 — League/Market/Source performance tables are the
+        // operational, real-bet-history view (distinct from Section E's
+        // league_stats.csv-driven table, which has no season concept and
+        // stays on allTime) — now Current-Season-scoped.
+        renderAnalyticsTable('analyticsLeagueRows', currentSeason.byLeague, 'league');
+        renderAnalyticsTable('analyticsMarketRows', currentSeason.byMarket, 'market');
+        renderAnalyticsTable('analyticsSourceRows', currentSeason.bySource, 'sourceLabel');
+        // renderStreaks() is left untouched (still allTime): it populates
+        // #streakCards, which physically lives on the Dashboard Home page
+        // (tab-summary), not this tab — changing its source would silently
+        // alter Home, which this phase must not touch. Analytics' own,
+        // Analytics-tab-only streak display is renderAnalyticsPerformers()'s
+        // #streakCardsAnalytics, which IS re-sourced to currentSeason below.
         renderStreaks();
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
         try { renderLeagueClassification(); } catch (e) { console.error('renderLeagueClassification', e); }
@@ -14526,8 +14620,12 @@ button:disabled {
       }
 
       function renderAnalyticsPerformers() {
-        const { allTime } = getAnalyticsAggregates();
-        const { top: top3, worst: worst3 } = buildTopWorstPerformers(allTime.byLeague);
+        // Phase 29.3 — Current-Season-scoped: Top/Worst Performers and this
+        // tab's own streak cards (#streakCardsAnalytics, distinct from
+        // #streakCards on Dashboard Home, which stays allTime via
+        // renderStreaks() — untouched, see renderAnalytics()'s comment).
+        const { currentSeason } = getAnalyticsAggregates();
+        const { top: top3, worst: worst3 } = buildTopWorstPerformers(currentSeason.byLeague);
 
         const topWrap = document.getElementById('analyticsTopPerformers');
         const worstWrap = document.getElementById('analyticsWorstPerformers');
@@ -14546,7 +14644,7 @@ button:disabled {
 
         const streakAnalytics = document.getElementById('streakCardsAnalytics');
         if (streakAnalytics) {
-          const s = allTime.streaks;
+          const s = currentSeason.streaks;
           streakAnalytics.innerHTML = [
             { label: 'Sequência de vitórias', value: s.currentWin, note: 'Ativa' },
             { label: 'Sequência de derrotas', value: s.currentLoss, note: 'Ativa' },
