@@ -479,6 +479,8 @@ Both branches sort together by date ascending. `renderPendingQueue()` and `build
 
 **Deliberately unaffected by Phase 28.5's season-boundary work** (`05_Known_Issues.md` DASHBOARD-8): every function on this tab still calls `getFilteredRealClosedRows()`/`getRealResolvedBotHistory()`/`getResolvedManualBets()` without the `sessionOnly` flag, and `league_stats.csv` has no `sessionStartDate` concept in the Python backend at all — scoping Analytics to a season would require a backend change, out of scope for that phase. Analytics remains an all-time/lifetime view by design.
 
+**Shared aggregation pipeline (Phase 29.2).** All 12 Analytics render functions (the 3 above plus League Classification, Market Intelligence, Edge Validation, Strategy Validation, Model Calibration, Action Engine, Learning Center, and Bot vs Manual's `renderVersus()` is explicitly separate) previously recomputed their own per-league/market/source/edge/odds/weekday/hour aggregates and streaks independently, on every render. `getAnalyticsAggregates()` — memoized via the existing `memoizeDataFn()`/`_dataGeneration` mechanism (Phase 26.39, ADR-016) — is now the single source every one of them reads from: `const { allTime } = getAnalyticsAggregates();`. It returns `{ allTime, currentSeason }`, each built by `buildAnalyticsDataset(closedRows, botRows)` into `{ byLeague, byMarket, bySource, byEdge, byEdgeStrict, byOdds, byWeekday, byHour, streaks, summary }`. `allTime` feeds all 12 sections today; `currentSeason` (built over the Phase 28.5 session-scoped pool) is computed and cached but not yet consumed by any renderer — preparatory plumbing for a future Current-Season/All-Time dual view, not a behaviour change. `byEdge` vs `byEdgeStrict` preserves a genuine pre-existing inconsistency rather than unifying it: Edge Validation/Strategy Validation use a "loose" edge≥0 filter (`byEdge`), while Action Engine/Learning Center use a "strict" filter additionally requiring real odds>1.0 and a settled result (`byEdgeStrict`) — verified byte-for-byte unchanged via a before/after Playwright snapshot of the full tab. See `08_Change_Log.md` Phase 29.2.
+
 **Sub-sections:**
 - **League Analytics** — per-league ROI, win rate, avg Kelly, total picks. Enriched with `state.leagueStats`.
 - **Analytics Performers** — top and bottom leagues by ROI.
@@ -809,9 +811,11 @@ The toggle is a transient view flag (`_historyViewMode`, module-level `let`, def
 
 ## 10. Analytics
 
+**Since Phase 29.2, every sub-section below reads its aggregates from `getAnalyticsAggregates().allTime`** (a single memoized `buildAnalyticsDataset()` call) rather than each calling `buildAnalytics()`/its own bucket reduction independently — see the "Shared aggregation pipeline" note in §6's Analytics entry above for the full architecture.
+
 ### League Analytics
 
-**Data sources:** `state.leagueStats` (from `league_stats.csv`) enriched with actual bet history via `buildAnalytics(rows, 'league')`. The enrichment joins by league name and adds real win rates and P&L from executed picks.
+**Data sources:** `state.leagueStats` (from `league_stats.csv`) enriched with actual bet history via `getAnalyticsAggregates().allTime.byLeague` (Phase 29.2; previously an independent `buildAnalytics(rows, 'league')` call). The enrichment joins by league name and adds real win rates and P&L from executed picks.
 
 **Displays:**
 - Table of all leagues: ROI%, WinRate%, avg Kelly, Tier, total picks.
