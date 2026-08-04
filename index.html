@@ -5034,6 +5034,21 @@ button:disabled {
         return getManualRowsMerged().filter(b => b._lucro !== null && b.status !== 'rejected');
       });
 
+      // Session-scoped (current season) counterparts of getRealResolvedBotHistory()/
+      // getResolvedManualBets() — Phase 28.5. Single reusable source for "which
+      // resolved bets belong to the season that started at state.sessionStartDate,"
+      // reusing the existing isOnOrAfterSession() primitive (already proven in
+      // getMetrics()'s "sessao" bundle and Strategy Lab's season filter — see
+      // Phase 28.4). Consumed by every page that must show current-season-only
+      // figures after Season Close (Bank, Bot vs Manual/Opinion suite) instead of
+      // each page independently re-deriving its own filtered copy.
+      const getSessionRealResolvedBotHistory = memoizeDataFn('getSessionRealResolvedBotHistory', function () {
+        return getRealResolvedBotHistory().filter(r => isOnOrAfterSession(r['Data']));
+      });
+      const getSessionResolvedManualBets = memoizeDataFn('getSessionResolvedManualBets', function () {
+        return getResolvedManualBets().filter(b => isOnOrAfterSession(b.data));
+      });
+
       // Every rejected manual bet, settled or not — feeds the History page's
       // "Rejeitadas" view, the permanent archive of rejected bets (Phase 26.31).
       // Unlike the operational "Apostas Manuais" list (which hides a rejected bet
@@ -5123,8 +5138,11 @@ button:disabled {
         const resolvedManual = getResolvedManualBets();
 
         const sessionHistoryResolved = historyResolved.filter(r => isOnOrAfterSession(r['Data']));
-        const sessionRealResolvedBot = realResolvedBot.filter(r => isOnOrAfterSession(r['Data']));
-        const sessionResolvedManual = resolvedManual.filter(r => isOnOrAfterSession(r.data));
+        // Phase 28.5 — reuse the shared session-scoped helpers (defined above,
+        // right after getResolvedManualBets()) instead of re-filtering inline,
+        // so Bank/Bot vs Manual consume the exact same pool this bundle does.
+        const sessionRealResolvedBot = getSessionRealResolvedBotHistory();
+        const sessionResolvedManual = getSessionResolvedManualBets();
 
         return {
           geral: buildMetricsBundle(historyResolved, realResolvedBot, resolvedManual),
@@ -5135,11 +5153,17 @@ button:disabled {
 
       // Single source of truth for all bankroll values.
       // Every page and widget must consume this — never compute bancaAtual inline.
+      // Phase 28.5 — scoped to the current season (getSessionRealResolvedBotHistory()/
+      // getSessionResolvedManualBets(), reusing isOnOrAfterSession() via the shared
+      // helpers above) so bankroll figures reset cleanly after Season Close instead
+      // of blending the new bankroll with every bet ever placed. The per-row profit
+      // formula itself (the ?? fallback to _lucroModeloLocal) is unchanged — only
+      // the season boundary was added, per Phase 28.4's audit.
       function getBankrollState() {
         const movTotals = getMovementTotals();
         const lucroReal =
-          sum(getRealResolvedBotHistory().map(r => r._lucroRealLocal ?? r._lucroModeloLocal)) +
-          sum(getResolvedManualBets().map(b => b._lucro));
+          sum(getSessionRealResolvedBotHistory().map(r => r._lucroRealLocal ?? r._lucroModeloLocal)) +
+          sum(getSessionResolvedManualBets().map(b => b._lucro));
 
         if (!state.bankrollInicialSet || state.bankrollInicial === null) {
           return {
@@ -5500,9 +5524,12 @@ button:disabled {
         };
       }
 
+      // Phase 28.5 — the History page shows the current season only by default
+      // (sessionOnly=true); previous seasons remain fully intact in
+      // picks_history.csv/archives/backups, just not in this default view.
       function getHistoryFilteredRows() {
         const filters = getHistoryFilters();
-        let rows = getFilteredRealClosedRows(filters);
+        let rows = getFilteredRealClosedRows(filters, true);
         const range = filters.oddsRange;
         if (range) {
           rows = rows.filter(r => {
@@ -5609,7 +5636,14 @@ button:disabled {
         });
       }
 
-      function getFilteredRealClosedRows(filters) {
+      // Phase 28.5 — sessionOnly (default false, preserving every pre-existing
+      // caller's behaviour unchanged) additionally restricts the result to the
+      // current season via the shared isOnOrAfterSession() primitive. Deliberately
+      // NOT the default: buildSeasonArchiveObject() and the Analytics tab's
+      // enrichment call both need the full all-time pool and must stay untouched
+      // (Phase 28.4/28.5 scope — Season Close flow, archive generation, and
+      // Analytics are explicitly not to be changed).
+      function getFilteredRealClosedRows(filters, sessionOnly) {
         const activeFilters = filters || getSummaryFilters();
 
         const botClosed = filterBotRows(getAllBotRowsMergedUnique(), activeFilters)
@@ -5644,11 +5678,13 @@ button:disabled {
             settlementReason: cleanString(r.settlementReason || '')
           }));
 
-        return [...botClosed, ...manualClosed].sort((a, b) => {
+        const combined = [...botClosed, ...manualClosed].sort((a, b) => {
           const ad = parseDateSafe(a.date)?.getTime() || 0;
           const bd = parseDateSafe(b.date)?.getTime() || 0;
           return ad - bd;
         });
+
+        return sessionOnly ? combined.filter(r => isOnOrAfterSession(r.date)) : combined;
       }
 
       function fillFilters() {
@@ -5767,8 +5803,9 @@ button:disabled {
         }
       }
 
+      // Phase 28.5 — Dashboard Home headline KPIs are current-season only.
       function renderSummaryHeadlineStats() {
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const rows = getFilteredRealClosedRows(getSummaryFilters(), true);
         const risk = getRiskMetrics();
 
         const wins = rows.filter(r => r.result === 'W').length;
@@ -6401,10 +6438,12 @@ button:disabled {
         const highestOddsWin = closedRows.filter(r => r.result === 'W' && r.odd !== null).length
           ? closedRows.filter(r => r.result === 'W' && r.odd !== null).reduce((a, b) => b.odd > a.odd ? b : a) : null;
 
-        // edge anomaly from bot history cross-ref
+        // edge anomaly from bot history cross-ref (Phase 28.5 — session-scoped,
+        // consistent with `rows` above, which already comes from the now
+        // current-season-only getHistoryFilteredRows())
         let highestEdge = null;
         try {
-          const botRows = getRealResolvedBotHistory();
+          const botRows = getSessionRealResolvedBotHistory();
           if (botRows.length) {
             const edgeRows = botRows.filter(r => r['Edge%'] !== undefined && r['Edge%'] !== '' && !isNaN(parseFloat(r['Edge%'])));
             if (edgeRows.length) {
@@ -8328,9 +8367,10 @@ button:disabled {
         `).join('');
       }
 
+      // Phase 28.5 — Dashboard Home's bankroll widget is current-season only.
       function renderBankrollChart() {
         const wrap = document.getElementById('bankrollChartWrap');
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const rows = getFilteredRealClosedRows(getSummaryFilters(), true);
 
         if (!state.bankrollInicialSet || state.bankrollInicial === null) {
           wrap.innerHTML = `<div class="chart-empty">Configura a banca inicial para ver a evolução da banca.</div>`;
@@ -8830,7 +8870,11 @@ button:disabled {
       }
 
       function exportRealCsv() {
-        const rows = getFilteredRealClosedRows(getHistoryFilters());
+        // Phase 28.5 — reuse getHistoryFilteredRows() (the exact same source the
+        // History table renders from, already includes the odds-range filter and
+        // the current-season default) instead of an independent, slightly
+        // different direct call, so the export always matches what's on screen.
+        const rows = getHistoryFilteredRows();
         if (!rows.length) {
           alert('Não há apostas reais fechadas para exportar com os filtros atuais.');
           return;
@@ -9446,13 +9490,14 @@ button:disabled {
         `;
       }
 
+      // Phase 28.5 — Bank's origin (Bot/Manual) breakdown is current-season only.
       function renderBankrollPerformanceBreakdown() {
         const botEl = document.getElementById('bkBotBreakdown');
         const manEl = document.getElementById('bkManualBreakdown');
         if (!botEl || !manEl) return;
 
-        const botRows = getRealResolvedBotHistory();
-        const manualRows = getResolvedManualBets();
+        const botRows = getSessionRealResolvedBotHistory();
+        const manualRows = getSessionResolvedManualBets();
 
         function calcStats(rows, isManual) {
           if (isManual) {
@@ -9508,6 +9553,9 @@ button:disabled {
         manEl.innerHTML = breakdownHTML('Manual Bets', '✍️', calcStats(manualRows, true));
       }
 
+      // Phase 28.5 — the evolution chart walks forward from state.bankrollInicial,
+      // so it must only replay this season's closed bets — otherwise it would
+      // apply the entire pre-close betting history on top of the new bankroll.
       function renderBankrollEvolution() {
         const wrap = document.getElementById('bankrollEvolutionWrap');
         if (!wrap) return;
@@ -9517,7 +9565,7 @@ button:disabled {
           return;
         }
 
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
+        const rows = getFilteredRealClosedRows(getSummaryFilters(), true);
         if (!rows.length) {
           wrap.innerHTML = `<div class="chart-empty">Sem apostas fechadas reais suficientes para o gráfico.</div>`;
           return;
@@ -9593,12 +9641,20 @@ button:disabled {
       const MIN_SAMPLE_MARKET  = 3;
       const MIN_SAMPLE_LEAGUE  = 3;
 
+      // Phase 28.5 — Bot vs Manual compares the current season only. botRows/
+      // manualRows are session-scoped via the shared helpers above; every
+      // Opinion Validation/Calibration/Recommendation Engine/Simulator section
+      // further down this function reuses this same `manualRows` variable
+      // (replacing what were previously independent, unfiltered
+      // getResolvedManualBets() re-derivations) instead of a second filter, so
+      // that whole suite inherits the season boundary automatically through
+      // window._opnSimCache without any change of its own.
       function renderVersus() {
         const kpiEl = document.getElementById('versusKpiRow');
         if (!kpiEl) return;
 
-        const botRows = getRealResolvedBotHistory();
-        const manualRows = getResolvedManualBets();
+        const botRows = getSessionRealResolvedBotHistory();
+        const manualRows = getSessionResolvedManualBets();
 
         // ─── Bot stats ───────────────────────────────────────────────────
         const botStake   = sum(botRows.map(r => r._stakeRealNum).filter(v => v !== null));
@@ -10092,7 +10148,7 @@ button:disabled {
         const scoreInsEl  = document.getElementById('versusScoreInsights');
         if (scoreBandEl || calibEl || scoreInsEl) {
 
-          const scoredBets = getResolvedManualBets().filter(b =>
+          const scoredBets = manualRows.filter(b =>
             b.hadAnalysis === true &&
             b.analysisSnapshot &&
             typeof b.scoreAtAnalysis === 'number' &&
@@ -10282,7 +10338,7 @@ button:disabled {
         const opinionRecEl   = document.getElementById('versusOpinionRecommendations');
         if (opinionTableEl || opinionCalibEl || opinionInsEl || opinionValidationEl || opinionRecEl) {
 
-          const opinionBets = getResolvedManualBets().filter(b =>
+          const opinionBets = manualRows.filter(b =>
             b.hadAnalysis === true &&
             b.analysisSnapshot &&
             b.botOpinion &&
@@ -11319,7 +11375,7 @@ button:disabled {
         const edgeEffEl   = document.getElementById('versusEdgeEfficiency');
         if (edgeBandEl || edgeCalibEl || edgeRealEl || edgeInsEl || edgeEffEl) {
 
-          const edgeBets = getResolvedManualBets().filter(b =>
+          const edgeBets = manualRows.filter(b =>
             b.hadAnalysis === true &&
             b.analysisSnapshot &&
             typeof b.edgeAtAnalysis === 'number' &&
@@ -11557,7 +11613,7 @@ button:disabled {
         const decisionEl   = document.getElementById('versusDecision');
         if (qualScoreEl || qualBreakEl || swEl || trustEl || execEl || actionEl || healthEl || prioritiesEl || decisionEl) {
 
-          const analyzedAll = getResolvedManualBets().filter(b =>
+          const analyzedAll = manualRows.filter(b =>
             b.hadAnalysis === true &&
             b.analysisSnapshot &&
             ['W', 'L', 'P'].includes(b._resultKey)
@@ -11578,7 +11634,7 @@ button:disabled {
             if (decisionEl)   decisionEl.innerHTML   = noDataNote;
           } else {
             // Re-derive score calibration
-            const scoredU = getResolvedManualBets().filter(b =>
+            const scoredU = manualRows.filter(b =>
               b.hadAnalysis === true &&
               b.analysisSnapshot &&
               typeof b.scoreAtAnalysis === 'number' &&
@@ -11599,7 +11655,7 @@ button:disabled {
               : sGHigh.roi <= sGLow.roi ? 'POOR' : 'MIXED';
 
             // Re-derive opinion calibration
-            const opinionU = getResolvedManualBets().filter(b =>
+            const opinionU = manualRows.filter(b =>
               b.hadAnalysis === true &&
               b.analysisSnapshot &&
               b.botOpinion &&
@@ -11626,7 +11682,7 @@ button:disabled {
               : oInv === 1 && !oAvBuInv ? 'MIXED' : 'POOR';
 
             // Re-derive edge capture
-            const edgeU    = getResolvedManualBets().filter(b =>
+            const edgeU    = manualRows.filter(b =>
               b.hadAnalysis === true &&
               b.analysisSnapshot &&
               typeof b.edgeAtAnalysis === 'number' &&
@@ -12885,10 +12941,13 @@ button:disabled {
         `;
       }
 
+      // Phase 28.5 — session-scoped, consistent with the rest of the Bank page
+      // (was .geral — showed a lifetime count next to "Sessão atual desde",
+      // which read as a current-season figure but wasn't one).
       function renderBankrollAudit() {
         const wrap = document.getElementById('bankrollAuditRow');
         if (!wrap) return;
-        const m = getMetrics().geral;
+        const m = getMetrics().sessao;
         const lastUpdate = state.lastUpdated ? new Date(state.lastUpdated).toLocaleString('pt-PT') : '—';
 
         wrap.innerHTML = `

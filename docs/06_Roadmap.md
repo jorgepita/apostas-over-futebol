@@ -226,8 +226,8 @@ When `POST /run-settlement` returns, show a toast listing how many bets were set
 **DX-3 — Offline indicator with queued-save display**  
 When Railway is unavailable, show a persistent banner with the count of pending saves and a retry button. Currently the cloud status indicator exists but does not show a retry affordance.
 
-**DX-4 — Season selector in History tab**  
-Allow switching between the current session and archived seasons (linked to MT-4). History, Analytics, and Bankroll would scope their data to the selected season.
+**DX-4 — Season selector in History tab (partially implemented, Phase 28.5)**  
+Phase 28.5 made History, Dashboard Home, Bank, and Bot vs Manual (and the Opinion Validation/Calibration/Recommendation Engine/Simulator suite that inherits from it) default to the current season only, reusing the existing `isOnOrAfterSession()`/`state.sessionStartDate` primitive — closing the gap Phase 28.4's audit found. **Still not built:** an actual selector to switch the view to a specific *archived* season (only "current season" vs "all-time," the latter still used internally by Analytics and the archive snapshot, is available; there is no UI to pick a past closed season and view History/Bank/Analytics scoped to it). Analytics remains all-time only and unaffected by Phase 28.5, since `league_stats.csv` has no season concept in the backend — see `05_Known_Issues.md` DASHBOARD-8 and `08_Change_Log.md` Phase 28.4/28.5.
 
 **DX-5 — Pick annotation field**  
 Add a free-text notes field to bot picks (alongside the existing `localEdits` system). Useful for recording why a pick was or was not placed.
@@ -334,7 +334,7 @@ These are interesting but not currently planned. They should not influence short
 | DX-1 | Periodic cloud sync (LIVE-1) | Critical | Blocked | ST-1 |
 | DX-2 | Toast on settlement result | Low | Planned | ST-1 |
 | DX-3 | Offline indicator with retry | Medium | Planned | — |
-| DX-4 | Season selector in History | Low | Deferred | MT-4 |
+| DX-4 | Season selector in History | Low | Partially done (Phase 28.5) | MT-4 |
 | DX-5 | Pick annotation field | Low | Planned | — |
 | BX-1 | SHA conflict retry | High | Planned | — |
 | BX-2 | Structured logging | Low | Planned | — |

@@ -341,7 +341,7 @@ After any state mutation:
 
 **Purpose:** At-a-glance overview on mobile. On desktop, this tab is also visible but the primary navigation is via the sidebar.
 
-**Data sources:** `state.footballDaily` (today's picks count), `state.footballHistory` + `state.localEdits` (settled history for P&L summary), `state.manualBets` (manual bet counts).
+**Data sources:** `state.footballDaily` (today's picks count), `state.footballHistory` + `state.localEdits` (settled history for P&L summary), `state.manualBets` (manual bet counts). **(Phase 28.5)** The headline P&L/ROI/win-rate KPI row (`renderSummaryHeadlineStats()`) and the bankroll widget chart (`renderBankrollChart()`) are current-season only — `getFilteredRealClosedRows(getSummaryFilters(), true)`, reusing `isOnOrAfterSession()`. Immediately after Season Close both correctly show empty/zero rather than the previous season's totals. See `05_Known_Issues.md` DASHBOARD-8.
 
 **User interactions:** None. Read-only summary cards.
 
@@ -453,12 +453,13 @@ Both branches sort together by date ascending. `renderPendingQueue()` and `build
 **Data sources:**
 - Bot picks: `state.footballHistory` merged with `state.localEdits` via `getRowWithLocalEdits()`.
 - Manual bets: `state.manualBets` filtered for `resultado` in `{W, L, P}`.
-- `getHistoryRowsMerged()` produces a unified list of settled rows from both sources.
+- `getHistoryRowsMerged()` produces a unified, **all-time** list of settled rows from both sources — this underlying store is never filtered, cleared, or reset by Season Close, since it's the permanent cross-season record.
+- The table/KPIs/equity curve actually render from `getHistoryFilteredRows()`, which since **Phase 28.5** calls `getFilteredRealClosedRows(filters, sessionOnly=true)` — restricting the default view to the current season only (`isOnOrAfterSession()`), closing the gap identified in `05_Known_Issues.md` DASHBOARD-8. Previous seasons remain fully present in `getHistoryRowsMerged()`/`picks_history.csv`/archives/backups; they simply don't appear in this page's default view. There is no UI to switch back to a previous season yet (`06_Roadmap.md` DX-4, still partially open).
 
 **User interactions:**
 - Filter by date range, league, market, result.
 - Edit "Odd Real", "Stake Real" for bot picks — stored in `state.localEdits`, calls `markDirty()`.
-- Export filtered history as CSV via `exportRealCsv()`.
+- Export filtered history as CSV via `exportRealCsv()` — **(Phase 28.5)** now calls `getHistoryFilteredRows()` directly (the exact same source the table renders from, including the current-season default and the odds-range filter) instead of an independent, slightly different call, so the export always matches what's on screen.
 
 **Update triggers:** `loadData()` (history CSV refresh); any `rerenderAll()` or `rerenderHistoryOnly()`.
 
@@ -474,7 +475,9 @@ Both branches sort together by date ascending. `renderPendingQueue()` and `build
 
 **Purpose:** Deeper performance intelligence. Multiple sub-sections using the settled history.
 
-**Data sources:** `getFilteredRealClosedRows(getSummaryFilters())` — the settled bot picks with execution data. `getResolvedManualBets()` — settled manual bets.
+**Data sources:** `getFilteredRealClosedRows(getSummaryFilters())` — the settled bot picks with execution data. `getResolvedManualBets()` — settled manual bets. **`league_stats.csv`** (`state.leagueStats`) for League Analytics specifically — computed entirely server-side (`src/league_stats.py`) from all of `picks_history.csv`.
+
+**Deliberately unaffected by Phase 28.5's season-boundary work** (`05_Known_Issues.md` DASHBOARD-8): every function on this tab still calls `getFilteredRealClosedRows()`/`getRealResolvedBotHistory()`/`getResolvedManualBets()` without the `sessionOnly` flag, and `league_stats.csv` has no `sessionStartDate` concept in the Python backend at all — scoping Analytics to a season would require a backend change, out of scope for that phase. Analytics remains an all-time/lifetime view by design.
 
 **Sub-sections:**
 - **League Analytics** — per-league ROI, win rate, avg Kelly, total picks. Enriched with `state.leagueStats`.
@@ -491,14 +494,16 @@ Both branches sort together by date ascending. `renderPendingQueue()` and `build
 
 **Data sources:** `state.bankrollInicial`, `state.movements`, `state.footballHistory`, `state.localEdits`, `state.manualBets`.
 
+**(Phase 28.5) Every bankroll figure on this page is current-season only.** `getBankrollState()` — documented as "the single source of truth for all bankroll values; every page and widget must consume this" — previously recomputed `lucroReal` from the all-time `getRealResolvedBotHistory()`/`getResolvedManualBets()`, independently of the session-scoped `sessao` bundle `getMetrics()` already computed elsewhere. It now sums `getSessionRealResolvedBotHistory()`/`getSessionResolvedManualBets()` instead — two new shared, memoized helpers (`index.html`, next to `getResolvedManualBets()`) that both `getBankrollState()` and `getMetrics()`'s own `sessao` bundle now consume, eliminating that duplicate calculation. The per-row profit formula itself (the `?? _lucroModeloLocal` fallback) is unchanged — only the season boundary was added. See `05_Known_Issues.md` DASHBOARD-8.
+
 **Sub-sections rendered by `renderBankrollPage()`:**
-- `renderBankrollOverview()` — current balance = initial bankroll + net P&L.
-- `renderBankrollComposition()` — split between bot picks and manual bets.
-- `renderBankrollPerformanceBreakdown()` — P&L breakdown by market.
-- `renderBankrollEvolution()` — balance over time.
-- `renderMovementsTable()` — list of deposits and withdrawals; add/remove actions.
+- `renderBankrollOverview()` — current balance = initial bankroll + net P&L. Reads `getBankrollState()` + `getMetrics().sessao` (was `.geral`).
+- `renderBankrollComposition()` — split between bot picks and manual bets. Reads `getBankrollState()`.
+- `renderBankrollPerformanceBreakdown()` — P&L breakdown by origin (bot/manual). **(Phase 28.5)** Now reads `getSessionRealResolvedBotHistory()`/`getSessionResolvedManualBets()` instead of the all-time getters.
+- `renderBankrollEvolution()` — balance over time, walking forward from `state.bankrollInicial`. **(Phase 28.5)** Now built from `getFilteredRealClosedRows(getSummaryFilters(), true)` — previously walked the *entire* betting history on top of the freshly-reset bankroll after a Season Close, producing a curve inconsistent with either season; immediately after a close with no new-season bets yet, this chart correctly shows its "no data" empty state rather than replaying pre-close history.
+- `renderMovementsTable()` — list of deposits and withdrawals; add/remove actions. Reads `state.movements` directly — already correctly reset by Season Close, unaffected by Phase 28.5.
 - `renderBankrollConfig()` — Kelly fraction, edge thresholds (read from `state.localEdits` or defaults).
-- `renderBankrollAudit()` — reconciliation table.
+- `renderBankrollAudit()` — reconciliation table. **(Phase 28.5)** Now reads `getMetrics().sessao` (was `.geral`) for its "Total apostas fechadas" figure, for consistency with the rest of this page.
 
 **User interactions:**
 - Set initial bankroll — locked once set (`bankrollInicialSet`).
@@ -823,13 +828,15 @@ The toggle is a transient view flag (`_historyViewMode`, module-level `let`, def
 
 | Metric | Bot | Manual |
 |---|---|---|
-| Source | `getRealResolvedBotHistory()` — executed bot picks with real outcomes | `getResolvedManualBets()` — settled manual bets |
+| Source | `getSessionRealResolvedBotHistory()` — current-season executed bot picks with real outcomes (Phase 28.5; was `getRealResolvedBotHistory()`) | `getSessionResolvedManualBets()` — current-season settled manual bets (Phase 28.5; was `getResolvedManualBets()`) |
 | Stake | Sum of `StakeReal€` | Sum of `stake` |
 | Profit | Sum of `LucroReal€` | Sum of `_lucro` |
 | ROI | profit / stake × 100 | profit / stake × 100 |
 | Win rate | wins / total | wins / total |
 
 Minimum sample threshold: `MIN_SAMPLE_COMPARE = 5` bets required before comparison is shown.
+
+**(Phase 28.5) Bot vs Manual, and every section below it, is current-season only.** `renderVersus()`'s top-level `botRows`/`manualRows` are now the session-scoped helpers above. Before this phase, the function additionally re-derived `getResolvedManualBets()` independently 7 more times further down its own body (once per sub-section: score-band calibration, Opinion Validation, Edge Realization, and the Model Health block's three internal re-derivations) — all 7 now reuse the single top-level `manualRows` variable instead, both applying the season boundary uniformly and collapsing 8 independent computations of the same pool into 1. Since `window._opnSimCache` (below) is populated from this same, now session-scoped `opinionBets`, **Opinion Validation, Opinion Engine Recommendations, and the Recommendation Simulator all automatically became current-season-only too, with no change of their own** — they were already correctly designed to consume `renderVersus()`'s output rather than re-deriving anything. See `05_Known_Issues.md` DASHBOARD-8 and `08_Change_Log.md` Phase 28.4/28.5.
 
 **Opinion Validation (Phase 26.20, evolved Phase 26.21).** Below the existing Opinion Performance/Calibration/Insights sections (M/N/O), an additive "Opinion Validation" section objectively measures whether the Opinion classifier (STRONG BUY/BUY/NEUTRAL/AVOID) is calibrated — i.e. whether higher-confidence opinions actually realise higher ROI. It is derived entirely from the same `opnData`/`opinionBets` already computed for M/N/O (analytics-only; no new filter, no new data source, no changes to pick generation, scoring, settlement, or persistence). M, N, and O themselves are untouched and continue to produce identical values.
 

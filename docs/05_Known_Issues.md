@@ -14,6 +14,25 @@ None currently open.
 
 ## Resolved Issues
 
+### DASHBOARD-8 — History, Bank, Dashboard Home, and Bot vs Manual Kept Showing Previous-Season Data After a Correctly-Executed Season Close
+
+**Status:** Resolved — 2026-08-04 (Phase 28.5, implementing the architectural fix identified by the Phase 28.4 read-only audit).
+
+**Was:** Immediately after a successful Season Close (with Phase 28.3A's boot-sync fix already confirmed working and `cloud_state.json` correctly holding the new season), the dashboard still displayed the previous season's data: History listed every previously-resolved bet ever placed; Bank showed cumulative all-time ROI/P&L/win-loss and a bankroll-evolution chart that replayed the entire betting history on top of the fresh bankroll; the Dashboard Home headline KPIs and the Bot vs Manual comparison (and, by inheritance, the entire Opinion Validation/Calibration/Recommendation Engine/Simulator suite) were equally all-time.
+
+**Root cause (Phase 28.4 audit, full trace in `08_Change_Log.md` Phase 28.4):** not a Season Close failure — `executeSeasonClose()` correctly resets `bankrollInicial`/`manualBets`/`movements`/`localEdits` and never touches `picks_history.csv`, which is a permanent, cross-season record by design. The gap was that the dashboard's own season-boundary primitive, `isOnOrAfterSession()`, already existed and was already correctly wired into `getMetrics()`'s `sessao` bundle and Strategy Lab's default "Época Atual" filter — but was never connected to `getFilteredRealClosedRows()` (History/Dashboard Home/Bank's evolution chart), `getBankrollState()` (Bank's documented single source of truth), or `renderVersus()` (Bot vs Manual and everything downstream of `window._opnSimCache`). This is exactly `docs/06_Roadmap.md`'s DX-4, "Season selector in History tab" — a documented, previously-deferred gap, not a regression.
+
+**Fix:** Reused the existing infrastructure exclusively — no new season model, no new global state, no duplicated filter logic:
+- Two new shared, memoized helpers, `getSessionRealResolvedBotHistory()`/`getSessionResolvedManualBets()` (`index.html`, immediately after `getResolvedManualBets()`), each a one-line `.filter(isOnOrAfterSession(...))` wrapper around the existing all-time getters. `getMetrics()`'s `sessao` bundle now calls these instead of its own inline filter (removing that duplication); `getBankrollState()`, `renderBankrollPerformanceBreakdown()`, and `renderVersus()` (Bot vs Manual, plus every `getResolvedManualBets()` re-derivation inside it — 7 call sites collapsed into one shared `manualRows` variable) now consume the same two helpers instead of each independently re-deriving an all-time pool.
+- `getFilteredRealClosedRows(filters, sessionOnly)` gained one optional, default-`false` parameter. `getHistoryFilteredRows()` (History), `renderSummaryHeadlineStats()`/`renderBankrollChart()` (Dashboard Home), and `renderBankrollEvolution()` (Bank) now pass `true`. Every other caller — `buildSeasonArchiveObject()` (the archive snapshot), Analytics's league enrichment, and the Close Season wizard's own review step — was left unchanged, deliberately, since none of those may be touched.
+- `exportRealCsv()` now reuses `getHistoryFilteredRows()` instead of an independent, slightly different direct call — the CSV export always matches what's on screen.
+
+**Explicitly not changed:** Season Close flow (`executeSeasonClose()`, `csmExecute()`, `csmGoStep4()`), archive generation (`buildSeasonArchiveObject()`), the backup subsystem, R2, Railway, cloud synchronization, and Strategy Lab's own pre-existing season filter. Analytics (`league_stats.csv`) is unchanged and remains all-time by architecture — it is computed entirely server-side (`src/league_stats.py`) with no `sessionStartDate` concept in the Python backend at all; fixing that would require a backend redesign, explicitly out of scope for this phase.
+
+**Verification:** real-browser (Playwright/Chromium) test against the unmodified `index.html`, 27 assertions across 3 scenarios — immediately-after-close (History/Bank/Dashboard Home/Bot vs Manual all correctly empty; old-season data confirmed still present and un-deleted in the underlying store), a new-season bet correctly appearing while the old one stays excluded from every season-scoped view but still visible in the untouched all-time (`.geral`)/Analytics path, and a full regression pass (Strategy Lab, Pending, Live Center, Manual Bets, Daily Picks, Analytics all confirmed unaffected). Full Python suite 430/430 and QuantEngine golden vectors 285/285, both unchanged, as expected for a JS-only, dashboard-only change.
+
+---
+
 ### DASHBOARD-7 — Returning Browsers Never Re-Checked the Cloud, So a Season Close Executed Elsewhere Left Them Showing a Stale Season Indefinitely
 
 **Status:** Resolved — 2026-08-04 (Phase 28.3A, following the Phase 28.3 read-only audit). Full technical detail in `08_Change_Log.md` — Phase 28.3A.
