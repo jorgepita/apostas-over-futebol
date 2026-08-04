@@ -4041,10 +4041,13 @@ button:disabled {
         const bodies = document.querySelectorAll('.league-analytics-body');
         if (!bodies.length) return;
 
-        // Enrich leagueStats rows with actual bet history data (joined by league name)
-        const actualRows = getFilteredRealClosedRows(getSummaryFilters());
+        // Enrich leagueStats rows with actual bet history data (joined by league name).
+        // Phase 29.2 — sourced from the shared aggregation cache instead of an
+        // independent buildAnalytics() call; .forEach() never mutates, so the
+        // shared array is safe to read directly here.
+        const { allTime } = getAnalyticsAggregates();
         const histByLeague = new Map();
-        buildAnalytics(actualRows, 'league').forEach(r => {
+        allTime.byLeague.forEach(r => {
           histByLeague.set(cleanString(r.key).toLowerCase(), r);
         });
 
@@ -5025,11 +5028,16 @@ button:disabled {
         return getHistoryRowsMerged().filter(r => ['W', 'L', 'P'].includes(r._resultKey));
       }
 
-      function getRealResolvedBotHistory() {
+      // Phase 29.2 — memoized (was a plain function recomputing this filter
+      // on every call; the Analytics tab alone had ~7 call sites re-deriving
+      // it per render). Extends the existing memoizeDataFn()/_dataGeneration
+      // mechanism already used by its sibling getResolvedManualBets() rather
+      // than introducing a second caching approach.
+      const getRealResolvedBotHistory = memoizeDataFn('getRealResolvedBotHistory', function () {
         return getAllBotRowsMergedUnique().filter(
           r => r._apostadaBool && (r._lucroRealLocal !== null || r._lucroModeloLocal !== null)
         );
-      }
+      });
 
       // Manual bets that count towards bankroll/ROI/profit/win-rate/financial reports.
       // Rejected bets are excluded here — and only here — so that every consumer
@@ -6043,9 +6051,202 @@ button:disabled {
         };
       }
 
+      // ═══════════════════════════════════════════════════════════════════
+      // Shared Analytics Aggregation Layer (Phase 29.2)
+      // ═══════════════════════════════════════════════════════════════════
+      // Phase 29.1's read-only audit found every Analytics section
+      // independently re-running buildAnalytics()/its own bucket reducer
+      // over the exact same rows — up to 9 separate calls per render for
+      // league/market alone. This layer computes every aggregate exactly
+      // once per dataset and every section below now reads from it instead.
+      //
+      // Two datasets, per Phase 29.1's own recommendation — no new season
+      // model, no new backend file: "allTime" (today's Analytics, unchanged
+      // values) and "currentSeason" (Phase 28.5's existing session-scoped
+      // getters — getSessionRealResolvedBotHistory()/
+      // getSessionResolvedManualBets()/getFilteredRealClosedRows(f, true)).
+      // Nothing in this phase displays currentSeason yet (that is the
+      // Phase 29.3 UI work); it is computed and cached here purely so that
+      // future work never has to add a second aggregation pipeline.
+
+      const EDGE_BUCKET_DEFS = [
+        { label: '0–2%',  min: 0, max: 2 },
+        { label: '2–4%',  min: 2, max: 4 },
+        { label: '4–6%',  min: 4, max: 6 },
+        { label: '6–8%',  min: 6, max: 8 },
+        { label: '8%+',   min: 8, max: Infinity }
+      ];
+
+      const ODDS_BUCKET_DEFS = [
+        { label: '1.00–1.49', min: 1.00, max: 1.50 },
+        { label: '1.50–1.79', min: 1.50, max: 1.80 },
+        { label: '1.80–1.99', min: 1.80, max: 2.00 },
+        { label: '2.00–2.19', min: 2.00, max: 2.20 },
+        { label: '2.20+',     min: 2.20, max: Infinity }
+      ];
+
+      const HOUR_BUCKET_DEFS = [
+        { label: '00–05', min: 0,  max: 6  },
+        { label: '06–11', min: 6,  max: 12 },
+        { label: '12–17', min: 12, max: 18 },
+        { label: '18–23', min: 18, max: 24 }
+      ];
+
+      const WEEKDAY_LABELS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+
+      // Every bucket-input shape already used across this file's Analytics
+      // sections — plain closed rows, edge-mapped bot rows, odds-mapped
+      // rows, hour-mapped rows — carries the same {result, stake, lucro}
+      // fields, so one reducer covers all of them (was copy-pasted inline,
+      // with these exact five field names, at every bucket site below).
+      function reduceBucketStats(rows) {
+        const picks = rows.length;
+        const stake = sum(rows.map(r => r.stake || 0));
+        const lucro = sum(rows.map(r => r.lucro || 0));
+        const wins = rows.filter(r => r.result === 'W').length;
+        const losses = rows.filter(r => r.result === 'L').length;
+        const roi = stake > 0 ? (lucro / stake) * 100 : null;
+        const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
+        return { picks, stake, lucro, wins, losses, roi, wr };
+      }
+
+      function buildEdgeBuckets(botRows) {
+        const bets = botRows.map(r => ({
+          edge: num(r['Edge%'] ?? r['Edge']),
+          result: r._resultKey,
+          stake: r._stakeRealNum ?? 0,
+          lucro: r._lucroRealLocal ?? 0
+        })).filter(b => b.edge !== null && b.edge >= 0);
+
+        return EDGE_BUCKET_DEFS.map(b => {
+          const rows = bets.filter(r => r.edge >= b.min && r.edge < b.max);
+          const avgEdge = rows.length > 0 ? rows.reduce((s, r) => s + r.edge, 0) / rows.length : null;
+          return { label: b.label, ...reduceBucketStats(rows), avgEdge };
+        });
+      }
+
+      // Action Engine/Learning Center's edge-bucket filter is genuinely
+      // stricter than buildEdgeBuckets() above (also requires a real,
+      // confirmed odds value >1.0 and a settled W/L/P result, excluding
+      // pending bets from the picks count) — a pre-existing difference in
+      // this codebase, not something Phase 29.2 may unify, since doing so
+      // would change displayed values. Kept as its own named, shared
+      // builder so the two consumers that already agreed with each other
+      // stop each independently re-deriving it.
+      function buildEdgeBucketsStrict(botRows) {
+        const bets = botRows.map(r => {
+          const edge = num(r['Edge%'] ?? r['Edge']);
+          const odds = r._oddRealNum;
+          if (edge === null || edge < 0 || odds === null || odds <= 1.0) return null;
+          if (!['W', 'L', 'P'].includes(r._resultKey)) return null;
+          return { edge, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
+        }).filter(b => b !== null);
+
+        return EDGE_BUCKET_DEFS.map(b => {
+          const rows = bets.filter(r => r.edge >= b.min && r.edge < b.max);
+          return { label: b.label, ...reduceBucketStats(rows) };
+        });
+      }
+
+      function buildOddsBuckets(closedRows, botRows) {
+        return ODDS_BUCKET_DEFS.map(b => {
+          const rows = closedRows.filter(r => r.odd !== null && r.odd >= b.min && r.odd < b.max);
+          const botInRange = botRows.filter(r => {
+            const o = r._oddRealNum;
+            const edge = num(r['Edge%'] ?? r['Edge']);
+            return o !== null && o >= b.min && o < b.max && edge !== null;
+          });
+          const avgEdge = botInRange.length > 0
+            ? botInRange.reduce((s, r) => s + (num(r['Edge%'] ?? r['Edge']) || 0), 0) / botInRange.length
+            : null;
+          return { label: b.label, ...reduceBucketStats(rows), avgEdge };
+        });
+      }
+
+      // Returns all 7 weekdays unconditionally (including zero-pick days) —
+      // Strategy Validation's own day-of-week section displays every day;
+      // callers that only want days with a minimum sample (Action Engine,
+      // Learning Center) filter this result themselves, exactly as their
+      // original inline code filtered its own freshly-computed array.
+      function buildWeekdayBuckets(closedRows) {
+        return WEEKDAY_LABELS.map((label, idx) => {
+          const jsDay = idx === 6 ? 0 : idx + 1;
+          const rows = closedRows.filter(r => { const d = parseDateSafe(r.date); return d && d.getDay() === jsDay; });
+          return { label, ...reduceBucketStats(rows) };
+        });
+      }
+
+      function buildHourBuckets(botRows) {
+        const betsWithTime = botRows.map(r => {
+          const timeStr = cleanString(r['Hora'] || r['Hour'] || r['KickoffTime'] || r['Time'] || r['Kickoff'] || '');
+          const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+          const hour = match ? parseInt(match[1], 10) : null;
+          return { hour, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
+        }).filter(b => b.hour !== null);
+
+        return HOUR_BUCKET_DEFS.map(b => {
+          const rows = betsWithTime.filter(r => r.hour >= b.min && r.hour < b.max);
+          return { label: b.label, ...reduceBucketStats(rows) };
+        });
+      }
+
+      // Matches renderAnalyticsPerformers()'s original inline computation
+      // exactly (min 2 picks, top/worst 3) — the only current consumer.
+      function buildTopWorstPerformers(byLeague, { minPicks = 2, topN = 3 } = {}) {
+        const qualified = byLeague.filter(r => r.apostas >= minPicks);
+        const sorted = [...qualified].sort((a, b) => b.roi - a.roi);
+        const top = sorted.slice(0, topN);
+        const worst = sorted.filter(r => r.roi < 0).slice(-topN).reverse();
+        return { top, worst };
+      }
+
+      // One dataset's complete aggregate bundle. byLeague/byMarket/bySource
+      // already carry the same {league:r.key}/{market:r.key}/
+      // {sourceLabel:r.key} rename every original call site applied after
+      // calling buildAnalytics() — callers that sort/filter these arrays
+      // must copy first ([...arr]) before any mutating array method,
+      // exactly as they always had to when buildAnalytics()'s own return
+      // value was being sorted directly.
+      function buildAnalyticsDataset(closedRows, botRows) {
+        return {
+          byLeague: buildAnalytics(closedRows, 'league').map(r => ({ ...r, league: r.key })),
+          byMarket: buildAnalytics(closedRows, 'market').map(r => ({ ...r, market: r.key })),
+          bySource: buildAnalytics(closedRows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key })),
+          byEdge: buildEdgeBuckets(botRows),
+          byEdgeStrict: buildEdgeBucketsStrict(botRows),
+          byOdds: buildOddsBuckets(closedRows, botRows),
+          byWeekday: buildWeekdayBuckets(closedRows),
+          byHour: buildHourBuckets(botRows),
+          streaks: computeStreaks(closedRows),
+          summary: {
+            ...reduceBucketStats(closedRows),
+            totalSettledBot: botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length
+          }
+        };
+      }
+
+      // Single memoized entry point every Analytics section calls instead
+      // of recomputing its own aggregate. Reuses the existing
+      // memoizeDataFn()/_dataGeneration mechanism (Phase 26.39) rather than
+      // introducing a second caching mechanism — cheap on repeat calls
+      // within the same render pass, and automatically invalidated by
+      // every mutation path that already calls markDirty()/
+      // invalidateDataCache().
+      const getAnalyticsAggregates = memoizeDataFn('getAnalyticsAggregates', function () {
+        const allTimeClosedRows = getFilteredRealClosedRows(getSummaryFilters());
+        const allTimeBotRows = getRealResolvedBotHistory();
+        const seasonClosedRows = getFilteredRealClosedRows(getSummaryFilters(), true);
+        const seasonBotRows = getSessionRealResolvedBotHistory();
+
+        return {
+          allTime: buildAnalyticsDataset(allTimeClosedRows, allTimeBotRows),
+          currentSeason: buildAnalyticsDataset(seasonClosedRows, seasonBotRows)
+        };
+      });
+
       function renderStreaks() {
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
-        const s = computeStreaks(rows);
+        const { allTime } = getAnalyticsAggregates();
+        const s = allTime.streaks;
 
         const cards = [
           { label: 'Sequência de vitórias', value: s.currentWin, note: 'Ativa', isWin: true, isCurrent: true },
@@ -6069,10 +6270,10 @@ button:disabled {
       }
 
       function renderAnalytics() {
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
-        renderAnalyticsTable('analyticsLeagueRows', buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key })), 'league');
-        renderAnalyticsTable('analyticsMarketRows', buildAnalytics(rows, 'market').map(r => ({ ...r, market: r.key })), 'market');
-        renderAnalyticsTable('analyticsSourceRows', buildAnalytics(rows, 'sourceLabel').map(r => ({ ...r, sourceLabel: r.key })), 'sourceLabel');
+        const { allTime } = getAnalyticsAggregates();
+        renderAnalyticsTable('analyticsLeagueRows', allTime.byLeague, 'league');
+        renderAnalyticsTable('analyticsMarketRows', allTime.byMarket, 'market');
+        renderAnalyticsTable('analyticsSourceRows', allTime.bySource, 'sourceLabel');
         renderStreaks();
         try { renderAnalyticsPerformers(); } catch (e) { console.error('renderAnalyticsPerformers', e); }
         try { renderLeagueClassification(); } catch (e) { console.error('renderLeagueClassification', e); }
@@ -13023,37 +13224,11 @@ button:disabled {
         const wrap = document.getElementById('edgeValidationWrap');
         if (!wrap) return;
 
-        // Source: raw bot history rows — same underlying data, with Edge% field available
-        const botRows = getRealResolvedBotHistory();
-        const bets = botRows
-          .map(r => ({
-            edge: num(r['Edge%'] ?? r['Edge']),
-            result: r._resultKey,
-            stake: r._stakeRealNum ?? 0,
-            lucro: r._lucroRealLocal ?? 0
-          }))
-          .filter(b => b.edge !== null && b.edge >= 0);
-
-        const BUCKETS = [
-          { label: '0–2%',  min: 0, max: 2 },
-          { label: '2–4%',  min: 2, max: 4 },
-          { label: '4–6%',  min: 4, max: 6 },
-          { label: '6–8%',  min: 6, max: 8 },
-          { label: '8%+',   min: 8, max: Infinity }
-        ];
-
-        const buckets = BUCKETS.map(b => {
-          const rows = bets.filter(r => r.edge >= b.min && r.edge < b.max);
-          const picks = rows.length;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          const avgEdge = picks > 0 ? rows.reduce((s, r) => s + r.edge, 0) / picks : null;
-          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr, avgEdge };
-        });
+        // Phase 29.2 — sourced from the shared aggregation cache; this
+        // section's own bucket definitions/fields were already byte-identical
+        // to buildEdgeBuckets()'s output.
+        const { allTime } = getAnalyticsAggregates();
+        const buckets = allTime.byEdge;
 
         // KPI summaries (over buckets with at least 1 pick)
         const active = buckets.filter(b => b.picks > 0);
@@ -13163,6 +13338,7 @@ button:disabled {
 
         const botRows = getRealResolvedBotHistory();
         const closedRows = getFilteredRealClosedRows(getSummaryFilters());
+        const { allTime } = getAnalyticsAggregates();
 
         if (!closedRows.length && !botRows.length) {
           wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem histórico real para análise.</div>`;
@@ -13195,34 +13371,9 @@ button:disabled {
         }
 
         // ── A: Edge vs ROI with Sample Quality ──────────────────
-        const edgeBets = botRows
-          .map(r => ({
-            edge: num(r['Edge%'] ?? r['Edge']),
-            result: r._resultKey,
-            stake: r._stakeRealNum ?? 0,
-            lucro: r._lucroRealLocal ?? 0
-          }))
-          .filter(b => b.edge !== null && b.edge >= 0);
-
-        const EDGE_BUCKETS = [
-          { label: '0–2%',  min: 0, max: 2 },
-          { label: '2–4%',  min: 2, max: 4 },
-          { label: '4–6%',  min: 4, max: 6 },
-          { label: '6–8%',  min: 6, max: 8 },
-          { label: '8%+',   min: 8, max: Infinity }
-        ];
-
-        const edgeBuckets = EDGE_BUCKETS.map(b => {
-          const rows = edgeBets.filter(r => r.edge >= b.min && r.edge < b.max);
-          const picks = rows.length;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr };
-        });
+        // Phase 29.2 — shared cache (byEdge also carries avgEdge, unused here,
+        // matching the original inline computation's fields exactly otherwise).
+        const edgeBuckets = allTime.byEdge;
 
         const edgeSection = subSection('A — Edge vs ROI', 'Sample quality por bucket de edge previsto',
           simpleTable(['Edge Range', 'Picks', 'Taxa de Acerto', 'ROI', 'P/L', 'Sample Quality'],
@@ -13237,33 +13388,8 @@ button:disabled {
               </tr>`).join('')));
 
         // ── B: Odds Analysis ─────────────────────────────────────
-        const ODDS_BUCKETS = [
-          { label: '1.00–1.49', min: 1.00, max: 1.50 },
-          { label: '1.50–1.79', min: 1.50, max: 1.80 },
-          { label: '1.80–1.99', min: 1.80, max: 2.00 },
-          { label: '2.00–2.19', min: 2.00, max: 2.20 },
-          { label: '2.20+',     min: 2.20, max: Infinity }
-        ];
-
-        const oddsBuckets = ODDS_BUCKETS.map(b => {
-          const rows = closedRows.filter(r => r.odd !== null && r.odd >= b.min && r.odd < b.max);
-          const picks = rows.length;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          const botInRange = botRows.filter(r => {
-            const o = r._oddRealNum;
-            const edge = num(r['Edge%'] ?? r['Edge']);
-            return o !== null && o >= b.min && o < b.max && edge !== null;
-          });
-          const avgEdge = botInRange.length > 0
-            ? botInRange.reduce((s, r) => s + (num(r['Edge%'] ?? r['Edge']) || 0), 0) / botInRange.length
-            : null;
-          return { label: b.label, picks, stake, lucro, wins, losses, roi, wr, avgEdge };
-        });
+        // Phase 29.2 — shared cache; identical bucket defs/fields.
+        const oddsBuckets = allTime.byOdds;
 
         const oddsSection = subSection('B — Odds Analysis', 'Performance real por intervalo de odds',
           simpleTable(['Odds Range', 'Picks', 'Taxa de Acerto', 'ROI', 'P/L', 'Avg Edge'],
@@ -13287,12 +13413,13 @@ button:disabled {
           leagueEdgeMap.get(lg).push(edge);
         });
 
-        const leagueData = buildAnalytics(closedRows, 'league')
+        // Phase 29.2 — allTime.byLeague already carries .league (== r.key).
+        const leagueData = allTime.byLeague
           .map(r => {
             const key = cleanString(r.key || '').toLowerCase();
             const edges = leagueEdgeMap.get(key) || [];
             const avgEdge = edges.length > 0 ? edges.reduce((s, e) => s + e, 0) / edges.length : null;
-            return { ...r, league: r.key, avgEdge };
+            return { ...r, avgEdge };
           })
           .filter(r => r.apostas >= 3)
           .sort((a, b) => b.roi - a.roi);
@@ -13317,9 +13444,8 @@ button:disabled {
           : subSection('C — Validação de Ligas', '', `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem ligas com 3+ picks.</div>`);
 
         // ── D: Market Validation ──────────────────────────────────
-        const marketData = buildAnalytics(closedRows, 'market')
-          .map(r => ({ ...r, market: r.key }))
-          .sort((a, b) => b.apostas - a.apostas);
+        // Phase 29.2 — copy before sort(): allTime.byMarket is shared/cached.
+        const marketData = [...allTime.byMarket].sort((a, b) => b.apostas - a.apostas);
 
         const marketSection = marketData.length
           ? subSection('D — Validação de Mercados', 'Rentabilidade real por tipo de mercado',
@@ -13335,23 +13461,8 @@ button:disabled {
           : subSection('D — Validação de Mercados', '', `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem dados de mercado.</div>`);
 
         // ── E: Day of Week Analysis ───────────────────────────────
-        const DAY_LABELS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-        // JS getDay(): 0=Sun 1=Mon ... 6=Sat — map idx (0=Mon) to jsDay
-        const dayBuckets = DAY_LABELS.map((label, idx) => {
-          const jsDay = idx === 6 ? 0 : idx + 1;
-          const rows = closedRows.filter(r => {
-            const d = parseDateSafe(r.date);
-            return d && d.getDay() === jsDay;
-          });
-          const picks = rows.length;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          return { label, picks, stake, lucro, wins, losses, roi, wr };
-        });
+        // Phase 29.2 — shared cache (all 7 days, unfiltered — matches original).
+        const dayBuckets = allTime.byWeekday;
 
         const daySection = subSection('E — Day of Week Analysis', 'Efeito do dia da semana na performance real',
           simpleTable(['Dia', 'Picks', 'Taxa de Acerto', 'ROI', 'P/L'],
@@ -13365,37 +13476,16 @@ button:disabled {
               </tr>`).join('')));
 
         // ── F: Kickoff Time Analysis ──────────────────────────────
-        const TIME_BUCKETS = [
-          { label: '00–05', min: 0,  max: 6  },
-          { label: '06–11', min: 6,  max: 12 },
-          { label: '12–17', min: 12, max: 18 },
-          { label: '18–23', min: 18, max: 24 }
-        ];
-
-        const betsWithTime = botRows.map(r => {
-          const timeStr = cleanString(r['Hora'] || r['Hour'] || r['KickoffTime'] || r['Time'] || r['Kickoff'] || '');
-          const match = timeStr.match(/(\d{1,2}):(\d{2})/);
-          const hour = match ? parseInt(match[1], 10) : null;
-          return { hour, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
-        }).filter(b => b.hour !== null);
+        // Phase 29.2 — shared cache; TIME_BUCKETS is exhaustive over 0–24h, so
+        // "no timed bets at all" is equivalent to every bucket having 0 picks.
+        const timeBuckets = allTime.byHour;
+        const hasAnyTimedBets = timeBuckets.some(b => b.picks > 0);
 
         let kickoffSection;
-        if (!betsWithTime.length) {
+        if (!hasAnyTimedBets) {
           kickoffSection = subSection('F — Kickoff Time Analysis', '',
             `<div class="note" style="padding:12px;text-align:center;opacity:0.5;">Sem dados de horário disponíveis nos registos de apostas.</div>`);
         } else {
-          const timeBuckets = TIME_BUCKETS.map(b => {
-            const rows = betsWithTime.filter(r => r.hour >= b.min && r.hour < b.max);
-            const picks = rows.length;
-            const stake = sum(rows.map(r => r.stake));
-            const lucro = sum(rows.map(r => r.lucro));
-            const wins = rows.filter(r => r.result === 'W').length;
-            const losses = rows.filter(r => r.result === 'L').length;
-            const roi = stake > 0 ? (lucro / stake) * 100 : null;
-            const wr = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-            return { label: b.label, picks, stake, lucro, roi, wr };
-          });
-
           kickoffSection = subSection('F — Kickoff Time Analysis', 'Performance por janela horária',
             simpleTable(['Hora', 'Picks', 'Taxa de Acerto', 'ROI', 'P/L'],
               timeBuckets.map(b => `
@@ -13409,8 +13499,10 @@ button:disabled {
         }
 
         // ── G: Strategy Scorecard ─────────────────────────────────
-        const globalStake = sum(closedRows.map(r => r.stake));
-        const globalRoi = globalStake > 0 ? (sum(closedRows.map(r => r.lucro)) / globalStake) * 100 : null;
+        // Phase 29.2 — allTime.summary already carries the identical
+        // stake/roi computed over closedRows.
+        const globalStake = allTime.summary.stake;
+        const globalRoi = allTime.summary.roi;
 
         function bestOf(arr, roiField) { return arr.filter(r => (r[roiField] ?? r.roi) !== null).sort((a, b) => (b[roiField] ?? b.roi) - (a[roiField] ?? a.roi))[0] ?? null; }
         function worstOf(arr, roiField) { return arr.filter(r => (r[roiField] ?? r.roi) !== null).sort((a, b) => (a[roiField] ?? a.roi) - (b[roiField] ?? b.roi))[0] ?? null; }
@@ -13535,7 +13627,8 @@ button:disabled {
         if (!wrap) return;
 
         const botRows = getRealResolvedBotHistory();
-        const totalSettled = botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
+        // Phase 29.2 — same figure the shared cache's summary already computes.
+        const totalSettled = getAnalyticsAggregates().allTime.summary.totalSettledBot;
 
         const bets = botRows.map(r => {
           const edge = num(r['Edge%'] ?? r['Edge']);
@@ -13803,6 +13896,7 @@ button:disabled {
 
         const closedRows = getFilteredRealClosedRows(getSummaryFilters());
         const botRows    = getRealResolvedBotHistory();
+        const { allTime } = getAnalyticsAggregates();
 
         if (!closedRows.length) {
           wrap.innerHTML = `<div class="note" style="padding:20px;text-align:center;opacity:0.5;">Sem histórico real para gerar recomendações.</div>`;
@@ -13842,48 +13936,28 @@ button:disabled {
         }
 
         // ── League Recommendations (min 5 picks) ──────────────
-        const leagueRecs = buildAnalytics(closedRows, 'league')
-          .map(r => ({ ...r, league: r.key }))
+        // Phase 29.2 — sourced from the shared cache (already carries .league).
+        const leagueRecs = allTime.byLeague
           .filter(r => r.apostas >= 5)
           .map(r => ({ ...r, action: getAction(r.roi, r.winRate) }))
           .sort((a, b) => b.roi - a.roi);
 
         // ── Market Recommendations (min 3 picks) ──────────────
-        const marketRecs = buildAnalytics(closedRows, 'market')
-          .map(r => ({ ...r, market: r.key }))
+        const marketRecs = allTime.byMarket
           .filter(r => r.apostas >= 3)
           .map(r => ({ ...r, action: getAction(r.roi, r.winRate) }))
           .sort((a, b) => b.roi - a.roi);
 
         // ── Edge Buckets ──────────────────────────────────────
-        const EDGE_DEFS = [
-          { label: '0–2%',  min: 0, max: 2 },
-          { label: '2–4%',  min: 2, max: 4 },
-          { label: '4–6%',  min: 4, max: 6 },
-          { label: '6–8%',  min: 6, max: 8 },
-          { label: '8%+',   min: 8, max: Infinity }
-        ];
-
-        const edgeBets = botRows.map(r => {
-          const edge = num(r['Edge%'] ?? r['Edge']);
-          const odds  = r._oddRealNum;
-          if (edge === null || edge < 0 || odds === null || odds <= 1.0) return null;
-          if (!['W', 'L', 'P'].includes(r._resultKey)) return null;
-          return { edge, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
-        }).filter(b => b !== null);
-
-        const edgeBuckets = EDGE_DEFS.map(b => {
-          const rows   = edgeBets.filter(r => r.edge >= b.min && r.edge < b.max);
-          const picks  = rows.length;
-          const stake  = sum(rows.map(r => r.stake));
-          const lucro  = sum(rows.map(r => r.lucro));
-          const wins   = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          const action = (roi !== null && wr !== null) ? getAction(roi, wr) : null;
-          return { label: b.label, picks, roi, wr, action };
-        });
+        // Phase 29.2 — byEdgeStrict (not byEdge): this section's own filter
+        // additionally requires real odds > 1.0 and a settled W/L/P result,
+        // matching Learning Center's identical filter — see
+        // buildEdgeBucketsStrict()'s own comment for why this is kept
+        // distinct from Edge Validation/Strategy Validation's byEdge.
+        const edgeBuckets = allTime.byEdgeStrict.map(b => ({
+          ...b,
+          action: (b.roi !== null && b.wr !== null) ? getAction(b.roi, b.wr) : null
+        }));
 
         const activeEdge = edgeBuckets.filter(b => b.picks >= 3 && b.roi !== null);
         let edgeInverted = false;
@@ -13897,24 +13971,18 @@ button:disabled {
         }
 
         // ── Weekday Recommendations (min 3 picks) ────────────
-        const DAY_LABELS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-        const weekdayRecs = DAY_LABELS.map((label, idx) => {
-          const jsDay = idx === 6 ? 0 : idx + 1;
-          const rows   = closedRows.filter(r => { const d = parseDateSafe(r.date); return d && d.getDay() === jsDay; });
-          const picks  = rows.length;
-          if (picks < 3) return null;
-          const stake  = sum(rows.map(r => r.stake));
-          const lucro  = sum(rows.map(r => r.lucro));
-          const wins   = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          return (roi !== null && wr !== null) ? { label, picks, roi, wr, action: getAction(roi, wr) } : null;
-        }).filter(r => r !== null);
+        // Phase 29.2 — allTime.byWeekday holds all 7 days unfiltered;
+        // apply the same picks>=3 + roi/wr-non-null filter the original
+        // inline computation applied to its own freshly-built array.
+        const weekdayRecs = allTime.byWeekday
+          .filter(b => b.picks >= 3 && b.roi !== null && b.wr !== null)
+          .map(b => ({ ...b, action: getAction(b.roi, b.wr) }));
 
         // ── Confidence Score (0–100) ──────────────────────────
-        const settledWithEdge = edgeBets.length;
-        const totalSettled    = botRows.filter(r => ['W', 'L', 'P'].includes(r._resultKey)).length;
+        // Phase 29.2 — equivalent to the original edgeBets.length (total
+        // qualifying bets across all buckets, before bucketing).
+        const settledWithEdge = sum(allTime.byEdgeStrict.map(b => b.picks));
+        const totalSettled    = allTime.summary.totalSettledBot;
 
         const samplePts  = Math.min(settledWithEdge / 200 * 25, 25);
         const leaguePts  = leagueRecs.length > 0 ? (leagueRecs.filter(r => r.roi >= 0).length / leagueRecs.length) * 25 : 0;
@@ -14097,53 +14165,23 @@ button:disabled {
         }
 
         // ── Core data ─────────────────────────────────────────
-        const totalSettled = botRows.filter(r => ['W','L','P'].includes(r._resultKey)).length;
-        const leagueData   = buildAnalytics(closedRows, 'league').map(r => ({ ...r, league: r.key }));
-        const marketData   = buildAnalytics(closedRows, 'market').map(r => ({ ...r, market: r.key }));
+        // Phase 29.2 — sourced from the shared cache. byEdgeStrict (not
+        // byEdge) matches this section's original filter exactly — see
+        // buildEdgeBucketsStrict()'s comment for why the two must stay
+        // distinct. byWeekday holds all 7 days unfiltered; apply the same
+        // picks>=3 + roi/wr-non-null filter the original inline code did.
+        const { allTime } = getAnalyticsAggregates();
+        const totalSettled = allTime.summary.totalSettledBot;
+        const leagueData   = allTime.byLeague;
+        const marketData   = allTime.byMarket;
         const qualLeagues  = leagueData.filter(r => r.apostas >= 5);
         const qualMarkets  = marketData.filter(r => r.apostas >= 3);
 
-        const DAY_LABELS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-        const weekdayData = DAY_LABELS.map((label, idx) => {
-          const jsDay = idx === 6 ? 0 : idx + 1;
-          const rows  = closedRows.filter(r => { const d = parseDateSafe(r.date); return d && d.getDay() === jsDay; });
-          const picks = rows.length;
-          if (picks < 3) return null;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins  = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          return (roi !== null && wr !== null) ? { label, picks, roi, wr } : null;
-        }).filter(r => r !== null);
+        const weekdayData = allTime.byWeekday.filter(r => r.picks >= 3 && r.roi !== null && r.wr !== null);
 
-        const edgeBets = botRows.map(r => {
-          const edge = num(r['Edge%'] ?? r['Edge']);
-          const odds = r._oddRealNum;
-          if (edge === null || edge < 0 || odds === null || odds <= 1.0) return null;
-          if (!['W','L','P'].includes(r._resultKey)) return null;
-          return { edge, result: r._resultKey, stake: r._stakeRealNum ?? 0, lucro: r._lucroRealLocal ?? 0 };
-        }).filter(b => b !== null);
+        const edgeBuckets = allTime.byEdgeStrict;
 
-        const EDGE_DEFS = [
-          { label: '0–2%', min: 0, max: 2 }, { label: '2–4%', min: 2, max: 4 },
-          { label: '4–6%', min: 4, max: 6 }, { label: '6–8%', min: 6, max: 8 },
-          { label: '8%+',  min: 8, max: Infinity }
-        ];
-        const edgeBuckets = EDGE_DEFS.map(b => {
-          const rows  = edgeBets.filter(r => r.edge >= b.min && r.edge < b.max);
-          const picks = rows.length;
-          const stake = sum(rows.map(r => r.stake));
-          const lucro = sum(rows.map(r => r.lucro));
-          const wins  = rows.filter(r => r.result === 'W').length;
-          const losses = rows.filter(r => r.result === 'L').length;
-          const roi = stake > 0 ? (lucro / stake) * 100 : null;
-          const wr  = (wins + losses) > 0 ? (wins / (wins + losses)) * 100 : null;
-          return { label: b.label, picks, roi, wr };
-        });
-
-        const settledWithEdge = edgeBets.length;
+        const settledWithEdge = sum(allTime.byEdgeStrict.map(b => b.picks));
         const edgeCovPct = totalSettled > 0 ? (settledWithEdge / totalSettled) * 100 : 0;
         const activeEdge = edgeBuckets.filter(b => b.picks >= 3 && b.roi !== null);
         let edgeInverted = false;
@@ -14347,8 +14385,8 @@ button:disabled {
         const wrap = document.getElementById('leagueClassificationWrap');
         if (!wrap) return;
 
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
-        const leagueData = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
+        const { allTime } = getAnalyticsAggregates();
+        const leagueData = allTime.byLeague;
 
         const promote = leagueData.filter(r => r.roi > 5 && r.apostas >= 10).sort((a, b) => b.roi - a.roi);
         const reduce = leagueData.filter(r => r.roi < -5 && r.apostas >= 10).sort((a, b) => a.roi - b.roi);
@@ -14391,10 +14429,9 @@ button:disabled {
         const wrap = document.getElementById('marketIntelligenceWrap');
         if (!wrap) return;
 
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
-        const marketData = buildAnalytics(rows, 'market')
-          .map(r => ({ ...r, market: r.key }))
-          .sort((a, b) => b.apostas - a.apostas);
+        const { allTime } = getAnalyticsAggregates();
+        // Copy before sort() — allTime.byMarket is a shared, cached array.
+        const marketData = [...allTime.byMarket].sort((a, b) => b.apostas - a.apostas);
 
         if (!marketData.length) {
           wrap.innerHTML = `<div class="note" style="padding:16px;text-align:center;opacity:0.5;">Sem dados suficientes.</div>`;
@@ -14489,14 +14526,8 @@ button:disabled {
       }
 
       function renderAnalyticsPerformers() {
-        const rows = getFilteredRealClosedRows(getSummaryFilters());
-        const leagueData = buildAnalytics(rows, 'league').map(r => ({ ...r, league: r.key }));
-
-        const qualified = leagueData.filter(r => r.apostas >= 2);
-
-        const sorted = [...qualified].sort((a, b) => b.roi - a.roi);
-        const top3 = sorted.slice(0, 3);
-        const worst3 = sorted.filter(r => r.roi < 0).slice(-3).reverse();
+        const { allTime } = getAnalyticsAggregates();
+        const { top: top3, worst: worst3 } = buildTopWorstPerformers(allTime.byLeague);
 
         const topWrap = document.getElementById('analyticsTopPerformers');
         const worstWrap = document.getElementById('analyticsWorstPerformers');
@@ -14515,8 +14546,7 @@ button:disabled {
 
         const streakAnalytics = document.getElementById('streakCardsAnalytics');
         if (streakAnalytics) {
-          const allRows = getFilteredRealClosedRows(getSummaryFilters());
-          const s = computeStreaks(allRows);
+          const s = allTime.streaks;
           streakAnalytics.innerHTML = [
             { label: 'Sequência de vitórias', value: s.currentWin, note: 'Ativa' },
             { label: 'Sequência de derrotas', value: s.currentLoss, note: 'Ativa' },
