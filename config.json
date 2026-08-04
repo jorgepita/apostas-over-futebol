@@ -31,7 +31,10 @@
     "mls_next_pro": { "name": "MLS Next Pro", "country": "USA" },
     "brasil": { "name": "Campeonato Brasileiro Serie A", "country": "BRA" },
     "japao": { "name": "J1 League", "country": "JPN" },
-    "coreia": { "name": "K League 1", "country": "KOR" }
+    "coreia": { "name": "K League 1", "country": "KOR" },
+    "suica": { "name": "Super League", "country": "CHE" },
+    "espanha2": { "name": "Segunda División", "country": "ESP" },
+    "portugal2": { "name": "Liga Portugal 2", "country": "PRT" }
   },
   "history": {
     "window": 12,
@@ -88,7 +91,10 @@
       "coreia": 292,
       "finlandia": 244,
       "islandia": 188,
-      "brasil": 71
+      "brasil": 71,
+      "suica": 207,
+      "espanha2": 141,
+      "portugal2": 95
     },
     "shortlist_total": 80,
     "shortlist_per_league_per_day": 4,
@@ -112,6 +118,13 @@
       "missing_fixture_void_after_hours": 72,
       "manual_void_available_after_hours": 24,
       "missing_fixture_min_attempts": 3
+    }
+  },
+  "historical": {
+    "seasons_by_league": {
+      "suica": [2024, 2025],
+      "espanha2": [2024, 2025],
+      "portugal2": [2024, 2025]
     }
   },
   "backup": {

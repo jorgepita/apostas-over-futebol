@@ -155,7 +155,7 @@ def process_league_fixtures(
     _eu_keys = {
         "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
         "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
-        "turquia",
+        "turquia", "suica", "espanha2", "portugal2",
     }
     verbose = league_key not in _eu_keys
 

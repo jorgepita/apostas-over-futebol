@@ -77,7 +77,7 @@ All persistent files are stored in the `jorgepita/apostas-over-futebol` reposito
 
 Used for two distinct purposes: fixture shortlisting and odds fetching during generation, and result settlement for every league — the sole result provider as of Phase 27.4 (football-data.org was removed entirely, see `09_Architecture_Decisions.md` ADR-004 update).
 
-- **Purpose (generation):** Fetch upcoming fixtures for all 22 leagues; fetch O2.5 and BTTS odds for shortlisted fixtures.
+- **Purpose (generation):** Fetch upcoming fixtures for all 25 leagues; fetch O2.5 and BTTS odds for shortlisted fixtures.
 - **Purpose (settlement):** Settle results for every registered league.
 - **Paid plan:** 7500 requests/day, 300 requests/minute. Limits are Railway environment configuration, not hardcoded.
 - **Base URL:** `https://v3.football.api-sports.io`. Configurable via `API_FOOTBALL_BASE` environment variable.
@@ -846,11 +846,12 @@ When `af_id` is set in the registry entry, `get_api_football_league_id()` return
 1. Add a `LeagueEntry` row to `REGISTRY` in `src/league_registry.py`.
 2. Add the league to the `leagues` section of `config.json`.
 3. Add the league ID to the `api_football.league_ids` section of `config.json`.
-4. Place a history CSV for the league at `data_raw/{key}.csv`.
+4. Place a history CSV for the league at `data_raw/{key}.csv` — built via `fetch_historical.py` (add a `LEAGUE_INFO` entry there first; note `data_raw/*.csv` is gitignored by pattern, so a genuinely new file needs `git add -f`, matching every currently-tracked league history file). If the "current" season has too few finished matches yet (e.g. bootstrapping right after a new season kicked off), add an explicit `config.json["historical"]["seasons_by_league"][key]` list pointing at the most recently completed season(s) instead of relying on the default month-based fallback.
+5. Add the league ID to `fetch_oddsapi_fixtures.py`'s `DEFAULT_LEAGUE_IDS` dict (a redundant fallback consulted only if `config.json` is missing the entry; every currently-registered league already has one — found undocumented but universally followed during the Phase 28.2 audit, added here to close the gap).
 
-That is all. `LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS`, and `REGISTRY_BY_KEY` are all regenerated automatically on the next import.
+That is all functionally required. `LEAGUE_CODE_MAP`, `API_FOOTBALL_COMPETITIONS`, `AF_SEASON_MODELS`, and `REGISTRY_BY_KEY` are all regenerated automatically on the next import; fixture-fetching, settlement, analytics (`src/league_stats.py`), and backups all read from these generically with no per-league code. `index.html`'s `LEAGUE_NORMALIZE` map (`03_Dashboard.md`) needs its own canonical + display-name entries so the dashboard recognises the league's CSV `Liga` value — dropdowns and filters themselves are populated dynamically from data, not hardcoded.
 
-**Do not** add league mappings to `update_results.py`, `config.json` (beyond the two sections above), or any other file.
+**Do not** add league mappings to `update_results.py`, `config.json` (beyond the sections above), or any other file.
 
 ### Registering two genuinely distinct competitions that share a colloquial name
 
@@ -869,7 +870,7 @@ Prior to Phase 26.42, `fetch_oddsapi_fixtures.py::fetch_fixtures_for_league_date
 football-data.org was removed entirely in Phase 27.4 (see `09_Architecture_Decisions.md` ADR-004 update) — API-Football is now the only external result provider.
 
 **Purpose:**
-1. **Fixture fetching (generation):** `fetch_oddsapi_fixtures.py` calls `/fixtures` for all 22 leagues to build the shortlist. Calls `/odds` for each shortlisted fixture to get O2.5 and BTTS odds.
+1. **Fixture fetching (generation):** `fetch_oddsapi_fixtures.py` calls `/fixtures` for all 25 leagues to build the shortlist. Calls `/odds` for each shortlisted fixture to get O2.5 and BTTS odds.
 2. **Settlement:** Used for every registered league — the sole result provider.
 
 **Authentication:** `x-apisports-key: {API_FOOTBALL_KEY}` header.
@@ -1074,12 +1075,12 @@ One gunicorn worker handles all requests serially. Concurrent requests queue and
 ### API usage
 
 **Generation per run (approximate):**
-- `fetch_oddsapi_fixtures.py`: 22 leagues × `days_ahead` (5) dates = up to ~110 `/fixtures` calls, plus up to 80 `/odds` calls. Total: up to ~190 API-Football requests per run.
-- Two generation runs per day (17:00 main, 23:00 top-up). Top-up is subset of 8 leagues. Approximate total: ~150 + ~60 = ~210 requests/day for generation.
+- `fetch_oddsapi_fixtures.py`: 25 leagues × `days_ahead` (5) dates = up to ~125 `/fixtures` calls, plus up to 80 `/odds` calls. Total: up to ~205 API-Football requests per run.
+- Two generation runs per day (17:00 main, 23:00 top-up). Top-up is subset of 8 leagues (unaffected by Phase 28.2 — all three new leagues are European, not top-up-eligible). Approximate total: ~165 + ~60 = ~225 requests/day for generation.
 
 **Settlement per run (approximate):**
-- API-Football: up to 22 leagues × 1 date call = 22 AF requests per settlement run (all leagues, since Phase 27.4 made API-Football the sole provider — previously only the 13 blocked/non-EU leagues queried AF directly and 6 EU leagues queried football-data.org first).
-- Two settlement runs per day: ~44 AF requests/day for settlement.
+- API-Football: up to 25 leagues × 1 date call = 25 AF requests per settlement run (all leagues, since Phase 27.4 made API-Football the sole provider — previously only the 13 blocked/non-EU leagues queried AF directly and 6 EU leagues queried football-data.org first).
+- Two settlement runs per day: ~50 AF requests/day for settlement.
 
 **Total daily API-Football usage:** ~250 requests/day, well within the 7500-request paid plan limit.
 

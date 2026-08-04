@@ -71,6 +71,14 @@ REGISTRY: list[LeagueEntry] = [
     LeagueEntry("brasil",        "Campeonato Brasileiro Serie A", "BRA", "brasil",       "Brazil",      "Série A",             71,  "calendar"),
     LeagueEntry("japao",         "J1 League",                     "JPN", "japao",        "Japan",       "J1 League",           98,  "calendar"),
     LeagueEntry("coreia",        "K League 1",                    "KOR", "coreia",       "South Korea", "K League 1",          292, "calendar"),
+    # ── EU leagues (Phase 28.2) ─────────────────────────────────────────────
+    # All three are "european" season model (Jul/Aug-May/Jun); confirmed live
+    # against API-Football's /leagues endpoint 2026-08-03. "code" follows the
+    # post-Phase-27.4 convention of using the key itself (no football-data.org
+    # legacy code exists for these, unlike the older EU entries above).
+    LeagueEntry("suica",         "Super League",                  "CHE", "suica",        "Switzerland", "Super League",        207),
+    LeagueEntry("espanha2",      "Segunda División",              "ESP", "espanha2",     "Spain",       "Segunda División",    141),
+    LeagueEntry("portugal2",     "Liga Portugal 2",               "PRT", "portugal2",    "Portugal",    "Segunda Liga",        95),
 ]
 
 # ── Fast lookups ──────────────────────────────────────────────────────────────

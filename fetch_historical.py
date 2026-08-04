@@ -34,6 +34,9 @@ LEAGUE_INFO = {
     "coreia": {"name": "K League 1", "country": "Korea Republic", "id": 292},
     "finlandia": {"name": "Veikkausliiga", "country": "Finland", "id": 244},
     "islandia": {"name": "Besta deild", "country": "Iceland", "id": 188},
+    "suica": {"name": "Super League", "country": "Switzerland", "id": 207},
+    "espanha2": {"name": "Segunda División", "country": "Spain", "id": 141},
+    "portugal2": {"name": "Segunda Liga", "country": "Portugal", "id": 95},
 }
 
 API_CALL_MIN_INTERVAL = 0.28

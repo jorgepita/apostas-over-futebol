@@ -251,7 +251,7 @@ These files reflect stable decisions. Modify only when there is a structural rea
 
 | File | Why it is stable |
 |---|---|
-| `src/league_registry.py` | 22 leagues are defined and working. Change only to add a league or fix a metadata error. |
+| `src/league_registry.py` | 25 leagues are defined and working. Change only to add a league or fix a metadata error. |
 | `Procfile` | Gunicorn configuration is fixed. `--workers 1` is intentional (ADR-003). |
 | `runtime.txt` | Python version. Change only for a deliberate upgrade. |
 | `requirements.txt` | Dependencies are minimal and stable. Add only when a new library is genuinely needed. |

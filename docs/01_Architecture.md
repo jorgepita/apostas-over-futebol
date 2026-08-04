@@ -138,7 +138,7 @@ Data flow directions:
 
 **Purpose:** The sole result provider for settlement, for every registered league (football-data.org was removed entirely in Phase 27.4 — see `09_Architecture_Decisions.md` ADR-004 update). Also used for fixture download in pick generation.
 
-**Used for:** All 22 registered leagues — Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig, and all non-EU leagues (MLS, MLS Next Pro, Nordic, Asian, Brazilian).
+**Used for:** All 25 registered leagues — Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig, Swiss Super League, Segunda División (Spain), Liga Portugal 2 (Phase 28.2), and all non-EU leagues (MLS, MLS Next Pro, Nordic, Asian, Brazilian).
 
 **Rate limit:** Paid subscription — 7500 requests/day, 300 requests/minute.
 

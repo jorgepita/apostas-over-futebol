@@ -284,6 +284,7 @@ def apply_market_rules(rows: list[dict], bankroll: float, rules: dict, label: st
     _eu_keys_mr = {
         "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
         "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal", "turquia",
+        "suica", "espanha2", "portugal2",
     }
     df_before_dyn = df.copy()
     df = df[

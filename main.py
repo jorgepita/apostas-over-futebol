@@ -351,7 +351,7 @@ def main(topup_mode: bool = False):
         eu = {
             "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
             "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
-            "turquia",
+            "turquia", "suica", "espanha2", "portugal2",
         }
         if df is None or df.empty:
             print(f"[TRACE] {label}: dataframe vazio")
@@ -376,7 +376,7 @@ def main(topup_mode: bool = False):
         eu = {
             "premier", "championship", "alemanha", "alemanha2", "espanha", "franca",
             "franca2", "italia", "italia2", "paises_baixos", "belgica", "portugal",
-            "turquia",
+            "turquia", "suica", "espanha2", "portugal2",
         }
         if before is None or before.empty:
             return

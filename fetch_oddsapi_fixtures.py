@@ -51,6 +51,9 @@ DEFAULT_LEAGUE_IDS = {
     "islandia": 188,
     # Brazilian Serie A: calendar-year season, BTTS-favored profile, O2.5 medium confidence only
     "brasil": 71,
+    "suica": 207,
+    "espanha2": 141,
+    "portugal2": 95,
 }
 
 LEAGUE_INFO_EXT = {

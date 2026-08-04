@@ -85,7 +85,7 @@ All persistent data lives in files committed to the GitHub repository. The Railw
 | Backend server | Flask + gunicorn, hosted on Railway |
 | Scheduled automation | GitHub Actions (`bot.yml`) |
 | Frontend | Single HTML file (`index.html`) — all JS inline, no build step |
-| Result API | API-Football v3 (sole provider for all 22 leagues since Phase 27.4) |
+| Result API | API-Football v3 (sole provider for all 25 leagues since Phase 27.4) |
 | Notifications | Telegram Bot API |
 | Persistence | GitHub repository (file storage via GitHub Contents API) |
 | Python dependencies | pandas, requests, flask, flask-cors, gunicorn, python-dotenv |
@@ -165,9 +165,9 @@ A minimal Flask API with four endpoints. Its only job is to proxy `cloud_state.j
 
 Single source of truth for all league metadata. To add a league, edit only this file.
 
-**22 registered leagues, all resolved through API-Football (sole provider since Phase 27.4):**
+**25 registered leagues, all resolved through API-Football (sole provider since Phase 27.4):**
 
-European (`"european"` season model): Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig.
+European (`"european"` season model): Premier League, LaLiga, Ligue 1, Serie A, Eredivisie, Championship, Primeira Liga, Bundesliga, 2. Bundesliga, Serie B, Ligue 2, Jupiler Pro League, Super Lig, Swiss Super League, Segunda División (Spain), Liga Portugal 2 (Phase 28.2).
 
 Non-European (`"calendar"` season model): Eliteserien, Allsvenskan, Veikkausliiga, Besta deild, MLS, MLS Next Pro (af_id=909, fully independent from MLS), Campeonato Brasileiro Série A, J1 League, K League 1.
 

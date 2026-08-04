@@ -1,0 +1,936 @@
+Date,HomeTeam,AwayTeam,FTHG,FTAG
+15/08/2024,Granada CF,Albacete,1,2
+16/08/2024,Cadiz,Zaragoza,0,4
+16/08/2024,Mirandes,Cordoba,1,0
+17/08/2024,Deportivo La Coruna,Oviedo,0,1
+17/08/2024,Eibar,Castellón,1,0
+17/08/2024,Racing Ferrol,Malaga,2,2
+18/08/2024,Burgos,FC Cartagena,3,1
+18/08/2024,Elche,Huesca,0,1
+18/08/2024,Racing Santander,Almeria,2,2
+18/08/2024,Sporting Gijon,Levante,1,2
+19/08/2024,Eldense,Tenerife,2,1
+23/08/2024,Huesca,Deportivo La Coruna,2,1
+23/08/2024,Racing Santander,Eibar,2,2
+24/08/2024,Levante,Cadiz,1,1
+24/08/2024,Malaga,Mirandes,1,1
+24/08/2024,Racing Ferrol,Granada CF,0,1
+24/08/2024,Sporting Gijon,Eldense,0,0
+24/08/2024,Tenerife,Almeria,0,1
+25/08/2024,Albacete,Elche,1,0
+25/08/2024,Castellón,Oviedo,0,0
+26/08/2024,Cordoba,Burgos,2,2
+26/08/2024,FC Cartagena,Zaragoza,1,2
+30/08/2024,Granada CF,Huesca,1,3
+30/08/2024,Oviedo,Racing Santander,1,3
+31/08/2024,Almeria,Sporting Gijon,1,1
+31/08/2024,Cadiz,Tenerife,2,2
+31/08/2024,Malaga,Albacete,2,1
+01/09/2024,Burgos,Castellón,0,2
+01/09/2024,Deportivo La Coruna,Racing Ferrol,1,0
+01/09/2024,Eldense,FC Cartagena,1,2
+01/09/2024,Mirandes,Zaragoza,0,0
+02/09/2024,Eibar,Levante,2,2
+02/09/2024,Elche,Cordoba,3,1
+06/09/2024,Tenerife,Racing Santander,0,1
+07/09/2024,Cordoba,Malaga,0,0
+07/09/2024,Granada CF,Deportivo La Coruna,1,1
+07/09/2024,Huesca,Burgos,0,1
+07/09/2024,Sporting Gijon,Oviedo,3,1
+08/09/2024,Eldense,Almeria,1,0
+08/09/2024,FC Cartagena,Levante,0,1
+08/09/2024,Racing Ferrol,Mirandes,0,0
+08/09/2024,Zaragoza,Elche,3,0
+09/09/2024,Albacete,Eibar,0,1
+09/09/2024,Castellón,Cadiz,1,3
+13/09/2024,Cordoba,Deportivo La Coruna,2,0
+14/09/2024,Eibar,Tenerife,1,0
+14/09/2024,Levante,Eldense,3,1
+14/09/2024,Malaga,Huesca,1,0
+14/09/2024,Racing Santander,Sporting Gijon,1,0
+15/09/2024,Burgos,Zaragoza,1,0
+15/09/2024,Cadiz,Racing Ferrol,0,0
+15/09/2024,Elche,Granada CF,2,2
+15/09/2024,Mirandes,Albacete,2,0
+15/09/2024,Oviedo,FC Cartagena,1,0
+16/09/2024,Almeria,Castellón,2,5
+20/09/2024,Granada CF,Malaga,2,2
+21/09/2024,Deportivo La Coruna,Burgos,0,2
+21/09/2024,Eldense,Oviedo,1,1
+21/09/2024,Racing Ferrol,Albacete,1,4
+21/09/2024,Zaragoza,Levante,2,1
+22/09/2024,Almeria,Eibar,2,2
+22/09/2024,Castellón,Racing Santander,0,1
+22/09/2024,Elche,Mirandes,1,0
+22/09/2024,FC Cartagena,Cadiz,1,2
+22/09/2024,Tenerife,Sporting Gijon,1,1
+23/09/2024,Huesca,Cordoba,4,1
+27/09/2024,Albacete,Deportivo La Coruna,2,5
+28/09/2024,Cadiz,Eldense,1,2
+28/09/2024,Malaga,Elche,0,3
+28/09/2024,Mirandes,Huesca,1,0
+28/09/2024,Sporting Gijon,Zaragoza,1,0
+29/09/2024,Burgos,Granada CF,2,2
+29/09/2024,Castellón,Tenerife,2,1
+29/09/2024,Cordoba,Racing Ferrol,3,1
+29/09/2024,Levante,Almeria,4,2
+29/09/2024,Oviedo,Eibar,1,0
+30/09/2024,Racing Santander,FC Cartagena,1,2
+04/10/2024,Huesca,Cadiz,3,1
+05/10/2024,Almeria,Burgos,2,0
+05/10/2024,Eibar,Sporting Gijon,1,3
+05/10/2024,Mirandes,Granada CF,0,1
+05/10/2024,Racing Ferrol,Elche,1,0
+05/10/2024,Tenerife,FC Cartagena,2,0
+05/10/2024,Zaragoza,Racing Santander,2,3
+06/10/2024,Albacete,Cordoba,1,1
+06/10/2024,Deportivo La Coruna,Malaga,0,0
+06/10/2024,Eldense,Castellón,2,3
+06/10/2024,Levante,Oviedo,0,0
+11/10/2024,Tenerife,Zaragoza,2,3
+12/10/2024,Cadiz,Malaga,2,2
+12/10/2024,Eibar,Eldense,1,0
+12/10/2024,FC Cartagena,Racing Ferrol,0,1
+13/10/2024,Burgos,Mirandes,0,1
+13/10/2024,Elche,Deportivo La Coruna,0,0
+13/10/2024,Granada CF,Cordoba,1,0
+13/10/2024,Huesca,Albacete,2,2
+13/10/2024,Oviedo,Almeria,3,2
+13/10/2024,Racing Santander,Levante,1,0
+14/10/2024,Sporting Gijon,Castellón,2,1
+18/10/2024,Cordoba,FC Cartagena,2,1
+19/10/2024,Castellón,Levante,2,0
+19/10/2024,Deportivo La Coruna,Eldense,1,1
+19/10/2024,Granada CF,Tenerife,4,0
+19/10/2024,Malaga,Oviedo,0,0
+19/10/2024,Mirandes,Eibar,1,0
+20/10/2024,Cadiz,Racing Santander,0,1
+20/10/2024,Elche,Sporting Gijon,2,1
+20/10/2024,Racing Ferrol,Huesca,0,0
+20/10/2024,Zaragoza,Almeria,1,2
+21/10/2024,Albacete,Burgos,2,0
+22/10/2024,Castellón,Granada CF,2,3
+22/10/2024,Oviedo,Mirandes,4,1
+23/10/2024,Eibar,Cadiz,1,0
+23/10/2024,Eldense,Zaragoza,2,3
+23/10/2024,FC Cartagena,Elche,0,0
+23/10/2024,Racing Santander,Cordoba,2,0
+24/10/2024,Almeria,Albacete,3,1
+24/10/2024,Burgos,Racing Ferrol,1,1
+24/10/2024,Levante,Deportivo La Coruna,2,1
+24/10/2024,Sporting Gijon,Huesca,2,1
+24/10/2024,Tenerife,Malaga,0,0
+26/10/2024,Cadiz,Oviedo,2,0
+26/10/2024,Cordoba,Eldense,2,0
+26/10/2024,Mirandes,FC Cartagena,3,1
+26/10/2024,Zaragoza,Castellón,1,2
+27/10/2024,Albacete,Sporting Gijon,3,3
+27/10/2024,Deportivo La Coruna,Racing Santander,1,2
+27/10/2024,Elche,Burgos,1,0
+27/10/2024,Granada CF,Levante,1,2
+27/10/2024,Huesca,Almeria,2,2
+27/10/2024,Malaga,Eibar,1,0
+28/10/2024,Racing Ferrol,Tenerife,1,1
+02/11/2024,Eibar,Elche,0,2
+02/11/2024,FC Cartagena,Deportivo La Coruna,1,5
+02/11/2024,Racing Santander,Albacete,1,1
+02/11/2024,Sporting Gijon,Cadiz,2,0
+02/11/2024,Zaragoza,Granada CF,2,1
+03/11/2024,Oviedo,Burgos,3,1
+03/11/2024,Tenerife,Mirandes,1,0
+08/11/2024,Elche,Almeria,1,2
+09/11/2024,Granada CF,Eldense,3,2
+09/11/2024,Huesca,Zaragoza,1,1
+09/11/2024,Malaga,FC Cartagena,1,0
+09/11/2024,Mirandes,Cadiz,2,2
+10/11/2024,Albacete,Oviedo,2,2
+10/11/2024,Burgos,Sporting Gijon,0,2
+10/11/2024,Cordoba,Castellón,2,2
+10/11/2024,Racing Ferrol,Racing Santander,1,2
+11/11/2024,Deportivo La Coruna,Eibar,1,0
+16/11/2024,Castellón,Mirandes,1,3
+16/11/2024,Eibar,Racing Ferrol,2,0
+16/11/2024,Eldense,Albacete,2,0
+16/11/2024,Levante,Elche,1,1
+16/11/2024,Racing Santander,Burgos,2,0
+16/11/2024,Sporting Gijon,Granada CF,1,2
+17/11/2024,Almeria,Deportivo La Coruna,2,1
+17/11/2024,Cadiz,Cordoba,2,0
+17/11/2024,FC Cartagena,Huesca,1,0
+17/11/2024,Oviedo,Tenerife,3,1
+17/11/2024,Zaragoza,Malaga,0,0
+20/11/2024,Eldense,Huesca,2,1
+22/11/2024,Racing Ferrol,Levante,0,0
+23/11/2024,Burgos,Eibar,1,0
+23/11/2024,Cordoba,Zaragoza,2,2
+23/11/2024,FC Cartagena,Almeria,1,2
+23/11/2024,Granada CF,Cadiz,0,0
+23/11/2024,Malaga,Racing Santander,0,0
+24/11/2024,Albacete,Tenerife,2,1
+24/11/2024,Deportivo La Coruna,Sporting Gijon,1,1
+24/11/2024,Elche,Oviedo,4,0
+24/11/2024,Huesca,Castellón,1,1
+24/11/2024,Mirandes,Eldense,1,0
+26/11/2024,Almeria,Cordoba,4,0
+27/11/2024,Castellón,Racing Ferrol,0,0
+27/11/2024,Levante,Malaga,4,2
+29/11/2024,Oviedo,Huesca,0,3
+30/11/2024,Almeria,Granada CF,2,1
+30/11/2024,Cadiz,Deportivo La Coruna,2,4
+30/11/2024,Racing Santander,Mirandes,0,1
+30/11/2024,Tenerife,Elche,1,1
+30/11/2024,Zaragoza,Albacete,0,1
+01/12/2024,Castellón,Malaga,2,0
+01/12/2024,Eldense,Racing Ferrol,0,0
+01/12/2024,Levante,Burgos,3,1
+01/12/2024,Sporting Gijon,Cordoba,2,0
+02/12/2024,Eibar,FC Cartagena,1,0
+06/12/2024,Mirandes,Levante,2,1
+07/12/2024,Deportivo La Coruna,Zaragoza,1,1
+07/12/2024,Elche,Cadiz,2,1
+07/12/2024,Granada CF,Racing Santander,3,0
+07/12/2024,Huesca,Eibar,2,1
+08/12/2024,Albacete,Castellón,0,0
+08/12/2024,Burgos,Eldense,1,0
+08/12/2024,Cordoba,Tenerife,3,0
+08/12/2024,Malaga,Almeria,1,1
+08/12/2024,Racing Ferrol,Oviedo,1,5
+09/12/2024,FC Cartagena,Sporting Gijon,1,0
+13/12/2024,Almeria,Mirandes,1,0
+14/12/2024,Cadiz,Albacete,1,0
+14/12/2024,Castellón,FC Cartagena,4,1
+14/12/2024,Eibar,Zaragoza,2,1
+14/12/2024,Eldense,Elche,0,0
+14/12/2024,Levante,Cordoba,2,2
+14/12/2024,Oviedo,Granada CF,2,0
+15/12/2024,Burgos,Malaga,0,0
+15/12/2024,Racing Santander,Huesca,0,1
+15/12/2024,Sporting Gijon,Racing Ferrol,1,3
+17/12/2024,Albacete,Levante,0,0
+17/12/2024,Cordoba,Eibar,2,1
+17/12/2024,Granada CF,FC Cartagena,4,1
+17/12/2024,Zaragoza,Oviedo,2,3
+18/12/2024,Malaga,Eldense,3,0
+18/12/2024,Mirandes,Sporting Gijon,1,1
+18/12/2024,Racing Ferrol,Almeria,1,4
+19/12/2024,Cadiz,Burgos,1,1
+19/12/2024,Deportivo La Coruna,Castellón,5,1
+19/12/2024,Elche,Racing Santander,3,0
+19/12/2024,Huesca,Tenerife,1,0
+20/12/2024,FC Cartagena,Albacete,0,0
+21/12/2024,Eibar,Granada CF,1,1
+21/12/2024,Oviedo,Cordoba,2,3
+21/12/2024,Sporting Gijon,Malaga,1,3
+21/12/2024,Zaragoza,Racing Ferrol,1,0
+22/12/2024,Almeria,Cadiz,1,1
+22/12/2024,Burgos,Tenerife,1,0
+22/12/2024,Castellón,Elche,0,2
+22/12/2024,Deportivo La Coruna,Mirandes,0,4
+22/12/2024,Levante,Huesca,1,1
+22/12/2024,Racing Santander,Eldense,2,2
+07/01/2025,Tenerife,Levante,0,3
+10/01/2025,Granada CF,Burgos,0,0
+11/01/2025,Albacete,Racing Santander,2,2
+11/01/2025,Huesca,Mirandes,1,0
+11/01/2025,Malaga,Deportivo La Coruna,1,1
+11/01/2025,Oviedo,Sporting Gijon,1,1
+11/01/2025,Racing Ferrol,FC Cartagena,0,0
+11/01/2025,Tenerife,Castellón,2,0
+12/01/2025,Cadiz,Levante,0,0
+12/01/2025,Cordoba,Almeria,0,3
+12/01/2025,Elche,Zaragoza,1,0
+13/01/2025,Eldense,Eibar,1,3
+17/01/2025,FC Cartagena,Oviedo,0,1
+18/01/2025,Eibar,Albacete,1,1
+18/01/2025,Eldense,Cadiz,1,4
+18/01/2025,Levante,Granada CF,3,1
+18/01/2025,Sporting Gijon,Elche,1,1
+19/01/2025,Almeria,Huesca,0,0
+19/01/2025,Burgos,Deportivo La Coruna,0,1
+19/01/2025,Castellón,Cordoba,1,2
+19/01/2025,Racing Santander,Racing Ferrol,6,0
+19/01/2025,Zaragoza,Tenerife,2,2
+20/01/2025,Mirandes,Malaga,3,2
+24/01/2025,Elche,Eibar,2,0
+25/01/2025,Cordoba,Racing Santander,1,2
+25/01/2025,Deportivo La Coruna,Levante,1,2
+25/01/2025,Huesca,FC Cartagena,4,0
+25/01/2025,Tenerife,Eldense,0,1
+26/01/2025,Albacete,Almeria,2,1
+26/01/2025,Granada CF,Sporting Gijon,3,1
+26/01/2025,Malaga,Zaragoza,1,2
+26/01/2025,Oviedo,Castellón,1,0
+27/01/2025,Cadiz,Mirandes,3,1
+29/01/2025,Tenerife,Deportivo La Coruna,0,0
+31/01/2025,Eldense,Granada CF,0,3
+01/02/2025,Almeria,Oviedo,1,1
+01/02/2025,Mirandes,Elche,3,0
+01/02/2025,Racing Santander,Malaga,2,1
+01/02/2025,Sporting Gijon,Burgos,2,0
+02/02/2025,Castellón,Huesca,0,1
+02/02/2025,Eibar,Deportivo La Coruna,0,1
+02/02/2025,FC Cartagena,Cordoba,0,1
+02/02/2025,Tenerife,Albacete,3,1
+02/02/2025,Zaragoza,Cadiz,0,0
+03/02/2025,Levante,Racing Ferrol,0,1
+07/02/2025,Albacete,Zaragoza,2,1
+08/02/2025,Granada CF,Mirandes,0,0
+08/02/2025,Malaga,Levante,1,1
+08/02/2025,Racing Ferrol,Castellón,1,3
+08/02/2025,Sporting Gijon,Eibar,0,0
+09/02/2025,Burgos,Racing Santander,2,1
+09/02/2025,Cadiz,FC Cartagena,5,2
+09/02/2025,Cordoba,Huesca,1,2
+09/02/2025,Deportivo La Coruna,Almeria,3,1
+09/02/2025,Elche,Tenerife,2,0
+10/02/2025,Oviedo,Eldense,0,0
+14/02/2025,Mirandes,Racing Ferrol,4,1
+15/02/2025,Castellón,Eibar,2,0
+15/02/2025,FC Cartagena,Malaga,0,1
+15/02/2025,Racing Santander,Cadiz,2,3
+15/02/2025,Tenerife,Cordoba,2,3
+16/02/2025,Eldense,Deportivo La Coruna,2,0
+16/02/2025,Huesca,Granada CF,1,1
+16/02/2025,Levante,Sporting Gijon,0,0
+16/02/2025,Oviedo,Albacete,1,0
+16/02/2025,Zaragoza,Burgos,0,1
+17/02/2025,Almeria,Elche,1,1
+21/02/2025,Malaga,Tenerife,1,0
+22/02/2025,Burgos,Oviedo,1,2
+22/02/2025,Eibar,Racing Santander,2,2
+22/02/2025,Granada CF,Zaragoza,2,2
+22/02/2025,Racing Ferrol,Cordoba,0,1
+22/02/2025,Sporting Gijon,Almeria,1,1
+23/02/2025,Albacete,Eldense,0,1
+23/02/2025,Cadiz,Castellón,0,0
+23/02/2025,Deportivo La Coruna,Huesca,0,0
+23/02/2025,Elche,FC Cartagena,2,1
+23/02/2025,Levante,Mirandes,1,0
+28/02/2025,FC Cartagena,Eibar,0,2
+01/03/2025,Almeria,Malaga,2,2
+01/03/2025,Castellón,Burgos,2,1
+01/03/2025,Huesca,Racing Ferrol,3,1
+01/03/2025,Zaragoza,Sporting Gijon,1,1
+02/03/2025,Albacete,Cadiz,3,0
+02/03/2025,Cordoba,Granada CF,5,0
+02/03/2025,Eldense,Levante,1,2
+02/03/2025,Oviedo,Deportivo La Coruna,1,2
+02/03/2025,Racing Santander,Elche,2,0
+03/03/2025,Mirandes,Tenerife,2,0
+05/03/2025,Racing Ferrol,Burgos,0,1
+07/03/2025,Deportivo La Coruna,Cordoba,1,1
+07/03/2025,Eibar,Almeria,1,0
+08/03/2025,Elche,Castellón,3,1
+08/03/2025,Mirandes,Oviedo,1,0
+08/03/2025,Sporting Gijon,Racing Santander,1,1
+08/03/2025,Zaragoza,Eldense,2,4
+09/03/2025,Granada CF,Racing Ferrol,3,0
+09/03/2025,Levante,FC Cartagena,3,0
+09/03/2025,Malaga,Cadiz,0,2
+09/03/2025,Tenerife,Huesca,2,0
+10/03/2025,Burgos,Albacete,1,0
+14/03/2025,Oviedo,Elche,1,1
+15/03/2025,Albacete,Malaga,2,0
+15/03/2025,Almeria,Zaragoza,4,1
+15/03/2025,Cordoba,Sporting Gijon,1,1
+15/03/2025,FC Cartagena,Burgos,0,1
+15/03/2025,Racing Ferrol,Eibar,0,0
+16/03/2025,Cadiz,Granada CF,1,0
+16/03/2025,Eldense,Mirandes,2,2
+16/03/2025,Huesca,Levante,1,2
+16/03/2025,Racing Santander,Tenerife,2,1
+17/03/2025,Castellón,Deportivo La Coruna,2,2
+21/03/2025,Burgos,Almeria,3,1
+22/03/2025,Elche,Eldense,2,0
+22/03/2025,Granada CF,Oviedo,1,0
+22/03/2025,Malaga,Racing Ferrol,2,0
+22/03/2025,Mirandes,Racing Santander,2,1
+23/03/2025,Deportivo La Coruna,FC Cartagena,2,2
+23/03/2025,Eibar,Huesca,2,1
+23/03/2025,Levante,Castellón,3,2
+23/03/2025,Sporting Gijon,Albacete,0,2
+23/03/2025,Tenerife,Cadiz,2,1
+24/03/2025,Zaragoza,Cordoba,1,1
+28/03/2025,Tenerife,Granada CF,2,1
+29/03/2025,Almeria,Levante,1,0
+29/03/2025,Eldense,Burgos,0,0
+29/03/2025,FC Cartagena,Castellón,2,2
+29/03/2025,Racing Ferrol,Deportivo La Coruna,0,1
+29/03/2025,Racing Santander,Zaragoza,2,0
+30/03/2025,Albacete,Mirandes,3,2
+30/03/2025,Cordoba,Elche,1,2
+30/03/2025,Huesca,Sporting Gijon,3,2
+30/03/2025,Oviedo,Malaga,2,1
+31/03/2025,Cadiz,Eibar,0,0
+04/04/2025,Castellón,Albacete,2,2
+05/04/2025,Eibar,Oviedo,1,1
+05/04/2025,FC Cartagena,Eldense,0,1
+05/04/2025,Granada CF,Almeria,3,1
+05/04/2025,Sporting Gijon,Tenerife,1,3
+06/04/2025,Burgos,Huesca,2,1
+06/04/2025,Deportivo La Coruna,Cadiz,1,0
+06/04/2025,Levante,Racing Santander,3,1
+06/04/2025,Malaga,Cordoba,0,1
+06/04/2025,Zaragoza,Mirandes,1,0
+07/04/2025,Elche,Racing Ferrol,1,0
+11/04/2025,Cordoba,Levante,2,2
+12/04/2025,Cadiz,Elche,0,1
+12/04/2025,Oviedo,Racing Ferrol,3,0
+12/04/2025,Tenerife,Burgos,0,0
+12/04/2025,Zaragoza,Eibar,2,2
+13/04/2025,Albacete,Granada CF,0,2
+13/04/2025,Almeria,FC Cartagena,2,1
+13/04/2025,Eldense,Sporting Gijon,1,2
+13/04/2025,Mirandes,Deportivo La Coruna,2,2
+13/04/2025,Racing Santander,Castellón,1,1
+14/04/2025,Huesca,Malaga,1,0
+18/04/2025,Castellón,Almeria,4,1
+18/04/2025,Sporting Gijon,Mirandes,3,1
+19/04/2025,Burgos,Cadiz,2,2
+19/04/2025,Huesca,Racing Santander,1,3
+19/04/2025,Levante,Zaragoza,5,2
+19/04/2025,Racing Ferrol,Eldense,1,0
+20/04/2025,Cordoba,Oviedo,0,0
+20/04/2025,Deportivo La Coruna,Tenerife,0,0
+20/04/2025,Elche,Albacete,2,2
+20/04/2025,FC Cartagena,Granada CF,2,3
+21/04/2025,Eibar,Malaga,2,2
+25/04/2025,Cadiz,Sporting Gijon,1,0
+26/04/2025,Albacete,FC Cartagena,3,1
+26/04/2025,Eldense,Cordoba,1,1
+26/04/2025,Granada CF,Elche,1,1
+26/04/2025,Mirandes,Burgos,2,1
+26/04/2025,Oviedo,Levante,1,0
+27/04/2025,Malaga,Castellón,1,0
+27/04/2025,Racing Santander,Deportivo La Coruna,2,1
+27/04/2025,Tenerife,Eibar,1,1
+27/04/2025,Zaragoza,Huesca,1,1
+29/04/2025,Almeria,Racing Ferrol,2,1
+02/05/2025,Cordoba,Cadiz,4,2
+03/05/2025,Burgos,Elche,0,1
+03/05/2025,Eibar,Mirandes,0,1
+03/05/2025,Huesca,Oviedo,1,2
+03/05/2025,Malaga,Granada CF,1,0
+04/05/2025,Almeria,Eldense,5,0
+04/05/2025,Deportivo La Coruna,Albacete,5,1
+04/05/2025,FC Cartagena,Racing Santander,1,0
+04/05/2025,Levante,Tenerife,1,1
+04/05/2025,Racing Ferrol,Zaragoza,1,2
+05/05/2025,Castellón,Sporting Gijon,4,3
+09/05/2025,Cadiz,Almeria,2,1
+10/05/2025,Burgos,Cordoba,3,2
+10/05/2025,Elche,Levante,1,3
+10/05/2025,Mirandes,Castellón,3,2
+10/05/2025,Sporting Gijon,Deportivo La Coruna,2,1
+10/05/2025,Zaragoza,FC Cartagena,3,2
+11/05/2025,Albacete,Huesca,3,2
+11/05/2025,Eldense,Malaga,1,0
+11/05/2025,Racing Santander,Oviedo,1,1
+11/05/2025,Tenerife,Racing Ferrol,0,0
+12/05/2025,Granada CF,Eibar,0,2
+16/05/2025,Levante,Albacete,1,0
+17/05/2025,Deportivo La Coruna,Granada CF,2,3
+17/05/2025,Eibar,Burgos,1,0
+17/05/2025,FC Cartagena,Tenerife,1,0
+17/05/2025,Huesca,Elche,2,1
+17/05/2025,Malaga,Sporting Gijon,2,1
+18/05/2025,Almeria,Racing Santander,2,0
+18/05/2025,Castellón,Eldense,1,1
+18/05/2025,Oviedo,Zaragoza,1,0
+18/05/2025,Racing Ferrol,Cadiz,1,0
+19/05/2025,Cordoba,Mirandes,1,2
+24/05/2025,Albacete,Racing Ferrol,2,0
+25/05/2025,Burgos,Levante,2,3
+25/05/2025,Cadiz,Huesca,4,0
+25/05/2025,Eibar,Cordoba,4,1
+25/05/2025,Elche,Malaga,2,0
+25/05/2025,Eldense,Racing Santander,3,3
+25/05/2025,Granada CF,Castellón,2,1
+25/05/2025,Mirandes,Almeria,0,0
+25/05/2025,Sporting Gijon,FC Cartagena,3,2
+25/05/2025,Tenerife,Oviedo,0,1
+25/05/2025,Zaragoza,Deportivo La Coruna,1,0
+30/05/2025,Castellón,Zaragoza,4,1
+31/05/2025,Malaga,Burgos,2,2
+31/05/2025,Racing Ferrol,Sporting Gijon,0,2
+01/06/2025,Almeria,Tenerife,2,0
+01/06/2025,Cordoba,Albacete,1,1
+01/06/2025,Deportivo La Coruna,Elche,0,4
+01/06/2025,FC Cartagena,Mirandes,1,3
+01/06/2025,Huesca,Eldense,3,2
+01/06/2025,Levante,Eibar,1,0
+01/06/2025,Oviedo,Cadiz,2,1
+01/06/2025,Racing Santander,Granada CF,2,1
+07/06/2025,Almeria,Oviedo,1,2
+08/06/2025,Racing Santander,Mirandes,3,3
+11/06/2025,Oviedo,Almeria,1,1
+12/06/2025,Mirandes,Racing Santander,4,1
+15/06/2025,Mirandes,Oviedo,1,0
+15/08/2025,Burgos,Cultural Leonesa,5,1
+15/08/2025,Valladolid,AD Ceuta FC,3,0
+16/08/2025,Granada CF,Deportivo La Coruna,1,3
+16/08/2025,Malaga,Eibar,1,1
+16/08/2025,Racing Santander,Castellón,3,1
+17/08/2025,Cadiz,Mirandes,1,0
+17/08/2025,Huesca,Leganes,1,1
+17/08/2025,Las Palmas,FC Andorra,1,1
+17/08/2025,Real Sociedad II,Zaragoza,1,0
+18/08/2025,Almeria,Albacete,4,4
+18/08/2025,Sporting Gijon,Cordoba,2,1
+22/08/2025,Castellón,Valladolid,0,1
+22/08/2025,Eibar,Granada CF,3,0
+22/08/2025,Leganes,Cadiz,1,1
+23/08/2025,AD Ceuta FC,Sporting Gijon,0,1
+23/08/2025,Mirandes,Huesca,0,1
+23/08/2025,Zaragoza,FC Andorra,1,3
+24/08/2025,Cultural Leonesa,Almeria,0,1
+24/08/2025,Deportivo La Coruna,Burgos,0,0
+24/08/2025,Malaga,Real Sociedad II,1,0
+25/08/2025,Albacete,Racing Santander,2,3
+25/08/2025,Cordoba,Las Palmas,1,3
+29/08/2025,Real Sociedad II,Almeria,2,2
+29/08/2025,Sporting Gijon,Cultural Leonesa,1,0
+30/08/2025,Castellón,Zaragoza,1,1
+30/08/2025,Racing Santander,AD Ceuta FC,4,1
+30/08/2025,Valladolid,Cordoba,0,0
+31/08/2025,Cadiz,Albacete,2,1
+31/08/2025,FC Andorra,Burgos,2,1
+31/08/2025,Granada CF,Mirandes,1,2
+31/08/2025,Las Palmas,Malaga,0,1
+01/09/2025,Huesca,Eibar,2,1
+01/09/2025,Leganes,Deportivo La Coruna,2,2
+05/09/2025,Albacete,Mirandes,1,4
+05/09/2025,Cordoba,Castellón,2,1
+06/09/2025,Deportivo La Coruna,Sporting Gijon,1,0
+06/09/2025,Malaga,Granada CF,2,2
+06/09/2025,Zaragoza,Valladolid,1,1
+07/09/2025,AD Ceuta FC,Huesca,2,1
+07/09/2025,Almeria,Racing Santander,2,3
+07/09/2025,Burgos,Las Palmas,0,0
+07/09/2025,Cultural Leonesa,Leganes,0,0
+07/09/2025,Real Sociedad II,Cadiz,3,3
+08/09/2025,Eibar,FC Andorra,2,0
+12/09/2025,Las Palmas,Real Sociedad II,2,1
+13/09/2025,Cadiz,Eibar,1,0
+13/09/2025,Huesca,Malaga,1,0
+13/09/2025,Mirandes,Deportivo La Coruna,1,5
+13/09/2025,Valladolid,Almeria,3,1
+14/09/2025,Castellón,AD Ceuta FC,3,3
+14/09/2025,FC Andorra,Cordoba,3,1
+14/09/2025,Granada CF,Leganes,0,2
+14/09/2025,Racing Santander,Cultural Leonesa,2,4
+14/09/2025,Sporting Gijon,Burgos,2,3
+15/09/2025,Zaragoza,Albacete,0,0
+19/09/2025,Deportivo La Coruna,Huesca,4,0
+20/09/2025,Almeria,Sporting Gijon,2,1
+20/09/2025,Cultural Leonesa,Castellón,1,3
+20/09/2025,FC Andorra,Mirandes,1,1
+20/09/2025,Leganes,Las Palmas,0,1
+21/09/2025,AD Ceuta FC,Zaragoza,1,0
+21/09/2025,Albacete,Valladolid,2,0
+21/09/2025,Cordoba,Racing Santander,2,2
+21/09/2025,Eibar,Real Sociedad II,2,1
+21/09/2025,Malaga,Cadiz,0,1
+22/09/2025,Burgos,Granada CF,1,1
+26/09/2025,Mirandes,Zaragoza,0,1
+27/09/2025,Eibar,Deportivo La Coruna,1,1
+27/09/2025,Las Palmas,Almeria,0,1
+27/09/2025,Racing Santander,FC Andorra,1,2
+28/09/2025,Burgos,Malaga,2,1
+28/09/2025,Cadiz,AD Ceuta FC,0,0
+28/09/2025,Huesca,Granada CF,0,1
+28/09/2025,Real Sociedad II,Cordoba,1,1
+28/09/2025,Sporting Gijon,Albacete,3,4
+28/09/2025,Valladolid,Cultural Leonesa,0,1
+29/09/2025,Leganes,Castellón,0,1
+03/10/2025,AD Ceuta FC,Eibar,1,0
+04/10/2025,Deportivo La Coruna,Almeria,1,1
+04/10/2025,FC Andorra,Leganes,1,2
+04/10/2025,Granada CF,Real Sociedad II,5,2
+04/10/2025,Huesca,Burgos,2,1
+05/10/2025,Castellón,Sporting Gijon,3,1
+05/10/2025,Las Palmas,Cadiz,1,0
+05/10/2025,Racing Santander,Malaga,3,0
+05/10/2025,Valladolid,Mirandes,1,1
+05/10/2025,Zaragoza,Cordoba,0,1
+06/10/2025,Cultural Leonesa,Albacete,0,0
+10/10/2025,Granada CF,Las Palmas,0,0
+11/10/2025,Almeria,Zaragoza,4,2
+11/10/2025,Mirandes,Leganes,0,0
+11/10/2025,Real Sociedad II,FC Andorra,3,0
+12/10/2025,Albacete,AD Ceuta FC,0,0
+12/10/2025,Burgos,Valladolid,0,1
+12/10/2025,Cadiz,Huesca,1,0
+12/10/2025,Eibar,Castellón,0,0
+12/10/2025,Malaga,Deportivo La Coruna,3,0
+12/10/2025,Sporting Gijon,Racing Santander,2,1
+13/10/2025,Cordoba,Cultural Leonesa,1,0
+17/10/2025,FC Andorra,Granada CF,0,0
+18/10/2025,AD Ceuta FC,Mirandes,2,0
+18/10/2025,Zaragoza,Cultural Leonesa,0,5
+19/10/2025,Castellón,Albacete,0,1
+19/10/2025,Cordoba,Almeria,1,1
+19/10/2025,Las Palmas,Eibar,3,1
+19/10/2025,Leganes,Malaga,2,0
+19/10/2025,Racing Santander,Deportivo La Coruna,2,1
+19/10/2025,Valladolid,Sporting Gijon,2,3
+20/10/2025,Cadiz,Burgos,1,3
+24/10/2025,Huesca,Las Palmas,1,1
+25/10/2025,Albacete,Cordoba,1,3
+25/10/2025,Burgos,Real Sociedad II,1,0
+25/10/2025,Cultural Leonesa,AD Ceuta FC,0,1
+25/10/2025,Eibar,Leganes,0,0
+25/10/2025,Granada CF,Cadiz,0,0
+25/10/2025,Mirandes,Racing Santander,1,3
+26/10/2025,Almeria,Castellón,1,0
+26/10/2025,Deportivo La Coruna,Valladolid,1,1
+26/10/2025,Malaga,FC Andorra,4,1
+26/10/2025,Sporting Gijon,Zaragoza,1,0
+31/10/2025,Racing Santander,Real Sociedad II,1,0
+01/11/2025,Albacete,Huesca,2,1
+01/11/2025,Almeria,Eibar,3,1
+01/11/2025,Cultural Leonesa,Mirandes,3,2
+01/11/2025,Leganes,Burgos,1,2
+02/11/2025,Castellón,Malaga,2,1
+02/11/2025,Cordoba,AD Ceuta FC,2,0
+02/11/2025,FC Andorra,Cadiz,0,0
+02/11/2025,Sporting Gijon,Las Palmas,0,0
+02/11/2025,Zaragoza,Deportivo La Coruna,0,2
+03/11/2025,Valladolid,Granada CF,2,1
+05/11/2025,Real Sociedad II,Huesca,2,0
+07/11/2025,Mirandes,Sporting Gijon,2,1
+08/11/2025,Deportivo La Coruna,Cultural Leonesa,3,0
+08/11/2025,Eibar,Albacete,3,2
+08/11/2025,Huesca,FC Andorra,2,2
+08/11/2025,Malaga,Cordoba,2,2
+08/11/2025,Real Sociedad II,Leganes,2,1
+09/11/2025,Cadiz,Valladolid,0,0
+09/11/2025,Granada CF,Zaragoza,3,1
+09/11/2025,Las Palmas,Racing Santander,3,1
+10/11/2025,Burgos,Castellón,0,0
+14/11/2025,Valladolid,Las Palmas,0,1
+15/11/2025,Albacete,FC Andorra,1,0
+15/11/2025,Castellón,Real Sociedad II,5,4
+15/11/2025,Racing Santander,Granada CF,2,2
+16/11/2025,AD Ceuta FC,Leganes,1,2
+16/11/2025,Almeria,Cadiz,3,0
+16/11/2025,Cordoba,Deportivo La Coruna,1,3
+16/11/2025,Mirandes,Burgos,0,2
+16/11/2025,Sporting Gijon,Eibar,1,1
+16/11/2025,Zaragoza,Huesca,1,0
+17/11/2025,Cultural Leonesa,Malaga,1,0
+21/11/2025,Las Palmas,Albacete,2,1
+22/11/2025,Eibar,Zaragoza,1,2
+22/11/2025,FC Andorra,Castellón,1,3
+22/11/2025,Granada CF,Cordoba,1,1
+22/11/2025,Leganes,Almeria,0,3
+23/11/2025,Burgos,Racing Santander,0,2
+23/11/2025,Cadiz,Cultural Leonesa,1,2
+23/11/2025,Deportivo La Coruna,AD Ceuta FC,2,1
+23/11/2025,Huesca,Sporting Gijon,2,0
+23/11/2025,Malaga,Mirandes,3,2
+24/11/2025,Real Sociedad II,Valladolid,1,0
+26/11/2025,AD Ceuta FC,Almeria,3,2
+28/11/2025,Sporting Gijon,FC Andorra,1,1
+29/11/2025,AD Ceuta FC,Burgos,1,0
+29/11/2025,Albacete,Deportivo La Coruna,0,2
+29/11/2025,Almeria,Huesca,0,0
+29/11/2025,Cultural Leonesa,Granada CF,0,1
+29/11/2025,Valladolid,Malaga,1,1
+30/11/2025,Castellón,Las Palmas,1,0
+30/11/2025,Cordoba,Cadiz,1,2
+30/11/2025,Mirandes,Real Sociedad II,1,0
+30/11/2025,Racing Santander,Eibar,4,0
+30/11/2025,Zaragoza,Leganes,3,2
+06/12/2025,FC Andorra,Almeria,1,2
+06/12/2025,Huesca,Valladolid,1,4
+06/12/2025,Real Sociedad II,Sporting Gijon,0,1
+07/12/2025,Cadiz,Racing Santander,2,3
+07/12/2025,Deportivo La Coruna,Castellón,1,3
+07/12/2025,Eibar,Cultural Leonesa,1,2
+07/12/2025,Granada CF,AD Ceuta FC,1,1
+07/12/2025,Leganes,Cordoba,0,0
+08/12/2025,Burgos,Albacete,0,1
+08/12/2025,Las Palmas,Mirandes,0,0
+08/12/2025,Malaga,Zaragoza,1,1
+12/12/2025,Cultural Leonesa,Huesca,0,2
+13/12/2025,Cordoba,Eibar,0,0
+13/12/2025,Deportivo La Coruna,Real Sociedad II,0,3
+13/12/2025,Racing Santander,Leganes,1,1
+13/12/2025,Sporting Gijon,Granada CF,1,0
+13/12/2025,Valladolid,FC Andorra,0,1
+13/12/2025,Zaragoza,Cadiz,1,2
+14/12/2025,AD Ceuta FC,Las Palmas,1,1
+14/12/2025,Albacete,Malaga,1,3
+14/12/2025,Almeria,Burgos,1,2
+15/12/2025,Castellón,Mirandes,3,1
+19/12/2025,Eibar,Valladolid,3,0
+20/12/2025,FC Andorra,Deportivo La Coruna,1,0
+20/12/2025,Huesca,Racing Santander,1,1
+20/12/2025,Las Palmas,Cultural Leonesa,4,0
+20/12/2025,Leganes,Sporting Gijon,0,1
+21/12/2025,Burgos,Zaragoza,1,1
+21/12/2025,Cadiz,Castellón,2,0
+21/12/2025,Granada CF,Albacete,1,1
+21/12/2025,Malaga,Almeria,2,1
+21/12/2025,Mirandes,Cordoba,1,2
+21/12/2025,Real Sociedad II,AD Ceuta FC,1,3
+02/01/2026,Eibar,Mirandes,2,1
+03/01/2026,Almeria,Granada CF,3,2
+03/01/2026,Castellón,Huesca,4,1
+03/01/2026,Cordoba,Burgos,2,0
+03/01/2026,Cultural Leonesa,Real Sociedad II,1,1
+03/01/2026,Valladolid,Racing Santander,1,1
+04/01/2026,AD Ceuta FC,FC Andorra,2,1
+04/01/2026,Albacete,Leganes,1,3
+04/01/2026,Deportivo La Coruna,Cadiz,2,2
+04/01/2026,Sporting Gijon,Malaga,1,3
+04/01/2026,Zaragoza,Las Palmas,1,2
+09/01/2026,Cadiz,Sporting Gijon,3,2
+10/01/2026,Burgos,Eibar,1,0
+10/01/2026,FC Andorra,Cultural Leonesa,1,1
+10/01/2026,Las Palmas,Deportivo La Coruna,1,1
+10/01/2026,Mirandes,Almeria,2,2
+10/01/2026,Racing Santander,Zaragoza,2,3
+10/01/2026,Real Sociedad II,Albacete,0,0
+11/01/2026,Granada CF,Castellón,0,0
+11/01/2026,Leganes,Valladolid,3,0
+11/01/2026,Malaga,AD Ceuta FC,2,1
+12/01/2026,Huesca,Cordoba,1,2
+16/01/2026,Castellón,Leganes,2,0
+17/01/2026,AD Ceuta FC,Valladolid,0,3
+17/01/2026,Almeria,Deportivo La Coruna,1,2
+17/01/2026,Cultural Leonesa,Sporting Gijon,2,4
+17/01/2026,Zaragoza,Real Sociedad II,1,1
+18/01/2026,Albacete,Cadiz,1,0
+18/01/2026,Burgos,Huesca,1,0
+18/01/2026,Cordoba,Malaga,0,1
+18/01/2026,Mirandes,FC Andorra,1,2
+18/01/2026,Racing Santander,Las Palmas,4,1
+19/01/2026,Granada CF,Eibar,0,0
+23/01/2026,Malaga,Burgos,3,0
+24/01/2026,Cadiz,Granada CF,1,2
+24/01/2026,Las Palmas,Cordoba,1,2
+24/01/2026,Leganes,Real Sociedad II,2,0
+24/01/2026,Sporting Gijon,Mirandes,3,0
+24/01/2026,Valladolid,Albacete,0,1
+25/01/2026,Deportivo La Coruna,Racing Santander,0,1
+25/01/2026,Eibar,Almeria,1,0
+25/01/2026,FC Andorra,Huesca,1,1
+25/01/2026,Zaragoza,Castellón,0,0
+26/01/2026,AD Ceuta FC,Cultural Leonesa,3,1
+30/01/2026,Real Sociedad II,Las Palmas,1,1
+31/01/2026,Albacete,Zaragoza,2,0
+31/01/2026,Burgos,Leganes,2,1
+31/01/2026,Cordoba,Valladolid,3,1
+31/01/2026,Cultural Leonesa,Deportivo La Coruna,0,1
+01/02/2026,Almeria,AD Ceuta FC,4,2
+01/02/2026,Castellón,FC Andorra,2,0
+01/02/2026,Eibar,Sporting Gijon,1,0
+01/02/2026,Granada CF,Racing Santander,1,0
+01/02/2026,Huesca,Cadiz,1,0
+02/02/2026,Mirandes,Malaga,2,1
+06/02/2026,Leganes,Granada CF,1,0
+07/02/2026,FC Andorra,Real Sociedad II,1,2
+07/02/2026,Las Palmas,Burgos,0,0
+07/02/2026,Zaragoza,Eibar,1,1
+08/02/2026,Cadiz,Almeria,1,2
+08/02/2026,Deportivo La Coruna,Albacete,2,1
+08/02/2026,Malaga,Cultural Leonesa,2,1
+08/02/2026,Sporting Gijon,Huesca,2,1
+08/02/2026,Valladolid,Castellón,0,4
+09/02/2026,Racing Santander,Mirandes,1,0
+13/02/2026,Almeria,FC Andorra,3,2
+14/02/2026,Burgos,Cadiz,1,1
+14/02/2026,Cordoba,Leganes,2,1
+14/02/2026,Cultural Leonesa,Zaragoza,0,0
+14/02/2026,Granada CF,Valladolid,5,1
+15/02/2026,Albacete,Sporting Gijon,1,1
+15/02/2026,Castellón,Deportivo La Coruna,2,0
+15/02/2026,Eibar,Racing Santander,2,1
+15/02/2026,Huesca,AD Ceuta FC,2,0
+15/02/2026,Mirandes,Las Palmas,1,1
+16/02/2026,Real Sociedad II,Malaga,2,1
+20/02/2026,AD Ceuta FC,Granada CF,2,1
+21/02/2026,Almeria,Cordoba,2,1
+21/02/2026,Deportivo La Coruna,Eibar,1,0
+21/02/2026,Huesca,Mirandes,1,2
+21/02/2026,Las Palmas,Castellón,1,1
+21/02/2026,Leganes,Cultural Leonesa,1,1
+22/02/2026,FC Andorra,Zaragoza,2,1
+22/02/2026,Malaga,Albacete,1,0
+22/02/2026,Racing Santander,Burgos,1,0
+22/02/2026,Sporting Gijon,Valladolid,2,2
+23/02/2026,Cadiz,Real Sociedad II,0,2
+25/02/2026,AD Ceuta FC,Cordoba,3,2
+27/02/2026,Albacete,Almeria,1,1
+28/02/2026,Castellón,Racing Santander,1,3
+28/02/2026,Granada CF,Malaga,0,1
+28/02/2026,Valladolid,Huesca,1,0
+28/02/2026,Zaragoza,Burgos,0,1
+01/03/2026,Cultural Leonesa,Las Palmas,0,3
+01/03/2026,Eibar,Cadiz,3,1
+01/03/2026,Mirandes,AD Ceuta FC,0,1
+01/03/2026,Real Sociedad II,Deportivo La Coruna,2,3
+02/03/2026,Cordoba,FC Andorra,1,4
+02/03/2026,Sporting Gijon,Leganes,0,0
+06/03/2026,Cadiz,Zaragoza,0,1
+07/03/2026,Burgos,Mirandes,2,0
+07/03/2026,Huesca,Albacete,0,0
+07/03/2026,Malaga,Valladolid,3,3
+07/03/2026,Real Sociedad II,Castellón,4,2
+08/03/2026,Deportivo La Coruna,Granada CF,0,2
+08/03/2026,FC Andorra,Sporting Gijon,1,0
+08/03/2026,Las Palmas,AD Ceuta FC,4,0
+08/03/2026,Leganes,Eibar,0,1
+08/03/2026,Racing Santander,Cordoba,4,3
+09/03/2026,Almeria,Cultural Leonesa,3,0
+13/03/2026,Mirandes,Cadiz,0,2
+14/03/2026,AD Ceuta FC,Deportivo La Coruna,1,2
+14/03/2026,Cultural Leonesa,Racing Santander,1,2
+14/03/2026,Valladolid,Leganes,3,2
+14/03/2026,Zaragoza,Almeria,2,0
+15/03/2026,Cordoba,Real Sociedad II,0,2
+15/03/2026,Eibar,Burgos,0,0
+15/03/2026,Granada CF,FC Andorra,1,1
+15/03/2026,Malaga,Huesca,5,3
+15/03/2026,Sporting Gijon,Castellón,4,1
+16/03/2026,Albacete,Las Palmas,2,1
+20/03/2026,Huesca,Almeria,1,3
+21/03/2026,Cadiz,Malaga,0,3
+21/03/2026,Deportivo La Coruna,Zaragoza,2,1
+21/03/2026,FC Andorra,Eibar,0,1
+21/03/2026,Leganes,AD Ceuta FC,5,2
+21/03/2026,Racing Santander,Albacete,0,4
+22/03/2026,Burgos,Cordoba,4,0
+22/03/2026,Las Palmas,Sporting Gijon,1,0
+22/03/2026,Mirandes,Valladolid,2,1
+22/03/2026,Real Sociedad II,Granada CF,0,2
+23/03/2026,Castellón,Cultural Leonesa,1,1
+27/03/2026,Cordoba,Mirandes,2,2
+28/03/2026,AD Ceuta FC,Cadiz,2,1
+28/03/2026,Albacete,Castellón,1,1
+28/03/2026,Granada CF,Huesca,4,2
+28/03/2026,Malaga,Leganes,0,0
+28/03/2026,Sporting Gijon,Deportivo La Coruna,1,1
+28/03/2026,Valladolid,Burgos,0,1
+29/03/2026,Almeria,Real Sociedad II,5,1
+29/03/2026,Cultural Leonesa,FC Andorra,0,4
+29/03/2026,Eibar,Las Palmas,3,1
+29/03/2026,Zaragoza,Racing Santander,2,0
+31/03/2026,Deportivo La Coruna,Cordoba,2,0
+31/03/2026,Mirandes,Albacete,1,1
+31/03/2026,Valladolid,Cadiz,3,0
+01/04/2026,Burgos,AD Ceuta FC,1,1
+01/04/2026,FC Andorra,Malaga,3,3
+01/04/2026,Huesca,Cultural Leonesa,1,1
+01/04/2026,Racing Santander,Sporting Gijon,3,1
+02/04/2026,Castellón,Almeria,2,0
+02/04/2026,Las Palmas,Granada CF,2,0
+02/04/2026,Leganes,Zaragoza,1,1
+02/04/2026,Real Sociedad II,Eibar,0,1
+04/04/2026,Albacete,Burgos,2,3
+04/04/2026,Cadiz,Cordoba,1,3
+04/04/2026,Cultural Leonesa,Valladolid,1,0
+04/04/2026,Deportivo La Coruna,Malaga,1,1
+05/04/2026,Almeria,Leganes,2,1
+05/04/2026,Eibar,AD Ceuta FC,3,0
+05/04/2026,FC Andorra,Racing Santander,6,2
+05/04/2026,Las Palmas,Huesca,2,1
+05/04/2026,Zaragoza,Mirandes,1,2
+06/04/2026,Castellón,Granada CF,3,2
+06/04/2026,Sporting Gijon,Real Sociedad II,1,0
+10/04/2026,AD Ceuta FC,Real Sociedad II,0,0
+11/04/2026,Burgos,Sporting Gijon,1,0
+11/04/2026,Cordoba,Zaragoza,1,0
+11/04/2026,Leganes,Albacete,2,1
+11/04/2026,Malaga,Las Palmas,2,0
+12/04/2026,Cadiz,FC Andorra,0,1
+12/04/2026,Granada CF,Cultural Leonesa,1,0
+12/04/2026,Huesca,Deportivo La Coruna,1,1
+12/04/2026,Mirandes,Castellón,2,2
+12/04/2026,Racing Santander,Almeria,5,1
+13/04/2026,Valladolid,Eibar,0,0
+17/04/2026,Las Palmas,Leganes,2,0
+17/04/2026,Real Sociedad II,Racing Santander,1,3
+18/04/2026,Castellón,Burgos,3,1
+18/04/2026,Cultural Leonesa,Cordoba,1,2
+18/04/2026,Zaragoza,AD Ceuta FC,2,2
+19/04/2026,Albacete,Granada CF,4,1
+19/04/2026,Almeria,Malaga,3,2
+19/04/2026,Eibar,Huesca,2,1
+19/04/2026,FC Andorra,Valladolid,1,0
+19/04/2026,Sporting Gijon,Cadiz,3,0
+20/04/2026,Deportivo La Coruna,Mirandes,3,1
+24/04/2026,Albacete,Eibar,0,3
+25/04/2026,Burgos,Deportivo La Coruna,1,1
+25/04/2026,Malaga,Castellón,2,3
+25/04/2026,Valladolid,Real Sociedad II,1,0
+26/04/2026,AD Ceuta FC,Racing Santander,0,0
+26/04/2026,Cordoba,Sporting Gijon,3,2
+26/04/2026,Granada CF,Almeria,2,4
+26/04/2026,Huesca,Zaragoza,1,0
+26/04/2026,Leganes,FC Andorra,0,4
+26/04/2026,Mirandes,Cultural Leonesa,2,1
+27/04/2026,Cadiz,Las Palmas,1,2
+01/05/2026,Deportivo La Coruna,Leganes,2,1
+01/05/2026,FC Andorra,Albacete,0,1
+01/05/2026,Zaragoza,Granada CF,0,1
+02/05/2026,Castellón,Cordoba,1,2
+02/05/2026,Cultural Leonesa,Cadiz,2,2
+02/05/2026,Eibar,Malaga,2,4
+03/05/2026,Las Palmas,Valladolid,2,1
+03/05/2026,Racing Santander,Huesca,4,2
+03/05/2026,Real Sociedad II,Burgos,0,0
+03/05/2026,Sporting Gijon,AD Ceuta FC,1,2
+04/05/2026,Almeria,Mirandes,4,2
+08/05/2026,Cadiz,Deportivo La Coruna,0,1
+09/05/2026,AD Ceuta FC,Castellón,1,1
+09/05/2026,Albacete,Cultural Leonesa,2,1
+09/05/2026,Burgos,Almeria,0,0
+09/05/2026,Malaga,Sporting Gijon,2,1
+09/05/2026,Valladolid,Zaragoza,2,0
+10/05/2026,Cordoba,Granada CF,1,0
+10/05/2026,FC Andorra,Las Palmas,5,1
+10/05/2026,Leganes,Racing Santander,1,2
+10/05/2026,Mirandes,Eibar,0,1
+11/05/2026,Huesca,Real Sociedad II,1,2
+15/05/2026,Castellón,Cadiz,1,1
+15/05/2026,Cordoba,Albacete,1,2
+16/05/2026,AD Ceuta FC,Malaga,1,4
+16/05/2026,Almeria,Las Palmas,1,2
+16/05/2026,Cultural Leonesa,Eibar,2,1
+16/05/2026,Granada CF,Burgos,0,1
+16/05/2026,Racing Santander,Valladolid,4,1
+16/05/2026,Real Sociedad II,Mirandes,2,2
+17/05/2026,Deportivo La Coruna,FC Andorra,2,1
+17/05/2026,Zaragoza,Sporting Gijon,1,3
+18/05/2026,Leganes,Huesca,0,0
+24/05/2026,Albacete,Real Sociedad II,3,1
+24/05/2026,Cadiz,Leganes,3,0
+24/05/2026,Cultural Leonesa,Burgos,0,2
+24/05/2026,Eibar,Cordoba,2,0
+24/05/2026,FC Andorra,AD Ceuta FC,0,2
+24/05/2026,Huesca,Castellón,0,1
+24/05/2026,Las Palmas,Zaragoza,1,1
+24/05/2026,Malaga,Racing Santander,1,1
+24/05/2026,Mirandes,Granada CF,3,1
+24/05/2026,Sporting Gijon,Almeria,3,1
+24/05/2026,Valladolid,Deportivo La Coruna,0,2
+30/05/2026,AD Ceuta FC,Albacete,1,0
+30/05/2026,Granada CF,Sporting Gijon,1,2
+30/05/2026,Real Sociedad II,Cultural Leonesa,1,1
+31/05/2026,Almeria,Valladolid,1,0
+31/05/2026,Burgos,FC Andorra,1,0
+31/05/2026,Castellón,Eibar,2,1
+31/05/2026,Cordoba,Huesca,1,1
+31/05/2026,Deportivo La Coruna,Las Palmas,1,2
+31/05/2026,Leganes,Mirandes,1,0
+31/05/2026,Racing Santander,Cadiz,4,1
+31/05/2026,Zaragoza,Malaga,0,2
+06/06/2026,Castellón,Almeria,1,1
+07/06/2026,Las Palmas,Malaga,0,1
+09/06/2026,Almeria,Castellón,3,2
+10/06/2026,Malaga,Las Palmas,1,1
+14/06/2026,Malaga,Almeria,0,0
+20/06/2026,Almeria,Malaga,1,2
