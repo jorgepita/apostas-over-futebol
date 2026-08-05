@@ -2589,15 +2589,19 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION C: Performance Over Time -->
-        <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">C — Desempenho ao Longo do Tempo</span>
+        <!-- NEUTRAL TRANSITION: Performance Over Time — deliberately outside
+             both Época Atual and Histórico Completo. Its rolling 7/30/90-day
+             + all-time windows are an independent, recency-based analysis,
+             not bounded by the season boundary — see renderPerformanceOverTime()
+             (unchanged; only this section's position/label moved, Phase 29.3B). -->
+        <div class="section-header" style="margin-top:14px;">
+          <span class="section-header-title" style="font-size:13px;color:var(--muted);">Desempenho ao Longo do Tempo — Janelas Móveis (Independente da Época)</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
           <div style="margin-bottom:10px;">
             <div style="font-size:13px;font-weight:700;">Evolução de performance por período</div>
-            <div class="note">Apostas reais fechadas (bot + manuais) — janelas móveis, independentes da época</div>
+            <div class="note">Apostas reais fechadas (bot + manuais) — janelas móveis (7/30/90 dias e todo o tempo), independentes da época atual ou de qualquer arquivo.</div>
           </div>
           <div id="perfOverTimeWrap">
             <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
@@ -2613,9 +2617,9 @@ button:disabled {
         <!-- LEAGUE ANALYTICS INSIGHTS -->
         <div class="grid grid-4 league-analytics-insights" style="margin-bottom:4px;"></div>
 
-        <!-- SECTION D: League Performance (league_stats.csv, all-time by design) -->
+        <!-- SECTION C: League Performance (league_stats.csv, all-time by design) -->
         <div class="section-header">
-          <span class="section-header-title">D — Desempenho por Liga (Histórico Completo)</span>
+          <span class="section-header-title">C — Desempenho por Liga (Histórico Completo)</span>
           <div class="section-header-line"></div>
         </div>
 
@@ -2673,18 +2677,18 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION E: League Classification -->
+        <!-- SECTION D: League Classification -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">E — Classificação de Ligas</span>
+          <span class="section-header-title">D — Classificação de Ligas</span>
           <div class="section-header-line"></div>
         </div>
         <div id="leagueClassificationWrap">
           <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
         </div>
 
-        <!-- SECTION F: Market Intelligence -->
+        <!-- SECTION E: Market Intelligence -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">F — Inteligência de Mercado</span>
+          <span class="section-header-title">E — Inteligência de Mercado</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2697,9 +2701,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION G: Edge Validation -->
+        <!-- SECTION F: Edge Validation -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">G — Validação de Edge</span>
+          <span class="section-header-title">F — Validação de Edge</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2712,9 +2716,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION H: Strategy Validation -->
+        <!-- SECTION G: Strategy Validation -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">H — Validação de Estratégia</span>
+          <span class="section-header-title">G — Validação de Estratégia</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2727,9 +2731,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION I: Model Calibration -->
+        <!-- SECTION H: Model Calibration -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">I — Calibração do Modelo</span>
+          <span class="section-header-title">H — Calibração do Modelo</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2742,9 +2746,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION J: Action Engine -->
+        <!-- SECTION I: Action Engine -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">J — Motor de Ação</span>
+          <span class="section-header-title">I — Motor de Ação</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -2757,9 +2761,9 @@ button:disabled {
           </div>
         </div>
 
-        <!-- SECTION K: Learning Center -->
+        <!-- SECTION J: Learning Center -->
         <div class="section-header" style="margin-top:4px;">
-          <span class="section-header-title">K — Centro de Aprendizagem</span>
+          <span class="section-header-title">J — Centro de Aprendizagem</span>
           <div class="section-header-line"></div>
         </div>
         <div class="card">
@@ -6334,7 +6338,7 @@ button:disabled {
               <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
               <span style="margin-left:auto;font-size:11px;color:var(--muted);">${note}</span>
             </div>
-            <div class="kpi-grid kpi-grid-4" style="margin-bottom:0;">
+            <div class="kpi-grid" style="margin-bottom:0;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));">
               ${kpiCell('Apostas Fechadas', String(s.picks), '')}
               ${kpiCell('Lucro', (s.lucro >= 0 ? '+' : '') + '€' + fmt(s.lucro), profColor(s.lucro))}
               ${kpiCell('ROI', s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—', s.roi !== null ? profColor(s.roi) : '')}
