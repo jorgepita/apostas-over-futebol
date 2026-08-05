@@ -2459,7 +2459,7 @@ button:disabled {
           <span class="section-header-title" style="font-size:14px;color:var(--text);">Visão Geral — Época Atual vs Histórico Completo</span>
           <div class="section-header-line"></div>
         </div>
-        <div id="analyticsOverviewWrap">
+        <div id="analyticsOverviewWrap" style="min-width:0;">
           <div class="note" style="padding:8px;opacity:0.5;">A calcular...</div>
         </div>
 
@@ -6333,12 +6333,12 @@ button:disabled {
         function seasonCard(title, note, accent, s) {
           const ddFmt = fmtDrawdown(s.maxDrawdown);
           const yld = s.roi !== null ? s.roi / 100 : null;
-          return `<div class="card">
+          return `<div class="card" style="min-width:0;">
             <div class="bankroll-split-header">
               <span class="bankroll-split-title" style="font-size:15px;color:${accent};">${title}</span>
               <span style="margin-left:auto;font-size:11px;color:var(--muted);">${note}</span>
             </div>
-            <div class="kpi-grid" style="margin-bottom:0;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));">
+            <div class="kpi-grid" style="margin-bottom:0;min-width:0;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));">
               ${kpiCell('Apostas Fechadas', String(s.picks), '')}
               ${kpiCell('Lucro', (s.lucro >= 0 ? '+' : '') + '€' + fmt(s.lucro), profColor(s.lucro))}
               ${kpiCell('ROI', s.roi !== null ? (s.roi >= 0 ? '+' : '') + pct(s.roi) : '—', s.roi !== null ? profColor(s.roi) : '')}
