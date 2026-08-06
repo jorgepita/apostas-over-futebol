@@ -6212,7 +6212,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -9485,7 +9485,7 @@
   ],
   "movements": [],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-06T11:08:35.867Z",
+  "lastUpdated": "2026-08-06T11:09:35.978Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
