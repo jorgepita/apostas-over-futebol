@@ -6120,7 +6120,8 @@
     },
     "2026-08-07|portugal|Estoril vs Famalicao|Over 2.5": {
       "apostada": true,
-      "stakeReal": "1"
+      "stakeReal": "1",
+      "oddReal": "1.75"
     }
   },
   "manualBets": [
@@ -9490,7 +9491,7 @@
   "movements": [],
   "sessionStartDate": "2026-08-03",
   "lastUpdated": "2026-08-06T11:17:36.262Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-pending",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
