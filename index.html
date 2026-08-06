@@ -787,6 +787,23 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    /* Phase 29.4 — Analytics responsive layout fix (root cause, not a
+       hack). Grid items default to min-width:auto, so a wide,
+       non-wrapping table (e.g. .league-analytics-table's own
+       min-width:980px) had its intrinsic content size propagate
+       upward through .card and the .grid wrappers that hold two cards
+       side by side, forcing .section-stack's shared grid track — and
+       therefore the whole page — wider than the viewport at
+       intermediate widths, even though .table-wrap/.league-analytics-
+       scroll already correctly scroll their own overflow internally.
+       Scoped to #tab-analytics only: every other tab already renders
+       correctly without this, so the shared .card/.grid/.section-stack
+       class definitions themselves are left untouched. */
+    #tab-analytics .section-stack > *,
+    #tab-analytics .grid > * {
+      min-width: 0;
+    }
+
     .divider-note {
       border-top: 1px solid var(--line);
       padding-top: 12px;
@@ -1104,6 +1121,82 @@ button,
 }
 
 /* =========================
+   ANALYTICS TABLE OPTIMISATION (Phase 29.4)
+   Scoped to #tab-analytics only — every other page's tables (History,
+   Bank, Strategy Lab, ...) keep the sticky-column widths above
+   unchanged. Analytics tables are dominated by short 1-3 digit counts
+   ("Picks"/"Apostas", and — in the three core performance tables —
+   "W"/"L") in the exact columns the sticky-column system reserves
+   90px/110px/180px for; that floor was tuned for wider content
+   elsewhere in the app and left far more room than these columns
+   need. Column 3's/4's sticky "left" offsets are recomputed to match
+   the narrower widths below so the sticky columns keep lining up
+   without a gap or overlap.
+========================= */
+#tab-analytics .table-wrap th:nth-child(2),
+#tab-analytics .table-wrap td:nth-child(2) {
+  min-width: 56px;
+}
+
+#tab-analytics .table-wrap th:nth-child(3),
+#tab-analytics .table-wrap td:nth-child(3) {
+  left: 102px; /* 46 (col1) + 56 (col2, narrowed above) */
+}
+
+/* The three core performance tables (League/Market/Origem — Época
+   Atual Section A/B) are the only Analytics tables where columns 3
+   and 4 are themselves single-letter result counts ("W"/"L") rather
+   than a longer label (e.g. "Taxa de Acerto") — tightened by their
+   own table-body IDs rather than a blanket rule that would incorrectly
+   shrink other tables' differently-shaped columns 3/4. analyticsMarketRows/
+   SourceRows/LeagueRows are IDs on the <tbody>, not the <table> — :has()
+   (already used elsewhere in this file, see the tier-background rules
+   above) reaches the sibling <thead> so th and td narrow together;
+   without it the browser sizes the column to the wider, untouched th. */
+table:has(#analyticsMarketRows) td:nth-child(3), table:has(#analyticsMarketRows) th:nth-child(3),
+table:has(#analyticsMarketRows) td:nth-child(4), table:has(#analyticsMarketRows) th:nth-child(4),
+table:has(#analyticsSourceRows) td:nth-child(3), table:has(#analyticsSourceRows) th:nth-child(3),
+table:has(#analyticsSourceRows) td:nth-child(4), table:has(#analyticsSourceRows) th:nth-child(4),
+table:has(#analyticsLeagueRows) td:nth-child(3), table:has(#analyticsLeagueRows) th:nth-child(3),
+table:has(#analyticsLeagueRows) td:nth-child(4), table:has(#analyticsLeagueRows) th:nth-child(4) {
+  min-width: 38px;
+}
+table:has(#analyticsMarketRows) th:nth-child(4), table:has(#analyticsMarketRows) td:nth-child(4),
+table:has(#analyticsSourceRows) th:nth-child(4), table:has(#analyticsSourceRows) td:nth-child(4),
+table:has(#analyticsLeagueRows) th:nth-child(4), table:has(#analyticsLeagueRows) td:nth-child(4) {
+  left: 140px; /* 102 (col3 start) + 38 (col3, narrowed above) */
+}
+
+/* Numeric alignment: every Analytics table where every column except
+   the first (a league/market/period/edge-range label) is itself a
+   numeric statistic gets a blanket right-align. Tables mixing numeric
+   columns with action badges or explanatory text (Action Engine,
+   League Analytics) are targeted column-by-column instead, so badges
+   and free text stay exactly as they were. */
+table:has(#analyticsMarketRows) th:not(:first-child), table:has(#analyticsMarketRows) td:not(:first-child),
+table:has(#analyticsSourceRows) th:not(:first-child), table:has(#analyticsSourceRows) td:not(:first-child),
+table:has(#analyticsLeagueRows) th:not(:first-child), table:has(#analyticsLeagueRows) td:not(:first-child),
+#perfOverTimeWrap table th:not(:first-child), #perfOverTimeWrap table td:not(:first-child),
+#marketIntelligenceWrap table th:not(:first-child), #marketIntelligenceWrap table td:not(:first-child),
+#edgeValidationWrap table th:not(:first-child), #edgeValidationWrap table td:not(:first-child),
+#strategyValidationWrap table th:not(:first-child), #strategyValidationWrap table td:not(:first-child),
+#modelCalibrationWrap table th:not(:first-child), #modelCalibrationWrap table td:not(:first-child) {
+  text-align: right;
+}
+#actionEngineWrap table th:nth-child(2), #actionEngineWrap table td:nth-child(2),
+#actionEngineWrap table th:nth-child(3), #actionEngineWrap table td:nth-child(3) {
+  text-align: right;
+}
+.league-analytics-table th:nth-child(3), .league-analytics-table td:nth-child(3),
+.league-analytics-table th:nth-child(7), .league-analytics-table td:nth-child(7),
+.league-analytics-table th:nth-child(8), .league-analytics-table td:nth-child(8),
+.league-analytics-table th:nth-child(10), .league-analytics-table td:nth-child(10),
+.league-analytics-table th:nth-child(11), .league-analytics-table td:nth-child(11),
+.league-analytics-table th:nth-child(12), .league-analytics-table td:nth-child(12) {
+  text-align: right;
+}
+
+/* =========================
    COLUMN TIGHTEN
 ========================= */
 td:nth-child(6),
@@ -1121,6 +1214,20 @@ td:nth-child(15) {
 ========================= */
 table {
   min-width: 840px;
+}
+
+/* Phase 29.4 — the 840px floor above was sized for wider, denser
+   tables elsewhere in the app; Analytics' simpler tables (9 columns
+   or fewer, mostly short numeric stats) don't need it, and it was
+   the reason narrowing individual numeric columns above had no
+   visible effect — with a fixed 840px total, the browser's table
+   layout just redistributed the freed space back across every
+   column instead of letting the table shrink. Excludes
+   .league-analytics-table (12 columns, genuinely dense — keeps its
+   own separate, wider 980px minimum, untouched) and is scoped to
+   #tab-analytics only. */
+#tab-analytics .table-wrap table:not(.league-analytics-table) {
+  min-width: 0;
 }
 
 /* esconder notas dos stats mas manter percentagens */
