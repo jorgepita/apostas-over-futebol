@@ -7063,7 +7063,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -7123,7 +7123,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -7290,7 +7290,7 @@
       "resultado": "",
       "scoreAtAnalysis": 40,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -7350,7 +7350,7 @@
       "resultado": "",
       "scoreAtAnalysis": 40,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -7731,7 +7731,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -8535,7 +8535,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -8770,7 +8770,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -9172,7 +9172,7 @@
       "resultado": "",
       "scoreAtAnalysis": 39,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -9326,7 +9326,7 @@
       "resultado": "",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "id": "manual_1786014516489_5h8c1l",
@@ -9338,7 +9338,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -9398,7 +9398,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
