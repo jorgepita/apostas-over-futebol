@@ -992,6 +992,39 @@
     },
     {
       "Date": "2026-08-08",
+      "League": "mls",
+      "LeagueName": "MLS",
+      "HomeTeam": "New England Revolution",
+      "AwayTeam": "Houston Dynamo",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.298",
+      "LambdaTotal": "3.498",
+      "KickoffUTC": "2026-08-08T21:30:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.679,
+      "Odd": "1.8",
+      "ProbMarket": 0.556,
+      "Edge": 0.123,
+      "KellyTrue": "0.2774",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0175",
+      "EdgeMinFinal": "0.0175",
+      "ProbGap": "0.123",
+      "StakeFracRaw": "0.0499",
+      "StakeFrac": "0.0216",
+      "Stake\u20ac": "1.08",
+      "DailyScale": "0.5406733581844062",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-08",
+      "Liga": "mls",
+      "Jogo": "New England Revolution vs Houston Dynamo",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 12.3
+    },
+    {
+      "Date": "2026-08-08",
       "League": "franca2",
       "LeagueName": "Ligue 2",
       "HomeTeam": "Metz",
@@ -4120,6 +4153,26 @@
     },
     {
       "Data": "2026-08-08",
+      "Liga": "mls",
+      "Jogo": "New England Revolution vs Houston Dynamo",
+      "Mercado": "Over 2.5",
+      "Odd": "1.8",
+      "Stake\u20ac": "1.08",
+      "Edge%": 12.33,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-08T21:30:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 12.33
+    },
+    {
+      "Data": "2026-08-08",
       "Liga": "portugal",
       "Jogo": "Estrela vs Sporting CP",
       "Mercado": "BTTS",
@@ -4638,9 +4691,9 @@
       "Market": "Over 2.5",
       "ROI%": "-37.2",
       "WinRate%": "50.0",
-      "AvgKelly": "0.6043",
+      "AvgKelly": "0.6207",
       "Tier": "Weak",
-      "TotalPicks": "28"
+      "TotalPicks": "29"
     },
     {
       "League": "Campeonato Brasileiro Serie A",
@@ -9439,22 +9492,69 @@
       "scoreAtAnalysis": 54,
       "stake": "1",
       "status": "pending"
+    },
+    {
+      "id": "manual_1786098317493_k4g20g",
+      "data": "2026-08-07",
+      "liga": "portugal",
+      "jogo": "Estoril vs Famalicao",
+      "mercado": "Over 2.5",
+      "odd": "2.01",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "STRONG BUY",
+      "edgeAtAnalysis": 15.095058136691408,
+      "scoreAtAnalysis": 88,
+      "analysisSnapshot": {
+        "cacheKey": "2026-08-07_portugal_estoril_famalicao|O2.5|2.01|1.00",
+        "market": "O2.5",
+        "odd": 2.01,
+        "stake": 1,
+        "ProbModel": 0.6484630191778594,
+        "ProbMarket": 0.49751243781094534,
+        "Edge": 0.15095058136691408,
+        "EdgePercent": 15.095058136691408,
+        "fairOdd": 1.5421079852291801,
+        "KellyTrue": 0.30040660252227464,
+        "Confidence": 1,
+        "EV": 0.3034106685474973,
+        "score": 88,
+        "scoreCls": "good",
+        "opinion": "STRONG BUY",
+        "opinionCls": "good",
+        "LambdaHome": 2.0037824867883764,
+        "LambdaAway": 1.3358111847802683,
+        "LambdaTotal": 3.339593671568645,
+        "usedFallback": false,
+        "sampleSize": 12,
+        "dataQuality": "HIGH",
+        "diagnostics": null,
+        "timestamp": "2026-08-07T10:25:13.508Z"
+      },
+      "kickoffUTC": "2026-08-07T20:15:00+01:00",
+      "homeTeam": "Estoril",
+      "awayTeam": "Famalicao",
+      "leagueId": 94
     }
   ],
   "movements": [],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-06T11:24:36.033Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-08-07T10:24:35.373Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
       "Date": "2026-08-07",
       "League": "alemanha2",
       "HomeTeam": "VfL Bochum",
       "AwayTeam": "Hertha BSC",
-      "Odd_Over25": "1.67",
-      "Odd_BTTS_Yes": "1.55",
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.58",
       "KickoffUTC": "2026-08-07T19:30:00+01:00"
     },
     {
@@ -9463,7 +9563,7 @@
       "HomeTeam": "Club Brugge KV",
       "AwayTeam": "Kortrijk",
       "Odd_Over25": "1.47",
-      "Odd_BTTS_Yes": "1.88",
+      "Odd_BTTS_Yes": "1.91",
       "KickoffUTC": "2026-08-07T19:45:00+01:00"
     },
     {
@@ -9480,7 +9580,7 @@
       "League": "portugal",
       "HomeTeam": "Estoril",
       "AwayTeam": "Famalicao",
-      "Odd_Over25": "1.96",
+      "Odd_Over25": "2.01",
       "Odd_BTTS_Yes": "1.73",
       "KickoffUTC": "2026-08-07T20:15:00+01:00"
     },
@@ -9498,7 +9598,7 @@
       "League": "alemanha2",
       "HomeTeam": "1. FC Magdeburg",
       "AwayTeam": "Eintracht Braunschweig",
-      "Odd_Over25": "1.67",
+      "Odd_Over25": "1.68",
       "Odd_BTTS_Yes": "1.62",
       "KickoffUTC": "2026-08-08T12:00:00+01:00"
     },
@@ -9507,8 +9607,8 @@
       "League": "alemanha2",
       "HomeTeam": "Karlsruher SC",
       "AwayTeam": "Arminia Bielefeld",
-      "Odd_Over25": "1.52",
-      "Odd_BTTS_Yes": "1.44",
+      "Odd_Over25": "1.55",
+      "Odd_BTTS_Yes": "1.46",
       "KickoffUTC": "2026-08-08T12:00:00+01:00"
     },
     {
@@ -9516,7 +9616,7 @@
       "League": "alemanha2",
       "HomeTeam": "SV Darmstadt 98",
       "AwayTeam": "Holstein Kiel",
-      "Odd_Over25": "1.60",
+      "Odd_Over25": "1.62",
       "Odd_BTTS_Yes": "1.50",
       "KickoffUTC": "2026-08-08T12:00:00+01:00"
     },
@@ -9535,7 +9635,7 @@
       "HomeTeam": "St. Truiden",
       "AwayTeam": "Lommel United",
       "Odd_Over25": "1.88",
-      "Odd_BTTS_Yes": "1.83",
+      "Odd_BTTS_Yes": "1.85",
       "KickoffUTC": "2026-08-08T19:45:00+01:00"
     },
     {
@@ -9543,7 +9643,7 @@
       "League": "belgica",
       "HomeTeam": "Standard Liege",
       "AwayTeam": "Cercle Brugge",
-      "Odd_Over25": "2.06",
+      "Odd_Over25": "2.02",
       "Odd_BTTS_Yes": "1.80",
       "KickoffUTC": "2026-08-08T17:15:00+01:00"
     },
@@ -9554,24 +9654,24 @@
       "AwayTeam": "Daejeon Citizen",
       "Odd_Over25": "2.06",
       "Odd_BTTS_Yes": "1.75",
-      "KickoffUTC": "2026-08-08T11:30:00+01:00"
+      "KickoffUTC": "2026-08-08T12:00:00+01:00"
     },
     {
       "Date": "2026-08-08",
       "League": "coreia",
       "HomeTeam": "Gimcheon Sangmu FC",
       "AwayTeam": "FC Seoul",
-      "Odd_Over25": "1.85",
+      "Odd_Over25": "1.87",
       "Odd_BTTS_Yes": "1.73",
-      "KickoffUTC": "2026-08-08T11:30:00+01:00"
+      "KickoffUTC": "2026-08-08T12:00:00+01:00"
     },
     {
       "Date": "2026-08-08",
       "League": "franca2",
       "HomeTeam": "Boulogne",
       "AwayTeam": "Nancy",
-      "Odd_Over25": "2.12",
-      "Odd_BTTS_Yes": "1.83",
+      "Odd_Over25": "2.15",
+      "Odd_BTTS_Yes": "1.87",
       "KickoffUTC": "2026-08-08T19:45:00+01:00"
     },
     {
@@ -9603,10 +9703,28 @@
     },
     {
       "Date": "2026-08-08",
+      "League": "mls",
+      "HomeTeam": "New England Revolution",
+      "AwayTeam": "Houston Dynamo",
+      "Odd_Over25": "1.80",
+      "Odd_BTTS_Yes": "1.65",
+      "KickoffUTC": "2026-08-08T21:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-08",
+      "League": "mls_next_pro",
+      "HomeTeam": "Inter Miami II",
+      "AwayTeam": "Crown Legacy",
+      "Odd_Over25": "1.40",
+      "Odd_BTTS_Yes": "1.48",
+      "KickoffUTC": "2026-08-08T00:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-08",
       "League": "noruega",
       "HomeTeam": "Start",
       "AwayTeam": "Fredrikstad",
-      "Odd_Over25": "1.80",
+      "Odd_Over25": "1.82",
       "Odd_BTTS_Yes": "1.62",
       "KickoffUTC": "2026-08-08T17:00:00+01:00"
     },
@@ -9616,7 +9734,7 @@
       "HomeTeam": "Valerenga",
       "AwayTeam": "Bodo/Glimt",
       "Odd_Over25": "1.35",
-      "Odd_BTTS_Yes": "1.50",
+      "Odd_BTTS_Yes": "1.46",
       "KickoffUTC": "2026-08-08T13:00:00+01:00"
     },
     {
@@ -9633,7 +9751,7 @@
       "League": "paises_baixos",
       "HomeTeam": "AZ Alkmaar",
       "AwayTeam": "ADO Den Haag",
-      "Odd_Over25": "1.54",
+      "Odd_Over25": "1.55",
       "Odd_BTTS_Yes": "1.67",
       "KickoffUTC": "2026-08-08T20:00:00+01:00"
     },
@@ -9642,7 +9760,7 @@
       "League": "paises_baixos",
       "HomeTeam": "GO Ahead Eagles",
       "AwayTeam": "Willem II",
-      "Odd_Over25": "1.65",
+      "Odd_Over25": "1.62",
       "Odd_BTTS_Yes": "1.62",
       "KickoffUTC": "2026-08-08T17:45:00+01:00"
     },
@@ -9651,7 +9769,7 @@
       "League": "paises_baixos",
       "HomeTeam": "NEC Nijmegen",
       "AwayTeam": "Telstar",
-      "Odd_Over25": "1.44",
+      "Odd_Over25": "1.45",
       "Odd_BTTS_Yes": "1.60",
       "KickoffUTC": "2026-08-08T15:30:00+01:00"
     },
@@ -9670,7 +9788,7 @@
       "HomeTeam": "Estrela",
       "AwayTeam": "Sporting CP",
       "Odd_Over25": "1.57",
-      "Odd_BTTS_Yes": "2.12",
+      "Odd_BTTS_Yes": "2.10",
       "KickoffUTC": "2026-08-08T20:30:00+01:00"
     },
     {
@@ -9678,7 +9796,7 @@
       "League": "portugal",
       "HomeTeam": "Guimaraes",
       "AwayTeam": "Arouca",
-      "Odd_Over25": "1.96",
+      "Odd_Over25": "1.94",
       "Odd_BTTS_Yes": "1.80",
       "KickoffUTC": "2026-08-08T18:00:00+01:00"
     },
@@ -9687,8 +9805,8 @@
       "League": "portugal",
       "HomeTeam": "Maritimo",
       "AwayTeam": "Casa Pia",
-      "Odd_Over25": "2.01",
-      "Odd_BTTS_Yes": "1.80",
+      "Odd_Over25": "2.02",
+      "Odd_BTTS_Yes": "1.75",
       "KickoffUTC": "2026-08-08T15:30:00+01:00"
     },
     {
@@ -9696,25 +9814,16 @@
       "League": "portugal2",
       "HomeTeam": "Chaves",
       "AwayTeam": "Academica",
-      "Odd_Over25": "2.08",
+      "Odd_Over25": "2.21",
       "Odd_BTTS_Yes": "1.91",
       "KickoffUTC": "2026-08-08T11:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-08",
-      "League": "portugal2",
-      "HomeTeam": "Tondela",
-      "AwayTeam": "Amarante",
-      "Odd_Over25": "2.10",
-      "Odd_BTTS_Yes": "2.20",
-      "KickoffUTC": "2026-08-08T18:00:00+01:00"
     },
     {
       "Date": "2026-08-08",
       "League": "suecia",
       "HomeTeam": "Mjallby AIF",
       "AwayTeam": "IF Elfsborg",
-      "Odd_Over25": "1.90",
+      "Odd_Over25": "1.93",
       "Odd_BTTS_Yes": "1.70",
       "KickoffUTC": "2026-08-08T16:30:00+01:00"
     },
@@ -9733,7 +9842,7 @@
       "HomeTeam": "Lausanne",
       "AwayTeam": "BSC Young Boys",
       "Odd_Over25": "1.42",
-      "Odd_BTTS_Yes": "1.40",
+      "Odd_BTTS_Yes": "1.39",
       "KickoffUTC": "2026-08-08T17:00:00+01:00"
     },
     {
@@ -9750,7 +9859,7 @@
       "League": "alemanha2",
       "HomeTeam": "1. FC N\u00fcrnberg",
       "AwayTeam": "Dynamo Dresden",
-      "Odd_Over25": "1.67",
+      "Odd_Over25": "1.71",
       "Odd_BTTS_Yes": "1.57",
       "KickoffUTC": "2026-08-09T12:30:00+01:00"
     },
@@ -9768,7 +9877,7 @@
       "League": "alemanha2",
       "HomeTeam": "FC St. Pauli",
       "AwayTeam": "SpVgg Greuther F\u00fcrth",
-      "Odd_Over25": "1.65",
+      "Odd_Over25": "1.67",
       "Odd_BTTS_Yes": "1.57",
       "KickoffUTC": "2026-08-09T12:30:00+01:00"
     },
@@ -9787,7 +9896,7 @@
       "HomeTeam": "Charleroi",
       "AwayTeam": "OH Leuven",
       "Odd_Over25": "2.11",
-      "Odd_BTTS_Yes": "1.91",
+      "Odd_BTTS_Yes": "1.92",
       "KickoffUTC": "2026-08-09T15:00:00+01:00"
     },
     {
@@ -9795,7 +9904,7 @@
       "League": "belgica",
       "HomeTeam": "Gent",
       "AwayTeam": "KV Mechelen",
-      "Odd_Over25": "1.95",
+      "Odd_Over25": "1.91",
       "Odd_BTTS_Yes": "1.75",
       "KickoffUTC": "2026-08-09T12:30:00+01:00"
     },
@@ -9813,7 +9922,7 @@
       "League": "brasil",
       "HomeTeam": "Botafogo",
       "AwayTeam": "Fluminense",
-      "Odd_Over25": "2.00",
+      "Odd_Over25": "1.98",
       "Odd_BTTS_Yes": "1.73",
       "KickoffUTC": "2026-08-09T01:00:00+01:00"
     },
@@ -9840,8 +9949,8 @@
       "League": "finlandia",
       "HomeTeam": "Inter Turku",
       "AwayTeam": "Lahti",
-      "Odd_Over25": "1.97",
-      "Odd_BTTS_Yes": "1.80",
+      "Odd_Over25": "2.03",
+      "Odd_BTTS_Yes": "1.84",
       "KickoffUTC": "2026-08-09T15:00:00+01:00"
     },
     {
@@ -9867,7 +9976,7 @@
       "League": "noruega",
       "HomeTeam": "Kristiansund BK",
       "AwayTeam": "Molde",
-      "Odd_Over25": "1.60",
+      "Odd_Over25": "1.58",
       "Odd_BTTS_Yes": "1.57",
       "KickoffUTC": "2026-08-09T18:15:00+01:00"
     },
@@ -9885,7 +9994,7 @@
       "League": "paises_baixos",
       "HomeTeam": "Groningen",
       "AwayTeam": "Utrecht",
-      "Odd_Over25": "1.82",
+      "Odd_Over25": "1.83",
       "Odd_BTTS_Yes": "1.62",
       "KickoffUTC": "2026-08-09T13:30:00+01:00"
     },
@@ -9894,7 +10003,7 @@
       "League": "paises_baixos",
       "HomeTeam": "Heerenveen",
       "AwayTeam": "Twente",
-      "Odd_Over25": "1.50",
+      "Odd_Over25": "1.51",
       "Odd_BTTS_Yes": "1.44",
       "KickoffUTC": "2026-08-09T15:45:00+01:00"
     },
@@ -9904,7 +10013,7 @@
       "HomeTeam": "PEC Zwolle",
       "AwayTeam": "Ajax",
       "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.58",
+      "Odd_BTTS_Yes": "1.60",
       "KickoffUTC": "2026-08-09T13:30:00+01:00"
     },
     {
@@ -9931,7 +10040,7 @@
       "HomeTeam": "FC Porto",
       "AwayTeam": "Alverca",
       "Odd_Over25": "1.60",
-      "Odd_BTTS_Yes": "2.42",
+      "Odd_BTTS_Yes": "2.35",
       "KickoffUTC": "2026-08-09T18:00:00+01:00"
     },
     {
@@ -9951,15 +10060,6 @@
       "Odd_Over25": "2.01",
       "Odd_BTTS_Yes": "1.91",
       "KickoffUTC": "2026-08-09T20:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-09",
-      "League": "portugal2",
-      "HomeTeam": "AVS",
-      "AwayTeam": "Sporting CP B",
-      "Odd_Over25": "1.96",
-      "Odd_BTTS_Yes": "2.10",
-      "KickoffUTC": "2026-08-09T15:30:00+01:00"
     },
     {
       "Date": "2026-08-09",
@@ -9993,8 +10093,8 @@
       "League": "suecia",
       "HomeTeam": "IFK Goteborg",
       "AwayTeam": "Kalmar FF",
-      "Odd_Over25": "1.72",
-      "Odd_BTTS_Yes": "1.62",
+      "Odd_Over25": "1.73",
+      "Odd_BTTS_Yes": "1.57",
       "KickoffUTC": "2026-08-09T15:30:00+01:00"
     },
     {
@@ -10003,7 +10103,7 @@
       "HomeTeam": "Malmo FF",
       "AwayTeam": "Degerfors IF",
       "Odd_Over25": "1.67",
-      "Odd_BTTS_Yes": "1.77",
+      "Odd_BTTS_Yes": "1.76",
       "KickoffUTC": "2026-08-09T13:00:00+01:00"
     },
     {
@@ -10012,7 +10112,7 @@
       "HomeTeam": "FC Basel 1893",
       "AwayTeam": "FC Thun",
       "Odd_Over25": "1.44",
-      "Odd_BTTS_Yes": "1.44",
+      "Odd_BTTS_Yes": "1.40",
       "KickoffUTC": "2026-08-09T15:30:00+01:00"
     },
     {
@@ -10020,7 +10120,7 @@
       "League": "suica",
       "HomeTeam": "FC Lugano",
       "AwayTeam": "FC Zurich",
-      "Odd_Over25": "1.55",
+      "Odd_Over25": "1.61",
       "Odd_BTTS_Yes": "1.65",
       "KickoffUTC": "2026-08-09T13:00:00+01:00"
     },
@@ -10030,7 +10130,7 @@
       "HomeTeam": "FC ST. Gallen",
       "AwayTeam": "FC Luzern",
       "Odd_Over25": "1.44",
-      "Odd_BTTS_Yes": "1.44",
+      "Odd_BTTS_Yes": "1.40",
       "KickoffUTC": "2026-08-09T15:30:00+01:00"
     },
     {
@@ -10038,7 +10138,7 @@
       "League": "suica",
       "HomeTeam": "FC Sion",
       "AwayTeam": "FC Vaduz",
-      "Odd_Over25": "1.50",
+      "Odd_Over25": "1.48",
       "Odd_BTTS_Yes": "1.62",
       "KickoffUTC": "2026-08-09T15:30:00+01:00"
     },
@@ -10056,7 +10156,7 @@
       "League": "portugal2",
       "HomeTeam": "Lusit\u00e2nia Lourosa",
       "AwayTeam": "FC Porto B",
-      "Odd_Over25": "2.10",
+      "Odd_Over25": "2.08",
       "Odd_BTTS_Yes": "1.83",
       "KickoffUTC": "2026-08-10T18:00:00+01:00"
     },
