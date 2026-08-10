@@ -8389,10 +8389,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.28",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 84,
       "stake": "1",
-      "status": "pending"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-10T08:40:22.558661+00:00"
     },
     {
       "analysisSnapshot": {
@@ -10378,8 +10381,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-09T22:56:19.222926+00:00",
-      "lastSuccessAt": "2026-08-09T22:56:19.222926+00:00",
+      "lastCheckedAt": "2026-08-10T08:40:22.559928+00:00",
+      "lastSuccessAt": "2026-08-10T08:40:22.559928+00:00",
       "status": "ok"
     }
   },
