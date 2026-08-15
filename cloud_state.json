@@ -7814,6 +7814,26 @@
     "2026-08-16|portugal|Nacional vs Estoril|BTTS": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-17|portugal|Casa Pia vs Benfica|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|turquia|Samsunspor vs G\u00f6ztepe|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|espanha2|Almeria vs Eldense|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|finlandia|Gnistan vs Ilves|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|mls|Seattle Sounders vs Vancouver Whitecaps|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -11383,7 +11403,7 @@
   "lastUpdated": "2026-08-15T08:34:54.723Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-08-15",
