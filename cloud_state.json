@@ -11543,7 +11543,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "AVOID",
@@ -13024,7 +13024,7 @@
   "movements": [],
   "sessionStartDate": "2026-08-03",
   "lastUpdated": "2026-08-15T08:40:57.142Z",
-  "activeTab": "tab-pending",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
