@@ -13259,6 +13259,28 @@
       "homeTeam": "Incheon United",
       "awayTeam": "Gimcheon Sangmu FC",
       "leagueId": 292
+    },
+    {
+      "id": "manual_1786783354158_qo1fun",
+      "data": "2026-08-16",
+      "liga": "espanha",
+      "jogo": "Racing Santander vs Villarreal",
+      "mercado": "BTTS",
+      "odd": "1.7",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": false,
+      "botOpinion": null,
+      "edgeAtAnalysis": null,
+      "scoreAtAnalysis": null,
+      "analysisSnapshot": null,
+      "kickoffUTC": "2026-08-16T16:00:00+01:00",
+      "homeTeam": "Racing Santander",
+      "awayTeam": "Villarreal",
+      "leagueId": 140
     }
   ],
   "movements": [],
