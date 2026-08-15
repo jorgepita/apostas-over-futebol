@@ -7834,6 +7834,22 @@
     "2026-08-17|mls|Seattle Sounders vs Vancouver Whitecaps|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-16|turquia|Ba\u015fak\u015fehir vs Kocaelispor|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|brasil|Atletico-MG vs Gremio|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|championship|Watford vs Southampton|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|turquia|Amed vs Erzurumspor FK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -11400,7 +11416,7 @@
   ],
   "movements": [],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-15T08:34:54.723Z",
+  "lastUpdated": "2026-08-15T08:35:57.247Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
