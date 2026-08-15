@@ -1,7 +1,7 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-08-15;Super Lig;Gaziantep FK vs Alanyaspor;O2.5;2.08;0.54;12.36;;;;;;;;2026-08-15T19:30:00+01:00;;
-2026-08-15;Primeira Liga;Rio Ave vs FC Porto;BTTS;2.15;0.39;5.97;;;;;;;;2026-08-15T20:30:00+01:00;;
-2026-08-15;Super Lig;Gençlerbirliği S.K. vs Fenerbahçe;O2.5;1.83;0.18;5.79;;;;;;;;2026-08-15T19:30:00+01:00;;
+2026-08-15;Super Lig;Gaziantep FK vs Alanyaspor;O2.5;2.08;0.54;12.36;;;;L;1-1;-0.54;;2026-08-15T18:30:00+00:00;;
+2026-08-15;Primeira Liga;Rio Ave vs FC Porto;BTTS;2.15;0.39;5.97;;;;L;0-2;-0.39;;2026-08-15T19:30:00+00:00;;
+2026-08-15;Super Lig;Gençlerbirliği S.K. vs Fenerbahçe;O2.5;1.83;0.18;5.79;;;;W;2-1;0.06;;2026-08-15T18:30:00+00:00;;
 2026-08-16;MLS;New York City FC vs Philadelphia Union;O2.5;1.68;0.54;12.48;;;;;;;;2026-08-16T23:00:00+01:00;;
 2026-08-16;Campeonato Brasileiro Serie A;Mirassol vs Flamengo;O2.5;2.08;0.51;10.96;;;;;;;;2026-08-16T22:30:00+01:00;;
 2026-08-16;Campeonato Brasileiro Serie A;Vasco DA Gama vs Santos;BTTS;1.85;0.98;10.52;;;;;;;;2026-08-16T20:00:00+01:00;;
