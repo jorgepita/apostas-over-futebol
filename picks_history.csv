@@ -212,7 +212,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-16;Allsvenskan;Kalmar FF vs Hammarby FF;O2.5;1.65;0.04;1.63;;;;;;;;2026-08-16T15:30:00+01:00;;
 2026-08-16;Campeonato Brasileiro Serie A;Atletico-MG vs Gremio;BTTS;1.91;0.89;7.93;;;;;;;;2026-08-16T20:00:00+01:00;;
 2026-08-16;Campeonato Brasileiro Serie A;Mirassol vs Flamengo;O2.5;2.08;0.51;10.96;;;;;;;;2026-08-16T22:30:00+01:00;;
-2026-08-16;Campeonato Brasileiro Serie A;Sao Paulo vs Coritiba;O2.5;2.02;0.37;13.8;;;;;;;;2026-08-16T01:00:00+01:00;;
+2026-08-16;Campeonato Brasileiro Serie A;Sao Paulo vs Coritiba;O2.5;2.02;0.37;13.8;;;;L;1-1;-0.37;;2026-08-16T00:00:00+00:00;;
 2026-08-16;Campeonato Brasileiro Serie A;Vasco DA Gama vs Santos;BTTS;1.85;1.5;10.52;;;;;;;;2026-08-16T20:00:00+01:00;;
 2026-08-16;Championship;Watford vs Southampton;O2.5;1.78;0.2;6.73;;;;;;;;2026-08-16T13:30:00+01:00;;
 2026-08-16;Eliteserien;Fredrikstad vs Kristiansund BK;O2.5;1.8;0.96;9.05;;;;;;;;2026-08-16T18:15:00+01:00;;
@@ -223,10 +223,10 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-16;Jupiler Pro League;RAAL La Louvière vs Gent;O2.5;2.0;0.29;7.72;;;;;;;;2026-08-16T15:00:00+01:00;;
 2026-08-16;K League 1;Incheon United vs Gimcheon Sangmu FC;O2.5;2.11;0.18;4.26;;;;;;;;2026-08-16T11:30:00+01:00;;
 2026-08-16;LaLiga;Racing Santander vs Villarreal;O2.5;1.95;0.1;5.05;;;;;;;;2026-08-16T16:00:00+01:00;;
-2026-08-16;MLS;Nashville SC vs Inter Miami;O2.5;1.55;0.38;7.48;;;;;;;;2026-08-16T01:30:00+01:00;;
+2026-08-16;MLS;Nashville SC vs Inter Miami;O2.5;1.55;0.38;7.48;;;;W;4-1;0.21;;2026-08-16T00:30:00+00:00;;
 2026-08-16;MLS;New York City FC vs Philadelphia Union;O2.5;1.67;1.16;12.12;;;;;;;;2026-08-16T23:00:00+01:00;;
-2026-08-16;MLS Next Pro;North Texas vs Portland Timbers II;O2.5;1.61;0.74;9.89;;;;;;;;2026-08-16T01:45:00+01:00;;
-2026-08-16;MLS Next Pro;Sporting KC II vs Colorado Rapids II;O2.5;1.62;0.53;8.6;;;;;;;;2026-08-16T01:00:00+01:00;;
+2026-08-16;MLS Next Pro;North Texas vs Portland Timbers II;O2.5;1.61;0.74;9.89;;;;W;0-3;0.45;;2026-08-16T00:45:00+00:00;;
+2026-08-16;MLS Next Pro;Sporting KC II vs Colorado Rapids II;O2.5;1.62;0.53;8.6;;;;W;2-2;0.33;;2026-08-16T00:00:00+00:00;;
 2026-08-16;Primeira Liga;Arouca vs Moreirense;BTTS;1.95;0.26;4.86;;;;;;;;2026-08-16T18:00:00+01:00;;
 2026-08-16;Primeira Liga;Famalicao vs Maritimo;O2.5;2.12;0.43;9.71;;;;;;;;2026-08-16T20:30:00+01:00;;
 2026-08-16;Primeira Liga;Nacional vs Estoril;BTTS;1.7;1.43;8.1;;;;;;;;2026-08-16T15:30:00+01:00;;
