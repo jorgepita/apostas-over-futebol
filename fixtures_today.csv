@@ -1,64 +1,46 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-08-16;alemanha2;Arminia Bielefeld;Energie Cottbus;1.60;1.57;2026-08-16T12:30:00+01:00
-2026-08-16;alemanha2;Dynamo Dresden;SV Darmstadt 98;1.62;1.55;2026-08-16T12:30:00+01:00
-2026-08-16;alemanha2;Hannover 96;VfL Wolfsburg;1.62;1.55;2026-08-16T12:30:00+01:00
-2026-08-16;belgica;KV Mechelen;Standard Liege;2.07;1.80;2026-08-16T17:30:00+01:00
-2026-08-16;belgica;Lommel United;Charleroi;1.99;1.75;2026-08-16T18:15:00+01:00
-2026-08-16;belgica;RAAL La Louvière;Gent;2.00;1.74;2026-08-16T15:00:00+01:00
-2026-08-16;belgica;SK Beveren;Anderlecht;1.88;1.70;2026-08-16T12:30:00+01:00
-2026-08-16;brasil;Atletico-MG;Gremio;2.05;1.91;2026-08-16T20:00:00+01:00
-2026-08-16;brasil;Mirassol;Flamengo;2.08;1.87;2026-08-16T22:30:00+01:00
-2026-08-16;brasil;Sao Paulo;Coritiba;2.15;1.95;2026-08-16T01:00:00+01:00
-2026-08-16;brasil;Vasco DA Gama;Santos;2.05;1.87;2026-08-16T20:00:00+01:00
-2026-08-16;championship;Burnley;West Ham;1.76;1.62;2026-08-16T16:00:00+01:00
-2026-08-16;championship;Watford;Southampton;1.78;1.64;2026-08-16T13:30:00+01:00
-2026-08-16;coreia;Incheon United;Gimcheon Sangmu FC;2.14;1.90;2026-08-16T11:30:00+01:00
-2026-08-16;coreia;Ulsan Hyundai FC;Gangwon FC;2.00;1.73;2026-08-16T11:30:00+01:00
-2026-08-16;espanha;Espanyol;Levante;2.27;1.94;2026-08-16T18:00:00+01:00
-2026-08-16;espanha;Racing Santander;Villarreal;1.83;1.63;2026-08-16T16:00:00+01:00
-2026-08-16;espanha2;Burgos;Cordoba;2.37;1.91;2026-08-16T18:00:00+01:00
-2026-08-16;finlandia;HJK Helsinki;FF Jaro;1.45;1.75;2026-08-16T14:00:00+01:00
-2026-08-16;finlandia;Lahti;KuPS;1.99;1.73;2026-08-16T15:00:00+01:00
-2026-08-16;mls;Atlanta United FC;New York Red Bulls;1.45;1.40;2026-08-16T00:30:00+01:00
-2026-08-16;mls;Nashville SC;Inter Miami;1.52;1.44;2026-08-16T01:30:00+01:00
-2026-08-16;mls;New York City FC;Philadelphia Union;1.68;1.57;2026-08-16T23:00:00+01:00
-2026-08-16;mls;Orlando City SC;FC Cincinnati;1.32;1.30;2026-08-16T00:30:00+01:00
-2026-08-16;mls_next_pro;FC Cincinnati II;Connecticut FC;1.50;1.50;2026-08-16T23:00:00+01:00
-2026-08-16;mls_next_pro;North Texas;Portland Timbers II;1.55;1.44;2026-08-16T01:45:00+01:00
-2026-08-16;mls_next_pro;Real Monarchs;Minnesota United II;1.50;1.40;2026-08-16T22:30:00+01:00
-2026-08-16;mls_next_pro;Sporting KC II;Colorado Rapids II;1.62;1.44;2026-08-16T01:00:00+01:00
-2026-08-16;noruega;Aalesund;Valerenga;1.45;1.39;2026-08-16T13:30:00+01:00
-2026-08-16;noruega;Fredrikstad;Kristiansund BK;1.81;1.70;2026-08-16T18:15:00+01:00
-2026-08-16;noruega;Molde;Tromso;1.72;1.58;2026-08-16T16:00:00+01:00
-2026-08-16;noruega;Sarpsborg 08 FF;Sandefjord;1.58;1.53;2026-08-16T16:00:00+01:00
-2026-08-16;paises_baixos;ADO Den Haag;Groningen;1.67;1.55;2026-08-16T11:15:00+01:00
-2026-08-16;paises_baixos;Ajax;Heerenveen;1.43;1.57;2026-08-16T15:45:00+01:00
-2026-08-16;paises_baixos;Feyenoord;GO Ahead Eagles;1.37;1.57;2026-08-16T13:30:00+01:00
-2026-08-16;paises_baixos;Twente;PEC Zwolle;1.40;1.85;2026-08-16T13:30:00+01:00
-2026-08-16;portugal;Arouca;Moreirense;2.20;1.91;2026-08-16T18:00:00+01:00
-2026-08-16;portugal;Famalicao;Maritimo;2.11;2.00;2026-08-16T20:30:00+01:00
-2026-08-16;portugal;Nacional;Estoril;1.96;1.70;2026-08-16T15:30:00+01:00
-2026-08-16;portugal;SC Braga;GIL Vicente;2.02;1.98;2026-08-16T20:30:00+01:00
-2026-08-16;portugal2;Amarante;Lusitânia Lourosa;2.15;1.85;2026-08-16T14:00:00+01:00
-2026-08-16;portugal2;Leixoes;Tondela;2.03;1.75;2026-08-16T15:30:00+01:00
-2026-08-16;suecia;Djurgardens IF;AIK Stockholm;1.53;1.62;2026-08-16T13:00:00+01:00
-2026-08-16;suecia;IF Brommapojkarna;Orgryte IS;1.61;1.57;2026-08-16T13:00:00+01:00
-2026-08-16;suecia;Kalmar FF;Hammarby FF;1.68;1.62;2026-08-16T15:30:00+01:00
-2026-08-16;turquia;Amed;Erzurumspor FK;1.86;1.67;2026-08-16T19:30:00+01:00
-2026-08-16;turquia;Başakşehir;Kocaelispor;1.92;2.00;2026-08-16T17:00:00+01:00
-2026-08-16;turquia;Beşiktaş;Eyüpspor;1.55;1.87;2026-08-16T19:30:00+01:00
+2026-08-16;belgica;Lommel United;Charleroi;1.82;1.70;2026-08-16T18:15:00+01:00
+2026-08-16;brasil;Atletico-MG;Gremio;2.04;1.87;2026-08-16T20:00:00+01:00
+2026-08-16;brasil;Corinthians;Cruzeiro;2.55;2.10;2026-08-16T23:30:00+01:00
+2026-08-16;brasil;Mirassol;Flamengo;2.10;1.88;2026-08-16T22:30:00+01:00
+2026-08-16;brasil;Vasco DA Gama;Santos;2.10;1.87;2026-08-16T20:00:00+01:00
+2026-08-16;espanha2;Las Palmas;Albacete;2.01;1.83;2026-08-16T20:30:00+01:00
+2026-08-16;mls;Chicago Fire;Portland Timbers;1.36;1.43;2026-08-16T23:00:00+01:00
+2026-08-16;mls;New York City FC;Philadelphia Union;1.68;1.55;2026-08-16T23:00:00+01:00
+2026-08-16;mls_next_pro;FC Cincinnati II;Connecticut FC;1.57;1.50;2026-08-16T23:00:00+01:00
+2026-08-16;noruega;Fredrikstad;Kristiansund BK;1.80;1.70;2026-08-16T18:15:00+01:00
+2026-08-16;portugal;Famalicao;Maritimo;2.20;2.02;2026-08-16T20:30:00+01:00
+2026-08-16;portugal;SC Braga;GIL Vicente;2.01;1.98;2026-08-16T20:30:00+01:00
+2026-08-16;turquia;Amed;Erzurumspor FK;1.90;1.67;2026-08-16T19:30:00+01:00
+2026-08-16;turquia;Beşiktaş;Eyüpspor;1.57;1.80;2026-08-16T19:30:00+01:00
+2026-08-17;championship;Cardiff;Wrexham;1.85;1.62;2026-08-17T20:00:00+01:00
 2026-08-17;espanha;Deportivo La Coruna;Elche;2.38;1.95;2026-08-17T20:00:00+01:00
-2026-08-17;espanha2;Almeria;Eldense;1.68;2.05;2026-08-17T20:30:00+01:00
-2026-08-17;finlandia;Gnistan;Ilves;1.60;1.50;2026-08-17T16:00:00+01:00
-2026-08-17;mls;Seattle Sounders;Vancouver Whitecaps;1.62;1.57;2026-08-17T03:30:00+01:00
-2026-08-17;portugal;Casa Pia;Benfica;1.65;2.38;2026-08-17T20:15:00+01:00
+2026-08-17;espanha2;Almeria;Eldense;1.68;2.10;2026-08-17T20:30:00+01:00
+2026-08-17;espanha2;Sporting Gijon;Sabadell;2.27;2.02;2026-08-17T18:00:00+01:00
+2026-08-17;finlandia;Gnistan;Ilves;1.61;1.50;2026-08-17T16:00:00+01:00
+2026-08-17;mls;Austin;FC Dallas;1.70;1.57;2026-08-17T01:30:00+01:00
+2026-08-17;mls;Seattle Sounders;Vancouver Whitecaps;1.60;1.57;2026-08-17T03:30:00+01:00
+2026-08-17;mls_next_pro;Huntsville City;Inter Miami II;1.51;1.55;2026-08-17T00:00:00+01:00
+2026-08-17;mls_next_pro;Los Angeles FC II;Tacoma Defiance;1.44;1.38;2026-08-17T03:00:00+01:00
+2026-08-17;mls_next_pro;New England II;Philadelphia Union II;1.57;1.51;2026-08-17T00:00:00+01:00
+2026-08-17;mls_next_pro;The Town;St. Louis City II;1.62;1.50;2026-08-17T03:30:00+01:00
+2026-08-17;portugal;Casa Pia;Benfica;1.64;2.38;2026-08-17T20:15:00+01:00
+2026-08-17;portugal2;Felgueiras 1932;AVS;2.10;1.83;2026-08-17T18:00:00+01:00
 2026-08-17;suecia;BK Hacken;Halmstad;1.44;1.73;2026-08-17T18:00:00+01:00
-2026-08-17;turquia;Samsunspor;Göztepe;2.10;1.85;2026-08-17T19:30:00+01:00
+2026-08-17;turquia;Samsunspor;Göztepe;2.00;1.83;2026-08-17T19:30:00+01:00
+2026-08-18;brasil;Internacional;Remo;1.88;1.87;2026-08-18T00:00:00+01:00
 2026-08-19;espanha;Atletico Madrid;Malaga;1.79;2.30;2026-08-19T20:00:00+01:00
-2026-08-20;mls;Colorado Rapids;Los Angeles FC;1.65;1.53;2026-08-20T02:30:00+01:00
+2026-08-20;espanha;Rayo Vallecano;Alaves;2.75;2.25;2026-08-20T20:00:00+01:00
+2026-08-20;mls;Colorado Rapids;Los Angeles FC;1.68;1.55;2026-08-20T02:30:00+01:00
 2026-08-20;mls;Orlando City SC;Chicago Fire;1.38;1.36;2026-08-20T00:30:00+01:00
 2026-08-20;mls;Portland Timbers;San Diego;1.37;1.36;2026-08-20T03:30:00+01:00
-2026-08-20;mls;Toronto FC;Charlotte;1.67;1.53;2026-08-20T00:30:00+01:00
-2026-08-21;franca;Marseille;Strasbourg;1.57;1.55;2026-08-21T19:45:00+01:00
-2026-08-21;italia2;Vicenza Virtus;Catanzaro;2.14;1.80;2026-08-21T19:30:00+01:00
+2026-08-20;mls;Toronto FC;Charlotte;1.68;1.55;2026-08-20T00:30:00+01:00
+2026-08-21;espanha;Real Betis;Real Sociedad;2.20;1.95;2026-08-21T20:00:00+01:00
+2026-08-21;finlandia;SJK;Lahti;1.65;1.55;2026-08-21T17:00:00+01:00
+2026-08-21;franca;Marseille;Strasbourg;1.57;1.57;2026-08-21T19:45:00+01:00
+2026-08-21;franca2;Boulogne;RED Star FC 93;2.26;1.91;2026-08-21T19:00:00+01:00
+2026-08-21;franca2;PAU;Nancy;1.82;1.62;2026-08-21T19:00:00+01:00
+2026-08-21;italia2;Vicenza Virtus;Catanzaro;2.13;1.80;2026-08-21T19:30:00+01:00
+2026-08-21;portugal2;Benfica B;Portimonense;1.89;1.80;2026-08-21T18:00:00+01:00
 2026-08-21;premier;Arsenal;Coventry;1.64;2.63;2026-08-21T20:00:00+01:00
+2026-08-21;suecia;Sirius;BK Hacken;1.40;1.40;2026-08-21T18:00:00+01:00
