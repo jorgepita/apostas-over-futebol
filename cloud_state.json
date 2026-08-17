@@ -13613,9 +13613,9 @@
       "mercado": "BTTS",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -13663,7 +13663,10 @@
       "kickoffUTC": "2026-08-16T23:00:00+01:00",
       "homeTeam": "New York City FC",
       "awayTeam": "Philadelphia Union",
-      "leagueId": 253
+      "leagueId": 253,
+      "lucro": 0.57,
+      "placar": "2-3",
+      "settledAt": "2026-08-17T07:54:01.791954+00:00"
     },
     {
       "id": "manual_1786783402953_mrzgb3",
@@ -13849,7 +13852,8 @@
       "kickoffUTC": "2026-08-16T22:30:00+01:00",
       "homeTeam": "Real Monarchs",
       "awayTeam": "Minnesota United II",
-      "leagueId": 909
+      "leagueId": 909,
+      "missingAttempts": 1
     },
     {
       "id": "manual_1786783421987_hv6ii5",
@@ -14927,7 +14931,7 @@
       "mercado": "BTTS",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -14977,7 +14981,10 @@
       "kickoffUTC": "2026-08-17T03:30:00+01:00",
       "homeTeam": "Seattle Sounders",
       "awayTeam": "Vancouver Whitecaps",
-      "leagueId": 253
+      "leagueId": 253,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-17T07:54:01.791954+00:00"
     },
     {
       "id": "manual_1786783553842_toz2xi",
@@ -15968,8 +15975,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-16T22:43:25.101819+00:00",
-      "lastSuccessAt": "2026-08-16T22:43:25.101819+00:00",
+      "lastCheckedAt": "2026-08-17T07:54:01.796777+00:00",
+      "lastSuccessAt": "2026-08-17T07:54:01.796777+00:00",
       "status": "ok"
     }
   },
