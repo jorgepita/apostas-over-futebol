@@ -13561,7 +13561,7 @@
       "leagueId": 909,
       "liga": "mls_next_pro",
       "mercado": "BTTS",
-      "missingAttempts": 2,
+      "missingAttempts": 3,
       "notas": "",
       "odd": "1.4",
       "resultado": "",
@@ -15021,10 +15021,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.68",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 80,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.68,
+      "placar": "3-0",
+      "settledAt": "2026-08-17T22:46:41.100332+00:00"
     },
     {
       "analysisSnapshot": {
@@ -15068,10 +15071,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.66",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 66,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.66,
+      "placar": "0-7",
+      "settledAt": "2026-08-17T22:46:41.100332+00:00"
     },
     {
       "id": "manual_1787001688117_0bihd1",
@@ -16318,8 +16324,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-17T21:26:48.283885+00:00",
-      "lastSuccessAt": "2026-08-17T21:26:48.283885+00:00",
+      "lastCheckedAt": "2026-08-17T22:46:41.103063+00:00",
+      "lastSuccessAt": "2026-08-17T22:46:41.103063+00:00",
       "status": "ok"
     }
   },
