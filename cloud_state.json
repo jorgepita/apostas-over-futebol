@@ -13561,7 +13561,7 @@
       "leagueId": 909,
       "liga": "mls_next_pro",
       "mercado": "BTTS",
-      "missingAttempts": 3,
+      "missingAttempts": 4,
       "notas": "",
       "odd": "1.4",
       "resultado": "",
@@ -15413,7 +15413,7 @@
       "mercado": "BTTS",
       "odd": "1.88",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -15463,7 +15463,10 @@
       "kickoffUTC": "2026-08-18T00:00:00+01:00",
       "homeTeam": "Internacional",
       "awayTeam": "Remo",
-      "leagueId": 71
+      "leagueId": 71,
+      "lucro": 0.88,
+      "placar": "1-1",
+      "settledAt": "2026-08-18T07:39:45.491587+00:00"
     },
     {
       "id": "manual_1787001780827_e58sv1",
@@ -16324,8 +16327,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-17T22:46:41.103063+00:00",
-      "lastSuccessAt": "2026-08-17T22:46:41.103063+00:00",
+      "lastCheckedAt": "2026-08-18T07:39:45.493778+00:00",
+      "lastSuccessAt": "2026-08-18T07:39:45.493778+00:00",
       "status": "ok"
     }
   },
