@@ -8466,6 +8466,66 @@
     "2026-08-21|belgica|Standard Liege vs RAAL La Louvi\u00e8re|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-22|portugal|Estoril vs Rio Ave|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|espanha2|Albacete vs Real Sociedad II|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|italia|Genoa vs Napoli|BTTS": {
+      "apostada": true,
+      "stakeReal": "1.5"
+    },
+    "2026-08-22|premier|Ipswich vs Sunderland|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|premier|Nottingham Forest vs Leeds|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|portugal|Maritimo vs Academico Viseu|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|franca|Le Mans vs Stade Brestois 29|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|belgica|Antwerp vs Genk|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|turquia|\u00c7orum FK vs Kas\u0131mpa\u015fa|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|championship|Millwall vs Norwich|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|franca|Estac Troyes vs Paris FC|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|portugal2|Leixoes vs Uni\u00e3o de Leiria|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|mls|St. Louis City vs Houston Dynamo|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|suecia|IF Brommapojkarna vs Degerfors IF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|suecia|Vasteras SK FK vs Kalmar FF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -16736,7 +16796,7 @@
   "lastUpdated": "2026-08-19T15:58:59.137Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-08-20",
