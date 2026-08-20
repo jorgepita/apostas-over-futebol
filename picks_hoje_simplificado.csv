@@ -1,7 +1,7 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-08-20;MLS;Colorado Rapids vs Los Angeles FC;O2.5;1.75;0.32;14.86;;;;;;;;2026-08-20T02:30:00+01:00;;
-2026-08-20;MLS;Toronto FC vs Charlotte;O2.5;1.7;0.32;13.18;;;;;;;;2026-08-20T00:30:00+01:00;;
-2026-08-20;MLS Next Pro;North Texas vs Austin II;O2.5;1.62;0.32;10.27;;;;;;;;2026-08-20T01:45:00+01:00;;
+2026-08-20;MLS;Colorado Rapids vs Los Angeles FC;O2.5;1.75;0.32;14.86;;;;L;1-0;-0.6;;2026-08-20T01:30:00+00:00;;
+2026-08-20;MLS;Toronto FC vs Charlotte;O2.5;1.7;0.32;13.18;;;;W;3-3;0.4;;2026-08-19T23:30:00+00:00;;
+2026-08-20;MLS Next Pro;North Texas vs Austin II;O2.5;1.62;0.32;10.27;;;;L;0-0;-0.32;;2026-08-20T00:45:00+00:00;;
 2026-08-21;Jupiler Pro League;Standard Liege vs RAAL La Louvière;O2.5;2.1;0.28;10.1;;;;;;;;2026-08-21T19:45:00+01:00;;
 2026-08-21;Ligue 1;Marseille vs Strasbourg;O2.5;1.57;0.28;8.31;;;;;;;;2026-08-21T19:45:00+01:00;;
 2026-08-21;Ligue 2;Clermont Foot vs Dijon;O2.5;2.12;0.11;6.42;;;;;;;;2026-08-21T19:00:00+01:00;;
