@@ -16760,7 +16760,7 @@
       "mercado": "BTTS",
       "odd": "1.9",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -16810,7 +16810,10 @@
       "kickoffUTC": "2026-08-21T19:45:00+01:00",
       "homeTeam": "Standard Liege",
       "awayTeam": "RAAL La Louvière",
-      "leagueId": 144
+      "leagueId": 144,
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155226137_1c2fu6",
@@ -16820,7 +16823,7 @@
       "mercado": "BTTS",
       "odd": "1.55",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -16870,7 +16873,10 @@
       "kickoffUTC": "2026-08-21T17:00:00+01:00",
       "homeTeam": "SJK",
       "awayTeam": "Lahti",
-      "leagueId": 244
+      "leagueId": 244,
+      "lucro": 0.55,
+      "placar": "1-2",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155247680_dkgxxy",
@@ -16880,9 +16886,9 @@
       "mercado": "BTTS",
       "odd": "2.65",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -16930,7 +16936,10 @@
       "kickoffUTC": "2026-08-21T20:00:00+01:00",
       "homeTeam": "Arsenal",
       "awayTeam": "Coventry",
-      "leagueId": 39
+      "leagueId": 39,
+      "lucro": -1.0,
+      "placar": "3-0",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155255974_b7imss",
@@ -16940,7 +16949,7 @@
       "mercado": "BTTS",
       "odd": "1.4",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -16990,7 +16999,10 @@
       "kickoffUTC": "2026-08-21T18:00:00+01:00",
       "homeTeam": "Sirius",
       "awayTeam": "BK Hacken",
-      "leagueId": 113
+      "leagueId": 113,
+      "lucro": -1.0,
+      "placar": "0-3",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155265562_9tdyqx",
@@ -17000,9 +17012,9 @@
       "mercado": "BTTS",
       "odd": "2",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -17050,7 +17062,10 @@
       "kickoffUTC": "2026-08-21T19:30:00+01:00",
       "homeTeam": "Erzurumspor FK",
       "awayTeam": "Galatasaray",
-      "leagueId": 203
+      "leagueId": 203,
+      "lucro": -1.0,
+      "placar": "0-4",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155283318_om31zf",
@@ -18237,9 +18252,9 @@
       "mercado": "BTTS",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -18287,7 +18302,10 @@
       "kickoffUTC": "2026-08-21T19:45:00+01:00",
       "homeTeam": "Marseille",
       "awayTeam": "Strasbourg",
-      "leagueId": 61
+      "leagueId": 61,
+      "lucro": -1.0,
+      "placar": "4-0",
+      "settledAt": "2026-08-21T22:47:15.537542+00:00"
     },
     {
       "id": "manual_1787155759121_x2zyzr",
@@ -19178,8 +19196,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-20T22:51:25.294469+00:00",
-      "lastSuccessAt": "2026-08-20T22:51:25.294469+00:00",
+      "lastCheckedAt": "2026-08-21T22:47:15.540716+00:00",
+      "lastSuccessAt": "2026-08-21T22:47:15.540716+00:00",
       "status": "ok"
     }
   },
