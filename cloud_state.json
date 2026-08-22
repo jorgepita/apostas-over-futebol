@@ -17075,9 +17075,9 @@
       "mercado": "Over 2.5",
       "odd": "2.05",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17112,7 +17112,10 @@
       "kickoffUTC": "2026-08-22T15:00:00+01:00",
       "homeTeam": "Derby",
       "awayTeam": "Cardiff",
-      "leagueId": 40
+      "leagueId": 40,
+      "lucro": 1.05,
+      "placar": "2-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155287575_oh6iaf",
@@ -17122,9 +17125,9 @@
       "mercado": "Over 2.5",
       "odd": "1.89",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17159,7 +17162,10 @@
       "kickoffUTC": "2026-08-22T15:00:00+01:00",
       "homeTeam": "Wrexham",
       "awayTeam": "Watford",
-      "leagueId": 40
+      "leagueId": 40,
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155292105_c7w0od",
@@ -17169,9 +17175,9 @@
       "mercado": "Over 2.5",
       "odd": "2.11",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -17206,7 +17212,10 @@
       "kickoffUTC": "2026-08-22T11:30:00+01:00",
       "homeTeam": "Jeju United FC",
       "awayTeam": "Gimcheon Sangmu FC",
-      "leagueId": 292
+      "leagueId": 292,
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155300453_v53xe7",
@@ -17216,7 +17225,7 @@
       "mercado": "BTTS",
       "odd": "1.62",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -17266,7 +17275,10 @@
       "kickoffUTC": "2026-08-22T11:30:00+01:00",
       "homeTeam": "Jeonbuk Motors",
       "awayTeam": "Ulsan Hyundai FC",
-      "leagueId": 292
+      "leagueId": 292,
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155309130_x244ya",
@@ -17276,9 +17288,9 @@
       "mercado": "Over 2.5",
       "odd": "2.1",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17313,7 +17325,10 @@
       "kickoffUTC": "2026-08-22T18:00:00+01:00",
       "homeTeam": "AD Ceuta FC",
       "awayTeam": "Las Palmas",
-      "leagueId": 141
+      "leagueId": 141,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155316713_6mw8rs",
@@ -17323,9 +17338,9 @@
       "mercado": "Over 2.5",
       "odd": "2.19",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17360,7 +17375,10 @@
       "kickoffUTC": "2026-08-22T20:30:00+01:00",
       "homeTeam": "Eldense",
       "awayTeam": "Cadiz",
-      "leagueId": 141
+      "leagueId": 141,
+      "lucro": 1.19,
+      "placar": "2-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155324191_3dl0ea",
@@ -17370,7 +17388,7 @@
       "mercado": "BTTS",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -17420,7 +17438,10 @@
       "kickoffUTC": "2026-08-22T19:45:00+01:00",
       "homeTeam": "Estac Troyes",
       "awayTeam": "Paris FC",
-      "leagueId": 61
+      "leagueId": 61,
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155362212_44shwk",
@@ -17430,7 +17451,7 @@
       "mercado": "BTTS",
       "odd": "1.62",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -17480,7 +17501,10 @@
       "kickoffUTC": "2026-08-22T19:45:00+01:00",
       "homeTeam": "Le Mans",
       "awayTeam": "Stade Brestois 29",
-      "leagueId": 61
+      "leagueId": 61,
+      "lucro": 0.62,
+      "placar": "2-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155397378_wb8xjv",
@@ -17490,9 +17514,9 @@
       "mercado": "Over 2.5",
       "odd": "2.08",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17527,7 +17551,10 @@
       "kickoffUTC": "2026-08-22T13:00:00+01:00",
       "homeTeam": "Metz",
       "awayTeam": "Laval",
-      "leagueId": 62
+      "leagueId": 62,
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155402874_yuhomy",
@@ -17537,9 +17564,9 @@
       "mercado": "Over 2.5",
       "odd": "2.35",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17574,7 +17601,10 @@
       "kickoffUTC": "2026-08-22T19:45:00+01:00",
       "homeTeam": "Genoa",
       "awayTeam": "Napoli",
-      "leagueId": 135
+      "leagueId": 135,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155412899_2fhphx",
@@ -17584,9 +17614,9 @@
       "mercado": "Over 2.5",
       "odd": "2.52",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17621,7 +17651,10 @@
       "kickoffUTC": "2026-08-22T19:45:00+01:00",
       "homeTeam": "Parma",
       "awayTeam": "Cagliari",
-      "leagueId": 135
+      "leagueId": 135,
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155423098_nx65p0",
@@ -17631,7 +17664,7 @@
       "mercado": "BTTS",
       "odd": "1.57",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -17681,7 +17714,10 @@
       "kickoffUTC": "2026-08-22T15:30:00+01:00",
       "homeTeam": "Fortuna Sittard",
       "awayTeam": "AZ Alkmaar",
-      "leagueId": 88
+      "leagueId": 88,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155430600_msiz0z",
@@ -17691,7 +17727,7 @@
       "mercado": "BTTS",
       "odd": "1.5",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -17741,7 +17777,10 @@
       "kickoffUTC": "2026-08-22T20:00:00+01:00",
       "homeTeam": "Heerenveen",
       "awayTeam": "PEC Zwolle",
-      "leagueId": 88
+      "leagueId": 88,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155437856_i2d1qk",
@@ -17811,9 +17850,9 @@
       "mercado": "Over 2.5",
       "odd": "2.16",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17848,7 +17887,10 @@
       "kickoffUTC": "2026-08-22T15:30:00+01:00",
       "homeTeam": "Maritimo",
       "awayTeam": "Academico Viseu",
-      "leagueId": 94
+      "leagueId": 94,
+      "lucro": 1.16,
+      "placar": "2-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155448930_irm3ms",
@@ -17858,9 +17900,9 @@
       "mercado": "Over 2.5",
       "odd": "1.9",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17895,7 +17937,10 @@
       "kickoffUTC": "2026-08-22T11:00:00+01:00",
       "homeTeam": "Leixoes",
       "awayTeam": "União de Leiria",
-      "leagueId": 95
+      "leagueId": 95,
+      "lucro": 0.9,
+      "placar": "2-4",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155457450_3tbhds",
@@ -17905,9 +17950,9 @@
       "mercado": "BTTS",
       "odd": "1.98",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -17955,7 +18000,10 @@
       "kickoffUTC": "2026-08-22T12:30:00+01:00",
       "homeTeam": "Hull City",
       "awayTeam": "Manchester United",
-      "leagueId": 39
+      "leagueId": 39,
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155480143_aj3308",
@@ -17965,7 +18013,7 @@
       "mercado": "BTTS",
       "odd": "1.62",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -18015,7 +18063,10 @@
       "kickoffUTC": "2026-08-22T14:00:00+01:00",
       "homeTeam": "Orgryte IS",
       "awayTeam": "Halmstad",
-      "leagueId": 113
+      "leagueId": 113,
+      "lucro": 0.62,
+      "placar": "1-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155496955_mefdtm",
@@ -18025,7 +18076,7 @@
       "mercado": "BTTS",
       "odd": "1.5",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -18075,7 +18126,10 @@
       "kickoffUTC": "2026-08-22T17:00:00+01:00",
       "homeTeam": "FC Luzern",
       "awayTeam": "Lausanne",
-      "leagueId": 207
+      "leagueId": 207,
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155500458_vwy0pz",
@@ -18085,9 +18139,9 @@
       "mercado": "Over 2.5",
       "odd": "1.62",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -18122,7 +18176,10 @@
       "kickoffUTC": "2026-08-22T19:30:00+01:00",
       "homeTeam": "FC Zurich",
       "awayTeam": "FC Basel 1893",
-      "leagueId": 207
+      "leagueId": 207,
+      "lucro": 0.62,
+      "placar": "1-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155508746_099osz",
@@ -18132,9 +18189,9 @@
       "mercado": "BTTS",
       "odd": "1.93",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -18182,7 +18239,10 @@
       "kickoffUTC": "2026-08-22T19:30:00+01:00",
       "homeTeam": "Fenerbahçe",
       "awayTeam": "Konyaspor",
-      "leagueId": 203
+      "leagueId": 203,
+      "lucro": 0.93,
+      "placar": "4-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155516941_pynrox",
@@ -18192,7 +18252,7 @@
       "mercado": "BTTS",
       "odd": "1.73",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -18242,7 +18302,10 @@
       "kickoffUTC": "2026-08-22T17:00:00+01:00",
       "homeTeam": "Çorum FK",
       "awayTeam": "Kasımpaşa",
-      "leagueId": 203
+      "leagueId": 203,
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155751852_zrl91q",
@@ -18315,7 +18378,7 @@
       "mercado": "BTTS",
       "odd": "1.67",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -18365,7 +18428,10 @@
       "kickoffUTC": "2026-08-22T19:45:00+01:00",
       "homeTeam": "Antwerp",
       "awayTeam": "Genk",
-      "leagueId": 144
+      "leagueId": 144,
+      "lucro": 0.67,
+      "placar": "4-4",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155766312_mdwjbk",
@@ -18375,9 +18441,9 @@
       "mercado": "BTTS",
       "odd": "1.83",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -18425,7 +18491,10 @@
       "kickoffUTC": "2026-08-22T18:00:00+01:00",
       "homeTeam": "Albacete",
       "awayTeam": "Real Sociedad II",
-      "leagueId": 141
+      "leagueId": 141,
+      "lucro": 0.83,
+      "placar": "1-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155776350_kns3sc",
@@ -18435,9 +18504,9 @@
       "mercado": "BTTS",
       "odd": "1.7",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -18485,7 +18554,10 @@
       "kickoffUTC": "2026-08-22T18:00:00+01:00",
       "homeTeam": "Estoril",
       "awayTeam": "Rio Ave",
-      "leagueId": 94
+      "leagueId": 94,
+      "lucro": -1.0,
+      "placar": "0-2",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155786375_hsyyai",
@@ -18495,9 +18567,9 @@
       "mercado": "BTTS",
       "odd": "1.75",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -18545,7 +18617,10 @@
       "kickoffUTC": "2026-08-22T15:00:00+01:00",
       "homeTeam": "Ipswich",
       "awayTeam": "Sunderland",
-      "leagueId": 39
+      "leagueId": 39,
+      "lucro": 0.75,
+      "placar": "2-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     },
     {
       "id": "manual_1787155794790_zsyego",
@@ -18555,9 +18630,9 @@
       "mercado": "BTTS",
       "odd": "1.73",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -18605,7 +18680,10 @@
       "kickoffUTC": "2026-08-22T15:00:00+01:00",
       "homeTeam": "Nottingham Forest",
       "awayTeam": "Leeds",
-      "leagueId": 39
+      "leagueId": 39,
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-22T22:44:10.928724+00:00"
     }
   ],
   "movements": [],
@@ -19196,8 +19274,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-21T22:47:15.540716+00:00",
-      "lastSuccessAt": "2026-08-21T22:47:15.540716+00:00",
+      "lastCheckedAt": "2026-08-22T22:44:10.931696+00:00",
+      "lastSuccessAt": "2026-08-22T22:44:10.931696+00:00",
       "status": "ok"
     }
   },
