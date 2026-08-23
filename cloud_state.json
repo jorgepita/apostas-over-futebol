@@ -1,301 +1,433 @@
 {
   "footballDaily": [
     {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "LeagueName": "MLS",
-      "HomeTeam": "Sporting Kansas City",
-      "AwayTeam": "Houston Dynamo",
-      "LambdaHome": "1.986",
-      "LambdaAway": "1.9",
-      "LambdaTotal": "3.886",
-      "KickoffUTC": "2026-08-02T01:30:00+01:00",
-      "Market": "O2.5",
-      "ProbModel": 0.72,
-      "Odd": "1.7",
-      "ProbMarket": 0.588,
-      "Edge": 0.132,
-      "KellyTrue": "0.32",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0075",
-      "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.132",
-      "StakeFracRaw": "0.0576",
-      "StakeFrac": "0.04",
-      "Stake\u20ac": "2.0",
-      "DailyScale": "1.0",
-      "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "mls",
-      "Jogo": "Sporting Kansas City vs Houston Dynamo",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 13.200000000000001
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "LeagueName": "Eliteserien",
-      "HomeTeam": "Aalesund",
-      "AwayTeam": "Tromso",
-      "LambdaHome": "2.017",
-      "LambdaAway": "1.479",
-      "LambdaTotal": "3.496",
-      "KickoffUTC": "2026-08-02T16:00:00+01:00",
-      "Market": "O2.5",
-      "ProbModel": 0.678,
-      "Odd": "1.7",
-      "ProbMarket": 0.588,
-      "Edge": 0.09000000000000008,
-      "KellyTrue": "0.2192",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0075",
-      "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.09000000000000008",
-      "StakeFracRaw": "0.0356",
-      "StakeFrac": "0.0356",
-      "Stake\u20ac": "1.78",
-      "DailyScale": "1.0",
-      "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "noruega",
-      "Jogo": "Aalesund vs Tromso",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 9.000000000000007
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "LeagueName": "Eliteserien",
-      "HomeTeam": "KFUM Oslo",
-      "AwayTeam": "Kristiansund BK",
-      "LambdaHome": "1.905",
-      "LambdaAway": "1.279",
-      "LambdaTotal": "3.183",
-      "KickoffUTC": "2026-08-02T16:00:00+01:00",
-      "Market": "O2.5",
-      "ProbModel": 0.617,
-      "Odd": "1.74",
-      "ProbMarket": 0.575,
-      "Edge": 0.04200000000000004,
-      "KellyTrue": "0.0986",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0075",
-      "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.04200000000000004",
-      "StakeFracRaw": "0.0074",
-      "StakeFrac": "0.0074",
-      "Stake\u20ac": "0.37",
-      "DailyScale": "1.0",
-      "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "noruega",
-      "Jogo": "KFUM Oslo vs Kristiansund BK",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 4.200000000000004
-    },
-    {
-      "Date": "2026-08-02",
+      "Date": "2026-08-23",
       "League": "suecia",
       "LeagueName": "Allsvenskan",
       "HomeTeam": "IF Brommapojkarna",
-      "AwayTeam": "Malmo FF",
-      "LambdaHome": "1.38",
+      "AwayTeam": "Degerfors IF",
+      "LambdaHome": "1.483",
       "LambdaAway": "1.9",
-      "LambdaTotal": "3.28",
-      "KickoffUTC": "2026-08-02T13:00:00+01:00",
+      "LambdaTotal": "3.383",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00",
       "Market": "O2.5",
-      "ProbModel": 0.637,
-      "Odd": "1.65",
-      "ProbMarket": 0.606,
-      "Edge": 0.031000000000000028,
-      "KellyTrue": "0.0776",
+      "ProbModel": 0.657,
+      "Odd": "1.9",
+      "ProbMarket": 0.526,
+      "Edge": 0.131,
+      "KellyTrue": "0.2758",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0225",
+      "EdgeMinFinal": "0.0225",
+      "ProbGap": "0.131",
+      "StakeFracRaw": "0.0496",
+      "StakeFrac": "0.0198",
+      "Stake\u20ac": "0.99",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-23",
+      "Liga": "suecia",
+      "Jogo": "IF Brommapojkarna vs Degerfors IF",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 13.100000000000001
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "finlandia",
+      "LeagueName": "Veikkausliiga",
+      "HomeTeam": "Turku PS",
+      "AwayTeam": "Inter Turku",
+      "LambdaHome": "1.604",
+      "LambdaAway": "1.505",
+      "LambdaTotal": "3.108",
+      "KickoffUTC": "2026-08-23T16:00:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.601,
+      "Odd": "1.97",
+      "ProbMarket": 0.508,
+      "Edge": 0.09299999999999997,
+      "KellyTrue": "0.1888",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0225",
+      "EdgeMinFinal": "0.0225",
+      "ProbGap": "0.09299999999999997",
+      "StakeFracRaw": "0.0316",
+      "StakeFrac": "0.0156",
+      "Stake\u20ac": "0.78",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-23",
+      "Liga": "finlandia",
+      "Jogo": "Turku PS vs Inter Turku",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 9.299999999999997
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls",
+      "LeagueName": "MLS",
+      "HomeTeam": "St. Louis City",
+      "AwayTeam": "Houston Dynamo",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.9",
+      "LambdaTotal": "4.1",
+      "KickoffUTC": "2026-08-23T01:30:00+01:00",
+      "Market": "BTTS",
+      "ProbModel": 0.669,
+      "Odd": "1.67",
+      "ProbMarket": 0.599,
+      "Edge": 0.07000000000000006,
+      "KellyTrue": "0.1756",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.0075",
       "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.031000000000000028",
-      "StakeFracRaw": "0.0043",
-      "StakeFrac": "0.0043",
-      "Stake\u20ac": "0.21",
+      "ProbGap": "0.07000000000000006",
+      "StakeFracRaw": "0.0223",
+      "StakeFrac": "0.0223",
+      "Stake\u20ac": "1.11",
       "DailyScale": "1.0",
       "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "suecia",
-      "Jogo": "IF Brommapojkarna vs Malmo FF",
-      "Mercado": "Over 2.5",
+      "Data": "2026-08-23",
+      "Liga": "mls",
+      "Jogo": "St. Louis City vs Houston Dynamo",
+      "Mercado": "BTTS",
       "Resultado": "",
-      "Edge%": 3.1000000000000028
+      "Edge%": 7.000000000000006
     },
     {
-      "Date": "2026-08-02",
+      "Date": "2026-08-23",
       "League": "suecia",
       "LeagueName": "Allsvenskan",
-      "HomeTeam": "IFK Goteborg",
-      "AwayTeam": "Degerfors IF",
-      "LambdaHome": "1.186",
-      "LambdaAway": "1.797",
-      "LambdaTotal": "2.983",
-      "KickoffUTC": "2026-08-02T13:00:00+01:00",
+      "HomeTeam": "Vasteras SK FK",
+      "AwayTeam": "Kalmar FF",
+      "LambdaHome": "1.702",
+      "LambdaAway": "1.508",
+      "LambdaTotal": "3.211",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00",
       "Market": "O2.5",
-      "ProbModel": 0.573,
-      "Odd": "1.83",
-      "ProbMarket": 0.546,
-      "Edge": 0.026999999999999913,
-      "KellyTrue": "0.0583",
+      "ProbModel": 0.622,
+      "Odd": "1.81",
+      "ProbMarket": 0.552,
+      "Edge": 0.06999999999999995,
+      "KellyTrue": "0.156",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.0175",
       "EdgeMinFinal": "0.0175",
-      "ProbGap": "0.026999999999999913",
-      "StakeFracRaw": "0.0028",
-      "StakeFrac": "0.0028",
-      "Stake\u20ac": "0.14",
-      "DailyScale": "1.0",
+      "ProbGap": "0.06999999999999995",
+      "StakeFracRaw": "0.0196",
+      "StakeFrac": "0.0097",
+      "Stake\u20ac": "0.48",
+      "DailyScale": "0.49438438865832124",
       "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
+      "Data": "2026-08-23",
       "Liga": "suecia",
-      "Jogo": "IFK Goteborg vs Degerfors IF",
+      "Jogo": "Vasteras SK FK vs Kalmar FF",
       "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 2.6999999999999913
+      "Edge%": 6.999999999999995
     },
     {
-      "Date": "2026-08-03",
-      "League": "suecia",
-      "LeagueName": "Allsvenskan",
-      "HomeTeam": "Halmstad",
-      "AwayTeam": "Sirius",
-      "LambdaHome": "1.77",
-      "LambdaAway": "1.9",
-      "LambdaTotal": "3.67",
-      "KickoffUTC": "2026-08-03T18:00:00+01:00",
+      "Date": "2026-08-23",
+      "League": "brasil",
+      "LeagueName": "Campeonato Brasileiro Serie A",
+      "HomeTeam": "RB Bragantino",
+      "AwayTeam": "Gremio",
+      "LambdaHome": "2.013",
+      "LambdaAway": "1.475",
+      "LambdaTotal": "3.488",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00",
       "Market": "BTTS",
-      "ProbModel": 0.624,
-      "Odd": "1.68",
-      "ProbMarket": 0.595,
-      "Edge": 0.029000000000000026,
-      "KellyTrue": "0.0723",
+      "ProbModel": 0.591,
+      "Odd": "1.87",
+      "ProbMarket": 0.535,
+      "Edge": 0.05599999999999994,
+      "KellyTrue": "0.1215",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0075",
-      "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.029000000000000026",
-      "StakeFracRaw": "0.0038",
-      "StakeFrac": "0.0038",
-      "Stake\u20ac": "0.19",
+      "EdgeMinDynamic": "0.0175",
+      "EdgeMinFinal": "0.0125",
+      "ProbGap": "0.05599999999999994",
+      "StakeFracRaw": "0.0124",
+      "StakeFrac": "0.0124",
+      "Stake\u20ac": "0.46",
       "DailyScale": "1.0",
       "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-03",
-      "Liga": "suecia",
-      "Jogo": "Halmstad vs Sirius",
+      "Data": "2026-08-23",
+      "Liga": "brasil",
+      "Jogo": "RB Bragantino vs Gremio",
       "Mercado": "BTTS",
       "Resultado": "",
-      "Edge%": 2.9000000000000026
+      "Edge%": 5.599999999999994
     },
     {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "LeagueName": "MLS",
-      "HomeTeam": "Colorado Rapids",
-      "AwayTeam": "Austin",
-      "LambdaHome": "2.2",
-      "LambdaAway": "1.407",
-      "LambdaTotal": "3.607",
-      "KickoffUTC": "2026-08-02T02:30:00+01:00",
+      "Date": "2026-08-23",
+      "League": "suecia",
+      "LeagueName": "Allsvenskan",
+      "HomeTeam": "Hammarby FF",
+      "AwayTeam": "Gais",
+      "LambdaHome": "2.112",
+      "LambdaAway": "1.269",
+      "LambdaTotal": "3.381",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00",
       "Market": "O2.5",
-      "ProbModel": 0.698,
-      "Odd": "1.72",
-      "ProbMarket": 0.581,
-      "Edge": 0.11699999999999999,
-      "KellyTrue": "0.2796",
+      "ProbModel": 0.657,
+      "Odd": "1.57",
+      "ProbMarket": 0.637,
+      "Edge": 0.020000000000000018,
+      "KellyTrue": "0.0542",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.0075",
       "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.11699999999999999",
-      "StakeFracRaw": "0.0503",
-      "StakeFrac": "0.0301",
-      "Stake\u20ac": "1.5",
-      "DailyScale": "0.7516574514211561",
+      "ProbGap": "0.020000000000000018",
+      "StakeFracRaw": "0.0019",
+      "StakeFrac": "0.0009",
+      "Stake\u20ac": "0.05",
+      "DailyScale": "0.49438438865832124",
       "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "mls",
-      "Jogo": "Colorado Rapids vs Austin",
+      "Data": "2026-08-23",
+      "Liga": "suecia",
+      "Jogo": "Hammarby FF vs Gais",
       "Mercado": "Over 2.5",
       "Resultado": "",
-      "Edge%": 11.7
+      "Edge%": 2.0000000000000018
     },
     {
-      "Date": "2026-08-02",
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "LeagueName": "MLS Next Pro",
+      "HomeTeam": "Austin II",
+      "AwayTeam": "The Town",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.9",
+      "LambdaTotal": "4.1",
+      "KickoffUTC": "2026-08-24T01:30:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.72,
+      "Odd": "1.71",
+      "ProbMarket": 0.585,
+      "Edge": 0.135,
+      "KellyTrue": "0.3256",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.135",
+      "StakeFracRaw": "0.0586",
+      "StakeFrac": "0.0198",
+      "Stake\u20ac": "0.99",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Austin II vs The Town",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 13.5
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "LeagueName": "MLS Next Pro",
+      "HomeTeam": "Crown Legacy",
+      "AwayTeam": "Chattanooga",
+      "LambdaHome": "2.2",
+      "LambdaAway": "1.571",
+      "LambdaTotal": "3.771",
+      "KickoffUTC": "2026-08-24T00:00:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.72,
+      "Odd": "1.57",
+      "ProbMarket": 0.637,
+      "Edge": 0.08299999999999996,
+      "KellyTrue": "0.2288",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.08299999999999996",
+      "StakeFracRaw": "0.0342",
+      "StakeFrac": "0.0169",
+      "Stake\u20ac": "0.85",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Crown Legacy vs Chattanooga",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 8.299999999999997
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "LeagueName": "MLS Next Pro",
+      "HomeTeam": "Colorado Rapids II",
+      "AwayTeam": "Real Monarchs",
+      "LambdaHome": "1.617",
+      "LambdaAway": "1.9",
+      "LambdaTotal": "3.517",
+      "KickoffUTC": "2026-08-24T01:00:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.682,
+      "Odd": "1.62",
+      "ProbMarket": 0.617,
+      "Edge": 0.06500000000000006,
+      "KellyTrue": "0.1698",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.06500000000000006",
+      "StakeFracRaw": "0.0199",
+      "StakeFrac": "0.0098",
+      "Stake\u20ac": "0.49",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Colorado Rapids II vs Real Monarchs",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 6.500000000000005
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "suecia",
+      "LeagueName": "Allsvenskan",
+      "HomeTeam": "Malmo FF",
+      "AwayTeam": "Djurgardens IF",
+      "LambdaHome": "1.635",
+      "LambdaAway": "1.9",
+      "LambdaTotal": "3.535",
+      "KickoffUTC": "2026-08-24T18:00:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.686,
+      "Odd": "1.59",
+      "ProbMarket": 0.629,
+      "Edge": 0.05700000000000005,
+      "KellyTrue": "0.1525",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0075",
+      "EdgeMinFinal": "0.0075",
+      "ProbGap": "0.05700000000000005",
+      "StakeFracRaw": "0.0155",
+      "StakeFrac": "0.0077",
+      "Stake\u20ac": "0.38",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-24",
+      "Liga": "suecia",
+      "Jogo": "Malmo FF vs Djurgardens IF",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 5.700000000000005
+    },
+    {
+      "Date": "2026-08-25",
+      "League": "brasil",
+      "LeagueName": "Campeonato Brasileiro Serie A",
+      "HomeTeam": "Botafogo",
+      "AwayTeam": "Atletico Paranaense",
+      "LambdaHome": "1.992",
+      "LambdaAway": "1.061",
+      "LambdaTotal": "3.052",
+      "KickoffUTC": "2026-08-25T00:00:00+01:00",
+      "Market": "O2.5",
+      "ProbModel": 0.588,
+      "Odd": "2.13",
+      "ProbMarket": 0.469,
+      "Edge": 0.119,
+      "KellyTrue": "0.2241",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0325",
+      "EdgeMinFinal": "0.0325",
+      "ProbGap": "0.119",
+      "StakeFracRaw": "0.0403",
+      "StakeFrac": "0.0198",
+      "Stake\u20ac": "0.99",
+      "DailyScale": "0.49438438865832124",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-25",
+      "Liga": "brasil",
+      "Jogo": "Botafogo vs Atletico Paranaense",
+      "Mercado": "Over 2.5",
+      "Resultado": "",
+      "Edge%": 11.899999999999999
+    },
+    {
+      "Date": "2026-08-23",
       "League": "mls",
       "LeagueName": "MLS",
       "HomeTeam": "St. Louis City",
-      "AwayTeam": "Real Salt Lake",
-      "LambdaHome": "2.169",
-      "LambdaAway": "1.624",
-      "LambdaTotal": "3.794",
-      "KickoffUTC": "2026-08-02T01:30:00+01:00",
-      "Market": "O2.5",
-      "ProbModel": 0.72,
-      "Odd": "1.55",
-      "ProbMarket": 0.645,
-      "Edge": 0.07499999999999996,
-      "KellyTrue": "0.2109",
-      "PassedQualityFilter": "True",
-      "QualityRejectReason": "",
-      "EdgeMinDynamic": "0.0075",
-      "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.07499999999999996",
-      "StakeFracRaw": "0.0284",
-      "StakeFrac": "0.0214",
-      "Stake\u20ac": "1.07",
-      "DailyScale": "0.7516574514211561",
-      "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-02",
-      "Liga": "mls",
-      "Jogo": "St. Louis City vs Real Salt Lake",
-      "Mercado": "Over 2.5",
-      "Resultado": "",
-      "Edge%": 7.499999999999996
-    },
-    {
-      "Date": "2026-08-03",
-      "League": "suecia",
-      "LeagueName": "Allsvenskan",
-      "HomeTeam": "Halmstad",
-      "AwayTeam": "Sirius",
-      "LambdaHome": "1.77",
+      "AwayTeam": "Houston Dynamo",
+      "LambdaHome": "2.2",
       "LambdaAway": "1.9",
-      "LambdaTotal": "3.67",
-      "KickoffUTC": "2026-08-03T18:00:00+01:00",
+      "LambdaTotal": "4.1",
+      "KickoffUTC": "2026-08-23T01:30:00+01:00",
       "Market": "BTTS",
-      "ProbModel": 0.624,
-      "Odd": "1.68",
-      "ProbMarket": 0.595,
-      "Edge": 0.029000000000000026,
-      "KellyTrue": "0.0723",
+      "ProbModel": 0.669,
+      "Odd": "1.67",
+      "ProbMarket": 0.599,
+      "Edge": 0.07000000000000006,
+      "KellyTrue": "0.1756",
       "PassedQualityFilter": "True",
       "QualityRejectReason": "",
       "EdgeMinDynamic": "0.0075",
       "EdgeMinFinal": "0.0075",
-      "ProbGap": "0.029",
-      "StakeFracRaw": "0.0038",
-      "StakeFrac": "0.0038",
-      "Stake\u20ac": "0.19",
+      "ProbGap": "0.07000000000000006",
+      "StakeFracRaw": "0.0223",
+      "StakeFrac": "0.0223",
+      "Stake\u20ac": "1.11",
       "DailyScale": "1.0",
       "Bankroll\u20ac": "50.0",
-      "Data": "2026-08-03",
-      "Liga": "suecia",
-      "Jogo": "Halmstad vs Sirius",
+      "Data": "2026-08-23",
+      "Liga": "mls",
+      "Jogo": "St. Louis City vs Houston Dynamo",
       "Mercado": "BTTS",
       "Resultado": "",
-      "Edge%": 2.9000000000000026
+      "Edge%": 7.000000000000006
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "brasil",
+      "LeagueName": "Campeonato Brasileiro Serie A",
+      "HomeTeam": "RB Bragantino",
+      "AwayTeam": "Gremio",
+      "LambdaHome": "2.013",
+      "LambdaAway": "1.475",
+      "LambdaTotal": "3.488",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00",
+      "Market": "BTTS",
+      "ProbModel": 0.591,
+      "Odd": "1.87",
+      "ProbMarket": 0.535,
+      "Edge": 0.05599999999999994,
+      "KellyTrue": "0.1215",
+      "PassedQualityFilter": "True",
+      "QualityRejectReason": "",
+      "EdgeMinDynamic": "0.0175",
+      "EdgeMinFinal": "0.0125",
+      "ProbGap": "0.05599999999999994",
+      "StakeFracRaw": "0.0124",
+      "StakeFrac": "0.0124",
+      "Stake\u20ac": "0.46",
+      "DailyScale": "1.0",
+      "Bankroll\u20ac": "50.0",
+      "Data": "2026-08-23",
+      "Liga": "brasil",
+      "Jogo": "RB Bragantino vs Gremio",
+      "Mercado": "BTTS",
+      "Resultado": "",
+      "Edge%": 5.599999999999994
     }
   ],
   "footballHistory": [
@@ -3078,6 +3210,226 @@
       "SettlementReason": "",
       "MissingAttempts": "",
       "Edge": 2.57
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "suecia",
+      "Jogo": "Hammarby FF vs Gais",
+      "Mercado": "Over 2.5",
+      "Odd": "1.57",
+      "Stake\u20ac": "0.05",
+      "Edge%": 1.97,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 1.97
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "suecia",
+      "Jogo": "IF Brommapojkarna vs Degerfors IF",
+      "Mercado": "Over 2.5",
+      "Odd": "1.9",
+      "Stake\u20ac": "0.99",
+      "Edge%": 13.06,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 13.06
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "suecia",
+      "Jogo": "Vasteras SK FK vs Kalmar FF",
+      "Mercado": "Over 2.5",
+      "Odd": "1.81",
+      "Stake\u20ac": "0.48",
+      "Edge%": 6.98,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 6.98
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "brasil",
+      "Jogo": "RB Bragantino vs Gremio",
+      "Mercado": "BTTS",
+      "Odd": "1.87",
+      "Stake\u20ac": "0.46",
+      "Edge%": 5.65,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 5.65
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "mls",
+      "Jogo": "St. Louis City vs Houston Dynamo",
+      "Mercado": "BTTS",
+      "Odd": "1.67",
+      "Stake\u20ac": "1.11",
+      "Edge%": 7.04,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T01:30:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 7.04
+    },
+    {
+      "Data": "2026-08-23",
+      "Liga": "finlandia",
+      "Jogo": "Turku PS vs Inter Turku",
+      "Mercado": "Over 2.5",
+      "Odd": "1.97",
+      "Stake\u20ac": "0.78",
+      "Edge%": 9.3,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-23T16:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 9.3
+    },
+    {
+      "Data": "2026-08-24",
+      "Liga": "suecia",
+      "Jogo": "Malmo FF vs Djurgardens IF",
+      "Mercado": "Over 2.5",
+      "Odd": "1.59",
+      "Stake\u20ac": "0.38",
+      "Edge%": 5.66,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-24T18:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 5.66
+    },
+    {
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Austin II vs The Town",
+      "Mercado": "Over 2.5",
+      "Odd": "1.71",
+      "Stake\u20ac": "0.99",
+      "Edge%": 13.52,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-24T01:30:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 13.52
+    },
+    {
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Colorado Rapids II vs Real Monarchs",
+      "Mercado": "Over 2.5",
+      "Odd": "1.62",
+      "Stake\u20ac": "0.49",
+      "Edge%": 6.5,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-24T01:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 6.5
+    },
+    {
+      "Data": "2026-08-24",
+      "Liga": "mls_next_pro",
+      "Jogo": "Crown Legacy vs Chattanooga",
+      "Mercado": "Over 2.5",
+      "Odd": "1.57",
+      "Stake\u20ac": "0.85",
+      "Edge%": 8.31,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-24T00:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 8.31
+    },
+    {
+      "Data": "2026-08-25",
+      "Liga": "brasil",
+      "Jogo": "Botafogo vs Atletico Paranaense",
+      "Mercado": "Over 2.5",
+      "Odd": "2.13",
+      "Stake\u20ac": "0.99",
+      "Edge%": 11.89,
+      "Apostada": "",
+      "OddReal": "",
+      "StakeReal\u20ac": "",
+      "Resultado": "",
+      "Placar": "",
+      "Lucro\u20ac": "",
+      "LucroReal\u20ac": "",
+      "KickoffUTC": "2026-08-25T00:00:00+01:00",
+      "SettlementReason": "",
+      "MissingAttempts": "",
+      "Edge": 11.89
     }
   ],
   "leagueStats": [
@@ -3104,9 +3456,9 @@
       "Market": "BTTS",
       "ROI%": "73.68",
       "WinRate%": "100.0",
-      "AvgKelly": "0.285",
-      "Tier": "Unproven",
-      "TotalPicks": "2"
+      "AvgKelly": "0.56",
+      "Tier": "Elite",
+      "TotalPicks": "3"
     },
     {
       "League": "Bundesliga",
@@ -3140,9 +3492,9 @@
       "Market": "Over 2.5",
       "ROI%": "59.71",
       "WinRate%": "100.0",
-      "AvgKelly": "0.3475",
+      "AvgKelly": "0.5314",
       "Tier": "Elite",
-      "TotalPicks": "4"
+      "TotalPicks": "7"
     },
     {
       "League": "Eliteserien",
@@ -3158,18 +3510,18 @@
       "Market": "Over 2.5",
       "ROI%": "21.9",
       "WinRate%": "73.33",
-      "AvgKelly": "0.5929",
+      "AvgKelly": "0.5705",
       "Tier": "Elite",
-      "TotalPicks": "17"
+      "TotalPicks": "21"
     },
     {
       "League": "Veikkausliiga",
       "Market": "Over 2.5",
       "ROI%": "20.85",
       "WinRate%": "53.85",
-      "AvgKelly": "0.6735",
+      "AvgKelly": "0.6774",
       "Tier": "Elite",
-      "TotalPicks": "26"
+      "TotalPicks": "27"
     },
     {
       "League": "Serie A",
@@ -3212,9 +3564,9 @@
       "Market": "BTTS",
       "ROI%": "-39.47",
       "WinRate%": "50.0",
-      "AvgKelly": "1.0067",
+      "AvgKelly": "0.87",
       "Tier": "Weak",
-      "TotalPicks": "3"
+      "TotalPicks": "4"
     },
     {
       "League": "Allsvenskan",
@@ -3239,9 +3591,9 @@
       "Market": "Over 2.5",
       "ROI%": "-100.0",
       "WinRate%": "0.0",
-      "AvgKelly": "0.623",
+      "AvgKelly": "0.6564",
       "Tier": "Weak",
-      "TotalPicks": "10"
+      "TotalPicks": "11"
     },
     {
       "League": "Serie B",
@@ -3343,7 +3695,7 @@
       "TotalPicks": "1"
     }
   ],
-  "bankrollInicial": 500,
+  "bankrollInicial": 100,
   "bankrollInicialSet": true,
   "localEdits": {
     "2026-04-03|championship|QPR vs Watford|BTTS": {
@@ -4651,9 +5003,7 @@
       "apostada": true
     },
     "2026-06-21|mls|Huntsville City vs Crown Legacy|Over 2.5": {
-      "apostada": true,
-      "resultadoManual": "P",
-      "settledAt": "2026-07-01T10:32:44.065Z"
+      "apostada": true
     },
     "2026-06-23|finlandia|KuPS vs Ilves|Over 2.5": {
       "apostada": true
@@ -4685,309 +5035,201 @@
     "2026-06-27|finlandia|Ilves vs SJK|Over 2.5": {
       "apostada": true
     },
-    "2026-06-28|mls|Toronto II vs New England II|Over 2.5": {
-      "apostada": true
-    },
-    "2026-06-28|mls|FC Cincinnati II vs Inter Miami II|Over 2.5": {
-      "apostada": true
-    },
-    "2026-06-29|mls|St. Louis City II vs Austin II|Over 2.5": {
-      "apostada": true
-    },
-    "2026-06-29|mls|Minnesota United II vs Tacoma Defiance|Over 2.5": {
-      "apostada": true
-    },
-    "2026-06-28|mls|Colorado Rapids II vs Vancouver Whitecaps II|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-03|suecia|Sirius vs Mjallby AIF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-06-28|mls|Ventura County vs Real Monarchs|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-04|finlandia|Lahti vs Gnistan|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-04|finlandia|SJK vs Turku PS|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-04|finlandia|FF Jaro vs Ilves|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-04|suecia|Degerfors IF vs Malmo FF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-05|suecia|IF Elfsborg vs Hammarby FF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-04|suecia|Halmstad vs Vasteras SK FK|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-05|suecia|Kalmar FF vs Orgryte IS|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-12|noruega|Brann vs Start|BTTS": {
-      "apostada": true
-    },
-    "2026-07-11|noruega|Fredrikstad vs Lillestrom|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|finlandia|Turku PS vs AC Oulu|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|finlandia|Gnistan vs Mariehamn|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|noruega|Tromso vs Valerenga|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|noruega|Aalesund vs Molde|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-12|suecia|Vasteras SK FK vs Degerfors IF|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|finlandia|Lahti vs HJK Helsinki|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-12|noruega|Rosenborg vs Kristiansund BK|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-12|suecia|Malmo FF vs IFK Goteborg|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-11|finlandia|Gnistan vs Mariehamn|BTTS": {
-      "apostada": true
-    },
-    "2026-07-12|suecia|IF Brommapojkarna vs Sirius|Over 2.5": {
-      "apostada": true
-    },
-    "2026-07-16|brasil|Botafogo vs Santos|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-17|suecia|Mjallby AIF vs Vasteras SK FK|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|noruega|Kristiansund BK vs Sarpsborg 08 FF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|noruega|Lillestrom vs KFUM Oslo|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|suecia|AIK Stockholm vs Gais|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|mls|Nashville SC vs Atlanta United FC|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|noruega|Molde vs Brann|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|brasil|Fluminense vs RB Bragantino|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|noruega|Viking vs Sandefjord|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-18|mls|Los Angeles Galaxy vs Los Angeles FC|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-19|suecia|IF Elfsborg vs Sirius|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-19|suecia|Hammarby FF vs Degerfors IF|BTTS": {
-      "apostada": true,
-      "stakeReal": "1.5"
-    },
-    "2026-07-17|mls|Chicago Fire vs Vancouver Whitecaps|Over 2.5": {
+    "2026-08-07|portugal|Estoril vs Famalicao|Over 2.5": {
       "apostada": true,
       "stakeReal": "1",
-      "resultadoManual": "P",
-      "settlementReason": "manual_void",
-      "settledAt": "2026-07-22T09:05:34.834Z"
+      "oddReal": "1.75"
     },
-    "2026-07-20|suecia|Kalmar FF vs Malmo FF|Over 2.5": {
+    "2026-08-14|franca2|Dijon vs PAU|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-20|finlandia|Mariehamn vs Lahti|Over 2.5": {
+    "2026-08-14|turquia|Galatasaray vs \u00c7orum FK|BTTS": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-20|finlandia|Turku PS vs Ilves|Over 2.5": {
+    "2026-08-15|suecia|Mjallby AIF vs Sirius|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-21|brasil|Atletico-MG vs Bahia|Over 2.5": {
+    "2026-08-15|portugal2|Sporting CP B vs Chaves|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-23|brasil|Botafogo vs Vitoria|Over 2.5": {
+    "2026-08-15|mls_next_pro|Toronto II vs Chattanooga|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-15|turquia|Gaziantep FK vs Alanyaspor|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-15|championship|Bristol City vs Millwall|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-15|alemanha2|SpVgg Greuther F\u00fcrth vs 1. FC N\u00fcrnberg|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-15|portugal2|Uni\u00e3o de Leiria vs Benfica B|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|brasil|Sao Paulo vs Coritiba|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|mls|New York City FC vs Philadelphia Union|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|brasil|Vasco DA Gama vs Santos|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|finlandia|Lahti vs KuPS|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|noruega|Fredrikstad vs Kristiansund BK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|mls_next_pro|North Texas vs Portland Timbers II|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|portugal|Nacional vs Estoril|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|portugal|Casa Pia vs Benfica|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|turquia|Samsunspor vs G\u00f6ztepe|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|espanha2|Almeria vs Eldense|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|finlandia|Gnistan vs Ilves|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|mls|Seattle Sounders vs Vancouver Whitecaps|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|turquia|Ba\u015fak\u015fehir vs Kocaelispor|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|brasil|Atletico-MG vs Gremio|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|championship|Watford vs Southampton|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-16|turquia|Amed vs Erzurumspor FK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-17|mls_next_pro|The Town vs St. Louis City II|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-19|espanha|Atletico Madrid vs Malaga|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-20|mls|Colorado Rapids vs Los Angeles FC|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-20|mls|Toronto FC vs Charlotte|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-21|espanha|Real Betis vs Real Sociedad|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-21|franca|Marseille vs Strasbourg|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-21|belgica|Standard Liege vs RAAL La Louvi\u00e8re|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|portugal|Estoril vs Rio Ave|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|espanha2|Albacete vs Real Sociedad II|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-22|italia|Genoa vs Napoli|BTTS": {
       "apostada": true,
       "stakeReal": "1.5"
     },
-    "2026-07-22|coreia|Gwangju FC vs Gimcheon Sangmu FC|Over 2.5": {
+    "2026-08-22|premier|Ipswich vs Sunderland|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-22|noruega|Lillestrom vs Viking|Over 2.5": {
+    "2026-08-22|premier|Nottingham Forest vs Leeds|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-24|finlandia|FF Jaro vs SJK|Over 2.5": {
+    "2026-08-22|portugal|Maritimo vs Academico Viseu|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-25|noruega|Kristiansund BK vs Start|Over 2.5": {
+    "2026-08-22|franca|Le Mans vs Stade Brestois 29|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-25|suecia|Kalmar FF vs Mjallby AIF|Over 2.5": {
+    "2026-08-22|belgica|Antwerp vs Genk|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-25|mls|New York Red Bulls vs Charlotte|Over 2.5": {
+    "2026-08-22|turquia|\u00c7orum FK vs Kas\u0131mpa\u015fa|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|suecia|Malmo FF vs IF Elfsborg|Over 2.5": {
+    "2026-08-22|championship|Millwall vs Norwich|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|mls|New York City FC vs Chicago Fire|Over 2.5": {
+    "2026-08-22|franca|Estac Troyes vs Paris FC|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|brasil|RB Bragantino vs Coritiba|BTTS": {
+    "2026-08-22|portugal2|Leixoes vs Uni\u00e3o de Leiria|BTTS": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|brasil|Vasco DA Gama vs Mirassol|Over 2.5": {
+    "2026-08-23|mls|St. Louis City vs Houston Dynamo|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|brasil|Bahia vs Corinthians|Over 2.5": {
+    "2026-08-23|suecia|IF Brommapojkarna vs Degerfors IF|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|brasil|Flamengo vs Sao Paulo|Over 2.5": {
+    "2026-08-23|suecia|Vasteras SK FK vs Kalmar FF|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
     },
-    "2026-07-26|finlandia|Ilves vs Lahti|Over 2.5": {
+    "2026-08-23|finlandia|Turku PS vs Inter Turku|Over 2.5": {
       "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-23|mls_next_pro|Vancouver Whitecaps II vs Austin II|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-26|mls_next_pro|North Texas vs Los Angeles FC II|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-23|mls|Nashville SC vs CF Montreal|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-23|mls|Sporting Kansas City vs Minnesota United FC|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-27|noruega|Rosenborg vs Fredrikstad|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-27|mls_next_pro|FC Cincinnati II vs New England II|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-27|mls_next_pro|Houston Dynamo FC II vs Austin II|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-29|brasil|Atletico-MG vs RB Bragantino|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-29|brasil|Sao Paulo vs Santos|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-29|brasil|Botafogo vs Gremio|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-29|brasil|Internacional vs Flamengo|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-30|brasil|Fluminense vs Bahia|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-01|noruega|Fredrikstad vs Sandefjord|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-01|finlandia|Gnistan vs KuPS|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-01|mls|New York City FC vs Toronto FC|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-01|finlandia|Lahti vs FF Jaro|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-02|mls|Sporting Kansas City vs Houston Dynamo|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-02|noruega|Aalesund vs Tromso|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-02|noruega|KFUM Oslo vs Kristiansund BK|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-02|suecia|IF Brommapojkarna vs Malmo FF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-02|suecia|IFK Goteborg vs Degerfors IF|Over 2.5": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-07-31|noruega|Bodo/Glimt vs Lillestrom|BTTS": {
-      "apostada": true,
-      "stakeReal": "1"
-    },
-    "2026-08-03|suecia|Halmstad vs Sirius|BTTS": {
-      "apostada": false,
       "stakeReal": "1"
     }
   },
@@ -15185,6 +15427,66 @@
       "scoreAtAnalysis": 66,
       "stake": "1",
       "status": "approved"
+    },
+    {
+      "id": "manual_1787450724251_tbo1uk",
+      "data": "2026-08-23",
+      "liga": "belgica",
+      "jogo": "Club Brugge KV vs Cercle Brugge",
+      "mercado": "BTTS",
+      "odd": "1.65",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "AVOID",
+      "edgeAtAnalysis": -7.787060606060603,
+      "scoreAtAnalysis": 30,
+      "analysisSnapshot": {
+        "cacheKey": "2026-08-23_belgica_club_brugge_kv_cercle_brugge|BTTS|1.65|1.00",
+        "market": "BTTS",
+        "odd": 1.65,
+        "stake": 1,
+        "ProbModel": 0.52819,
+        "ProbMarket": 0.6060606060606061,
+        "Edge": -0.07787060606060603,
+        "EdgePercent": -7.787060606060603,
+        "fairOdd": 1.8932581078778468,
+        "KellyTrue": 0,
+        "Confidence": 0,
+        "EV": -0.12848649999999995,
+        "score": 30,
+        "scoreCls": "bad",
+        "opinion": "AVOID",
+        "opinionCls": "bad",
+        "LambdaHome": 1.6779411764705883,
+        "LambdaAway": 1.3238235294117646,
+        "LambdaTotal": 3.001764705882353,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "diagnostics": {
+          "rawPoisson": 0.596825,
+          "baseAdjFactor": 0.885,
+          "afterBaseAdj": 0.52819,
+          "penRatio": 1,
+          "penGap": 1,
+          "penSmaller": 1,
+          "penProduct": 1,
+          "totalPenalty": 1,
+          "finalProbUnclamped": 0.52819,
+          "lamRatio": 1.2675,
+          "lamGap": 0.3541,
+          "lamProduct": 2.2213
+        },
+        "timestamp": "2026-08-23T02:05:22.595Z"
+      },
+      "kickoffUTC": "2026-08-23T17:30:00+01:00",
+      "homeTeam": "Club Brugge KV",
+      "awayTeam": "Cercle Brugge",
+      "leagueId": 144
     }
   ],
   "movements": [
@@ -15210,263 +15512,605 @@
       "type": "withdrawal"
     }
   ],
-  "sessionStartDate": "2026-04-19",
-  "lastUpdated": "2026-08-02T11:26:55.029Z",
+  "sessionStartDate": "2026-08-03",
+  "lastUpdated": "2026-08-23T02:05:11.544Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": true,
+  "cloudAvailable": false,
   "fixtures": [
     {
-      "Date": "2026-08-02",
-      "League": "coreia",
-      "HomeTeam": "Daejeon Citizen",
-      "AwayTeam": "Gwangju FC",
-      "Odd_Over25": "1.89",
-      "Odd_BTTS_Yes": "2.05",
-      "KickoffUTC": "2026-08-02T11:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "coreia",
-      "HomeTeam": "Jeju United FC",
-      "AwayTeam": "Incheon United",
-      "Odd_Over25": "2.46",
-      "Odd_BTTS_Yes": "2.05",
-      "KickoffUTC": "2026-08-02T11:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "coreia",
-      "HomeTeam": "Ulsan Hyundai FC",
-      "AwayTeam": "FC Anyang",
-      "Odd_Over25": "1.87",
-      "Odd_BTTS_Yes": "1.75",
-      "KickoffUTC": "2026-08-02T11:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "finlandia",
-      "HomeTeam": "AC Oulu",
-      "AwayTeam": "Ilves",
-      "Odd_Over25": "1.72",
-      "Odd_BTTS_Yes": "1.62",
-      "KickoffUTC": "2026-08-02T15:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "finlandia",
-      "HomeTeam": "VPS",
-      "AwayTeam": "Inter Turku",
-      "Odd_Over25": "2.06",
-      "Odd_BTTS_Yes": "1.73",
-      "KickoffUTC": "2026-08-02T13:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "HomeTeam": "Chicago Fire",
-      "AwayTeam": "Charlotte",
-      "Odd_Over25": "1.46",
-      "Odd_BTTS_Yes": "1.56",
-      "KickoffUTC": "2026-08-02T01:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "HomeTeam": "Colorado Rapids",
-      "AwayTeam": "Austin",
-      "Odd_Over25": "1.72",
-      "Odd_BTTS_Yes": "1.67",
-      "KickoffUTC": "2026-08-02T02:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "HomeTeam": "Sporting Kansas City",
-      "AwayTeam": "Houston Dynamo",
-      "Odd_Over25": "1.67",
-      "Odd_BTTS_Yes": "1.57",
-      "KickoffUTC": "2026-08-02T01:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls",
-      "HomeTeam": "St. Louis City",
-      "AwayTeam": "Real Salt Lake",
-      "Odd_Over25": "1.55",
-      "Odd_BTTS_Yes": "1.50",
-      "KickoffUTC": "2026-08-02T01:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls_next_pro",
-      "HomeTeam": "Chicago Fire II",
-      "AwayTeam": "FC Cincinnati II",
-      "Odd_Over25": "1.48",
-      "Odd_BTTS_Yes": "1.52",
-      "KickoffUTC": "2026-08-02T21:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls_next_pro",
-      "HomeTeam": "Huntsville City",
-      "AwayTeam": "Crown Legacy",
-      "Odd_Over25": "1.45",
-      "Odd_BTTS_Yes": "1.46",
-      "KickoffUTC": "2026-08-02T01:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "mls_next_pro",
-      "HomeTeam": "New York RB II",
-      "AwayTeam": "New England II",
-      "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.41",
-      "KickoffUTC": "2026-08-02T22:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "HomeTeam": "Aalesund",
-      "AwayTeam": "Tromso",
-      "Odd_Over25": "1.70",
-      "Odd_BTTS_Yes": "1.62",
-      "KickoffUTC": "2026-08-02T16:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "HomeTeam": "Brann",
-      "AwayTeam": "Rosenborg",
-      "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.49",
-      "KickoffUTC": "2026-08-02T18:15:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "HomeTeam": "KFUM Oslo",
-      "AwayTeam": "Kristiansund BK",
-      "Odd_Over25": "1.75",
-      "Odd_BTTS_Yes": "1.75",
-      "KickoffUTC": "2026-08-02T16:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "noruega",
-      "HomeTeam": "Molde",
-      "AwayTeam": "Sarpsborg 08 FF",
-      "Odd_Over25": "1.45",
-      "Odd_BTTS_Yes": "1.50",
-      "KickoffUTC": "2026-08-02T16:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "suecia",
-      "HomeTeam": "AIK Stockholm",
-      "AwayTeam": "Orgryte IS",
-      "Odd_Over25": "1.55",
-      "Odd_BTTS_Yes": "1.70",
-      "KickoffUTC": "2026-08-02T15:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "suecia",
-      "HomeTeam": "IF Brommapojkarna",
-      "AwayTeam": "Malmo FF",
-      "Odd_Over25": "1.65",
-      "Odd_BTTS_Yes": "1.53",
-      "KickoffUTC": "2026-08-02T13:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-02",
-      "League": "suecia",
-      "HomeTeam": "IFK Goteborg",
-      "AwayTeam": "Degerfors IF",
-      "Odd_Over25": "1.83",
-      "Odd_BTTS_Yes": "1.75",
-      "KickoffUTC": "2026-08-02T13:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-03",
-      "League": "finlandia",
-      "HomeTeam": "SJK",
-      "AwayTeam": "HJK Helsinki",
-      "Odd_Over25": "1.53",
-      "Odd_BTTS_Yes": "1.50",
-      "KickoffUTC": "2026-08-03T17:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-03",
-      "League": "suecia",
-      "HomeTeam": "Djurgardens IF",
-      "AwayTeam": "Vasteras SK FK",
-      "Odd_Over25": "1.48",
-      "Odd_BTTS_Yes": "1.62",
-      "KickoffUTC": "2026-08-03T18:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-03",
-      "League": "suecia",
-      "HomeTeam": "Halmstad",
-      "AwayTeam": "Sirius",
-      "Odd_Over25": "1.45",
-      "Odd_BTTS_Yes": "1.68",
-      "KickoffUTC": "2026-08-03T18:00:00+01:00"
-    },
-    {
-      "Date": "2026-08-07",
-      "League": "alemanha2",
-      "HomeTeam": "VfL Bochum",
-      "AwayTeam": "Hertha BSC",
-      "Odd_Over25": "1.61",
-      "Odd_BTTS_Yes": "1.50",
-      "KickoffUTC": "2026-08-07T19:30:00+01:00"
-    },
-    {
-      "Date": "2026-08-07",
+      "Date": "2026-08-23",
       "League": "belgica",
       "HomeTeam": "Club Brugge KV",
-      "AwayTeam": "Kortrijk",
-      "Odd_Over25": "1.50",
-      "Odd_BTTS_Yes": "1.91",
-      "KickoffUTC": "2026-08-07T19:45:00+01:00"
+      "AwayTeam": "Cercle Brugge",
+      "Odd_Over25": "1.32",
+      "Odd_BTTS_Yes": "1.65",
+      "KickoffUTC": "2026-08-23T17:30:00+01:00"
     },
     {
-      "Date": "2026-08-07",
+      "Date": "2026-08-23",
+      "League": "belgica",
+      "HomeTeam": "Lommel United",
+      "AwayTeam": "KVC Westerlo",
+      "Odd_Over25": "1.81",
+      "Odd_BTTS_Yes": "1.61",
+      "KickoffUTC": "2026-08-23T15:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "brasil",
+      "HomeTeam": "RB Bragantino",
+      "AwayTeam": "Gremio",
+      "Odd_Over25": "1.95",
+      "Odd_BTTS_Yes": "1.87",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "championship",
+      "HomeTeam": "West Brom",
+      "AwayTeam": "Burnley",
+      "Odd_Over25": "2.10",
+      "Odd_BTTS_Yes": "1.87",
+      "KickoffUTC": "2026-08-23T12:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "coreia",
+      "HomeTeam": "Gwangju FC",
+      "AwayTeam": "Incheon United",
+      "Odd_Over25": "2.33",
+      "Odd_BTTS_Yes": "2.10",
+      "KickoffUTC": "2026-08-23T11:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "espanha",
+      "HomeTeam": "Atletico Madrid",
+      "AwayTeam": "Villarreal",
+      "Odd_Over25": "1.92",
+      "Odd_BTTS_Yes": "1.77",
+      "KickoffUTC": "2026-08-23T16:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "espanha",
+      "HomeTeam": "Elche",
+      "AwayTeam": "Barcelona",
+      "Odd_Over25": "1.47",
+      "Odd_BTTS_Yes": "1.76",
+      "KickoffUTC": "2026-08-23T20:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "espanha",
+      "HomeTeam": "Getafe",
+      "AwayTeam": "Racing Santander",
+      "Odd_Over25": "3.00",
+      "Odd_BTTS_Yes": "2.32",
+      "KickoffUTC": "2026-08-23T18:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "espanha2",
+      "HomeTeam": "Castell\u00f3n",
+      "AwayTeam": "Sabadell",
+      "Odd_Over25": "1.72",
+      "Odd_BTTS_Yes": "1.80",
+      "KickoffUTC": "2026-08-23T18:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
       "League": "finlandia",
-      "HomeTeam": "SJK",
+      "HomeTeam": "HJK Helsinki",
       "AwayTeam": "Gnistan",
-      "Odd_Over25": "1.56",
-      "Odd_BTTS_Yes": "1.49",
-      "KickoffUTC": "2026-08-07T17:00:00+01:00"
+      "Odd_Over25": "1.52",
+      "Odd_BTTS_Yes": "1.57",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00"
     },
     {
-      "Date": "2026-08-07",
-      "League": "noruega",
-      "HomeTeam": "Sandefjord",
-      "AwayTeam": "KFUM Oslo",
-      "Odd_Over25": "1.68",
+      "Date": "2026-08-23",
+      "League": "finlandia",
+      "HomeTeam": "KuPS",
+      "AwayTeam": "Mariehamn",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.88",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "finlandia",
+      "HomeTeam": "Turku PS",
+      "AwayTeam": "Inter Turku",
+      "Odd_Over25": "1.97",
+      "Odd_BTTS_Yes": "1.75",
+      "KickoffUTC": "2026-08-23T16:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "franca",
+      "HomeTeam": "Rennes",
+      "AwayTeam": "Paris Saint Germain",
+      "Odd_Over25": "1.47",
+      "Odd_BTTS_Yes": "1.57",
+      "KickoffUTC": "2026-08-23T19:45:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "italia",
+      "HomeTeam": "Frosinone",
+      "AwayTeam": "Juventus",
+      "Odd_Over25": "1.92",
+      "Odd_BTTS_Yes": "2.02",
+      "KickoffUTC": "2026-08-23T17:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "italia",
+      "HomeTeam": "Torino",
+      "AwayTeam": "AC Milan",
+      "Odd_Over25": "1.97",
+      "Odd_BTTS_Yes": "1.82",
+      "KickoffUTC": "2026-08-23T19:45:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "italia2",
+      "HomeTeam": "Cesena",
+      "AwayTeam": "Sampdoria",
+      "Odd_Over25": "2.08",
+      "Odd_BTTS_Yes": "1.80",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "italia2",
+      "HomeTeam": "Pisa",
+      "AwayTeam": "Padova",
+      "Odd_Over25": "2.24",
+      "Odd_BTTS_Yes": "2.02",
+      "KickoffUTC": "2026-08-23T18:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls",
+      "HomeTeam": "Inter Miami",
+      "AwayTeam": "Toronto FC",
+      "Odd_Over25": "1.23",
+      "Odd_BTTS_Yes": "1.42",
+      "KickoffUTC": "2026-08-23T00:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls",
+      "HomeTeam": "Orlando City SC",
+      "AwayTeam": "Real Salt Lake",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.44",
+      "KickoffUTC": "2026-08-23T00:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls",
+      "HomeTeam": "San Jose Earthquakes",
+      "AwayTeam": "Minnesota United FC",
+      "Odd_Over25": "1.51",
+      "Odd_BTTS_Yes": "1.44",
+      "KickoffUTC": "2026-08-23T03:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls",
+      "HomeTeam": "St. Louis City",
+      "AwayTeam": "Houston Dynamo",
+      "Odd_Over25": "1.89",
+      "Odd_BTTS_Yes": "1.67",
+      "KickoffUTC": "2026-08-23T01:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls_next_pro",
+      "HomeTeam": "Carolina Core",
+      "AwayTeam": "FC Cincinnati II",
+      "Odd_Over25": "1.54",
       "Odd_BTTS_Yes": "1.55",
-      "KickoffUTC": "2026-08-07T18:00:00+01:00"
+      "KickoffUTC": "2026-08-23T00:30:00+01:00"
     },
     {
-      "Date": "2026-08-07",
+      "Date": "2026-08-23",
+      "League": "mls_next_pro",
+      "HomeTeam": "Chicago Fire II",
+      "AwayTeam": "Inter Miami II",
+      "Odd_Over25": "1.28",
+      "Odd_BTTS_Yes": "1.43",
+      "KickoffUTC": "2026-08-23T21:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls_next_pro",
+      "HomeTeam": "North Texas",
+      "AwayTeam": "Minnesota United II",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.41",
+      "KickoffUTC": "2026-08-23T01:45:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "mls_next_pro",
+      "HomeTeam": "Philadelphia Union II",
+      "AwayTeam": "Connecticut FC",
+      "Odd_Over25": "1.50",
+      "Odd_BTTS_Yes": "1.41",
+      "KickoffUTC": "2026-08-23T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
       "League": "paises_baixos",
       "HomeTeam": "Cambuur",
-      "AwayTeam": "Excelsior",
-      "Odd_Over25": "1.65",
-      "Odd_BTTS_Yes": "1.53",
-      "KickoffUTC": "2026-08-07T19:00:00+01:00"
+      "AwayTeam": "Feyenoord",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.77",
+      "KickoffUTC": "2026-08-23T15:45:00+01:00"
     },
     {
-      "Date": "2026-08-07",
+      "Date": "2026-08-23",
+      "League": "paises_baixos",
+      "HomeTeam": "GO Ahead Eagles",
+      "AwayTeam": "ADO Den Haag",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.55",
+      "KickoffUTC": "2026-08-23T11:15:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "paises_baixos",
+      "HomeTeam": "PSV Eindhoven",
+      "AwayTeam": "Groningen",
+      "Odd_Over25": "1.35",
+      "Odd_BTTS_Yes": "1.55",
+      "KickoffUTC": "2026-08-23T13:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
       "League": "portugal",
-      "HomeTeam": "Estoril",
-      "AwayTeam": "Famalicao",
+      "HomeTeam": "FC Porto",
+      "AwayTeam": "Arouca",
+      "Odd_Over25": "1.65",
+      "Odd_BTTS_Yes": "2.35",
+      "KickoffUTC": "2026-08-23T20:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "portugal",
+      "HomeTeam": "Vit\u00f3ria SC",
+      "AwayTeam": "Nacional",
       "Odd_Over25": "1.96",
+      "Odd_BTTS_Yes": "1.90",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "portugal2",
+      "HomeTeam": "Chaves",
+      "AwayTeam": "AVS",
+      "Odd_Over25": "1.98",
+      "Odd_BTTS_Yes": "1.83",
+      "KickoffUTC": "2026-08-23T11:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "premier",
+      "HomeTeam": "Manchester City",
+      "AwayTeam": "Bournemouth",
+      "Odd_Over25": "1.45",
+      "Odd_BTTS_Yes": "1.57",
+      "KickoffUTC": "2026-08-23T14:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "premier",
+      "HomeTeam": "Newcastle",
+      "AwayTeam": "Liverpool",
+      "Odd_Over25": "1.52",
+      "Odd_BTTS_Yes": "1.48",
+      "KickoffUTC": "2026-08-23T16:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "suecia",
+      "HomeTeam": "Hammarby FF",
+      "AwayTeam": "Gais",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.80",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "suecia",
+      "HomeTeam": "IF Brommapojkarna",
+      "AwayTeam": "Degerfors IF",
+      "Odd_Over25": "1.90",
+      "Odd_BTTS_Yes": "1.70",
+      "KickoffUTC": "2026-08-23T15:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "suecia",
+      "HomeTeam": "Vasteras SK FK",
+      "AwayTeam": "Kalmar FF",
+      "Odd_Over25": "1.81",
+      "Odd_BTTS_Yes": "1.62",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "suica",
+      "HomeTeam": "BSC Young Boys",
+      "AwayTeam": "FC Vaduz",
+      "Odd_Over25": "1.29",
+      "Odd_BTTS_Yes": "1.57",
+      "KickoffUTC": "2026-08-23T13:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "suica",
+      "HomeTeam": "FC Thun",
+      "AwayTeam": "Servette FC",
+      "Odd_Over25": "1.58",
+      "Odd_BTTS_Yes": "1.50",
+      "KickoffUTC": "2026-08-23T16:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "turquia",
+      "HomeTeam": "Alanyaspor",
+      "AwayTeam": "Be\u015fikta\u015f",
+      "Odd_Over25": "1.82",
+      "Odd_BTTS_Yes": "1.67",
+      "KickoffUTC": "2026-08-23T19:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "turquia",
+      "HomeTeam": "Ey\u00fcpspor",
+      "AwayTeam": "Gaziantep FK",
+      "Odd_Over25": "1.94",
+      "Odd_BTTS_Yes": "1.70",
+      "KickoffUTC": "2026-08-23T17:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "turquia",
+      "HomeTeam": "G\u00f6ztepe",
+      "AwayTeam": "Gen\u00e7lerbirli\u011fi S.K.",
+      "Odd_Over25": "1.93",
+      "Odd_BTTS_Yes": "1.90",
+      "KickoffUTC": "2026-08-23T19:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-23",
+      "League": "turquia",
+      "HomeTeam": "Trabzonspor",
+      "AwayTeam": "Ba\u015fak\u015fehir",
+      "Odd_Over25": "1.77",
+      "Odd_BTTS_Yes": "1.61",
+      "KickoffUTC": "2026-08-23T17:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "espanha",
+      "HomeTeam": "Malaga",
+      "AwayTeam": "Deportivo La Coruna",
+      "Odd_Over25": "2.62",
+      "Odd_BTTS_Yes": "2.12",
+      "KickoffUTC": "2026-08-24T20:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "espanha",
+      "HomeTeam": "Osasuna",
+      "AwayTeam": "Levante",
+      "Odd_Over25": "2.08",
+      "Odd_BTTS_Yes": "1.91",
+      "KickoffUTC": "2026-08-24T18:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "espanha2",
+      "HomeTeam": "Granada CF",
+      "AwayTeam": "Mallorca",
+      "Odd_Over25": "2.45",
+      "Odd_BTTS_Yes": "2.00",
+      "KickoffUTC": "2026-08-24T20:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "italia",
+      "HomeTeam": "AS Roma",
+      "AwayTeam": "Fiorentina",
+      "Odd_Over25": "1.98",
+      "Odd_BTTS_Yes": "1.95",
+      "KickoffUTC": "2026-08-24T19:45:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls",
+      "HomeTeam": "Atlanta United FC",
+      "AwayTeam": "Sporting Kansas City",
+      "Odd_Over25": "1.53",
+      "Odd_BTTS_Yes": "1.54",
+      "KickoffUTC": "2026-08-24T00:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "HomeTeam": "Austin II",
+      "AwayTeam": "The Town",
+      "Odd_Over25": "1.71",
+      "Odd_BTTS_Yes": "1.63",
+      "KickoffUTC": "2026-08-24T01:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "HomeTeam": "Colorado Rapids II",
+      "AwayTeam": "Real Monarchs",
+      "Odd_Over25": "1.62",
+      "Odd_BTTS_Yes": "1.53",
+      "KickoffUTC": "2026-08-24T01:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "HomeTeam": "Crown Legacy",
+      "AwayTeam": "Chattanooga",
+      "Odd_Over25": "1.57",
+      "Odd_BTTS_Yes": "1.45",
+      "KickoffUTC": "2026-08-24T00:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "mls_next_pro",
+      "HomeTeam": "Huntsville City",
+      "AwayTeam": "Columbus Crew II",
+      "Odd_Over25": "1.53",
+      "Odd_BTTS_Yes": "1.42",
+      "KickoffUTC": "2026-08-24T00:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "portugal",
+      "HomeTeam": "GIL Vicente",
+      "AwayTeam": "Casa Pia",
+      "Odd_Over25": "2.38",
+      "Odd_BTTS_Yes": "2.23",
+      "KickoffUTC": "2026-08-24T20:15:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "premier",
+      "HomeTeam": "Fulham",
+      "AwayTeam": "Chelsea",
+      "Odd_Over25": "1.71",
+      "Odd_BTTS_Yes": "1.60",
+      "KickoffUTC": "2026-08-24T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "suecia",
+      "HomeTeam": "Malmo FF",
+      "AwayTeam": "Djurgardens IF",
+      "Odd_Over25": "1.59",
+      "Odd_BTTS_Yes": "1.50",
+      "KickoffUTC": "2026-08-24T18:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-24",
+      "League": "turquia",
+      "HomeTeam": "Kocaelispor",
+      "AwayTeam": "Amed",
+      "Odd_Over25": "2.16",
+      "Odd_BTTS_Yes": "1.88",
+      "KickoffUTC": "2026-08-24T19:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-25",
+      "League": "brasil",
+      "HomeTeam": "Botafogo",
+      "AwayTeam": "Atletico Paranaense",
+      "Odd_Over25": "2.13",
+      "Odd_BTTS_Yes": "1.83",
+      "KickoffUTC": "2026-08-25T00:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-25",
+      "League": "espanha",
+      "HomeTeam": "Valencia",
+      "AwayTeam": "Real Betis",
+      "Odd_Over25": "2.05",
+      "Odd_BTTS_Yes": "1.80",
+      "KickoffUTC": "2026-08-25T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-26",
+      "League": "espanha",
+      "HomeTeam": "Real Madrid",
+      "AwayTeam": "Real Sociedad",
+      "Odd_Over25": "1.55",
+      "Odd_BTTS_Yes": "1.74",
+      "KickoffUTC": "2026-08-26T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-27",
+      "League": "espanha",
+      "HomeTeam": "Barcelona",
+      "AwayTeam": "Athletic Club",
+      "Odd_Over25": "1.55",
       "Odd_BTTS_Yes": "1.75",
-      "KickoffUTC": "2026-08-07T20:15:00+01:00"
+      "KickoffUTC": "2026-08-27T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-27",
+      "League": "espanha",
+      "HomeTeam": "Celta Vigo",
+      "AwayTeam": "Osasuna",
+      "Odd_Over25": "2.18",
+      "Odd_BTTS_Yes": "1.95",
+      "KickoffUTC": "2026-08-27T19:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "alemanha",
+      "HomeTeam": "Bayern M\u00fcnchen",
+      "AwayTeam": "VfB Stuttgart",
+      "Odd_Over25": "1.26",
+      "Odd_BTTS_Yes": "1.50",
+      "KickoffUTC": "2026-08-28T19:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "alemanha2",
+      "HomeTeam": "Eintracht Braunschweig",
+      "AwayTeam": "Hertha BSC",
+      "Odd_Over25": "1.78",
+      "Odd_BTTS_Yes": "1.60",
+      "KickoffUTC": "2026-08-28T17:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "alemanha2",
+      "HomeTeam": "VfL Bochum",
+      "AwayTeam": "VfL Osnabr\u00fcck",
+      "Odd_Over25": "1.72",
+      "Odd_BTTS_Yes": "1.72",
+      "KickoffUTC": "2026-08-28T17:30:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "championship",
+      "HomeTeam": "Wrexham",
+      "AwayTeam": "Birmingham",
+      "Odd_Over25": "2.05",
+      "Odd_BTTS_Yes": "1.80",
+      "KickoffUTC": "2026-08-28T20:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "franca2",
+      "HomeTeam": "Rodez",
+      "AwayTeam": "PAU",
+      "Odd_Over25": "1.75",
+      "Odd_BTTS_Yes": "1.65",
+      "KickoffUTC": "2026-08-28T19:00:00+01:00"
+    },
+    {
+      "Date": "2026-08-28",
+      "League": "premier",
+      "HomeTeam": "Crystal Palace",
+      "AwayTeam": "Manchester City",
+      "Odd_Over25": "1.74",
+      "Odd_BTTS_Yes": "1.73",
+      "KickoffUTC": "2026-08-28T20:00:00+01:00"
     }
   ],
   "manualBetsRemote": [],
@@ -15514,7 +16158,10 @@
       "coreia": 292,
       "finlandia": 244,
       "islandia": 188,
-      "brasil": 71
+      "brasil": 71,
+      "suica": 207,
+      "espanha2": 141,
+      "portugal2": 95
     }
   }
 }
