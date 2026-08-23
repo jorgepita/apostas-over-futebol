@@ -1,12 +1,12 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-08-23;Serie B;Cesena vs Sampdoria;O2.5;2.09;0.56;11.96;;;;;;;;2026-08-23T20:00:00+01:00;;
-2026-08-23;Super Lig;Göztepe vs Gençlerbirliği S.K.;O2.5;2.03;0.55;11.17;;;;;;;;2026-08-23T19:30:00+01:00;;
-2026-08-23;Super Lig;Alanyaspor vs Beşiktaş;O2.5;2.0;0.52;10.44;;;;;;;;2026-08-23T19:30:00+01:00;;
-2026-08-23;Campeonato Brasileiro Serie A;RB Bragantino vs Gremio;BTTS;1.91;0.65;6.77;;;;;;;;2026-08-23T20:00:00+01:00;;
-2026-08-23;Serie A;Torino vs AC Milan;O2.5;2.13;0.19;6.4;;;;;;;;2026-08-23T19:45:00+01:00;;
-2026-08-23;Campeonato Brasileiro Serie A;Palmeiras vs Vasco DA Gama;O2.5;1.93;0.17;5.78;;;;;;;;2026-08-23T20:00:00+01:00;;
-2026-08-23;Serie B;Palermo vs Juve Stabia;O2.5;2.02;0.15;5.45;;;;;;;;2026-08-23T20:00:00+01:00;;
-2026-08-23;LaLiga;Elche vs Barcelona;BTTS;1.74;0.27;3.59;;;;;;;;2026-08-23T20:30:00+01:00;;
+2026-08-23;Serie B;Cesena vs Sampdoria;O2.5;2.09;0.56;11.96;;;;L;1-1;-0.32;;2026-08-23T19:00:00+00:00;;
+2026-08-23;Super Lig;Göztepe vs Gençlerbirliği S.K.;O2.5;2.03;0.55;11.17;;;;L;0-1;-0.22;;2026-08-23T18:30:00+00:00;;
+2026-08-23;Super Lig;Alanyaspor vs Beşiktaş;O2.5;2.0;0.52;10.44;;;;L;1-0;-0.1;;2026-08-23T18:30:00+00:00;;
+2026-08-23;Campeonato Brasileiro Serie A;RB Bragantino vs Gremio;BTTS;1.91;0.65;6.77;;;;L;1-0;-0.46;;2026-08-23T19:00:00+00:00;;
+2026-08-23;Serie A;Torino vs AC Milan;O2.5;2.13;0.19;6.4;;;;W;1-2;0.21;;2026-08-23T18:45:00+00:00;;
+2026-08-23;Campeonato Brasileiro Serie A;Palmeiras vs Vasco DA Gama;O2.5;1.93;0.17;5.78;;;;W;4-1;0.2;;2026-08-23T19:00:00+00:00;;
+2026-08-23;Serie B;Palermo vs Juve Stabia;O2.5;2.02;0.15;5.45;;;;L;1-0;-0.15;;2026-08-23T19:00:00+00:00;;
+2026-08-23;LaLiga;Elche vs Barcelona;BTTS;1.74;0.27;3.59;;;;L;0-5;-0.32;;2026-08-23T19:30:00+00:00;;
 2026-08-24;Super Lig;Kocaelispor vs Amed;O2.5;2.16;0.56;14.14;;;;;;;;2026-08-24T19:30:00+01:00;;
 2026-08-24;MLS Next Pro;Austin II vs The Town;O2.5;1.72;0.56;13.86;;;;;;;;2026-08-24T01:30:00+01:00;;
 2026-08-24;LaLiga;Osasuna vs Levante;BTTS;1.91;1.53;8.99;;;;;;;;2026-08-24T18:30:00+01:00;;
