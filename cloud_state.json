@@ -15733,10 +15733,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.1",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 1.1,
+      "placar": "3-1",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -15793,10 +15796,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "2.1",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 48,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -16080,10 +16086,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.57",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.57,
+      "placar": "2-3",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -16140,10 +16149,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.88",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.88,
+      "placar": "2-4",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -16967,10 +16979,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.57",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 60,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.57,
+      "placar": "3-1",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -17027,10 +17042,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.55",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 30,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.55,
+      "placar": "5-1",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -17194,10 +17212,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.98",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 43,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.98,
+      "placar": "2-2",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -17421,10 +17442,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.57",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 38,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.57,
+      "placar": "4-2",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     },
     {
       "analysisSnapshot": {
@@ -18705,10 +18729,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.62",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 34,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-08-23T14:50:11.193121+00:00"
     }
   ],
   "movements": [
@@ -19339,8 +19366,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-23T07:34:34.794756+00:00",
-      "lastSuccessAt": "2026-08-23T07:34:34.794756+00:00",
+      "lastCheckedAt": "2026-08-23T14:50:11.195872+00:00",
+      "lastSuccessAt": "2026-08-23T14:50:11.195872+00:00",
       "status": "ok"
     }
   },
