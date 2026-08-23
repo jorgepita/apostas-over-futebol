@@ -9391,6 +9391,36 @@ button:disabled {
         }
       }
 
+      // Phase 29.6 — shared season-staleness gate, extracted from _doLoadCloudState()'s
+      // pre-existing Phase 28.3A/fromUser guard (logic unchanged, just no longer inlined
+      // in one caller). Answers: "would applying this cloud snapshot's season-scoped
+      // fields overwrite a real, current local season with an older one?" A cloud
+      // snapshot is stale only when a meaningful local season already exists (so there
+      // is something worth protecting) AND the cloud's own sessionStartDate strictly
+      // predates the local one — the exact ISO 'YYYY-MM-DD' string comparison this
+      // project has used since Phase 28.3A. Deliberately permissive (returns false —
+      // "not stale") whenever there's nothing to compare against (no local season yet,
+      // or the cloud payload carries no sessionStartDate at all): that is the existing,
+      // correct behaviour for a brand-new browser and is not changed here.
+      //
+      // Used by both _doLoadCloudState() (already protected since Phase 28.3A) and
+      // _reloadManualBetsFromCloud() (Phase 29.6 — previously unprotected; see
+      // 05_Known_Issues.md and the Phase 29.5/29.5B incident this closes) so the two
+      // cloud-content consumers make the identical season-safety decision instead of
+      // each re-deriving its own.
+      function isCloudSessionStale(cloudSessionStartDate) {
+        const cloudSession = cloudSessionStartDate || '';
+        const localSession = state.sessionStartDate || '';
+        const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
+        return !!(
+          cloudSession &&
+          localSession &&
+          localSessionStored &&
+          hasMeaningfulLocalState() &&
+          cloudSession < localSession
+        );
+      }
+
       // Internal implementation of cloud state loading.
       // fromUser=true  → interactive path: season guard active, shows alert on success/error.
       // fromUser=false → auto-recovery path: guard skipped, shows toast, fails silently.
@@ -9426,14 +9456,7 @@ button:disabled {
           if (fromUser) {
             const cloudSession = content.sessionStartDate || '';
             const localSession = state.sessionStartDate   || '';
-            const localSessionStored = !!localStorage.getItem(STORAGE_KEYS.sessionStartDate);
-            if (
-              cloudSession &&
-              localSession &&
-              localSessionStored &&
-              hasMeaningfulLocalState() &&
-              cloudSession < localSession
-            ) {
+            if (isCloudSessionStale(content.sessionStartDate)) {
               alert(
                 `Cannot load cloud state: the cloud season started on ${cloudSession}, ` +
                 `but your current season started on ${localSession}.\n\n` +
@@ -15267,6 +15290,31 @@ button:disabled {
           if (!res.ok) return;
           const content = await res.json();
           if (!content || !Array.isArray(content.manualBets)) {
+            return;
+          }
+
+          // Phase 29.6 — season-staleness gate (see 05_Known_Issues.md and the
+          // Phase 29.5/29.5B incident). Unlike _doLoadCloudState(), this function was
+          // never given the Phase 28.3A recency guard: it unconditionally trusted
+          // content.manualBets, called on every boot and every tab visibilitychange.
+          // When a backup restore reverted cloud_state.json to a previous-season
+          // snapshot, this path silently replaced the browser's correct current-season
+          // manualBets with the stale ones, persisted the corruption to localStorage
+          // via saveLocalState() below, and a later ordinary auto-save then pushed it
+          // back to GitHub — permanently overwriting the real data. isCloudSessionStale()
+          // reuses the exact same season comparison _doLoadCloudState() already applies,
+          // so both cloud-content consumers make one identical decision. A stale cloud
+          // snapshot is rejected outright — state.manualBets/movements/localStorage are
+          // left completely untouched, and the sync is still marked complete (this *is*
+          // a resolved decision, not a failure) so boot() doesn't retry it and Live
+          // Center/saveCloudState() aren't left waiting on _bootSyncComplete forever.
+          if (isCloudSessionStale(content.sessionStartDate)) {
+            console.warn(
+              '[Sync] Cloud manualBets belong to an older season — refusing to overwrite ' +
+              `current-season data (cloud sessionStartDate=${content.sessionStartDate || '—'}, ` +
+              `local sessionStartDate=${state.sessionStartDate || '—'}).`
+            );
+            _completeBootSync();
             return;
           }
 
