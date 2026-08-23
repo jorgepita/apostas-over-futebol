@@ -9198,6 +9198,58 @@
     "2026-08-23|turquia|Alanyaspor vs Be\u015fikta\u015f|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-23|italia|Torino vs AC Milan|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|brasil|Palmeiras vs Vasco DA Gama|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|italia2|Palermo vs Juve Stabia|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-23|espanha|Elche vs Barcelona|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|turquia|Kocaelispor vs Amed|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|espanha|Osasuna vs Levante|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|premier|Fulham vs Chelsea|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|portugal|GIL Vicente vs Casa Pia|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|espanha|Malaga vs Deportivo La Coruna|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|espanha2|Granada CF vs Mallorca|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-24|italia|AS Roma vs Fiorentina|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-25|espanha|Valencia vs Real Betis|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-27|espanha|Celta Vigo vs Osasuna|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -32850,7 +32902,7 @@
   ],
   "sessionStartDate": "2026-08-03",
   "lastUpdated": "2026-08-23T18:13:33.011Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
