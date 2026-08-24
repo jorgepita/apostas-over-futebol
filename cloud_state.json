@@ -22026,10 +22026,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.53",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 61,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.53,
+      "placar": "2-1",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22086,10 +22089,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.63",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 67,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22133,10 +22139,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.62",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 69,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.62,
+      "placar": "4-1",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22180,10 +22189,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.57",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 75,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.57,
+      "placar": "3-1",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22227,10 +22239,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.53",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 70,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "analysisSnapshot": {
@@ -32962,7 +32977,7 @@
       "mercado": "BTTS",
       "odd": "1.91",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -33012,7 +33027,10 @@
       "kickoffUTC": "2026-08-23T22:30:00+01:00",
       "homeTeam": "Chapecoense-sc",
       "awayTeam": "Sao Paulo",
-      "leagueId": 71
+      "leagueId": 71,
+      "lucro": -1.0,
+      "placar": "1-0",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "id": "manual_1787508890887_511iuc",
@@ -33022,9 +33040,9 @@
       "mercado": "Over 2.5",
       "odd": "2.75",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "STRONG BUY",
@@ -33059,7 +33077,10 @@
       "kickoffUTC": "2026-08-23T23:30:00+01:00",
       "homeTeam": "Coritiba",
       "awayTeam": "Corinthians",
-      "leagueId": 71
+      "leagueId": 71,
+      "lucro": 1.75,
+      "placar": "2-1",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "id": "manual_1787508906035_kkq8li",
@@ -33295,7 +33316,7 @@
       "mercado": "Over 2.5",
       "odd": "1.78",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -33332,7 +33353,10 @@
       "kickoffUTC": "2026-08-23T21:30:00+01:00",
       "homeTeam": "New England Revolution",
       "awayTeam": "New York City FC",
-      "leagueId": 253
+      "leagueId": 253,
+      "lucro": -1.0,
+      "placar": "1-1",
+      "settledAt": "2026-08-24T07:58:47.933412+00:00"
     },
     {
       "id": "manual_1787508960285_73fp7w",
@@ -34287,8 +34311,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-23T22:44:05.231594+00:00",
-      "lastSuccessAt": "2026-08-23T22:44:05.231594+00:00",
+      "lastCheckedAt": "2026-08-24T07:58:47.942238+00:00",
+      "lastSuccessAt": "2026-08-24T07:58:47.942238+00:00",
       "status": "ok"
     }
   },
