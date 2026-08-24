@@ -1,3 +1,4 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
 2026-08-24;espanha;LaLiga;Osasuna;Levante;2.2;1.512;3.712;2026-08-24T18:30:00+01:00;BTTS;0.614;1.95;0.513;0.1007;0.2067;True;;0.0225;0.0225;0.101;0.0372;0.0372;1.86;1.0;50.0
 2026-08-24;portugal;Primeira Liga;GIL Vicente;Casa Pia;1.62;1.344;2.964;2026-08-24T20:15:00+01:00;BTTS;0.525;2.23;0.448;0.0764;0.1385;True;;0.0325;0.0325;0.076;0.019;0.019;0.95;1.0;50.0
+2026-08-29;suecia;Allsvenskan;IF Elfsborg;Degerfors IF;1.764;1.844;3.608;2026-08-29T14:00:00+01:00;BTTS;0.617;1.95;0.513;0.1045;0.2144;True;;0.0225;0.0225;0.10399999999999998;0.0386;0.0386;1.93;1.0;50.0
