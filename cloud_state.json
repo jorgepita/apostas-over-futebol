@@ -21812,10 +21812,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "2.12",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 72,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 1.12,
+      "placar": "1-1",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -21872,10 +21875,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.91",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 85,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "0-0",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -21932,10 +21938,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "2",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 61,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -21979,10 +21988,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.98",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 67,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.98,
+      "placar": "4-0",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22302,10 +22314,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "2.23",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 77,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22349,10 +22364,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.71",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 83,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.71,
+      "placar": "2-3",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22396,10 +22414,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "1.59",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 67,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 0.59,
+      "placar": "0-3",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -22456,10 +22477,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.88",
-      "resultado": "",
+      "resultado": "L",
       "scoreAtAnalysis": 63,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": -1.0,
+      "placar": "2-0",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -32121,10 +32145,13 @@
       "mercado": "BTTS",
       "notas": "",
       "odd": "1.62",
-      "resultado": "",
+      "resultado": "P",
       "scoreAtAnalysis": 42,
       "stake": "1",
-      "status": "rejected"
+      "status": "rejected",
+      "lucro": 0.0,
+      "settlementReason": "postponed_timeout",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "analysisSnapshot": {
@@ -33366,7 +33393,7 @@
       "mercado": "BTTS",
       "odd": "1.87",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -33416,7 +33443,10 @@
       "kickoffUTC": "2026-08-24T19:45:00+01:00",
       "homeTeam": "Reims",
       "awayTeam": "Annecy",
-      "leagueId": 62
+      "leagueId": 62,
+      "lucro": 0.87,
+      "placar": "3-1",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "id": "manual_1787508973744_gisk65",
@@ -33426,7 +33456,7 @@
       "mercado": "BTTS",
       "odd": "1.95",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -33476,7 +33506,10 @@
       "kickoffUTC": "2026-08-24T17:30:00+01:00",
       "homeTeam": "Bologna",
       "awayTeam": "Lazio",
-      "leagueId": 135
+      "leagueId": 135,
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "id": "manual_1787509026009_hnukga",
@@ -33486,7 +33519,7 @@
       "mercado": "BTTS",
       "odd": "2.1",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
       "status": "rejected",
       "analysisStale": false,
@@ -33536,7 +33569,10 @@
       "kickoffUTC": "2026-08-24T18:00:00+01:00",
       "homeTeam": "Farense",
       "awayTeam": "Felgueiras 1932",
-      "leagueId": 95
+      "leagueId": 95,
+      "lucro": 1.1,
+      "placar": "1-1",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "id": "manual_1787509036584_b4jcrh",
@@ -33546,9 +33582,9 @@
       "mercado": "Over 2.5",
       "odd": "2.27",
       "stake": "1",
-      "resultado": "",
+      "resultado": "L",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -33583,7 +33619,10 @@
       "kickoffUTC": "2026-08-24T20:15:00+01:00",
       "homeTeam": "Feirense",
       "awayTeam": "FC Porto B",
-      "leagueId": 95
+      "leagueId": 95,
+      "lucro": -1.0,
+      "placar": "0-1",
+      "settledAt": "2026-08-24T22:49:33.917794+00:00"
     },
     {
       "id": "manual_1787509052410_vradwg",
@@ -34311,8 +34350,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-24T07:58:47.942238+00:00",
-      "lastSuccessAt": "2026-08-24T07:58:47.942238+00:00",
+      "lastCheckedAt": "2026-08-24T22:49:33.923582+00:00",
+      "lastSuccessAt": "2026-08-24T22:49:33.923582+00:00",
       "status": "ok"
     }
   },
