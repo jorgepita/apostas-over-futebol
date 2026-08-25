@@ -34568,7 +34568,7 @@
       "resultado": "",
       "scoreAtAnalysis": 40,
       "stake": "1",
-      "status": "pending"
+      "status": "rejected"
     },
     {
       "analysisSnapshot": {
@@ -34629,53 +34629,6 @@
       "scoreAtAnalysis": 63,
       "stake": "1",
       "status": "pending"
-    },
-    {
-      "id": "manual_1787696807208_rag5sr",
-      "data": "2026-08-28",
-      "liga": "turquia",
-      "jogo": "Gen\u00e7lerbirli\u011fi S.K. vs Erzurumspor FK",
-      "mercado": "Over 2.5",
-      "odd": "1.88",
-      "stake": "1",
-      "resultado": "",
-      "notas": "",
-      "status": "pending",
-      "analysisStale": false,
-      "hadAnalysis": true,
-      "botOpinion": "STRONG BUY",
-      "edgeAtAnalysis": 7.2443746213039395,
-      "scoreAtAnalysis": 80,
-      "analysisSnapshot": {
-        "cacheKey": "2026-08-28_turquia_gen\u00e7lerbirli\u011fi_s.k._erzurumspor_fk|O2.5|1.88|1.00",
-        "market": "O2.5",
-        "odd": 1.88,
-        "stake": 1,
-        "ProbModel": 0.6043586398300607,
-        "ProbMarket": 0.5319148936170213,
-        "Edge": 0.0724437462130394,
-        "EdgePercent": 7.2443746213039395,
-        "fairOdd": 1.6546466519965521,
-        "KellyTrue": 0.15476618509149329,
-        "Confidence": 0.724437462130394,
-        "EV": 0.13619424288051407,
-        "score": 80,
-        "scoreCls": "good",
-        "opinion": "STRONG BUY",
-        "opinionCls": "good",
-        "LambdaHome": 1.721303602058319,
-        "LambdaAway": 1.4043224699828474,
-        "LambdaTotal": 3.1256260720411664,
-        "usedFallback": true,
-        "sampleSize": 0,
-        "dataQuality": "NONE",
-        "diagnostics": null,
-        "timestamp": "2026-08-25T22:24:12.990Z"
-      },
-      "kickoffUTC": "2026-08-28T19:30:00+01:00",
-      "homeTeam": "Gen\u00e7lerbirli\u011fi S.K.",
-      "awayTeam": "Erzurumspor FK",
-      "leagueId": 203
     }
   ],
   "movements": [
