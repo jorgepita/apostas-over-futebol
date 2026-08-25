@@ -9489,6 +9489,78 @@
     "2026-08-28|franca|Lille vs Paris Saint Germain|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-28|alemanha2|Eintracht Braunschweig vs Hertha BSC|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-28|alemanha2|VfL Bochum vs VfL Osnabr\u00fcck|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-28|turquia|Gen\u00e7lerbirli\u011fi S.K. vs Erzurumspor FK|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-28|premier|Crystal Palace vs Manchester City|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-28|belgica|Genk vs SK Beveren|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-28|portugal2|Uni\u00e3o de Leiria vs Tondela|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|brasil|Atletico-MG vs Vitoria|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|franca|Stade Brestois 29 vs Toulouse|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|alemanha|FSV Mainz 05 vs SC Paderborn 07|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|alemanha|Union Berlin vs Eintracht Frankfurt|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|italia|Sassuolo vs Torino|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|suecia|IF Elfsborg vs Degerfors IF|BTTS": {
+      "apostada": true,
+      "stakeReal": "1.5"
+    },
+    "2026-08-29|premier|Coventry vs Hull City|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|suecia|Halmstad vs Kalmar FF|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|italia|Monza vs Udinese|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|mls|Seattle Sounders vs Chicago Fire|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|alemanha|1. FC K\u00f6ln vs 1899 Hoffenheim|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|alemanha2|1. FC N\u00fcrnberg vs Arminia Bielefeld|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -34108,10 +34180,10 @@
     }
   ],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-25T22:19:02.177Z",
-  "activeTab": "tab-day",
+  "lastUpdated": "2026-08-25T22:20:04.369Z",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-08-25",
