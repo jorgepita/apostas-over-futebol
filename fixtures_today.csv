@@ -1,7 +1,6 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-08-25;espanha;Valencia;Real Betis;2.19;1.83;2026-08-25T20:00:00+01:00
-2026-08-26;coreia;FC Anyang;Incheon United;2.21;1.88;2026-08-26T11:30:00+01:00
-2026-08-26;espanha;Real Madrid;Real Sociedad;1.47;1.78;2026-08-26T20:00:00+01:00
+2026-08-26;coreia;FC Anyang;Incheon United;2.20;1.88;2026-08-26T11:30:00+01:00
+2026-08-26;espanha;Real Madrid;Real Sociedad;1.47;1.76;2026-08-26T20:00:00+01:00
 2026-08-28;alemanha;Bayern München;VfB Stuttgart;1.25;1.50;2026-08-28T19:30:00+01:00
 2026-08-28;alemanha2;Eintracht Braunschweig;Hertha BSC;1.75;1.60;2026-08-28T17:30:00+01:00
 2026-08-28;alemanha2;VfL Bochum;VfL Osnabrück;1.75;1.73;2026-08-28T17:30:00+01:00
@@ -24,20 +23,14 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-08-29;belgica;Kortrijk;Charleroi;1.92;1.82;2026-08-29T17:15:00+01:00
 2026-08-29;brasil;Atletico-MG;Vitoria;2.07;2.00;2026-08-29T22:30:00+01:00
 2026-08-29;championship;Bristol City;Portsmouth;2.10;1.83;2026-08-29T15:00:00+01:00
-2026-08-29;franca;Lorient;Estac Troyes;2.08;1.87;2026-08-29T19:45:00+01:00
-2026-08-29;franca;Stade Brestois 29;Toulouse;2.03;1.75;2026-08-29T19:45:00+01:00
+2026-08-29;coreia;Ulsan Hyundai FC;Gimcheon Sangmu FC;1.70;1.62;2026-08-29T11:30:00+01:00
 2026-08-29;franca2;Annecy;Metz;2.25;1.91;2026-08-29T13:00:00+01:00
 2026-08-29;italia;Monza;Udinese;2.33;1.95;2026-08-29T17:30:00+01:00
-2026-08-29;italia;Sassuolo;Torino;2.09;1.80;2026-08-29T17:30:00+01:00
 2026-08-29;mls;Seattle Sounders;Chicago Fire;1.55;1.47;2026-08-29T21:30:00+01:00
 2026-08-29;noruega;Viking;Aalesund;1.28;1.58;2026-08-29T17:00:00+01:00
 2026-08-29;paises_baixos;AZ Alkmaar;GO Ahead Eagles;1.42;1.60;2026-08-29T17:45:00+01:00
 2026-08-29;paises_baixos;PEC Zwolle;NEC Nijmegen;1.45;1.50;2026-08-29T20:00:00+01:00
 2026-08-29;portugal2;Portimonense;Leixoes;2.07;1.85;2026-08-29T11:00:00+01:00
-2026-08-29;premier;Coventry;Hull City;1.89;1.70;2026-08-29T15:00:00+01:00
-2026-08-29;premier;Liverpool;Nottingham Forest;1.64;1.75;2026-08-29T12:30:00+01:00
-2026-08-29;suecia;BK Hacken;Vasteras SK FK;1.50;1.67;2026-08-29T14:00:00+01:00
-2026-08-29;suecia;Halmstad;Kalmar FF;1.87;1.70;2026-08-29T16:30:00+01:00
 2026-08-29;suecia;IF Elfsborg;Degerfors IF;1.86;1.95;2026-08-29T14:00:00+01:00
 2026-08-29;suica;BSC Young Boys;FC Basel 1893;1.35;1.39;2026-08-29T19:30:00+01:00
 2026-08-29;suica;Lausanne;FC Zurich;1.58;1.53;2026-08-29T17:00:00+01:00
@@ -53,7 +46,6 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-08-30;espanha2;Cordoba;Granada CF;1.89;1.73;2026-08-30T20:30:00+01:00
 2026-08-30;franca;Monaco;Marseille;1.60;1.50;2026-08-30T19:45:00+01:00
 2026-08-30;franca;Paris FC;Nice;2.18;1.91;2026-08-30T14:00:00+01:00
-2026-08-30;franca;Rennes;Le Mans;1.60;1.75;2026-08-30T16:15:00+01:00
 2026-08-30;italia2;Mantova;Empoli;2.12;1.85;2026-08-30T18:00:00+01:00
 2026-08-30;italia2;Pisa;Catanzaro;2.40;2.10;2026-08-30T20:00:00+01:00
 2026-08-30;mls;Inter Miami;CF Montreal;1.30;1.45;2026-08-30T00:30:00+01:00
@@ -69,5 +61,11 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-08-30;portugal;Casa Pia;Moreirense;2.49;2.05;2026-08-30T18:00:00+01:00
 2026-08-30;portugal;Nacional;Estrela;2.08;1.80;2026-08-30T15:30:00+01:00
 2026-08-30;premier;Leeds;Brentford;1.96;1.70;2026-08-30T14:00:00+01:00
-2026-08-30;premier;Manchester United;Ipswich;1.69;1.87;2026-08-30T16:30:00+01:00
 2026-08-30;suica;FC Vaduz;Grasshoppers;1.52;1.44;2026-08-30T15:30:00+01:00
+2026-08-31;espanha;Osasuna;Getafe;2.71;2.20;2026-08-31T18:30:00+01:00
+2026-08-31;finlandia;Ilves;HJK Helsinki;1.57;1.50;2026-08-31T17:00:00+01:00
+2026-08-31;finlandia;VPS;Lahti;2.00;1.62;2026-08-31T17:00:00+01:00
+2026-08-31;italia;Atalanta;Bologna;1.92;1.73;2026-08-31T19:45:00+01:00
+2026-08-31;mls;St. Louis City;FC Dallas;1.60;1.53;2026-08-31T00:00:00+01:00
+2026-08-31;portugal;Benfica;Estoril;1.36;2.25;2026-08-31T20:15:00+01:00
+2026-08-31;suecia;Djurgardens IF;Mjallby AIF;1.60;1.67;2026-08-31T18:00:00+01:00
