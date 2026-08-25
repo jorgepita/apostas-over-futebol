@@ -22527,10 +22527,13 @@
       "mercado": "Over 2.5",
       "notas": "",
       "odd": "2.13",
-      "resultado": "",
+      "resultado": "W",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "approved"
+      "status": "settled",
+      "lucro": 1.13,
+      "placar": "2-3",
+      "settledAt": "2026-08-25T07:45:41.164510+00:00"
     },
     {
       "analysisSnapshot": {
@@ -33799,9 +33802,9 @@
       "mercado": "Over 2.5",
       "odd": "1.44",
       "stake": "1",
-      "resultado": "",
+      "resultado": "W",
       "notas": "",
-      "status": "approved",
+      "status": "settled",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "NEUTRAL",
@@ -33836,7 +33839,10 @@
       "kickoffUTC": "2026-08-25T03:00:00+01:00",
       "homeTeam": "Tacoma Defiance",
       "awayTeam": "Sporting KC II",
-      "leagueId": 909
+      "leagueId": 909,
+      "lucro": 0.44,
+      "placar": "4-0",
+      "settledAt": "2026-08-25T07:45:41.164510+00:00"
     }
   ],
   "movements": [
@@ -34350,8 +34356,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-24T22:49:33.923582+00:00",
-      "lastSuccessAt": "2026-08-24T22:49:33.923582+00:00",
+      "lastCheckedAt": "2026-08-25T07:45:41.171295+00:00",
+      "lastSuccessAt": "2026-08-25T07:45:41.171295+00:00",
       "status": "ok"
     }
   },
