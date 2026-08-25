@@ -34277,53 +34277,6 @@
     },
     {
       "analysisSnapshot": {
-        "Confidence": 0.7491364988611315,
-        "EV": 0.13109888730069796,
-        "Edge": 0.07491364988611315,
-        "EdgePercent": 7.491364988611315,
-        "KellyTrue": 0.1747985164009306,
-        "LambdaAway": 1.5265185185185186,
-        "LambdaHome": 1.8023703703703704,
-        "LambdaTotal": 3.328888888888889,
-        "ProbMarket": 0.5714285714285714,
-        "ProbModel": 0.6463422213146846,
-        "cacheKey": "2026-08-28_alemanha2_vfl_bochum_vfl_osnabr\u00fcck|O2.5|1.75|1.00",
-        "dataQuality": "NONE",
-        "diagnostics": null,
-        "fairOdd": 1.5471679971114407,
-        "market": "O2.5",
-        "odd": 1.75,
-        "opinion": "STRONG BUY",
-        "opinionCls": "good",
-        "sampleSize": 0,
-        "score": 80,
-        "scoreCls": "good",
-        "stake": 1,
-        "timestamp": "2026-08-25T22:21:58.018Z",
-        "usedFallback": true
-      },
-      "analysisStale": false,
-      "awayTeam": "VfL Osnabr\u00fcck",
-      "botOpinion": "STRONG BUY",
-      "data": "2026-08-28",
-      "edgeAtAnalysis": 7.491364988611315,
-      "hadAnalysis": true,
-      "homeTeam": "VfL Bochum",
-      "id": "manual_1787696519174_bwjt3p",
-      "jogo": "VfL Bochum vs VfL Osnabr\u00fcck",
-      "kickoffUTC": "2026-08-28T17:30:00+01:00",
-      "leagueId": 79,
-      "liga": "alemanha2",
-      "mercado": "Over 2.5",
-      "notas": "",
-      "odd": "1.75",
-      "resultado": "",
-      "scoreAtAnalysis": 80,
-      "stake": "1",
-      "status": "pending"
-    },
-    {
-      "analysisSnapshot": {
         "Confidence": 1,
         "EV": 0.39249813094245467,
         "Edge": 0.16,
@@ -34367,7 +34320,7 @@
       "resultado": "",
       "scoreAtAnalysis": 88,
       "stake": "1",
-      "status": "pending"
+      "status": "approved"
     },
     {
       "analysisSnapshot": {
