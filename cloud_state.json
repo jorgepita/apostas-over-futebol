@@ -10559,6 +10559,14 @@
     "2026-08-30|franca|Paris FC vs Nice|BTTS": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-30|paises_baixos|Feyenoord vs ADO Den Haag|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-30|premier|Leeds vs Brentford|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
