@@ -35010,6 +35010,53 @@
       "scoreAtAnalysis": 35,
       "stake": "1",
       "status": "rejected"
+    },
+    {
+      "id": "manual_1787753371404_229zee",
+      "data": "2026-08-29",
+      "liga": "alemanha",
+      "jogo": "1. FC K\u00f6ln vs 1899 Hoffenheim",
+      "mercado": "Over 2.5",
+      "odd": "1.62",
+      "stake": "1",
+      "resultado": "",
+      "notas": "",
+      "status": "pending",
+      "analysisStale": false,
+      "hadAnalysis": true,
+      "botOpinion": "BUY",
+      "edgeAtAnalysis": 6.805295948096846,
+      "scoreAtAnalysis": 70,
+      "analysisSnapshot": {
+        "cacheKey": "2026-08-29_alemanha_1._fc_k\u00f6ln_1899_hoffenheim|O2.5|1.62|1.00",
+        "market": "O2.5",
+        "odd": 1.62,
+        "stake": 1,
+        "ProbModel": 0.6853369100982524,
+        "ProbMarket": 0.6172839506172839,
+        "Edge": 0.06805295948096846,
+        "EdgePercent": 6.805295948096846,
+        "fairOdd": 1.4591363536171376,
+        "KellyTrue": 0.17781579735349806,
+        "Confidence": 0.6805295948096846,
+        "EV": 0.11024579435916881,
+        "score": 70,
+        "scoreCls": "info",
+        "opinion": "BUY",
+        "opinionCls": "info",
+        "LambdaHome": 1.8815109343936385,
+        "LambdaAway": 1.6521669980119285,
+        "LambdaTotal": 3.533677932405567,
+        "usedFallback": true,
+        "sampleSize": 0,
+        "dataQuality": "NONE",
+        "diagnostics": null,
+        "timestamp": "2026-08-26T14:09:30.370Z"
+      },
+      "kickoffUTC": "2026-08-29T14:30:00+01:00",
+      "homeTeam": "1. FC K\u00f6ln",
+      "awayTeam": "1899 Hoffenheim",
+      "leagueId": 78
     }
   ],
   "movements": [
@@ -35039,7 +35086,7 @@
   "lastUpdated": "2026-08-26T14:08:59.448Z",
   "activeTab": "tab-manual",
   "mobileActionsOpen": true,
-  "cloudAvailable": false,
+  "cloudAvailable": true,
   "fixtures": [
     {
       "Date": "2026-08-26",
@@ -35679,6 +35726,48 @@
       "lastCheckedAt": "2026-08-26T07:49:11.383137+00:00",
       "lastSuccessAt": "2026-08-26T07:49:11.383137+00:00",
       "status": "ok"
+    }
+  },
+  "_modelConfigCache": {
+    "window": 12,
+    "decay": 0.88,
+    "minGamesHome": 8,
+    "minGamesAway": 8,
+    "lambdaBoost": 1.12,
+    "leagueLambdaBoost": {
+      "japao": 1,
+      "coreia": 1,
+      "finlandia": 1,
+      "islandia": 1,
+      "brasil": 1
+    },
+    "bttsAdj": 0.885,
+    "apiFootballLeagueIds": {
+      "premier": 39,
+      "portugal": 94,
+      "alemanha": 78,
+      "espanha": 140,
+      "franca": 61,
+      "italia": 135,
+      "paises_baixos": 88,
+      "championship": 40,
+      "alemanha2": 79,
+      "italia2": 136,
+      "franca2": 62,
+      "belgica": 144,
+      "turquia": 203,
+      "noruega": 103,
+      "suecia": 113,
+      "mls": 253,
+      "mls_next_pro": 909,
+      "japao": 98,
+      "coreia": 292,
+      "finlandia": 244,
+      "islandia": 188,
+      "brasil": 71,
+      "suica": 207,
+      "espanha2": 141,
+      "portugal2": 95
     }
   }
 }
