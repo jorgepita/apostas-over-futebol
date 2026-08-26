@@ -36119,7 +36119,7 @@
       "stake": "1",
       "resultado": "",
       "notas": "",
-      "status": "pending",
+      "status": "rejected",
       "analysisStale": false,
       "hadAnalysis": true,
       "botOpinion": "BUY",
@@ -37270,7 +37270,7 @@
   ],
   "sessionStartDate": "2026-08-03",
   "lastUpdated": "2026-08-26T22:00:02.525Z",
-  "activeTab": "tab-day",
+  "activeTab": "tab-manual",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
