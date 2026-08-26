@@ -10527,6 +10527,14 @@
     "2026-08-30|noruega|Lillestrom vs Fredrikstad|Over 2.5": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-30|italia2|Pisa vs Catanzaro|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-29|championship|Bristol City vs Portsmouth|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -37225,8 +37233,8 @@
     }
   ],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-26T21:57:04.011Z",
-  "activeTab": "tab-manual",
+  "lastUpdated": "2026-08-26T21:58:02.507Z",
+  "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
   "fixtures": [
