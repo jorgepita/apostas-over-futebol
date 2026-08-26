@@ -10547,6 +10547,18 @@
     "2026-08-30|portugal|Casa Pia vs Moreirense|BTTS": {
       "apostada": true,
       "stakeReal": "1"
+    },
+    "2026-08-30|franca|Monaco vs Marseille|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-30|alemanha|FC Augsburg vs FC Schalke 04|Over 2.5": {
+      "apostada": true,
+      "stakeReal": "1"
+    },
+    "2026-08-30|franca|Paris FC vs Nice|BTTS": {
+      "apostada": true,
+      "stakeReal": "1"
     }
   },
   "manualBets": [
@@ -37245,7 +37257,7 @@
     }
   ],
   "sessionStartDate": "2026-08-03",
-  "lastUpdated": "2026-08-26T21:59:02.652Z",
+  "lastUpdated": "2026-08-26T22:00:02.525Z",
   "activeTab": "tab-day",
   "mobileActionsOpen": true,
   "cloudAvailable": true,
