@@ -35523,8 +35523,8 @@
   "providerHealth": {
     "api-football": {
       "consecutiveFailures": 0,
-      "lastCheckedAt": "2026-08-25T22:51:17.950845+00:00",
-      "lastSuccessAt": "2026-08-25T22:51:17.950845+00:00",
+      "lastCheckedAt": "2026-08-26T07:49:11.383137+00:00",
+      "lastSuccessAt": "2026-08-26T07:49:11.383137+00:00",
       "status": "ok"
     }
   },
