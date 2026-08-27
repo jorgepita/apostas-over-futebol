@@ -294,7 +294,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-23;Serie A;Torino vs AC Milan;O2.5;2.13;0.19;6.4;;;;W;1-2;0.21;;2026-08-23T18:45:00+00:00;;
 2026-08-23;Serie B;Cesena vs Sampdoria;O2.5;2.07;0.32;11.5;;;;L;1-1;-0.32;;2026-08-23T19:00:00+00:00;;
 2026-08-23;Serie B;Palermo vs Juve Stabia;O2.5;2.02;0.15;5.45;;;;L;1-0;-0.15;;2026-08-23T19:00:00+00:00;;
-2026-08-23;Super League;FC Lugano vs FC ST. Gallen;O2.5;1.62;0.07;4.23;;;;;;;;2026-08-23T15:30:00+01:00;;9
+2026-08-23;Super League;FC Lugano vs FC ST. Gallen;O2.5;1.62;0.07;4.23;;;;P;;0.0;;2026-08-23T15:30:00+01:00;missing_fixture_timeout;10
 2026-08-23;Super League;FC Thun vs Servette FC;O2.5;1.55;0.22;7.48;;;;P;;0.0;;2026-08-23T16:00:00+01:00;postponed_timeout;
 2026-08-23;Super Lig;Alanyaspor vs Beşiktaş;O2.5;1.83;0.1;5.79;;;;L;1-0;-0.1;;2026-08-23T18:30:00+00:00;;
 2026-08-23;Super Lig;Eyüpspor vs Gaziantep FK;O2.5;1.94;0.24;8.89;;;;L;0-1;-0.24;;2026-08-23T16:00:00+00:00;;
