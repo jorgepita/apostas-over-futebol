@@ -337,6 +337,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-29;Ligue 1;Stade Brestois 29 vs Toulouse;O2.5;2.03;0.51;14.12;;;;;;;;2026-08-29T19:45:00+01:00;;
 2026-08-29;Ligue 2;Annecy vs Metz;O2.5;2.12;0.34;9.36;;;;;;;;2026-08-29T13:00:00+01:00;;
 2026-08-29;MLS;Seattle Sounders vs Chicago Fire;O2.5;1.55;1.2;6.88;;;;;;;;2026-08-29T21:30:00+01:00;;
+2026-08-29;MLS Next Pro;Colorado Rapids II vs Ventura County;O2.5;1.55;0.07;2.08;;;;;;;;2026-08-29T01:00:00+01:00;;
 2026-08-29;Premier League;Coventry vs Hull City;O2.5;1.89;0.43;9.45;;;;;;;;2026-08-29T15:00:00+01:00;;
 2026-08-29;Serie A;Monza vs Udinese;BTTS;1.95;1.02;7.42;;;;;;;;2026-08-29T17:30:00+01:00;;
 2026-08-29;Serie A;Sassuolo vs Torino;O2.5;2.09;0.48;10.95;;;;;;;;2026-08-29T17:30:00+01:00;;
@@ -354,5 +355,6 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-30;Primeira Liga;Casa Pia vs Moreirense;BTTS;2.02;0.99;10.02;;;;;;;;2026-08-30T18:00:00+01:00;;
 2026-08-30;Segunda División;Cordoba vs Granada CF;O2.5;1.92;0.45;10.48;;;;;;;;2026-08-30T20:30:00+01:00;;
 2026-08-30;Serie B;Pisa vs Catanzaro;BTTS;2.04;1.1;14.0;;;;;;;;2026-08-30T20:00:00+01:00;;
+2026-08-31;Allsvenskan;Djurgardens IF vs Mjallby AIF;O2.5;1.57;0.02;1.14;;;;;;;;2026-08-31T18:00:00+01:00;;
 2026-08-31;MLS;St. Louis City vs FC Dallas;O2.5;1.6;0.1;2.57;;;;;;;;2026-08-31T00:00:00+01:00;;
 2026-08-31;Veikkausliiga;VPS vs Lahti;O2.5;2.0;1.19;10.06;;;;;;;;2026-08-31T17:00:00+01:00;;
