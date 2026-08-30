@@ -349,6 +349,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-30;2. Bundesliga;FC St. Pauli vs 1. FC Kaiserslautern;O2.5;1.66;0.1;4.39;;;;;;;;2026-08-30T12:30:00+01:00;;
 2026-08-30;Bundesliga;FC Augsburg vs FC Schalke 04;O2.5;1.7;0.46;9.71;;;;;;;;2026-08-30T16:30:00+01:00;;
 2026-08-30;Bundesliga;SC Freiburg vs Werder Bremen;O2.5;1.83;0.46;13.89;;;;;;;;2026-08-30T14:30:00+01:00;;
+2026-08-30;Campeonato Brasileiro Serie A;Bahia vs Internacional;O2.5;1.95;0.07;3.02;;;;;;;;2026-08-30T23:30:00+01:00;;
 2026-08-30;Campeonato Brasileiro Serie A;Mirassol vs Palmeiras;O2.5;2.18;1.12;10.72;;;;;;;;2026-08-30T22:30:00+01:00;;
 2026-08-30;Eliteserien;Lillestrom vs Fredrikstad;O2.5;1.69;1.45;8.68;;;;;;;;2026-08-30T18:15:00+01:00;;
 2026-08-30;Eliteserien;Start vs KFUM Oslo;O2.5;1.73;1.74;10.05;;;;;;;;2026-08-30T16:00:00+01:00;;
@@ -359,6 +360,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-30;Ligue 1;Monaco vs Marseille;O2.5;1.61;0.46;9.89;;;;;;;;2026-08-30T19:45:00+01:00;;
 2026-08-30;Ligue 1;Paris FC vs Nice;BTTS;1.91;0.8;8.76;;;;;;;;2026-08-30T14:00:00+01:00;;
 2026-08-30;MLS;Colorado Rapids vs Real Salt Lake;O2.5;1.67;0.99;8.35;;;;L;1-0;-0.99;;2026-08-30T01:30:00+00:00;;
+2026-08-30;MLS;Columbus Crew vs New England Revolution;O2.5;1.7;0.13;3.92;;;;;;;;2026-08-30T21:30:00+01:00;;
 2026-08-30;MLS;Nashville SC vs FC Cincinnati;O2.5;1.55;0.28;7.48;;;;W;4-0;0.15;;2026-08-30T00:30:00+00:00;;
 2026-08-30;MLS Next Pro;Portland Timbers II vs Austin II;O2.5;1.85;0.55;14.49;;;;;;;;2026-08-30T21:00:00+01:00;;
 2026-08-30;Premier League;Leeds vs Brentford;BTTS;1.7;0.39;5.67;;;;;;;;2026-08-30T14:00:00+01:00;;
@@ -369,8 +371,18 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-08-31;Allsvenskan;Djurgardens IF vs Mjallby AIF;O2.5;1.57;0.02;1.14;;;;;;;;2026-08-31T18:00:00+01:00;;
 2026-08-31;Ligue 2;Dijon vs Saint Etienne;O2.5;2.01;0.07;3.84;;;;;;;;2026-08-31T19:45:00+01:00;;
 2026-08-31;MLS;St. Louis City vs FC Dallas;O2.5;1.6;0.1;2.57;;;;;;;;2026-08-31T00:00:00+01:00;;
+2026-08-31;MLS Next Pro;Real Monarchs vs Tacoma Defiance;O2.5;1.55;0.46;6.85;;;;;;;;2026-08-31T02:30:00+01:00;;
+2026-08-31;MLS Next Pro;The Town vs Los Angeles FC II;O2.5;1.57;0.09;3.08;;;;;;;;2026-08-31T03:30:00+01:00;;
+2026-08-31;Primeira Liga;SC Braga vs Vitória SC;O2.5;1.98;0.29;6.37;;;;;;;;2026-08-31T20:15:00+01:00;;
+2026-08-31;Serie A;Lecce vs AS Roma;BTTS;2.25;0.57;5.91;;;;;;;;2026-08-31T17:30:00+01:00;;
 2026-08-31;Super Lig;Amed vs Trabzonspor;O2.5;1.76;0.08;3.62;;;;;;;;2026-08-31T19:30:00+01:00;;
 2026-08-31;Super Lig;Beşiktaş vs Çorum FK;O2.5;1.88;0.28;7.24;;;;;;;;2026-08-31T19:30:00+01:00;;
 2026-08-31;Veikkausliiga;AC Oulu vs SJK;O2.5;1.72;0.02;1.6;;;;;;;;2026-08-31T17:00:00+01:00;;
 2026-08-31;Veikkausliiga;VPS vs Lahti;O2.5;2.0;1.19;10.06;;;;;;;;2026-08-31T17:00:00+01:00;;
 2026-09-01;Championship;Birmingham vs Southampton;O2.5;1.8;0.11;4.41;;;;;;;;2026-09-01T20:00:00+01:00;;
+2026-09-01;Championship;Swansea vs Watford;O2.5;1.91;0.3;6.42;;;;;;;;2026-09-01T19:45:00+01:00;;
+2026-09-02;Championship;Burnley vs Middlesbrough;O2.5;2.02;0.65;9.67;;;;;;;;2026-09-02T20:00:00+01:00;;
+2026-09-02;Championship;Millwall vs Wrexham;O2.5;2.0;0.58;9.11;;;;;;;;2026-09-02T19:45:00+01:00;;
+2026-09-02;Championship;QPR vs Cardiff;BTTS;1.8;1.4;8.31;;;;;;;;2026-09-02T19:45:00+01:00;;
+2026-09-02;Championship;West Brom vs Charlton;O2.5;2.2;0.23;5.96;;;;;;;;2026-09-02T19:45:00+01:00;;
+2026-09-03;LaLiga;Real Sociedad vs Celta Vigo;O2.5;2.05;0.39;7.55;;;;;;;;2026-09-03T20:00:00+01:00;;
