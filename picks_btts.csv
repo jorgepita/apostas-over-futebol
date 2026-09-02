@@ -1,5 +1,5 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-09-02;championship;Championship;QPR;Cardiff;2.176;1.682;3.858;2026-09-02T19:45:00+01:00;BTTS;0.639;1.65;0.606;0.0326;0.0827;True;;0.0075;0.0075;0.033;0.0048;0.0048;0.24;1.0;50.0
 2026-09-05;italia;Serie A;Fiorentina;Torino;2.2;1.45;3.65;2026-09-05T14:00:00+01:00;BTTS;0.602;1.95;0.513;0.0895;0.1837;True;;0.0225;0.0225;0.09;0.0296;0.0296;1.48;1.0;50.0
 2026-09-05;italia;Serie A;Inter;Napoli;1.927;1.42;3.347;2026-09-05T17:00:00+01:00;BTTS;0.573;2.02;0.495;0.0784;0.1552;True;;0.0225;0.0225;0.078;0.0219;0.0219;1.09;1.0;50.0
-2026-09-06;brasil;Campeonato Brasileiro Serie A;Botafogo;Palmeiras;1.707;1.723;3.43;2026-09-06T22:30:00+01:00;BTTS;0.595;1.8;0.556;0.0396;0.089;True;;0.0175;0.0125;0.038999999999999924;0.0063;0.0063;0.24;1.0;50.0
+2026-09-05;premier;Premier League;Manchester City;Coventry;1.709;1.508;3.217;2026-09-05T15:00:00+01:00;BTTS;0.564;2.05;0.488;0.0765;0.1494;True;;0.0325;0.0325;0.077;0.0206;0.0206;1.03;1.0;50.0
+2026-09-06;brasil;Campeonato Brasileiro Serie A;Botafogo;Palmeiras;1.707;1.723;3.43;2026-09-06T22:30:00+01:00;BTTS;0.595;1.8;0.556;0.0396;0.089;True;;0.0175;0.0125;0.04;0.0063;0.0063;0.24;1.0;50.0
