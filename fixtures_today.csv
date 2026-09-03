@@ -1,5 +1,5 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-09-03;espanha;Real Sociedad;Celta Vigo;1.96;1.75;2026-09-03T20:00:00+01:00
+2026-09-03;espanha;Real Sociedad;Celta Vigo;1.97;1.77;2026-09-03T20:00:00+01:00
 2026-09-03;suica;FC Basel 1893;FC Sion;1.53;1.44;2026-09-03T19:30:00+01:00
 2026-09-03;suica;FC Lugano;Servette FC;1.70;1.60;2026-09-03T19:30:00+01:00
 2026-09-04;alemanha;VfB Stuttgart;1. FC Köln;1.40;1.48;2026-09-04T19:30:00+01:00
@@ -12,17 +12,14 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-09-04;portugal;FC Porto;Moreirense;1.71;2.50;2026-09-04T20:15:00+01:00
 2026-09-04;turquia;Başakşehir;Galatasaray;1.55;1.58;2026-09-04T18:00:00+01:00
 2026-09-05;alemanha;1899 Hoffenheim;Borussia Dortmund;1.50;1.44;2026-09-05T14:30:00+01:00
-2026-09-05;alemanha;Bayer Leverkusen;Union Berlin;1.45;1.57;2026-09-05T14:30:00+01:00
+2026-09-05;alemanha;Bayer Leverkusen;Union Berlin;1.44;1.57;2026-09-05T14:30:00+01:00
 2026-09-05;alemanha;Borussia Mönchengladbach;SV Elversberg;1.66;1.60;2026-09-05T14:30:00+01:00
 2026-09-05;alemanha;SC Paderborn 07;SC Freiburg;1.72;1.57;2026-09-05T14:30:00+01:00
-2026-09-05;alemanha2;1. FC Kaiserslautern;SV Darmstadt 98;1.65;1.53;2026-09-05T12:00:00+01:00
+2026-09-05;alemanha2;1. FC Kaiserslautern;SV Darmstadt 98;1.63;1.53;2026-09-05T12:00:00+01:00
 2026-09-05;alemanha2;Dynamo Dresden;VfL Bochum;1.65;1.55;2026-09-05T19:30:00+01:00
 2026-09-05;alemanha2;Holstein Kiel;1. FC Nürnberg;1.62;1.50;2026-09-05T12:00:00+01:00
 2026-09-05;alemanha2;VfL Wolfsburg;Energie Cottbus;1.50;1.75;2026-09-05T12:00:00+01:00
 2026-09-05;championship;QPR;Middlesbrough;1.95;1.73;2026-09-05T15:00:00+01:00
-2026-09-05;championship;West Brom;Watford;2.18;1.95;2026-09-05T15:00:00+01:00
-2026-09-05;coreia;FC Seoul;Incheon United;2.04;1.87;2026-09-05T11:00:00+01:00
-2026-09-05;franca;Le Havre;Stade Brestois 29;2.18;1.85;2026-09-05T19:45:00+01:00
 2026-09-05;franca;Nice;Le Mans;1.95;1.80;2026-09-05T19:45:00+01:00
 2026-09-05;franca2;Metz;Rodez;1.75;1.62;2026-09-05T13:00:00+01:00
 2026-09-05;franca2;Reims;Guingamp;1.72;1.66;2026-09-05T13:00:00+01:00
@@ -34,9 +31,8 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-09-05;paises_baixos;NEC Nijmegen;Feyenoord;1.37;1.34;2026-09-05T15:30:00+01:00
 2026-09-05;paises_baixos;Utrecht;GO Ahead Eagles;1.57;1.50;2026-09-05T17:45:00+01:00
 2026-09-05;portugal2;Tondela;FC Porto B;2.00;1.83;2026-09-05T11:00:00+01:00
-2026-09-05;premier;Manchester City;Coventry;1.37;2.05;2026-09-05T15:00:00+01:00
 2026-09-05;premier;Newcastle;Bournemouth;1.62;1.55;2026-09-05T12:30:00+01:00
-2026-09-05;suica;BSC Young Boys;FC Luzern;1.29;1.40;2026-09-05T17:00:00+01:00
+2026-09-05;suica;BSC Young Boys;FC Luzern;1.27;1.40;2026-09-05T17:00:00+01:00
 2026-09-05;suica;FC Vaduz;Lausanne;1.50;1.44;2026-09-05T17:00:00+01:00
 2026-09-05;suica;Grasshoppers;FC Zurich;1.68;1.57;2026-09-05T19:30:00+01:00
 2026-09-05;turquia;Erzurumspor FK;Konyaspor;2.06;1.80;2026-09-05T15:00:00+01:00
@@ -47,7 +43,7 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-09-06;brasil;Botafogo;Palmeiras;2.05;1.80;2026-09-06T22:30:00+01:00
 2026-09-06;brasil;Internacional;Santos;1.98;1.80;2026-09-06T20:00:00+01:00
 2026-09-06;coreia;Gimcheon Sangmu FC;Gwangju FC;1.98;2.00;2026-09-06T11:00:00+01:00
-2026-09-06;espanha;Valencia;Barcelona;1.52;1.70;2026-09-06T15:15:00+01:00
+2026-09-06;espanha;Valencia;Barcelona;1.40;1.71;2026-09-06T15:15:00+01:00
 2026-09-06;espanha2;Almeria;Cadiz;1.80;1.83;2026-09-06T20:00:00+01:00
 2026-09-06;espanha2;Eibar;Granada CF;2.27;2.00;2026-09-06T13:00:00+01:00
 2026-09-06;mls;Charlotte;Houston Dynamo;1.71;1.62;2026-09-06T00:30:00+01:00
@@ -62,4 +58,5 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-09-06;suecia;IF Brommapojkarna;IF Elfsborg;1.79;1.67;2026-09-06T15:30:00+01:00
 2026-09-06;suica;Servette FC;FC ST. Gallen;1.55;1.45;2026-09-06T13:00:00+01:00
 2026-09-07;portugal;Estoril;Arouca;1.90;1.70;2026-09-07T20:15:00+01:00
-2026-09-07;suecia;Malmo FF;AIK Stockholm;1.53;1.53;2026-09-07T18:00:00+01:00
+2026-09-07;suecia;Malmo FF;AIK Stockholm;1.54;1.53;2026-09-07T18:00:00+01:00
+2026-09-08;paises_baixos;NEC Nijmegen;Excelsior;1.40;1.57;2026-09-08T17:45:00+01:00
