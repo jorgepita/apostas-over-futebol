@@ -1,66 +1,71 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-09-04;alemanha;VfB Stuttgart;1. FC Köln;1.39;1.50;2026-09-04T19:30:00+01:00
-2026-09-04;alemanha2;Arminia Bielefeld;FC St. Pauli;1.65;1.55;2026-09-04T17:30:00+01:00
-2026-09-04;alemanha2;Hannover 96;Karlsruher SC;1.45;1.49;2026-09-04T17:30:00+01:00
-2026-09-04;espanha;Real Betis;Real Madrid;1.39;1.58;2026-09-04T20:00:00+01:00
-2026-09-04;franca;Paris Saint Germain;Monaco;1.45;1.64;2026-09-04T20:05:00+01:00
-2026-09-04;noruega;Aalesund;Start;1.50;1.45;2026-09-04T18:00:00+01:00
-2026-09-04;noruega;Fredrikstad;Bodo/Glimt;1.42;1.73;2026-09-04T18:00:00+01:00
-2026-09-04;paises_baixos;Sparta Rotterdam;PEC Zwolle;1.50;1.46;2026-09-04T19:00:00+01:00
-2026-09-04;turquia;Başakşehir;Galatasaray;1.55;1.57;2026-09-04T18:00:00+01:00
-2026-09-05;alemanha;1899 Hoffenheim;Borussia Dortmund;1.50;1.44;2026-09-05T14:30:00+01:00
-2026-09-05;alemanha;Bayer Leverkusen;Union Berlin;1.45;1.60;2026-09-05T14:30:00+01:00
-2026-09-05;alemanha;Borussia Mönchengladbach;SV Elversberg;1.65;1.57;2026-09-05T14:30:00+01:00
-2026-09-05;alemanha;SC Paderborn 07;SC Freiburg;1.73;1.57;2026-09-05T14:30:00+01:00
+2026-09-04;mls_next_pro;Crown Legacy;Chicago Fire II;1.36;1.36;2026-09-04T22:30:00+01:00
+2026-09-05;alemanha;1899 Hoffenheim;Borussia Dortmund;1.48;1.44;2026-09-05T14:30:00+01:00
+2026-09-05;alemanha;Bayer Leverkusen;Union Berlin;1.44;1.57;2026-09-05T14:30:00+01:00
+2026-09-05;alemanha;Borussia Mönchengladbach;SV Elversberg;1.63;1.55;2026-09-05T14:30:00+01:00
+2026-09-05;alemanha;SC Paderborn 07;SC Freiburg;1.71;1.57;2026-09-05T14:30:00+01:00
 2026-09-05;alemanha2;1. FC Kaiserslautern;SV Darmstadt 98;1.71;1.55;2026-09-05T12:00:00+01:00
-2026-09-05;alemanha2;Dynamo Dresden;VfL Bochum;1.65;1.55;2026-09-05T19:30:00+01:00
-2026-09-05;alemanha2;Holstein Kiel;1. FC Nürnberg;1.62;1.50;2026-09-05T12:00:00+01:00
-2026-09-05;alemanha2;VfL Wolfsburg;Energie Cottbus;1.45;1.80;2026-09-05T12:00:00+01:00
-2026-09-05;championship;QPR;Middlesbrough;1.91;1.73;2026-09-05T15:00:00+01:00
-2026-09-05;franca;Nice;Le Mans;1.93;1.80;2026-09-05T19:45:00+01:00
+2026-09-05;alemanha2;Dynamo Dresden;VfL Bochum;1.66;1.55;2026-09-05T19:30:00+01:00
+2026-09-05;alemanha2;Holstein Kiel;1. FC Nürnberg;1.60;1.50;2026-09-05T12:00:00+01:00
+2026-09-05;alemanha2;VfL Wolfsburg;Energie Cottbus;1.44;1.73;2026-09-05T12:00:00+01:00
+2026-09-05;championship;QPR;Middlesbrough;1.76;1.62;2026-09-05T15:00:00+01:00
+2026-09-05;espanha;Athletic Club;Atletico Madrid;1.97;1.70;2026-09-05T15:15:00+01:00
+2026-09-05;franca;Le Havre;Stade Brestois 29;2.19;1.85;2026-09-05T19:45:00+01:00
+2026-09-05;franca;Nice;Le Mans;1.89;1.75;2026-09-05T19:45:00+01:00
 2026-09-05;franca2;Metz;Rodez;1.75;1.62;2026-09-05T13:00:00+01:00
-2026-09-05;franca2;Reims;Guingamp;1.73;1.66;2026-09-05T13:00:00+01:00
-2026-09-05;italia;Fiorentina;Torino;2.19;1.95;2026-09-05T14:00:00+01:00
-2026-09-05;italia;Inter;Napoli;2.10;2.04;2026-09-05T17:00:00+01:00
-2026-09-05;mls;New York City FC;Nashville SC;1.80;1.67;2026-09-05T00:30:00+01:00
-2026-09-05;mls_next_pro;Houston Dynamo FC II;Austin II;1.76;1.60;2026-09-05T00:00:00+01:00
-2026-09-05;mls_next_pro;Philadelphia Union II;Columbus Crew II;1.44;1.36;2026-09-05T00:00:00+01:00
-2026-09-05;mls_next_pro;Toronto II;FC Cincinnati II;1.50;1.49;2026-09-05T00:00:00+01:00
+2026-09-05;franca2;Reims;Guingamp;1.71;1.62;2026-09-05T13:00:00+01:00
+2026-09-05;italia;Fiorentina;Torino;2.14;1.95;2026-09-05T14:00:00+01:00
+2026-09-05;italia;Inter;Napoli;2.10;1.96;2026-09-05T17:00:00+01:00
+2026-09-05;mls;New York City FC;Nashville SC;1.83;1.62;2026-09-05T00:30:00+01:00
+2026-09-05;mls_next_pro;Houston Dynamo FC II;Austin II;1.75;1.60;2026-09-05T00:00:00+01:00
+2026-09-05;mls_next_pro;North Texas;Real Monarchs;1.57;1.44;2026-09-05T01:45:00+01:00
+2026-09-05;mls_next_pro;Philadelphia Union II;Columbus Crew II;1.42;1.30;2026-09-05T00:00:00+01:00
+2026-09-05;mls_next_pro;Toronto II;FC Cincinnati II;1.50;1.44;2026-09-05T00:00:00+01:00
 2026-09-05;noruega;Brann;Lillestrom;1.50;1.50;2026-09-05T17:00:00+01:00
-2026-09-05;paises_baixos;Ajax;PSV Eindhoven;1.35;1.31;2026-09-05T19:00:00+01:00
-2026-09-05;paises_baixos;NEC Nijmegen;Feyenoord;1.38;1.35;2026-09-05T15:30:00+01:00
-2026-09-05;paises_baixos;Utrecht;GO Ahead Eagles;1.57;1.50;2026-09-05T17:45:00+01:00
-2026-09-05;portugal2;Tondela;FC Porto B;2.00;1.83;2026-09-05T11:00:00+01:00
-2026-09-05;premier;Newcastle;Bournemouth;1.62;1.50;2026-09-05T12:30:00+01:00
+2026-09-05;paises_baixos;Ajax;PSV Eindhoven;1.32;1.30;2026-09-05T19:00:00+01:00
+2026-09-05;paises_baixos;NEC Nijmegen;Feyenoord;1.36;1.33;2026-09-05T15:30:00+01:00
+2026-09-05;paises_baixos;Utrecht;GO Ahead Eagles;1.52;1.50;2026-09-05T17:45:00+01:00
+2026-09-05;portugal2;Tondela;FC Porto B;1.92;1.83;2026-09-05T11:00:00+01:00
+2026-09-05;premier;Hull City;Aston Villa;1.96;1.80;2026-09-05T17:30:00+01:00
+2026-09-05;premier;Manchester City;Coventry;1.35;1.95;2026-09-05T15:00:00+01:00
+2026-09-05;premier;Newcastle;Bournemouth;1.65;1.50;2026-09-05T12:30:00+01:00
+2026-09-05;premier;Nottingham Forest;Tottenham;1.94;1.70;2026-09-05T15:00:00+01:00
 2026-09-05;suica;BSC Young Boys;FC Luzern;1.26;1.36;2026-09-05T17:00:00+01:00
-2026-09-05;suica;FC Vaduz;Lausanne;1.50;1.44;2026-09-05T17:00:00+01:00
-2026-09-05;suica;Grasshoppers;FC Zurich;1.68;1.57;2026-09-05T19:30:00+01:00
-2026-09-05;turquia;Erzurumspor FK;Konyaspor;2.05;1.80;2026-09-05T15:00:00+01:00
-2026-09-06;alemanha;Eintracht Frankfurt;FC Augsburg;1.50;1.44;2026-09-06T16:30:00+01:00
-2026-09-06;alemanha;Hamburger SV;FSV Mainz 05;1.79;1.60;2026-09-06T14:30:00+01:00
-2026-09-06;alemanha2;Hertha BSC;1. FC Magdeburg;1.50;1.44;2026-09-06T12:30:00+01:00
-2026-09-06;alemanha2;SpVgg Greuther Fürth;1. FC Heidenheim;1.55;1.44;2026-09-06T12:30:00+01:00
+2026-09-05;suica;FC Vaduz;Lausanne;1.51;1.44;2026-09-05T17:00:00+01:00
+2026-09-05;suica;Grasshoppers;FC Zurich;1.64;1.53;2026-09-05T19:30:00+01:00
+2026-09-05;turquia;Erzurumspor FK;Konyaspor;2.08;1.83;2026-09-05T15:00:00+01:00
+2026-09-05;turquia;Fenerbahçe;Beşiktaş;1.76;1.67;2026-09-05T18:00:00+01:00
+2026-09-06;alemanha;Eintracht Frankfurt;FC Augsburg;1.50;1.45;2026-09-06T16:30:00+01:00
+2026-09-06;alemanha;Hamburger SV;FSV Mainz 05;1.77;1.57;2026-09-06T14:30:00+01:00
+2026-09-06;alemanha2;Hertha BSC;1. FC Magdeburg;1.50;1.45;2026-09-06T12:30:00+01:00
+2026-09-06;alemanha2;SpVgg Greuther Fürth;1. FC Heidenheim;1.54;1.45;2026-09-06T12:30:00+01:00
 2026-09-06;alemanha2;VfL Osnabrück;Eintracht Braunschweig;1.79;1.62;2026-09-06T12:30:00+01:00
-2026-09-06;belgica;Anderlecht;Genk;1.72;1.57;2026-09-06T17:30:00+01:00
-2026-09-06;belgica;Cercle Brugge;Gent;1.70;1.57;2026-09-06T12:30:00+01:00
+2026-09-06;belgica;Anderlecht;Genk;1.72;1.59;2026-09-06T17:30:00+01:00
+2026-09-06;belgica;Cercle Brugge;Gent;1.75;1.62;2026-09-06T12:30:00+01:00
 2026-09-06;brasil;Botafogo;Palmeiras;2.05;1.80;2026-09-06T22:30:00+01:00
 2026-09-06;brasil;Internacional;Santos;1.98;1.80;2026-09-06T20:00:00+01:00
-2026-09-06;coreia;Gimcheon Sangmu FC;Gwangju FC;1.98;2.05;2026-09-06T11:00:00+01:00
+2026-09-06;coreia;Gimcheon Sangmu FC;Gwangju FC;1.88;1.91;2026-09-06T11:00:00+01:00
 2026-09-06;espanha;Valencia;Barcelona;1.40;1.73;2026-09-06T15:15:00+01:00
-2026-09-06;espanha2;Almeria;Cadiz;1.77;1.80;2026-09-06T20:00:00+01:00
-2026-09-06;espanha2;Eibar;Granada CF;2.32;2.00;2026-09-06T13:00:00+01:00
-2026-09-06;mls;Charlotte;Houston Dynamo;1.72;1.62;2026-09-06T00:30:00+01:00
-2026-09-06;mls;FC Cincinnati;DC United;1.40;1.45;2026-09-06T00:30:00+01:00
-2026-09-06;mls;Orlando City SC;San Diego;1.37;1.35;2026-09-06T00:30:00+01:00
+2026-09-06;espanha2;Almeria;Cadiz;1.77;1.85;2026-09-06T20:00:00+01:00
+2026-09-06;espanha2;Eibar;Granada CF;2.34;2.00;2026-09-06T13:00:00+01:00
+2026-09-06;franca;Estac Troyes;Strasbourg;1.96;1.73;2026-09-06T14:00:00+01:00
+2026-09-06;mls;Charlotte;Houston Dynamo;1.73;1.57;2026-09-06T00:30:00+01:00
+2026-09-06;mls;FC Cincinnati;DC United;1.40;1.50;2026-09-06T00:30:00+01:00
+2026-09-06;mls;Orlando City SC;San Diego;1.38;1.36;2026-09-06T00:30:00+01:00
 2026-09-06;mls;Portland Timbers;Minnesota United FC;1.55;1.50;2026-09-06T03:30:00+01:00
-2026-09-06;noruega;Sarpsborg 08 FF;Valerenga;1.42;1.40;2026-09-06T16:00:00+01:00
-2026-09-06;paises_baixos;ADO Den Haag;Fortuna Sittard;1.45;1.40;2026-09-06T15:45:00+01:00
-2026-09-06;paises_baixos;Heerenveen;AZ Alkmaar;1.47;1.47;2026-09-06T13:30:00+01:00
-2026-09-06;paises_baixos;Telstar;Cambuur;1.52;1.55;2026-09-06T13:30:00+01:00
-2026-09-06;premier;Arsenal;Chelsea;1.81;1.75;2026-09-06T16:30:00+01:00
-2026-09-06;suecia;IF Brommapojkarna;IF Elfsborg;1.80;1.62;2026-09-06T15:30:00+01:00
-2026-09-06;suica;Servette FC;FC ST. Gallen;1.55;1.45;2026-09-06T13:00:00+01:00
-2026-09-07;portugal;Estoril;Arouca;1.90;1.70;2026-09-07T20:15:00+01:00
-2026-09-07;suecia;Malmo FF;AIK Stockholm;1.52;1.53;2026-09-07T18:00:00+01:00
+2026-09-06;mls_next_pro;Los Angeles FC II;Ventura County;1.41;1.35;2026-09-06T03:00:00+01:00
+2026-09-06;mls_next_pro;Minnesota United II;Colorado Rapids II;1.53;1.50;2026-09-06T01:00:00+01:00
+2026-09-06;mls_next_pro;Sporting KC II;St. Louis City II;1.52;1.48;2026-09-06T01:00:00+01:00
+2026-09-06;noruega;Sarpsborg 08 FF;Valerenga;1.40;1.40;2026-09-06T16:00:00+01:00
+2026-09-06;paises_baixos;ADO Den Haag;Fortuna Sittard;1.47;1.41;2026-09-06T15:45:00+01:00
+2026-09-06;paises_baixos;Heerenveen;AZ Alkmaar;1.44;1.44;2026-09-06T13:30:00+01:00
+2026-09-06;paises_baixos;Telstar;Cambuur;1.45;1.50;2026-09-06T13:30:00+01:00
+2026-09-06;premier;Arsenal;Chelsea;1.78;1.73;2026-09-06T16:30:00+01:00
+2026-09-06;premier;Everton;Manchester United;1.85;1.57;2026-09-06T14:00:00+01:00
+2026-09-06;suecia;IF Brommapojkarna;IF Elfsborg;1.76;1.62;2026-09-06T15:30:00+01:00
+2026-09-06;suica;Servette FC;FC ST. Gallen;1.48;1.40;2026-09-06T13:00:00+01:00
+2026-09-07;portugal;Estoril;Arouca;1.91;1.70;2026-09-07T20:15:00+01:00
+2026-09-07;suecia;Malmo FF;AIK Stockholm;1.50;1.53;2026-09-07T18:00:00+01:00
+2026-09-08;finlandia;Gnistan;KuPS;1.62;1.53;2026-09-08T17:00:00+01:00
 2026-09-08;paises_baixos;NEC Nijmegen;Excelsior;1.40;1.57;2026-09-08T17:45:00+01:00
-2026-09-09;portugal;Moreirense;Benfica;1.43;1.91;2026-09-09T20:45:00+01:00
+2026-09-09;finlandia;HJK Helsinki;Inter Turku;1.94;1.67;2026-09-09T16:00:00+01:00
