@@ -399,9 +399,9 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-09-05;Liga Portugal 2;Tondela vs FC Porto B;O2.5;1.89;0.46;9.1;;;;;;;;2026-09-05T11:00:00+01:00;;
 2026-09-05;Ligue 1;Nice vs Le Mans;O2.5;1.94;0.58;11.84;;;;;;;;2026-09-05T19:45:00+01:00;;
 2026-09-05;Ligue 2;Metz vs Rodez;O2.5;1.85;0.58;14.2;;;;;;;;2026-09-05T13:00:00+01:00;;
-2026-09-05;MLS;New York City FC vs Nashville SC;O2.5;1.79;2.0;13.69;;;;;;;;2026-09-05T00:30:00+01:00;;
-2026-09-05;MLS Next Pro;Houston Dynamo FC II vs Austin II;BTTS;1.6;0.16;2.61;;;;;;;;2026-09-05T00:00:00+01:00;;
-2026-09-05;MLS Next Pro;North Texas vs Real Monarchs;O2.5;1.57;0.25;8.31;;;;;;;;2026-09-05T01:45:00+01:00;;
+2026-09-05;MLS;New York City FC vs Nashville SC;O2.5;1.79;2.0;13.69;;;;L;0-0;-2.0;;2026-09-04T23:30:00+00:00;;
+2026-09-05;MLS Next Pro;Houston Dynamo FC II vs Austin II;BTTS;1.6;0.16;2.61;;;;L;0-2;-0.16;;2026-09-04T23:00:00+00:00;;
+2026-09-05;MLS Next Pro;North Texas vs Real Monarchs;O2.5;1.57;0.25;8.31;;;;W;4-1;0.14;;2026-09-05T00:45:00+00:00;;
 2026-09-05;Premier League;Hull City vs Aston Villa;O2.5;1.96;0.29;11.34;;;;;;;;2026-09-05T17:30:00+01:00;;
 2026-09-05;Premier League;Manchester City vs Coventry;BTTS;2.05;1.03;7.65;;;;;;;;2026-09-05T15:00:00+01:00;;
 2026-09-05;Premier League;Newcastle vs Bournemouth;O2.5;1.66;0.58;11.76;;;;;;;;2026-09-05T12:30:00+01:00;;
