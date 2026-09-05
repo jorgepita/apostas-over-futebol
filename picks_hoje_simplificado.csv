@@ -1,5 +1,5 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-09-05;MLS;New York City FC vs Nashville SC;O2.5;1.83;0.29;14.92;;;;;;;;2026-09-05T00:30:00+01:00;;
+2026-09-05;MLS;New York City FC vs Nashville SC;O2.5;1.83;0.29;14.92;;;;L;0-0;-2.0;;2026-09-04T23:30:00+00:00;;
 2026-09-05;Super Lig;Erzurumspor FK vs Konyaspor;O2.5;2.08;0.29;12.36;;;;;;;;2026-09-05T15:00:00+01:00;;
 2026-09-05;Premier League;Newcastle vs Bournemouth;O2.5;1.65;0.29;11.39;;;;;;;;2026-09-05T12:30:00+01:00;;
 2026-09-05;Premier League;Hull City vs Aston Villa;O2.5;1.96;0.29;11.34;;;;;;;;2026-09-05T17:30:00+01:00;;
@@ -10,7 +10,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-09-05;Liga Portugal 2;Tondela vs FC Porto B;O2.5;1.92;0.27;9.93;;;;;;;;2026-09-05T11:00:00+01:00;;
 2026-09-05;Serie A;Fiorentina vs Torino;BTTS;1.95;1.48;8.95;;;;;;;;2026-09-05T14:00:00+01:00;;
 2026-09-05;Championship;QPR vs Middlesbrough;O2.5;1.76;0.21;8.33;;;;;;;;2026-09-05T15:00:00+01:00;;
-2026-09-05;MLS Next Pro;North Texas vs Real Monarchs;O2.5;1.57;0.25;8.31;;;;;;;;2026-09-05T01:45:00+01:00;;
+2026-09-05;MLS Next Pro;North Texas vs Real Monarchs;O2.5;1.57;0.25;8.31;;;;W;4-1;0.14;;2026-09-05T00:45:00+00:00;;
 2026-09-06;MLS;Charlotte vs Houston Dynamo;O2.5;1.73;0.29;14.2;;;;;;;;2026-09-06T00:30:00+01:00;;
 2026-09-06;Campeonato Brasileiro Serie A;Internacional vs Santos;O2.5;1.98;0.29;14.0;;;;;;;;2026-09-06T20:00:00+01:00;;
 2026-09-06;Allsvenskan;IF Brommapojkarna vs IF Elfsborg;O2.5;1.76;0.29;13.4;;;;;;;;2026-09-06T15:30:00+01:00;;
