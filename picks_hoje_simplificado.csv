@@ -1,8 +1,8 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-09-05;Ligue 1;Le Havre vs Stade Brestois 29;O2.5;2.06;0.4;14.84;;;;;;;;2026-09-05T19:45:00+01:00;;
-2026-09-05;Ligue 1;Nice vs Le Mans;O2.5;1.84;0.32;9.04;;;;;;;;2026-09-05T19:45:00+01:00;;
-2026-09-05;Primeira Liga;Sporting CP vs Nacional;BTTS;2.05;0.24;3.7;;;;;;;;2026-09-05T20:30:00+01:00;;
-2026-09-05;Jupiler Pro League;Standard Liege vs Antwerp;O2.5;1.79;0.01;1.85;;;;;;;;2026-09-05T19:45:00+01:00;;
+2026-09-05;Ligue 1;Le Havre vs Stade Brestois 29;O2.5;2.06;0.4;14.84;;;;W;1-2;0.42;;2026-09-05T18:45:00+00:00;;
+2026-09-05;Ligue 1;Nice vs Le Mans;O2.5;1.84;0.32;9.04;;;;L;1-1;-0.58;;2026-09-05T18:45:00+00:00;;
+2026-09-05;Primeira Liga;Sporting CP vs Nacional;BTTS;2.05;0.24;3.7;;;;L;2-0;-0.24;;2026-09-05T19:30:00+00:00;;
+2026-09-05;Jupiler Pro League;Standard Liege vs Antwerp;O2.5;1.79;0.01;1.85;;;;L;1-0;-0.01;;2026-09-05T18:45:00+00:00;;
 2026-09-06;Campeonato Brasileiro Serie A;Internacional vs Santos;O2.5;2.02;0.4;15.0;;;;;;;;2026-09-06T20:00:00+01:00;;
 2026-09-06;Segunda División;Almeria vs Cadiz;O2.5;1.81;0.4;13.92;;;;;;;;2026-09-06T20:00:00+01:00;;
 2026-09-06;Allsvenskan;IF Brommapojkarna vs IF Elfsborg;O2.5;1.76;0.4;13.4;;;;;;;;2026-09-06T15:30:00+01:00;;
