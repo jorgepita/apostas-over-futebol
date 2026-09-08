@@ -1,10 +1,10 @@
 {
   "providerHealth": {
     "api-football": {
-      "consecutiveFailures": 3,
+      "consecutiveFailures": 4,
       "status": "warning",
       "lastSuccessAt": "2026-09-06T11:33:25.256190+00:00",
-      "lastCheckedAt": "2026-09-08T00:33:52.400963+00:00",
+      "lastCheckedAt": "2026-09-08T12:01:36.805895+00:00",
       "lastError": {
         "provider": "api-football",
         "endpoint": "https://v3.football.api-sports.io/fixtures?league=203&season=2026&date=2026-09-07",
@@ -16,7 +16,7 @@
         "category": "PLAN_LIMIT",
         "message": "plan: Free plans do not have access to this season, try from 2022 to 2024.",
         "retryable": false,
-        "timestamp": "2026-09-08T00:33:48.500597+00:00"
+        "timestamp": "2026-09-08T12:01:31.944107+00:00"
       }
     }
   }
