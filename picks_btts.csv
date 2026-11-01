@@ -1,3 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-11-01;suecia;Allsvenskan;Djurgardens IF;Degerfors IF;1.927;1.545;3.472;2026-11-01T13:00:00+00:00;BTTS;0.595;1.95;0.513;0.082;0.1684;True;;0.0225;0.0225;0.082;0.0249;0.0249;1.24;1.0;50.0
-2026-11-01;turquia;Super Lig;Amed;Eyüpspor;1.721;1.404;3.126;2026-11-01T10:30:00+00:00;BTTS;0.548;2.1;0.476;0.0721;0.1377;True;;0.0325;0.0325;0.072;0.0179;0.0179;0.89;1.0;50.0
+2026-11-02;franca;Ligue 1;Lorient;Stade Brestois 29;1.813;1.453;3.267;2026-11-02T19:45:00+00:00;BTTS;0.567;1.83;0.546;0.021;0.0464;True;;0.0175;0.0175;0.021;0.0018;0.0018;0.09;1.0;50.0
