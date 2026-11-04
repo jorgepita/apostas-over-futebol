@@ -3,8 +3,8 @@
     "api-football": {
       "consecutiveFailures": 0,
       "status": "ok",
-      "lastSuccessAt": "2026-11-04T02:29:24.064785+00:00",
-      "lastCheckedAt": "2026-11-04T02:29:24.064785+00:00",
+      "lastSuccessAt": "2026-11-04T15:13:20.817880+00:00",
+      "lastCheckedAt": "2026-11-04T15:13:20.817880+00:00",
       "lastError": {
         "provider": "api-football",
         "endpoint": "https://v3.football.api-sports.io/fixtures?league=94&season=2026&date=2026-09-10",
