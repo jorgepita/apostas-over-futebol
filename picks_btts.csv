@@ -1,7 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-11-07;portugal;Primeira Liga;Sporting CP;Moreirense;1.62;1.344;2.964;2026-11-07T20:30:00+00:00;BTTS;0.525;2.25;0.444;0.0804;0.1447;True;;0.0325;0.0325;0.08;0.0209;0.0209;1.05;1.0;50.0
-2026-11-07;premier;Premier League;Leeds;Tottenham;2.2;1.641;3.841;2026-11-07T12:30:00+00:00;BTTS;0.634;1.75;0.571;0.063;0.1471;True;;0.0175;0.0175;0.063;0.0167;0.0167;0.83;1.0;50.0
-2026-11-07;franca;Ligue 1;Paris Saint Germain;Estac Troyes;1.813;1.453;3.267;2026-11-07T20:05:00+00:00;BTTS;0.567;1.95;0.513;0.0547;0.1122;True;;0.0225;0.0225;0.055;0.011;0.011;0.55;1.0;50.0
-2026-11-07;italia;Serie A;Parma;Bologna;1.388;1.9;3.288;2026-11-07T17:00:00+00:00;BTTS;0.565;1.95;0.513;0.052;0.1068;True;;0.0225;0.0225;0.052;0.01;0.01;0.5;1.0;50.0
-2026-11-08;finlandia;Veikkausliiga;HJK Helsinki;AC Oulu;1.816;1.47;3.286;2026-11-08T13:00:00+00:00;BTTS;0.571;1.95;0.513;0.0578;0.1187;True;;0.0225;0.0225;0.058;0.0123;0.0123;0.62;1.0;50.0
-2026-11-07;noruega;Eliteserien;Rosenborg;Start;2.017;1.479;3.496;2026-11-07T17:00:00+00:00;BTTS;0.592;1.75;0.571;0.021;0.0491;True;;0.0175;0.0175;0.02100000000000002;0.0019;0.0019;0.09;1.0;50.0
+2026-11-08;finlandia;Veikkausliiga;HJK Helsinki;AC Oulu;1.816;1.47;3.286;2026-11-08T13:00:00+00:00;BTTS;0.571;2.0;0.5;0.0706;0.1413;True;;0.0225;0.0225;0.071;0.018;0.018;0.9;1.0;50.0
