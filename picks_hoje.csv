@@ -1,4 +1,2 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-11-08;mls_next_pro;MLS Next Pro;Chattanooga;Los Angeles FC II;2.2;1.239;3.439;2026-11-08T23:00:00+00:00;O2.5;0.668;1.62;0.617;0.0505;0.1318;True;;0.0075;0.0075;0.051000000000000045;0.012;0.012;0.6;1.0;50.0
-2026-11-09;portugal2;Liga Portugal 2;Torreense;União de Leiria;2.098;1.434;3.531;2026-11-09T20:15:00+00:00;O2.5;0.685;1.8;0.556;0.1294;0.2911;True;;0.0175;0.0175;0.129;0.0524;0.04;2.0;1.0;50.0
-2026-11-09;espanha2;Segunda División;Sabadell;Real Sociedad II;1.625;1.267;2.893;2026-11-09T19:30:00+00:00;O2.5;0.552;2.1;0.476;0.0762;0.1454;True;;0.0325;0.0325;0.07600000000000007;0.0199;0.0199;1.0;1.0;50.0
+2026-11-14;espanha2;Segunda División;Oviedo;Girona;1.625;1.267;2.893;2026-11-14T20:00:00+00:00;O2.5;0.552;2.05;0.488;0.0646;0.1261;True;;0.0325;0.0325;0.06400000000000006;0.0147;0.0147;0.73;1.0;50.0
