@@ -1,11 +1,9 @@
 Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
-2026-11-14;brasil;Chapecoense-sc;Vasco DA Gama;1.70;1.91;2026-11-14T23:30:00+00:00
-2026-11-14;brasil;Mirassol;Atletico-MG;1.91;1.70;2026-11-14T21:30:00+00:00
-2026-11-15;espanha2;Eibar;Cadiz;1.78;1.80;2026-11-15T17:30:00+00:00
-2026-11-15;espanha2;Eldense;Sabadell;2.45;2.00;2026-11-15T17:30:00+00:00
-2026-11-15;espanha2;Granada CF;Las Palmas;1.94;1.67;2026-11-15T15:15:00+00:00
+2026-11-15;espanha2;Eibar;Cadiz;1.79;1.75;2026-11-15T17:30:00+00:00
+2026-11-15;espanha2;Eldense;Sabadell;2.47;2.00;2026-11-15T17:30:00+00:00
+2026-11-15;espanha2;Granada CF;Las Palmas;1.90;1.67;2026-11-15T15:15:00+00:00
 2026-11-15;espanha2;Tenerife;AD Ceuta FC;1.98;1.83;2026-11-15T13:00:00+00:00
-2026-11-15;portugal2;Amarante;Felgueiras 1932;2.48;2.00;2026-11-15T11:00:00+00:00
+2026-11-15;portugal2;Amarante;Felgueiras 1932;2.49;2.00;2026-11-15T11:00:00+00:00
 2026-11-15;portugal2;Leixoes;Chaves;1.98;1.74;2026-11-15T18:00:00+00:00
 2026-11-15;portugal2;Penafiel;Lusitânia Lourosa;2.08;1.83;2026-11-15T15:30:00+00:00
 2026-11-15;portugal2;Portimonense;Academica;2.10;1.83;2026-11-15T14:00:00+00:00
@@ -15,6 +13,21 @@ Date;League;HomeTeam;AwayTeam;Odd_Over25;Odd_BTTS_Yes;KickoffUTC
 2026-11-18;brasil;Flamengo;Atletico Paranaense;1.50;1.95;2026-11-18T23:30:00+00:00
 2026-11-18;brasil;Remo;Chapecoense-sc;1.65;1.65;2026-11-18T23:00:00+00:00
 2026-11-19;brasil;Corinthians;Botafogo;1.92;1.80;2026-11-19T00:30:00+00:00
-2026-11-19;brasil;Gremio;Bahia;1.74;1.60;2026-11-19T00:30:00+00:00
+2026-11-19;brasil;Gremio;Bahia;1.75;1.60;2026-11-19T00:30:00+00:00
 2026-11-19;brasil;Vasco DA Gama;Internacional;1.85;1.80;2026-11-19T22:30:00+00:00
 2026-11-19;brasil;Vitoria;RB Bragantino;1.83;1.65;2026-11-19T22:30:00+00:00
+2026-11-20;alemanha;Bayern München;1. FC Köln;1.20;1.95;2026-11-20T19:30:00+00:00
+2026-11-20;alemanha2;Arminia Bielefeld;1. FC Magdeburg;1.68;1.53;2026-11-20T17:30:00+00:00
+2026-11-20;alemanha2;SV Darmstadt 98;1. FC Heidenheim;1.55;1.50;2026-11-20T17:30:00+00:00
+2026-11-20;belgica;Cercle Brugge;KVC Westerlo;1.45;1.44;2026-11-20T19:45:00+00:00
+2026-11-20;brasil;Sao Paulo;Fluminense;2.15;1.83;2026-11-20T00:30:00+00:00
+2026-11-20;espanha;Athletic Club;Espanyol;1.92;1.95;2026-11-20T20:00:00+00:00
+2026-11-20;franca;Estac Troyes;Le Havre;1.86;1.67;2026-11-20T19:45:00+00:00
+2026-11-20;franca2;Nancy;Dijon;1.72;1.67;2026-11-20T19:00:00+00:00
+2026-11-20;franca2;Nantes;Grenoble;1.94;2.00;2026-11-20T19:00:00+00:00
+2026-11-20;franca2;RED Star FC 93;PAU;1.88;1.67;2026-11-20T19:00:00+00:00
+2026-11-20;franca2;Reims;Saint Etienne;1.81;1.67;2026-11-20T19:00:00+00:00
+2026-11-20;islandia;Western Sydney Wanderers;Adelaide United;1.50;1.53;2026-11-20T08:40:00+00:00
+2026-11-20;mls;Orlando City SC;FC Cincinnati;1.31;1.29;2026-11-20T00:30:00+00:00
+2026-11-20;mls;Seattle Sounders;Real Salt Lake;1.57;1.53;2026-11-20T03:00:00+00:00
+2026-11-20;noruega;Molde;Bodo/Glimt;1.27;1.29;2026-11-20T18:00:00+00:00
