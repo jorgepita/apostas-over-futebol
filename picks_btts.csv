@@ -1,3 +1,1 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-11-15;portugal2;Liga Portugal 2;Leixoes;Chaves;2.2;1.9;4.1;2026-11-15T18:00:00+00:00;BTTS;0.669;1.74;0.575;0.0945;0.2223;True;;0.0075;0.0075;0.095;0.0378;0.0378;1.89;1.0;50.0
-2026-11-15;espanha2;Segunda División;Granada CF;Las Palmas;1.83;1.836;3.666;2026-11-15T15:15:00+00:00;BTTS;0.625;1.67;0.599;0.0257;0.0641;True;;0.0075;0.0075;0.026;0.003;0.003;0.15;1.0;50.0
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap
