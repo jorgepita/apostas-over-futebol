@@ -1,1 +1,3 @@
-Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap
+Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-11-20;alemanha;Bundesliga;Bayern München;1. FC Köln;1.882;1.652;3.534;2026-11-20T19:30:00+00:00;BTTS;0.606;1.95;0.513;0.0936;0.1921;True;;0.0225;0.0225;0.094;0.0324;0.0324;1.62;1.0;50.0
+2026-11-21;paises_baixos;Eredivisie;Feyenoord;Excelsior;2.2;1.529;3.729;2026-11-21T17:45:00+00:00;BTTS;0.616;1.8;0.556;0.0608;0.1368;True;;0.0175;0.0175;0.061;0.015;0.015;0.75;1.0;50.0
