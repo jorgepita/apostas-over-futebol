@@ -1,5 +1,4 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
-2026-11-20;alemanha;Bundesliga;Bayern München;1. FC Köln;1.882;1.652;3.534;2026-11-20T19:30:00+00:00;BTTS;0.606;1.87;0.535;0.0716;0.154;True;;0.0175;0.0175;0.072;0.0199;0.0199;0.99;1.0;50.0
-2026-11-21;paises_baixos;Eredivisie;Feyenoord;Excelsior;2.2;1.529;3.729;2026-11-21T17:45:00+00:00;BTTS;0.616;1.8;0.556;0.0608;0.1368;True;;0.0175;0.0175;0.061;0.015;0.015;0.75;1.0;50.0
-2026-11-22;portugal2;Liga Portugal 2;Vizela;Feirense;1.844;1.547;3.39;2026-11-22T14:00:00+00:00;BTTS;0.586;2.0;0.5;0.0863;0.1726;True;;0.0225;0.0225;0.086;0.0268;0.0268;1.34;1.0;50.0
-2026-11-22;paises_baixos;Eredivisie;Ajax;ADO Den Haag;1.93;1.522;3.452;2026-11-22T13:30:00+00:00;BTTS;0.591;1.75;0.571;0.0199;0.0465;True;;0.0175;0.0175;0.02;0.0017;0.0017;0.08;1.0;50.0
+2026-11-21;paises_baixos;Eredivisie;Feyenoord;Excelsior;2.2;1.529;3.729;2026-11-21T17:45:00+00:00;BTTS;0.616;1.9;0.526;0.0901;0.1901;True;;0.0225;0.0225;0.09;0.0308;0.0308;1.54;1.0;50.0
+2026-11-22;portugal2;Liga Portugal 2;Vizela;Feirense;1.844;1.547;3.39;2026-11-22T14:00:00+00:00;BTTS;0.586;2.1;0.476;0.1101;0.2102;True;;0.0325;0.0325;0.11;0.0378;0.0378;1.89;1.0;50.0
+2026-11-23;franca2;Ligue 2;Nantes;Grenoble;1.561;1.261;2.822;2026-11-23T19:45:00+00:00;BTTS;0.501;2.15;0.465;0.036;0.0674;True;;0.0325;0.0325;0.036;0.0044;0.0044;0.22;1.0;50.0
