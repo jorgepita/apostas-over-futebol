@@ -1,5 +1,5 @@
 Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultado;Placar;Lucro€;LucroReal€;KickoffUTC;SettlementReason;MissingAttempts
-2026-11-21;Allsvenskan;Ostersunds FK vs Varbergs BoIS FC;O2.5;2.04;0.45;13.21;;;;;;;;2026-11-21T12:00:00+00:00;;
+2026-11-21;Allsvenskan;Ostersunds FK vs Varbergs BoIS FC;O2.5;2.04;0.45;13.21;;;;L;0-2;-1.25;;2026-11-21T12:00:00+00:00;;
 2026-11-21;Premier League;Newcastle vs Arsenal;O2.5;1.74;0.45;12.1;;;;;;;;2026-11-21T17:30:00+00:00;;
 2026-11-21;Premier League;Bournemouth vs Nottingham Forest;O2.5;1.93;0.45;10.54;;;;;;;;2026-11-21T15:00:00+00:00;;
 2026-11-21;Eredivisie;Feyenoord vs Excelsior;BTTS;1.9;1.54;9.01;;;;;;;;2026-11-21T17:45:00+00:00;;
@@ -9,7 +9,7 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-11-21;2. Bundesliga;FC St. Pauli vs VfL Bochum;O2.5;1.7;0.17;5.81;;;;;;;;2026-11-21T19:30:00+00:00;;
 2026-11-21;Bundesliga;SV Elversberg vs SC Freiburg;O2.5;1.58;0.15;5.24;;;;;;;;2026-11-21T14:30:00+00:00;;
 2026-11-21;Ligue 1;Strasbourg vs Stade Brestois 29;O2.5;1.72;0.13;5.24;;;;;;;;2026-11-21T19:45:00+00:00;;
-2026-11-21;Super Lig;Gençlerbirliği S.K. vs Gaziantep FK;O2.5;1.81;0.12;5.19;;;;;;;;2026-11-21T10:30:00+00:00;;
+2026-11-21;Super Lig;Gençlerbirliği S.K. vs Gaziantep FK;O2.5;1.81;0.12;5.19;;;;L;1-0;-0.24;;2026-11-21T10:30:00+00:00;;
 2026-11-21;Super Lig;Kocaelispor vs Fenerbahçe;O2.5;1.73;0.03;2.63;;;;;;;;2026-11-21T16:00:00+00:00;;
 2026-11-22;Serie A;Bologna vs Udinese;O2.5;1.98;0.45;13.32;;;;;;;;2026-11-22T14:00:00+00:00;;
 2026-11-22;Liga Portugal 2;Vizela vs Feirense;BTTS;2.1;1.89;11.01;;;;;;;;2026-11-22T14:00:00+00:00;;
