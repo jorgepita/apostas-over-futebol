@@ -1,5 +1,6 @@
 Date;League;LeagueName;HomeTeam;AwayTeam;LambdaHome;LambdaAway;LambdaTotal;KickoffUTC;Market;ProbModel;Odd;ProbMarket;Edge;KellyTrue;PassedQualityFilter;QualityRejectReason;EdgeMinDynamic;EdgeMinFinal;ProbGap;StakeFracRaw;StakeFrac;Stake€;DailyScale;Bankroll€
+2026-11-28;championship;Championship;Wrexham;Portsmouth;2.146;1.802;3.948;2026-11-28T15:00:00+00:00;BTTS;0.653;1.91;0.524;0.129;0.2708;True;;0.0225;0.0225;0.129;0.0487;0.04;2.0;1.0;50.0
 2026-11-28;franca;Ligue 1;Paris Saint Germain;Lorient;1.813;1.453;3.267;2026-11-28T19:45:00+00:00;BTTS;0.567;2.05;0.488;0.0797;0.1556;True;;0.0325;0.0325;0.08;0.0223;0.0223;1.12;1.0;50.0
 2026-11-28;portugal;Primeira Liga;Arouca;Rio Ave;2.081;1.398;3.479;2026-11-28T15:30:00+00:00;BTTS;0.583;1.95;0.513;0.0704;0.1444;True;;0.0225;0.0225;0.07;0.0183;0.0183;0.91;1.0;50.0
-2026-11-29;premier;Premier League;Fulham;Bournemouth;2.2;1.9;4.1;2026-11-29T14:05:00+00:00;BTTS;0.669;1.59;0.629;0.0403;0.1086;True;;0.0075;0.0075;0.04;0.0079;0.0079;0.39;1.0;50.0
-2026-11-28;suecia;Allsvenskan;Varbergs BoIS FC;Ostersunds FK;1.702;1.508;3.211;2026-11-28T12:00:00+00:00;BTTS;0.564;2.0;0.5;0.0636;0.1271;True;;0.0225;0.0225;0.06399999999999995;0.0145;0.0145;0.73;1.0;50.0
+2026-11-28;suecia;Allsvenskan;Varbergs BoIS FC;Ostersunds FK;1.702;1.508;3.211;2026-11-28T12:00:00+00:00;BTTS;0.564;2.0;0.5;0.0636;0.1271;True;;0.0225;0.0225;0.064;0.0145;0.0145;0.73;1.0;50.0
+2026-11-29;premier;Premier League;Fulham;Bournemouth;2.2;1.9;4.1;2026-11-29T14:05:00+00:00;BTTS;0.669;1.62;0.617;0.052;0.1358;True;;0.0075;0.0075;0.052;0.0127;0.0127;0.63;1.0;50.0
