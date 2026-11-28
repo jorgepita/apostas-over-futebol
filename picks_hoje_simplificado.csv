@@ -4,12 +4,12 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-11-28;Championship;Derby vs Watford;O2.5;2.0;0.43;13.41;;;;;;;;2026-11-28T15:00:00+00:00;;
 2026-11-28;Bundesliga;1. FC Köln vs SV Elversberg;O2.5;1.67;0.36;8.65;;;;;;;;2026-11-28T14:30:00+00:00;;
 2026-11-28;Primeira Liga;Academico Viseu vs Alverca;O2.5;2.07;0.27;8.57;;;;;;;;2026-11-28T18:00:00+00:00;;
-2026-11-28;2. Bundesliga;Holstein Kiel vs 1. FC Kaiserslautern;O2.5;1.78;0.31;8.45;;;;;;;;2026-11-28T12:00:00+00:00;;
+2026-11-28;2. Bundesliga;Holstein Kiel vs 1. FC Kaiserslautern;O2.5;1.78;0.31;8.45;;;;W;3-0;0.14;;2026-11-28T12:00:00+00:00;;
 2026-11-28;Ligue 1;Paris Saint Germain vs Lorient;BTTS;2.05;1.12;7.97;;;;;;;;2026-11-28T19:45:00+00:00;;
-2026-11-28;Super Lig;Samsunspor vs Gençlerbirliği S.K.;O2.5;1.89;0.23;7.53;;;;;;;;2026-11-28T13:00:00+00:00;;
-2026-11-28;MLS;Real Salt Lake vs Vancouver Whitecaps;O2.5;1.68;0.25;7.29;;;;;;;;2026-11-28T03:00:00+00:00;;
+2026-11-28;Super Lig;Samsunspor vs Gençlerbirliği S.K.;O2.5;1.89;0.23;7.53;;;;W;3-1;0.26;;2026-11-28T13:00:00+00:00;;
+2026-11-28;MLS;Real Salt Lake vs Vancouver Whitecaps;O2.5;1.68;0.25;7.29;;;;L;0-1;-0.25;;2026-11-28T03:00:00+00:00;;
 2026-11-28;Primeira Liga;Arouca vs Rio Ave;BTTS;1.95;0.91;7.04;;;;;;;;2026-11-28T15:30:00+00:00;;
-2026-11-28;2. Bundesliga;Dynamo Dresden vs FC St. Pauli;O2.5;1.72;0.19;6.49;;;;;;;;2026-11-28T12:00:00+00:00;;
+2026-11-28;2. Bundesliga;Dynamo Dresden vs FC St. Pauli;O2.5;1.72;0.19;6.49;;;;W;2-1;0.16;;2026-11-28T12:00:00+00:00;;
 2026-11-28;Ligue 1;Nice vs Estac Troyes;O2.5;1.75;0.17;6.24;;;;;;;;2026-11-28T19:45:00+00:00;;
 2026-11-29;Segunda División;Granada CF vs AD Ceuta FC;O2.5;1.75;0.43;14.86;;;;;;;;2026-11-29T13:00:00+00:00;;
 2026-11-29;Campeonato Brasileiro Serie A;Atletico-MG vs Vasco DA Gama;O2.5;1.85;0.41;9.93;;;;;;;;2026-11-29T22:30:00+00:00;;
@@ -27,5 +27,5 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-12-02;Premier League;Hull City vs Nottingham Forest;O2.5;1.99;0.43;12.11;;;;;;;;2026-12-02T19:30:00+00:00;;
 2026-12-02;Premier League;Brentford vs Arsenal;O2.5;1.87;0.16;6.28;;;;;;;;2026-12-02T20:15:00+00:00;;
 2026-12-02;Premier League;Manchester City vs Leeds;O2.5;1.67;0.03;2.48;;;;;;;;2026-12-02T19:30:00+00:00;;
-2026-11-28;Allsvenskan;Varbergs BoIS FC vs Ostersunds FK;BTTS;1.95;0.48;5.07;;;;;;;;2026-11-28T12:00:00+00:00;;
+2026-11-28;Allsvenskan;Varbergs BoIS FC vs Ostersunds FK;BTTS;1.95;0.48;5.07;;;;W;4-1;0.73;;2026-11-28T12:00:00+00:00;;
 2026-11-29;Allsvenskan;Djurgardens IF vs BK Hacken;O2.5;1.55;0.25;3.14;;;;;;;;2026-11-29T14:00:00+00:00;;
