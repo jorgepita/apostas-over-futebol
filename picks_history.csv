@@ -623,7 +623,9 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-11-28;Championship;Wrexham vs Portsmouth;BTTS;1.91;2.0;12.9;;;;;;;;2026-11-28T15:00:00+00:00;;
 2026-11-28;Ligue 1;Nice vs Estac Troyes;O2.5;1.75;0.22;6.24;;;;;;;;2026-11-28T19:45:00+00:00;;
 2026-11-28;Ligue 1;Paris Saint Germain vs Lorient;BTTS;2.0;0.82;6.75;;;;;;;;2026-11-28T19:45:00+00:00;;
+2026-11-28;MLS;Real Salt Lake vs Vancouver Whitecaps;O2.5;1.68;0.25;7.29;;;;;;;;2026-11-28T03:00:00+00:00;;
 2026-11-28;Premier League;Leeds vs Coventry;O2.5;1.78;0.21;6.18;;;;;;;;2026-11-28T15:00:00+00:00;;
+2026-11-28;Primeira Liga;Academico Viseu vs Alverca;O2.5;2.07;0.27;8.57;;;;;;;;2026-11-28T18:00:00+00:00;;
 2026-11-28;Primeira Liga;Arouca vs Rio Ave;BTTS;1.95;0.91;7.04;;;;;;;;2026-11-28T15:30:00+00:00;;
 2026-11-28;Serie A;Inter vs Genoa;O2.5;1.66;0.12;4.43;;;;;;;;2026-11-28T19:45:00+00:00;;
 2026-11-28;Super Lig;Samsunspor vs Gençlerbirliği S.K.;O2.5;1.89;0.29;7.53;;;;;;;;2026-11-28T13:00:00+00:00;;
@@ -642,4 +644,8 @@ Data;Liga;Jogo;Mercado;Odd;Stake€;Edge%;Apostada;OddReal;StakeReal€;Resultad
 2026-11-29;Segunda División;Almeria vs Sporting Gijon;O2.5;1.75;0.36;14.86;;;;;;;;2026-11-29T20:00:00+00:00;;
 2026-11-29;Segunda División;Cadiz vs Cordoba;O2.5;1.55;0.11;4.94;;;;;;;;2026-11-29T17:30:00+00:00;;
 2026-11-29;Segunda División;Granada CF vs AD Ceuta FC;O2.5;1.7;0.36;13.18;;;;;;;;2026-11-29T13:00:00+00:00;;
+2026-11-29;Super Lig;Çorum FK vs Kocaelispor;O2.5;1.96;0.35;9.42;;;;;;;;2026-11-29T10:30:00+00:00;;
 2026-12-01;Premier League;Coventry vs Ipswich;O2.5;1.75;0.11;5.21;;;;;;;;2026-12-01T20:00:00+00:00;;
+2026-12-02;Premier League;Brentford vs Arsenal;O2.5;1.87;0.16;6.28;;;;;;;;2026-12-02T20:15:00+00:00;;
+2026-12-02;Premier League;Hull City vs Nottingham Forest;O2.5;1.99;0.43;12.11;;;;;;;;2026-12-02T19:30:00+00:00;;
+2026-12-02;Premier League;Manchester City vs Leeds;O2.5;1.67;0.03;2.48;;;;;;;;2026-12-02T19:30:00+00:00;;
